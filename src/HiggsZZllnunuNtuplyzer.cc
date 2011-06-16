@@ -3,7 +3,7 @@
 // Package:    HiggsZZllnunuNtuplyzer
 // Class:      HiggsZZllnunuNtuplyzer
 // 
-/**\class HiggsZZllnunuNtuplyzer HiggsZZllnunuNtuplyzer.cc UserCode/HiggsZZllnunuNtuplyzer/src/HiggsZZllnunuNtuplyzer.cc
+/**\class HiggsZZllnunuNtuplyzer HiggsZZllnunuNtuplyzer.cc NWU/Higgs/src/HiggsZZllnunuNtuplyzer.cc
 
  Description: Higgs to ZZ to 2l2nu analysis
 
@@ -13,7 +13,7 @@
 //
 // Original Author:  Andrey Pozdnyakov
 //         Created:  Fri Mar 25 08:07:03 CDT 2011
-//
+// $Id: HiggsZZllnunuNtuplyzer.cc,v 1.1 2011/06/16 13:10:04 andrey Exp $
 //
 
 #include <memory>
@@ -68,18 +68,6 @@
 #include "DataFormats/Common/interface/TriggerResults.h"
 #include "HLTrigger/HLTcore/interface/HLTConfigProvider.h"
 
-//#include "DataFormats/HLTReco/interface/TriggerEvent.h"
-//#include "DataFormats/L1Trigger/interface/L1JetParticleFwd.h"
-//#include "DataFormats/L1Trigger/interface/L1JetParticle.h"
-
-//#include "CondFormats/L1TObjects/interface/L1GtTriggerMenu.h"
-//#include "CondFormats/DataRecord/interface/L1GtTriggerMenuRcd.h"
-
-//#include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerReadoutSetupFwd.h"
-//#include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerReadoutSetup.h"
-
-//#include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerReadoutRecord.h"
-//#include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerRecord.h"
 
 //ROOT stuff
 #include "TROOT.h"
@@ -618,10 +606,6 @@ void HiggsZZllnunuNtuplyzer::analyze(const edm::Event& iEvent, const edm::EventS
   //- Fill the Ntuple and clear the memory ---//
   rTree-> Fill();
     
-
-
-
-
 
 
   //primaryVtx         -> Clear("C");
