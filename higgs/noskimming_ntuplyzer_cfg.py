@@ -82,7 +82,7 @@ process.source = cms.Source("PoolSource",
 
 #'/store/data/Run2011A/DoubleElectron/AOD/May10ReReco-v1/0005/F0B77A28-897B-E011-86FC-0026189437FC.root',
 #'/store/data/Run2011A/DoubleElectron/AOD/May10ReReco-v1/0005/EE63D495-8B7B-E011-9E52-001A92811700.root',
-#'/store/data/Run2011A/DoubleElectron/AOD/May10ReReco-v1/0005/DEAFCEF8-887B-E011-9BF2-00261894397F.root',
+'/store/data/Run2011A/DoubleElectron/AOD/May10ReReco-v1/0005/DEAFCEF8-887B-E011-9BF2-00261894397F.root',
 
 
 )

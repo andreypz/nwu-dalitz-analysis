@@ -2,7 +2,7 @@ import FWCore.ParameterSet.Config as cms
 
 process = cms.Process("HiggsZZllnunu")
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(600) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1600) )
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.MessageLogger.cerr.FwkReport.reportEvery = cms.untracked.int32(500)
 
@@ -84,6 +84,10 @@ process.source = cms.Source("PoolSource",
 #'/store/data/Run2011A/DoubleElectron/AOD/May10ReReco-v1/0005/EE63D495-8B7B-E011-9E52-001A92811700.root',
 #'/store/data/Run2011A/DoubleElectron/AOD/May10ReReco-v1/0005/DEAFCEF8-887B-E011-9BF2-00261894397F.root',
 
+'/store/mc/Spring11/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/GEN-SIM-RECO/PU_S1_START311_V1G1-v1/0005/08A906D0-1D55-E011-BEDC-003048679214.root',
+'/store/mc/Spring11/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/GEN-SIM-RECO/PU_S1_START311_V1G1-v1/0005/089269D6-1B55-E011-9F14-00261894385D.root',
+'/store/mc/Spring11/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/GEN-SIM-RECO/PU_S1_START311_V1G1-v1/0005/08017A2D-1855-E011-B844-00304867D838.root',
+'/store/mc/Spring11/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/GEN-SIM-RECO/PU_S1_START311_V1G1-v1/0005/044EA4DB-1E55-E011-9DF7-00261894385D.root',
 
 )
 )
@@ -105,10 +109,10 @@ process.simpleEleId80relIso.electronQuality = "80relIso"
 
 
 
-demo0 = cms.EDAnalyzer('Dummy',)
-demo1 = demo0.clone()
-demo2 = demo0.clone()
-demo3 = demo0.clone()
+process.demo0 = cms.EDAnalyzer('Dummy',)
+process.demo1 = process.demo0.clone()
+process.demo2 = process.demo0.clone()
+process.demo3 = process.demo0.clone()
 
 process.load("RecoJets.Configuration.RecoPFJets_cff")
 process.kt6PFJets.doRhoFastjet = True
@@ -161,6 +165,11 @@ process.options = cms.untracked.PSet(
     wantSummary = cms.untracked.bool(True)
 )
 
+process.load("Configuration/Skimming/PDWG_HZZSkim_cff")
+#zzdiMuonSequence = cms.Sequence( goodHzzMuons * diHzzMuons * diHzzMuonsFilter )
+#zzdiElectronSequence = cms.Sequence( goodHzzElectrons * diHzzElectrons * diHzzElectronsFilter )
+#zzeleMuSequence = cms.Sequence( goodHzzMuons * goodHzzElectrons * crossHzzLeptons * crossHzzLeptonsFilter )
+
 
 process.TimerService = cms.Service("TimerService", useCPUtime = cms.untracked.bool(True))
 process.pts = cms.EDFilter("PathTimerInserter")
@@ -185,33 +194,41 @@ process.hltHighLevel = cms.EDFilter("HLTHighLevel",
                                     )
 
 
-preSequence = cms.Sequence(process.offlinePrimaryVerticesDAWithBS *
-                           process.simpleEleId80relIso *
-                           #  * process.HBHENoiseFilter
+preSequence = cms.Sequence(process.offlinePrimaryVerticesDAWithBS 
+                           * process.simpleEleId80relIso 
                            #  * process.correctedJets
-                           process.kt6PFJets *
-                           process.ak5PFJetsHZZ2l2nu *
-                           process.metJESCorPFAK5 *
-                           process.ak5JetTracksAssociatorAtVertex *
-                           process.impactParameterTagInfos *
-                           ( process.trackCountingHighEffBJetTags +
-                             process.trackCountingHighPurBJetTags +
-                             process.jetProbabilityBJetTags       +
-                             process.jetBProbabilityBJetTags) *
-                           #                   * process.btagging
-                           process.HBHENoiseFilterResultProducer
+                           * process.kt6PFJets 
+                           * process.ak5PFJetsHZZ2l2nu 
+                           * process.metJESCorPFAK5 
+                           * process.ak5JetTracksAssociatorAtVertex 
+                           * process.impactParameterTagInfos 
+                           * ( process.trackCountingHighEffBJetTags +
+                               process.trackCountingHighPurBJetTags +
+                               process.jetProbabilityBJetTags       +
+                               process.jetBProbabilityBJetTags) 
+                           * process.HBHENoiseFilterResultProducer
+                           # * ecalDead
                            )
-		
 
-#process.p = cms.Path(preSequence* ecalDead * process.higgs) ## MC
-#process.p = cms.Path(process.hltHighLevel * preSequence* ecalDead * process.higgs)
-process.p = cms.Path(process.hltHighLevel * preSequence * process.higgs) # No Ecal (Run on AOD)
+process.dummy0 = cms.Path(process.demo0)
+process.diSequence = cms.Path((process.goodHzzMuons + process.goodHzzElectrons)
+                      *(process.diHzzMuons + process.diHzzElectrons + process.crossHzzLeptons ) )
+                
+process.diMuonFilter     = cms.Path(process.diHzzMuonsFilter      *process.demo1*preSequence *process.higgs)
+process.diElectronFilter = cms.Path(process.diHzzElectronsFilter  *process.demo2*preSequence *process.higgs)
+process.EleMuFilter      = cms.Path(process.crossHzzLeptonsFilter *process.demo3*preSequence *process.higgs)
 
+
+#process.p = cms.Path(process.hltHighLevel * preSequence * process.higgs) # No Ecal (Run on AOD)
+#(process.zzdiMuonSequence + process.zzdiElectronSequence + process.zzeleMuSequence)
 
 ###############################################################################
 #process.out = cms.OutputModule("PoolOutputModule",
-#                               fileName = cms.untracked.string('aatest.root'),
-#                               outputCommands = cms.untracked.vstring('drop *', 'keep EcalRecHitsSorted_*_*_*','keep AnomalousECALVariables_*_*_*' )
-#                               )                               
-#process.e = cms.EndPath(process.out)
+#process.out = cms.OutputModule("AsciiOutputModule",
+#                               SelectEvents = cms.untracked.PSet(SelectEvents = cms.vstring('diMuonFilter','diElectronFilter')
+#                                                                 #fileName = cms.untracked.string('aatest.root'),
+#                                                                 #                               outputCommands = cms.untracked.vstring('drop *', )
+#                                                                 )
+#                               )
+#process.e = cms.EndPath(process.out * process.higgs)
 #############################################
