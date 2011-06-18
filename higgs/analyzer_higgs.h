@@ -1,5 +1,4 @@
-//////////////////////////////////////////////////////////
-// This class has been automatically generated on
+//////////////////////////////////////////////////////////// This class has been automatically generated on
 // Tue Apr 12 10:25:05 2011 by ROOT version 5.27/06b
 // from TTree rTree/rTree
 // found on file: out_higgs.root
@@ -48,15 +47,17 @@ class analyzer_higgs : public TSelector {
 public :
   TFile* histoFile;
   
-  TH1F *met_phi[nCuts], *met_et[nCuts], *met_over_qt[nCuts];
+  TH1F *mt0[nCuts], *mt1[nCuts], *mt2[nCuts], *mt3[nCuts], *mt4[nCuts];
+  TH1F *met0_phi[nCuts], *met0_et[nCuts], *met0_over_qt[nCuts];
   TH1F *met1_phi[nCuts], *met1_et[nCuts], *met1_over_qt[nCuts];
   TH1F *met2_phi[nCuts], *met2_et[nCuts], *met2_over_qt[nCuts];
   TH1F *met3_phi[nCuts], *met3_et[nCuts], *met3_over_qt[nCuts];
-  TH1F *met4_phi[nCuts], *met4_et[nCuts], *met4_over_qt[nCuts], *met4_sig[nCuts];
+  TH1F *met4_phi[nCuts], *met4_et[nCuts], *met4_over_qt[nCuts], *met4_puSig[nCuts];
   TH1F *mu1_phi[nCuts], *mu1_eta[nCuts], *mu1_pt[nCuts];
   TH1F *mu2_phi[nCuts], *mu2_eta[nCuts], *mu2_pt[nCuts];
   TH1F *btag_hp[nCuts];
-
+  TH1F *di_qt[nCuts];
+  TH2F *met0_et_ovQt[nCuts], *met1_et_ovQt[nCuts], *met2_et_ovQt[nCuts], *met3_et_ovQt[nCuts], *met4_et_ovQt[nCuts]; 
 
    TTree          *fChain;   //!pointer to the analyzed TTree or TChain
 

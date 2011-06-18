@@ -24,37 +24,51 @@ void analyzer_higgs::Begin(TTree * /*tree*/)
   TString option = GetOption();
   histoFile = new TFile("hhhh.root", "RECREATE"); 
   //histoFile = new TFile(Form("hhistograms_%s.root", sample.Data()), "RECREATE"); 
-  for(Int_t n=0; n<nCuts; n++)
+    for(Int_t n=0; n<nCuts; n++)
     {
-      met_phi[n]      = new TH1F(Form("met_phi_%i",n), "met_phi", 50, -TMath::Pi(), TMath::Pi()); 
-      met_et[n]       = new TH1F(Form("met_et_%i",n), "met_et", 50, 0,350);
-      met_over_qt[n]  = new TH1F(Form("met_over_qt_%i",n), "met_over_qt", 50, 0,4);
+      TH1::SetDefaultSumw2(kTRUE);
+      met0_phi[n]      = new TH1F(Form("met0_phi_%i",n), "met0_phi", 40, -TMath::Pi(), TMath::Pi()); 
+      met0_et[n]       = new TH1F(Form("met0_et_%i",n), "met0_et", 40, 0,400);
+      met0_over_qt[n]  = new TH1F(Form("met0_over_qt_%i",n), "met0_over_qt", 40, 0,4);
+
+      met0_et_ovQt[n]  = new TH2F(Form("met0_et_ovQt_%i",n), "pfMET vs Met/qt", 40, 0,400, 40, 0,4);
+      met1_et_ovQt[n]  = new TH2F(Form("met1_et_ovQt_%i",n), "MET1 vs Met/qt", 40, 0,400, 40, 0,4);
+      met2_et_ovQt[n]  = new TH2F(Form("met2_et_ovQt_%i",n), "pfMet noise vs Met/qt", 40, 0,400, 40, 0,4);
+      met3_et_ovQt[n]  = new TH2F(Form("met3_et_ovQt_%i",n), "projMET vs Met/qt", 40, 0,400, 40, 0,4);
+      met4_et_ovQt[n]  = new TH2F(Form("met4_et_ovQt_%i",n), "puCorrMET vs Met/qt", 40, 0,400, 40, 0,4);
     
-      met1_phi[n]     = new TH1F(Form("met1_phi_%i",n), "met1_phi", 50, -TMath::Pi(), TMath::Pi()); 
-      met1_et[n]      = new TH1F(Form("met1_et_%i",n), "met1_et", 50, 0,350);
-      met1_over_qt[n] = new TH1F(Form("met1_over_qt_%i",n), "met1_over_qt", 50, 0,4);
+      met1_phi[n]     = new TH1F(Form("met1_phi_%i",n), "met1_phi", 40, -TMath::Pi(), TMath::Pi()); 
+      met1_et[n]      = new TH1F(Form("met1_et_%i",n), "met1_et", 40, 0,400);
+      met1_over_qt[n] = new TH1F(Form("met1_over_qt_%i",n), "met1_over_qt", 40, 0,4);
 
-      met2_phi[n]     = new TH1F(Form("met2_phi_%i",n), "met2_phi", 50, -TMath::Pi(), TMath::Pi()); 
-      met2_et[n]      = new TH1F(Form("met2_et_%i",n), "met2_et", 50, 0,350);
-      met2_over_qt[n] = new TH1F(Form("met2_over_qt_%i",n), "met2_over_qt", 50, 0,4);
+      met2_phi[n]     = new TH1F(Form("met2_phi_%i",n), "met2_phi", 40, -TMath::Pi(), TMath::Pi()); 
+      met2_et[n]      = new TH1F(Form("met2_et_%i",n), "met2_et", 40, 0,400);
+      met2_over_qt[n] = new TH1F(Form("met2_over_qt_%i",n), "met2_over_qt", 40, 0,4);
 
-      met3_phi[n]     = new TH1F(Form("met3_phi_%i",n), "met3_phi", 50, -TMath::Pi(), TMath::Pi()); 
-      met3_et[n]      = new TH1F(Form("met3_et_%i",n), "met3_et", 50, 0,350);
-      met3_over_qt[n] = new TH1F(Form("met3_over_qt_%i",n), "met2_over_qt", 50, 0,4);
+      met3_phi[n]     = new TH1F(Form("met3_phi_%i",n), "met3_phi", 40, -TMath::Pi(), TMath::Pi()); 
+      met3_et[n]      = new TH1F(Form("met3_et_%i",n), "met3_et", 40, 0,400);
+      met3_over_qt[n] = new TH1F(Form("met3_over_qt_%i",n), "met2_over_qt", 40, 0,4);
 
-      met4_phi[n]     = new TH1F(Form("met4_phi_%i",n), "met4_phi", 50, -TMath::Pi(), TMath::Pi()); 
-      met4_et[n]      = new TH1F(Form("met4_et_%i",n), "met4_et", 52, -14,350);
-      met4_over_qt[n] = new TH1F(Form("met4_over_qt_%i",n), "met4_over_qt", 52, -0.16,4);
-      met4_sig[n]     = new TH1F(Form("met4_sig_%i",n), "met4_sig", 52, -0.32,8);
+      met4_phi[n]     = new TH1F(Form("met4_phi_%i",n), "met4_phi", 40, -TMath::Pi(), TMath::Pi()); 
+      met4_et[n]      = new TH1F(Form("met4_et_%i",n), "met4_et", 42, -20,400);
+      met4_over_qt[n] = new TH1F(Form("met4_over_qt_%i",n), "met4_over_qt", 42, -0.2,4);
+      met4_puSig[n]   = new TH1F(Form("met4_sig_%i",n), "met4_sig", 42, -0.4,8);
 
-      mu1_phi[n] = new TH1F(Form("mu1_phi_%i",n), "mu1_phi", 50, -TMath::Pi(), TMath::Pi()); 
-      mu1_eta[n] = new TH1F(Form("mu1_eta_%i",n), "mu1_eta", 50, -2.6, 2.6); 
-      mu1_pt[n]  = new TH1F(Form("mu1_pt_%i",n), "mu1_pt", 50, 0, 200); 
+      mu1_phi[n] = new TH1F(Form("mu1_phi_%i",n), "mu1_phi", 40, -TMath::Pi(), TMath::Pi()); 
+      mu1_eta[n] = new TH1F(Form("mu1_eta_%i",n), "mu1_eta", 40, -2.6, 2.6); 
+      mu1_pt[n]  = new TH1F(Form("mu1_pt_%i",n), "mu1_pt", 40, 0, 200); 
 
-      mu2_phi[n] = new TH1F(Form("mu2_phi_%i",n), "mu2_phi", 50, -TMath::Pi(), TMath::Pi()); 
-      mu2_eta[n] = new TH1F(Form("mu2_eta_%i",n), "mu2_eta", 50, -2.6, 2.6); 
-      mu2_pt[n]  = new TH1F(Form("mu2_pt_%i",n), "mu2_pt", 50, 0, 200); 
-      btag_hp[n] = new TH1F(Form("btag_hp_%i",n), "btag_hp", 50, -10, 10); 
+      mu2_phi[n] = new TH1F(Form("mu2_phi_%i",n), "mu2_phi", 40, -TMath::Pi(), TMath::Pi()); 
+      mu2_eta[n] = new TH1F(Form("mu2_eta_%i",n), "mu2_eta", 40, -2.6, 2.6); 
+      mu2_pt[n]  = new TH1F(Form("mu2_pt_%i",n), "mu2_pt", 40, 0, 200); 
+      btag_hp[n] = new TH1F(Form("btag_hp_%i",n), "btag_hp", 40, -10, 10); 
+
+      mt0[n]     = new TH1F(Form("mt0_%i",n), "MT pf", 40, 0, 400); 
+      mt1[n]     = new TH1F(Form("mt1_%i",n), "MT type1", 40, 0, 400); 
+      mt2[n]     = new TH1F(Form("mt2_%i",n), "MT noise", 40, 0, 400); 
+      mt3[n]     = new TH1F(Form("mt3_%i",n), "MT proj", 40, 0, 400); 
+      mt4[n]     = new TH1F(Form("mt4_%i",n), "MT pu corr", 40, 0, 400); 
+      di_qt[n]   = new TH1F(Form("di_qt_%i",n), "di-lepton qt", 40, 0,400);  
     }
 
   ffout.open("./events_printout_andrey_final.txt",ofstream::out);
@@ -94,7 +108,7 @@ Bool_t analyzer_higgs::Process(Long64_t entry)
   
 
   GetEntry(entry); 
-  //  if ( nEvents[0]>500) return kTRUE; 
+  //if ( nEvents[0]>500) return kTRUE; 
   nEvents[0]++; 
   if(!isNoiseHcal)        nEventsPassNoiseFilter[1][0]++; 
   if(!isDeadEcalCluster)  nEventsPassNoiseFilter[2][0]++; 
@@ -363,25 +377,36 @@ Bool_t analyzer_higgs::Process(Long64_t entry)
   //if (muCount==2) cout<<"MT: "<<MT<<"    "<<ZptXY.X()<<" "<<ZptXY.Y()<<"    "<<METXY.X()<<" "<<METXY.Y()<<endl;
 
   Float_t METqt = MET/qT;
-  met_over_qt[0] -> Fill(METqt);
+  Float_t MET1qt = MET1/qT;
 
-  met_et[0] -> Fill(MET);
-  met_phi[0] -> Fill(MET_phi);
+  di_qt[0] -> Fill(qT);
+  met0_over_qt[0] -> Fill(METqt);
+  met0_et[0]      -> Fill(MET);
+  met0_et_ovQt[0] -> Fill(MET, METqt);
+  met0_phi[0]     -> Fill(MET_phi);
 
-  met1_et[0] -> Fill(MET1);
-  met1_phi[0] -> Fill(MET1_phi);
+  met1_over_qt[0] -> Fill(MET1qt);
+  met1_et[0]      -> Fill(MET1);
+  met1_et_ovQt[0] -> Fill(MET1, MET1qt);
+  met1_phi[0]     -> Fill(MET1_phi);
+
+  mt0[0] -> Fill(MT);
 
   if(!isNoiseHcal && !isDeadEcalCluster && !isScraping && !isCSCTightHalo) 
     {
+      met2_over_qt[0] -> Fill(METqt);
       met2_et[0]      -> Fill(MET);
+      met2_et_ovQt[0] -> Fill(MET, METqt);
       met2_phi[0]     -> Fill(MET_phi);
 
       met3_over_qt[0] -> Fill(projMETqt);
       met3_et[0]      -> Fill(projMET);
+      met3_et_ovQt[0] -> Fill(projMET, projMETqt);
 
       met4_over_qt[0] -> Fill(puCorrMETqt);
       met4_et[0]      -> Fill(puCorrMET);
-      met4_sig[0]     -> Fill(puSigMET);
+      met4_et_ovQt[0] -> Fill(puCorrMET, puCorrMETqt);
+      met4_puSig[0]   -> Fill(puSigMET);
     }
   else
     if(verboseLvl>1) 
@@ -399,29 +424,40 @@ Bool_t analyzer_higgs::Process(Long64_t entry)
   if(!isNoiseHcal && !isDeadEcalCluster  && !isScraping && !isCSCTightHalo) 
     {
       nEventsPassNoiseFilter[0][1]++; 
-      met2_et[1]         -> Fill(MET);
-      met2_phi[1]        -> Fill(MET_phi);
+      met2_over_qt[1] -> Fill(METqt);
+      met2_et[1]      -> Fill(MET);
+      met2_et_ovQt[1] -> Fill(MET, METqt);
+      met2_phi[1]     -> Fill(MET_phi);
 
-      met3_over_qt[1] -> Fill(projMETqt);
-      met3_et[1]         -> Fill(projMET);
+      met3_over_qt[1]  -> Fill(projMETqt);
+      met3_et[1]       -> Fill(projMET);
+      met3_et_ovQt[1] -> Fill(projMET, projMETqt);
 
       met4_over_qt[1] -> Fill(puCorrMETqt);
-      met4_et[1]         -> Fill(puCorrMET);
-      met4_sig[1]        -> Fill(puSigMET);
+      met4_et[1]      -> Fill(puCorrMET);
+      met4_et_ovQt[1] -> Fill(puCorrMET, puCorrMETqt);
+      met4_puSig[1]   -> Fill(puSigMET);
     }
   else
     if(verboseLvl>0) 
       nout[1]<<"* "<<runNumber<<"\t* "<<eventNumber<<"  \t* "<<lumiSection<<"\t* "<<MET<<"\t* "
 	     <<isNoiseHcal<<"\t* "<<isDeadEcalCluster<<"\t* "<<isScraping<<"\t* "<<isCSCTightHalo<<"\t* "<<endl;  
+
+  di_qt[1] -> Fill(qT);
+  met0_over_qt[1] -> Fill(METqt);
+  met0_et[1]      -> Fill(MET);
+  met0_et_ovQt[1] -> Fill(MET, METqt);
+  met0_phi[1]     -> Fill(MET_phi);
+
+  met1_over_qt[1] -> Fill(MET1qt);
+  met1_et[1]      -> Fill(MET1);
+  met1_et_ovQt[1] -> Fill(MET1, MET1qt);
+  met1_phi[1]     -> Fill(MET1_phi);
+
+  mt0[1] -> Fill(MT);
+    
   
-
-  met_et[1]  -> Fill(MET);
-  met_phi[1] -> Fill(MET_phi);
-
-  met1_et[1]  -> Fill(MET1);
-  met1_phi[1] -> Fill(MET1_phi);
-
-  if (!passZpeak) return kTRUE;
+if (!passZpeak) return kTRUE;
   nEvents[2]++;
   if(!isNoiseHcal)        nEventsPassNoiseFilter[1][2]++; 
   if(!isDeadEcalCluster)  nEventsPassNoiseFilter[2][2]++; 
@@ -431,23 +467,35 @@ Bool_t analyzer_higgs::Process(Long64_t entry)
   if(!isNoiseHcal && !isDeadEcalCluster && !isScraping && !isCSCTightHalo) 
     {
       nEventsPassNoiseFilter[0][2]++; 
+      met2_over_qt[2] -> Fill(METqt);
       met2_et[2]      -> Fill(MET);
+      met2_et_ovQt[2] -> Fill(MET, METqt);
       met2_phi[2]     -> Fill(MET_phi);
+
       met3_over_qt[2] -> Fill(projMETqt);
       met3_et[2]      -> Fill(projMET);
-
+      met3_et_ovQt[1] -> Fill(projMET, projMETqt);
+      
       met4_over_qt[2] -> Fill(puCorrMETqt);
       met4_et[2]      -> Fill(puCorrMET);
-      met4_sig[2]     -> Fill(puSigMET);
+      met4_et_ovQt[1] -> Fill(puCorrMET, puCorrMETqt);
+      met4_puSig[2]     -> Fill(puSigMET);
     }
 
 
-  met_et[2]  -> Fill(MET);
-  met_phi[2] -> Fill(MET_phi);
+  di_qt[2] -> Fill(qT);
+  met0_over_qt[2] -> Fill(METqt);
+  met0_et[2]      -> Fill(MET);
+  met0_et_ovQt[2] -> Fill(MET, METqt);
+  met0_phi[2]     -> Fill(MET_phi);
 
-  met1_et[2]  -> Fill(MET1);
-  met1_phi[2] -> Fill(MET1_phi);
+  met1_over_qt[2] -> Fill(MET1qt);
+  met1_et[2]      -> Fill(MET1);
+  met1_et_ovQt[2] -> Fill(MET1, MET1qt);
+  met1_phi[2]     -> Fill(MET1_phi);
 
+  mt0[2] -> Fill(MT);
+ 
   if (isMuonSample)
     {
       mu1_eta[2] -> Fill(myMuon1->eta());
@@ -515,23 +563,36 @@ Bool_t analyzer_higgs::Process(Long64_t entry)
       mu2_pt[4]  -> Fill(myMuon2->pt());
 
     }
-  met_et[4]  -> Fill(MET);
-  met_phi[4] -> Fill(MET_phi);
-
-  met1_et[4]  -> Fill(MET1);
-  met1_phi[4] -> Fill(MET1_phi);
 
   if(!isNoiseHcal && !isDeadEcalCluster && !isScraping && !isCSCTightHalo)
     { 
-      met2_et[4]         -> Fill(MET);
-      met2_phi[4]        -> Fill(MET_phi);
+      met2_over_qt[4] -> Fill(METqt);
+      met2_et[4]      -> Fill(MET);
+      met2_et_ovQt[4] -> Fill(MET, METqt);
+      met2_phi[4]     -> Fill(MET_phi);
+
       met3_over_qt[4] -> Fill(projMETqt);
-      met3_et[4]         -> Fill(projMET);
+      met3_et[4]      -> Fill(projMET);
+      met3_et_ovQt[4] -> Fill(projMET, projMETqt);
       
       met4_over_qt[4] -> Fill(puCorrMETqt);
-      met4_et[4]         -> Fill(puCorrMET);
-      met4_sig[4]        -> Fill(puSigMET);
+      met4_et[4]      -> Fill(puCorrMET);
+      met4_et_ovQt[4] -> Fill(puCorrMET, puCorrMETqt);
+      met4_puSig[4]   -> Fill(puSigMET);
     }
+  
+  di_qt[4] -> Fill(qT);
+  met0_over_qt[4] -> Fill(METqt);
+  met0_et[4]      -> Fill(MET);
+  met0_et_ovQt[4] -> Fill(MET, METqt);
+  met0_phi[4]     -> Fill(MET_phi);
+
+  met1_over_qt[4] -> Fill(MET1qt);
+  met1_et[4]      -> Fill(MET1);
+  met1_et_ovQt[4] -> Fill(MET1, MET1qt);
+  met1_phi[4]     -> Fill(MET1_phi);
+
+  mt0[4] -> Fill(MT);
 
   if(verboseLvl>1) 
     fout[4]<<"* "<<runNumber<<"\t* "<<eventNumber<<"  \t* "<<lumiSection<<"\t* "<<Mll<<"\t* "<<MT<<"\t* "<<MET<<"\t* "<<pTll<<"\t* "<<rhoFactor<<"\t*"<<endl;  
@@ -540,7 +601,7 @@ Bool_t analyzer_higgs::Process(Long64_t entry)
   for (Int_t i = 0; i < recoJets->GetSize(); ++i) 
     {    
       TCJet* thisJet = (TCJet*) recoJets->At(i);     
-      if (fabs(thisJet->P4(7).Eta()) <= 2.5) 
+      if (fabs(thisJet->P4(7).Eta()) <= 2.4) 
 	{
 	  //do anti-b tag
           if (thisJet->P4(7).Pt() > 30 && thisJet->BDiscrTrkCountHiEff() > 2) return kTRUE; 
@@ -558,23 +619,33 @@ Bool_t analyzer_higgs::Process(Long64_t entry)
   if(!isNoiseHcal && !isDeadEcalCluster && !isScraping && !isCSCTightHalo) 
     {
       nEventsPassNoiseFilter[0][5]++; 
-      met2_et[5]         -> Fill(MET);
-      met2_phi[5]        -> Fill(MET_phi);
+      met2_over_qt[5] -> Fill(METqt);
+      met2_et[5]      -> Fill(MET);
+      met2_et_ovQt[5] -> Fill(MET, METqt);
+      met2_phi[5]     -> Fill(MET_phi);
+    
       met3_over_qt[5] -> Fill(projMETqt);
-      met3_et[5]         -> Fill(projMET);
-      
+      met3_et[5]      -> Fill(projMET);
+      met3_et_ovQt[5] -> Fill(projMET, projMETqt);
+ 
       met4_over_qt[5] -> Fill(puCorrMETqt);
-      met4_et[5]         -> Fill(puCorrMET);
-      met4_sig[5]        -> Fill(puSigMET);
+      met4_et[5]      -> Fill(puCorrMET);
+      met4_et_ovQt[5] -> Fill(puCorrMET, puCorrMETqt);
+      met4_puSig[5]   -> Fill(puSigMET);
     }
 
-  met_et[5]      -> Fill(MET);
-  met_phi[5]     -> Fill(MET_phi);
-  met_over_qt[5] -> Fill(METqt);
+  di_qt[5] -> Fill(qT);
+  met0_over_qt[5] -> Fill(METqt);
+  met0_et[5]      -> Fill(MET);
+  met0_et_ovQt[5] -> Fill(MET, METqt);
+  met0_phi[5]     -> Fill(MET_phi);
 
+  met1_over_qt[5] -> Fill(MET1qt);
   met1_et[5]      -> Fill(MET1);
+  met1_et_ovQt[5] -> Fill(MET1, MET1qt);
   met1_phi[5]     -> Fill(MET1_phi);
-  met1_over_qt[5] -> Fill(METqt);
+
+  mt0[5] -> Fill(MT);
 
   if (isMuonSample)
     {
@@ -587,12 +658,16 @@ Bool_t analyzer_higgs::Process(Long64_t entry)
       mu2_pt[5]  -> Fill(myMuon2->pt());
 
     }
+  
 
   if(verboseLvl>1)   
     fout[5]<<"* "<<runNumber<<"\t* "<<eventNumber<<"  \t* "<<lumiSection<<"\t* "<<Mll<<"\t* "<<MT<<"\t* "<<MET<<"\t* "<<pTll<<"\t* "<<rhoFactor<<"\t*"<<endl;  
 
-  if (pTll<50) return kTRUE;
-  nEvents[6]++;
+  // if (pTll<50) return kTRUE;
+ 
+  if (projMET<70) return kTRUE;
+ 
+ nEvents[6]++;
 
   if(!isNoiseHcal)        nEventsPassNoiseFilter[1][6]++; 
   if(!isDeadEcalCluster)  nEventsPassNoiseFilter[2][6]++; 
@@ -602,28 +677,37 @@ Bool_t analyzer_higgs::Process(Long64_t entry)
   if(!isNoiseHcal && !isDeadEcalCluster && !isScraping && !isCSCTightHalo) 
     {
       nEventsPassNoiseFilter[0][6]++; 
-      met2_et[6]         -> Fill(MET);
-      met2_phi[6]        -> Fill(MET_phi);
-      met3_over_qt[6] -> Fill(projMETqt);
-      met3_et[6]         -> Fill(projMET);
+      met2_over_qt[6] -> Fill(METqt);
+      met2_et[6]      -> Fill(MET);
+      met2_et_ovQt[6] -> Fill(MET, METqt);
+      met2_phi[6]     -> Fill(MET_phi);
       
+      met3_over_qt[6] -> Fill(projMETqt);
+      met3_et[6]      -> Fill(projMET);
+      met3_et_ovQt[6] -> Fill(projMET, projMETqt);
+
       met4_over_qt[6] -> Fill(puCorrMETqt);
-      met4_et[6]         -> Fill(puCorrMET);
-      met4_sig[6]        -> Fill(puSigMET);
+      met4_et[6]      -> Fill(puCorrMET);
+      met4_et_ovQt[6] -> Fill(puCorrMET, puCorrMETqt);
+      met4_puSig[6]   -> Fill(puSigMET);
     }
   else
     if(verboseLvl>0) 
       nout[6]<<"* "<<runNumber<<"\t* "<<eventNumber<<"  \t* "<<lumiSection<<"\t* "<<MET<<"\t* "
 	     <<isNoiseHcal<<"\t* "<<isDeadEcalCluster<<"\t* "<<isScraping<<"\t* "<<isCSCTightHalo<<"\t* "<<endl;  
   
+  di_qt[6] -> Fill(qT);
+  met0_over_qt[6] -> Fill(METqt);
+  met0_et[6]      -> Fill(MET);
+  met0_et_ovQt[6] -> Fill(MET, METqt);
+  met0_phi[6]     -> Fill(MET_phi);
 
-  met_et[6]      -> Fill(MET);
-  met_phi[6]     -> Fill(MET_phi);
-  met_over_qt[6] -> Fill(METqt);
-
+  met1_over_qt[6] -> Fill(MET1qt);
   met1_et[6]      -> Fill(MET1);
+  met1_et_ovQt[6] -> Fill(MET1, MET1qt);
   met1_phi[6]     -> Fill(MET1_phi);
-  met1_over_qt[6] -> Fill(METqt);
+
+  mt0[6] -> Fill(MT);
 
   if (isMuonSample)
     {
@@ -640,8 +724,8 @@ Bool_t analyzer_higgs::Process(Long64_t entry)
   if(verboseLvl>0) 
     fout[6]<<"* "<<runNumber<<"\t* "<<eventNumber<<"  \t* "<<lumiSection<<"\t* "<<Mll<<"\t* "<<MT<<"\t* "<<MET<<"\t* "<<pTll<<"\t* "<<rhoFactor<<"\t*"<<endl;  
 
-  if (MET<80) return kTRUE;
-  nEvents[7]++;
+
+ nEvents[7]++;
   if(!isNoiseHcal)        nEventsPassNoiseFilter[1][7]++; 
   if(!isDeadEcalCluster)  nEventsPassNoiseFilter[2][7]++; 
   if(!isScraping)         nEventsPassNoiseFilter[3][7]++;
@@ -650,25 +734,37 @@ Bool_t analyzer_higgs::Process(Long64_t entry)
   if(!isNoiseHcal && !isDeadEcalCluster && !isScraping && !isCSCTightHalo) 
     {
       nEventsPassNoiseFilter[0][7]++; 
-      met2_et[7]         -> Fill(MET);
-      met2_phi[7]        -> Fill(MET_phi);
+      met2_over_qt[7] -> Fill(METqt);
+      met2_et[7]      -> Fill(MET);
+      met2_et_ovQt[7] -> Fill(MET, METqt);
+      met2_phi[7]     -> Fill(MET_phi);
+
       met3_over_qt[7] -> Fill(projMETqt);
-      met3_et[7]         -> Fill(projMET);
+      met3_et[7]      -> Fill(projMET);
+      met3_et_ovQt[7] -> Fill(projMET, projMETqt);
       
       met4_over_qt[7] -> Fill(puCorrMETqt);
-      met4_et[7]         -> Fill(puCorrMET);
-      met4_sig[7]        -> Fill(puSigMET);
+      met4_et[7]      -> Fill(puCorrMET);
+      met4_et_ovQt[7] -> Fill(puCorrMET, puCorrMETqt);
+      met4_puSig[7]   -> Fill(puSigMET);
     }
   else
     if(verboseLvl>0) 
       nout[7]<<"* "<<runNumber<<"\t* "<<eventNumber<<"  \t* "<<lumiSection<<"\t* "<<MET<<"\t* "
 	     <<isNoiseHcal<<"\t* "<<isDeadEcalCluster<<"\t* "<<isScraping<<"\t* "<<isCSCTightHalo<<"\t* "<<endl;  
   
-  met_et[7]  -> Fill(MET);
-  met_phi[7] -> Fill(MET_phi);
+  di_qt[7] -> Fill(qT);
+  met0_over_qt[7] -> Fill(METqt);
+  met0_et[7]      -> Fill(MET);
+  met0_et_ovQt[7] -> Fill(MET, METqt);
+  met0_phi[7]     -> Fill(MET_phi);
 
-  met1_et[7]  -> Fill(MET1);
-  met1_phi[7] -> Fill(MET1_phi);
+  met1_over_qt[7] -> Fill(MET1qt);
+  met1_et[7]      -> Fill(MET1);
+  met1_et_ovQt[7] -> Fill(MET1, MET1qt);
+  met1_phi[7]     -> Fill(MET1_phi);
+
+  mt0[7] -> Fill(MT);
 
   if (isMuonSample)
     {
@@ -725,9 +821,9 @@ void analyzer_higgs::Terminate()
   ncout<<"3 pt1     \n| "<<nEvents[3]<<" |\t"<<(Float_t)nEvents[3]/nEvents[0]<<" |"<<(Float_t)nEvents[3]/nEvents[2]<<" |"<<endl;
   ncout<<"4 pt2   \n| "<<nEvents[4]<<" |\t"<<(Float_t)nEvents[4]/nEvents[0]<<" |"<<(Float_t)nEvents[4]/nEvents[3]<<" |"<<endl;
   ncout<<"5 anti-b  \n| "<<nEvents[5]<<" |\t"<<(Float_t)nEvents[5]/nEvents[0]<<" |"<<(Float_t)nEvents[5]/nEvents[4]<<" |"<<endl;
-  ncout<<"6 pTll  \n| "<<nEvents[6]<<" |\t"<<(Float_t)nEvents[6]/nEvents[0]<<" |"<<(Float_t)nEvents[6]/nEvents[5]<<" |"<<endl;
-  ncout<<"7 pfMet  \n| "<<nEvents[7]<<" |\t"<<(Float_t)nEvents[7]/nEvents[0]<<" |"<<(Float_t)nEvents[7]/nEvents[6]<<" |"<<endl;
-  ncout<<"8      \n| "<<nEvents[8]<<" |\t"<<(Float_t)nEvents[8]/nEvents[0]<<" |"<<(Float_t)nEvents[8]/nEvents[7]<<" |"<<endl;
+  ncout<<"6 Met    \n| "<<nEvents[6]<<" |\t"<<(Float_t)nEvents[6]/nEvents[0]<<" |"<<(Float_t)nEvents[6]/nEvents[5]<<" |"<<endl;
+  //ncout<<"7        \n| "<<nEvents[7]<<" |\t"<<(Float_t)nEvents[7]/nEvents[0]<<" |"<<(Float_t)nEvents[7]/nEvents[6]<<" |"<<endl;
+  //ncout<<"8        \n| "<<nEvents[8]<<" |\t"<<(Float_t)nEvents[8]/nEvents[0]<<" |"<<(Float_t)nEvents[8]/nEvents[7]<<" |"<<endl;
   // ncout<<"9      \n| "<<nEvents[9]<<" |\t"<<(Float_t)nEvents[9]/nEvents[0]<<" |"<<(Float_t)nEvents[9]/nEvents[8]<<" |"<<endl;
   // ncout<<"10     \n| "<<nEvents[10]<<" |\t"<<(Float_t)nEvents[10]/nEvents[0]<<" |"<<(Float_t)nEvents[10]/nEvents[9]<<" |"<<endl;
   
