@@ -4,7 +4,7 @@
 #include "TH1.h"
 #include "TTree.h"
 #include "TKey.h"
-#include "Riostream.h"
+//#include "Riostream.h"
 
 TList *FileList;
 TFile *Target;
@@ -51,7 +51,7 @@ void makePlot(Int_t sel=1, TString hPath="00")
   if (sel==2) TFile  *fData = (TFile*)fda_2011A_DoubleEl;
  
 
-  TFile *fr = new TFile(Form("./forRadek_%i.root",sel), "RECREATE");
+  TFile *fA = new TFile(Form("./forAnton_%i.root",sel), "RECREATE");
 
   TFile* fmc_ZllG      = new TFile(Form("./%s/dir_%i_MC_ZllG_/hhhh.root", histoPath.Data(), sel));
   TFile* fmc_Wjets     = new TFile(Form("./%s/dir_%i_MC_Wjets_/hhhh.root",histoPath.Data(), sel));
@@ -79,29 +79,49 @@ void makePlot(Int_t sel=1, TString hPath="00")
   list_bg->Add(fmc_Zjets);
   list_bg->Add(fmc_Wjets);
 
-  THStack *hs_met_et[nC], *hs_met_over_qt[nC], *hs_di_qt[nC], *hs_met_et_ovQt[nC], *hs_mt[nC];
+  THStack *hs_met_et[nC], *hs_met2_et[nC], *hs_met_over_qt[nC], *hs_di_qt[nC], *hs_met_et_ovQt[nC], *hs_mt[nC], *hs_mtZ[nC];
   THStack *hs_jet_N[nC], *hs_jet_b_N[nC], hs_jet_b_pt[nC];
   THStack *hs_di_mass[nC];
   THStack *hs_met_dPhiLeadJet1[nC], *hs_met_dPhiLeadJet2[nC], *hs_met_dPhiClosJet1[nC], *hs_met_dPhiClosJet2[nC];
   for(Int_t n = 0; n<nC; n++)
     {
       hs_met_et[n]       = makeStack(list_bg, Form("%s_et_%i", metType.Data(), n));
+      hs_met2_et[n]      = makeStack(list_bg, Form("met2_et_%i", n));
       hs_mt[n]           = makeStack(list_bg, Form("%s_%i", mtType.Data(), n));
+      hs_mtZ[n]          = makeStack(list_bg, Form("mtZ_%i", n));
 
       hs_met_over_qt[n]  = makeStack(list_bg, Form("%s_over_qt_%i", metType.Data(), n));
       hs_met_et_ovQt[n]  = makeStack(list_bg, Form("%s_et_ovQt_%i", metType.Data(), n));
 
+      hs_di_qt[n]   = makeStack(list_bg, Form("di_qt_%i",n));
       hs_di_mass[n] = makeStack(list_bg, Form("di_mass_%i",n));
       hs_jet_N[n]   = makeStack(list_bg, Form("jet_N_%i",n));
-      hs_jet_b_N[n]  = makeStack(list_bg, Form("jet_b_N_%i",n)); 
+      hs_jet_b_N[n] = makeStack(list_bg, Form("jet_b_N_%i",n)); 
     
       hs_met_dPhiLeadJet1[n] = makeStack(list_bg, Form("met2_dPhiLeadJet1_%i",n));
       hs_met_dPhiLeadJet2[n] = makeStack(list_bg, Form("met2_dPhiLeadJet2_%i",n));
       hs_met_dPhiClosJet1[n] = makeStack(list_bg, Form("met2_dPhiClosJet1_%i",n));
       hs_met_dPhiClosJet2[n] = makeStack(list_bg, Form("met2_dPhiClosJet2_%i",n));
     }
-  //      hs_jet_b_pt[8]  = makeStack(list_bg, Form("jet_b_pt_%i",8)); //_ to be fixed
+  //  hs_jet_b_pt[8]  = makeStack(list_bg, Form("jet_b_pt_%i",8)); //_ to be fixed
 
+  
+//hs_di_mass[5] -> Write();
+  //hs_met_et[5]  -> Write();
+  //hs_mt[5]      -> Write();
+ 
+  fA -> cd();
+  TH1F *Zjets_qt   = fmc_Zjets->Get("di_qt_5") ->Clone();
+  TH1F *Zjets_mass = fmc_Zjets->Get("di_mass_5") ->Clone();
+  TH1F *Zjets_met  = fmc_Zjets->Get("met3_et_5") ->Clone();
+  TH1F *Zjets_met2  = fmc_Zjets->Get("met2_et_5") ->Clone();
+  TH1F *Zjets_mt   = fmc_Zjets->Get("mt2_5") ->Clone();
+  Zjets_qt -> Write();
+  Zjets_mass -> Write();
+  Zjets_met  -> Write();
+  Zjets_met2  -> Write();
+  Zjets_mt   -> Write();
+  fA -> Close();
 
   TIter next(hs_jet_N[F0] -> GetHists());
   TH1 * forLegend[21];
@@ -151,9 +171,6 @@ void makePlot(Int_t sel=1, TString hPath="00")
 
   TCanvas *c2 = new TCanvas("c2","example",600,700);
  
-  
-
-
   drawMuliPlot("projMET", 1, 0.0001, 100000, 0,5, hs_met_et[F0], c2, leg01, fData, fmc_ggH200, fmc_ggH400, fmc_ZllG);
   c2 -> SaveAs(imgpath+"ov01.png");
   drawMuliPlot("projMET/q_{T}", 1, 0.0001, 100000, 0,3, hs_met_over_qt[F0], c2, leg01, fData, fmc_ggH200, fmc_ggH400, fmc_ZllG);
@@ -200,28 +217,52 @@ void makePlot(Int_t sel=1, TString hPath="00")
   drawMuliPlot("N b-jets", 1, 0.0001, 100000, 0,5, hs_jet_b_N[F3], c2, leg01, fData, fmc_ggH200, fmc_ggH400, fmc_ZllG);
   c2 -> SaveAs(imgpath+"ov18.png");
   
-  /*
-  drawMuliPlot("N jets", 1, 0.0001, 100000, 0,5, hs_jet_N[F2], c2, leg01, fData, fmc_ggH200, fmc_ggH400, fmc_ZllG);
-  c2 -> SaveAs(imgpath+"ov17.png");
-  drawMuliPlot("N b-jets", 1, 0.0001, 100000, 0,5, hs_jet_b_N[F2], c2, leg01, fData, fmc_ggH200, fmc_ggH400, fmc_ZllG);
-    c2 -> SaveAs(imgpath+"ov18.png");
-  */
 
-  drawMuliPlot("#Delta#phi(MET, lead jet), p_{T}>20, |#eta|<2.4", 1, 0.0001, 1000000, 0,2, hs_met_dPhiLeadJet1[F0], c2, leg01, fData, fmc_ggH200, fmc_ggH400, fmc_ZllG);
+ // drawMuliPlot("N jets", 1, 0.0001, 100000, 0,5, hs_jet_N[F2], c2, leg01, fData, fmc_ggH200, fmc_ggH400, fmc_ZllG);
+ // c2 -> SaveAs(imgpath+"ov17.png");
+ // drawMuliPlot("N b-jets", 1, 0.0001, 100000, 0,5, hs_jet_b_N[F2], c2, leg01, fData, fmc_ggH200, fmc_ggH400, fmc_ZllG);
+ //   c2 -> SaveAs(imgpath+"ov18.png");
+  
+
+  drawMuliPlot("N b-jets", 1, 0.0001, 100000, 0,5, hs_jet_b_N[7], c2, leg01, fData, fmc_ggH200, fmc_ggH400, fmc_ZllG);
   c2 -> SaveAs(imgpath+"ov19.png");
-  drawMuliPlot("#Delta#phi(MET, closest jet), p_{T}>20, |#eta|<2.4", 1, 0.0001, 1000000, 0,2, hs_met_dPhiClosJet1[F0], c2, leg01, fData, fmc_ggH200, fmc_ggH400, fmc_ZllG);
+  drawMuliPlot("N b-jets", 1, 0.0001, 100000, 0,5, hs_jet_b_N[8], c2, leg01, fData, fmc_ggH200, fmc_ggH400, fmc_ZllG);
   c2 -> SaveAs(imgpath+"ov20.png");
 
-  drawMuliPlot("#Delta#phi(MET, lead jet), p_{T}>20, |#eta|<2.4", 1, 0.0001, 100000, 0,5, hs_met_dPhiLeadJet1[F1], c2, leg01, fData, fmc_ggH200, fmc_ggH400, fmc_ZllG);
+  drawMuliPlot("#Delta#phi(MET, lead jet), p_{T}>20, |#eta|<2.4", 1, 0.0001, 1000000, 0,2, hs_met_dPhiLeadJet1[F0], c2, leg01, fData, fmc_ggH200, fmc_ggH400, fmc_ZllG);
   c2 -> SaveAs(imgpath+"ov21.png");
-  drawMuliPlot("#Delta#phi(MET, closest jet), p_{T}>20, |#eta|<2.4", 1, 0.0001, 100000, 0,5, hs_met_dPhiClosJet1[F1], c2, leg01, fData, fmc_ggH200, fmc_ggH400, fmc_ZllG);
+  drawMuliPlot("#Delta#phi(MET, closest jet), p_{T}>20, |#eta|<2.4", 1, 0.0001, 1000000, 0,2, hs_met_dPhiClosJet1[F0], c2, leg01, fData, fmc_ggH200, fmc_ggH400, fmc_ZllG);
   c2 -> SaveAs(imgpath+"ov22.png");
 
-  drawMuliPlot("#Delta#phi(MET, lead jet), p_{T}>20, |#eta|<2.4", 1, 0.0001, 100000, 0,5, hs_met_dPhiLeadJet1[F3], c2, leg01, fData, fmc_ggH200, fmc_ggH400, fmc_ZllG);
+  drawMuliPlot("#Delta#phi(MET, lead jet), p_{T}>20, |#eta|<2.4", 1, 0.0001, 100000, 0,5, hs_met_dPhiLeadJet1[F1], c2, leg01, fData, fmc_ggH200, fmc_ggH400, fmc_ZllG);
   c2 -> SaveAs(imgpath+"ov23.png");
-  drawMuliPlot("#Delta#phi(MET, closest jet), p_{T}>20, |#eta|<2.4", 1, 0.0001, 100000, 0,5, hs_met_dPhiClosJet1[F3], c2, leg01, fData, fmc_ggH200, fmc_ggH400, fmc_ZllG);
+  drawMuliPlot("#Delta#phi(MET, closest jet), p_{T}>20, |#eta|<2.4", 1, 0.0001, 100000, 0,5, hs_met_dPhiClosJet1[F1], c2, leg01, fData, fmc_ggH200, fmc_ggH400, fmc_ZllG);
   c2 -> SaveAs(imgpath+"ov24.png");
 
+  drawMuliPlot("#Delta#phi(MET, lead jet), p_{T}>20, |#eta|<2.4", 1, 0.0001, 1000000, 0,2, hs_met_dPhiLeadJet1[F2], c2, leg01, fData, fmc_ggH200, fmc_ggH400, fmc_ZllG);
+  c2 -> SaveAs(imgpath+"ov25.png");
+  drawMuliPlot("#Delta#phi(MET, closest jet), p_{T}>20, |#eta|<2.4", 1, 0.0001, 1000000, 0,2, hs_met_dPhiClosJet1[F2], c2, leg01, fData, fmc_ggH200, fmc_ggH400, fmc_ZllG);
+  c2 -> SaveAs(imgpath+"ov26.png");
+
+
+  drawMuliPlot("q_{T} (di-lepton p_{T})", 1, 0.0001, 100000, 0,5, hs_di_qt[F0], c2, leg01, fData, fmc_ggH200, fmc_ggH400, fmc_ZllG);
+  c2 -> SaveAs(imgpath+"ov27.png");
+  drawMuliPlot("q_{T} (di_lepton p_{T})", 1, 0.0001, 100000, 0,5, hs_di_qt[F1], c2, leg01, fData, fmc_ggH200, fmc_ggH400, fmc_ZllG);
+  c2 -> SaveAs(imgpath+"ov28.png");
+
+  drawMuliPlot("pfMET", 1, 0.0001, 100000, 0,5, hs_met2_et[F0], c2, leg01, fData, fmc_ggH200, fmc_ggH400, fmc_ZllG);
+  c2 -> SaveAs(imgpath+"ov29.png");
+  drawMuliPlot("MT (using Z mass)", 1, 0.0001, 100000, 0,5, hs_mtZ[F0], c2, leg01, fData, fmc_ggH200, fmc_ggH400, fmc_ZllG);
+  c2 -> SaveAs(imgpath+"ov30.png");
+
+  drawMuliPlot("pfMET", 1, 0.0001, 100000, 0,5, hs_met2_et[F1], c2, leg01, fData, fmc_ggH200, fmc_ggH400, fmc_ZllG);
+  c2 -> SaveAs(imgpath+"ov31.png");
+  drawMuliPlot("MT (using Z mass)", 1, 0.0001, 100000, 0,5, hs_mtZ[F1], c2, leg01, fData, fmc_ggH200, fmc_ggH400, fmc_ZllG);
+  c2 -> SaveAs(imgpath+"ov32.png");
+  
+
+  // drawMuliPlot("pfMET", 1, 0.0001, 100000, 0,5, hs_jet_b_pt[8], c2, leg01, fData, fmc_ggH200, fmc_ggH400, fmc_ZllG);
+  //c2 -> SaveAs(imgpath+"ov33.png");
 
   /*
 

@@ -1,6 +1,6 @@
 #!/bin/csh
 
-set lepton = 1 # 1- muons, 2 -electrons
+set lepton = 2 # 1- muons, 2 -electrons
 
 set dataset = (\
  2011A_May10_DoubleMu \

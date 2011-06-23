@@ -82,7 +82,7 @@ void analyzer_higgs::Begin(TTree * /*tree*/)
       mtZ_met3[n]     = new TH2F(Form("mtZ_met3_%i",n), "MTZ pf vs projMet noise", 50, 100, 600, 40, 0,400); 
       mt2_met3[n]     = new TH2F(Form("mt2_met3_%i",n), "MT pf vs projfMet noise", 50, 100, 600, 40, 0,400); 
  
-      di_qt[n]     = new TH1F(Form("di_qt_%i",n), "di-lepton qt", 40, 0,40);  
+      di_qt[n]     = new TH1F(Form("di_qt_%i",n), "di-lepton qt", 40, 0,400);  
       di_mass[n]   = new TH1F(Form("di_mass_%i",n), "di-lepton Mass", 50, 50,150);  
 
       jet_N[n]  = new TH1F(Form("jet_N_%i",n), "Number of jets", 20,0,20);
@@ -451,10 +451,10 @@ Bool_t analyzer_higgs::Process(Long64_t entry)
       jetCount++;
     }
 
-  for(Int_t ii=0; ii<nCuts; ii++)
+  for(Int_t ii=0; ii<nC; ii++)
     {
       //Fill out 
-      if(ii!=8) jet_b_pt[ii] ->Fill(66);
+      if(ii!=8 && ii!=4) jet_b_pt[ii] ->Fill(66);
     }
 
   di_qt[0] -> Fill(qT);
@@ -774,7 +774,7 @@ if (!passZpeak) return kTRUE;
 	{    
 	  TCJet* thisJet2 = (TCJet*) recoJets->At(i);     
 	  if (fabs(thisJet2->P4(7).Eta()) <= 2.4 && thisJet2->BDiscrTrkCountHiEff() > 2) 
-	    jet_b_pt[8] ->Fill(thisJet->P4(7).Pt());
+	    jet_b_pt[8] ->Fill(thisJet2->P4(7).Pt());
 	}
     }
 
