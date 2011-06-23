@@ -1,10 +1,6 @@
 #define analyzer_higgs_cxx
 
 #include "analyzer_higgs.h"
-#include <TH2.h>
-#include <TStyle.h>
-#include <TString.h>
-#include <TMath.h>
 
 using namespace std;
 
@@ -17,16 +13,20 @@ UInt_t nEventsPassNoiseFilter[6][20]; //1-Hcal, 2-Ecal, 3- Scraping, 4-CSCTight,
 Bool_t isElectronSample = kFALSE, isMuonSample = kTRUE;
 
 UInt_t verboseLvl = 1;
-//TString sample("none");
+
+string sel, sample;//, lColor, fColor;
+Float_t CS, nEv;
+Int_t lColor, fColor;
 
 void analyzer_higgs::Begin(TTree * /*tree*/)
 { 
   TString option = GetOption();
+  TH1::SetDefaultSumw2(kTRUE);
+
   histoFile = new TFile("hhhh.root", "RECREATE"); 
   //histoFile = new TFile(Form("hhistograms_%s.root", sample.Data()), "RECREATE"); 
-    for(Int_t n=0; n<nCuts; n++)
+    for(Int_t n=0; n<nC; n++)
     {
-      TH1::SetDefaultSumw2(kTRUE);
       met0_phi[n]      = new TH1F(Form("met0_phi_%i",n), "met0_phi", 40, -TMath::Pi(), TMath::Pi()); 
       met0_et[n]       = new TH1F(Form("met0_et_%i",n), "met0_et", 40, 0,400);
       met0_over_qt[n]  = new TH1F(Form("met0_over_qt_%i",n), "met0_over_qt", 40, 0,4);
@@ -54,6 +54,12 @@ void analyzer_higgs::Begin(TTree * /*tree*/)
       met4_over_qt[n] = new TH1F(Form("met4_over_qt_%i",n), "met4_over_qt", 42, -0.2,4);
       met4_puSig[n]   = new TH1F(Form("met4_sig_%i",n), "met4_sig", 42, -0.4,8);
 
+      met2_dPhiLeadJet1[n] =  new TH1F(Form("met2_dPhiLeadJet1_%i",n), "delta phi to lead jets", 40, 0, TMath::Pi());
+      met2_dPhiLeadJet2[n] =  new TH1F(Form("met2_dPhiLeadJet2_%i",n), "delta phi to lead jets", 40, 0, TMath::Pi());
+      met2_dPhiClosJet1[n] =  new TH1F(Form("met2_dPhiClosJet1_%i",n), "delta phi to closest jets", 40, 0, TMath::Pi());
+      met2_dPhiClosJet2[n] =  new TH1F(Form("met2_dPhiClosJet2_%i",n), "delta phi to closest jets", 40, 0, TMath::Pi());
+
+
       mu1_phi[n] = new TH1F(Form("mu1_phi_%i",n), "mu1_phi", 40, -TMath::Pi(), TMath::Pi()); 
       mu1_eta[n] = new TH1F(Form("mu1_eta_%i",n), "mu1_eta", 40, -2.6, 2.6); 
       mu1_pt[n]  = new TH1F(Form("mu1_pt_%i",n), "mu1_pt", 40, 0, 200); 
@@ -63,26 +69,46 @@ void analyzer_higgs::Begin(TTree * /*tree*/)
       mu2_pt[n]  = new TH1F(Form("mu2_pt_%i",n), "mu2_pt", 40, 0, 200); 
       btag_hp[n] = new TH1F(Form("btag_hp_%i",n), "btag_hp", 40, -10, 10); 
 
-      mt0[n]     = new TH1F(Form("mt0_%i",n), "MT pf", 40, 0, 400); 
-      mt1[n]     = new TH1F(Form("mt1_%i",n), "MT type1", 40, 0, 400); 
-      mt2[n]     = new TH1F(Form("mt2_%i",n), "MT noise", 40, 0, 400); 
-      mt3[n]     = new TH1F(Form("mt3_%i",n), "MT proj", 40, 0, 400); 
-      mt4[n]     = new TH1F(Form("mt4_%i",n), "MT pu corr", 40, 0, 400); 
-      di_qt[n]   = new TH1F(Form("di_qt_%i",n), "di-lepton qt", 40, 0,400);  
+      mtZ[n]     = new TH1F(Form("mtZ_%i",n), "MTZ pf", 50, 100, 600); 
+      mt0[n]     = new TH1F(Form("mt0_%i",n), "MT pf", 50, 100, 600); 
+      mt1[n]     = new TH1F(Form("mt1_%i",n), "MT type1", 50, 100, 600); 
+      mt2[n]     = new TH1F(Form("mt2_%i",n), "MT noise", 50, 100, 600); 
+      mt3[n]     = new TH1F(Form("mt3_%i",n), "MT proj", 50, 100, 600); 
+      mt4[n]     = new TH1F(Form("mt4_%i",n), "MT pu corr", 50, 100, 600);
+
+      mtZ_met2[n]     = new TH2F(Form("mtZ_met2_%i",n), "MTZ pf vs pfMet noise", 50, 100, 600, 40, 0,400); 
+      mt2_met2[n]     = new TH2F(Form("mt2_met2_%i",n), "MT pf vs pfMet noise", 50, 100, 600, 40, 0,400); 
+
+      mtZ_met3[n]     = new TH2F(Form("mtZ_met3_%i",n), "MTZ pf vs projMet noise", 50, 100, 600, 40, 0,400); 
+      mt2_met3[n]     = new TH2F(Form("mt2_met3_%i",n), "MT pf vs projfMet noise", 50, 100, 600, 40, 0,400); 
+ 
+      di_qt[n]     = new TH1F(Form("di_qt_%i",n), "di-lepton qt", 40, 0,40);  
+      di_mass[n]   = new TH1F(Form("di_mass_%i",n), "di-lepton Mass", 50, 50,150);  
+
+      jet_N[n]  = new TH1F(Form("jet_N_%i",n), "Number of jets", 20,0,20);
+      jet_b_N[n] = new TH1F(Form("jet_b_N_%i",n), "Number of b-jets", 10,0,10);
+
+      jet_pt[n] = new TH1F(Form("jet_pt_%i",n), "Pt of jets, eta<2.4", 40,0,200);
+      jet_b_pt[n] = new TH1F(Form("jet_b_pt_%i",n), "Pt of b-jets, eta<2.4", 40,0,200);
+
+
     }
+
 
   ffout.open("./events_printout_andrey_final.txt",ofstream::out);
   ncout.open("./counts_for_tex.txt",ofstream::out);
-  string sel;
   ifstream params;
-  params.open("./params.txt"); params>>sel;
+  params.open("./params.txt"); 
+  params>>sel;
   if (sel == "muon")      { ncout<<"Mu selection!"<<endl; isMuonSample = kTRUE;  isElectronSample = kFALSE;}
   if (sel == "electron")  { ncout<<"El selection!"<<endl; isMuonSample = kFALSE; isElectronSample = kTRUE;}
   ncout<<endl;
+  params>>sample;  params>>nEv;  params>>CS;  params>>lColor;  params>>fColor;
+  ncout<<"sample: "<<sample<<"  cs: "<<CS<<"  events: "<<nEv<<" colors: "<<lColor<<"  "<<fColor<<endl;
+  ncout<<endl;
 
- 
   ffout.precision(4); ffout.setf(ios::fixed, ios::floatfield);
-  for(Int_t i=0; i<nCuts; i++)
+  for(Int_t i=0; i<nC; i++)
     {
       fout[i].open(Form("./events_printout_andrey_%i.txt",i),ofstream::out);
       fout[i].precision(3); fout[i].setf(ios::fixed, ios::floatfield);
@@ -108,7 +134,7 @@ Bool_t analyzer_higgs::Process(Long64_t entry)
   
 
   GetEntry(entry); 
-  //if ( nEvents[0]>500) return kTRUE; 
+  //if ( nEvents[0]>250) return kTRUE; 
   nEvents[0]++; 
   if(!isNoiseHcal)        nEventsPassNoiseFilter[1][0]++; 
   if(!isDeadEcalCluster)  nEventsPassNoiseFilter[2][0]++; 
@@ -340,7 +366,7 @@ Bool_t analyzer_higgs::Process(Long64_t entry)
 
   Float_t MET=0, MET_phi=0;
   Float_t MET1=0, MET1_phi=0;
-  Float_t MT = 0;
+  Float_t MT = 0, MTZ = 0;
   if (recoMET->GetSize()>1) cout<<"warning: to many mets"<<endl;
   
   TCMET* pfMet = 0, *pfMetCorr = 0;
@@ -374,10 +400,62 @@ Bool_t analyzer_higgs::Process(Long64_t entry)
   ZptXY.Set(diLepton.X(), diLepton.Y());
   METXY.Set(MET*cos(MET_phi), MET*sin(MET_phi));
   MT = higgsMT(pTll, Mll, MET, ZptXY, METXY);
+  MTZ = higgsMT(pTll, 91.1876, MET, ZptXY, METXY);
   //if (muCount==2) cout<<"MT: "<<MT<<"    "<<ZptXY.X()<<" "<<ZptXY.Y()<<"    "<<METXY.X()<<" "<<METXY.Y()<<endl;
 
   Float_t METqt = MET/qT;
   Float_t MET1qt = MET1/qT;
+
+  Bool_t antiB  = kFALSE;
+  Int_t jetCount=0, nJets = 0, nJetsB = 0;
+
+  Float_t ptJ1 = 0, ptJ2=0;
+  Float_t  dPhiLead1 = 110,  dPhiLead2 = 110; 
+  Float_t  dPhiClos1 = 110,  dPhiClos2 = 110; 
+  for (Int_t i = 0; i < recoJets->GetSize(); ++i) 
+    {    
+      TCJet* thisJet = (TCJet*) recoJets->At(i);     
+      if (thisJet->P4(7).Pt() > 30 && fabs(thisJet->P4(7).Eta()) <= 2.4) 
+	{
+	  //do anti-b tag
+          if (thisJet->BDiscrTrkCountHiEff() > 2)
+	    {
+	      antiB = kTRUE;//return kTRUE; 
+	      nJetsB++;
+	    }
+	  nJets++;
+	}
+
+      Float_t ptTemp = thisJet->P4(7).Pt();
+      if(ptTemp>ptJ1)
+	{
+	  ptJ1 = ptTemp;
+	  dPhiLead1 = fabs(TVector2::Phi_mpi_pi(thisJet->P4(7).Phi() - MET_phi));
+	}
+      
+      if(ptTemp>ptJ2 && fabs(thisJet->P4(7).Eta()) <= 2.4)
+	{
+	  ptJ2 = ptTemp;
+	  dPhiLead2 = fabs(TVector2::Phi_mpi_pi(thisJet->P4(7).Phi() - MET_phi));
+	}
+
+      Float_t dphiTemp = fabs(TVector2::Phi_mpi_pi(thisJet->P4(7).Phi() - MET_phi));
+      
+      if(dphiTemp<dPhiClos1)
+	dPhiClos1 = dphiTemp;
+      
+      if(dphiTemp<dPhiClos2 && fabs(thisJet->P4(7).Eta()) <= 2.4)
+	dPhiClos2 = dphiTemp;
+
+
+      jetCount++;
+    }
+
+  for(Int_t ii=0; ii<nCuts; ii++)
+    {
+      //Fill out 
+      if(ii!=8) jet_b_pt[ii] ->Fill(66);
+    }
 
   di_qt[0] -> Fill(qT);
   met0_over_qt[0] -> Fill(METqt);
@@ -407,6 +485,27 @@ Bool_t analyzer_higgs::Process(Long64_t entry)
       met4_et[0]      -> Fill(puCorrMET);
       met4_et_ovQt[0] -> Fill(puCorrMET, puCorrMETqt);
       met4_puSig[0]   -> Fill(puSigMET);
+
+      mt2[0]      -> Fill(MT);
+      mtZ[0]      -> Fill(MTZ);
+      mt2_met2[0] -> Fill(MT, MET);
+      mtZ_met2[0] -> Fill(MTZ, MET);
+      mt2_met3[0] -> Fill(MT, projMET);
+      mtZ_met3[0] -> Fill(MTZ, projMET);
+
+      di_mass[0]  -> Fill(Mll);
+      jet_N[0]    -> Fill(nJets);
+      jet_b_N[0]   -> Fill(nJetsB);
+
+      if(jetCount>0)  
+	{
+	  met2_dPhiClosJet1[0] -> Fill(dPhiClos1); 
+	  met2_dPhiClosJet2[0] -> Fill(dPhiClos2); 
+	  met2_dPhiLeadJet1[0] -> Fill(dPhiLead1); 
+	  met2_dPhiLeadJet2[0] -> Fill(dPhiLead2); 
+	}
+
+
     }
   else
     if(verboseLvl>1) 
@@ -437,6 +536,25 @@ Bool_t analyzer_higgs::Process(Long64_t entry)
       met4_et[1]      -> Fill(puCorrMET);
       met4_et_ovQt[1] -> Fill(puCorrMET, puCorrMETqt);
       met4_puSig[1]   -> Fill(puSigMET);
+
+      mt2[1]      -> Fill(MT);
+      mtZ[1]      -> Fill(MTZ);
+      mt2_met2[1] -> Fill(MT, MET);
+      mtZ_met2[1] -> Fill(MTZ, MET);
+      mt2_met3[1] -> Fill(MT, projMET);
+      mtZ_met3[1] -> Fill(MTZ, projMET);
+
+      di_mass[1]  -> Fill(Mll);
+      jet_N[1]    -> Fill(nJets);
+      jet_b_N[1]   -> Fill(nJetsB);
+
+      if(jetCount>0)  
+	{
+	  met2_dPhiClosJet1[1] -> Fill(dPhiClos1); 
+	  met2_dPhiClosJet2[1] -> Fill(dPhiClos2); 
+	  met2_dPhiLeadJet1[1] -> Fill(dPhiLead1); 
+	  met2_dPhiLeadJet2[1] -> Fill(dPhiLead2); 
+	}
     }
   else
     if(verboseLvl>0) 
@@ -474,12 +592,33 @@ if (!passZpeak) return kTRUE;
 
       met3_over_qt[2] -> Fill(projMETqt);
       met3_et[2]      -> Fill(projMET);
-      met3_et_ovQt[1] -> Fill(projMET, projMETqt);
+      met3_et_ovQt[2] -> Fill(projMET, projMETqt);
       
       met4_over_qt[2] -> Fill(puCorrMETqt);
       met4_et[2]      -> Fill(puCorrMET);
-      met4_et_ovQt[1] -> Fill(puCorrMET, puCorrMETqt);
+      met4_et_ovQt[2] -> Fill(puCorrMET, puCorrMETqt);
       met4_puSig[2]     -> Fill(puSigMET);
+
+      mt2[2]      -> Fill(MT);
+      mtZ[2]      -> Fill(MTZ);
+      mt2_met2[2] -> Fill(MT, MET);
+      mtZ_met2[2] -> Fill(MTZ, MET);
+      mt2_met3[2] -> Fill(MT, projMET);
+      mtZ_met3[2] -> Fill(MTZ, projMET);
+
+      di_mass[2]  -> Fill(Mll);
+      jet_N[2]    -> Fill(nJets);
+      jet_b_N[2]   -> Fill(nJetsB);
+
+
+      if(jetCount>0)  
+	{
+	  met2_dPhiClosJet1[2] -> Fill(dPhiClos1); 
+	  met2_dPhiClosJet2[2] -> Fill(dPhiClos2); 
+	  met2_dPhiLeadJet1[2] -> Fill(dPhiLead1); 
+	  met2_dPhiLeadJet2[2] -> Fill(dPhiLead2); 
+	}
+
     }
 
 
@@ -579,6 +718,26 @@ if (!passZpeak) return kTRUE;
       met4_et[4]      -> Fill(puCorrMET);
       met4_et_ovQt[4] -> Fill(puCorrMET, puCorrMETqt);
       met4_puSig[4]   -> Fill(puSigMET);
+
+      mt2[4]      -> Fill(MT);
+      mtZ[4]      -> Fill(MTZ);
+      mt2_met2[4] -> Fill(MT, MET);
+      mtZ_met2[4] -> Fill(MTZ, MET);
+      mt2_met3[4] -> Fill(MT, projMET);
+      mtZ_met3[4] -> Fill(MTZ, projMET);
+
+      di_mass[4]  -> Fill(Mll);
+      jet_N[4]    -> Fill(nJets);
+      jet_b_N[4]   -> Fill(nJetsB);
+
+      if(jetCount>0)  
+	{
+	  met2_dPhiClosJet1[4] -> Fill(dPhiClos1); 
+	  met2_dPhiClosJet2[4] -> Fill(dPhiClos2); 
+	  met2_dPhiLeadJet1[4] -> Fill(dPhiLead1); 
+	  met2_dPhiLeadJet2[4] -> Fill(dPhiLead2); 
+	}
+
     }
   
   di_qt[4] -> Fill(qT);
@@ -597,18 +756,33 @@ if (!passZpeak) return kTRUE;
   if(verboseLvl>1) 
     fout[4]<<"* "<<runNumber<<"\t* "<<eventNumber<<"  \t* "<<lumiSection<<"\t* "<<Mll<<"\t* "<<MT<<"\t* "<<MET<<"\t* "<<pTll<<"\t* "<<rhoFactor<<"\t*"<<endl;  
 
-  Int_t jetCount=0;
+
   for (Int_t i = 0; i < recoJets->GetSize(); ++i) 
     {    
       TCJet* thisJet = (TCJet*) recoJets->At(i);     
-      if (fabs(thisJet->P4(7).Eta()) <= 2.4) 
-	{
-	  //do anti-b tag
-          if (thisJet->P4(7).Pt() > 30 && thisJet->BDiscrTrkCountHiEff() > 2) return kTRUE; 
-	}
-      jetCount++;
+      if (fabs(thisJet->P4(7).Eta()) <= 2.4 && thisJet->BDiscrTrkCountHiEff() > 2) 
+	jet_b_pt[4] ->Fill(thisJet->P4(7).Pt());
     }
   
+  if (projMET>70)
+    {
+      jet_b_N[7]   -> Fill(nJetsB);
+      if(MT>327 && MT<441)
+	jet_b_N[8]   -> Fill(nJetsB);
+
+     for (Int_t i = 0; i < recoJets->GetSize(); ++i) 
+	{    
+	  TCJet* thisJet2 = (TCJet*) recoJets->At(i);     
+	  if (fabs(thisJet2->P4(7).Eta()) <= 2.4 && thisJet2->BDiscrTrkCountHiEff() > 2) 
+	    jet_b_pt[8] ->Fill(thisJet->P4(7).Pt());
+	}
+    }
+
+
+
+  if(antiB) return kTRUE;
+
+
   nEvents[5]++;
 
   if(!isNoiseHcal)        nEventsPassNoiseFilter[1][5]++; 
@@ -632,6 +806,62 @@ if (!passZpeak) return kTRUE;
       met4_et[5]      -> Fill(puCorrMET);
       met4_et_ovQt[5] -> Fill(puCorrMET, puCorrMETqt);
       met4_puSig[5]   -> Fill(puSigMET);
+
+      mt2[5]      -> Fill(MT);
+      mtZ[5]      -> Fill(MTZ);
+      mt2_met2[5] -> Fill(MT, MET);
+      mtZ_met2[5] -> Fill(MTZ, MET);
+      mt2_met3[5] -> Fill(MT, projMET);
+      mtZ_met3[5] -> Fill(MTZ, projMET);
+
+      di_mass[5]  -> Fill(Mll);
+      jet_N[5]    -> Fill(nJets);
+      jet_b_N[5]   -> Fill(nJetsB);
+
+      if(jetCount>0)  
+	{
+	  met2_dPhiClosJet1[5] -> Fill(dPhiClos1); 
+	  met2_dPhiClosJet2[5] -> Fill(dPhiClos2); 
+	  met2_dPhiLeadJet1[5] -> Fill(dPhiLead1); 
+	  met2_dPhiLeadJet2[5] -> Fill(dPhiLead2); 
+	}
+
+      if(projMET<70)
+	{
+	  //Revercing MEt cut
+	  met2_over_qt[9] -> Fill(METqt);
+	  met2_et[9]      -> Fill(MET);
+	  met2_et_ovQt[9] -> Fill(MET, METqt);
+	  met2_phi[9]     -> Fill(MET_phi);
+	  
+	  met3_over_qt[9] -> Fill(projMETqt);
+	  met3_et[9]      -> Fill(projMET);
+	  met3_et_ovQt[9] -> Fill(projMET, projMETqt);
+	  
+	  met4_over_qt[9] -> Fill(puCorrMETqt);
+	  met4_et[9]      -> Fill(puCorrMET);
+	  met4_et_ovQt[9] -> Fill(puCorrMET, puCorrMETqt);
+	  met4_puSig[9]   -> Fill(puSigMET);
+	  
+	  mt2[9]      -> Fill(MT);
+	  mtZ[9]      -> Fill(MTZ);
+	  mt2_met2[9] -> Fill(MT, MET);
+	  mtZ_met2[9] -> Fill(MTZ, MET);
+	  mt2_met3[9] -> Fill(MT, projMET);
+	  mtZ_met3[9] -> Fill(MTZ, projMET);
+	  
+	  di_mass[9]  -> Fill(Mll);
+	  jet_N[9]    -> Fill(nJets);
+	  jet_b_N[9]   -> Fill(nJetsB);
+	  
+	  if(jetCount>0)  
+	    {
+	      met2_dPhiClosJet1[9] -> Fill(dPhiClos1); 
+	      met2_dPhiClosJet2[9] -> Fill(dPhiClos2); 
+	      met2_dPhiLeadJet1[9] -> Fill(dPhiLead1); 
+	      met2_dPhiLeadJet2[9] -> Fill(dPhiLead2); 
+	    }
+	}
     }
 
   di_qt[5] -> Fill(qT);
@@ -665,6 +895,8 @@ if (!passZpeak) return kTRUE;
 
   // if (pTll<50) return kTRUE;
  
+
+
   if (projMET<70) return kTRUE;
  
  nEvents[6]++;
@@ -690,6 +922,27 @@ if (!passZpeak) return kTRUE;
       met4_et[6]      -> Fill(puCorrMET);
       met4_et_ovQt[6] -> Fill(puCorrMET, puCorrMETqt);
       met4_puSig[6]   -> Fill(puSigMET);
+
+      mt2[6]      -> Fill(MT);
+      mtZ[6]      -> Fill(MTZ);
+      mt2_met2[6] -> Fill(MT, MET);
+      mtZ_met2[6] -> Fill(MTZ, MET);
+      mt2_met3[6] -> Fill(MT, projMET);
+      mtZ_met3[6] -> Fill(MTZ, projMET);
+
+      di_mass[6]  -> Fill(Mll);
+      jet_N[6]    -> Fill(nJets);
+      jet_b_N[6]   -> Fill(nJetsB);
+
+      if(jetCount>0)  
+	{
+	  met2_dPhiClosJet1[6] -> Fill(dPhiClos1); 
+	  met2_dPhiClosJet2[6] -> Fill(dPhiClos2); 
+	  met2_dPhiLeadJet1[6] -> Fill(dPhiLead1); 
+	  met2_dPhiLeadJet2[6] -> Fill(dPhiLead2); 
+	}
+
+
     }
   else
     if(verboseLvl>0) 
@@ -810,7 +1063,7 @@ void analyzer_higgs::Terminate()
   cout<<" Begin Terminate"<<endl;
   cout<<endl;
 
-  for(Int_t i=0; i<nCuts; i++) {nout[i].close();  fout[i].close();}
+  for(Int_t i=0; i<nC; i++) {nout[i].close();  fout[i].close();}
   ffout.close();
 
   ncout.precision(3); cout.setf(ios::fixed, ios::floatfield);
@@ -829,7 +1082,7 @@ void analyzer_higgs::Terminate()
   
   ncout<<endl;
   ncout<<" & total   &  passHcal  & passEcal  &  Scraping  & CSCTight & CSCLoose & & passAll & frac \\\\ \n \\hline"<<endl;
-  for (Int_t i=0; i<nCuts; i++)
+  for (Int_t i=0; i<nC; i++)
     {
       ncout<<" & "<<nEvents[i]<<
 	" & "<<nEventsPassNoiseFilter[1][i]<<"\t& "<<nEventsPassNoiseFilter[2][i]<<"\t&  "<<nEventsPassNoiseFilter[3][i]<<
@@ -841,9 +1094,25 @@ void analyzer_higgs::Terminate()
   ncout.close();
 
   cout<<"End of Job. Let's write the files."<<endl;
-  histoFile->cd();
+
+
+
+
+  Float_t nEv1 = getNevents(sample.c_str(), met1_et[0]);
+
+  //TFile *temp = new TFile("temp.root", "RECREATE"); 
+  //temp->Write();
+  //   gDirectory -> GetListOfKeys() -> Print();
+
   histoFile->Write();
+  scaleAndColor(sample.c_str(), CS, nEv1, 191.0, lColor, fColor);
+  //scale(sample.c_str(), CS, nEv1, 191.0);
+  
+  // cout<<"met0_et_0 integral: "<<met0_et[0]->Integral()<<endl;  //histoFile->Write();
+
+  //histoFile->Print("-d");
   histoFile->Close();
+  //temp ->Close();
   cout<<"Wrote and Closed"<<endl;
 
 }
@@ -882,7 +1151,6 @@ double analyzer_higgs::higgsMT(Float_t pTll, Float_t Mll, Float_t MET, TVector2 
 
 double analyzer_higgs::projectedMET(Float_t MET, Float_t MET_phi, TLorentzVector Lepton1, TLorentzVector Lepton2)
 {
-  //Float_t deltaPhiMin = TMath::Min(deltaPhi(Lepton1.Phi(), MET_phi), deltaPhi(Lepton2.Phi(), MET_phi));
   Float_t deltaPhiMin =   TMath::Min( fabs(TVector2::Phi_mpi_pi(Lepton1.Phi() - MET_phi)), fabs(TVector2::Phi_mpi_pi(Lepton2.Phi() - MET_phi)));
   //cout<<deltaPhiMin<<endl;
   Float_t projMET = 0;
@@ -902,6 +1170,96 @@ double analyzer_higgs::pileUpCorrectedMET(Float_t projMET, Int_t nVtx)
   Float_t puCorrMET = projMET2*sigma0/sigmaT;
   return puCorrMET;
 }
+
+
+
+//void analyzer_higgs::scale(string sample1, TFile *file, TFile * outFile, Float_t cs, Float_t nTotEv, Float_t lumi)
+void analyzer_higgs::scaleAndColor(TString sample1, Float_t cs, Float_t nTotEv, Float_t lumi, Int_t line, Int_t fill)
+{
+  Float_t scaleFactor      = lumi*cs/nTotEv;
+  Bool_t isData = kFALSE; 
+  if(sample1.Contains("2011A_")) {scaleFactor = 1.0; isData = kTRUE;}
+  if(sample1.Contains("MC_ggH")) scaleFactor*=10;
+
+  //  cout<<sample1<<"   Rescaling all the histograms by: "<<scaleFactor<<endl;
+    
+  //  file -> cd();
+  TIter nextkey( gDirectory->GetListOfKeys() );
+  //TIter nextkey( file->GetListOfKeys() );
+  TKey *key, *oldkey=0;
+
+    while ( (key = (TKey*)nextkey())) 
+    {
+      if (oldkey && !strcmp(oldkey->GetName(),key->GetName())) continue;
+      TObject *obj = key->ReadObj();
+      if ( ! (obj->IsA()->InheritsFrom( TH1::Class() )) ) continue; 
+      TH1 *hist = (TH1*)key->ReadObj();
+      hist -> Scale(scaleFactor);
+      if(line!=-1)      hist -> SetLineColor(line);
+      if(fill!=-1)      hist -> SetFillColor(fill);
+      if(isData)        hist -> SetMarkerStyle(20);
+      hist->SetLineWidth(2);
+      hist->Write("",kWriteDelete); //overwrite the object in the file
+      delete obj;
+      //cout<<sample1<<"  nEv: "<<nTotEv<<"   cs: "<<cs<<"   Rescaling all the histogram "<<hist->GetName()<<" by: "<<scaleFactor<<endl;
+    }
+
+}
+
+float analyzer_higgs::getNevents(string sample1, TH1F* h)
+{
+
+  Int_t nEv2 = 0;
+  if(sample1=="MC_ZllG") nEv2 = 165000.;
+  else if(sample1=="MC_Wjets") nEv2 = h    -> GetEntries();
+  else if(sample1=="MC_tt2l2nu2b") nEv2 = h       -> GetEntries();
+  else if(sample1=="MC_tSchannel") nEv2 = h       -> GetEntries();
+  else if(sample1=="MC_tTchannel") nEv2 = h       -> GetEntries();
+  else if(sample1=="MC_tWchannel") nEv2 = h       -> GetEntries();
+  else if(sample1=="MC_ZZtoAny") nEv2 = h   -> GetEntries();
+  else if(sample1=="MC_DYmumu") nEv2 = 1984154.;
+  else if(sample1=="MC_DYee") nEv2 = 1992276.;
+  else if(sample1=="MC_DYtautau") nEv2 = 1995369.;
+  else if(sample1=="MC_WW") nEv2 = 110000.;
+  else if(sample1=="MC_WZ") nEv2 = 110000.;
+  else if(sample1=="MC_Zbb0") nEv2 = 347393.;
+  else if(sample1=="MC_Zbb1") nEv2 = 2025811.;
+  else if(sample1=="MC_Zbb2") nEv2 = 10842.;
+  else if(sample1=="MC_Zbb3") nEv2 = 10898.;
+  else if(sample1=="MC_Zcc0") nEv2 = 438067.;
+  else if(sample1=="MC_Zcc1") nEv2 = 184365.;
+  else if(sample1=="MC_Zcc2") nEv2 = 10735.;
+  else if(sample1=="MC_Zcc3") nEv2 = 10177.;
+  else if(sample1=="MC_ggH200") nEv2 = 109274;
+  else if(sample1=="MC_ggH400") nEv2 = h   -> GetEntries();
+  else if(sample1=="MC_ggH600") nEv2 = 109255;
+  else if(sample1=="MC_ggH200_WW2l2nu") nEv2 = 109988;
+  else if(sample1=="MC_ggH400_WW2l2nu") nEv2 = 109584;
+  else if(sample1=="MC_ggH600_WW2l2nu") nEv2 = 109974;
+  else if(sample1=="MC_ggH200_WW2t2nu") nEv2 = 65995;
+  else if(sample1=="MC_ggH400_WW2t2nu") nEv2 = 65991;
+  else if(sample1=="MC_ggH600_WW2t2nu") nEv2 = 65997;
+  return nEv2;
+}
+
+/*
+void analyzer_higgs::scale(string sample1, TH1 * h, Float_t cs, Float_t nTotEv, Float_t lumi)
+{
+
+  Float_t scaleFactor      = lumi*cs/nTotEv;
+  if(sample1=="2011A_May10_DoubleMu" ||
+     sample1=="2011A_May10_DoubleElectron" ||
+     sample1=="2011A_HZZSkim_DoubleMu" ||
+     sample1=="2011A_HZZSkim_DoubleElectron") scaleFactor = 1.0;
+  if(sample1=="MC_ggH200" ||
+     sample1=="MC_ggH400" ||
+     sample1=="MC_ggH600" ) scaleFactor*=10;
+     
+
+  // cout<<sample1<<"  nEv: "<<nTotEv<<"   cs: "<<cs<<"   Rescaling all the histogram "<<h->GetName()<<" by: "<<scaleFactor<<endl;
+  h -> Scale(scaleFactor);
+}
+*/
 
 /*
 void analyzer_higgs::CountEvents(UInt_t nEv[], UInt_t nEvPassNoiseFilter[])

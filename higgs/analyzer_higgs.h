@@ -30,11 +30,19 @@
 #include <iostream>
 #include <fstream>
 
-#define nCuts 10
+#include <TKey.h>
+#include <TList.h>
+//#include <TFileIter.h>                                                                                                                                     
+#include <TH2.h>
+#include <TStyle.h>
+#include <TString.h>
+#include <TMath.h>
+//#include <TClass.h>
 
+#define nC 10  //nCuts in the analysis. make plots after each cut
 
 class analyzer_higgs : public TSelector {
-  ofstream nout[nCuts], fout[nCuts], ffout, ncout;
+  ofstream nout[nC], fout[nC], ffout, ncout;
   
   double dz(TCPrimaryVtx *primVtx, TVector3* trackVtx, TVector3* trackMom);
   double dxy(TCPrimaryVtx *primVtx, TVector3* trackVtx, TVector3* trackMom);
@@ -42,22 +50,34 @@ class analyzer_higgs : public TSelector {
   double projectedMET(Float_t MET, Float_t MET_phi, TLorentzVector Lepton1, TLorentzVector Lepton2);
   double pileUpCorrectedMET(Float_t projMET, Int_t nVtx);
 
-  void CountEvents(UInt_t nEvents[], UInt_t nEventsPassNoiseFilter[]);
+  float getNevents(string, TH1F* );
+  void scaleAndColor(TString , Float_t , Float_t , Float_t , Int_t , Int_t );
+  //void scaleAndColor(TString , Float_t cs, Float_t nEv, Float_t lumi, Int_t line, Int_t fill);
+  //void scale(string sample, Float_t cs, Float_t nEv, Float_t lumi);
+  //void scale(string sample, TH1 *h, Float_t cs, Float_t nEv, Float_t lumi);
+//  void CountEvents(UInt_t nEvents[], UInt_t nEventsPassNoiseFilter[]);
   
 public :
   TFile* histoFile;
   
-  TH1F *mt0[nCuts], *mt1[nCuts], *mt2[nCuts], *mt3[nCuts], *mt4[nCuts];
-  TH1F *met0_phi[nCuts], *met0_et[nCuts], *met0_over_qt[nCuts];
-  TH1F *met1_phi[nCuts], *met1_et[nCuts], *met1_over_qt[nCuts];
-  TH1F *met2_phi[nCuts], *met2_et[nCuts], *met2_over_qt[nCuts];
-  TH1F *met3_phi[nCuts], *met3_et[nCuts], *met3_over_qt[nCuts];
-  TH1F *met4_phi[nCuts], *met4_et[nCuts], *met4_over_qt[nCuts], *met4_puSig[nCuts];
-  TH1F *mu1_phi[nCuts], *mu1_eta[nCuts], *mu1_pt[nCuts];
-  TH1F *mu2_phi[nCuts], *mu2_eta[nCuts], *mu2_pt[nCuts];
-  TH1F *btag_hp[nCuts];
-  TH1F *di_qt[nCuts];
-  TH2F *met0_et_ovQt[nCuts], *met1_et_ovQt[nCuts], *met2_et_ovQt[nCuts], *met3_et_ovQt[nCuts], *met4_et_ovQt[nCuts]; 
+  TH1F *mtZ[nC], *mt0[nC], *mt1[nC], *mt2[nC], *mt3[nC], *mt4[nC];
+  TH1F *met0_phi[nC], *met0_et[nC], *met0_over_qt[nC];
+  TH1F *met1_phi[nC], *met1_et[nC], *met1_over_qt[nC];
+  TH1F *met2_phi[nC], *met2_et[nC], *met2_over_qt[nC];
+  TH1F *met3_phi[nC], *met3_et[nC], *met3_over_qt[nC];
+  TH1F *met4_phi[nC], *met4_et[nC], *met4_over_qt[nC], *met4_puSig[nC];
+  TH1F *mu1_phi[nC], *mu1_eta[nC], *mu1_pt[nC];
+  TH1F *mu2_phi[nC], *mu2_eta[nC], *mu2_pt[nC];
+  TH1F *btag_hp[nC];
+  TH1F *di_qt[nC], *di_mass[nC];
+  TH1F *jet_N[nC], *jet_pt[nC];
+  TH1F *jet_b_N[nC], *jet_b_pt[nC];
+
+  TH1F *met2_dPhiLeadJet1[nC], *met2_dPhiLeadJet2[nC], *met2_dPhiClosJet1[nC], *met2_dPhiClosJet2[nC];
+
+  TH2F *met0_et_ovQt[nC], *met1_et_ovQt[nC], *met2_et_ovQt[nC], *met3_et_ovQt[nC], *met4_et_ovQt[nC]; 
+  TH2F *mtZ_met2[nC], *mt2_met2[nC];
+  TH2F *mtZ_met3[nC], *mt2_met3[nC];
 
    TTree          *fChain;   //!pointer to the analyzed TTree or TChain
 

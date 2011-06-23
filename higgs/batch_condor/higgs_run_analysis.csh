@@ -9,6 +9,7 @@ set dir =  /uscms_data/d2/andreypz/cmssw/higgs3/CMSSW_4_2_3/src/NWU/Higgs/higgs/
 cp $dir/run_analysis.C .
 cp $dir/analyzer_higgs.C .
 cp $dir/analyzer_higgs.h .
+cp $dir/xSecAndColors.C .
 cp $dir/../src/TC* .
 
 # this wierd string is for 'run_analysis.C("2010A","2010B")' kind of thing:

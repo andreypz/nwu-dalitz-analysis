@@ -1,6 +1,6 @@
 #!/bin/csh
 
-set lepton = 2 # 1- muons, 2 -electrons
+set lepton = 1 # 1- muons, 2 -electrons
 
 set dataset = (\
  2011A_May10_DoubleMu \
@@ -15,7 +15,6 @@ set dataset = (\
  MC_tSchannel\
  MC_tTchannel\
  MC_tWchannel\
- MC_ggH400\
  MC_WW\
  MC_WZ\
  MC_DYmumu\
@@ -29,7 +28,17 @@ set dataset = (\
  MC_Zcc1\
  MC_Zcc2\
  MC_Zcc3\
- )
+ MC_ggH200\
+ MC_ggH400\
+ MC_ggH600\
+)
+# MC_ggH200_HWW2l2nu\
+# MC_ggH400_HWW2l2nu\
+# MC_ggH600_HWW2t2nu\
+# MC_ggH200_HWW2t2nu\
+# MC_ggH400_HWW2t2nu\
+# MC_ggH600_HWW2t2nu\
+# )
 
 foreach name ($dataset)
 echo $name

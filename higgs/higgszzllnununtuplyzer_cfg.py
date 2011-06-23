@@ -161,15 +161,11 @@ process.higgs = cms.EDAnalyzer('HiggsZZllnunuNtuplyzer',
                                ecalAnomalousFilterTag = cms.untracked.InputTag("BE1214","anomalousECALVariables")	
 )
 
+process.load("Configuration/Skimming/PDWG_HZZSkim_cff")
+
 process.options = cms.untracked.PSet(
     wantSummary = cms.untracked.bool(True)
 )
-
-process.load("Configuration/Skimming/PDWG_HZZSkim_cff")
-#zzdiMuonSequence = cms.Sequence( goodHzzMuons * diHzzMuons * diHzzMuonsFilter )
-#zzdiElectronSequence = cms.Sequence( goodHzzElectrons * diHzzElectrons * diHzzElectronsFilter )
-#zzeleMuSequence = cms.Sequence( goodHzzMuons * goodHzzElectrons * crossHzzLeptons * crossHzzLeptonsFilter )
-
 
 process.TimerService = cms.Service("TimerService", useCPUtime = cms.untracked.bool(True))
 process.pts = cms.EDFilter("PathTimerInserter")
