@@ -67,6 +67,13 @@ int getColors(string dataset="MC_ggH400", Int_t b =1)
   else if(dataset=="MC_ggH400") {lCol = kCyan;    fCol  = -1;}
   else if(dataset=="MC_ggH600") {lCol = kCyan+1;  fCol  = -1;}
 
+  else if(dataset=="MC_ggH200_WW2l2nu") {lCol = kWhite;  fCol  = -1;}
+  else if(dataset=="MC_ggH400_WW2l2nu") {lCol = kCyan;    fCol  = -1;}
+  else if(dataset=="MC_ggH600_WW2l2nu") {lCol = kCyan+1;  fCol  = -1;}
+  else if(dataset=="MC_ggH200_WW2t2nu") {lCol = kWhite;  fCol  = -1;}
+  else if(dataset=="MC_ggH400_WW2t2nu") {lCol = kCyan;    fCol  = -1;}
+  else if(dataset=="MC_ggH600_WW2t2nu") {lCol = kCyan+1;  fCol  = -1;}
+
   else if(dataset=="MC_ZZtoAny")   {lCol = kBlue;     fCol = kMagenta;}
   else if(dataset=="MC_Wjets")     {lCol = kGreen-2;  fCol = kCyan+1;}
   else if(dataset=="MC_ZllG")      {lCol = kYellow;   fCol = -1;}

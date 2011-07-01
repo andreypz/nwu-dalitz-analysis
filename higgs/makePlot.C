@@ -16,9 +16,6 @@ TFile *Target;
 #define F3 4
 
 
-//THStack * makeStack(TList *s);
-//THStack * drawMultiPlot(THStack *h, TCanvas *c, TString s);
-
 void makePlot(Int_t sel=1, TString hPath="00")
 {
   gROOT->ProcessLine(".L ../data/tdrstyle.C");
@@ -51,7 +48,9 @@ void makePlot(Int_t sel=1, TString hPath="00")
   if (sel==2) TFile  *fData = (TFile*)fda_2011A_DoubleEl;
  
 
-  TFile *fA = new TFile(Form("./forAnton_%i.root",sel), "RECREATE");
+  TFile *fA_Zj = new TFile(Form("./forAnton_Zjets_%i.root",sel), "RECREATE");
+  TFile *fA_Da = new TFile(Form("./forAnton_Data_%i.root",sel), "RECREATE");
+  TFile *fA_Ds = new TFile(Form("./forAnton_Data_sbtr_%i.root",sel), "RECREATE");
 
   TFile* fmc_ZllG      = new TFile(Form("./%s/dir_%i_MC_ZllG_/hhhh.root", histoPath.Data(), sel));
   TFile* fmc_Wjets     = new TFile(Form("./%s/dir_%i_MC_Wjets_/hhhh.root",histoPath.Data(), sel));
@@ -105,23 +104,71 @@ void makePlot(Int_t sel=1, TString hPath="00")
     }
   //  hs_jet_b_pt[8]  = makeStack(list_bg, Form("jet_b_pt_%i",8)); //_ to be fixed
 
-  
-//hs_di_mass[5] -> Write();
-  //hs_met_et[5]  -> Write();
-  //hs_mt[5]      -> Write();
- 
-  fA -> cd();
-  TH1F *Zjets_qt   = fmc_Zjets->Get("di_qt_5") ->Clone();
-  TH1F *Zjets_mass = fmc_Zjets->Get("di_mass_5") ->Clone();
-  TH1F *Zjets_met  = fmc_Zjets->Get("met3_et_5") ->Clone();
-  TH1F *Zjets_met2  = fmc_Zjets->Get("met2_et_5") ->Clone();
-  TH1F *Zjets_mt   = fmc_Zjets->Get("mt2_5") ->Clone();
-  Zjets_qt -> Write();
+  /*
+  fA_Ds -> cd();
+  TH1F *Zjets_qt   = fData->Get("di_qt_4") ->Clone();
+  TH1F *Zjets_mass = fData->Get("di_mass_4") ->Clone();
+  TH1F *Zjets_met  = fData->Get("met3_et_5") ->Clone();
+  TH1F *Zjets_met2 = fData->Get("met2_et_5") ->Clone();
+  TH1F *Zjets_mt   = fData->Get("mt2_6") ->Clone();
+  TH1F *Zjets_nj5  = fData->Get("jet_N_5") ->Clone();
+  TH1F *Zjets_nj6  = fData->Get("jet_N_6") ->Clone();
+  Zjets_qt   -> Write();
   Zjets_mass -> Write();
   Zjets_met  -> Write();
-  Zjets_met2  -> Write();
+  Zjets_met2 -> Write();
   Zjets_mt   -> Write();
-  fA -> Close();
+  Zjets_nj5  -> Write();
+  Zjets_nj6  -> Write();
+  fA_Ds -> Close();
+  */
+
+ 
+  fA_Zj -> cd();
+  TH1F *Zjets_qt   = fmc_Zjets->Get("di_qt_4") ->Clone();
+  TH1F *Zjets_mass = fmc_Zjets->Get("di_mass_4") ->Clone();
+  TH1F *Zjets_met  = fmc_Zjets->Get("met3_et_5") ->Clone();
+  TH1F *Zjets_met2 = fmc_Zjets->Get("met2_et_5") ->Clone();
+  TH1F *Zjets_mt   = fmc_Zjets->Get("mt2_6") ->Clone();
+  TH1F *Zjets_nj5  = fmc_Zjets->Get("jet_N_5") ->Clone();
+  TH1F *Zjets_nj6  = fmc_Zjets->Get("jet_N_6") ->Clone();
+  TH1F *Zjets_mOq5 = fmc_Zjets->Get("met2_over_qt_5") ->Clone();
+  TH1F *Zjets_mOq6 = fmc_Zjets->Get("met2_over_qt_6") ->Clone();
+  Zjets_qt   -> Write();
+  Zjets_mass -> Write();
+  Zjets_met  -> Write();
+  Zjets_met2 -> Write();
+  Zjets_mt   -> Write();
+  Zjets_nj5  -> Write();
+  Zjets_nj6  -> Write();
+  Zjets_mOq5 -> Write();
+  Zjets_mOq6 -> Write();
+  fA_Zj -> Close();
+
+  
+  fA_Da -> cd();
+  TH1F *da__qt   = fData->Get("di_qt_4") ->Clone();
+  TH1F *da__mass = fData->Get("di_mass_4") ->Clone();
+  TH1F *da__met  = fData->Get("met3_et_5") ->Clone();
+  TH1F *da__met2 = fData->Get("met2_et_5") ->Clone();
+  TH1F *da__mt   = fData->Get("mt2_6") ->Clone();
+  TH1F *da__nj5  = fData->Get("jet_N_5") ->Clone();
+  TH1F *da__nj6  = fData->Get("jet_N_6") ->Clone();
+  TH1F *da__mOq5 = fData->Get("met2_over_qt_5") ->Clone();
+  TH1F *da__mOq6 = fData->Get("met2_over_qt_6") ->Clone();
+  da__qt   -> Write();
+  da__mass -> Write();
+  da__met  -> Write();
+  da__met2 -> Write();
+  da__mt   -> Write();
+  da__nj5  -> Write();
+  da__nj6  -> Write();
+  da__mOq5 -> Write();
+  da__mOq6 -> Write();
+  fA_Da -> Close();
+  
+
+
 
   TIter next(hs_jet_N[F0] -> GetHists());
   TH1 * forLegend[21];
@@ -196,7 +243,7 @@ void makePlot(Int_t sel=1, TString hPath="00")
   drawMuliPlot("MT", 1, 0.0001, 100000, 0,5, hs_mt[F1], c2, leg01, fData, fmc_ggH200, fmc_ggH400, fmc_ZllG);
   c2 -> SaveAs(imgpath+"ov10.png");
 
-  drawMuliPlot("M(ll)", 1, 0.0001, 100000, 0,2, hs_di_mass[F2], c2, leg01, fData, fmc_ggH200, fmc_ggH400, fmc_ZllG);
+  drawMuliPlot("M(ll)", 1, 0.0001, 1000000, 0,2, hs_di_mass[F2], c2, leg01, fData, fmc_ggH200, fmc_ggH400, fmc_ZllG);
   c2 -> SaveAs(imgpath+"ov11.png");
   drawMuliPlot("MT", 1, 0.0001, 100000, 0,2, hs_mt[F2], c2, leg01, fData, fmc_ggH200, fmc_ggH400, fmc_ZllG);
   c2 -> SaveAs(imgpath+"ov12.png");

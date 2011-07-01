@@ -2,15 +2,13 @@
 
 using namespace std;
 
-void newplot(Int_t sel =1, TString hPath ="v10") {
+void newplot(Int_t sel =1, TString hPath ="v11") {
   gROOT->LoadMacro("./makePlot.C");
   gROOT->LoadMacro("./merge.C");
   //gROOT->ProcessLine(".L ../data/tdrstyle.C");
   
   TString histoPath = hPath.Data();
-  if (histoPath.Contains("v08")) cout<<"contains: "<<histoPath.Data()	<<endl;
-
-   cout<<histoPath.Data()<<endl;
+  cout<<histoPath.Data()<<endl;
 
   TStopwatch timer;	
   timer.Start();
