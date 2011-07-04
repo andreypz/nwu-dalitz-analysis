@@ -30,8 +30,10 @@ void makePlot(Int_t sel=1, TString hPath="00")
   TH1::SetDefaultSumw2(kTRUE);
 
   TString histoPath = hPath.Data();
-  cout<<"histoPath:  "<<histoPath.Data()<<endl;
-  //  Int_t sel = 1; //1-muon, 2 -electron
+  Float_t intLumi = 1000.; //Note: in v11 and below the histograms are already normylized to 191, after that - to 1000
+ 
+  cout<<"histoPath:  "<<histoPath.Data()<<"  int Lumi: "<<intLumi<<endl;
+
 
   //Types of met: met - pfMet, met1 - type1 corrected, met2 - pfMet passed Noise filters, 
   //met3 - projMet, met4 - puProj corrected met (those two are passed Noise filters) 
@@ -78,50 +80,32 @@ void makePlot(Int_t sel=1, TString hPath="00")
   list_bg->Add(fmc_Zjets);
   list_bg->Add(fmc_Wjets);
 
-  THStack *hs_met_et[nC], *hs_met2_et[nC], *hs_met_over_qt[nC], *hs_di_qt[nC], *hs_met_et_ovQt[nC], *hs_mt[nC], *hs_mtZ[nC];
+  THStack *hs_met_et[nC], *hs_met2_et[nC], *hs_met_over_qt[nC], *hs_met2_over_qt[nC], *hs_di_qt[nC], *hs_met_et_ovQt[nC], *hs_mt[nC], *hs_mtZ[nC];
   THStack *hs_jet_N[nC], *hs_jet_b_N[nC], hs_jet_b_pt[nC];
   THStack *hs_di_mass[nC];
   THStack *hs_met_dPhiLeadJet1[nC], *hs_met_dPhiLeadJet2[nC], *hs_met_dPhiClosJet1[nC], *hs_met_dPhiClosJet2[nC];
   for(Int_t n = 0; n<nC; n++)
     {
-      hs_met_et[n]       = makeStack(list_bg, Form("%s_et_%i", metType.Data(), n));
-      hs_met2_et[n]      = makeStack(list_bg, Form("met2_et_%i", n));
-      hs_mt[n]           = makeStack(list_bg, Form("%s_%i", mtType.Data(), n));
-      hs_mtZ[n]          = makeStack(list_bg, Form("mtZ_%i", n));
+      hs_met_et[n]       = makeStack(list_bg, Form("%s_et_%i", metType.Data(), n), intLumi);
+      hs_met2_et[n]      = makeStack(list_bg, Form("met2_et_%i", n), intLumi);
+      hs_mt[n]           = makeStack(list_bg, Form("%s_%i", mtType.Data(), n), intLumi);
+      hs_mtZ[n]          = makeStack(list_bg, Form("mtZ_%i", n), intLumi);
 
-      hs_met_over_qt[n]  = makeStack(list_bg, Form("%s_over_qt_%i", metType.Data(), n));
-      hs_met_et_ovQt[n]  = makeStack(list_bg, Form("%s_et_ovQt_%i", metType.Data(), n));
+      hs_met_over_qt[n]  = makeStack(list_bg, Form("%s_over_qt_%i", metType.Data(), n), intLumi);
+      hs_met2_over_qt[n] = makeStack(list_bg, Form("met2_over_qt_%i", n), intLumi);
+      hs_met_et_ovQt[n]  = makeStack(list_bg, Form("%s_et_ovQt_%i", metType.Data(), n), intLumi);
 
-      hs_di_qt[n]   = makeStack(list_bg, Form("di_qt_%i",n));
-      hs_di_mass[n] = makeStack(list_bg, Form("di_mass_%i",n));
-      hs_jet_N[n]   = makeStack(list_bg, Form("jet_N_%i",n));
-      hs_jet_b_N[n] = makeStack(list_bg, Form("jet_b_N_%i",n)); 
+      hs_di_qt[n]   = makeStack(list_bg, Form("di_qt_%i",n), intLumi);
+      hs_di_mass[n] = makeStack(list_bg, Form("di_mass_%i",n), intLumi);
+      hs_jet_N[n]   = makeStack(list_bg, Form("jet_N_%i",n), intLumi);
+      hs_jet_b_N[n] = makeStack(list_bg, Form("jet_b_N_%i",n), intLumi); 
     
-      hs_met_dPhiLeadJet1[n] = makeStack(list_bg, Form("met2_dPhiLeadJet1_%i",n));
-      hs_met_dPhiLeadJet2[n] = makeStack(list_bg, Form("met2_dPhiLeadJet2_%i",n));
-      hs_met_dPhiClosJet1[n] = makeStack(list_bg, Form("met2_dPhiClosJet1_%i",n));
-      hs_met_dPhiClosJet2[n] = makeStack(list_bg, Form("met2_dPhiClosJet2_%i",n));
+      hs_met_dPhiLeadJet1[n] = makeStack(list_bg, Form("met2_dPhiLeadJet1_%i",n), intLumi);
+      hs_met_dPhiLeadJet2[n] = makeStack(list_bg, Form("met2_dPhiLeadJet2_%i",n), intLumi);
+      hs_met_dPhiClosJet1[n] = makeStack(list_bg, Form("met2_dPhiClosJet1_%i",n), intLumi);
+      hs_met_dPhiClosJet2[n] = makeStack(list_bg, Form("met2_dPhiClosJet2_%i",n), intLumi);
     }
   //  hs_jet_b_pt[8]  = makeStack(list_bg, Form("jet_b_pt_%i",8)); //_ to be fixed
-
-  /*
-  fA_Ds -> cd();
-  TH1F *Zjets_qt   = fData->Get("di_qt_4") ->Clone();
-  TH1F *Zjets_mass = fData->Get("di_mass_4") ->Clone();
-  TH1F *Zjets_met  = fData->Get("met3_et_5") ->Clone();
-  TH1F *Zjets_met2 = fData->Get("met2_et_5") ->Clone();
-  TH1F *Zjets_mt   = fData->Get("mt2_6") ->Clone();
-  TH1F *Zjets_nj5  = fData->Get("jet_N_5") ->Clone();
-  TH1F *Zjets_nj6  = fData->Get("jet_N_6") ->Clone();
-  Zjets_qt   -> Write();
-  Zjets_mass -> Write();
-  Zjets_met  -> Write();
-  Zjets_met2 -> Write();
-  Zjets_mt   -> Write();
-  Zjets_nj5  -> Write();
-  Zjets_nj6  -> Write();
-  fA_Ds -> Close();
-  */
 
  
   fA_Zj -> cd();
@@ -129,7 +113,8 @@ void makePlot(Int_t sel=1, TString hPath="00")
   TH1F *Zjets_mass = fmc_Zjets->Get("di_mass_4") ->Clone();
   TH1F *Zjets_met  = fmc_Zjets->Get("met3_et_5") ->Clone();
   TH1F *Zjets_met2 = fmc_Zjets->Get("met2_et_5") ->Clone();
-  TH1F *Zjets_mt   = fmc_Zjets->Get("mt2_6") ->Clone();
+  TH1F *Zjets_mt5  = fmc_Zjets->Get("mt2_5") ->Clone();
+  TH1F *Zjets_mt6  = fmc_Zjets->Get("mt2_6") ->Clone();
   TH1F *Zjets_nj5  = fmc_Zjets->Get("jet_N_5") ->Clone();
   TH1F *Zjets_nj6  = fmc_Zjets->Get("jet_N_6") ->Clone();
   TH1F *Zjets_mOq5 = fmc_Zjets->Get("met2_over_qt_5") ->Clone();
@@ -138,34 +123,76 @@ void makePlot(Int_t sel=1, TString hPath="00")
   Zjets_mass -> Write();
   Zjets_met  -> Write();
   Zjets_met2 -> Write();
-  Zjets_mt   -> Write();
+  Zjets_mt5  -> Write();
+  Zjets_mt6  -> Write();
   Zjets_nj5  -> Write();
   Zjets_nj6  -> Write();
   Zjets_mOq5 -> Write();
   Zjets_mOq6 -> Write();
-  fA_Zj -> Close();
+  //fA_Zj -> Close();
 
   
   fA_Da -> cd();
-  TH1F *da__qt   = fData->Get("di_qt_4") ->Clone();
-  TH1F *da__mass = fData->Get("di_mass_4") ->Clone();
-  TH1F *da__met  = fData->Get("met3_et_5") ->Clone();
-  TH1F *da__met2 = fData->Get("met2_et_5") ->Clone();
-  TH1F *da__mt   = fData->Get("mt2_6") ->Clone();
-  TH1F *da__nj5  = fData->Get("jet_N_5") ->Clone();
-  TH1F *da__nj6  = fData->Get("jet_N_6") ->Clone();
-  TH1F *da__mOq5 = fData->Get("met2_over_qt_5") ->Clone();
-  TH1F *da__mOq6 = fData->Get("met2_over_qt_6") ->Clone();
-  da__qt   -> Write();
-  da__mass -> Write();
-  da__met  -> Write();
-  da__met2 -> Write();
-  da__mt   -> Write();
-  da__nj5  -> Write();
-  da__nj6  -> Write();
-  da__mOq5 -> Write();
-  da__mOq6 -> Write();
-  fA_Da -> Close();
+  TH1F *da_qt   = fData->Get("di_qt_4") ->Clone();
+  TH1F *da_mass = fData->Get("di_mass_4") ->Clone();
+  TH1F *da_met  = fData->Get("met3_et_5") ->Clone();
+  TH1F *da_met2 = fData->Get("met2_et_5") ->Clone();
+  TH1F *da_mt5  = fData->Get("mt2_5") ->Clone();
+  TH1F *da_mt6  = fData->Get("mt2_6") ->Clone();
+  TH1F *da_nj5  = fData->Get("jet_N_5") ->Clone();
+  TH1F *da_nj6  = fData->Get("jet_N_6") ->Clone();
+  TH1F *da_mOq5 = fData->Get("met2_over_qt_5") ->Clone();
+  TH1F *da_mOq6 = fData->Get("met2_over_qt_6") ->Clone();
+  da_qt   -> Write();
+  da_mass -> Write();
+  da_met  -> Write();
+  da_met2 -> Write();
+  da_mt5  -> Write();
+  da_mt6  -> Write();
+  da_nj5  -> Write();
+  da_nj6  -> Write();
+  da_mOq5 -> Write();
+  da_mOq6 -> Write();
+  //fA_Da -> Close();
+
+
+  fA_Ds -> cd();
+  TH1F *ds_qt   = (TH1F*)hs_di_qt[4]->Sum()->Clone();
+  TH1F *ds_mass = (TH1F*)hs_di_mass[4]->Sum()->Clone();
+  TH1F *ds_met  = (TH1F*)hs_met_et[5]->Sum()->Clone();
+  TH1F *ds_met2 = (TH1F*)hs_met2_et[5]->Sum()->Clone();
+  TH1F *ds_mt5 = (TH1F*)hs_mt[5]->Sum()->Clone();
+  TH1F *ds_mt6 = (TH1F*)hs_mt[6]->Sum()->Clone();
+  TH1F *ds_nj5 = (TH1F*)hs_jet_N[5]->Sum()->Clone();
+  TH1F *ds_nj6 = (TH1F*)hs_jet_N[6]->Sum()->Clone();
+  TH1F *ds_mOq5 = (TH1F*)hs_met2_over_qt[5]->Sum()->Clone();
+  TH1F *ds_mOq6 = (TH1F*)hs_met2_over_qt[6]->Sum()->Clone();
+
+   da_qt -> Add(ds_qt,-1);
+   da_mass -> Add(ds_mass,-1);
+   da_met -> Add(ds_met,-1);
+   da_met2 -> Add(ds_met2,-1);
+   da_mt5 -> Add(ds_mt5,-1);
+   da_mt6 -> Add(ds_mt6,-1);
+
+   da_nj5 -> Add(ds_nj5,-1);
+   da_nj6 -> Add(ds_nj6,-1);
+
+   da_mOq5 -> Add(ds_mOq5,-1);
+   da_mOq6 -> Add(ds_mOq6,-1);
+
+  da_qt -> Write();
+  da_mass -> Write();
+  da_met  -> Write();
+  da_met2 -> Write();
+  da_mt5  -> Write();
+  da_mt6  -> Write();
+  da_nj5  -> Write();
+  da_nj6  -> Write();
+  da_mOq5 -> Write();
+  da_mOq6 -> Write();
+  fA_Ds -> Close();
+
   
 
 
@@ -205,8 +232,7 @@ void makePlot(Int_t sel=1, TString hPath="00")
   leg01->AddEntry(forLegend[3],  "WW","f");
   leg01->AddEntry(forLegend[0],  "t#rightarrow l#nub","f");
   leg01->AddEntry(forLegend[2],  "WZ","f");
-  leg01->AddEntry(forLegend[16], "tt#rightarrow 2l2#nu2b","f");
-  leg01->AddEntry(forLegend[19], "Z#gamma#rightarrow ll#gamma","f");
+  leg01->AddEntry(forLegend[16], "tt#rightarrow 2l2#nu2b","f");  leg01->AddEntry(forLegend[19], "Z#gamma#rightarrow ll#gamma","f");
   leg01->AddEntry(forLegend[17], "10xH200","f");
   leg01->AddEntry(forLegend[17]," ","");  //empty slot
   leg01->AddEntry(forLegend[18], "10xH400","f");
@@ -220,7 +246,10 @@ void makePlot(Int_t sel=1, TString hPath="00")
  
   drawMuliPlot("projMET", 1, 0.0001, 100000, 0,5, hs_met_et[F0], c2, leg01, fData, fmc_ggH200, fmc_ggH400, fmc_ZllG);
   c2 -> SaveAs(imgpath+"ov01.png");
+
+  cout<<"dbg multi"<<endl;
   drawMuliPlot("projMET/q_{T}", 1, 0.0001, 100000, 0,3, hs_met_over_qt[F0], c2, leg01, fData, fmc_ggH200, fmc_ggH400, fmc_ZllG);
+
   c2 -> SaveAs(imgpath+"ov02.png");
 
   drawMuliPlot("projMET", 1, 0.0001, 100000, 0,5, hs_met_et[F1], c2, leg01, fData, fmc_ggH200, fmc_ggH400, fmc_ZllG);
@@ -328,7 +357,7 @@ void makePlot(Int_t sel=1, TString hPath="00")
   
 }
 
-THStack* makeStack(TList *sourcelist, TString name)
+THStack* makeStack(TList *sourcelist, TString name, Float_t lumi)
 {
   //cout<<"making stack!"<<endl;
   THStack * hs = new THStack(Form("hs_11_%i",1),"Stacked MT");
@@ -351,7 +380,11 @@ THStack* makeStack(TList *sourcelist, TString name)
 	  {
 	    //cout<<"first "<<key->GetName()<<endl;
 	    //hs -> Add((TH1*)key->ReadObj());
-	    hs -> Add((TH1*)key->ReadObj()->Clone());
+	    TH1 *hh1 = (TH1*)key->ReadObj()->Clone();
+	    hh1 -> Scale(lumi/1000);
+	    hs -> Add(hh1);
+	    //hs -> Add((TH1*)key->ReadObj()->Clone());
+	    //hs -> Add( ((TH1*)key->ReadObj()->Clone())->Scale(lumi/1000));
 	  }
       TFile *nextsource = (TFile*)sourcelist->After( first_source );
       while ( nextsource )
@@ -365,7 +398,11 @@ THStack* makeStack(TList *sourcelist, TString name)
 	      if(strncmp(Form("%s",name.Data()),key2->GetName(), name.Length()) ==0)
 		{
 		  //cout<<"nextsource "<<key2->GetName()<<endl;
-		   hs -> Add((TH1*)key2->ReadObj()->Clone());
+		  TH1 *hh2 = (TH1*)key2->ReadObj()->Clone();
+		  hh2 -> Scale(lumi/1000);
+		  hs -> Add(hh2);
+		  //hs -> Add((TH1*)key2->ReadObj()->Clone());
+		  //hs -> Add( ((TH1*)key2->ReadObj()->Clone())->Scale(lumi/1000));
 		}
 	      //delete h2;
 	    }
@@ -395,8 +432,7 @@ void drawMuliPlot(TString xtitle, Int_t isLog, Float_t y1min, Float_t y1max, Flo
 
   h_data -> Print();
 
-
-  cc ->cd();
+   cc ->cd();
   TPad *pad1 = new TPad("pad1","pad1",0,0.3,1,1);
   cc -> cd();
   pad1->SetBottomMargin(0);

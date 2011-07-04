@@ -5,7 +5,7 @@
 using namespace std;
 
 Float_t cut_vz = 24, cut_vd0 = 2, cut_vndof = 4;  //PV filter cuts
-Float_t cut_Mll_low = 76.2, cut_Mll_high = 106.2, cut_pTll = 25.;
+Float_t cut_Mll_low = 76.2, cut_Mll_high = 106.2, cut_pTll = 25.; //Di-lepton quantities
  
 UInt_t nEvents[20], nEventsPassHcal[20], nEventsPassEcal[20];
 UInt_t nEventsPassNoiseFilter[6][20]; //1-Hcal, 2-Ecal, 3- Scraping, 4-CSCTight, 5-CSCLoose,   0-passed all
@@ -14,7 +14,7 @@ Bool_t isElectronSample = kFALSE, isMuonSample = kTRUE;
 
 UInt_t verboseLvl = 1;
 
-string sel, sample;//, lColor, fColor;
+string sel, sample;
 Float_t CS, nEv;
 Int_t lColor, fColor;
 
@@ -84,6 +84,9 @@ void analyzer_higgs::Begin(TTree * /*tree*/)
  
       di_qt[n]     = new TH1F(Form("di_qt_%i",n), "di-lepton qt", 40, 0,400);  
       di_mass[n]   = new TH1F(Form("di_mass_%i",n), "di-lepton Mass", 50, 70,120);  
+      di_mass_EB[n]   = new TH1F(Form("di_mass_EB_%i",n), "di-lepton Mass in Ecal Barrel", 50, 70,120);  
+      di_mass_EE[n]   = new TH1F(Form("di_mass_EE_%i",n), "di-lepton Mass in Ecal Endcap", 50, 70,120);  
+      di_mass_EX[n]   = new TH1F(Form("di_mass_EX_%i",n), "di-lepton Mass in Ecal E/B mix", 50, 70,120);  
 
       jet_N[n]  = new TH1F(Form("jet_N_%i",n), "Number of jets", 20,0,20);
       jet_b_N[n] = new TH1F(Form("jet_b_N_%i",n), "Number of b-jets", 10,0,10);
@@ -193,7 +196,7 @@ Bool_t analyzer_higgs::Process(Long64_t entry)
 
 
   //Lepton variables:
-  Float_t Mll=0, pTll=0;
+  Float_t Mll=0, Mll_EE=0, Mll_EB=0, Mll_EX=0, pTll=0;
   //--------------//
   //--- Muons------//
   //-------------//
@@ -202,7 +205,7 @@ Bool_t analyzer_higgs::Process(Long64_t entry)
   TCMuon *myMuon1=0, *myMuon2=0, *myMuon3=0, *myMuon4=0;
   Int_t muIndex[5] = {-1,-1,-1,-1,-1};
 
-  Int_t muCount=0;
+  Int_t muCount=0, muCountLoose = 0;
   for (Int_t i = 0; i < recoMuons->GetSize(); ++i) 
     {    
       TCMuon* thisMuon = (TCMuon*) recoMuons->At(i);     
@@ -235,6 +238,14 @@ Bool_t analyzer_higgs::Process(Long64_t entry)
 	  
 	  muCount++;
 	}
+
+      if (fabs(thisMuon->p4().Eta()) < 2.4 &&
+          thisMuon->p4().Pt()>10     &&
+          thisMuon->isGLB()  &&
+          fabs(dxyVtx)<0.05  &&
+          fabs(dzVtx)<0.2   
+	  )  muCountLoose++;
+      
     }
   
   if (muCount>=2) 
@@ -270,7 +281,7 @@ Bool_t analyzer_higgs::Process(Long64_t entry)
   Int_t eleIndex[3] = {-1,-1,-1};
 
   //if (recoElectrons->GetSize()>1)  cout<<"N ele: "<<  recoElectrons->GetSize()<<endl;
-  Int_t eleCount=0;
+  Int_t eleCount=0, eleCountLoose=0;
   for (Int_t i = 0; i < recoElectrons->GetSize(); ++i) 
     {    
       TCElectron* thisElectron = (TCElectron*) recoElectrons->At(i);     
@@ -311,8 +322,14 @@ Bool_t analyzer_higgs::Process(Long64_t entry)
 	  if (eleIndex[2]==-1 && eleIndex[1]!=i) eleIndex[2] = i;
 	  
 	  eleCount++;
-	  
 	}
+	  
+      if (fabs(thisElectron->eta())   < 2.5 && 
+	  thisElectron->p4().Pt()     > 10  && 
+	  fabs(dxyVtx) < 0.05               && 
+	  fabs(dzVtx)  < 0.2                
+	  )  eleCountLoose++;
+      
     }
   if (eleCount==2) 
     {
@@ -361,6 +378,7 @@ Bool_t analyzer_higgs::Process(Long64_t entry)
 	}
 
     }
+
 
   Float_t MET=0, MET_phi=0;
   Float_t MET1=0, MET1_phi=0;
@@ -470,6 +488,11 @@ Bool_t analyzer_higgs::Process(Long64_t entry)
   if(!isNoiseHcal && !isDeadEcalCluster && !isScraping && !isCSCTightHalo) 
     {
       di_qt[0] -> Fill(qT);
+      di_mass[0]  -> Fill(Mll);
+      if(Mll_EB!=0) di_mass_EB[0]  -> Fill(Mll_EB);
+      if(Mll_EE!=0) di_mass_EE[0]  -> Fill(Mll_EE);
+      if(Mll_EX!=0) di_mass_EX[0]  -> Fill(Mll_EX);
+      
       met2_over_qt[0] -> Fill(METqt);
       met2_et[0]      -> Fill(MET);
       met2_et_ovQt[0] -> Fill(MET, METqt);
@@ -491,7 +514,6 @@ Bool_t analyzer_higgs::Process(Long64_t entry)
       mt2_met3[0] -> Fill(MT, projMET);
       mtZ_met3[0] -> Fill(MTZ, projMET);
 
-      di_mass[0]  -> Fill(Mll);
       jet_N[0]    -> Fill(nJets);
       jet_b_N[0]   -> Fill(nJetsB);
 
@@ -511,6 +533,11 @@ Bool_t analyzer_higgs::Process(Long64_t entry)
 	     <<isNoiseHcal<<"\t* "<<isDeadEcalCluster<<"\t* "<<isScraping<<"\t* "<<isCSCTightHalo<<"\t* "<<endl;  
 
   if (!passPreSelection) return kTRUE;
+
+  // Only make sense after preselection (two leptons):
+  if(fabs(Lepton1.Eta()) < 1.444 && fabs(Lepton2.Eta())<1.444) Mll_EB = diLepton.M();
+  else  if(fabs(Lepton1.Eta()) > 1.566 && fabs(Lepton2.Eta())>1.566)  Mll_EE = diLepton.M();
+  else  Mll_EX = diLepton.M();
   
   nEvents[1]++;
   if(!isNoiseHcal)        nEventsPassNoiseFilter[1][1]++; 
@@ -544,6 +571,10 @@ Bool_t analyzer_higgs::Process(Long64_t entry)
 
       di_qt[1]    -> Fill(qT);
       di_mass[1]  -> Fill(Mll);
+      if(Mll_EB!=0) di_mass_EB[1]  -> Fill(Mll_EB);
+      if(Mll_EE!=0) di_mass_EE[1]  -> Fill(Mll_EE);
+      if(Mll_EX!=0) di_mass_EX[1]  -> Fill(Mll_EX);
+
       jet_N[1]    -> Fill(nJets);
       jet_b_N[1]  -> Fill(nJetsB);
 
@@ -606,6 +637,10 @@ if (!passZpeak) return kTRUE;
 
       di_qt[2] -> Fill(qT);
       di_mass[2]  -> Fill(Mll);
+      if(Mll_EB!=0) di_mass_EB[2]  -> Fill(Mll_EB);
+      if(Mll_EE!=0) di_mass_EE[2]  -> Fill(Mll_EE);
+      if(Mll_EX!=0) di_mass_EX[2]  -> Fill(Mll_EX);
+
       jet_N[2]    -> Fill(nJets);
       jet_b_N[2]   -> Fill(nJetsB);
 
@@ -725,6 +760,10 @@ if (!passZpeak) return kTRUE;
 
       di_qt[4]    -> Fill(qT);
       di_mass[4]  -> Fill(Mll);
+      if(Mll_EB!=0) di_mass_EB[4]  -> Fill(Mll_EB);
+      if(Mll_EE!=0) di_mass_EE[4]  -> Fill(Mll_EE);
+      if(Mll_EX!=0) di_mass_EX[4]  -> Fill(Mll_EX);
+
       jet_N[4]    -> Fill(nJets);
       jet_b_N[4]  -> Fill(nJetsB);
 
@@ -813,6 +852,10 @@ if (!passZpeak) return kTRUE;
 
       di_qt[5]    -> Fill(qT);
       di_mass[5]  -> Fill(Mll);
+      if(Mll_EB!=0) di_mass_EB[5]  -> Fill(Mll_EB);
+      if(Mll_EE!=0) di_mass_EE[5]  -> Fill(Mll_EE);
+      if(Mll_EX!=0) di_mass_EX[5]  -> Fill(Mll_EX);
+
       jet_N[5]    -> Fill(nJets);
       jet_b_N[5]  -> Fill(nJetsB);
 
@@ -850,6 +893,10 @@ if (!passZpeak) return kTRUE;
 	  
 	  di_qt[9]    -> Fill(qT);
 	  di_mass[9]  -> Fill(Mll);
+	  if(Mll_EB!=0) di_mass_EB[9]  -> Fill(Mll_EB);
+	  if(Mll_EE!=0) di_mass_EE[9]  -> Fill(Mll_EE);
+	  if(Mll_EX!=0) di_mass_EX[9]  -> Fill(Mll_EX);
+
 	  jet_N[9]    -> Fill(nJets);
 	  jet_b_N[9]  -> Fill(nJetsB);
 	  
@@ -930,6 +977,10 @@ if (!passZpeak) return kTRUE;
 
       di_qt[6]    -> Fill(qT);
       di_mass[6]  -> Fill(Mll);
+      if(Mll_EB!=0) di_mass_EB[6]  -> Fill(Mll_EB);
+      if(Mll_EE!=0) di_mass_EE[6]  -> Fill(Mll_EE);
+      if(Mll_EX!=0) di_mass_EX[6]  -> Fill(Mll_EX);
+
       jet_N[6]    -> Fill(nJets);
       jet_b_N[6]  -> Fill(nJetsB);
 
@@ -973,7 +1024,7 @@ if (!passZpeak) return kTRUE;
     }
 
   if(verboseLvl>0) 
-    fout[6]<<"* "<<runNumber<<"\t* "<<eventNumber<<"  \t* "<<lumiSection<<"\t* "<<Mll<<"\t* "<<MT<<"\t* "<<MET<<"\t* "<<pTll<<"\t* "<<rhoFactor<<"\t*"<<endl;  
+    fout[6]<<"* "<<runNumber<<"\t* "<<eventNumber<<"  \t* "<<lumiSection<<"\t* "<<Mll<<"\t* "<<MT<<"\t* "<<MET<<"\t* "<<pTll<<"\t* "<<rhoFactor<<"\t* "<<muCountLoose<<"\t* "<<eleCountLoose<<endl;  
 
 
  nEvents[7]++;
@@ -1102,7 +1153,8 @@ void analyzer_higgs::Terminate()
   //   gDirectory -> GetListOfKeys() -> Print();
 
   histoFile->Write();
-  scaleAndColor(sample.c_str(), CS, nEv1, 191.0, lColor, fColor);
+  scaleAndColor(sample.c_str(), CS, nEv1, 1000.0, lColor, fColor); //1fb
+  //  scaleAndColor(sample.c_str(), CS, nEv1, 191.0, lColor, fColor);
   //scale(sample.c_str(), CS, nEv1, 191.0);
   
   // cout<<"met0_et_0 integral: "<<met0_et[0]->Integral()<<endl;  //histoFile->Write();

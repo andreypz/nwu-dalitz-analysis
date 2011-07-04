@@ -52,9 +52,6 @@ class analyzer_higgs : public TSelector {
 
   float getNevents(string, TH1F* );
   void scaleAndColor(TString , Float_t , Float_t , Float_t , Int_t , Int_t );
-  //void scaleAndColor(TString , Float_t cs, Float_t nEv, Float_t lumi, Int_t line, Int_t fill);
-  //void scale(string sample, Float_t cs, Float_t nEv, Float_t lumi);
-  //void scale(string sample, TH1 *h, Float_t cs, Float_t nEv, Float_t lumi);
 //  void CountEvents(UInt_t nEvents[], UInt_t nEventsPassNoiseFilter[]);
   
 public :
@@ -69,7 +66,7 @@ public :
   TH1F *mu1_phi[nC], *mu1_eta[nC], *mu1_pt[nC];
   TH1F *mu2_phi[nC], *mu2_eta[nC], *mu2_pt[nC];
   TH1F *btag_hp[nC];
-  TH1F *di_qt[nC], *di_mass[nC];
+  TH1F *di_qt[nC], *di_mass[nC], *di_mass_EB[nC], *di_mass_EE[nC], *di_mass_EX[nC];
   TH1F *jet_N[nC], *jet_pt[nC];
   TH1F *jet_b_N[nC], *jet_b_pt[nC];
 

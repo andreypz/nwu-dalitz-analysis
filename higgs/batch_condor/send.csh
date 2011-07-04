@@ -1,9 +1,10 @@
 #!/bin/csh
 
-set lepton = 1 # 1- muons, 2 -electrons
+set lepton = 2 # 1- muons, 2 -electrons
 
 set dataset = (\
- 2011A_May10_DoubleMu \
+ 2011A_Prompt_v4_DoubleMu \
+ 2011A_Prompt_v4_DoubleElectron \
  2011A_HZZSkim_DoubleMu \
  2011A_May10_DoubleElectron\
  2011A_HZZSkim_DoubleElectron\
