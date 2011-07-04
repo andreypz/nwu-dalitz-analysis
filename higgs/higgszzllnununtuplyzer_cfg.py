@@ -80,14 +80,16 @@ process.source = cms.Source("PoolSource",
 #'/store/data/Run2011A/DoubleElectron/RECO/May10ReReco-v1/0005/F8BAA7A5-887B-E011-8E51-002618943957.root',
 #'/store/data/Run2011A/DoubleElectron/RECO/May10ReReco-v1/0005/F859FB7E-8A7B-E011-ACC9-002618943836.root',
 
+'/store/data/Run2011A/DoubleMu/RECO/PromptReco-v4/000/165/121/1A873C93-A381-E011-902F-0030487CD710.root',
+
 #'/store/data/Run2011A/DoubleElectron/AOD/May10ReReco-v1/0005/F0B77A28-897B-E011-86FC-0026189437FC.root',
 #'/store/data/Run2011A/DoubleElectron/AOD/May10ReReco-v1/0005/EE63D495-8B7B-E011-9E52-001A92811700.root',
 #'/store/data/Run2011A/DoubleElectron/AOD/May10ReReco-v1/0005/DEAFCEF8-887B-E011-9BF2-00261894397F.root',
 
-'/store/mc/Spring11/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/GEN-SIM-RECO/PU_S1_START311_V1G1-v1/0005/08A906D0-1D55-E011-BEDC-003048679214.root',
-'/store/mc/Spring11/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/GEN-SIM-RECO/PU_S1_START311_V1G1-v1/0005/089269D6-1B55-E011-9F14-00261894385D.root',
-'/store/mc/Spring11/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/GEN-SIM-RECO/PU_S1_START311_V1G1-v1/0005/08017A2D-1855-E011-B844-00304867D838.root',
-'/store/mc/Spring11/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/GEN-SIM-RECO/PU_S1_START311_V1G1-v1/0005/044EA4DB-1E55-E011-9DF7-00261894385D.root',
+#'/store/mc/Spring11/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/GEN-SIM-RECO/PU_S1_START311_V1G1-v1/0005/08A906D0-1D55-E011-BEDC-003048679214.root',
+#'/store/mc/Spring11/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/GEN-SIM-RECO/PU_S1_START311_V1G1-v1/0005/089269D6-1B55-E011-9F14-00261894385D.root',
+#'/store/mc/Spring11/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/GEN-SIM-RECO/PU_S1_START311_V1G1-v1/0005/08017A2D-1855-E011-B844-00304867D838.root',
+#'/store/mc/Spring11/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/GEN-SIM-RECO/PU_S1_START311_V1G1-v1/0005/044EA4DB-1E55-E011-9DF7-00261894385D.root',
 
 )
 )
@@ -161,7 +163,8 @@ process.higgs = cms.EDAnalyzer('HiggsZZllnunuNtuplyzer',
                                ecalAnomalousFilterTag = cms.untracked.InputTag("BE1214","anomalousECALVariables")	
 )
 
-process.load("Configuration/Skimming/PDWG_HZZSkim_cff")
+process.load("NWU/Higgs/hzzSkim_cff")
+#process.load("Configuration/Skimming/PDWG_HZZSkim_cff")
 
 process.options = cms.untracked.PSet(
     wantSummary = cms.untracked.bool(True)
@@ -203,7 +206,7 @@ preSequence = cms.Sequence(process.offlinePrimaryVerticesDAWithBS
                                process.jetProbabilityBJetTags       +
                                process.jetBProbabilityBJetTags) 
                            * process.HBHENoiseFilterResultProducer
-                           # * ecalDead
+                           * ecalDead
                            )
 
 process.dummy0 = cms.Path(process.demo0)
