@@ -2,7 +2,7 @@
 
 using namespace std;
 
-void newplot(Int_t sel =1, TString hPath ="v11") {
+void newplot(Int_t sel =1, TString hPath ="v16") {
   gROOT->LoadMacro("./makePlot.C");
   gROOT->LoadMacro("./merge.C");
   //gROOT->ProcessLine(".L ../data/tdrstyle.C");
@@ -38,18 +38,33 @@ void newplot(Int_t sel =1, TString hPath ="v11") {
   TFile* fda_2011A_DoubleMu  = new TFile(Form("./%s/dir_1_2011A_May10_DoubleMu_/hhhh.root",histoPath.Data()));
   TFile* fda_2011A_DoubleEl  = new TFile(Form("./%s/dir_2_2011A_May10_DoubleElectron_/hhhh.root",histoPath.Data()));
 
+  TFile* fda_2011A_Prompt_v4_DoubleMu  = new TFile(Form("./%s/dir_1_2011A_Prompt_v4_DoubleMu_/hhhh.root",histoPath.Data()));
+  TFile* fda_2011A_Prompt_v4_DoubleEl  = new TFile(Form("./%s/dir_2_2011A_Prompt_v4_DoubleElectron_/hhhh.root",histoPath.Data()));
+
   TFile *m_Zjets = new TFile(Form("./m_Zjets_%i.root",sel), "RECREATE");
   TFile *m_ZQQ   = new TFile(Form("./m_ZQQ_%i.root",sel), "RECREATE");
   TFile *m_Top   = new TFile(Form("./m_Top_%i.root",sel), "RECREATE");
 
-  //cout<<  Zjets->GetPath() <<endl;
+  TFile *m_Data   = new TFile(Form("./m_Data_%i.root",sel), "RECREATE");
+  
+  
+  list_Data = new TList();
+  if(sel==1){
+    list_Data ->Add(fda_2011A_DoubleMu);
+    list_Data ->Add(fda_2011A_Prompt_v4_DoubleMu);
+  }
+  if(sel==2){
+    list_Data ->Add(fda_2011A_DoubleEl);
+    list_Data ->Add(fda_2011A_Prompt_v4_DoubleEl);
+  } 
+  MergeRootfile(m_Data, list_Data, kBlack, 0);
+  
 
-
-   list_Zjets = new TList();
-
-   list_Zjets->Add(fmc_DYmumu);
-   list_Zjets->Add(fmc_DYee);
-   list_Zjets->Add(fmc_DYtautau);
+  list_Zjets = new TList();
+  
+  list_Zjets->Add(fmc_DYmumu);
+  list_Zjets->Add(fmc_DYee);
+  list_Zjets->Add(fmc_DYtautau);
   
   MergeRootfile(m_Zjets, list_Zjets, kGreen+2, kRed+1);
 

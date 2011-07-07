@@ -94,7 +94,6 @@ void analyzer_higgs::Begin(TTree * /*tree*/)
       jet_pt[n] = new TH1F(Form("jet_pt_%i",n), "Pt of jets, eta<2.4", 40,0,200);
       jet_b_pt[n] = new TH1F(Form("jet_b_pt_%i",n), "Pt of b-jets, eta<2.4", 40,0,200);
 
-
     }
 
 
@@ -134,8 +133,6 @@ void analyzer_higgs::SlaveBegin(TTree * /*tree*/)
 
 Bool_t analyzer_higgs::Process(Long64_t entry)
 {
-  
-
   GetEntry(entry); 
   //if ( nEvents[0]>250) return kTRUE; 
   nEvents[0]++; 
@@ -208,12 +205,12 @@ Bool_t analyzer_higgs::Process(Long64_t entry)
   Int_t muCount=0, muCountLoose = 0;
   for (Int_t i = 0; i < recoMuons->GetSize(); ++i) 
     {    
-      TCMuon* thisMuon = (TCMuon*) recoMuons->At(i);     
+      TCMuon* thisMuon   = (TCMuon*) recoMuons->At(i);     
       TVector3 *muVertex =  new TVector3(thisMuon->Vtx());
       TVector3 *muMomentum = new TVector3( thisMuon->p4().Vect());
       
       double dxyVtx = dxy(mainPrimaryVertex, muVertex, muMomentum);
-      double dzVtx = dz(mainPrimaryVertex, muVertex, muMomentum);
+      double dzVtx  = dz(mainPrimaryVertex, muVertex, muMomentum);
       
       if (fabs(thisMuon->p4().Eta()) < 2.4 && 
 	  thisMuon->p4().Pt()>10     &&
@@ -358,6 +355,7 @@ Bool_t analyzer_higgs::Process(Long64_t entry)
       //if((diLepton.M()-Mll)>0.01 || (diLepton.Pt()-pTll)>0.01) cout<<" Warning!  Dilepton is wrong"
       //							   <<diLepton.M()<<"  "<<Mll<<endl;
       //cout<<"dbg  "<<muCount<<endl;
+      //if (eleCountLoose==0 && muCountLoose==2 && myMuon1->charge()*myMuon2->charge()==-1 && Mll>40 && Mll<500)	 
       if (eleCount==0 && myMuon1->charge()*myMuon2->charge()==-1 && Mll>40 && Mll<500)	 
 	{
 	  passPreSelection= kTRUE;
@@ -371,6 +369,7 @@ Bool_t analyzer_higgs::Process(Long64_t entry)
      
       diLepton = (TLorentzVector)(myElectron1->p4()+myElectron2->p4());
       if (muCount==0 && myElectron1->charge()*myElectron2->charge()==-1 && Mll>40 && Mll<500)	 
+	//if (muCountLoose==0 && eleCountLoose==2 && myElectron1->charge()*myElectron2->charge()==-1 && Mll>40 && Mll<500)	 
 	{
 	  //cout<<"preselection?!"<<endl;
 	  passPreSelection= kTRUE;
@@ -539,6 +538,7 @@ Bool_t analyzer_higgs::Process(Long64_t entry)
   else  if(fabs(Lepton1.Eta()) > 1.566 && fabs(Lepton2.Eta())>1.566)  Mll_EE = diLepton.M();
   else  Mll_EX = diLepton.M();
   
+
   nEvents[1]++;
   if(!isNoiseHcal)        nEventsPassNoiseFilter[1][1]++; 
   if(!isDeadEcalCluster)  nEventsPassNoiseFilter[2][1]++; 
@@ -802,21 +802,21 @@ if (!passZpeak) return kTRUE;
   
   if (projMET>70)
     {
-      jet_b_N[7]   -> Fill(nJetsB);
+      jet_b_N[9]   -> Fill(nJetsB);
       if(MT>327 && MT<441)
-	jet_b_N[8]   -> Fill(nJetsB);
+	jet_b_N[10]   -> Fill(nJetsB);
 
      for (Int_t i = 0; i < recoJets->GetSize(); ++i) 
 	{    
 	  TCJet* thisJet2 = (TCJet*) recoJets->At(i);     
 	  if (fabs(thisJet2->P4(7).Eta()) <= 2.4 && thisJet2->BDiscrTrkCountHiEff() > 2) 
-	    jet_b_pt[8] ->Fill(thisJet2->P4(7).Pt());
+	    jet_b_pt[10] ->Fill(thisJet2->P4(7).Pt());
 	}
     }
 
 
-
-  if(antiB  &&  pTll<cut_pTll) return kTRUE;
+  if (antiB) return kTRUE;
+  //  if(pTll<cut_pTll) return kTRUE;
 
 
   nEvents[5]++;
@@ -870,42 +870,42 @@ if (!passZpeak) return kTRUE;
       if(projMET<70)
 	{
 	  //Reversing Met cut
-	  met2_over_qt[9] -> Fill(METqt);
-	  met2_et[9]      -> Fill(MET);
-	  met2_et_ovQt[9] -> Fill(MET, METqt);
-	  met2_phi[9]     -> Fill(MET_phi);
+	  met2_over_qt[11] -> Fill(METqt);
+	  met2_et[11]      -> Fill(MET);
+	  met2_et_ovQt[11] -> Fill(MET, METqt);
+	  met2_phi[11]     -> Fill(MET_phi);
 	  
-	  met3_over_qt[9] -> Fill(projMETqt);
-	  met3_et[9]      -> Fill(projMET);
-	  met3_et_ovQt[9] -> Fill(projMET, projMETqt);
+	  met3_over_qt[11] -> Fill(projMETqt);
+	  met3_et[11]      -> Fill(projMET);
+	  met3_et_ovQt[11] -> Fill(projMET, projMETqt);
 	  
-	  met4_over_qt[9] -> Fill(puCorrMETqt);
-	  met4_et[9]      -> Fill(puCorrMET);
-	  met4_et_ovQt[9] -> Fill(puCorrMET, puCorrMETqt);
-	  met4_puSig[9]   -> Fill(puSigMET);
+	  met4_over_qt[11] -> Fill(puCorrMETqt);
+	  met4_et[11]      -> Fill(puCorrMET);
+	  met4_et_ovQt[11] -> Fill(puCorrMET, puCorrMETqt);
+	  met4_puSig[11]   -> Fill(puSigMET);
 	  
-	  mt2[9]      -> Fill(MT);
-	  mtZ[9]      -> Fill(MTZ);
-	  mt2_met2[9] -> Fill(MT, MET);
-	  mtZ_met2[9] -> Fill(MTZ, MET);
-	  mt2_met3[9] -> Fill(MT, projMET);
-	  mtZ_met3[9] -> Fill(MTZ, projMET);
+	  mt2[11]      -> Fill(MT);
+	  mtZ[11]      -> Fill(MTZ);
+	  mt2_met2[11] -> Fill(MT, MET);
+	  mtZ_met2[11] -> Fill(MTZ, MET);
+	  mt2_met3[11] -> Fill(MT, projMET);
+	  mtZ_met3[11] -> Fill(MTZ, projMET);
 	  
-	  di_qt[9]    -> Fill(qT);
-	  di_mass[9]  -> Fill(Mll);
-	  if(Mll_EB!=0) di_mass_EB[9]  -> Fill(Mll_EB);
-	  if(Mll_EE!=0) di_mass_EE[9]  -> Fill(Mll_EE);
-	  if(Mll_EX!=0) di_mass_EX[9]  -> Fill(Mll_EX);
+	  di_qt[11]    -> Fill(qT);
+	  di_mass[11]  -> Fill(Mll);
+	  if(Mll_EB!=0) di_mass_EB[11]  -> Fill(Mll_EB);
+	  if(Mll_EE!=0) di_mass_EE[11]  -> Fill(Mll_EE);
+	  if(Mll_EX!=0) di_mass_EX[11]  -> Fill(Mll_EX);
 
-	  jet_N[9]    -> Fill(nJets);
-	  jet_b_N[9]  -> Fill(nJetsB);
+	  jet_N[11]    -> Fill(nJets);
+	  jet_b_N[11]  -> Fill(nJetsB);
 	  
 	  if(jetCount>0)  
 	    {
-	      met2_dPhiClosJet1[9] -> Fill(dPhiClos1); 
-	      met2_dPhiClosJet2[9] -> Fill(dPhiClos2); 
-	      met2_dPhiLeadJet1[9] -> Fill(dPhiLead1); 
-	      met2_dPhiLeadJet2[9] -> Fill(dPhiLead2); 
+	      met2_dPhiClosJet1[11] -> Fill(dPhiClos1); 
+	      met2_dPhiClosJet2[11] -> Fill(dPhiClos2); 
+	      met2_dPhiLeadJet1[11] -> Fill(dPhiLead1); 
+	      met2_dPhiLeadJet2[11] -> Fill(dPhiLead2); 
 	    }
 	}
     }
@@ -936,12 +936,10 @@ if (!passZpeak) return kTRUE;
   
 
   if(verboseLvl>1)   
-    fout[5]<<"* "<<runNumber<<"\t* "<<eventNumber<<"  \t* "<<lumiSection<<"\t* "<<Mll<<"\t* "<<MT<<"\t* "<<MET<<"\t* "<<pTll<<"\t* "<<rhoFactor<<"\t*"<<endl;  
+    fout[5]<<"* "<<runNumber<<"\t* "<<eventNumber<<"  \t* "<<lumiSection<<"\t* "<<Mll<<"\t* "<<MT<<"\t* "<<MET<<"\t* "<<pTll<<"\t* "<<rhoFactor<<"\t*"<<muCountLoose<<"\t* "<<eleCountLoose<<endl;  
 
   // if (pTll<50) return kTRUE;
  
-
-
   if (projMET<70) return kTRUE;
  
  nEvents[6]++;
@@ -984,14 +982,6 @@ if (!passZpeak) return kTRUE;
       jet_N[6]    -> Fill(nJets);
       jet_b_N[6]  -> Fill(nJetsB);
 
-      if(jetCount>0)  
-	{
-	  met2_dPhiClosJet1[6] -> Fill(dPhiClos1); 
-	  met2_dPhiClosJet2[6] -> Fill(dPhiClos2); 
-	  met2_dPhiLeadJet1[6] -> Fill(dPhiLead1); 
-	  met2_dPhiLeadJet2[6] -> Fill(dPhiLead2); 
-	}
-
 
     }
   else
@@ -1026,8 +1016,11 @@ if (!passZpeak) return kTRUE;
   if(verboseLvl>0) 
     fout[6]<<"* "<<runNumber<<"\t* "<<eventNumber<<"  \t* "<<lumiSection<<"\t* "<<Mll<<"\t* "<<MT<<"\t* "<<MET<<"\t* "<<pTll<<"\t* "<<rhoFactor<<"\t* "<<muCountLoose<<"\t* "<<eleCountLoose<<endl;  
 
+  //  cout<<"dbg 322"<<endl;
+  
+  if(projMETqt <0.6 || projMETqt>1.8) return kTRUE;
 
- nEvents[7]++;
+  nEvents[7]++;
   if(!isNoiseHcal)        nEventsPassNoiseFilter[1][7]++; 
   if(!isDeadEcalCluster)  nEventsPassNoiseFilter[2][7]++; 
   if(!isScraping)         nEventsPassNoiseFilter[3][7]++;
@@ -1036,6 +1029,15 @@ if (!passZpeak) return kTRUE;
   if(!isNoiseHcal && !isDeadEcalCluster && !isScraping && !isCSCTightHalo) 
     {
       nEventsPassNoiseFilter[0][7]++; 
+
+      if(jetCount>0)  
+	{
+	  met2_dPhiClosJet1[7] -> Fill(dPhiClos1); 
+	  met2_dPhiClosJet2[7] -> Fill(dPhiClos2); 
+	  met2_dPhiLeadJet1[7] -> Fill(dPhiLead1); 
+	  met2_dPhiLeadJet2[7] -> Fill(dPhiLead2); 
+	}
+
       met2_over_qt[7] -> Fill(METqt);
       met2_et[7]      -> Fill(MET);
       met2_et_ovQt[7] -> Fill(MET, METqt);
@@ -1049,6 +1051,23 @@ if (!passZpeak) return kTRUE;
       met4_et[7]      -> Fill(puCorrMET);
       met4_et_ovQt[7] -> Fill(puCorrMET, puCorrMETqt);
       met4_puSig[7]   -> Fill(puSigMET);
+
+      mt2[7]      -> Fill(MT);
+      mtZ[7]      -> Fill(MTZ);
+      mt2_met2[7] -> Fill(MT, MET);
+      mtZ_met2[7] -> Fill(MTZ, MET);
+      mt2_met3[7] -> Fill(MT, projMET);
+      mtZ_met3[7] -> Fill(MTZ, projMET);
+
+      di_qt[7]    -> Fill(qT);
+      di_mass[7]  -> Fill(Mll);
+      if(Mll_EB!=0) di_mass_EB[7]  -> Fill(Mll_EB);
+      if(Mll_EE!=0) di_mass_EE[7]  -> Fill(Mll_EE);
+      if(Mll_EX!=0) di_mass_EX[7]  -> Fill(Mll_EX);
+
+      jet_N[7]    -> Fill(nJets);
+      jet_b_N[7]  -> Fill(nJetsB);
+
     }
   else
     if(verboseLvl>0) 

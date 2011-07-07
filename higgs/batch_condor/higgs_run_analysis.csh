@@ -4,7 +4,6 @@ scram pro CMSSW CMSSW_4_2_3
 cd CMSSW_4_2_3/src
 cmsenv 
 
-set dir =  /uscms_data/d2/andreypz/cmssw/higgs2/CMSSW_4_2_3/src/UserCode/AndreyPozdnyakov/higgs/
 set dir =  /uscms_data/d2/andreypz/cmssw/higgs3/CMSSW_4_2_3/src/NWU/Higgs/higgs/
 cp $dir/run_analysis.C .
 cp $dir/analyzer_higgs.C .

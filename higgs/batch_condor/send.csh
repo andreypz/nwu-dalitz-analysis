@@ -1,12 +1,13 @@
 #!/bin/csh
 
-set lepton = 2 # 1- muons, 2 -electrons
+set lepton = 1 # 1- muons, 2 -electrons
 
 set dataset = (\
  2011A_Prompt_v4_DoubleMu \
  2011A_Prompt_v4_DoubleElectron \
- 2011A_HZZSkim_DoubleMu \
+ 2011A_May10_DoubleMu\
  2011A_May10_DoubleElectron\
+ 2011A_HZZSkim_DoubleMu \
  2011A_HZZSkim_DoubleElectron\
  MC_ZZtoAny\
  MC_Wjets\
@@ -32,12 +33,12 @@ set dataset = (\
  MC_ggH200\
  MC_ggH400\
  MC_ggH600\
- MC_ggH200_HWW2l2nu\
- MC_ggH400_HWW2l2nu\
- MC_ggH600_HWW2t2nu\
- MC_ggH200_HWW2t2nu\
- MC_ggH400_HWW2t2nu\
- MC_ggH600_HWW2t2nu\
+ MC_ggH200_WW2l2nu\
+ MC_ggH400_WW2l2nu\
+ MC_ggH600_WW2t2nu\
+ MC_ggH200_WW2t2nu\
+ MC_ggH400_WW2t2nu\
+ MC_ggH600_WW2t2nu\
  )
 
 foreach name ($dataset)

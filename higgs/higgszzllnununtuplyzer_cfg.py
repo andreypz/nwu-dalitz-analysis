@@ -101,6 +101,14 @@ process.offlinePrimaryVerticesDAWithBS.useBeamConstraint = cms.bool(True)
 process.offlinePrimaryVerticesDAWithBS.TkClusParameters.TkDAClusParameters.Tmin= cms.double(4.)
 process.offlinePrimaryVerticesDAWithBS.TkClusParameters.TkDAClusParameters.vertexSize= cms.double(0.01)
 
+process.VerticesDA = process.offlinePrimaryVerticesDA.clone()
+process.VerticesDA.useBeamConstraint = cms.bool(False)
+process.VerticesDA.TkClusParameters.TkDAClusParameters.Tmin= cms.double(4.)
+process.VerticesDA.TkClusParameters.TkDAClusParameters.vertexSize= cms.double(0.01)
+
+
+
+
 #For eleID maps:
 process.load("ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi")
 process.simpleEleId80relIso = process.simpleCutBasedElectronID.clone()
@@ -193,7 +201,8 @@ process.hltHighLevel = cms.EDFilter("HLTHighLevel",
                                     )
 
 
-preSequence = cms.Sequence(process.offlinePrimaryVerticesDAWithBS 
+preSequence = cms.Sequence(process.offlinePrimaryVerticesDAWithBS
+                           *process.VerticesDA 
                            * process.simpleEleId80relIso 
                            #  * process.correctedJets
                            * process.kt6PFJets 

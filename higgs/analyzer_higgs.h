@@ -9,7 +9,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <iostream>
 #include <vector>
 
 #include <TROOT.h>
@@ -32,14 +31,12 @@
 
 #include <TKey.h>
 #include <TList.h>
-//#include <TFileIter.h>                                                                                                                                     
 #include <TH2.h>
 #include <TStyle.h>
 #include <TString.h>
 #include <TMath.h>
-//#include <TClass.h>
 
-#define nC 10  //nCuts in the analysis. make plots after each cut
+#define nC 12  //nCuts in the analysis. make plots after each cut
 
 class analyzer_higgs : public TSelector {
   ofstream nout[nC], fout[nC], ffout, ncout;
