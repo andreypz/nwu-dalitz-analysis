@@ -24,8 +24,7 @@
 #include "TClonesArray.h"
 #include "TLorentzVector.h"
 #include "TVector3.h"
-#include "TH1F.h"
-#include "TH2D.h"
+#include "TH1.h"
 #include <iostream>
 #include <fstream>
 
@@ -35,8 +34,10 @@
 #include <TStyle.h>
 #include <TString.h>
 #include <TMath.h>
+#include "TTree.h"
 
 #define nC 12  //nCuts in the analysis. make plots after each cut
+
 
 class analyzer_higgs : public TSelector {
   ofstream nout[nC], fout[nC], ffout, ncout;
@@ -49,10 +50,16 @@ class analyzer_higgs : public TSelector {
 
   float getNevents(string, TH1F* );
   void scaleAndColor(TString , Float_t , Float_t , Float_t , Int_t , Int_t );
-//  void CountEvents(UInt_t nEvents[], UInt_t nEventsPassNoiseFilter[]);
+
+  float weightZZ(Float_t );
+
+  inline void FillHistos(Int_t, Double_t);
+  inline void FillHistosNoise(Int_t, Double_t);
+  inline void CountEvents(Int_t);
   
 public :
   TFile* histoFile;
+  TTree * cutTree;
   
   TH1F *mtZ[nC], *mt0[nC], *mt1[nC], *mt2[nC], *mt3[nC], *mt4[nC];
   TH1F *met0_phi[nC], *met0_et[nC], *met0_over_qt[nC];
@@ -63,8 +70,8 @@ public :
   TH1F *mu1_phi[nC], *mu1_eta[nC], *mu1_pt[nC];
   TH1F *mu2_phi[nC], *mu2_eta[nC], *mu2_pt[nC];
   TH1F *btag_hp[nC];
-  TH1F *di_qt[nC], *di_mass[nC], *di_mass_EB[nC], *di_mass_EE[nC], *di_mass_EX[nC];
-  TH1F *jet_N[nC], *jet_pt[nC];
+  TH1F *di_qt[nC], *di_eta[nC], *di_mass[nC], *di_mass_EB[nC], *di_mass_EE[nC], *di_mass_EX[nC];
+  TH1F *jet_N[nC], *jet_dRlep1[nC], *jet_dRlep2[nC], *jet_pt[nC];
   TH1F *jet_b_N[nC], *jet_b_pt[nC];
 
   TH1F *met2_dPhiLeadJet1[nC], *met2_dPhiLeadJet2[nC], *met2_dPhiClosJet1[nC], *met2_dPhiClosJet2[nC];

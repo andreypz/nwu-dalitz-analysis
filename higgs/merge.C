@@ -62,7 +62,7 @@ void MergeRootfile( TDirectory *target, TList *sourcelist , Int_t color1, Int_t 
       globChain->Add(first_source->GetName());
       TFile *nextsource = (TFile*)sourcelist->After( first_source );
       //      const char* file_name = nextsource->GetName();
-       cout << "file name  " << file_name << endl;
+       //cout << "file name  " << file_name << endl;
       while ( nextsource ) {
 
 	globChain->Add(nextsource->GetName());

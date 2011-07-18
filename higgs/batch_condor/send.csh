@@ -1,6 +1,6 @@
 #!/bin/csh
 
-set lepton = 1 # 1- muons, 2 -electrons
+set lepton = ${1} # 1- muons, 2 -electrons
 
 set dataset = (\
  2011A_Prompt_v4_DoubleMu \
@@ -42,7 +42,7 @@ set dataset = (\
  )
 
 foreach name ($dataset)
-echo $name
+echo $name lepton: $lepton
 
 cp condor_job temp_job
 sed -i "s:<lepton>:${lepton}:g" temp_job

@@ -29,7 +29,7 @@ void run_analysis(UInt_t sel = 1, string aa = "none", string bb="none") {
   //TString sample1("2011A_v1_DoubleMu");
   TString sample1("MC_ggH400");
   //TString sample1("MC_DYmumu");
-  //TString sample1("MC_Zcc3");
+  //TString sample1("MC_ZZtoAny");
 
   TString sample2("2011A_v2_DoubleMu");
   TString sample2("none");

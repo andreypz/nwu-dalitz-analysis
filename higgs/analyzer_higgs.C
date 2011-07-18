@@ -15,8 +15,18 @@ Bool_t isElectronSample = kFALSE, isMuonSample = kTRUE;
 UInt_t verboseLvl = 1;
 
 string sel, sample;
-Float_t CS, nEv;
-Int_t lColor, fColor;
+Float_t CS, nEv;  Int_t lColor, fColor;
+
+Float_t ct_pfMet, ct_projMet, ct_MT, ct_qT; //variables for cutTree
+
+//Variables to Fill into histos. Have to be global
+Float_t qT, diEta, Mll, Mll_EB, Mll_EE, Mll_EX;
+Float_t MET, MET_phi, MET1, MET1_phi, projMET, puCorrMET, puSigMET;
+Float_t METqt, MET1qt, projMETqt, puCorrMETqt;
+Float_t MT, MTZ; 
+Int_t nJets, nJetsB, jetCount;
+Float_t dPhiClos1,dPhiClos2, dPhiLead1, dPhiLead2;
+ 
 
 void analyzer_higgs::Begin(TTree * /*tree*/)
 { 
@@ -25,7 +35,7 @@ void analyzer_higgs::Begin(TTree * /*tree*/)
 
   histoFile = new TFile("hhhh.root", "RECREATE"); 
   //histoFile = new TFile(Form("hhistograms_%s.root", sample.Data()), "RECREATE"); 
-    for(Int_t n=0; n<nC; n++)
+  for(Int_t n=0; n<nC; n++)
     {
       met0_phi[n]      = new TH1F(Form("met0_phi_%i",n), "met0_phi", 40, -TMath::Pi(), TMath::Pi()); 
       met0_et[n]       = new TH1F(Form("met0_et_%i",n), "met0_et", 40, 0,400);
@@ -76,27 +86,35 @@ void analyzer_higgs::Begin(TTree * /*tree*/)
       mt3[n]     = new TH1F(Form("mt3_%i",n), "MT proj", 50, 100, 600); 
       mt4[n]     = new TH1F(Form("mt4_%i",n), "MT pu corr", 50, 100, 600);
 
-      mtZ_met2[n]     = new TH2F(Form("mtZ_met2_%i",n), "MTZ pf vs pfMet noise", 50, 100, 600, 40, 0,400); 
-      mt2_met2[n]     = new TH2F(Form("mt2_met2_%i",n), "MT pf vs pfMet noise", 50, 100, 600, 40, 0,400); 
+      mtZ_met2[n]   = new TH2F(Form("mtZ_met2_%i",n), "MTZ pf vs pfMet noise", 50, 100, 600, 40, 0,400); 
+      mt2_met2[n]   = new TH2F(Form("mt2_met2_%i",n), "MT pf vs pfMet noise", 50, 100, 600, 40, 0,400); 
 
-      mtZ_met3[n]     = new TH2F(Form("mtZ_met3_%i",n), "MTZ pf vs projMet noise", 50, 100, 600, 40, 0,400); 
-      mt2_met3[n]     = new TH2F(Form("mt2_met3_%i",n), "MT pf vs projfMet noise", 50, 100, 600, 40, 0,400); 
+      mtZ_met3[n]   = new TH2F(Form("mtZ_met3_%i",n), "MTZ pf vs projMet noise", 50, 100, 600, 40, 0,400); 
+      mt2_met3[n]   = new TH2F(Form("mt2_met3_%i",n), "MT pf vs projfMet noise", 50, 100, 600, 40, 0,400); 
  
-      di_qt[n]     = new TH1F(Form("di_qt_%i",n), "di-lepton qt", 40, 0,400);  
-      di_mass[n]   = new TH1F(Form("di_mass_%i",n), "di-lepton Mass", 50, 70,120);  
-      di_mass_EB[n]   = new TH1F(Form("di_mass_EB_%i",n), "di-lepton Mass in Ecal Barrel", 50, 70,120);  
-      di_mass_EE[n]   = new TH1F(Form("di_mass_EE_%i",n), "di-lepton Mass in Ecal Endcap", 50, 70,120);  
-      di_mass_EX[n]   = new TH1F(Form("di_mass_EX_%i",n), "di-lepton Mass in Ecal E/B mix", 50, 70,120);  
+      di_qt[n]      = new TH1F(Form("di_qt_%i",n), "di-lepton qt", 40, 0,400);  
+      di_eta[n]     = new TH1F(Form("di_eta_%i",n), "di-lepton Eta", 40, -2.6,2.6);  
+      di_mass[n]    = new TH1F(Form("di_mass_%i",n), "di-lepton Mass", 50, 70,120);  
+      di_mass_EB[n] = new TH1F(Form("di_mass_EB_%i",n), "di-lepton Mass in Ecal Barrel", 50, 70,120);  
+      di_mass_EE[n] = new TH1F(Form("di_mass_EE_%i",n), "di-lepton Mass in Ecal Endcap", 50, 70,120);  
+      di_mass_EX[n] = new TH1F(Form("di_mass_EX_%i",n), "di-lepton Mass in Ecal E/B mix", 50, 70,120);  
 
-      jet_N[n]  = new TH1F(Form("jet_N_%i",n), "Number of jets", 20,0,20);
-      jet_b_N[n] = new TH1F(Form("jet_b_N_%i",n), "Number of b-jets", 10,0,10);
+      jet_N[n]      = new TH1F(Form("jet_N_%i",n), "Number of jets", 20,0,20);
+      jet_dRlep1[n] = new TH1F(Form("jet_dRlep1_%i",n), "dR(jet, lepton1)", 50, 0,1);
+      jet_dRlep2[n] = new TH1F(Form("jet_dRlep2_%i",n), "dR(jet, lepton2)", 50, 0,1);
+      jet_b_N[n]    = new TH1F(Form("jet_b_N_%i",n), "Number of b-jets", 10,0,10);
 
-      jet_pt[n] = new TH1F(Form("jet_pt_%i",n), "Pt of jets, eta<2.4", 40,0,200);
+      jet_pt[n]   = new TH1F(Form("jet_pt_%i",n), "Pt of jets, eta<2.4", 40,0,200);
       jet_b_pt[n] = new TH1F(Form("jet_b_pt_%i",n), "Pt of b-jets, eta<2.4", 40,0,200);
 
     }
-
-
+  
+  cutTree = new TTree("cutTree","Tree for cuts");
+  cutTree->Branch("ct_pfMet",&ct_pfMet, "ct_pfMet/F");
+  cutTree->Branch("ct_projMet",&ct_projMet, "ct_projMet/F");
+  cutTree->Branch("ct_MT",&ct_MT, "ct_MT/F");
+  cutTree->Branch("ct_qT",&ct_qT, "ct_qT/F");
+  
   ffout.open("./events_printout_andrey_final.txt",ofstream::out);
   ncout.open("./counts_for_tex.txt",ofstream::out);
   ifstream params;
@@ -108,7 +126,7 @@ void analyzer_higgs::Begin(TTree * /*tree*/)
   params>>sample;  params>>nEv;  params>>CS;  params>>lColor;  params>>fColor;
   ncout<<"sample: "<<sample<<"  cs: "<<CS<<"  events: "<<nEv<<" colors: "<<lColor<<"  "<<fColor<<endl;
   ncout<<endl;
-
+  
   ffout.precision(4); ffout.setf(ios::fixed, ios::floatfield);
   for(Int_t i=0; i<nC; i++)
     {
@@ -135,15 +153,9 @@ Bool_t analyzer_higgs::Process(Long64_t entry)
 {
   GetEntry(entry); 
   //if ( nEvents[0]>250) return kTRUE; 
-  nEvents[0]++; 
-  if(!isNoiseHcal)        nEventsPassNoiseFilter[1][0]++; 
-  if(!isDeadEcalCluster)  nEventsPassNoiseFilter[2][0]++; 
-  if(!isScraping)         nEventsPassNoiseFilter[3][0]++;
-  if(!isCSCTightHalo)     nEventsPassNoiseFilter[4][0]++;
-  if(!isCSCLooseHalo)     nEventsPassNoiseFilter[5][0]++;
-  if(!isNoiseHcal && !isDeadEcalCluster&& !isScraping && !isCSCTightHalo) 
-    nEventsPassNoiseFilter[0][0]++; 
-    
+  CountEvents(0);
+
+
   //cout<<"run: "<runNumber<<" \t event: "<<eventNumber<<" \t lumi: "<<lumiSection<<" \t bx: "<<bunchCross<<endl;
   //cout<<"rho:  "<<rhoFactor<<endl;
 
@@ -193,7 +205,8 @@ Bool_t analyzer_higgs::Process(Long64_t entry)
 
 
   //Lepton variables:
-  Float_t Mll=0, Mll_EE=0, Mll_EB=0, Mll_EX=0, pTll=0;
+  //  Float_t 
+  Mll=0, Mll_EE=0, Mll_EB=0, Mll_EX=0;//, pTll=0;
   //--------------//
   //--- Muons------//
   //-------------//
@@ -217,11 +230,11 @@ Bool_t analyzer_higgs::Process(Long64_t entry)
 	  thisMuon->isGLB()  && 
 	  fabs(dxyVtx)<0.02  && 
 	  fabs(dzVtx)<0.1    &&
-	  thisMuon->normChi2()<10    &&
-	  thisMuon->nTRKHits()>10     &&
-	  thisMuon->nPXLHits()>0     &&
-	  thisMuon->nValidMuHits()>0 &&
-	  thisMuon->nMatchSeg()>1    &&
+	  thisMuon->normChi2()     < 10 &&
+	  thisMuon->nTRKHits()     > 10 &&
+	  thisMuon->nPXLHits()     > 0  &&
+	  thisMuon->nValidMuHits() > 0  &&
+	  thisMuon->nMatchSeg()    > 1  &&
 	  (thisMuon->trkIso() + thisMuon->hadIso() + thisMuon->emIso() - rhoFactor*TMath::Pi()*0.09)/thisMuon->pt() < 0.15
 	  
 	  ) 
@@ -239,8 +252,13 @@ Bool_t analyzer_higgs::Process(Long64_t entry)
       if (fabs(thisMuon->p4().Eta()) < 2.4 &&
           thisMuon->p4().Pt()>10     &&
           thisMuon->isGLB()  &&
-          fabs(dxyVtx)<0.05  &&
-          fabs(dzVtx)<0.2   
+	  fabs(dxyVtx)<0.05  && 
+	  fabs(dzVtx)<0.2    &&
+	  thisMuon->normChi2()     < 200 &&
+	  thisMuon->nTRKHits()     > 2   &&
+	  //thisMuon->nPXLHits()     > 0   &&
+	  thisMuon->nValidMuHits() > 0   
+	  // thisMuon->nMatchSeg()    > 0   
 	  )  muCountLoose++;
       
     }
@@ -324,7 +342,11 @@ Bool_t analyzer_higgs::Process(Long64_t entry)
       if (fabs(thisElectron->eta())   < 2.5 && 
 	  thisElectron->p4().Pt()     > 10  && 
 	  fabs(dxyVtx) < 0.05               && 
-	  fabs(dzVtx)  < 0.2                
+	  fabs(dzVtx)  < 0.2                &&
+	  thisElectron->sigmaIetaIeta()          < 0.03 &&
+	  fabs(thisElectron->dPhiSuperCluster()) < 0.8  &&
+	  fabs(thisElectron->dEtaSuperCluster()) < 0.01 &&
+	  thisElectron->hadOverEm() < 0.15
 	  )  eleCountLoose++;
       
     }
@@ -346,6 +368,7 @@ Bool_t analyzer_higgs::Process(Long64_t entry)
       
     }
 
+  Float_t pTll =0;
 
   if (isMuonSample && muCount==2)
     {
@@ -353,10 +376,9 @@ Bool_t analyzer_higgs::Process(Long64_t entry)
       pTll = (myMuon1->p4()+myMuon2->p4()).Pt();
       diLepton = (TLorentzVector)(myMuon1->p4()+myMuon2->p4());
       //if((diLepton.M()-Mll)>0.01 || (diLepton.Pt()-pTll)>0.01) cout<<" Warning!  Dilepton is wrong"
-      //							   <<diLepton.M()<<"  "<<Mll<<endl;
-      //cout<<"dbg  "<<muCount<<endl;
-      //if (eleCountLoose==0 && muCountLoose==2 && myMuon1->charge()*myMuon2->charge()==-1 && Mll>40 && Mll<500)	 
-      if (eleCount==0 && myMuon1->charge()*myMuon2->charge()==-1 && Mll>40 && Mll<500)	 
+      
+      //if (eleCount==0 && myMuon1->charge()*myMuon2->charge()==-1 && Mll>40 && Mll<500)	 
+      if (eleCountLoose==0 && muCountLoose==2 && myMuon1->charge()*myMuon2->charge()==-1 && Mll>40 && Mll<500)	 
 	{
 	  passPreSelection= kTRUE;
 	  if (Mll>cut_Mll_low && Mll<cut_Mll_high) passZpeak = kTRUE;
@@ -368,8 +390,8 @@ Bool_t analyzer_higgs::Process(Long64_t entry)
       pTll = (myElectron1->p4()+myElectron2->p4()).Pt();
      
       diLepton = (TLorentzVector)(myElectron1->p4()+myElectron2->p4());
-      if (muCount==0 && myElectron1->charge()*myElectron2->charge()==-1 && Mll>40 && Mll<500)	 
-	//if (muCountLoose==0 && eleCountLoose==2 && myElectron1->charge()*myElectron2->charge()==-1 && Mll>40 && Mll<500)	 
+      //if (muCount==0 && myElectron1->charge()*myElectron2->charge()==-1 && Mll>40 && Mll<500)	 
+      if (muCountLoose==0 && eleCountLoose==2 && myElectron1->charge()*myElectron2->charge()==-1 && Mll>40 && Mll<500)	 
 	{
 	  //cout<<"preselection?!"<<endl;
 	  passPreSelection= kTRUE;
@@ -378,10 +400,6 @@ Bool_t analyzer_higgs::Process(Long64_t entry)
 
     }
 
-
-  Float_t MET=0, MET_phi=0;
-  Float_t MET1=0, MET1_phi=0;
-  Float_t MT = 0, MTZ = 0;
   if (recoMET->GetSize()>1) cout<<"warning: to many mets"<<endl;
   
   TCMET* pfMet = 0, *pfMetCorr = 0;
@@ -401,393 +419,146 @@ Bool_t analyzer_higgs::Process(Long64_t entry)
     }
 
 
-  Float_t qT = diLepton.Pt();
+  qT = diLepton.Pt();
 
-  Float_t projMET     = projectedMET(MET1, MET1_phi, Lepton1, Lepton2);
-  Float_t projMETqt   = projMET/qT;
-  Float_t puCorrMET   = pileUpCorrectedMET(projMET, nVtx);
-  Float_t puCorrMETqt = puCorrMET/qT;
+  Double_t weight = 1;
+  if(sample=="MC_ZZtoAny") weight *= weightZZ(qT);
+
+
+  projMET     = projectedMET(MET1, MET1_phi, Lepton1, Lepton2);
+  projMETqt   = projMET/qT;
+  puCorrMET   = pileUpCorrectedMET(projMET, nVtx);
+  puCorrMETqt = puCorrMET/qT;
   Float_t sigma0      = 7.343;
-  Float_t puSigMET    = puCorrMET/sigma0;
-
+  puSigMET    = puCorrMET/sigma0;
+  
   //cout<<"pfMET: "<<MET<<"  pfType1: "<<MET1<<"  proj1: "<<projMET<<"  puCorrMET: "<< puCorrMET<<"   signif: "<<puSigMET<<"  nVtx: "<<nVtx<<endl;
   TVector2 ZptXY(0.0,0.0), METXY(0.0,0.0);  
   ZptXY.Set(diLepton.X(), diLepton.Y());
   METXY.Set(MET*cos(MET_phi), MET*sin(MET_phi));
-  MT = higgsMT(pTll, Mll, MET, ZptXY, METXY);
+  MT  = higgsMT(pTll, Mll, MET, ZptXY, METXY);
   MTZ = higgsMT(pTll, 91.1876, MET, ZptXY, METXY);
   //if (muCount==2) cout<<"MT: "<<MT<<"    "<<ZptXY.X()<<" "<<ZptXY.Y()<<"    "<<METXY.X()<<" "<<METXY.Y()<<endl;
 
-  Float_t METqt = MET/qT;
-  Float_t MET1qt = MET1/qT;
-
-  Bool_t antiB  = kFALSE;
-  Int_t jetCount=0, nJets = 0, nJetsB = 0;
-
-  Float_t ptJ1 = 0, ptJ2=0;
-  Float_t  dPhiLead1 = 110,  dPhiLead2 = 110; 
-  Float_t  dPhiClos1 = 110,  dPhiClos2 = 110; 
-  for (Int_t i = 0; i < recoJets->GetSize(); ++i) 
-    {    
-      TCJet* thisJet = (TCJet*) recoJets->At(i);     
-      if (thisJet->P4(7).Pt() > 30 && fabs(thisJet->P4(7).Eta()) <= 2.4) 
-	{
-	  //do anti-b tag
-          if (thisJet->BDiscrTrkCountHiEff() > 2)
-	    {
-	      antiB = kTRUE;//return kTRUE; 
-	      nJetsB++;
-	    }
-	  nJets++;
-	}
-
-      Float_t ptTemp = thisJet->P4(7).Pt();
-      if(ptTemp>ptJ1)
-	{
-	  ptJ1 = ptTemp;
-	  dPhiLead1 = fabs(TVector2::Phi_mpi_pi(thisJet->P4(7).Phi() - MET_phi));
-	}
-      
-      if(ptTemp>ptJ2 && fabs(thisJet->P4(7).Eta()) <= 2.4)
-	{
-	  ptJ2 = ptTemp;
-	  dPhiLead2 = fabs(TVector2::Phi_mpi_pi(thisJet->P4(7).Phi() - MET_phi));
-	}
-
-      Float_t dphiTemp = fabs(TVector2::Phi_mpi_pi(thisJet->P4(7).Phi() - MET_phi));
-      
-      if(dphiTemp<dPhiClos1)
-	dPhiClos1 = dphiTemp;
-      
-      if(dphiTemp<dPhiClos2 && fabs(thisJet->P4(7).Eta()) <= 2.4)
-	dPhiClos2 = dphiTemp;
+  METqt  = MET/qT;
+  MET1qt = MET1/qT;
 
 
-      jetCount++;
-    }
-
-  for(Int_t ii=0; ii<nC; ii++)
-    {
-      //Fill out 
-      if(ii!=8 && ii!=4) jet_b_pt[ii] ->Fill(66);
-    }
-
-  met0_over_qt[0] -> Fill(METqt);
-  met0_et[0]      -> Fill(MET);
-  met0_et_ovQt[0] -> Fill(MET, METqt);
-  met0_phi[0]     -> Fill(MET_phi);
-
-  met1_over_qt[0] -> Fill(MET1qt);
-  met1_et[0]      -> Fill(MET1);
-  met1_et_ovQt[0] -> Fill(MET1, MET1qt);
-  met1_phi[0]     -> Fill(MET1_phi);
-
-  mt0[0] -> Fill(MT);
-
-  if(!isNoiseHcal && !isDeadEcalCluster && !isScraping && !isCSCTightHalo) 
-    {
-      di_qt[0] -> Fill(qT);
-      di_mass[0]  -> Fill(Mll);
-      if(Mll_EB!=0) di_mass_EB[0]  -> Fill(Mll_EB);
-      if(Mll_EE!=0) di_mass_EE[0]  -> Fill(Mll_EE);
-      if(Mll_EX!=0) di_mass_EX[0]  -> Fill(Mll_EX);
-      
-      met2_over_qt[0] -> Fill(METqt);
-      met2_et[0]      -> Fill(MET);
-      met2_et_ovQt[0] -> Fill(MET, METqt);
-      met2_phi[0]     -> Fill(MET_phi);
-
-      met3_over_qt[0] -> Fill(projMETqt);
-      met3_et[0]      -> Fill(projMET);
-      met3_et_ovQt[0] -> Fill(projMET, projMETqt);
-
-      met4_over_qt[0] -> Fill(puCorrMETqt);
-      met4_et[0]      -> Fill(puCorrMET);
-      met4_et_ovQt[0] -> Fill(puCorrMET, puCorrMETqt);
-      met4_puSig[0]   -> Fill(puSigMET);
-
-      mt2[0]      -> Fill(MT);
-      mtZ[0]      -> Fill(MTZ);
-      mt2_met2[0] -> Fill(MT, MET);
-      mtZ_met2[0] -> Fill(MTZ, MET);
-      mt2_met3[0] -> Fill(MT, projMET);
-      mtZ_met3[0] -> Fill(MTZ, projMET);
-
-      jet_N[0]    -> Fill(nJets);
-      jet_b_N[0]   -> Fill(nJetsB);
-
-      if(jetCount>0)  
-	{
-	  met2_dPhiClosJet1[0] -> Fill(dPhiClos1); 
-	  met2_dPhiClosJet2[0] -> Fill(dPhiClos2); 
-	  met2_dPhiLeadJet1[0] -> Fill(dPhiLead1); 
-	  met2_dPhiLeadJet2[0] -> Fill(dPhiLead2); 
-	}
-
-
-    }
+   FillHistosNoise(0, weight);
+   if(!isNoiseHcal && !isDeadEcalCluster  && !isScraping && !isCSCTightHalo) FillHistos(0, weight);
   else
     if(verboseLvl>1) 
       nout[0]<<"* "<<runNumber<<"\t* "<<eventNumber<<"  \t* "<<lumiSection<<"\t* "<<MET<<"\t* "
 	     <<isNoiseHcal<<"\t* "<<isDeadEcalCluster<<"\t* "<<isScraping<<"\t* "<<isCSCTightHalo<<"\t* "<<endl;  
-
+  
   if (!passPreSelection) return kTRUE;
-
+  
   // Only make sense after preselection (two leptons):
   if(fabs(Lepton1.Eta()) < 1.444 && fabs(Lepton2.Eta())<1.444) Mll_EB = diLepton.M();
   else  if(fabs(Lepton1.Eta()) > 1.566 && fabs(Lepton2.Eta())>1.566)  Mll_EE = diLepton.M();
   else  Mll_EX = diLepton.M();
-  
 
-  nEvents[1]++;
-  if(!isNoiseHcal)        nEventsPassNoiseFilter[1][1]++; 
-  if(!isDeadEcalCluster)  nEventsPassNoiseFilter[2][1]++; 
-  if(!isScraping)         nEventsPassNoiseFilter[3][1]++;
-  if(!isCSCTightHalo)     nEventsPassNoiseFilter[4][1]++;
-  if(!isCSCLooseHalo)     nEventsPassNoiseFilter[5][1]++;
-  if(!isNoiseHcal && !isDeadEcalCluster  && !isScraping && !isCSCTightHalo) 
-    {
-      nEventsPassNoiseFilter[0][1]++; 
-      met2_over_qt[1] -> Fill(METqt);
-      met2_et[1]      -> Fill(MET);
-      met2_et_ovQt[1] -> Fill(MET, METqt);
-      met2_phi[1]     -> Fill(MET_phi);
+  diEta = diLepton.Eta();
 
-      met3_over_qt[1]  -> Fill(projMETqt);
-      met3_et[1]       -> Fill(projMET);
-      met3_et_ovQt[1] -> Fill(projMET, projMETqt);
+  Bool_t antiB  = kFALSE;
+  jetCount=0, nJets = 0, nJetsB = 0;
 
-      met4_over_qt[1] -> Fill(puCorrMETqt);
-      met4_et[1]      -> Fill(puCorrMET);
-      met4_et_ovQt[1] -> Fill(puCorrMET, puCorrMETqt);
-      met4_puSig[1]   -> Fill(puSigMET);
-
-      mt2[1]      -> Fill(MT);
-      mtZ[1]      -> Fill(MTZ);
-      mt2_met2[1] -> Fill(MT, MET);
-      mtZ_met2[1] -> Fill(MTZ, MET);
-      mt2_met3[1] -> Fill(MT, projMET);
-      mtZ_met3[1] -> Fill(MTZ, projMET);
-
-      di_qt[1]    -> Fill(qT);
-      di_mass[1]  -> Fill(Mll);
-      if(Mll_EB!=0) di_mass_EB[1]  -> Fill(Mll_EB);
-      if(Mll_EE!=0) di_mass_EE[1]  -> Fill(Mll_EE);
-      if(Mll_EX!=0) di_mass_EX[1]  -> Fill(Mll_EX);
-
-      jet_N[1]    -> Fill(nJets);
-      jet_b_N[1]  -> Fill(nJetsB);
-
-      if(jetCount>0)  
-	{
-	  met2_dPhiClosJet1[1] -> Fill(dPhiClos1); 
-	  met2_dPhiClosJet2[1] -> Fill(dPhiClos2); 
-	  met2_dPhiLeadJet1[1] -> Fill(dPhiLead1); 
-	  met2_dPhiLeadJet2[1] -> Fill(dPhiLead2); 
-	}
+  Float_t ptJ1 = 0, ptJ2=0;
+  dPhiLead1 = 110,  dPhiLead2 = 110; 
+  dPhiClos1 = 110,  dPhiClos2 = 110; 
+  for (Int_t i = 0; i < recoJets->GetSize(); ++i) 
+    {    
+      TCJet* thisJet = (TCJet*) recoJets->At(i);     
+      if(thisJet->NumConstit()    > 1
+	 && thisJet->NumChPart()  > 0 
+	 && thisJet->ChHadFrac()  > 0
+	 && thisJet->ChEmFrac()   < 1
+	 && (thisJet->NeuHadFrac() + thisJet->NeuEmFrac()) < 0.9
+	 && thisJet->P4().DeltaR(Lepton1) > 0.4
+	 && thisJet->P4().DeltaR(Lepton2) > 0.4
+	 ){
+	
+	if (thisJet->P4(7).Pt() > 30 && fabs(thisJet->P4(7).Eta()) <= 2.4) 
+	  {
+	    //do anti-b tag
+	    if (thisJet->BDiscrTrkCountHiEff() > 2)
+	      {
+		antiB = kTRUE;
+		nJetsB++;
+	      }
+	    nJets++;
+	  }
+	
+	Float_t ptTemp = thisJet->P4(7).Pt();
+	if(ptTemp>ptJ1)
+	  {
+	    ptJ1 = ptTemp;
+	    dPhiLead1 = fabs(TVector2::Phi_mpi_pi(thisJet->P4(7).Phi() - MET_phi));
+	  }
+	
+	if(ptTemp>ptJ2 && fabs(thisJet->P4(7).Eta()) <= 2.4)
+	  {
+	    ptJ2 = ptTemp;
+	    dPhiLead2 = fabs(TVector2::Phi_mpi_pi(thisJet->P4(7).Phi() - MET_phi));
+	  }
+	
+	Float_t dphiTemp = fabs(TVector2::Phi_mpi_pi(thisJet->P4(7).Phi() - MET_phi));
+	
+	if(dphiTemp<dPhiClos1)
+	  dPhiClos1 = dphiTemp;
+	
+	if(dphiTemp<dPhiClos2 && fabs(thisJet->P4(7).Eta()) <= 2.4)
+	  dPhiClos2 = dphiTemp;
+	
+	
+	jetCount++;
+      }
     }
+
+  for(Int_t ii=0; ii<nC; ii++)
+    if(ii!=8 && ii!=4) jet_b_pt[ii] -> Fill(66, weight);
+
+
+
+  FillHistosNoise(1, weight);
+  CountEvents(1);
+
+  if(!isNoiseHcal && !isDeadEcalCluster  && !isScraping && !isCSCTightHalo) 
+    FillHistos(1, weight);
   else
     if(verboseLvl>0) 
       nout[1]<<"* "<<runNumber<<"\t* "<<eventNumber<<"  \t* "<<lumiSection<<"\t* "<<MET<<"\t* "
 	     <<isNoiseHcal<<"\t* "<<isDeadEcalCluster<<"\t* "<<isScraping<<"\t* "<<isCSCTightHalo<<"\t* "<<endl;  
-
-  met0_over_qt[1] -> Fill(METqt);
-  met0_et[1]      -> Fill(MET);
-  met0_et_ovQt[1] -> Fill(MET, METqt);
-  met0_phi[1]     -> Fill(MET_phi);
-
-  met1_over_qt[1] -> Fill(MET1qt);
-  met1_et[1]      -> Fill(MET1);
-  met1_et_ovQt[1] -> Fill(MET1, MET1qt);
-  met1_phi[1]     -> Fill(MET1_phi);
-
-  mt0[1] -> Fill(MT);
-    
   
-if (!passZpeak) return kTRUE;
-  nEvents[2]++;
-  if(!isNoiseHcal)        nEventsPassNoiseFilter[1][2]++; 
-  if(!isDeadEcalCluster)  nEventsPassNoiseFilter[2][2]++; 
-  if(!isScraping)         nEventsPassNoiseFilter[3][2]++;
-  if(!isCSCTightHalo)     nEventsPassNoiseFilter[4][2]++;
-  if(!isCSCLooseHalo)     nEventsPassNoiseFilter[5][2]++;
+  if (!passZpeak) return kTRUE;
+  CountEvents(2);
+  FillHistosNoise(2, weight);
+
   if(!isNoiseHcal && !isDeadEcalCluster && !isScraping && !isCSCTightHalo) 
-    {
-      nEventsPassNoiseFilter[0][2]++; 
-      met2_over_qt[2] -> Fill(METqt);
-      met2_et[2]      -> Fill(MET);
-      met2_et_ovQt[2] -> Fill(MET, METqt);
-      met2_phi[2]     -> Fill(MET_phi);
-
-      met3_over_qt[2] -> Fill(projMETqt);
-      met3_et[2]      -> Fill(projMET);
-      met3_et_ovQt[2] -> Fill(projMET, projMETqt);
-      
-      met4_over_qt[2] -> Fill(puCorrMETqt);
-      met4_et[2]      -> Fill(puCorrMET);
-      met4_et_ovQt[2] -> Fill(puCorrMET, puCorrMETqt);
-      met4_puSig[2]     -> Fill(puSigMET);
-
-      mt2[2]      -> Fill(MT);
-      mtZ[2]      -> Fill(MTZ);
-      mt2_met2[2] -> Fill(MT, MET);
-      mtZ_met2[2] -> Fill(MTZ, MET);
-      mt2_met3[2] -> Fill(MT, projMET);
-      mtZ_met3[2] -> Fill(MTZ, projMET);
-
-      di_qt[2] -> Fill(qT);
-      di_mass[2]  -> Fill(Mll);
-      if(Mll_EB!=0) di_mass_EB[2]  -> Fill(Mll_EB);
-      if(Mll_EE!=0) di_mass_EE[2]  -> Fill(Mll_EE);
-      if(Mll_EX!=0) di_mass_EX[2]  -> Fill(Mll_EX);
-
-      jet_N[2]    -> Fill(nJets);
-      jet_b_N[2]   -> Fill(nJetsB);
-
-
-      if(jetCount>0)  
-	{
-	  met2_dPhiClosJet1[2] -> Fill(dPhiClos1); 
-	  met2_dPhiClosJet2[2] -> Fill(dPhiClos2); 
-	  met2_dPhiLeadJet1[2] -> Fill(dPhiLead1); 
-	  met2_dPhiLeadJet2[2] -> Fill(dPhiLead2); 
-	}
-
-    }
-
-  met0_over_qt[2] -> Fill(METqt);
-  met0_et[2]      -> Fill(MET);
-  met0_et_ovQt[2] -> Fill(MET, METqt);
-  met0_phi[2]     -> Fill(MET_phi);
-
-  met1_over_qt[2] -> Fill(MET1qt);
-  met1_et[2]      -> Fill(MET1);
-  met1_et_ovQt[2] -> Fill(MET1, MET1qt);
-  met1_phi[2]     -> Fill(MET1_phi);
-
-  mt0[2] -> Fill(MT);
- 
+    FillHistos(2, weight);
+     
   if (isMuonSample)
     {
-      mu1_eta[2] -> Fill(myMuon1->eta());
-      mu1_phi[2] -> Fill(myMuon1->phi());
-      mu1_pt[2]  -> Fill(myMuon1->pt());
-
-      mu2_eta[2] -> Fill(myMuon2->eta());
-      mu2_phi[2] -> Fill(myMuon2->phi());
-      mu2_pt[2]  -> Fill(myMuon2->pt());
-
       if (myMuon1->pt() < 20) return kTRUE;
-      nEvents[3]++;
-      if(!isNoiseHcal)        nEventsPassNoiseFilter[1][3]++; 
-      if(!isDeadEcalCluster)  nEventsPassNoiseFilter[2][3]++; 
-      if(!isScraping)         nEventsPassNoiseFilter[3][3]++;
-      if(!isCSCTightHalo)     nEventsPassNoiseFilter[4][3]++;
-      if(!isCSCLooseHalo)     nEventsPassNoiseFilter[5][3]++;
-      if(!isNoiseHcal && !isDeadEcalCluster && !isScraping && !isCSCTightHalo) 
-	nEventsPassNoiseFilter[0][3]++; 
+      CountEvents(3);
 
       if (myMuon2->pt() < 20) return kTRUE;
-      nEvents[4]++;
-      if(!isNoiseHcal)        nEventsPassNoiseFilter[1][4]++; 
-      if(!isDeadEcalCluster)  nEventsPassNoiseFilter[2][4]++; 
-      if(!isScraping)         nEventsPassNoiseFilter[3][4]++;
-      if(!isCSCTightHalo)     nEventsPassNoiseFilter[4][4]++;
-      if(!isCSCLooseHalo)     nEventsPassNoiseFilter[5][4]++;
-      if(!isNoiseHcal && !isDeadEcalCluster && !isScraping && !isCSCTightHalo) 
-	nEventsPassNoiseFilter[0][4]++; 
-
+      CountEvents(4);
     }
 
   if (isElectronSample)
     {
       if (myElectron1->pt() < 20) return kTRUE;
-      nEvents[3]++;
-      if(!isNoiseHcal)        nEventsPassNoiseFilter[1][3]++; 
-      if(!isDeadEcalCluster)  nEventsPassNoiseFilter[2][3]++; 
-      if(!isScraping)         nEventsPassNoiseFilter[3][3]++;
-      if(!isCSCTightHalo)     nEventsPassNoiseFilter[4][3]++;
-      if(!isCSCLooseHalo)     nEventsPassNoiseFilter[5][3]++;
-      if(!isNoiseHcal && !isDeadEcalCluster && !isScraping && !isCSCTightHalo) 
-	nEventsPassNoiseFilter[0][3]++; 
+      CountEvents(3);
   
       if (myElectron2->pt() < 20) return kTRUE;
-      nEvents[4]++;
-      if(!isNoiseHcal)        nEventsPassNoiseFilter[1][4]++; 
-      if(!isDeadEcalCluster)  nEventsPassNoiseFilter[2][4]++; 
-      if(!isScraping)         nEventsPassNoiseFilter[3][4]++;
-      if(!isCSCTightHalo)     nEventsPassNoiseFilter[4][4]++;
-      if(!isCSCLooseHalo)     nEventsPassNoiseFilter[5][4]++;
-      if(!isNoiseHcal && !isDeadEcalCluster && !isScraping && !isCSCTightHalo) 
-	nEventsPassNoiseFilter[0][4]++; 
-  
+      CountEvents(4);
     }
      
-  if (isMuonSample)
-    {
-      mu1_eta[4] -> Fill(myMuon1->eta());
-      mu1_phi[4] -> Fill(myMuon1->phi());
-      mu1_pt[4]  -> Fill(myMuon1->pt());
 
-      mu2_eta[4] -> Fill(myMuon2->eta());
-      mu2_phi[4] -> Fill(myMuon2->phi());
-      mu2_pt[4]  -> Fill(myMuon2->pt());
-
-    }
-
+  FillHistosNoise(4, weight);
   if(!isNoiseHcal && !isDeadEcalCluster && !isScraping && !isCSCTightHalo)
-    { 
-      met2_over_qt[4] -> Fill(METqt);
-      met2_et[4]      -> Fill(MET);
-      met2_et_ovQt[4] -> Fill(MET, METqt);
-      met2_phi[4]     -> Fill(MET_phi);
-
-      met3_over_qt[4] -> Fill(projMETqt);
-      met3_et[4]      -> Fill(projMET);
-      met3_et_ovQt[4] -> Fill(projMET, projMETqt);
-      
-      met4_over_qt[4] -> Fill(puCorrMETqt);
-      met4_et[4]      -> Fill(puCorrMET);
-      met4_et_ovQt[4] -> Fill(puCorrMET, puCorrMETqt);
-      met4_puSig[4]   -> Fill(puSigMET);
-
-      mt2[4]      -> Fill(MT);
-      mtZ[4]      -> Fill(MTZ);
-      mt2_met2[4] -> Fill(MT, MET);
-      mtZ_met2[4] -> Fill(MTZ, MET);
-      mt2_met3[4] -> Fill(MT, projMET);
-      mtZ_met3[4] -> Fill(MTZ, projMET);
-
-      di_qt[4]    -> Fill(qT);
-      di_mass[4]  -> Fill(Mll);
-      if(Mll_EB!=0) di_mass_EB[4]  -> Fill(Mll_EB);
-      if(Mll_EE!=0) di_mass_EE[4]  -> Fill(Mll_EE);
-      if(Mll_EX!=0) di_mass_EX[4]  -> Fill(Mll_EX);
-
-      jet_N[4]    -> Fill(nJets);
-      jet_b_N[4]  -> Fill(nJetsB);
-
-      if(jetCount>0)  
-	{
-	  met2_dPhiClosJet1[4] -> Fill(dPhiClos1); 
-	  met2_dPhiClosJet2[4] -> Fill(dPhiClos2); 
-	  met2_dPhiLeadJet1[4] -> Fill(dPhiLead1); 
-	  met2_dPhiLeadJet2[4] -> Fill(dPhiLead2); 
-	}
-
-    }
-  
-  met0_over_qt[4] -> Fill(METqt);
-  met0_et[4]      -> Fill(MET);
-  met0_et_ovQt[4] -> Fill(MET, METqt);
-  met0_phi[4]     -> Fill(MET_phi);
-
-  met1_over_qt[4] -> Fill(MET1qt);
-  met1_et[4]      -> Fill(MET1);
-  met1_et_ovQt[4] -> Fill(MET1, MET1qt);
-  met1_phi[4]     -> Fill(MET1_phi);
-
-  mt0[4] -> Fill(MT);
+    FillHistos(4, weight);  
 
   if(verboseLvl>1) 
     fout[4]<<"* "<<runNumber<<"\t* "<<eventNumber<<"  \t* "<<lumiSection<<"\t* "<<Mll<<"\t* "<<MT<<"\t* "<<MET<<"\t* "<<pTll<<"\t* "<<rhoFactor<<"\t*"<<endl;  
@@ -796,315 +567,105 @@ if (!passZpeak) return kTRUE;
   for (Int_t i = 0; i < recoJets->GetSize(); ++i) 
     {    
       TCJet* thisJet = (TCJet*) recoJets->At(i);     
-      if (fabs(thisJet->P4(7).Eta()) <= 2.4 && thisJet->BDiscrTrkCountHiEff() > 2) 
-	jet_b_pt[4] ->Fill(thisJet->P4(7).Pt());
-    }
+      if(thisJet->NumConstit()    > 1
+	 && thisJet->NumChPart()  > 0 
+	 && thisJet->ChHadFrac()  > 0
+	 && thisJet->ChEmFrac()   < 1
+	 && (thisJet->NeuHadFrac() + thisJet->NeuEmFrac()) < 0.9
+	 ){
+	
+	if (fabs(thisJet->P4(7).Eta()) <= 2.4 && thisJet->BDiscrTrkCountHiEff() > 2) 
+	  jet_b_pt[4] ->Fill(thisJet->P4(7).Pt(), weight);
+
+	jet_dRlep1[4] -> Fill(thisJet->P4(7).DeltaR(Lepton1), weight);
+	jet_dRlep2[4] -> Fill(thisJet->P4(7).DeltaR(Lepton2), weight);
+
+      }
+  }
   
   if (projMET>70)
     {
-      jet_b_N[9]   -> Fill(nJetsB);
+      jet_b_N[9]   -> Fill(nJetsB, weight);
       if(MT>327 && MT<441)
-	jet_b_N[10]   -> Fill(nJetsB);
+	jet_b_N[10]   -> Fill(nJetsB, weight);
 
      for (Int_t i = 0; i < recoJets->GetSize(); ++i) 
 	{    
 	  TCJet* thisJet2 = (TCJet*) recoJets->At(i);     
 	  if (fabs(thisJet2->P4(7).Eta()) <= 2.4 && thisJet2->BDiscrTrkCountHiEff() > 2) 
-	    jet_b_pt[10] ->Fill(thisJet2->P4(7).Pt());
+	    jet_b_pt[10] ->Fill(thisJet2->P4(7).Pt(), weight);
 	}
     }
 
 
+  if(pTll<cut_pTll) return kTRUE;
   if (antiB) return kTRUE;
-  //  if(pTll<cut_pTll) return kTRUE;
+  if(jetCount>0  && dPhiClos1 < 0.3) return kTRUE;
 
+  CountEvents(5);
+  FillHistosNoise(5, weight);
 
-  nEvents[5]++;
-
-  if(!isNoiseHcal)        nEventsPassNoiseFilter[1][5]++; 
-  if(!isDeadEcalCluster)  nEventsPassNoiseFilter[2][5]++; 
-  if(!isScraping)         nEventsPassNoiseFilter[3][5]++;
-  if(!isCSCTightHalo)     nEventsPassNoiseFilter[4][5]++;
-  if(!isCSCLooseHalo)     nEventsPassNoiseFilter[5][5]++;
   if(!isNoiseHcal && !isDeadEcalCluster && !isScraping && !isCSCTightHalo) 
     {
-      nEventsPassNoiseFilter[0][5]++; 
-      met2_over_qt[5] -> Fill(METqt);
-      met2_et[5]      -> Fill(MET);
-      met2_et_ovQt[5] -> Fill(MET, METqt);
-      met2_phi[5]     -> Fill(MET_phi);
-    
-      met3_over_qt[5] -> Fill(projMETqt);
-      met3_et[5]      -> Fill(projMET);
-      met3_et_ovQt[5] -> Fill(projMET, projMETqt);
- 
-      met4_over_qt[5] -> Fill(puCorrMETqt);
-      met4_et[5]      -> Fill(puCorrMET);
-      met4_et_ovQt[5] -> Fill(puCorrMET, puCorrMETqt);
-      met4_puSig[5]   -> Fill(puSigMET);
+      FillHistos(5, weight);
 
-      mt2[5]      -> Fill(MT);
-      mtZ[5]      -> Fill(MTZ);
-      mt2_met2[5] -> Fill(MT, MET);
-      mtZ_met2[5] -> Fill(MTZ, MET);
-      mt2_met3[5] -> Fill(MT, projMET);
-      mtZ_met3[5] -> Fill(MTZ, projMET);
-
-      di_qt[5]    -> Fill(qT);
-      di_mass[5]  -> Fill(Mll);
-      if(Mll_EB!=0) di_mass_EB[5]  -> Fill(Mll_EB);
-      if(Mll_EE!=0) di_mass_EE[5]  -> Fill(Mll_EE);
-      if(Mll_EX!=0) di_mass_EX[5]  -> Fill(Mll_EX);
-
-      jet_N[5]    -> Fill(nJets);
-      jet_b_N[5]  -> Fill(nJetsB);
-
-      if(jetCount>0)  
-	{
-	  met2_dPhiClosJet1[5] -> Fill(dPhiClos1); 
-	  met2_dPhiClosJet2[5] -> Fill(dPhiClos2); 
-	  met2_dPhiLeadJet1[5] -> Fill(dPhiLead1); 
-	  met2_dPhiLeadJet2[5] -> Fill(dPhiLead2); 
-	}
-
-      if(projMET<70)
-	{
-	  //Reversing Met cut
-	  met2_over_qt[11] -> Fill(METqt);
-	  met2_et[11]      -> Fill(MET);
-	  met2_et_ovQt[11] -> Fill(MET, METqt);
-	  met2_phi[11]     -> Fill(MET_phi);
-	  
-	  met3_over_qt[11] -> Fill(projMETqt);
-	  met3_et[11]      -> Fill(projMET);
-	  met3_et_ovQt[11] -> Fill(projMET, projMETqt);
-	  
-	  met4_over_qt[11] -> Fill(puCorrMETqt);
-	  met4_et[11]      -> Fill(puCorrMET);
-	  met4_et_ovQt[11] -> Fill(puCorrMET, puCorrMETqt);
-	  met4_puSig[11]   -> Fill(puSigMET);
-	  
-	  mt2[11]      -> Fill(MT);
-	  mtZ[11]      -> Fill(MTZ);
-	  mt2_met2[11] -> Fill(MT, MET);
-	  mtZ_met2[11] -> Fill(MTZ, MET);
-	  mt2_met3[11] -> Fill(MT, projMET);
-	  mtZ_met3[11] -> Fill(MTZ, projMET);
-	  
-	  di_qt[11]    -> Fill(qT);
-	  di_mass[11]  -> Fill(Mll);
-	  if(Mll_EB!=0) di_mass_EB[11]  -> Fill(Mll_EB);
-	  if(Mll_EE!=0) di_mass_EE[11]  -> Fill(Mll_EE);
-	  if(Mll_EX!=0) di_mass_EX[11]  -> Fill(Mll_EX);
-
-	  jet_N[11]    -> Fill(nJets);
-	  jet_b_N[11]  -> Fill(nJetsB);
-	  
-	  if(jetCount>0)  
-	    {
-	      met2_dPhiClosJet1[11] -> Fill(dPhiClos1); 
-	      met2_dPhiClosJet2[11] -> Fill(dPhiClos2); 
-	      met2_dPhiLeadJet1[11] -> Fill(dPhiLead1); 
-	      met2_dPhiLeadJet2[11] -> Fill(dPhiLead2); 
-	    }
-	}
+      if(projMET<70) {
+	//Reversing Met cut
+	FillHistos(11, weight);
+      }
     }
 
-  met0_over_qt[5] -> Fill(METqt);
-  met0_et[5]      -> Fill(MET);
-  met0_et_ovQt[5] -> Fill(MET, METqt);
-  met0_phi[5]     -> Fill(MET_phi);
-
-  met1_over_qt[5] -> Fill(MET1qt);
-  met1_et[5]      -> Fill(MET1);
-  met1_et_ovQt[5] -> Fill(MET1, MET1qt);
-  met1_phi[5]     -> Fill(MET1_phi);
-
-  mt0[5] -> Fill(MT);
-
-  if (isMuonSample)
-    {
-      mu1_eta[5] -> Fill(myMuon1->eta());
-      mu1_phi[5] -> Fill(myMuon1->phi());
-      mu1_pt[5]  -> Fill(myMuon1->pt());
-
-      mu2_eta[5] -> Fill(myMuon2->eta());
-      mu2_phi[5] -> Fill(myMuon2->phi());
-      mu2_pt[5]  -> Fill(myMuon2->pt());
-
-    }
-  
 
   if(verboseLvl>1)   
     fout[5]<<"* "<<runNumber<<"\t* "<<eventNumber<<"  \t* "<<lumiSection<<"\t* "<<Mll<<"\t* "<<MT<<"\t* "<<MET<<"\t* "<<pTll<<"\t* "<<rhoFactor<<"\t*"<<muCountLoose<<"\t* "<<eleCountLoose<<endl;  
 
   // if (pTll<50) return kTRUE;
  
-  if (projMET<70) return kTRUE;
+  if (projMET<50) return kTRUE;
  
- nEvents[6]++;
-
-  if(!isNoiseHcal)        nEventsPassNoiseFilter[1][6]++; 
-  if(!isDeadEcalCluster)  nEventsPassNoiseFilter[2][6]++; 
-  if(!isScraping)         nEventsPassNoiseFilter[3][6]++;
-  if(!isCSCTightHalo)     nEventsPassNoiseFilter[4][6]++;
-  if(!isCSCLooseHalo)     nEventsPassNoiseFilter[5][6]++;
-  if(!isNoiseHcal && !isDeadEcalCluster && !isScraping && !isCSCTightHalo) 
+  if(!isNoiseHcal && !isDeadEcalCluster && !isScraping && !isCSCTightHalo)
     {
-      nEventsPassNoiseFilter[0][6]++; 
-      met2_over_qt[6] -> Fill(METqt);
-      met2_et[6]      -> Fill(MET);
-      met2_et_ovQt[6] -> Fill(MET, METqt);
-      met2_phi[6]     -> Fill(MET_phi);
-      
-      met3_over_qt[6] -> Fill(projMETqt);
-      met3_et[6]      -> Fill(projMET);
-      met3_et_ovQt[6] -> Fill(projMET, projMETqt);
-
-      met4_over_qt[6] -> Fill(puCorrMETqt);
-      met4_et[6]      -> Fill(puCorrMET);
-      met4_et_ovQt[6] -> Fill(puCorrMET, puCorrMETqt);
-      met4_puSig[6]   -> Fill(puSigMET);
-
-      mt2[6]      -> Fill(MT);
-      mtZ[6]      -> Fill(MTZ);
-      mt2_met2[6] -> Fill(MT, MET);
-      mtZ_met2[6] -> Fill(MTZ, MET);
-      mt2_met3[6] -> Fill(MT, projMET);
-      mtZ_met3[6] -> Fill(MTZ, projMET);
-
-      di_qt[6]    -> Fill(qT);
-      di_mass[6]  -> Fill(Mll);
-      if(Mll_EB!=0) di_mass_EB[6]  -> Fill(Mll_EB);
-      if(Mll_EE!=0) di_mass_EE[6]  -> Fill(Mll_EE);
-      if(Mll_EX!=0) di_mass_EX[6]  -> Fill(Mll_EX);
-
-      jet_N[6]    -> Fill(nJets);
-      jet_b_N[6]  -> Fill(nJetsB);
-
-
+      ct_pfMet = MET; ct_projMet=projMET; ct_MT = MT; ct_qT = qT;
+      cutTree -> Fill();
     }
+
+
+  CountEvents(6);
+  FillHistosNoise(6, weight);
+  
+  if(!isNoiseHcal && !isDeadEcalCluster && !isScraping && !isCSCTightHalo) 
+    FillHistos(6, weight);
   else
     if(verboseLvl>0) 
       nout[6]<<"* "<<runNumber<<"\t* "<<eventNumber<<"  \t* "<<lumiSection<<"\t* "<<MET<<"\t* "
 	     <<isNoiseHcal<<"\t* "<<isDeadEcalCluster<<"\t* "<<isScraping<<"\t* "<<isCSCTightHalo<<"\t* "<<endl;  
-  
-  met0_over_qt[6] -> Fill(METqt);
-  met0_et[6]      -> Fill(MET);
-  met0_et_ovQt[6] -> Fill(MET, METqt);
-  met0_phi[6]     -> Fill(MET_phi);
 
-  met1_over_qt[6] -> Fill(MET1qt);
-  met1_et[6]      -> Fill(MET1);
-  met1_et_ovQt[6] -> Fill(MET1, MET1qt);
-  met1_phi[6]     -> Fill(MET1_phi);
-
-  mt0[6] -> Fill(MT);
-
-  if (isMuonSample)
-    {
-      mu1_eta[6] -> Fill(myMuon1->eta());
-      mu1_phi[6] -> Fill(myMuon1->phi());
-      mu1_pt[6]  -> Fill(myMuon1->pt());
-
-      mu2_eta[6] -> Fill(myMuon2->eta());
-      mu2_phi[6] -> Fill(myMuon2->phi());
-      mu2_pt[6]  -> Fill(myMuon2->pt());
-
-    }
 
   if(verboseLvl>0) 
     fout[6]<<"* "<<runNumber<<"\t* "<<eventNumber<<"  \t* "<<lumiSection<<"\t* "<<Mll<<"\t* "<<MT<<"\t* "<<MET<<"\t* "<<pTll<<"\t* "<<rhoFactor<<"\t* "<<muCountLoose<<"\t* "<<eleCountLoose<<endl;  
 
   //  cout<<"dbg 322"<<endl;
+  if (projMET<112) return kTRUE;
+  if (MT<292) return kTRUE;
   
-  if(projMETqt <0.6 || projMETqt>1.8) return kTRUE;
-
-  nEvents[7]++;
-  if(!isNoiseHcal)        nEventsPassNoiseFilter[1][7]++; 
-  if(!isDeadEcalCluster)  nEventsPassNoiseFilter[2][7]++; 
-  if(!isScraping)         nEventsPassNoiseFilter[3][7]++;
-  if(!isCSCTightHalo)     nEventsPassNoiseFilter[4][7]++;
-  if(!isCSCLooseHalo)     nEventsPassNoiseFilter[5][7]++;
+  //  if(projMETqt <0.6 || projMETqt>1.8) return kTRUE;
+  
+  FillHistosNoise(7, weight);
+  CountEvents(7);
+  
   if(!isNoiseHcal && !isDeadEcalCluster && !isScraping && !isCSCTightHalo) 
-    {
-      nEventsPassNoiseFilter[0][7]++; 
-
-      if(jetCount>0)  
-	{
-	  met2_dPhiClosJet1[7] -> Fill(dPhiClos1); 
-	  met2_dPhiClosJet2[7] -> Fill(dPhiClos2); 
-	  met2_dPhiLeadJet1[7] -> Fill(dPhiLead1); 
-	  met2_dPhiLeadJet2[7] -> Fill(dPhiLead2); 
-	}
-
-      met2_over_qt[7] -> Fill(METqt);
-      met2_et[7]      -> Fill(MET);
-      met2_et_ovQt[7] -> Fill(MET, METqt);
-      met2_phi[7]     -> Fill(MET_phi);
-
-      met3_over_qt[7] -> Fill(projMETqt);
-      met3_et[7]      -> Fill(projMET);
-      met3_et_ovQt[7] -> Fill(projMET, projMETqt);
-      
-      met4_over_qt[7] -> Fill(puCorrMETqt);
-      met4_et[7]      -> Fill(puCorrMET);
-      met4_et_ovQt[7] -> Fill(puCorrMET, puCorrMETqt);
-      met4_puSig[7]   -> Fill(puSigMET);
-
-      mt2[7]      -> Fill(MT);
-      mtZ[7]      -> Fill(MTZ);
-      mt2_met2[7] -> Fill(MT, MET);
-      mtZ_met2[7] -> Fill(MTZ, MET);
-      mt2_met3[7] -> Fill(MT, projMET);
-      mtZ_met3[7] -> Fill(MTZ, projMET);
-
-      di_qt[7]    -> Fill(qT);
-      di_mass[7]  -> Fill(Mll);
-      if(Mll_EB!=0) di_mass_EB[7]  -> Fill(Mll_EB);
-      if(Mll_EE!=0) di_mass_EE[7]  -> Fill(Mll_EE);
-      if(Mll_EX!=0) di_mass_EX[7]  -> Fill(Mll_EX);
-
-      jet_N[7]    -> Fill(nJets);
-      jet_b_N[7]  -> Fill(nJetsB);
-
-    }
+    FillHistos(7, weight);
   else
     if(verboseLvl>0) 
       nout[7]<<"* "<<runNumber<<"\t* "<<eventNumber<<"  \t* "<<lumiSection<<"\t* "<<MET<<"\t* "
 	     <<isNoiseHcal<<"\t* "<<isDeadEcalCluster<<"\t* "<<isScraping<<"\t* "<<isCSCTightHalo<<"\t* "<<endl;  
   
-  met0_over_qt[7] -> Fill(METqt);
-  met0_et[7]      -> Fill(MET);
-  met0_et_ovQt[7] -> Fill(MET, METqt);
-  met0_phi[7]     -> Fill(MET_phi);
 
-  met1_over_qt[7] -> Fill(MET1qt);
-  met1_et[7]      -> Fill(MET1);
-  met1_et_ovQt[7] -> Fill(MET1, MET1qt);
-  met1_phi[7]     -> Fill(MET1_phi);
+    fout[7]<<"* "<<runNumber<<"\t* "<<eventNumber<<"  \t* "<<lumiSection<<"\t* "<<Mll<<"\t* "<<MT<<"\t* "<<MET<<"\t* "<<pTll<<"\t* "<<rhoFactor<<"\t* "<<muCountLoose<<"\t* "<<eleCountLoose<<endl;  
 
-  mt0[7] -> Fill(MT);
-
-  if (isMuonSample)
-    {
-      mu1_eta[7] -> Fill(myMuon1->eta());
-      mu1_phi[7] -> Fill(myMuon1->phi());
-      mu1_pt[7]  -> Fill(myMuon1->pt());
-
-      mu2_eta[7] -> Fill(myMuon2->eta());
-      mu2_phi[7] -> Fill(myMuon2->phi());
-      mu2_pt[7]  -> Fill(myMuon2->pt());
-
-    }
-
-  if(verboseLvl>0) 
-    fout[7]<<"* "<<runNumber<<"\t* "<<eventNumber<<"  \t* "<<lumiSection<<"\t* "<<Mll<<"\t* "<<MT<<"\t* "<<MET<<"\t* "<<pTll<<"\t* "<<rhoFactor<<"\t*"<<endl;  
-
-  nEvents[8]++;
-
-  nEvents[9]++;
-  nEvents[10]++;
+    CountEvents(8);
+    CountEvents(9);
+    CountEvents(10);
 
   //  if(verboseLvl>1)   fout[9]<<"* "<<runNumber<<"\t* "<<eventNumber<<"  \t* "<<Mll<<"\t* "<<pTll<<"\t* "<<MET<<"\t* "<<pTll<<"\t* "<<rhoFactor<<"\t*"<<endl;  
 
@@ -1162,25 +723,13 @@ void analyzer_higgs::Terminate()
 
   cout<<"End of Job. Let's write the files."<<endl;
 
-
-
-
   Float_t nEv1 = getNevents(sample.c_str(), met1_et[0]);
-
-  //TFile *temp = new TFile("temp.root", "RECREATE"); 
-  //temp->Write();
-  //   gDirectory -> GetListOfKeys() -> Print();
 
   histoFile->Write();
   scaleAndColor(sample.c_str(), CS, nEv1, 1000.0, lColor, fColor); //1fb
-  //  scaleAndColor(sample.c_str(), CS, nEv1, 191.0, lColor, fColor);
-  //scale(sample.c_str(), CS, nEv1, 191.0);
-  
-  // cout<<"met0_et_0 integral: "<<met0_et[0]->Integral()<<endl;  //histoFile->Write();
 
-  //histoFile->Print("-d");
   histoFile->Close();
-  //temp ->Close();
+
   cout<<"Wrote and Closed"<<endl;
 
 }
@@ -1211,32 +760,32 @@ double analyzer_higgs::dz(TCPrimaryVtx *primVtx, TVector3* trackVtx, TVector3* t
   return ret;
 }
 
-double analyzer_higgs::higgsMT(Float_t pTll, Float_t Mll, Float_t MET, TVector2 ZptXY, TVector2 METXY)
+double analyzer_higgs::higgsMT(Float_t f_pTll, Float_t f_Mll, Float_t f_MET, TVector2 f_ZptXY, TVector2 f_METXY)
 {
-  double MT = sqrt( pow(sqrt(pTll*pTll + Mll*Mll) + sqrt(MET*MET + Mll*Mll), 2) - (ZptXY + METXY).Mod2());
-  return MT;
+  double f_MT = sqrt( pow(sqrt(f_pTll*f_pTll + f_Mll*f_Mll) + sqrt(f_MET*f_MET + f_Mll*f_Mll), 2) - (f_ZptXY + f_METXY).Mod2());
+  return f_MT;
 }
 
-double analyzer_higgs::projectedMET(Float_t MET, Float_t MET_phi, TLorentzVector Lepton1, TLorentzVector Lepton2)
+double analyzer_higgs::projectedMET(Float_t f_MET, Float_t f_MET_phi, TLorentzVector f_Lepton1, TLorentzVector f_Lepton2)
 {
-  Float_t deltaPhiMin =   TMath::Min( fabs(TVector2::Phi_mpi_pi(Lepton1.Phi() - MET_phi)), fabs(TVector2::Phi_mpi_pi(Lepton2.Phi() - MET_phi)));
+  Float_t deltaPhiMin =   TMath::Min( fabs(TVector2::Phi_mpi_pi(f_Lepton1.Phi() - f_MET_phi)), fabs(TVector2::Phi_mpi_pi(f_Lepton2.Phi() - f_MET_phi)));
   //cout<<deltaPhiMin<<endl;
-  Float_t projMET = 0;
-  if (deltaPhiMin > TMath::Pi()/2) projMET = MET;
-  else projMET = MET*sin(deltaPhiMin);
-  return projMET;
+  Float_t f_projMET = 0;
+  if (deltaPhiMin > TMath::Pi()/2) f_projMET = f_MET;
+  else f_projMET = f_MET*sin(deltaPhiMin);
+  return f_projMET;
 }
 
-double analyzer_higgs::pileUpCorrectedMET(Float_t projMET, Int_t nVtx)
+double analyzer_higgs::pileUpCorrectedMET(Float_t f_projMET, Int_t nVtx)
 {
   //See talk by Marionneau Matthieu at DibosonMeeting on May 11, 2011
   Float_t sigma0  = 7.343;//, sigma0_err = 0.111;
   Float_t sigmaPU = 3.9;
   Float_t a = 0.856; //slope
   Float_t sigmaT = sqrt(sigma0*sigma0 + (nVtx-1)*sigmaPU*sigmaPU);
-  Float_t projMET2 = projMET - a*(nVtx-1);
-  Float_t puCorrMET = projMET2*sigma0/sigmaT;
-  return puCorrMET;
+  Float_t projMET2 = f_projMET - a*(nVtx-1);
+  Float_t f_puCorrMET = projMET2*sigma0/sigmaT;
+  return f_puCorrMET;
 }
 
 
@@ -1310,6 +859,82 @@ float analyzer_higgs::getNevents(string sample1, TH1F* h)
   return nEv2;
 }
 
+
+float analyzer_higgs::weightZZ(Float_t x)
+{
+  Float_t a = 1.108, b = 0.002429, c = -1.655e-06;
+  Float_t w = a + b*x + c*x*x;  
+  return w;
+}
+
+inline void analyzer_higgs::FillHistosNoise(Int_t num, Double_t weight){
+  met0_over_qt[num] -> Fill(METqt, weight);  
+  met0_et[num]      -> Fill(MET, weight);
+  met0_et_ovQt[num] -> Fill(MET, METqt, weight);
+  met0_phi[num]     -> Fill(MET_phi, weight);
+
+  met1_over_qt[num] -> Fill(MET1qt, weight);
+  met1_et[num]      -> Fill(MET1, weight);
+  met1_et_ovQt[num] -> Fill(MET1, MET1qt, weight);
+  met1_phi[num]     -> Fill(MET1_phi, weight);
+
+  mt0[num]          -> Fill(MT, weight);
+}
+
+inline void analyzer_higgs::FillHistos(Int_t num, Double_t weight){
+      met2_over_qt[num] -> Fill(METqt, weight);
+      met2_et[num]      -> Fill(MET, weight);
+      met2_et_ovQt[num] -> Fill(MET, METqt, weight);
+      met2_phi[num]     -> Fill(MET_phi, weight);
+
+      met3_over_qt[num]  -> Fill(projMETqt, weight);
+      met3_et[num]       -> Fill(projMET, weight);
+      met3_et_ovQt[num] -> Fill(projMET, projMETqt, weight);
+
+      met4_over_qt[num] -> Fill(puCorrMETqt, weight);
+      met4_et[num]      -> Fill(puCorrMET, weight);
+      met4_et_ovQt[num] -> Fill(puCorrMET, puCorrMETqt, weight);
+      met4_puSig[num]   -> Fill(puSigMET, weight);
+
+      mt2[num]      -> Fill(MT, weight);
+      mtZ[num]      -> Fill(MTZ, weight);
+      mt2_met2[num] -> Fill(MT, MET, weight);
+      mtZ_met2[num] -> Fill(MTZ, MET, weight);
+      mt2_met3[num] -> Fill(MT, projMET, weight);
+      mtZ_met3[num] -> Fill(MTZ, projMET, weight);
+
+      di_qt[num]    -> Fill(qT, weight);
+      di_eta[num] -> Fill(diEta);
+      di_mass[num]  -> Fill(Mll, weight);
+      if(Mll_EB!=0) di_mass_EB[num]  -> Fill(Mll_EB, weight);
+      if(Mll_EE!=0) di_mass_EE[num]  -> Fill(Mll_EE, weight);
+      if(Mll_EX!=0) di_mass_EX[num]  -> Fill(Mll_EX, weight);
+
+      jet_N[num]    -> Fill(nJets, weight);
+      jet_b_N[num]  -> Fill(nJetsB, weight);
+
+      if(jetCount>0)  
+	{
+	  met2_dPhiClosJet1[num] -> Fill(dPhiClos1, weight); 
+	  met2_dPhiClosJet2[num] -> Fill(dPhiClos2, weight); 
+	  met2_dPhiLeadJet1[num] -> Fill(dPhiLead1, weight); 
+	  met2_dPhiLeadJet2[num] -> Fill(dPhiLead2, weight); 
+	}
+
+}
+
+inline void analyzer_higgs::CountEvents(Int_t num)
+{
+  nEvents[num]++;
+  if(!isNoiseHcal)        nEventsPassNoiseFilter[1][num]++; 
+  if(!isDeadEcalCluster)  nEventsPassNoiseFilter[2][num]++; 
+  if(!isScraping)         nEventsPassNoiseFilter[3][num]++;
+  if(!isCSCTightHalo)     nEventsPassNoiseFilter[4][num]++;
+  if(!isCSCLooseHalo)     nEventsPassNoiseFilter[5][num]++;
+  if(!isNoiseHcal && !isDeadEcalCluster && !isScraping && !isCSCTightHalo) 
+      nEventsPassNoiseFilter[0][num]++; 
+}
+
 /*
 void analyzer_higgs::scale(string sample1, TH1 * h, Float_t cs, Float_t nTotEv, Float_t lumi)
 {
@@ -1329,15 +954,3 @@ void analyzer_higgs::scale(string sample1, TH1 * h, Float_t cs, Float_t nTotEv, 
 }
 */
 
-/*
-void analyzer_higgs::CountEvents(UInt_t nEv[], UInt_t nEvPassNoiseFilter[])
-{
-  nEv[0]++; 
-  if(!isNoiseHcal)  nEvPassNoiseFilter[1][0]++; 
-  if(!isDeadEcalCluster)  nEvPassNoiseFilter[2][0]++; 
-  if(!isScraping)  nEvPassNoiseFilter[3][0]++;
-  if(!isCSCTightHalo)  nEvPassNoiseFilter[4][0]++;
-  if(!isCSCLooseHalo)  nEvPassNoiseFilter[5][0]++;
-  if(!isNoiseHcal && !isDeadEcalCluster&& !isScraping && !isCSCTightHalo)  nEvPassNoiseFilter[0][0]++; 
-}
-*/
