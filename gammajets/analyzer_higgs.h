@@ -1,4 +1,5 @@
-//////////////////////////////////////////////////////////// This class has been automatically generated on
+//////////////////////////////////////////////////////////
+// This class has been automatically generated on
 // Tue Apr 12 10:25:05 2011 by ROOT version 5.27/06b
 // from TTree rTree/rTree
 // found on file: out_higgs.root
@@ -9,6 +10,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <iostream>
 #include <vector>
 
 #include <TROOT.h>
@@ -20,92 +22,89 @@
 #include "../src/TCElectron.h"
 #include "../src/TCJet.h"
 #include "../src/TCMET.h"
+#include "../src/TCPhoton.h"
+#include "../src/TCTrigger.h"
 
 #include "TClonesArray.h"
 #include "TLorentzVector.h"
 #include "TVector3.h"
-#include "TH1.h"
+#include "TH1F.h"
+#include "TH2D.h"
 #include <iostream>
 #include <fstream>
 
-#include <TKey.h>
-#include <TList.h>
-#include <TH2.h>
-#include <TStyle.h>
-#include <TString.h>
-#include <TMath.h>
-#include "TTree.h"
-
-#define nC 12  //nCuts in the analysis. make plots after each cut
+#define nCuts 10
 
 
 class analyzer_higgs : public TSelector {
-
-
- private:
-
-  //Variables to Fill into histos. Have to be global                                                                                                           
-  Float_t qT, diEta, Mll, Mll_EB, Mll_EE, Mll_EX;
-  Float_t MET, MET_phi, MET1, MET1_phi, projMET, puCorrMET, puSigMET;
-  Float_t METqt, MET1qt, projMETqt, puCorrMETqt;
-  Float_t MT, MTZ, pTll;
-  Int_t nJets, nJetsB, jetCount, muCountLoose, eleCountLoose;
-  Float_t dPhiClos1,dPhiClos2, dPhiLead1, dPhiLead2;
-
-
-
-  ofstream nout[nC], fout[nC], ffout, ncout;
+  ofstream nout[nCuts], fout[nCuts], ffout, ncout;
   
-
-  TFile* histoFile;
-  TTree * cutTree;
-  
-  TH1F *mtZ[nC], *mt0[nC], *mt1[nC], *mt2[nC], *mt3[nC], *mt4[nC];
-  TH1F *met0_phi[nC], *met0_et[nC], *met0_over_qt[nC];
-  TH1F *met1_phi[nC], *met1_et[nC], *met1_over_qt[nC];
-  TH1F *met2_phi[nC], *met2_et[nC], *met2_over_qt[nC];
-  TH1F *met3_phi[nC], *met3_et[nC], *met3_over_qt[nC];
-  TH1F *met4_phi[nC], *met4_et[nC], *met4_over_qt[nC], *met4_puSig[nC];
-  TH1F *mu1_phi[nC], *mu1_eta[nC], *mu1_pt[nC];
-  TH1F *mu2_phi[nC], *mu2_eta[nC], *mu2_pt[nC];
-  TH1F *btag_hp[nC];
-  TH1F *di_qt[nC], *di_eta[nC], *di_mass[nC], *di_mass_EB[nC], *di_mass_EE[nC], *di_mass_EX[nC];
-  TH1F *jet_N[nC], *jet_dRlep1[nC], *jet_dRlep2[nC], *jet_pt[nC];
-  TH1F *jet_b_N[nC], *jet_b_pt[nC];
-
-  TH1F *met2_dPhiLeadJet1[nC], *met2_dPhiLeadJet2[nC], *met2_dPhiClosJet1[nC], *met2_dPhiClosJet2[nC];
-
-  TH2F *met0_et_ovQt[nC], *met1_et_ovQt[nC], *met2_et_ovQt[nC], *met3_et_ovQt[nC], *met4_et_ovQt[nC]; 
-  TH2F *mtZ_met2[nC], *mt2_met2[nC];
-  TH2F *mtZ_met3[nC], *mt2_met3[nC];
-
-
-public :
-
   double dz(TCPrimaryVtx *primVtx, TVector3* trackVtx, TVector3* trackMom);
   double dxy(TCPrimaryVtx *primVtx, TVector3* trackVtx, TVector3* trackMom);
   double higgsMT(Float_t pTll, Float_t Mll, Float_t MET, TVector2 ZptXY, TVector2 METXY);
   double projectedMET(Float_t MET, Float_t MET_phi, TLorentzVector Lepton1, TLorentzVector Lepton2);
   double pileUpCorrectedMET(Float_t projMET, Int_t nVtx);
 
-  float getNevents(string, TH1F* );
-  void scaleAndColor(TString , Float_t , Float_t , Float_t , Int_t , Int_t );
+  void CountEvents(UInt_t nEvents[], UInt_t nEventsPassNoiseFilter[]);
+  
+public :
+  TFile* histoFile;
+  
+  TH1F *met_phi[nCuts], *met_et[nCuts], *met_over_qt[nCuts];
+  TH1F *met1_phi[nCuts], *met1_et[nCuts], *met1_over_qt[nCuts];
+  TH1F *met2_phi[nCuts], *met2_et[nCuts], *met2_over_qt[nCuts];
+  TH1F *met3_phi[nCuts], *met3_et[nCuts], *met3_over_qt[nCuts];
+  TH1F *met4_phi[nCuts], *met4_et[nCuts], *met4_over_qt[nCuts], *met4_sig[nCuts];
+  TH1F *mu1_phi[nCuts], *mu1_eta[nCuts], *mu1_pt[nCuts];
+  TH1F *mu2_phi[nCuts], *mu2_eta[nCuts], *mu2_pt[nCuts];
+  TH1F *btag_hp[nCuts];
 
-  float weightZZ(Float_t );
-  float puReweighting(Int_t );
+  TH1F *h_hlt_fired, *h_hlt_fired2;
+  TH2F *h_hlt_fired_prescale, *h_hlt_fired_prescale2;
+  TH1F *h_pho_pt, *h_pho_mass;
+  TH1F *h_phow_pt, *h_phow_mass;
+  
+  TH1F *h_pho_eta, *h_pho_phi;
+  TH1F *h_phow_eta, *h_phow_phi; 
 
-  void FillHistos(Int_t, Double_t);
-  void FillHistosNoise(Int_t, Double_t);
-  void CountEvents(Int_t);
-  void PrintOut(Int_t);
-  void PrintOutNoisy(Int_t);
-  /*
-  inline void FillHistos(Int_t, Double_t);
-  inline void FillHistosNoise(Int_t, Double_t);
-  inline void CountEvents(Int_t);
-  inline void PrintOut(Int_t);
-  inline void PrintOutNoisy(Int_t);
-  */
+  TH1F *h_pho1_pt, *h_pho1_mass;
+  TH1F *h_phow1_pt, *h_phow1_mass;
+
+  TH1F *h_pho1_eta, *h_pho1_phi;
+  TH1F *h_phow1_eta, *h_phow1_phi;
+
+  TH1F *h_pho2_pt, *h_pho2_mass;
+  TH1F *h_phow2_pt, *h_phow2_mass;
+
+  TH1F *h_pho2_eta, *h_pho2_phi;
+  TH1F *h_phow2_eta, *h_phow2_phi;
+
+  // histograms for event-level variable
+  TH1F *h_phow1_mt[12], *h_phow1_met[12], *h_phow1_projMet[12], *h_phow1_metOverQt[12], *h_phow1_projMetOverQt[12], *h_phow1_nJets[12];
+  TH1F *h_phow2_mt[12], *h_phow2_met[12], *h_phow2_projMet[12], *h_phow2_metOverQt[12], *h_phow2_projMetOverQt[12], *h_phow2_nJets[12];
+
+
+
+  // histograms that hold the weights for photons to be applied for
+  // bg estimation in ee and mumu. The combined histogram "ll" is 
+  // obtained after combining the samples and needs additional weight 
+  // factor for ee and mumu. First Check the ee, mumu... ll if thre is 
+  // strong reason for it
+
+  TH1F *h1_photonWeightEe, *h1_photonWeightMumu, *h1_photonWeightLl;
+
+  Float_t photonWeightEe(Float_t pt);     // weight for the photons in ee bg estimate 
+  Float_t photonWeightMumu(Float_t pt);   //  same for mumu
+ 
+
+  // histograms to hold the ee, mumu mass spectra observed in data
+  // when "photon mass" is generated directly from the histograms
+ TH1F *h1_photonMassFromEe, *h1_photonMassFromMumu; 
+
+
+
+
+
    TTree          *fChain;   //!pointer to the analyzed TTree or TChain
 
    // Declaration of leaf types
@@ -135,6 +134,8 @@ public :
    TClonesArray    *recoMuons;
    TClonesArray    *recoMET;
    TClonesArray    *corrMET;
+   TClonesArray    *recoPhotons; 
+   TClonesArray    *hltTriggerResults;; 
 
    // List of branches
    TBranch        *b_isRealData;   //!
@@ -160,6 +161,8 @@ public :
    TBranch        *b_recoMuons;   //!
    TBranch        *b_recoMET;   //!
    TBranch        *b_corrMET;   //!
+   TBranch        *b_recoPhotons;   //!  
+   TBranch        *b_hltTriggerResults;   //!  
 
    analyzer_higgs(TTree * /*tree*/ =0) { }
    virtual ~analyzer_higgs() { }
@@ -202,6 +205,8 @@ void analyzer_higgs::Init(TTree *tree)
    recoMuons = 0;
    recoMET = 0;
    corrMET = 0;
+   recoPhotons = 0;
+   hltTriggerResults = 0;
    // Set branch addresses and branch pointers
    if (!tree) return;
    fChain = tree;
@@ -230,6 +235,8 @@ void analyzer_higgs::Init(TTree *tree)
    fChain->SetBranchAddress("recoMuons", &recoMuons, &b_recoMuons);
    fChain->SetBranchAddress("recoMET", &recoMET, &b_recoMET);
    fChain->SetBranchAddress("corrMET", &corrMET, &b_corrMET);
+   fChain->SetBranchAddress("recoPhotons", &recoPhotons, &b_recoPhotons);
+   fChain->SetBranchAddress("hltTriggerResults", &hltTriggerResults, &b_hltTriggerResults);
 }
 
 Bool_t analyzer_higgs::Notify()

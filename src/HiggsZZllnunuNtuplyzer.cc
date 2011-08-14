@@ -13,7 +13,7 @@
 //
 // Original Author:  Andrey Pozdnyakov
 //         Created:  Fri Mar 25 08:07:03 CDT 2011
-// $Id: HiggsZZllnunuNtuplyzer.cc,v 1.1 2011/06/16 13:10:04 andrey Exp $
+// $Id: HiggsZZllnunuNtuplyzer.cc,v 1.2 2011/06/16 14:21:01 andrey Exp $
 //
 
 #include <memory>
@@ -132,7 +132,7 @@ class HiggsZZllnunuNtuplyzer : public edm::EDAnalyzer {
   //TClonesArray *beamSpot;
   // static POINT beamSpot;
   //TClonesArray *primaryVtx;
-  TClonesArray *primaryVtxWithBS, *primaryVtxDAWithBS;
+  TClonesArray *primaryVtxWithBS, *primaryVtxDAWithBS, *primaryVtxDA;
   TClonesArray *recoJets, *recoMET, *corrMET, *recoMuons, *recoElectrons;
 
   Bool_t isNoiseHcal, isDeadEcalCluster;
@@ -205,15 +205,17 @@ void HiggsZZllnunuNtuplyzer::analyze(const edm::Event& iEvent, const edm::EventS
   iEvent.getByLabel("offlinePrimaryVerticesWithBS", primaryVtcsWithBS);
   Handle<reco::VertexCollection> primaryVtcsDAWithBS;
   iEvent.getByLabel("offlinePrimaryVerticesDAWithBS", primaryVtcsDAWithBS);
+  Handle<reco::VertexCollection> primaryVtcsDA;
+  iEvent.getByLabel("VerticesDA", primaryVtcsDA);
 
   
   Int_t  nPrimVtx = 0;
   //Double_t chi2OverNdof = 1000000;
-  /* Not using this collection for now  
-  for(VertexCollection::const_iterator vtx_iter = primaryVtcs->begin(); vtx_iter!= primaryVtcs->end(); ++vtx_iter)
+  // Not using this collection for now  
+  for(VertexCollection::const_iterator vtx_iter = primaryVtcsDA->begin(); vtx_iter!= primaryVtcsDA->end(); ++vtx_iter)
     {
       reco::Vertex myVtx = reco::Vertex(*vtx_iter);
-      TCPrimaryVtx* vtxCon = new ((*primaryVtx)[nPrimVtx]) TCPrimaryVtx;
+      TCPrimaryVtx* vtxCon = new ((*primaryVtxDA)[nPrimVtx]) TCPrimaryVtx;
       vtxCon->SetPosition(myVtx.x(), myVtx.y(), myVtx.z());
       vtxCon->SetNDof(myVtx.ndof());
       vtxCon->SetChi2(myVtx.chi2());
@@ -223,7 +225,7 @@ void HiggsZZllnunuNtuplyzer::analyze(const edm::Event& iEvent, const edm::EventS
       vtxCon->SetSumPt2Trks(sumPtSquared(myVtx));
       ++nPrimVtx;
     }// end of Primary Vertecies loop
-  */
+  
   
 //PV with Beam Spot constrain
   nPrimVtx=0;
@@ -611,6 +613,7 @@ void HiggsZZllnunuNtuplyzer::analyze(const edm::Event& iEvent, const edm::EventS
   //primaryVtx         -> Clear("C");
   primaryVtxWithBS   -> Clear("C");
   primaryVtxDAWithBS -> Clear("C");
+  primaryVtxDA       -> Clear("C");
   
   recoJets      -> Clear("C");
   recoMET       -> Clear("C");
@@ -626,8 +629,9 @@ void
 HiggsZZllnunuNtuplyzer::beginJob()
 {
   //primaryVtx       = new TClonesArray("TCPrimaryVtx");
-  primaryVtxWithBS = new TClonesArray("TCPrimaryVtx");
+  primaryVtxWithBS   = new TClonesArray("TCPrimaryVtx");
   primaryVtxDAWithBS = new TClonesArray("TCPrimaryVtx");
+  primaryVtxDA       = new TClonesArray("TCPrimaryVtx");
 
   recoJets         = new TClonesArray("TCJet");
   recoMET          = new TClonesArray("TCMET");
@@ -653,6 +657,7 @@ HiggsZZllnunuNtuplyzer::beginJob()
   //rTree->Branch("primaryVtx",&primaryVtx, 6400, 0);
   rTree->Branch("primaryVtxWithBS",&primaryVtxWithBS, 6400, 0);
   rTree->Branch("primaryVtxDAWithBS",&primaryVtxDAWithBS, 6400, 0);
+  rTree->Branch("primaryVtxDA",&primaryVtxDA, 6400, 0);
 
   rTree->Branch("recoJets",&recoJets, 6400, 0);
   rTree->Branch("recoElectrons",&recoElectrons, 6400, 0);

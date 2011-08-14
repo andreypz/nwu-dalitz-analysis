@@ -1,4 +1,4 @@
-#define nC 10
+#define nC 12
 #define F0 5
 #define F1 6
 #define F2 7
@@ -37,7 +37,7 @@ void makePlot(Int_t sel=1, TString hPath="00")
   if (sel==1)  TString imgpath("~/afs/public_html/higgs/overview/muon/");  
   if (sel==2)  TString imgpath("~/afs/public_html/higgs/overview/electron/");  
 
-  Bool_t doPhotons = 1, makeZjetsQt=0, doEBEE=0, doOverview=0;
+  Bool_t doPhotons = 0, makeZjetsQt=0, doEBEE=0, doOverview=1;
   Bool_t doSB = 0, doTest=1;
 
   TFile* fda_2011A_DoubleMu  = new TFile(Form("./%s/dir_1_2011A_May10_DoubleMu_/hhhh.root",histoPath.Data()));
@@ -111,10 +111,8 @@ void makePlot(Int_t sel=1, TString hPath="00")
       hs_jet_N[n]      = makeStack(list_bg, Form("jet_N_%i",n), intLumi);
       hs_jet_b_N[n]    = makeStack(list_bg, Form("jet_b_N_%i",n), intLumi); 
 
-      if(hPath=="v18") {
-	hs_jet_dRlep1[n]   = makeStack(list_bg, Form("jet_dRlep1_%i",n), intLumi);
-	hs_jet_dRlep2[n]   = makeStack(list_bg, Form("jet_dRlep2_%i",n), intLumi);
-      }
+      hs_jet_dRlep1[n]   = makeStack(list_bg, Form("jet_dRlep1_%i",n), intLumi);
+      hs_jet_dRlep2[n]   = makeStack(list_bg, Form("jet_dRlep2_%i",n), intLumi);
 
       hs_met_dPhiLeadJet1[n] = makeStack(list_bg, Form("met2_dPhiLeadJet1_%i",n), intLumi);
       hs_met_dPhiLeadJet2[n] = makeStack(list_bg, Form("met2_dPhiLeadJet2_%i",n), intLumi);
@@ -346,10 +344,11 @@ void makePlot(Int_t sel=1, TString hPath="00")
   if(doTest){
     TString testpath("~/afs/public_html/test/");  
     
-    //TH1* sig  =  fmc_ggH400 -> Get("mt2_7") -> Clone();
+    // TH1* sig  =  fmc_ggH400 -> Get("mt2_7") -> Clone();
     //TH1* data =  fData ->Get("mt2_7") -> Clone();
-    //   for(Int_t nn=4; nn<8; nn++)
-    //PrintYields(hs_mt[nn], (TH1*)fmc_ggH400 -> Get(Form("mt2_%i",nn))->Clone(), (TH1*)fData ->Get(Form("mt2_%i",nn))->Clone(), sel, nn, hPath);
+  
+    for(Int_t nn=3; nn<=10; nn++)
+      PrintYields(hs_mt[nn], (TH1*)fmc_ggH400 -> Get(Form("mt2_%i",nn))->Clone(), (TH1*)fData ->Get(Form("mt2_%i",nn))->Clone(), sel, nn, hPath);
 
     //for(Int_t nn=4; nn<8; nn++)
     //PrintYields(ph_mt[nn], (TH1*)fmc_ggH400 -> Get(Form("mt2_%i",nn))->Clone(), (TH1*)fData ->Get(Form("mt2_%i",nn))->Clone(), sel, nn, hPath);
@@ -832,7 +831,6 @@ void PrintYields(THStack *stack, TH1 *signal, TH1 *data, Int_t sel, Int_t num, T
       if(option=="tex")    oo<<hh->Integral(0,bins+1)<<"\t& ";
       if(option=="twiki")  oo<<hh->Integral(0,bins+1)<<"\t& ";
     }
-
 
   TH1* sig = (TH1*)signal->Clone();
   TH1* bkg = (TH1*)stack->Sum();

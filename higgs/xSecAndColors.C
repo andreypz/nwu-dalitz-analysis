@@ -26,7 +26,7 @@ Float_t getCS(string dataset="MC_ggH400")
  else if(dataset=="MC_ggH400_WW2t2nu") cs   = 0.1253*1./9;
  else if(dataset=="MC_ggH600_WW2t2nu") cs   = 0.02256*1./9;
 
- else if(dataset=="MC_ZZtoAny") cs   = 5.9;
+ else if(dataset=="MC_ZZtoAny") cs   = 4.37; //4.37 from Alexei's email. 5.3 LO? 5.9 is NLO
  else if(dataset=="MC_Wjets") cs     = 31314.0;
  else if(dataset=="MC_ZllG") cs      = 14.3;
  else if(dataset=="MC_tt2l2nu2b") cs = 16.5;
@@ -47,7 +47,7 @@ Float_t getCS(string dataset="MC_ggH400")
  else if(dataset=="MC_Zcc1") cs =  1.63;
  else if(dataset=="MC_Zcc2") cs =  0.627;
  else if(dataset=="MC_Zcc3") cs =  0.281;
-
+  
   return cs;
 }
 
