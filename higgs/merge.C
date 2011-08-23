@@ -4,7 +4,7 @@
 
 void MergeRootfile( TDirectory *target, TList *sourcelist , Int_t color1, Int_t color2) {
 
-    cout << "Merging into file: " << target->GetPath() << endl;
+  cout << "Merging into file: " << target->GetPath() << endl;
   TString path( (char*)strstr( target->GetPath(), ":" ) );
   path.Remove( 0, 2 );
 
@@ -81,7 +81,7 @@ void MergeRootfile( TDirectory *target, TList *sourcelist , Int_t color1, Int_t 
       // newdir is now the starting point of another round of merging
       // newdir still knows its depth within the target file via
       // GetPath(), so we can still figure out where we are in the recursion
-      MergeRootfile( newdir, sourcelist );
+      MergeRootfile( newdir, sourcelist , color1, color2);
 
     } else {
 

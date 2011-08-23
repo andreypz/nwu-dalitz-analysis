@@ -34,7 +34,7 @@ float TCJet::Et() const {
    return _p4.Et();
 }
 
-float TCJet::pt() const {
+float TCJet::Pt() const {
    return _p4.Pt();
 }
 
@@ -72,7 +72,7 @@ float TCJet::Et(unsigned int lvl) const {
    return TotalJetCorr(lvl) * _p4.Et();
 }
 
-float TCJet::pt(unsigned int lvl) const {
+float TCJet::Pt(unsigned int lvl) const {
    if (lvl > 7) {
       std::cout << "\nJet correction = " << lvl << std::endl;
       std::cout << "Correction level cannot exceed 7!\n";
@@ -126,14 +126,13 @@ int TCJet::VtxNTracks() const {
    return _vtxNTracks;
 }  
 
-
-unsigned int TCJet::VtxIndex() const {
-   return _vtxIndex;
+unsigned int TCJet::VtxSumPtIndex() const {
+   return _vtxSumPtIndex;
 }
 
-//TVector3 TCJet::AssocVtx() {
-//   return _assocPV;
-//}
+unsigned int TCJet::VtxCountIndex() const {
+   return _vtxCountIndex;
+}
 
 bool TCJet::JetCorrIsSet(unsigned int lvl) const {
    return _jetCorrIsSet[lvl];
@@ -158,34 +157,41 @@ float TCJet::UncertaintyJES() const {
 // b tagging discriminators
 //Track counting tag with N = 3: trackCountingHighPurBJetTags
 
-float TCJet::BDiscrTrkCountHiPure() const {
-   return _bDiscrTrkCountHiPure;
+float TCJet::BDiscrTCHP() const {
+   return _bDiscrTCHP;
 }
 
 //Track counting tag with N = 2: trackCountingHighEffBJetTags
 
-float TCJet::BDiscrTrkCountHiEff() const {
-   return _bDiscrTrkCountHiEff;
+float TCJet::BDiscrTCHE() const {
+   return _bDiscrTCHE;
 }
 
 //Simple secondary vertex b tag: simpleSecondaryVertexBJetTags
 
-float TCJet::BDiscrSecVtxSimple() const {
-   return _bDiscrSecVtxSimple;
+float TCJet::BDiscrSSVHE() const {
+   return _bDiscrSSVHE;
 }
 
-//Combined SV b tag using likelihood ratios: combinedSVBJetTags
-
-float TCJet::BDiscrSecVtxL() const {
-   return _bDiscrSecVtxL;
+float TCJet::BDiscrSSVHP() const {
+   return _bDiscrSSVHP;
 }
 
-//Combined SV b tag using MVA: combinedSVMVABJetTags
-
-float TCJet::BDiscrSecVtxMVA() const {
-   return _bDiscrSecVtxMVA;
+float TCJet::BDiscrJP() const {
+   return _bDiscrJP;
 }
 
+float TCJet::BDiscrJBP() const {
+   return _bDiscrJBP;
+}
+
+float TCJet::BDiscrCSV() const {
+   return _bDiscrCSV;
+}
+
+int TCJet::JetFlavor() const {
+    return _jetFlavor;
+}
 
 // "set" methods ---------------------------------------------
 
@@ -203,29 +209,29 @@ void TCJet::SetVtx(float vx, float vy, float vz) {
    _vtx = v3;
 }
 
-void TCJet::SetVtxSumPtFrac(float vtxSumPtFrac){
-   _vtxSumPtFrac = vtxSumPtFrac;
+void TCJet::SetVtxSumPtFrac(float f){
+   _vtxSumPtFrac = f;
 }  
 
-void TCJet::SetVtxSumPt(float vtxSumPt){
-   _vtxSumPt = vtxSumPt;
+void TCJet::SetVtxSumPt(float p){
+   _vtxSumPt = p;
 }  
 
-void TCJet::SetVtxTrackFrac(float vtxTrackFrac){
-   _vtxTrackFrac = vtxTrackFrac;
+void TCJet::SetVtxTrackFrac(float f){
+   _vtxTrackFrac = f;
 }  
 
-void TCJet::SetVtxNTracks(int vtxNTracks){
-   _vtxNTracks = vtxNTracks;
+void TCJet::SetVtxNTracks(int n){
+   _vtxNTracks = n;
 }  
 
-void TCJet::SetVtxIndex(unsigned int vtxIndex){
-   _vtxIndex = vtxIndex;
+void TCJet::SetVtxSumPtIndex(unsigned int i){
+   _vtxSumPtIndex = i;
 } 
-//void TCJet::SetAssocVtx(float vx, float vy, float vz) {
-//   TVector3 v3(vx, vy, vz);
-//   _assocPV = v3;
-//}
+
+void TCJet::SetVtxCountIndex(unsigned int i){
+   _vtxCountIndex = i;
+} 
 
 void TCJet::SetChHadFrac(float c) {
    _chHadFrac = c;
@@ -253,7 +259,7 @@ void TCJet::SetNumChPart(unsigned int n) {
 
 void TCJet::SetJetCorr(unsigned int lvl, float corr) {
 
-   if ( lvl <= 7) {
+   if (lvl <= 7) {
       _jetCorr[lvl] = corr;
       _jetCorrIsSet[lvl] = true;
 
@@ -268,22 +274,34 @@ void TCJet::SetUncertaintyJES(float u) {
 }
 // b tagging discriminators
 
-void TCJet::SetBDiscrTrkCountHiPure(float d) {
-   _bDiscrTrkCountHiPure = d;
+void TCJet::SetBDiscrTCHE(float d) {
+   _bDiscrTCHE = d;
 }
 
-void TCJet::SetBDiscrTrkCountHiEff(float d) {
-   _bDiscrTrkCountHiEff = d;
+void TCJet::SetBDiscrTCHP(float d) {
+   _bDiscrTCHP = d;
 }
 
-void TCJet::SetBDiscrSecVtxSimple(float d) {
-   _bDiscrSecVtxSimple = d;
+void TCJet::SetBDiscrSSVHE(float d) {
+   _bDiscrSSVHE = d;
 }
 
-void TCJet::SetBDiscrSecVtxL(float d) {
-   _bDiscrSecVtxL = d;
+void TCJet::SetBDiscrSSVHP(float d) {
+   _bDiscrSSVHP = d;
 }
 
-void TCJet::SetBDiscrSecVtxMVA(float d) {
-   _bDiscrSecVtxMVA = d;
+void TCJet::SetBDiscrJP(float d) {
+   _bDiscrJP = d;
+}
+
+void TCJet::SetBDiscrJBP(float d) {
+   _bDiscrJBP = d;
+}
+
+void TCJet::SetBDiscrCSV(float d) {
+   _bDiscrCSV = d;
+}
+
+void TCJet::SetJetFlavor(float f) {
+    _jetFlavor = f;
 }

@@ -25,15 +25,11 @@ float TCPrimaryVtx::Chi2() const {
    return _chi2;
 }
 
-//bool TCPrimaryVtx::isValid() const {
-//   return _isValid;
-//}
-
-bool TCPrimaryVtx::isFake() const {
+bool TCPrimaryVtx::IsFake() const {
    return _isFake;
 }
 
-int TCPrimaryVtx::nTracks() const {
+int TCPrimaryVtx::Ntracks() const {
    return _nTracks;
 }
 
@@ -54,10 +50,6 @@ void TCPrimaryVtx::SetNDof(float n) {
 void TCPrimaryVtx::SetChi2(float chi2) {
    _chi2 = chi2;
 }
-
-//void TCPrimaryVtx::SetIsValid(bool isV) {
-//   _isValid = isV;
-//}
 
 void TCPrimaryVtx::SetIsFake(bool isF) {
    _isFake = isF;

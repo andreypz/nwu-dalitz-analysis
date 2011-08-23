@@ -13,7 +13,7 @@
 //
 // Original Author:  Andrey Pozdnyakov
 //         Created:  Fri Mar 25 08:07:03 CDT 2011
-// $Id: HiggsZZllnunuNtuplyzer.cc,v 1.2 2011/06/16 14:21:01 andrey Exp $
+// $Id: HiggsZZllnunuNtuplyzer.cc,v 1.3 2011/08/14 18:52:42 andrey Exp $
 //
 
 #include <memory>
@@ -228,11 +228,14 @@ void HiggsZZllnunuNtuplyzer::analyze(const edm::Event& iEvent, const edm::EventS
   
   
 //PV with Beam Spot constrain
+
   nPrimVtx=0;
   for(VertexCollection::const_iterator vtx_iter = primaryVtcsWithBS->begin(); vtx_iter!= primaryVtcsWithBS->end(); ++vtx_iter)
     {
+
       reco::Vertex myVtx = reco::Vertex(*vtx_iter);
       TCPrimaryVtx* vtxCon = new ((*primaryVtxWithBS)[nPrimVtx]) TCPrimaryVtx;
+    /*
       vtxCon->SetPosition(myVtx.x(), myVtx.y(), myVtx.z());
       vtxCon->SetNDof(myVtx.ndof());
       vtxCon->SetChi2(myVtx.chi2());
@@ -240,6 +243,8 @@ void HiggsZZllnunuNtuplyzer::analyze(const edm::Event& iEvent, const edm::EventS
       vtxCon->SetNtracks(myVtx.nTracks(0)); //0 is the minWeight, default is 0.5
       if (myVtx.nTracks(0)!=myVtx.tracksSize()) LogWarning(" Vertex nTracks: ")<<"is something wrong here?";
       vtxCon->SetSumPt2Trks(sumPtSquared(myVtx));
+*/
+
       ++nPrimVtx;
     }// end of Primary Vertecies loop
 
@@ -250,6 +255,7 @@ void HiggsZZllnunuNtuplyzer::analyze(const edm::Event& iEvent, const edm::EventS
     {
       reco::Vertex myVtx = reco::Vertex(*vtx_iter);
       TCPrimaryVtx* vtxCon = new ((*primaryVtxDAWithBS)[nPrimVtx]) TCPrimaryVtx;
+      /*
       vtxCon->SetPosition(myVtx.x(), myVtx.y(), myVtx.z());
       vtxCon->SetNDof(myVtx.ndof());
       vtxCon->SetChi2(myVtx.chi2());
@@ -257,8 +263,11 @@ void HiggsZZllnunuNtuplyzer::analyze(const edm::Event& iEvent, const edm::EventS
       vtxCon->SetNtracks(myVtx.nTracks(0)); //0 is the minWeight, default is 0.5
       if (myVtx.nTracks(0)!=myVtx.tracksSize()) LogWarning(" Vertex nTracks: ")<<"is something wrong here?";
       vtxCon->SetSumPt2Trks(sumPtSquared(myVtx));
+      */
+
       ++nPrimVtx;
     }// end of Primary Vertecies loop
+
 
   //------ End of PV filling ----------------
 
@@ -332,7 +341,7 @@ void HiggsZZllnunuNtuplyzer::analyze(const edm::Event& iEvent, const edm::EventS
 	    }
 	  cc++;
 
-
+	  /*
 	  jetCon->SetBDiscrTrkCountHiEff(jet_b_1->second);
 	  jetCon->SetBDiscrTrkCountHiPure(jet_b_2->second);
 	  
@@ -354,7 +363,7 @@ void HiggsZZllnunuNtuplyzer::analyze(const edm::Event& iEvent, const edm::EventS
 	  jetCon->SetNeuEmFrac(myJet.neutralEmEnergyFraction());
 	  jetCon->SetNumConstit(myJet.chargedMultiplicity() + myJet.neutralMultiplicity());
 	  jetCon->SetNumChPart(myJet.chargedMultiplicity());	  
-
+	  */
 	  //jetmomenta.push_back(myJet.p4());
 
 	  pfCount++;  
@@ -382,6 +391,7 @@ void HiggsZZllnunuNtuplyzer::analyze(const edm::Event& iEvent, const edm::EventS
   //for (PFMETCollection::const_iterator iMET = MET->begin(); iMET != MET->end(); ++iMET) 
   //{}
   TCMET* metCon = new ((*recoMET)[metCount]) TCMET;
+  /*
   metCon->SetSumEt(iMET.sumEt());
   metCon->SetMet(iMET.et());
   metCon->SetPhi(iMET.phi());
@@ -393,6 +403,7 @@ void HiggsZZllnunuNtuplyzer::analyze(const edm::Event& iEvent, const edm::EventS
   metCon->SetHFHadronEtFraction(iMET.HFHadronEtFraction());
   metCon->SetHFEMEtFraction(iMET.HFEMEtFraction());
   //metCount++;
+  */
   
   //Type 1 corrected MET
   Handle<METCollection> pfMEThandle1;
@@ -403,9 +414,11 @@ void HiggsZZllnunuNtuplyzer::analyze(const edm::Event& iEvent, const edm::EventS
   //reco::PFMET iMET1 = pfMEThandle1->front();
   
   TCMET* metCon1 = new ((*corrMET)[0]) TCMET;
+  /*
   metCon1->SetSumEt(iMET1.sumEt());
   metCon1->SetMet(iMET1.et());
   metCon1->SetPhi(iMET1.phi());
+  */
   //metCon1->SetPhotonEtFraction(iMET1.photonEtFraction());
   //metCon1->SetElectronEtFraction(iMET1.electronEtFraction());
   //metCon1->SetMuonEtFraction(iMET1.muonEtFraction());
@@ -432,6 +445,7 @@ void HiggsZZllnunuNtuplyzer::analyze(const edm::Event& iEvent, const edm::EventS
     if (mu->isGlobalMuon() && mu->pt() > 9)
       {
 	TCMuon* muCon = new ((*recoMuons)[muCount]) TCMuon;
+	/*
 	muCon->Setp4(mu->px(), mu->py(), mu->pz(), mu->p());
 	muCon->SetVtx(mu->globalTrack()->vx(),mu->globalTrack()->vy(),mu->globalTrack()->vz());
 	muCon->SetCharge(mu->charge());
@@ -447,6 +461,7 @@ void HiggsZZllnunuNtuplyzer::analyze(const edm::Event& iEvent, const edm::EventS
 	muCon->SetEMIso(mu->isolationR03().emEt);
 	muCon->SetHADIso(mu->isolationR03().hadEt);
 	muCon->SetTRKIso(mu->isolationR03().sumPt);
+	*/
 	muCount++;
       }
   }
@@ -488,7 +503,8 @@ void HiggsZZllnunuNtuplyzer::analyze(const edm::Event& iEvent, const edm::EventS
       if ( (id==5 || id==7)  && electronRef->pt() > 9)
 	{
 	  TCElectron* elCon = new ((*recoElectrons)[elCount]) TCElectron;
-	  elCon->Setp4(electronRef->px(),electronRef->py(),electronRef->pz(),electronRef->p());
+	  /*
+	    elCon->Setp4(electronRef->px(),electronRef->py(),electronRef->pz(),electronRef->p());
 	  elCon->SetVtx(electronRef->gsfTrack()->vx(),electronRef->gsfTrack()->vy(),electronRef->gsfTrack()->vz());
 	  elCon->SetCharge(electronRef->charge());
 	  elCon->SetNormChi2(electronRef->gsfTrack()->normalizedChi2());
@@ -502,7 +518,7 @@ void HiggsZZllnunuNtuplyzer::analyze(const edm::Event& iEvent, const edm::EventS
 	  elCon->SetDPhiSuperCluster(electronRef->deltaPhiSuperClusterTrackAtVtx());
 	  elCon->SetDEtaSuperCluster(electronRef->deltaEtaSuperClusterTrackAtVtx());
 	  elCon->SetSigmaIetaIeta(electronRef->sigmaIetaIeta());
-
+	  */
 	  elCount++;
 	}
   }

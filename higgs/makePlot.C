@@ -1,4 +1,4 @@
-#define nC 12
+#define nC 20
 #define F0 5
 #define F1 6
 #define F2 7
@@ -24,85 +24,105 @@ void makePlot(Int_t sel=1, TString hPath="00")
   cout.precision(3); cout.setf(ios::fixed, ios::floatfield);
   TH1::SetDefaultSumw2(kTRUE);
 
-  TString histoPath = hPath.Data();
   //Float_t intLumi = 191.; //Note: in v11 and below the histograms are already normylized to 191, after that - to 1000
-  Float_t intLumi = 191. + 963.6 *0.94; //-6% of lumi 191 =0.94* 204
+  // Float_t intLumi = 191. + 963.6 *0.94; //-6% of lumi 191 =0.94* 204
+  Float_t intLumi = 204 + 888;
  
-  cout<<"histoPath:  "<<histoPath.Data()<<"  int Lumi: "<<intLumi<<endl;
 
   //Types of met: met - pfMet, met1 - type1 corrected, met2 - pfMet passed Noise filters, 
   //met3 - projMet, met4 - puProj corrected met (those two are passed Noise filters) 
-  TString metType("met3");   TString mtType("mt2"); 
+  TString metType("met2");   TString mtType("mt2"); 
+  TString ssel("none");
 
-  if (sel==1)  TString imgpath("~/afs/public_html/higgs/overview/muon/");  
-  if (sel==2)  TString imgpath("~/afs/public_html/higgs/overview/electron/");  
+  if (sel==1)  {ssel = "muon"; TString imgpath("~/afs/public_html/higgs/overview/muon/"); }
+  if (sel==2)  {ssel = "electron"; TString imgpath("~/afs/public_html/higgs/overview/electron/"); }
 
-  Bool_t doPhotons = 0, makeZjetsQt=0, doEBEE=0, doOverview=1;
+  TString histoPath =  hPath.Data();
+  cout<<"histoPath:  "<<histoPath.Data()<<"  int Lumi: "<<intLumi<<endl;
+
+  Bool_t doPhotons = 0, makeZjetsQt=0, doEBEE=0, doOverview=0;
   Bool_t doSB = 0, doTest=1;
 
-  TFile* fda_2011A_DoubleMu  = new TFile(Form("./%s/dir_1_2011A_May10_DoubleMu_/hhhh.root",histoPath.Data()));
-  TFile* fda_2011A_DoubleEl  = new TFile(Form("./%s/dir_2_2011A_May10_DoubleElectron_/hhhh.root",histoPath.Data()));
-  if (sel==1) TFile  *fData = (TFile*)fda_2011A_DoubleMu;
-  if (sel==2) TFile  *fData = (TFile*)fda_2011A_DoubleEl;
+  TFile* fda_2011A_DoubleMu_May10  = new TFile(Form("./%s/hhhh_DoubleMu_May10.root",histoPath.Data()));
+  TFile* fda_2011A_DoubleEl_May10  = new TFile(Form("./%s/hhhh_DoubleMu_May10.root",histoPath.Data()));
+
+  TFile* fda_2011A_DoubleMu_PromptV4  = new TFile(Form("./%s/hhhh_DoubleMu_PromptV4.root",histoPath.Data()));
+  TFile* fda_2011A_DoubleEl_PromptV4  = new TFile(Form("./%s/hhhh_DoubleMu_PromptV4.root",histoPath.Data()));
+
+  if (sel==1) TFile  *fData = (TFile*)fda_2011A_DoubleMu_PromptV4;
+  if (sel==2) TFile  *fData = (TFile*)fda_2011A_DoubleEl_PromptV4;
+  
   TFile* fda_Data  = new TFile(Form("./m_Data_%i.root", sel));  //Merged Data
   TFile  *fData = (TFile*)fda_Data;
  
-  TFile* fmc_ZllG      = new TFile(Form("./%s/dir_%i_MC_ZllG_/hhhh.root", histoPath.Data(), sel));
-  TFile* fmc_Wjets     = new TFile(Form("./%s/dir_%i_MC_Wjets_/hhhh.root",histoPath.Data(), sel));
-  TFile* fmc_ZZtoAny   = new TFile(Form("./%s/dir_%i_MC_ZZtoAny_/hhhh.root",histoPath.Data(), sel));
-  TFile* fmc_tt        = new TFile(Form("./%s/dir_%i_MC_tt2l2nu2b_/hhhh.root",histoPath.Data(), sel));
-  TFile* fmc_WW        = new TFile(Form("./%s/dir_%i_MC_WW_/hhhh.root",histoPath.Data(), sel));
-  TFile* fmc_WZ        = new TFile(Form("./%s/dir_%i_MC_WZ_/hhhh.root",histoPath.Data(), sel));
+  // TFile* fmc_ZllG      = new TFile(Form("./%s/hhhh_WZ.root", histoPath.Data() ));
+  // TFile* fmc_Wjets     = new TFile(Form("./%s/hhhh_Wjets.root",histoPath.Data() ));
 
-  TFile* fmc_ggH200    = new TFile(Form("./%s/dir_%i_MC_ggH200_/hhhh.root",histoPath.Data(), sel));
-  TFile* fmc_ggH400    = new TFile(Form("./%s/dir_%i_MC_ggH400_/hhhh.root",histoPath.Data(), sel));
-  TFile* fmc_ggH600    = new TFile(Form("./%s/dir_%i_MC_ggH600_/hhhh.root",histoPath.Data(), sel));
-  //TFile* fmc_  = new TFile(Form("./%s/dir_%i__/hhhh.root",histoPath.Data(), sel));
+  TFile* fmc_ZZ        = new TFile(Form("./%s/hhhh_ZZ.root",histoPath.Data() ));
+  //TFile* fmc_tt        = new TFile(Form("./%s/hhhh_ttbar_1.root",histoPath.Data() ));
+  TFile* fmc_WW        = new TFile(Form("./%s/hhhh_WW.root",histoPath.Data() ));
+  TFile* fmc_WZ        = new TFile(Form("./%s/hhhh_WZ.root",histoPath.Data() ));
+  //TFile* fmc_Top       = new TFile(Form("./%s/hhhh_tW.root",histoPath.Data() ));
 
-  TFile* fmc_Zjets  = new TFile(Form("./m_Zjets_%i.root", sel));
-  TFile* fmc_Top    = new TFile(Form("./m_Top_%i.root", sel));
-  //TFile* fmc_ZQQ    = new TFile(Form("./m_ZQQ_%i.root", sel));
+  TFile* fmc_ggH200    = new TFile(Form("./%s/hhhh_ggHZZ200.root",histoPath.Data() ));
+  //TFile* fmc_ggH250    = new TFile(Form("./%s/hhhh_ggHZZ250.root",histoPath.Data() ));
+  TFile* fmc_ggH300    = new TFile(Form("./%s/hhhh_ggHZZ300.root",histoPath.Data() ));
+  //TFile* fmc_ggH350    = new TFile(Form("./%s/hhhh_ggHZZ350.root",histoPath.Data() ));
+  TFile* fmc_ggH400    = new TFile(Form("./%s/hhhh_ggHZZ400.root",histoPath.Data() ));
 
+
+
+  //TFile* fmc_ggH600    = new TFile(Form("./%s/hhhh_SignalM600_HToZZ.root",histoPath.Data() ));
+  //TFile* fmc_  = new TFile(Form("./%s/dir_%i__/hhhh.root",histoPath.Data() ));
+
+  TFile* fmc_tt   = new TFile(Form("./m_ttbar_%i.root",sel ));
+  TFile* fmc_Zjets  = new TFile(Form("./m_Zjets_%i.root",sel ));
+  TFile* fmc_Top    = new TFile(Form("./m_Top_%i.root",sel ));
+ 
   //List of background samples to Stack
   list_bg = new TList();
   list_bg->Add(fmc_Top);
   list_bg->Add(fmc_tt);
   list_bg->Add(fmc_WZ);
   list_bg->Add(fmc_WW);
-  list_bg->Add(fmc_ZZtoAny);
+  list_bg->Add(fmc_ZZ);
   list_bg->Add(fmc_Zjets);
-  list_bg->Add(fmc_Wjets);
+  //list_bg->Add(fmc_Wjets);
 
   list_bg2 = new TList();
   list_bg2->Add(fmc_Top);
   list_bg2->Add(fmc_tt);
   list_bg2->Add(fmc_WZ);
   list_bg2->Add(fmc_WW);
-  list_bg2->Add(fmc_ZZtoAny);
-  list_bg2->Add(fmc_Wjets);
+  list_bg2->Add(fmc_ZZ);
+  //list_bg2->Add(fmc_Wjets);
 
   list_overlay = new TList();
   list_overlay->Add(fData); 
   list_overlay->Add(fmc_ggH200);
-  list_overlay->Add(fmc_ggH400);
-  list_overlay->Add(fmc_ZllG);
+  list_overlay->Add(fmc_ggH300);
+  //  list_overlay->Add(fmc_ggH400);
+
+  list_signal = new TList();
+  //list_signal->Add(fmc_ggH200);
+  list_signal->Add(fmc_ggH300);
+  list_signal->Add(fmc_ggH400);
+
+  PrintYields(list_bg, list_signal, fData, sel, histoPath, "twiki");
+
 
   THStack *hs_met_et[nC], *hs_met2_et[nC], *hs_met_over_qt[nC], *hs_met2_over_qt[nC], *hs_di_qt[nC], *hs_met_et_ovQt[nC], *hs_mt[nC], *hs_mtZ[nC];
   THStack *hs_jet_N[nC], *hs_jet_dRlep1[nC], *hs_jet_dRlep2[nC], *hs_jet_b_N[nC], hs_jet_b_pt[nC];
   THStack *hs_di_mass[nC], *hs_di_mass_EB[nC], *hs_di_mass_EE[nC], *hs_di_mass_EX[nC];
   THStack *hs_met_dPhiLeadJet1[nC], *hs_met_dPhiLeadJet2[nC], *hs_met_dPhiClosJet1[nC], *hs_met_dPhiClosJet2[nC];
+  THStack *hs_vtx_nPV_raw[nC], *hs_vtx_nPV_weight[nC];
 
   for(Int_t n = 0; n<nC; n++)
     {
       hs_met_et[n]       = makeStack(list_bg, Form("%s_et_%i", metType.Data(), n), intLumi);
-      hs_met2_et[n]      = makeStack(list_bg, Form("met2_et_%i", n), intLumi);
       hs_mt[n]           = makeStack(list_bg, Form("%s_%i", mtType.Data(), n), intLumi);
-      hs_mtZ[n]          = makeStack(list_bg, Form("mtZ_%i", n), intLumi);
 
-      hs_met_over_qt[n]  = makeStack(list_bg, Form("%s_over_qt_%i", metType.Data(), n), intLumi);
-      hs_met2_over_qt[n] = makeStack(list_bg, Form("met2_over_qt_%i", n), intLumi);
-      hs_met_et_ovQt[n]  = makeStack(list_bg, Form("%s_et_ovQt_%i", metType.Data(), n), intLumi);
-
+      //hs_met2_et[n]     = makeStack(list_bg, Form("met2_et_%i", n), intLumi);
       hs_di_qt[n]      = makeStack(list_bg, Form("di_qt_%i",n), intLumi);
       hs_di_mass[n]    = makeStack(list_bg, Form("di_mass_%i",n), intLumi);
       hs_di_mass_EB[n] = makeStack(list_bg, Form("di_mass_EB_%i",n), intLumi);
@@ -111,6 +131,15 @@ void makePlot(Int_t sel=1, TString hPath="00")
       hs_jet_N[n]      = makeStack(list_bg, Form("jet_N_%i",n), intLumi);
       hs_jet_b_N[n]    = makeStack(list_bg, Form("jet_b_N_%i",n), intLumi); 
 
+      hs_vtx_nPV_raw[n]    = makeStack(list_bg, Form("vtx_nPV_raw_%i",n), intLumi); 
+      hs_vtx_nPV_weight[n] = makeStack(list_bg, Form("vtx_nPV_weight_%i",n), intLumi); 
+
+      /*      hs_mtZ[n]          = makeStack(list_bg, Form("mtZ_%i", n), intLumi);
+
+      hs_met_over_qt[n]  = makeStack(list_bg, Form("%s_over_qt_%i", metType.Data(), n), intLumi);
+      hs_met2_over_qt[n] = makeStack(list_bg, Form("met2_over_qt_%i", n), intLumi);
+      hs_met_et_ovQt[n]  = makeStack(list_bg, Form("%s_et_ovQt_%i", metType.Data(), n), intLumi);
+
       hs_jet_dRlep1[n]   = makeStack(list_bg, Form("jet_dRlep1_%i",n), intLumi);
       hs_jet_dRlep2[n]   = makeStack(list_bg, Form("jet_dRlep2_%i",n), intLumi);
 
@@ -118,8 +147,10 @@ void makePlot(Int_t sel=1, TString hPath="00")
       hs_met_dPhiLeadJet2[n] = makeStack(list_bg, Form("met2_dPhiLeadJet2_%i",n), intLumi);
       hs_met_dPhiClosJet1[n] = makeStack(list_bg, Form("met2_dPhiClosJet1_%i",n), intLumi);
       hs_met_dPhiClosJet2[n] = makeStack(list_bg, Form("met2_dPhiClosJet2_%i",n), intLumi);
+      */
     }
-
+  
+  /*
   THStack *ph_met_et[nC], *ph_met2_et[nC], *ph_met_over_qt[nC], *ph_met2_over_qt[nC], *ph_di_qt[nC], *ph_met_et_ovQt[nC], *ph_mt[nC], *ph_mtZ[nC];
   THStack *ph_jet_N[nC], *ph_jet_dRlep1[nC], *ph_jet_dRlep2[nC], *ph_jet_b_N[nC], ph_jet_b_pt[nC];
   THStack *ph_di_mass[nC], *ph_di_mass_EB[nC], *ph_di_mass_EE[nC], *ph_di_mass_EX[nC];
@@ -144,64 +175,59 @@ void makePlot(Int_t sel=1, TString hPath="00")
       ph_jet_N[n]      = makeStack(list_bg2, Form("jet_N_%i",n), intLumi);
       ph_jet_b_N[n]    = makeStack(list_bg2, Form("jet_b_N_%i",n), intLumi); 
 
-      if(hPath=="v18") {
-	ph_jet_dRlep1[n]   = makeStack(list_bg2, Form("jet_dRlep1_%i",n), intLumi);
-	ph_jet_dRlep2[n]   = makeStack(list_bg2, Form("jet_dRlep2_%i",n), intLumi);
-      }
+      ph_jet_dRlep1[n]   = makeStack(list_bg2, Form("jet_dRlep1_%i",n), intLumi);
+      ph_jet_dRlep2[n]   = makeStack(list_bg2, Form("jet_dRlep2_%i",n), intLumi);
+
 
       ph_met_dPhiLeadJet1[n] = makeStack(list_bg2, Form("met2_dPhiLeadJet1_%i",n), intLumi);
       ph_met_dPhiLeadJet2[n] = makeStack(list_bg2, Form("met2_dPhiLeadJet2_%i",n), intLumi);
       ph_met_dPhiClosJet1[n] = makeStack(list_bg2, Form("met2_dPhiClosJet1_%i",n), intLumi);
       ph_met_dPhiClosJet2[n] = makeStack(list_bg2, Form("met2_dPhiClosJet2_%i",n), intLumi);
     }
+  */  
   
-  
-  TIter next(hs_jet_N[F0] -> GetHists());
+
   TH1 * forLegend[21];
-  Int_t aa = 0;
-  TObject *obj;
-  while ((obj = next()))
+  list_legend = new TList();
+  list_legend -> AddAll(list_bg);
+  list_legend -> AddAll(list_overlay);
+  //  TIter next(list_legend);
+
+  TFile *ff[10]; 
+  Int_t size = list_legend->GetSize();
+  TH1 *hh[10]; 
+  if(size>10) {cout<<"To many plots to overlay"<<endl; return 0;}
+  for(Int_t n=0; n<size; n++)
     {
-      forLegend[aa] = (TH1F*)obj;
-      //cout<<obj->GetName()<<endl;
-      aa++;
+      ff[n] = (TFile*)list_legend->At(n);
+      hh[n] = (TH1*) ff[n]->Get("Andrey/met2_et_6")->Clone();
+      //cout<<n<<"   "<<ff[n] -> GetName()<<endl;
+      forLegend[n] = (TH1F*)hh[n];
     }
-
-  fda_2011A_DoubleMu->cd();
-  forLegend[20] = (TH1F*)met3_et_0;
-  fmc_ZllG -> cd();
-  forLegend[19] = (TH1F*)met3_et_0;
-  fmc_ggH400 -> cd();
-  forLegend[18] = (TH1F*)met3_et_0;
-  fmc_ggH200 -> cd();
-  met3_et_0 -> SetLineColor(kBlack); ///need a fix
-  forLegend[17] = (TH1F*)met3_et_0;
-  fmc_tt -> cd();
-  forLegend[16] = (TH1F*)met3_et_0;
-
  
   leg01 = new TLegend(0.53,0.7,0.95,0.95);
   leg01 -> SetNColumns(2);
   leg01 -> SetTextSize(0.04);
   
-  leg01->AddEntry(forLegend[20], "Data","epl");
+  leg01->AddEntry(forLegend[6], "Data","epl");
   leg01->AddEntry(forLegend[5],  "Z + jets","f");
   leg01->AddEntry(forLegend[4],  "ZZ","f");
-  leg01->AddEntry(forLegend[6],  "W + jets","f");
-  leg01->AddEntry(forLegend[3],  "WW","f");
-  leg01->AddEntry(forLegend[0],  "t#rightarrow l#nub","f");
-  leg01->AddEntry(forLegend[2],  "WZ","f");
-  leg01->AddEntry(forLegend[16], "tt#rightarrow 2l2#nu2b","f");  leg01->AddEntry(forLegend[19], "Z#gamma#rightarrow ll#gamma","f");
-  leg01->AddEntry(forLegend[17], "10xH200","f");
-  leg01->AddEntry(forLegend[17]," ","");  //empty slot
-  leg01->AddEntry(forLegend[18], "10xH400","f");
+  //leg01->AddEntry(forLegend[5],  "W + jets","f");
+  leg01->AddEntry(forLegend[2],  "WW","f");
+  leg01->AddEntry(forLegend[0],  "tW","f");
+  leg01->AddEntry(forLegend[3],  "WZ","f");
+  leg01->AddEntry(forLegend[1], "ttbar","f");  
+  leg01->AddEntry(forLegend[7], "10xH200","f");
+  leg01->AddEntry(forLegend[8], "10xH300","f");
+  //  leg01->AddEntry(forLegend[9], "10xH400","f");
+  
   leg01->SetFillColor(kWhite);
-   
+  
   hs_met_et[F0] -> Draw("hist");
   c1 -> SaveAs(imgpath+"ov01.png");
   TCanvas *c2 = new TCanvas("c2","example",600,700);
-
-
+  
+  
 
   if(doSB){
     cout<<"doing S/B"<<endl;
@@ -259,7 +285,7 @@ void makePlot(Int_t sel=1, TString hPath="00")
     
     //Float_t usedLumi = 191;    
     Float_t usedLumi = (191 + 963.6);    
-
+    
     if(sel==1){
       AddPhoton(photon2_weighted_pt, ph_di_qt[4], intLumi, usedLumi);
       AddPhoton(photon2_weighted_met_0, ph_met2_et[5], intLumi, usedLumi);
@@ -280,31 +306,13 @@ void makePlot(Int_t sel=1, TString hPath="00")
       AddPhoton(photon2_weighted_metOverQt_4, ph_met2_over_qt[6], intLumi, usedLumi);
       
     }
-    if(sel==2){
-      AddPhoton(photon1_weighted_pt, ph_di_qt[4], intLumi, usedLumi);
-      AddPhoton(photon1_weighted_met_0, ph_met2_et[5], intLumi, usedLumi);
-      AddPhoton(photon1_weighted_met_4, ph_met2_et[6], intLumi, usedLumi);
-      
-      AddPhoton(photon1_weighted_mt_0, ph_mt[5], intLumi, usedLumi);
-      AddPhoton(photon1_weighted_mt_4, ph_mt[6], intLumi, usedLumi);
-      AddPhoton(photon1_weighted_mt_6, ph_mt[7], intLumi, usedLumi);
-      
-      AddPhoton(photon1_weighted_nJets_0, ph_jet_N[5], intLumi, usedLumi);
-      AddPhoton(photon1_weighted_nJets_4, ph_jet_N[6], intLumi, usedLumi);
-      AddPhoton(photon1_weighted_nJets_6, ph_jet_N[7], intLumi, usedLumi);
-      
-      AddPhoton(photon1_weighted_metOverQt_0, ph_met_over_qt[5], intLumi, usedLumi);
-      AddPhoton(photon1_weighted_metOverQt_4, ph_met_over_qt[6], intLumi, usedLumi);
 
-      AddPhoton(photon1_weighted_metOverQt_0, ph_met2_over_qt[5], intLumi, usedLumi);
-      AddPhoton(photon1_weighted_metOverQt_4, ph_met2_over_qt[6], intLumi, usedLumi);
-    }
-    
-
+    /*
     drawMuliPlot("nJets", 1, 0.01, 1000, 0,2, ph_jet_N[7], c2, leg01, list_overlay, intLumi);
     c2 -> SaveAs(imgpath+"ph09.png");
     drawMuliPlot("nJets", 1, 0.01, 1000, 0,2, hs_jet_N[7], c2, leg01, list_overlay, intLumi);
     c2 -> SaveAs(imgpath+"ph10.png");
+    */
 
     /*    
     drawMuliPlot("q_{T}", 1, 0.01, 100000, 0,2, ph_di_qt[4], c2, leg01, list_overlay, intLumi);
@@ -340,28 +348,42 @@ void makePlot(Int_t sel=1, TString hPath="00")
     */   
     
   }
-
+  
   if(doTest){
     TString testpath("~/afs/public_html/test/");  
     
+    drawMuliPlot("pfMET", 1, 0.001, 1000000, 0,5, hs_met_et[6], c2, leg01, list_overlay, intLumi); 
+    c2 -> SaveAs(testpath+"p01.png");
+    drawMuliPlot("MT", 1, 0.001, 1000000, 0,5, hs_mt[6], c2, leg01, list_overlay, intLumi); 
+    c2 -> SaveAs(testpath+"p02.png");
+
+    cout<<"dbg"<<endl;
+
+    drawMuliPlot("MT 250", 0, 0.001, 10, 0,5, hs_mt[7], c2, leg01, list_overlay, intLumi); 
+    c2 -> SaveAs(testpath+"p03.png");
+    drawMuliPlot("MT 300", 0, 0.001, 10, 0,5, hs_mt[8], c2, leg01, list_overlay, intLumi); 
+    c2 -> SaveAs(testpath+"p04.png");
+       
+    drawMuliPlot("N b-jets", 0, 0.0, 30, 0.,5, hs_jet_b_N[9], c2, leg01, list_overlay, intLumi);
+    c2 -> SaveAs(testpath+"p05.png");
+    drawMuliPlot("N jets", 0, 0.0, 20, 0.,5, hs_jet_N[9], c2, leg01, list_overlay, intLumi);
+    c2 -> SaveAs(testpath+"p06.png");
+
+
+    //PrintYields(ph_mt[nn], (TH1*)fmc_ggH400 -> Get(Form("mt2_%i",nn))->Clone(), (TH1*)fData ->Get(Form("mt2_%i",nn))->Clone(), sel, nn, hPath);
+
     // TH1* sig  =  fmc_ggH400 -> Get("mt2_7") -> Clone();
     //TH1* data =  fData ->Get("mt2_7") -> Clone();
   
-    for(Int_t nn=3; nn<=10; nn++)
-      PrintYields(hs_mt[nn], (TH1*)fmc_ggH400 -> Get(Form("mt2_%i",nn))->Clone(), (TH1*)fData ->Get(Form("mt2_%i",nn))->Clone(), sel, nn, hPath);
+    // for(Int_t nn=3; nn<=10; nn++)
+    //  PrintYields(hs_mt[nn], (TH1*)fmc_ggH400 -> Get(Form("mt2_%i",nn))->Clone(), (TH1*)fData ->Get(Form("mt2_%i",nn))->Clone(), sel, nn, hPath);
 
     //for(Int_t nn=4; nn<8; nn++)
-    //PrintYields(ph_mt[nn], (TH1*)fmc_ggH400 -> Get(Form("mt2_%i",nn))->Clone(), (TH1*)fData ->Get(Form("mt2_%i",nn))->Clone(), sel, nn, hPath);
     
-    drawMuliPlot("projMET", 1, 0.001, 1000000, 0,5, hs_met_et[6], c2, leg01, list_overlay, intLumi); 
-    c2 -> SaveAs(testpath+"p01.png");
-    drawMuliPlot("projMET/q_{T}", 1, 0.001, 1000000, 0,3, hs_met_over_qt[5], c2, leg01, list_overlay, intLumi);
-    c2 -> SaveAs(testpath+"p02.png");
-    drawMuliPlot("MT", 1, 0.001, 1000000, 0,3, hs_mt[6], c2, leg01, list_overlay, intLumi);
-    c2 -> SaveAs(testpath+"p03.png");
-    drawMuliPlot("MT", 1, 0.001, 1000000, 0,3, hs_mt[7], c2, leg01, list_overlay, intLumi);
-    c2 -> SaveAs(testpath+"p04.png");
+    //drawMuliPlot("projMET/q_{T}", 1, 0.001, 1000000, 0,3, hs_met_over_qt[5], c2, leg01, list_overlay, intLumi);
+    //c2 -> SaveAs(testpath+"p02.png");
 
+    /*
 
     drawMuliPlot("#Delta#phi(MET, closest jet), p_{T}>20, |#eta|<5?", 1, 0.001, 1000000, 0,5, hs_met_dPhiClosJet1[6], c2, leg01, list_overlay, intLumi);
     c2 -> SaveAs(testpath+"p05.png");
@@ -437,6 +459,7 @@ void makePlot(Int_t sel=1, TString hPath="00")
 
     leg02-> Draw();
     c1 -> SaveAs(testpath+"p11.png");
+    */
 
     /*
     TF1 * f1 = new TF1 ("f1","[0] + [1]*x +[2]*x*x",0,400);
@@ -453,6 +476,7 @@ void makePlot(Int_t sel=1, TString hPath="00")
     //    drawMuliPlot("N jets", 1, 0.001, 1000000, 0,5, hs_jet_N[F0], c2, leg01, list_overlay, intLumi);
     // c2 -> SaveAs(testpath+"p09.png");
     
+    /*
     if(hPath=="v18"){
       drawMuliPlot("#DeltaR(jet, lepton1)", 1, 0.001, 1000000, 0,5, hs_jet_dRlep1[4], c2, leg01, list_overlay, intLumi);
       c2 -> SaveAs(testpath+"p09.png");
@@ -471,11 +495,12 @@ void makePlot(Int_t sel=1, TString hPath="00")
     drawMuliPlot("MT", 1, 0.001, 1000000, 0,3, ph_mt[7], c2, leg01, list_overlay, intLumi);
     c2 -> SaveAs(testpath+"p16.png");
 
-    drawMuliPlot("MT", 1, 0.001, 1000000, 0,3, hs_mt[6], c2, leg01, list_overlay, intLumi);
+    drawMuliPlot("MT", 0, 0.001, 10, 0,3, hs_mt[6], c2, leg01, list_overlay, intLumi);
     c2 -> SaveAs(testpath+"p17.png");
-    drawMuliPlot("MT", 1, 0.001, 1000000, 0,3, ph_mt[6], c2, leg01, list_overlay, intLumi);
+    drawMuliPlot("MT", 0, 0.001, 10, 0,3, ph_mt[6], c2, leg01, list_overlay, intLumi);
     c2 -> SaveAs(testpath+"p18.png");
 
+    */
   }
   
 
@@ -549,7 +574,8 @@ void makePlot(Int_t sel=1, TString hPath="00")
     c2 -> SaveAs(imgpath+"ov03.png");
     drawMuliPlot("projMET/q_{T}", 1, 0.001, 1000000, 0,5, hs_met_over_qt[F1], c2, leg01, list_overlay, intLumi);
     c2 -> SaveAs(imgpath+"ov04.png");
-    
+  
+
     drawMuliPlot("projMET", 1, 0.001, 1000000, 0,3, hs_met_et[F2], c2, leg01, list_overlay, intLumi);
     c2 -> SaveAs(imgpath+"ov05.png");
     drawMuliPlot("projMET/q_{T}", 1, 0.001, 1000000, 0,3, hs_met_over_qt[F2], c2, leg01, list_overlay, intLumi);
@@ -565,7 +591,7 @@ void makePlot(Int_t sel=1, TString hPath="00")
     drawMuliPlot("MT", 1, 0.001, 1000000, 0,5, hs_mt[F1], c2, leg01, list_overlay, intLumi);
     c2 -> SaveAs(imgpath+"ov10.png");
     
-    /*
+  /*    
       drawMuliPlot("M(ll)", 1, 0.001, 10000000, 0,2, hs_di_mass[F2], c2, leg01, list_overlay, intLumi);
       c2 -> SaveAs(imgpath+"ov11.png");
       drawMuliPlot("MT", 1, 0.001, 1000000, 0,2, hs_mt[F2], c2, leg01, list_overlay, intLumi);
@@ -629,7 +655,7 @@ void makePlot(Int_t sel=1, TString hPath="00")
       c2 -> SaveAs(imgpath+"ov31.png");
       drawMuliPlot("MT (using Z mass)", 1, 0.001, 1000000, 0,5, hs_mtZ[F1], c2, leg01, list_overlay, intLumi);
       c2 -> SaveAs(imgpath+"ov32.png");
-    */
+  */
   
   }
 
@@ -654,10 +680,11 @@ void makePlot(Int_t sel=1, TString hPath="00")
 THStack* makeStack(TList *sourcelist, TString name, Float_t lumi)
 {
   //cout<<"making stack!"<<endl;
-  THStack * hs = new THStack(Form("hs_11_%i",1),"Stacked MT");
+  THStack * hs = new THStack(Form("hs_11_%i",1),"Stacked hist");
+  //sourcelist ->Print();
 
   TFile *first_source = (TFile*)sourcelist->First();
-  first_source->cd();
+  first_source->cd("Andrey");
   TDirectory *current_sourcedir = gDirectory;
 
   TIter nextkey( current_sourcedir->GetListOfKeys() );
@@ -665,7 +692,7 @@ THStack* makeStack(TList *sourcelist, TString name, Float_t lumi)
   while ( (key = (TKey*)nextkey())) 
     {
       if (oldkey && !strcmp(oldkey->GetName(),key->GetName())) continue;
-      first_source->cd();
+      //first_source->cd();
  
       TClass *cl = gROOT->GetClass(key->GetClassName());
       if (!cl->InheritsFrom("TH1")) continue;
@@ -676,14 +703,15 @@ THStack* makeStack(TList *sourcelist, TString name, Float_t lumi)
 	    //hs -> Add((TH1*)key->ReadObj());
 	    TH1 *hh1 = (TH1*)key->ReadObj()->Clone();
 	    hh1 -> Scale(lumi/1000);
-	    hs -> Add(hh1);
+	    hs  -> Add(hh1);
+	    //hh1 -> Print();
 	    //hs -> Add((TH1*)key->ReadObj()->Clone());
 	    //hs -> Add( ((TH1*)key->ReadObj()->Clone())->Scale(lumi/1000));
 	  }
       TFile *nextsource = (TFile*)sourcelist->After( first_source );
       while ( nextsource )
 	{
-	  nextsource->cd();
+	  nextsource->cd("Andrey");
 	  TKey *key2 = (TKey*)gDirectory->GetListOfKeys()->FindObject(key->GetName());
 	  
 	  if (key2) 
@@ -714,27 +742,25 @@ THStack* makeStack(TList *sourcelist, TString name, Float_t lumi)
 void drawMuliPlot(TString xtitle, Int_t isLog, Float_t y1min, Float_t y1max, Float_t y2min, Float_t y2max, THStack *hs, TCanvas *cc, TLegend *leg, TList *list, Float_t lumi)
 {
   //Find the samm objects as in hs stack
-  TString name = Form("%s", hs->GetHists()->First()->GetName());
+  TString name = Form("Andrey/%s", hs->GetHists()->First()->GetName());
   //data -> ls();
   cout<<"drawMultiPlot:: " <<name<<endl;
 
   TFile *ff[5];   Int_t size = list->GetSize();
+  TH1 *hh[5]; 
   if(size>5) {cout<<"To many plots to overlay"<<endl; return 0;}
   for(Int_t n=0; n<size; n++)
     {
       ff[n] = (TFile*)list->At(n);
-      //cout<<n<<"   "<<ff[n] -> GetName()<<endl;
+      hh[n] = (TH1*)ff[n]->Get( name.Data() )->Clone();
+      //cout<<n<<" file  "<<ff[n] -> GetName()<<"   histoname: "<<hh[n]->GetName()<<endl;
     }
-  //The order corresponds to the order of list:
-  TH1 *h_data = (TH1*)ff[0]->Get(  name.Data()  )->Clone();
-  TH1 *h_H200 = (TH1*)ff[1]->Get(  name.Data()  )->Clone();
-  TH1 *h_H400 = (TH1*)ff[2]->Get(  name.Data()  )->Clone();
-  TH1 *h_ZllG = (TH1*)ff[3]->Get(  name.Data()  )->Clone();
 
-  // cout<<name<<endl;
-  h_H200 ->Scale(lumi/1000.);
-  h_H400 ->Scale(lumi/1000.);
-  h_ZllG ->Scale(lumi/1000.);
+
+  for(Int_t n=1; n<size; n++)
+    hh[n] ->Scale(lumi/1000./10);
+
+  TH1 *h_data = hh[0]->Clone();
 
   //h_data -> Print();
 
@@ -750,10 +776,9 @@ void drawMuliPlot(TString xtitle, Int_t isLog, Float_t y1min, Float_t y1max, Flo
   hs -> SetTitle(";; Events");
   hs -> SetMinimum(y1min);
   hs -> SetMaximum(y1max);
-  h_data  -> Draw("same e1pl");
-  h_H400 -> Draw("same hist"); 
-  h_H200 -> Draw("same hist");
-  h_ZllG   -> Draw("same hist");
+  h_data  -> Draw("same e1pl"); //DATA
+ for(Int_t n=1; n<size; n++)
+    hh[n] -> Draw("same hist");
   leg -> Draw();
 
   cc ->cd();
@@ -807,15 +832,15 @@ TH1 *THStack::Sum()
 
 
 //void *THStack::PrintYields(Int_t sel, Int_t ver, string option="tex")
-void PrintYields(THStack *stack, TH1 *signal, TH1 *data, Int_t sel, Int_t num, TString ver, string option="tex")
+void PrintYields(THStack *stack[], TH1 *signal, TH1 *data, Int_t sel, Int_t num, TString ver, string option="tex")
 {
   Int_t bins = 0;
   ofstream oo;
-  if (sel==1)  oo.open(Form("yields_%s_muons_%i.txt",ver.Data(), num), ofstream::out);
-  if (sel==2)  oo.open(Form("yields_%s_electrons_%i.txt",ver.Data(), num), ofstream::out);
+  if (sel==1)  oo.open(Form("yields_%s_muons.txt",ver.Data()), ofstream::out);
+  if (sel==2)  oo.open(Form("yields_%s_electrons.txt",ver.Data()), ofstream::out);
   oo.precision(2); oo.setf(ios::fixed, ios::floatfield);
 
-  TList * mylist = (TList*)stack->GetHists();
+  TList * mylist = (TList*)stack[0]->GetHists();
   TIter next(mylist);
   TH1 *hh  = (TH1*) mylist -> First() ->Clone();
   bins = hh -> GetNbinsX();
@@ -858,9 +883,92 @@ void PrintYields(THStack *stack, TH1 *signal, TH1 *data, Int_t sel, Int_t num, T
     oo<<"\t"<<SB<<"\t&"<<SrootB<<"\t \\\\ \n \\hline"<<endl;
   }
 
+  oo<<"end of printing yields"<<endl;
+  oo.close();
+}
+
+
+
+void PrintYields(TList *bgList, TList *sigList, TFile *dataFile, Int_t sel, TString path, string option="tex")
+{
+  Int_t bins = 0;
+  ofstream oo;
+  oo.open(Form("%s/yields_%s.txt",path.Data(), option.c_str()), ofstream::out);
+  oo.precision(2); oo.setf(ios::fixed, ios::floatfield);
+
+  TString beginLine("");
+  TString endLine("");
+  TString separator("");
+  TString title("");
+  if(option=="tex"){
+    title = " sel & WW & WZ   \\\\ \\hline";
+    beginLine = "   ";
+    endLine   = "\\\\ \\hline";
+    separator = "\t &";
+  }
+  if(option=="twiki"){
+    title = "| sel | *top*  | *ttbar*  | *WZ*  | *WW* | *ZZ*  | *Zjets*  | *Data*  | *Total bg*  | *higgs* | *S/B* |";
+    beginLine = "|   ";
+    endLine   = "\t |";
+    separator = "\t |";
+  }
+
+  oo<<title<<endl;
+
+  for(Int_t j = 6; j<12; j++)
+    {
+      Int_t size = bgList->GetSize();
+      TFile *ff[10];    TH1 *hh[10];
+      if(size>10) {cout<<"To many plots to overlay"<<endl; return 0;}
+
+      oo<<beginLine;
+      oo<<j<<separator;
+
+      Float_t total_bg = 0, total_bgError;
+
+      for(Int_t n=0; n<size; n++)
+	{
+	  ff[n] = (TFile*)bgList->At(n);
+	  hh[n] = (TH1*)ff[n]->Get( Form("Andrey/mt2_%i",j) )->Clone();
+	  cout<<n<<" file  "<<ff[n] -> GetName()<<"   histoname: "<<hh[n]->GetName()<<endl;
+	
+	  bins = hh[n] -> GetNbinsX();
+	  oo<<hh[n]->Integral(0,bins+1)<<separator;
+	  total_bg += hh[n]->Integral(0,bins+1);
+	  total_bgError += 0;
+	}      
+
+
+      TH1* data = (TH1*)dataFile->Get(  Form("Andrey/mt2_%i",j) )->Clone();
+      TFile* sigFile  = (TFile*)sigList->First();//->Get(  Form("Andrey/mt2_%i",j) )->Clone();
+      TH1* sig  = (TH1*)sigFile->Get(Form("Andrey/mt2_%i",j))->Clone();
+      
+      Int_t sig_nBins = sig->GetNbinsX();
+      Int_t bkg_nBins = hh[0]->GetNbinsX();
+      Int_t nBins=0;
+      if (sig_nBins!=bkg_nBins) cout<<" IN yields \n WARNING:  different number of bis"<<endl;
+      else nBins = sig_nBins;
+      
+      Float_t iSig = sig -> Integral(0,nBins+1);  //Count overflows
+      Float_t iBkg = total_bg;
+      Float_t SB   = 0.1*iSig/iBkg;        //Higgs signal is 10*real in the histograms
+      //Float_t SrootB  = 0.1*iSig/sqrt(iBkg);
+      //Float_t SrootSB = 0.1*iSig/sqrt(iBkg + 0.1*iSig);
+      
+      oo.precision(0);
+      oo<<data->Integral(0,nBins+1);
+      oo.precision(2);
+      oo<<separator<<iBkg<<separator<<0.1*iSig<<separator;
+      oo.precision(3);
+      oo<<SB<<endLine<<endl;  
+      
+  }
+
+
 
   oo<<"end of printing yields"<<endl;
   oo.close();
+  
 }
 
 

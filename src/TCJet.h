@@ -21,9 +21,10 @@ private:
     float _vtxSumPt;
     float _vtxTrackFrac;
     float _vtxNTracks;
-    unsigned int _vtxIndex;
+    unsigned int _vtxSumPtIndex;
+    unsigned int _vtxCountIndex;
 
-    float _jesUncertainty;
+	float _jesUncertainty;
     float _jetCorr[8];
     bool  _jetCorrIsSet[8];
 
@@ -36,16 +37,14 @@ private:
     unsigned int _numChPart;
 
     // b tagging discriminators
-    //Track counting tag with N = 3: trackCountingHighPurBJetTags
-    float _bDiscrTrkCountHiPure;
-    //Track counting tag with N = 2: trackCountingHighEffBJetTags
-    float _bDiscrTrkCountHiEff;
-    //Simple secondary vertex b tag: simpleSecondaryVertexBJetTags
-    float _bDiscrSecVtxSimple;
-    //Combined SV b tag using likelihood ratios: combinedSVBJetTags
-    float _bDiscrSecVtxL;
-    //Combined SV b tag using MVA: combinedSVMVABJetTags
-    float _bDiscrSecVtxMVA;
+    float _bDiscrTCHP;
+    float _bDiscrTCHE;
+    float _bDiscrSSVHE;
+    float _bDiscrSSVHP;
+    float _bDiscrJP;
+    float _bDiscrJBP;
+    float _bDiscrCSV;
+    int   _jetFlavor;
 
 public:
     TCJet();
@@ -56,7 +55,7 @@ public:
     TLorentzVector P4() const;
     TVector2 P2() const;
     float Et() const;
-    float pt() const;
+    float Pt() const;
 
     // accessors for corrected jets (the argument is the level of correction)
     // Note: in this implementation all lower-level corrections will be
@@ -65,7 +64,7 @@ public:
     TLorentzVector P4(unsigned int lvl) const;
     TVector2 P2(unsigned int lvl) const;
     float Et(unsigned int lvl) const;
-    float pt(unsigned int lvl) const;
+    float Pt(unsigned int lvl) const;
 
     float TotalJetCorr(unsigned int lvl) const;
 
@@ -82,28 +81,33 @@ public:
     float VtxSumPt() const;
     float VtxTrackFrac() const;
     int   VtxNTracks() const;
-    unsigned int VtxIndex() const;
+    unsigned int VtxSumPtIndex() const;
+    unsigned int VtxCountIndex() const;
     //    TVector3 AssocVtx() const;
     bool  JetCorrIsSet(unsigned int lvl) const;
     float JetCorr(unsigned int lvl) const;
-	 float UncertaintyJES() const;
+	float UncertaintyJES() const;
 
     // b tagging discriminators
-    float BDiscrTrkCountHiPure() const;
-    float BDiscrTrkCountHiEff() const;
-    float BDiscrSecVtxSimple() const;
-    float BDiscrSecVtxL() const;
-    float BDiscrSecVtxMVA() const;
+    float BDiscrTCHP() const;
+    float BDiscrTCHE() const;
+    float BDiscrSSVHE() const;
+    float BDiscrSSVHP() const;
+    float BDiscrJP() const;
+    float BDiscrJBP() const;
+    float BDiscrCSV() const;
+    int   JetFlavor() const;
 
     // "set" methods ---------
     void SetP4(TLorentzVector p4);
     void SetP4(float px, float py, float pz, float e);
     void SetVtx(float vx, float vy, float vz);    
-    void SetVtxSumPtFrac(float vtxSumPtFrac);
-    void SetVtxSumPt(float vtxSumPt);
-    void SetVtxTrackFrac(float vtxTrackFrac);
-    void SetVtxNTracks(int vtxNTracks);
-    void SetVtxIndex(unsigned int vtxIndex);
+    void SetVtxSumPtFrac(float f);
+    void SetVtxSumPt(float p);
+    void SetVtxTrackFrac(float f);
+    void SetVtxNTracks(int n);
+    void SetVtxSumPtIndex(unsigned int i);
+    void SetVtxCountIndex(unsigned int i);
 
     void SetChHadFrac(float c);
     void SetNeuHadFrac(float n);
@@ -112,16 +116,19 @@ public:
     void SetNumConstit(unsigned int n);
     void SetNumChPart(unsigned int n);
     void SetJetCorr(unsigned int lvl, float corr);
-    void SetUncertaintyJES(float u);
+	void SetUncertaintyJES(float u);
 
     // b tagging discriminators
     // see the corresponding class members for description
-    void SetBDiscrTrkCountHiPure(float d);
-    void SetBDiscrTrkCountHiEff(float d);
-    void SetBDiscrSecVtxSimple(float d);
-    void SetBDiscrSecVtxL(float d);
-    void SetBDiscrSecVtxMVA(float d);
+    void SetBDiscrTCHE(float d);
+    void SetBDiscrTCHP(float d);
+    void SetBDiscrSSVHE(float d);
+    void SetBDiscrSSVHP(float d);
+    void SetBDiscrJP(float d);
+    void SetBDiscrJBP(float d);
+    void SetBDiscrCSV(float d);
 
+    void SetJetFlavor(float f);
 
     ClassDef(TCJet, 1);
 
