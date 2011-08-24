@@ -26,7 +26,8 @@ void makePlot(Int_t sel=1, TString hPath="00")
 
   //Float_t intLumi = 191.; //Note: in v11 and below the histograms are already normylized to 191, after that - to 1000
   // Float_t intLumi = 191. + 963.6 *0.94; //-6% of lumi 191 =0.94* 204
-  Float_t intLumi = 204 + 888;
+  Float_t intLumi = 928.2;
+  //Float_t intLumi = 201.2 + 928.2;
  
 
   //Types of met: met - pfMet, met1 - type1 corrected, met2 - pfMet passed Noise filters, 
@@ -53,7 +54,7 @@ void makePlot(Int_t sel=1, TString hPath="00")
   if (sel==2) TFile  *fData = (TFile*)fda_2011A_DoubleEl_PromptV4;
   
   TFile* fda_Data  = new TFile(Form("./m_Data_%i.root", sel));  //Merged Data
-  TFile  *fData = (TFile*)fda_Data;
+  //TFile  *fData = (TFile*)fda_Data;
  
   // TFile* fmc_ZllG      = new TFile(Form("./%s/hhhh_WZ.root", histoPath.Data() ));
   // TFile* fmc_Wjets     = new TFile(Form("./%s/hhhh_Wjets.root",histoPath.Data() ));

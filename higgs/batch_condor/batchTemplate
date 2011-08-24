@@ -6,8 +6,8 @@ Should_Transfer_Files = YES
 WhenToTransferOutput = ON_EXIT
 Transfer_Input_Files =
 Output = reports/report_$(Cluster)_$(Process).stdout
-Error = reports/report_$(Cluster)_$(Process).stderr
-Log = reports/report_$(Cluster)_$(Process).log
+Error  = reports/report_$(Cluster)_$(Process).stderr
+Log    = reports/report_$(Cluster)_$(Process).log
 notify_user = andreypz@FNAL.GOV
 Queue 1
 

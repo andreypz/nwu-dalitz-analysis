@@ -263,9 +263,10 @@ void higgsAnalyzer::Begin(TTree * /*tree*/)
 bool higgsAnalyzer::Process(Long64_t entry)
 {  
     GetEntry(entry);
-
     CountEvents(0);
     ++nEventsWeighted[0];
+    MET = 0;
+    FillHistosNoise(0, 1);
 
     if (nEvents[0] % (int)1e5 == 0) cout<<nEvents[13]<<" events passed of "<<nEvents[0]<<" checked!"<<endl;
 
@@ -301,6 +302,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
 
     CountEvents(1);
     ++nEventsWeighted[1];
+    FillHistosNoise(1, 1);
 
     ////////////////////////////
     //Check the event vertices//
@@ -522,21 +524,9 @@ bool higgsAnalyzer::Process(Long64_t entry)
 	      && thisJet->VtxSumPtFrac() > 0. 
 	      && thisJet->VtxSumPtIndex() == 1
 	      ) {
-	    h1_TESTS[6]->Fill(thisJet->VtxSumPtFrac());
 	    jetP4.push_back(thisJet->P4(JC_LVL));
 	    sumJetP4 += thisJet->P4();
 	  }
-	  
-	  if (
-	      thisJet->VtxNTracks() > 0
-	      && thisJet->VtxSumPtFrac() > 0. 
-	      && thisJet->VtxSumPtIndex() == 1
-	      ) {
-	    jetP4.push_back(thisJet->P4(JC_LVL));
-	    sumJetP4 += thisJet->P4();
-	  }
-
-	  
 	  ++jetCount;
 	}
       } else {
@@ -652,6 +642,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
 
     CountEvents(3);
     nEventsWeighted[3] += evtWeight;
+    FillHistosNoise(3, evtWeight);
 
     ////////////
     // Z mass //
@@ -660,6 +651,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
     if (ZP4.M() < zMassCut[0] || ZP4.M() > zMassCut[1]) return kTRUE;  
     CountEvents(4);
     nEventsWeighted[4] += evtWeight;
+    FillHistosNoise(4, evtWeight);
 
     /////////////////////
     // 3rd lepton veto //
@@ -671,6 +663,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
     if ((muons.size() > 0 || electrons.size() > 0) && (selection == "eGamma" || selection == "muGamma" || selection == "gamma")) return kTRUE;
     CountEvents(5);
     nEventsWeighted[5] += evtWeight;
+    FillHistosNoise(5, evtWeight);
 
     //////////
     // Z Qt //
@@ -713,6 +706,8 @@ bool higgsAnalyzer::Process(Long64_t entry)
 	CountEvents(6);
 	nEventsWeighted[6] += evtWeight;
 	FillHistos(6, evtWeight);
+	FillHistosNoise(6, evtWeight);
+    
 	//Yields for all Higgs masses//
 	PostSelectionYieldCounter(nEventsWeighted[6], metP4, ZP4, deltaPhiJetMET, evtWeight); 
     }
@@ -728,6 +723,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
 	CountEvents(7);
 	nEventsWeighted[7] += evtWeight;
        	FillHistos(7, evtWeight);
+	FillHistosNoise(7, evtWeight);
 	h1_bJetMultPreVeto->Fill(bJetP4.size(), evtWeight);
       }
 
@@ -738,6 +734,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
 	CountEvents(8);
 	nEventsWeighted[8] += evtWeight;
 	FillHistos(8, evtWeight);
+	FillHistosNoise(8, evtWeight);
       }
 
 
@@ -747,6 +744,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
 	CountEvents(9);
 	nEventsWeighted[9] += evtWeight;
        	FillHistos(9, evtWeight);
+	FillHistosNoise(9, evtWeight);
       }
 
     if (passBveto && deltaPhiJetMET > dPhiMinCut[2] &&  MET>metMinCut[2]  && (MT > mtMinCut[2] && MT < mtMaxCut[2]))
@@ -755,6 +753,8 @@ bool higgsAnalyzer::Process(Long64_t entry)
 	CountEvents(10);
 	nEventsWeighted[10] += evtWeight;
        	FillHistos(10, evtWeight);
+	FillHistosNoise(10, evtWeight);
+
       }
     if (passBveto && deltaPhiJetMET > dPhiMinCut[3] &&  MET>metMinCut[3]  && (MT > mtMinCut[3] && MT < mtMaxCut[3]))
       {
@@ -762,6 +762,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
 	CountEvents(11);
 	nEventsWeighted[11] += evtWeight;
        	FillHistos(11, evtWeight);
+	FillHistosNoise(11, evtWeight);
       }
     if (passBveto && deltaPhiJetMET > dPhiMinCut[4] &&  MET>metMinCut[4]  && (MT > mtMinCut[4] && MT < mtMaxCut[4]))
       {
@@ -769,6 +770,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
 	CountEvents(12);
 	nEventsWeighted[12] += evtWeight;
        	FillHistos(12, evtWeight);
+    	FillHistosNoise(12, evtWeight);
       }
 
 
@@ -897,15 +899,10 @@ void higgsAnalyzer::Terminate()
     //Normalization to 1fb and coloring the histograms
     string sel, sample;
     Float_t CS, nEv;  Int_t lColor, fColor;
-    
-    // Bool_t isElectronSample = kFALSE, isMuonSample = kTRUE;
 
     ifstream params;
-    params.open("./params.txt");  //This is a file where parameters are stored
+    params.open("./params.txt");  //This is the file where parameters are stored
     params>>sel;
-    //if (sel == "muon") { ncout<<"Mu selection!"<<endl; isMuonSample = kTRUE;  isElectronSample = kFALSE;}
-    //if (sel == "electron") { ncout<<"El selection!"<<endl; isMuonSample = kFALSE; isElectronSample = kTRUE;}
-    //ncout<<endl;
     params>>sample;  params>>nEv;  params>>CS;  params>>lColor;  params>>fColor;
     cout<<"sample: "<<sample<<"  cs: "<<CS<<"  events: "<<nEv<<" colors: "<<lColor<<"  "<<fColor<<endl;
     //ncout<<endl;
