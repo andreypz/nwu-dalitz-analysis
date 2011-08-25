@@ -8,10 +8,10 @@ using namespace std;
 //Specify parameters here. //
 /////////////////////////////
 
-string  selection      = "";
+string  selection      = "muon";
 int     JC_LVL         = 3;
-int     trigger[]      = {0};
-string  suffix         = "WZ";
+int     trigger[]      = {4,8};
+string  suffix         = "DATA";
 
 
 UInt_t verboseLvl = 1;
@@ -152,19 +152,19 @@ void higgsAnalyzer::Begin(TTree * /*tree*/)
 	vtx_ndof_2[n]     = new  TH1F(Form("vtx_ndof_2_%i",n), "Ndof of second PV", 0,0,100);
 
       }
-    ffout.open("./events_printout_WZ_final.txt",ofstream::out);
-    ncout.open("./counts_for_tex_WZ.txt",ofstream::out);
+    ffout.open("./events_printout_DATA_final.txt",ofstream::out);
+    ncout.open("./counts_for_tex_DATA.txt",ofstream::out);
 
     ffout.precision(4); ffout.setf(ios::fixed, ios::floatfield);
     for(Int_t i=6; i<nC; i++)
       {
-	fout[i].open(Form("./events_printout_WZ_%i.txt",i),ofstream::out);
+	fout[i].open(Form("./events_printout_DATA_%i.txt",i),ofstream::out);
 	fout[i].precision(3); fout[i].setf(ios::fixed, ios::floatfield);
 	fout[i]<<
 	  "******\t*********\t*****\t********\t************\t*********\t********\t*****\t*\n"<<
 	  "* Run \t* Event  \t* LS \t*  m(ll)\t*   MT(llvv)\t* PFMET  \t* PT(ll)\t* rho\t*\n"<<
 	  "******\t*********\t*****\t********\t************\t*********\t********\t*****\t*\n";
-	nout[i].open(Form("./events_filtered_WZ_%i.txt",i),ofstream::out);
+	nout[i].open(Form("./events_filtered_DATA_%i.txt",i),ofstream::out);
 	nout[i].precision(3); fout[i].setf(ios::fixed, ios::floatfield);
 	nout[i]<<
 	  "******\t*********\t*********\t******************************************\n"<<
@@ -173,76 +173,76 @@ void higgsAnalyzer::Begin(TTree * /*tree*/)
       }
 
     histoFile->cd("Misc");
-    h1_ptHat                        = new TH1D("h1_ptHat_WZ", "ptHat", 37, 15.0, 200.0);
-    h1_triggerStatus                = new TH1D("h1_triggerStatus_WZ", "Triggers", 32, 0.5, 32.5);
-    h1_goodRuns                     = new TH1D("h1_goodRuns_WZ", "Number of events passing selection cuts by run;Run number; nEvents", 9200, 160000., 175000.);
-    h1_acceptanceByCut              = new TH1D("h1_acceptanceByCut_WZ", "Weighted number of events passing cuts by cut; cut; N_{evts}", 16, -0.5, 15.5);
-    h1_acceptanceByCutRaw           = new TH1D("h1_acceptanceByCutRaw_WZ", "Raw number of events passing cuts; cut; N_{evts}", 16, -0.5, 15.5);
-    h1_pvMult                       = new TH1D("h1_pvMult_WZ", "Multiplicity of PVs", 25, 0.5, 25.5);
-    h1_simVertexMult                = new TH1D("h1_simVertexMult_WZ", "Multiplicity of simulated vertices", 25, -0.5, 24.5);
-    h1_eventWeight                  = new TH1D("h1_eventWeight_WZ", "event weight", 100, 0., 2.);
-    h2_nEventsByHMass               = new TH2D("h2_nEventsByHMass_WZ", "", 10, 0., 10., 10, 0., 10.);
+    h1_ptHat                        = new TH1D("h1_ptHat_DATA", "ptHat", 37, 15.0, 200.0);
+    h1_triggerStatus                = new TH1D("h1_triggerStatus_DATA", "Triggers", 32, 0.5, 32.5);
+    h1_goodRuns                     = new TH1D("h1_goodRuns_DATA", "Number of events passing selection cuts by run;Run number; nEvents", 9200, 160000., 175000.);
+    h1_acceptanceByCut              = new TH1D("h1_acceptanceByCut_DATA", "Weighted number of events passing cuts by cut; cut; N_{evts}", 16, -0.5, 15.5);
+    h1_acceptanceByCutRaw           = new TH1D("h1_acceptanceByCutRaw_DATA", "Raw number of events passing cuts; cut; N_{evts}", 16, -0.5, 15.5);
+    h1_pvMult                       = new TH1D("h1_pvMult_DATA", "Multiplicity of PVs", 25, 0.5, 25.5);
+    h1_simVertexMult                = new TH1D("h1_simVertexMult_DATA", "Multiplicity of simulated vertices", 25, -0.5, 24.5);
+    h1_eventWeight                  = new TH1D("h1_eventWeight_DATA", "event weight", 100, 0., 2.);
+    h2_nEventsByHMass               = new TH2D("h2_nEventsByHMass_DATA", "", 10, 0., 10., 10, 0., 10.);
     p1_nVtcs                        = new TProfile("p1_nVtcs", "Average number of vertices per run; Run Number; nVertices", 8700.0, 135000.0, 144200.0, 0.0, 6.0);
 
     histoFile->cd("Lepton");
-    h1_leadLeptonPt                 = new TH1D("h1_leadLeptonPt_WZ", "p_{T} leading lepton;p_{T};N_{evts}", 48, 10., 250.);
-    h1_leadLeptonEta                = new TH1D("h1_leadLeptonEta_WZ", "#eta leading lepton;#eta;N_{evts}", 25, -2.5, 2.5);
-    h1_leadLeptonPhi                = new TH1D("h1_leadLeptonPhi_WZ", "#phi leading lepton;#phi;N_{evts}", 18, -TMath::Pi(), TMath::Pi());
-    h1_trailingLeptonPt             = new TH1D("h1_trailingLeptonPt_WZ", "p_{T} trailing lepton;p_{T};N_{evts}", 38, 10., 200.);
-    h1_trailingLeptonEta            = new TH1D("h1_trailingLeptonEta_WZ", "#eta trailing lepton;#eta;N_{evts}", 25, -2.5, 2.5);
-    h1_trailingLeptonPhi            = new TH1D("h1_trailingLeptonPhi_WZ", "#phi trailing lepton;#phi;N_{evts}", 18, -TMath::Pi(), TMath::Pi());
+    h1_leadLeptonPt                 = new TH1D("h1_leadLeptonPt_DATA", "p_{T} leading lepton;p_{T};N_{evts}", 48, 10., 250.);
+    h1_leadLeptonEta                = new TH1D("h1_leadLeptonEta_DATA", "#eta leading lepton;#eta;N_{evts}", 25, -2.5, 2.5);
+    h1_leadLeptonPhi                = new TH1D("h1_leadLeptonPhi_DATA", "#phi leading lepton;#phi;N_{evts}", 18, -TMath::Pi(), TMath::Pi());
+    h1_trailingLeptonPt             = new TH1D("h1_trailingLeptonPt_DATA", "p_{T} trailing lepton;p_{T};N_{evts}", 38, 10., 200.);
+    h1_trailingLeptonEta            = new TH1D("h1_trailingLeptonEta_DATA", "#eta trailing lepton;#eta;N_{evts}", 25, -2.5, 2.5);
+    h1_trailingLeptonPhi            = new TH1D("h1_trailingLeptonPhi_DATA", "#phi trailing lepton;#phi;N_{evts}", 18, -TMath::Pi(), TMath::Pi());
 
-    h1_diLeptonTransMass            = new TH1D("h1_diLeptonTransMass_WZ", "M_{T,ll};M_{T,ll};N_{evts}", 100, 55., 255.);
-    h1_diLeptonMass                 = new TH1D("h1_diLeptonMass_WZ", "M_{ll}; M_{ll};N_{evts}", 40, 70., 110.);
-    h1_diLeptonQt                   = new TH1D("h1_diLeptonQt_WZ", "q_{T};Q_{T};N_{evts}", 50, 0., 500.);
-    h1_diLeptonPtRatio              = new TH1D("h1_diLeptonPtRatio_WZ", "dilepton p_{T} ratio;p_{T,2}/p_{T,1};N_{evts}", 25, 0., 1.);
-    h1_diLeptonDeltaEta             = new TH1D("h1_diLeptonDeltaEta_WZ", "dilepton #Delta#eta;#Delta#eta;N_{evts}", 25, 0., 2.5);
-    h1_diLeptonDeltaPhi             = new TH1D("h1_diLeptonDeltaPhi_WZ", "dilepton #Delta#phi;#Delta#phi;N_{evts}", 18, 0., TMath::Pi());
-    h1_diLeptonDeltaR               = new TH1D("h1_diLeptonDeltaR_WZ", "dilepton #Delta R;#Delta R;N_{evts}", 18, 0., 4.5);  	
+    h1_diLeptonTransMass            = new TH1D("h1_diLeptonTransMass_DATA", "M_{T,ll};M_{T,ll};N_{evts}", 100, 55., 255.);
+    h1_diLeptonMass                 = new TH1D("h1_diLeptonMass_DATA", "M_{ll}; M_{ll};N_{evts}", 40, 70., 110.);
+    h1_diLeptonQt                   = new TH1D("h1_diLeptonQt_DATA", "q_{T};Q_{T};N_{evts}", 50, 0., 500.);
+    h1_diLeptonPtRatio              = new TH1D("h1_diLeptonPtRatio_DATA", "dilepton p_{T} ratio;p_{T,2}/p_{T,1};N_{evts}", 25, 0., 1.);
+    h1_diLeptonDeltaEta             = new TH1D("h1_diLeptonDeltaEta_DATA", "dilepton #Delta#eta;#Delta#eta;N_{evts}", 25, 0., 2.5);
+    h1_diLeptonDeltaPhi             = new TH1D("h1_diLeptonDeltaPhi_DATA", "dilepton #Delta#phi;#Delta#phi;N_{evts}", 18, 0., TMath::Pi());
+    h1_diLeptonDeltaR               = new TH1D("h1_diLeptonDeltaR_DATA", "dilepton #Delta R;#Delta R;N_{evts}", 18, 0., 4.5);  	
 
     histoFile->cd("Jet");
-    h1_leadJetPt                  = new TH1D("h1_leadJetPt_WZ", "p_{T} of lead jet;p_{T};N_{evts}", 26, 10., 250.);
-    h1_leadJetEta                 = new TH1D("h1_leadJetEta_WZ", "#eta of lead jet;#eta;N_{evts}", 25, -2.5, 2.5);
-    h1_leadJetPhi                 = new TH1D("h1_leadJetPhi_WZ", "#phi of lead jet;#phi;N_{evts}", 18, -TMath::Pi(), TMath::Pi());
-    h1_tailJetPt                  = new TH1D("h1_tailJetPt_WZ", "p_{T} of tail jet;p_{T};N_{evts}", 26, 10., 250.);
-    h1_tailJetEta                 = new TH1D("h1_tailJetEta_WZ", "#eta of tail jet;#eta;N_{evts}", 25, -2.5, 2.5);
-    h1_tailJetPhi                 = new TH1D("h1_tailJetPhi_WZ", "#phi of tail jet;#phi;N_{evts}", 18, -TMath::Pi(), TMath::Pi());
-    h1_nearestJetEta              = new TH1D("h1_nearestJetEta_WZ", "#eta of jet_{nearest};#eta;N_{evts}", 25, -2.5, 2.5);
-    h1_jetMult                    = new TH1D("h1_jetMult_WZ", "Multiplicity of jets;N_{jets};N_{evts}", 11, -0.5, 10.5);
-    h1_leadBJetPt                 = new TH1D("h1_leadBJetPt_WZ", "p_{T} of lead b-jet;p_{T};N_{evts}", 36, 10., 190.);
-    h1_leadBJetEta                = new TH1D("h1_leadBJetEta_WZ", "#eta of lead b-jet;#eta;N_{evts}", 25, -2.5, 2.5);
-    h1_leadBJetPhi                = new TH1D("h1_leadBJetPhi_WZ", "#phi of lead b-jet;#phi;N_{evts}", 18, -TMath::Pi(), TMath::Pi());
-    h1_bJetMultPostVeto           = new TH1D("h1_bJetMultPostVeto_WZ", "Multiplicity of b-jets (post-veto);N_{jets};N_{evts}", 11, -0.5, 10.5);
-    h1_bJetMultPreVeto            = new TH1D("h1_bJetMultPreVeto_WZ", "Multiplicity of b-jets (pre-veto);N_{jets};N_{evts}", 11, -0.5, 10.5);
+    h1_leadJetPt                  = new TH1D("h1_leadJetPt_DATA", "p_{T} of lead jet;p_{T};N_{evts}", 26, 10., 250.);
+    h1_leadJetEta                 = new TH1D("h1_leadJetEta_DATA", "#eta of lead jet;#eta;N_{evts}", 25, -2.5, 2.5);
+    h1_leadJetPhi                 = new TH1D("h1_leadJetPhi_DATA", "#phi of lead jet;#phi;N_{evts}", 18, -TMath::Pi(), TMath::Pi());
+    h1_tailJetPt                  = new TH1D("h1_tailJetPt_DATA", "p_{T} of tail jet;p_{T};N_{evts}", 26, 10., 250.);
+    h1_tailJetEta                 = new TH1D("h1_tailJetEta_DATA", "#eta of tail jet;#eta;N_{evts}", 25, -2.5, 2.5);
+    h1_tailJetPhi                 = new TH1D("h1_tailJetPhi_DATA", "#phi of tail jet;#phi;N_{evts}", 18, -TMath::Pi(), TMath::Pi());
+    h1_nearestJetEta              = new TH1D("h1_nearestJetEta_DATA", "#eta of jet_{nearest};#eta;N_{evts}", 25, -2.5, 2.5);
+    h1_jetMult                    = new TH1D("h1_jetMult_DATA", "Multiplicity of jets;N_{jets};N_{evts}", 11, -0.5, 10.5);
+    h1_leadBJetPt                 = new TH1D("h1_leadBJetPt_DATA", "p_{T} of lead b-jet;p_{T};N_{evts}", 36, 10., 190.);
+    h1_leadBJetEta                = new TH1D("h1_leadBJetEta_DATA", "#eta of lead b-jet;#eta;N_{evts}", 25, -2.5, 2.5);
+    h1_leadBJetPhi                = new TH1D("h1_leadBJetPhi_DATA", "#phi of lead b-jet;#phi;N_{evts}", 18, -TMath::Pi(), TMath::Pi());
+    h1_bJetMultPostVeto           = new TH1D("h1_bJetMultPostVeto_DATA", "Multiplicity of b-jets (post-veto);N_{jets};N_{evts}", 11, -0.5, 10.5);
+    h1_bJetMultPreVeto            = new TH1D("h1_bJetMultPreVeto_DATA", "Multiplicity of b-jets (pre-veto);N_{jets};N_{evts}", 11, -0.5, 10.5);
 
     histoFile->cd("MET");
-    h1_Met                        = new TH1D("h1_Met_WZ", "MET;MET;N_{evts}", 50, 0., 250.);
-    h1_MetPhi                     = new TH1D("h1_MetPhi_WZ", "#phi MET;#phi;N_{evts}", 18, -TMath::Pi(), TMath::Pi());
-    h1_MetSumEt                   = new TH1D("h1_MetSumEt_WZ", "#Sigma E_{T} of MET;#Sigma E_{T};N_{evts}", 75, 0., 1500.);
-    h1_ReducedMET                 = new TH1D("h1_ReducedMET_WZ", " Reduced MET;ReducedMET;N_{evts}", 50, 0., 250.);
-    h1_ReducedMETTransverse       = new TH1D("h1_ReducedMETTransverse_WZ", " Reduced MET (Transverse);TransRedMET;N_{evts}", 40, -50., 50.);
-    h1_ReducedMETLongitudinal     = new TH1D("h1_ReducedMETLongitudinal_WZ", " Reduced MET (longitudinal);TransRedMET;N_{evts}", 40, -50., 50.);
-    h1_MetNearestJetDeltaPhi      = new TH1D("h1_MetNearestJetDeltaPhi_WZ", "#Delta#phi(j_{nearest}, MET);#Delta#phi;N_{evts}", 18, 0., TMath::Pi());
-    h1_ProjectedMet               = new TH1D("h1_ProjectedMet_WZ", "ProjMET; ProjMET; N_{evts}", 50, 0., 250.);
+    h1_Met                        = new TH1D("h1_Met_DATA", "MET;MET;N_{evts}", 50, 0., 250.);
+    h1_MetPhi                     = new TH1D("h1_MetPhi_DATA", "#phi MET;#phi;N_{evts}", 18, -TMath::Pi(), TMath::Pi());
+    h1_MetSumEt                   = new TH1D("h1_MetSumEt_DATA", "#Sigma E_{T} of MET;#Sigma E_{T};N_{evts}", 75, 0., 1500.);
+    h1_ReducedMET                 = new TH1D("h1_ReducedMET_DATA", " Reduced MET;ReducedMET;N_{evts}", 50, 0., 250.);
+    h1_ReducedMETTransverse       = new TH1D("h1_ReducedMETTransverse_DATA", " Reduced MET (Transverse);TransRedMET;N_{evts}", 40, -50., 50.);
+    h1_ReducedMETLongitudinal     = new TH1D("h1_ReducedMETLongitudinal_DATA", " Reduced MET (longitudinal);TransRedMET;N_{evts}", 40, -50., 50.);
+    h1_MetNearestJetDeltaPhi      = new TH1D("h1_MetNearestJetDeltaPhi_DATA", "#Delta#phi(j_{nearest}, MET);#Delta#phi;N_{evts}", 18, 0., TMath::Pi());
+    h1_ProjectedMet               = new TH1D("h1_ProjectedMet_DATA", "ProjMET; ProjMET; N_{evts}", 50, 0., 250.);
 
     histoFile->cd("MET+Lepton");
-    h1_MetOverQt                  = new TH1D("h1_MetOverQt_WZ", "MET/Q_{T,ll};MET/q_{T};N_{evts}", 45, 0., 9.);
-    h1_MetPlusQtMagnitude         = new TH1D("h1_MetPlusQtMagnitude_WZ", "|MET + q_{T}|;|MET + Q_{T,ll}|;N_{evts}", 60, 0., 300.);
-    h1_MetQtDeltaPhi              = new TH1D("h1_MetQtDeltaPhi_WZ", "#Delta#phi(q_{T}, MET);#Delta#phi;N_{evts}", 18, 0., TMath::Pi());
-    h1_MetLeadLeptonDeltaPhi      = new TH1D("h1_MetLeadLeptonDeltaPhi_WZ", "#Delta#phi(l1, MET);#Delta#phi;N_{evts}", 18, 0., TMath::Pi());
-    h1_MetTrailingLeptonDeltaPhi  = new TH1D("h1_MetTrailingLeptonDeltaPhi_WZ", "#Delta#phi(l2, MET);#Delta#phi;N_{evts}", 18, 0., TMath::Pi());
-    h1_ProjMetByQt                = new TH1D("h1_ProjMetByQt_WZ", "Longitudinal MET by q_{T};MET_{longitudinal};N_{evts}", 52, -180., 80.);
-    h1_OrthoMetByQt               = new TH1D("h1_OrthoMetByQt_WZ", "Transverse MET by q_{T};MET_{Transverse};N_{evts}", 64, -100., 80.);
-    h1_ZPlusJetMHT                = new TH1D("h1_ZPlusJetMHT_WZ", "MET of jets + dilepton;MET;N_{evts}", 80, 0., 400.);
-    h1_MetDileptonMT              = new TH1D("h1_MetDileptonMT_WZ", "M_{T};M_{T};N_{evts}", 90, 50., 500.);
-    h1_MetLeadLeptonMT            = new TH1D("h1_MetLeadLeptonMT_WZ", "M_{T,l1};M_{T,l1};N_{evts}", 50, 0., 250.);
-    h1_MetTrailingLeptonMT        = new TH1D("h1_MetTrailingLeptonMT_WZ", "M_{T,l2};M_{T,l2};N_{evts}", 50, 0., 250.);
+    h1_MetOverQt                  = new TH1D("h1_MetOverQt_DATA", "MET/Q_{T,ll};MET/q_{T};N_{evts}", 45, 0., 9.);
+    h1_MetPlusQtMagnitude         = new TH1D("h1_MetPlusQtMagnitude_DATA", "|MET + q_{T}|;|MET + Q_{T,ll}|;N_{evts}", 60, 0., 300.);
+    h1_MetQtDeltaPhi              = new TH1D("h1_MetQtDeltaPhi_DATA", "#Delta#phi(q_{T}, MET);#Delta#phi;N_{evts}", 18, 0., TMath::Pi());
+    h1_MetLeadLeptonDeltaPhi      = new TH1D("h1_MetLeadLeptonDeltaPhi_DATA", "#Delta#phi(l1, MET);#Delta#phi;N_{evts}", 18, 0., TMath::Pi());
+    h1_MetTrailingLeptonDeltaPhi  = new TH1D("h1_MetTrailingLeptonDeltaPhi_DATA", "#Delta#phi(l2, MET);#Delta#phi;N_{evts}", 18, 0., TMath::Pi());
+    h1_ProjMetByQt                = new TH1D("h1_ProjMetByQt_DATA", "Longitudinal MET by q_{T};MET_{longitudinal};N_{evts}", 52, -180., 80.);
+    h1_OrthoMetByQt               = new TH1D("h1_OrthoMetByQt_DATA", "Transverse MET by q_{T};MET_{Transverse};N_{evts}", 64, -100., 80.);
+    h1_ZPlusJetMHT                = new TH1D("h1_ZPlusJetMHT_DATA", "MET of jets + dilepton;MET;N_{evts}", 80, 0., 400.);
+    h1_MetDileptonMT              = new TH1D("h1_MetDileptonMT_DATA", "M_{T};M_{T};N_{evts}", 90, 50., 500.);
+    h1_MetLeadLeptonMT            = new TH1D("h1_MetLeadLeptonMT_DATA", "M_{T,l1};M_{T,l1};N_{evts}", 50, 0., 250.);
+    h1_MetTrailingLeptonMT        = new TH1D("h1_MetTrailingLeptonMT_DATA", "M_{T,l2};M_{T,l2};N_{evts}", 50, 0., 250.);
 
     histoFile->cd("2D");
-    h2_MetByMetOverQt             = new TH2D("h2_MetByMetOverQt_WZ", "MET/q_{T} vs. MET; MET; MET/q_{T}", 40, 0., 200., 40, 0., 4.);
-    h2_MetByMetPlusQtMag          = new TH2D("h2_MetByMetPlusQtMag_WZ", "|MET + q_{T}| vs. MET; MET; MET/q_{T}", 40, 0., 200., 60, 0., 300.);
-    h2_JetMultVsPVMult            = new TH2D("h2_JetMultVsPVMult_WZ", "Jet multiplicity vs. N_{PV};N_{PV};N_{jets}", 20, 0.5, 20.5, 11, -0.5, 10.5);
-    h2_MetLeptonMT                = new TH2D("h2_MetLeptonMT_WZ", "MT(MET,lepton);MT(MET, l1);MT(MET, l2)", 80, 0., 400., 80, 0., 400.);
+    h2_MetByMetOverQt             = new TH2D("h2_MetByMetOverQt_DATA", "MET/q_{T} vs. MET; MET; MET/q_{T}", 40, 0., 200., 40, 0., 4.);
+    h2_MetByMetPlusQtMag          = new TH2D("h2_MetByMetPlusQtMag_DATA", "|MET + q_{T}| vs. MET; MET; MET/q_{T}", 40, 0., 200., 60, 0., 300.);
+    h2_JetMultVsPVMult            = new TH2D("h2_JetMultVsPVMult_DATA", "Jet multiplicity vs. N_{PV};N_{PV};N_{jets}", 20, 0.5, 20.5, 11, -0.5, 10.5);
+    h2_MetLeptonMT                = new TH2D("h2_MetLeptonMT_DATA", "MT(MET,lepton);MT(MET, l1);MT(MET, l2)", 80, 0., 400., 80, 0., 400.);
 
     histoFile->cd("TESTS");
     h1_TESTS[0]                   = new TH1D("h1_TEST1", "Jet multiplicity;N_{evts};N_{jets}", 10, -0.5, 9.5);
