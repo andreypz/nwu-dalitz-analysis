@@ -3,8 +3,7 @@
 */
 
 void MergeRootfile( TDirectory *target, TList *sourcelist , Int_t color1, Int_t color2) {
-
-  cout << "Merging into file: " << target->GetPath() << endl;
+  // cout << "Merging into file: " << target->GetPath() << endl;
   TString path( (char*)strstr( target->GetPath(), ":" ) );
   path.Remove( 0, 2 );
 
@@ -36,6 +35,7 @@ void MergeRootfile( TDirectory *target, TList *sourcelist , Int_t color1, Int_t 
       h1 -> SetLineColor(color1);
       h1 -> SetFillColor(color2);
       h1 -> SetLineWidth(2);
+      //  h1 -> UseCurrentStyle();
       // loop over all source files and add the content of the
       // correspondant histogram to the one pointed to by "h1"
       TFile *nextsource = (TFile*)sourcelist->After( first_source );
@@ -72,7 +72,7 @@ void MergeRootfile( TDirectory *target, TList *sourcelist , Int_t color1, Int_t 
     } else if ( obj->IsA()->InheritsFrom( TDirectory::Class() ) ) {
       // it's a subdirectory
 
-      cout << "Found subdirectory " << obj->GetName() << endl;
+      // cout << "Found subdirectory " << obj->GetName() << endl;
 
       // create a new subdir of same name and title in the target file
       target->cd();

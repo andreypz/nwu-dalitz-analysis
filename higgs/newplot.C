@@ -19,9 +19,14 @@ void newplot(Int_t sel =1, TString hPath ="v30") {
   timer.Start();
 
   TFile* fda_2011A_DoubleMu_May10  = new TFile(Form("./%s/hhhh_DoubleMu_May10.root",histoPath.Data()));
+  TFile* fda_2011A_DoubleMu_PromptV4 = new TFile(Form("./%s/hhhh_DoubleMu_PromptV4.root",histoPath.Data()));
+  TFile* fda_2011A_DoubleMu_Aug05    = new TFile(Form("./%s/hhhh_DoubleMu_Aug05.root",histoPath.Data()));
+  TFile* fda_2011A_DoubleMu_PromptV6 = new TFile(Form("./%s/hhhh_DoubleMu_PromptV6.root",histoPath.Data()));
+
   TFile* fda_2011A_DoubleEl_May10  = new TFile(Form("./%s/hhhh_DoubleMu_May10.root",histoPath.Data()));
-  TFile* fda_2011A_Prompt_v4_DoubleMu  = new TFile(Form("./%s/hhhh_DoubleMu_PromptV4.root",histoPath.Data()));
-  TFile* fda_2011A_Prompt_v4_DoubleEl  = new TFile(Form("./%s/hhhh_DoubleMu_PromptV4.root",histoPath.Data()));
+  TFile* fda_2011A_DoubleEl_PromptV4 = new TFile(Form("./%s/hhhh_DoubleMu_PromptV4.root",histoPath.Data()));
+  TFile* fda_2011A_DoubleEl_Aug05    = new TFile(Form("./%s/hhhh_DoubleMu_Aug05.root",histoPath.Data()));
+  TFile* fda_2011A_DoubleEl_PromptV6 = new TFile(Form("./%s/hhhh_DoubleMu_PromptV6.root",histoPath.Data()));
 
 
   TFile* fmc_DYmumu_1     = new TFile(Form("./%s/hhhh_DYToMuMu_1.root",histoPath.Data() ));
@@ -46,11 +51,15 @@ void newplot(Int_t sel =1, TString hPath ="v30") {
   list_Data = new TList();
   if(sel==1){
     list_Data -> Add(fda_2011A_DoubleMu_May10);
-    list_Data -> Add(fda_2011A_Prompt_v4_DoubleMu);
+    list_Data -> Add(fda_2011A_DoubleMu_PromptV4);
+    list_Data -> Add(fda_2011A_DoubleMu_Aug05);
+    list_Data -> Add(fda_2011A_DoubleMu_PromptV6);
   }
   if(sel==2){
     list_Data -> Add(fda_2011A_DoubleEl_May10);
-    list_Data -> Add(fda_2011A_Prompt_v4_DoubleEl);
+    list_Data -> Add(fda_2011A_DoubleEl_PromptV4);
+    list_Data -> Add(fda_2011A_DoubleEl_Aug05);
+    list_Data -> Add(fda_2011A_DoubleEl_PromptV6);
   } 
   MergeRootfile(m_Data, list_Data, kBlack, 0);
   
@@ -66,7 +75,6 @@ void newplot(Int_t sel =1, TString hPath ="v30") {
   
   MergeRootfile(m_Zjets, list_Zjets, kGreen+2, kRed+1);
 
-  //Zjets -> ls();
 
   list_ttbar = new TList();
   list_ttbar -> Add(fmc_tt_1);
@@ -80,9 +88,9 @@ void newplot(Int_t sel =1, TString hPath ="v30") {
   list_Top -> Add(fmc_tW);
   MergeRootfile(m_Top, list_Top, kBlue, kOrange-3);
 
-  m_Top -> Close();
 
   m_Data  -> Close();
+  m_Top -> Close();
   m_Zjets -> Close();
   m_ttbar -> Close();
 

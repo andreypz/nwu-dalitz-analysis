@@ -246,17 +246,6 @@ void higgsAnalyzer::Begin(TTree * /*tree*/)
 
     histoFile->cd("TESTS");
     h1_TESTS[0]                   = new TH1D("h1_TEST1", "Jet multiplicity;N_{evts};N_{jets}", 10, -0.5, 9.5);
-    h1_TESTS[1]                   = new TH1D("h1_TEST2", "no PU, associated", 10, -0.5, 9.5);
-    h1_TESTS[2]                   = new TH1D("h1_TEST3", "PU, not associated", 10, -0.5, 9.5);
-    h1_TESTS[3]                   = new TH1D("h1_TEST4", "no PU, not associated", 10, -0.5, 9.5);
-    h1_TESTS[4]                   = new TH1D("h1_TEST5", "MET (corrected);MET;N_{evts}", 50, 0., 250.);
-    h1_TESTS[6]                   = new TH1D("h1_TEST7", "sum pt fraction;#Sigma p_{T};N_{jets}", 30, 0., 1.2);
-    h1_TESTS[7]                   = new TH1D("h1_TEST8", "jet-vertex index", 10, -0.5, 9.5);
-    h1_TESTS[8]                   = new TH1D("h1_TEST9", "jet d_{xy}", 200, -1., 1.);
-    h1_TESTS[9]                   = new TH1D("h1_TEST10", "jet d_{z}", 200, -1., 1.);
-
-    h2_TESTS[0]                   = new TH2D("h2_TEST1", "jet d_{xy} vs. sumPt cut", 10, 0., 1., 200, -1., 1.);
-    h2_TESTS[1]                   = new TH2D("h2_TEST2", "jet d_{z} vs. sumPt cut", 10, 0., 1., 200, -1., 1.);
 
 }
 
@@ -549,16 +538,6 @@ bool higgsAnalyzer::Process(Long64_t entry)
     nJets  = jetP4.size();
     nJetsB = bJetP4.size();
 
-    if (!isRealData) {
-        if (nPUVertices == 0) {
-            h1_TESTS[1]->Fill(jetP4.size());
-            h1_TESTS[3]->Fill(testJetP4.size());
-        } else {
-            h1_TESTS[0]->Fill(jetP4.size());
-            h1_TESTS[2]->Fill(testJetP4.size());
-        }
-    }
-
 
     /////////
     // MET //
@@ -709,7 +688,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
 	FillHistosNoise(6, evtWeight);
     
 	//Yields for all Higgs masses//
-	PostSelectionYieldCounter(nEventsWeighted[6], metP4, ZP4, deltaPhiJetMET, evtWeight); 
+	//PostSelectionYieldCounter(nEventsWeighted[6], metP4, ZP4, deltaPhiJetMET, evtWeight); 
     }
 
   

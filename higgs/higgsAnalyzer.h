@@ -1,7 +1,8 @@
+// $Id: higgsAnalyzer.h,v 1.3 2011/08/25 10:18:29 andrey
+
 #ifndef higgsAnalyzer_h
 #define higgsAnalyzer_h
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <iostream>
 #include <vector>

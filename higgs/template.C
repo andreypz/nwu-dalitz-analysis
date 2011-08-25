@@ -146,10 +146,10 @@ void higgsAnalyzer::Begin(TTree * /*tree*/)
 	jet_b_pt[n] = new TH1F(Form("jet_b_pt_%i",n), "Pt of b-jets, eta<2.4", 40,0,200);
 
 
-	vtx_nPV_raw[n]    = new  TH1F(Form("vtx_nPV_raw_%i",n), "Number of PVs, raw", 0,0,20);
-	vtx_nPV_weight[n] = new  TH1F(Form("vtx_nPV_weight_%i",n), "Number of PVs, reweighted", 0,0,20);
-	vtx_ndof_1[n]     = new  TH1F(Form("vtx_ndof_1_%i",n), "Ndof of first PV", 0,0,100);
-	vtx_ndof_2[n]     = new  TH1F(Form("vtx_ndof_2_%i",n), "Ndof of second PV", 0,0,100);
+	vtx_nPV_raw[n]    = new  TH1F(Form("vtx_nPV_raw_%i",n), "Number of PVs, raw", 20,0,20);
+	vtx_nPV_weight[n] = new  TH1F(Form("vtx_nPV_weight_%i",n), "Number of PVs, reweighted", 20,0,20);
+	vtx_ndof_1[n]     = new  TH1F(Form("vtx_ndof_1_%i",n), "Ndof of first PV", 50,0,100);
+	vtx_ndof_2[n]     = new  TH1F(Form("vtx_ndof_2_%i",n), "Ndof of second PV", 50,0,100);
 
       }
     ffout.open("./events_printout_SUFFIX_final.txt",ofstream::out);
@@ -246,17 +246,6 @@ void higgsAnalyzer::Begin(TTree * /*tree*/)
 
     histoFile->cd("TESTS");
     h1_TESTS[0]                   = new TH1D("h1_TEST1", "Jet multiplicity;N_{evts};N_{jets}", 10, -0.5, 9.5);
-    h1_TESTS[1]                   = new TH1D("h1_TEST2", "no PU, associated", 10, -0.5, 9.5);
-    h1_TESTS[2]                   = new TH1D("h1_TEST3", "PU, not associated", 10, -0.5, 9.5);
-    h1_TESTS[3]                   = new TH1D("h1_TEST4", "no PU, not associated", 10, -0.5, 9.5);
-    h1_TESTS[4]                   = new TH1D("h1_TEST5", "MET (corrected);MET;N_{evts}", 50, 0., 250.);
-    h1_TESTS[6]                   = new TH1D("h1_TEST7", "sum pt fraction;#Sigma p_{T};N_{jets}", 30, 0., 1.2);
-    h1_TESTS[7]                   = new TH1D("h1_TEST8", "jet-vertex index", 10, -0.5, 9.5);
-    h1_TESTS[8]                   = new TH1D("h1_TEST9", "jet d_{xy}", 200, -1., 1.);
-    h1_TESTS[9]                   = new TH1D("h1_TEST10", "jet d_{z}", 200, -1., 1.);
-
-    h2_TESTS[0]                   = new TH2D("h2_TEST1", "jet d_{xy} vs. sumPt cut", 10, 0., 1., 200, -1., 1.);
-    h2_TESTS[1]                   = new TH2D("h2_TEST2", "jet d_{z} vs. sumPt cut", 10, 0., 1., 200, -1., 1.);
 
 }
 
@@ -278,25 +267,25 @@ bool higgsAnalyzer::Process(Long64_t entry)
     //Trigger status//
     //////////////////
 
+
     for(int i = 0; i < 32; ++i) {
-        unsigned int iHLT = 0x0; 
-        iHLT = 0x01 << i;  
-        if ((triggerStatus & iHLT) == iHLT) h1_triggerStatus->Fill(i+1);  
+      unsigned int iHLT = 0x0; 
+      iHLT = 0x01 << i;  
+      if ((triggerStatus & iHLT) == iHLT) h1_triggerStatus->Fill(i+1);  
     } 
 
     bool triggerPass = false; 
     if (trigger[0] != 0) { 
-        //unsigned int iHLT = 0x0; 
-        //for (int i = 0; i < (int)(sizeof(trigger)/sizeof(int)); ++i) iHLT |= 0x01 << (trigger[i] - 1);  
-        //if ((triggerStatus & iHLT) == iHLT) triggerPass = true; 
+      //unsigned int iHLT = 0x0; 
+      //for (int i = 0; i < (int)(sizeof(trigger)/sizeof(int)); ++i) if (i == 0 || hltPrescale[trigger[i]] == 1) iHLT |= 0x01 << (trigger[i] - 1);  
+      //if ((triggerStatus & iHLT) == iHLT) triggerPass = true; 
 
-        for (int i = 0; i < (int)(sizeof(trigger)/sizeof(int)); ++i) {
-            unsigned int iHLT = 0x01 << (trigger[i] - 1);  
-            if ((selection == "muon" || selection == "electron")  && hltPrescale[i] != 1) continue;
-            if ((triggerStatus & iHLT) == iHLT) triggerPass = true; 
-        }
+      for (int i = 0; i < (int)(sizeof(trigger)/sizeof(int)); ++i) {
+	unsigned int iHLT = 0x01 << (trigger[i] - 1);  
+	if ((selection == "muon" || selection == "electron")  && hltPrescale[trigger[i]] != 1) continue;
+	if ((triggerStatus & iHLT) == iHLT) triggerPass = true; 
+      }
     } else {triggerPass = true;}
-    
 
     if (!triggerPass) return kTRUE;
 
@@ -549,16 +538,6 @@ bool higgsAnalyzer::Process(Long64_t entry)
     nJets  = jetP4.size();
     nJetsB = bJetP4.size();
 
-    if (!isRealData) {
-        if (nPUVertices == 0) {
-            h1_TESTS[1]->Fill(jetP4.size());
-            h1_TESTS[3]->Fill(testJetP4.size());
-        } else {
-            h1_TESTS[0]->Fill(jetP4.size());
-            h1_TESTS[2]->Fill(testJetP4.size());
-        }
-    }
-
 
     /////////
     // MET //
@@ -709,7 +688,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
 	FillHistosNoise(6, evtWeight);
     
 	//Yields for all Higgs masses//
-	PostSelectionYieldCounter(nEventsWeighted[6], metP4, ZP4, deltaPhiJetMET, evtWeight); 
+	//PostSelectionYieldCounter(nEventsWeighted[6], metP4, ZP4, deltaPhiJetMET, evtWeight); 
     }
 
   
