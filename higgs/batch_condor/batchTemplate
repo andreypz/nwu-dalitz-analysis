@@ -1,7 +1,7 @@
 Arguments = ARGS
 universe = vanilla
 Executable = batchSend.csh
-Requirements = Memory >= 399 &&OpSys == "LINUX"&& (Arch != "DUMMY" )&& Disk > 1000000
+Requirements = Memory >= 299 &&OpSys == "LINUX"&& (Arch != "DUMMY" )&& Disk > 1000000
 Should_Transfer_Files = YES
 WhenToTransferOutput = ON_EXIT
 Transfer_Input_Files =
@@ -9,6 +9,4 @@ Output = reports/report_$(Cluster)_$(Process).stdout
 Error  = reports/report_$(Cluster)_$(Process).stderr
 Log    = reports/report_$(Cluster)_$(Process).log
 notify_user = andreypz@FNAL.GOV
-Queue 1
-
-
+Queue 
