@@ -22,11 +22,12 @@ Float_t getXsecOrColors(string dataset="ggH200", Int_t b = 1)
   else if(dataset=="DYee")   {lCol = kRed;        fCol = kWhite;   cs = 1666.0; }
   else if(dataset=="DYtautau") {lCol = kRed;      fCol = kWhite;   cs = 1666.0; }
   else if(dataset=="ggHZZ140") {lCol = kBlue-1;  fCol  = -1; cs = 0.022; }
-  else if(dataset=="ggHZZ200") {lCol = kPink;  fCol  = -1; cs = 0.06277; }
+  else if(dataset=="ggHZZ200") {lCol = kPink;  fCol  = -1;   cs = 0.06277; }
   else if(dataset=="ggHZZ250") {lCol = kBlue-1;  fCol  = -1; cs = 0.0398; }
   else if(dataset=="ggHZZ300") {lCol = kCyan;    fCol  = -1; cs = 0.0301; }
   else if(dataset=="ggHZZ350") {lCol = kCyan;    fCol  = -1; cs = 0.0286; }
   else if(dataset=="ggHZZ400") {lCol = kYellow;  fCol  = -1; cs = 0.0221; }
+  else if(dataset=="ggHZZ450") {lCol = kYellow;  fCol  = -1; cs = 0.0221; }
   else if(dataset=="ggHZZ600") {lCol = kCyan+1;  fCol  = -1; cs = 0.004232; }
 
 

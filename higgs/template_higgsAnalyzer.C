@@ -348,7 +348,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
     // Data quality //
     //////////////////
 
-    //if (isNoiseHcal || isDeadEcalCluster || isScraping || isCSCTightHalo) return kTRUE;// <-- Not yet in ntuples
+    if (isNoiseHcal || isDeadEcalCluster || isScraping || isCSCTightHalo) return kTRUE;// <-- Not yet in ntuples
 
     ///////////////
     // electrons //
@@ -1185,7 +1185,7 @@ float higgsAnalyzer::getNevents(string dataset, TH1F* h)
   //nEv2 = 10000;
 
   if(dataset=="DATA")          nEv2 = -1.;
-  else if(dataset=="DYmumu")   nEv2 = 29.5e6;
+  else if(dataset=="DYmumu")   nEv2 = 29.7e6;
   else if(dataset=="DYee")     nEv2 = 29.5e6;
   else if(dataset=="DYtautau") nEv2 = 29.5e6;
   else if(dataset=="ttbar")    nEv2 = 10.34e6;
@@ -1193,13 +1193,14 @@ float higgsAnalyzer::getNevents(string dataset, TH1F* h)
   else if(dataset=="WW")       nEv2 = 220e3;
   else if(dataset=="ZZ")       nEv2 = 220e3;
   else if(dataset=="WZ")       nEv2 = 205e3;
-  else if(dataset=="Wjets")    nEv2 = 31314.0;
+  else if(dataset=="Wjets")    nEv2 = 30e6;
   else if(dataset=="ggHZZ140") nEv2 = 99.99e3;
-  else if(dataset=="ggHZZ200") nEv2 = 99.62e3;
+  else if(dataset=="ggHZZ200") nEv2 = 96.20e3;
   else if(dataset=="ggHZZ250") nEv2 = 99.99e3;
-  else if(dataset=="ggHZZ300") nEv2 = 96.99e3;
-  else if(dataset=="ggHZZ350") nEv2 = 96.99e3;
+  else if(dataset=="ggHZZ300") nEv2 = 99.99e3;
+  else if(dataset=="ggHZZ350") nEv2 = 99.99e3;
   else if(dataset=="ggHZZ400") nEv2 = 93.90e3;
+  else if(dataset=="ggHZZ450") nEv2 = 93.90e3; //??
   else if(dataset=="ggHZZ600") nEv2 = 93.90e3;
   else if(dataset=="VBFHZZ200") nEv2  = 93.90e3;
 
