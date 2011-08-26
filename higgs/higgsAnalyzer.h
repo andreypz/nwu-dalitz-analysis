@@ -316,10 +316,10 @@ void higgsAnalyzer::Init(TTree *tree)
 	fChain->SetBranchAddress("triggerStatus", &triggerStatus, &b_triggerStatus);
 	fChain->SetBranchAddress("hltPrescale",&hltPrescale, &b_hltPrescale);
 
-	//fChain->SetBranchAddress("isNoiseHcal", &isNoiseHcal, &b_isNoiseHcal);
-	//fChain->SetBranchAddress("isDeadEcalCluster", &isDeadEcalCluster, &b_isDeadEcalCluster);
-	//fChain->SetBranchAddress("isScraping", &isScraping, &b_isScraping);
-	//fChain->SetBranchAddress("isCSCTightHalo", &isCSCTightHalo, &b_isCSCTightHalo);
+	fChain->SetBranchAddress("isNoiseHcal", &isNoiseHcal, &b_isNoiseHcal);
+	fChain->SetBranchAddress("isDeadEcalCluster", &isDeadEcalCluster, &b_isDeadEcalCluster);
+	fChain->SetBranchAddress("isScraping", &isScraping, &b_isScraping);
+	fChain->SetBranchAddress("isCSCTightHalo", &isCSCTightHalo, &b_isCSCTightHalo);
 
 	// ADD THESE!
 	//eventTree->Branch("recoTaus",&recoTaus, 6400, 0);

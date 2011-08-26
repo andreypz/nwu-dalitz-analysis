@@ -1,3 +1,5 @@
+// $Id: template_higgsAnalyzer.C,v 1.1 2011/08/26 10:03:29 andrey
+
 #define higgsAnalyzer_cxx
 
 #include "higgsAnalyzer.h"

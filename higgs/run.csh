@@ -1,8 +1,10 @@
 #!/bin/csh
 
+echo "Start runninng"
+
 set dir=`echo $1 | cut -d _ -f 1 `
 
-cp template.C higgsAnalyzer.C
+cp template_higgsAnalyzer.C higgsAnalyzer.C
 
 sed -i "s/SUFFIX/$1/g" higgsAnalyzer.C
 sed -i "s/TRIGGER/$2/g" higgsAnalyzer.C
@@ -10,6 +12,7 @@ sed -i "s/SELECTION/$4/g" higgsAnalyzer.C
 
 cat > run.C << +EOF
     
+
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -84,3 +87,5 @@ root -l -b -q run.C
 
 rm run.C
 mv higgsHistograms.root hhhh_$3.root
+
+echo "End runninng"
