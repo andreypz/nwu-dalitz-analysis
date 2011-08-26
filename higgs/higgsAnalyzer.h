@@ -55,7 +55,7 @@ class higgsAnalyzer : public TSelector {
   Float_t METqt, MET1qt;
   Int_t nVtx;
   Float_t nDofVtx1, nDofVtx2;
-  Int_t nJets, nJetsB;
+  Int_t nJets, nJetsB, nJetsB25, nJetsB30,;
   /* jetCount, muCountLoose, eleCountLoose;
   Float_t dPhiClos1,dPhiClos2, dPhiLead1, dPhiLead2;
   */
@@ -74,7 +74,7 @@ class higgsAnalyzer : public TSelector {
   TH1F *btag_hp[nC];
   TH1F *di_qt[nC], *di_eta[nC], *di_mass[nC], *di_mass_EB[nC], *di_mass_EE[nC], *di_mass_EX[nC];
   TH1F *jet_N[nC], *jet_dRlep1[nC], *jet_dRlep2[nC], *jet_pt[nC];
-  TH1F *jet_b_N[nC], *jet_b_pt[nC];
+  TH1F *jet_b_N[nC], *jet_b_N25[nC],*jet_b_N30[nC], *jet_b_pt[nC];
 
   TH1F *met2_dPhiLeadJet1[nC], *met2_dPhiLeadJet2[nC], *met2_dPhiClosJet1[nC], *met2_dPhiClosJet2[nC];
 

@@ -28,7 +28,7 @@ void makePlot(Int_t sel=1, TString hPath="00")
   //Float_t intLumi = 928.2;
   // Float_t intLumi = 215.2 + 928.2;
   //Float_t intLumi = 201.2 + 928.2;
-  Float_t intLumi = 215. + 928. + 410 +450;
+  Float_t intLumi = 201.2. + 927. + 407.5 +450.6;
  
 
   //Types of met: met - pfMet, met1 - type1 corrected, met2 - pfMet passed Noise filters, 
@@ -42,7 +42,7 @@ void makePlot(Int_t sel=1, TString hPath="00")
   TString histoPath =  hPath.Data();
   cout<<"histoPath:  "<<histoPath.Data()<<"  int Lumi: "<<intLumi<<endl;
 
-  Bool_t doPhotons = 0, makeZjetsQt=0, doEBEE=1, doOverview=0;
+  Bool_t doPhotons = 0, makeZjetsQt=0, doEBEE=0, doOverview=0;
   Bool_t doSB = 0, doTest=1;
 
   TFile* fda_2011A_DoubleMu_May10  = new TFile(Form("./%s/hhhh_DoubleMu_May10.root",histoPath.Data()));
@@ -111,7 +111,8 @@ void makePlot(Int_t sel=1, TString hPath="00")
 
   THStack *hs_met_et[nC], *hs_met2_et[nC], *hs_met_over_qt[nC], *hs_met2_over_qt[nC], *hs_di_qt[nC], *hs_met_et_ovQt[nC], *hs_mt[nC], *hs_mtZ[nC];
   THStack *hs_met0_et[nC], *hs_met3_et[nC];
-  THStack *hs_jet_N[nC], *hs_jet_dRlep1[nC], *hs_jet_dRlep2[nC], *hs_jet_b_N[nC], hs_jet_b_pt[nC];
+  THStack *hs_jet_N[nC], *hs_jet_dRlep1[nC], *hs_jet_dRlep2[nC];
+  THStack *hs_jet_b_N[nC], *hs_jet_b_N25[nC], *hs_jet_b_N30[nC], hs_jet_b_pt[nC];
   THStack *hs_di_mass[nC], *hs_di_mass_EB[nC], *hs_di_mass_EE[nC], *hs_di_mass_EX[nC];
   THStack *hs_met_dPhiLeadJet1[nC], *hs_met_dPhiLeadJet2[nC], *hs_met_dPhiClosJet1[nC], *hs_met_dPhiClosJet2[nC];
   THStack *hs_vtx_nPV_raw[nC], *hs_vtx_nPV_weight[nC];
@@ -132,6 +133,8 @@ void makePlot(Int_t sel=1, TString hPath="00")
       hs_di_mass_EX[n] = makeStack(list_bg, Form("di_mass_EX_%i",n), intLumi);
       hs_jet_N[n]      = makeStack(list_bg, Form("jet_N_%i",n), intLumi);
       hs_jet_b_N[n]    = makeStack(list_bg, Form("jet_b_N_%i",n), intLumi); 
+      hs_jet_b_N25[n]  = makeStack(list_bg, Form("jet_b_N25_%i",n), intLumi); 
+      hs_jet_b_N30[n]  = makeStack(list_bg, Form("jet_b_N30_%i",n), intLumi); 
 
       hs_vtx_nPV_raw[n]    = makeStack(list_bg, Form("vtx_nPV_raw_%i",n), intLumi); 
       hs_vtx_nPV_weight[n] = makeStack(list_bg, Form("vtx_nPV_weight_%i",n), intLumi); 
@@ -179,9 +182,9 @@ void makePlot(Int_t sel=1, TString hPath="00")
   leg01->AddEntry(forLegend[5],  "Z + jets","f");
   leg01->AddEntry(forLegend[4],  "ZZ","f");
   //leg01->AddEntry(forLegend[10],  "W + jets","f");
-  leg01->AddEntry(forLegend[2],  "WW","f");
+  leg01->AddEntry(forLegend[3],  "WW","f");
   leg01->AddEntry(forLegend[0],  "tW","f");
-  leg01->AddEntry(forLegend[3],  "WZ","f");
+  leg01->AddEntry(forLegend[2],  "WZ","f");
   leg01->AddEntry(forLegend[1], "ttbar","f");  
   leg01->AddEntry(forLegend[7], "10xH200","f");
   leg01->AddEntry(forLegend[8], "10xH300","f");
@@ -240,6 +243,7 @@ void makePlot(Int_t sel=1, TString hPath="00")
   if(doTest){
     TString testpath("~/afs/public_html/test/");  
     
+
     drawMuliPlot("pfMET", 1, 0.001, 1000000, 0,3, hs_met_et[6], c2, leg01, list_overlay, intLumi); 
     c2 -> SaveAs(testpath+"p01.png");
     drawMuliPlot("MT", 1, 0.001, 1000000, 0,3, hs_mt[6], c2, leg01, list_overlay, intLumi); 
@@ -268,10 +272,21 @@ void makePlot(Int_t sel=1, TString hPath="00")
     c2 -> SaveAs(testpath+"p10.png");
 
 
-    drawMuliPlot("nVtx raw", 1, 0.001, 1000000, 0,5, hs_vtx_nPV_raw[6], c2, leg01, list_overlay, intLumi); 
+    drawMuliPlot("nVtx raw", 1, 0.001, 1000000, 0,2, hs_vtx_nPV_raw[6], c2, leg01, list_overlay, intLumi); 
     c2 -> SaveAs(testpath+"p11.png");
-    drawMuliPlot("nVtx reweighted", 1, 0.001, 1000000, 0,5, hs_vtx_nPV_weight[6], c2, leg01, list_overlay, intLumi); 
+    drawMuliPlot("nVtx reweighted", 1, 0.001, 1000000, 0,2, hs_vtx_nPV_weight[6], c2, leg01, list_overlay, intLumi); 
     c2 -> SaveAs(testpath+"p12.png");
+
+    drawMuliPlot("nVtx raw", 0, 0.0, 30, 0,5, hs_vtx_nPV_raw[8], c2, leg01, list_overlay, intLumi); 
+    c2 -> SaveAs(testpath+"p13.png");
+    drawMuliPlot("nVtx reweighted", 0, 0.0, 30, 0,5, hs_vtx_nPV_weight[8], c2, leg01, list_overlay, intLumi); 
+    c2 -> SaveAs(testpath+"p14.png");
+
+
+    //drawMuliPlot("N b-jets pt>25", 0, 0.0, 30, 0.,5, hs_jet_b_N25[7], c2, leg01, list_overlay, intLumi);
+    //c2 -> SaveAs(testpath+"p13.png");
+    //drawMuliPlot("N b-jets pt>30", 0, 0.0, 30, 0.,5, hs_jet_b_N30[7], c2, leg01, list_overlay, intLumi);
+    //c2 -> SaveAs(testpath+"p14.png");
 
     // Mll in electons, EE vs EB
     if(doEBEE){
@@ -282,7 +297,6 @@ void makePlot(Int_t sel=1, TString hPath="00")
       //drawMuliPlot("Leptons in EB/EE, mixed, M(ll)", 1, 0.001, 1000000, 0,4, hs_di_mass_EX[F0], c2, leg01, list_overlay, intLumi);
       //c2 -> SaveAs(testpath+"p03.png");
     }
-
 
     //PrintYields(ph_mt[nn], (TH1*)fmc_ggH400 -> Get(Form("mt2_%i",nn))->Clone(), (TH1*)fData ->Get(Form("mt2_%i",nn))->Clone(), sel, nn, hPath);
 

@@ -11,7 +11,7 @@ using namespace std;
 /////////////////////////////
 
 string  selection      = "SELECTION";
-int     JC_LVL         = 3;
+int     JC_LVL         = 4;
 int     trigger[]      = {TRIGGER};
 string  suffix         = "SUFFIX";
 
@@ -39,8 +39,8 @@ Float_t cut_vz = 24, cut_vd0 = 2, cut_vndof = 4;  //PV filter cuts
 
 // Cuts for mass points in the PAS.
 
-float dPhiMinCut[] = {0.62, 0.28, 0.14, TMath::Pi(), TMath::Pi(), TMath::Pi(), TMath::Pi(), TMath::Pi()};
-float metMinCut[]  = {69., 83., 97., 112., 126., 141., 155., 170.};
+float dPhiMinCut[] = {0.62, 0.28, 0.14, 0,    0,    0,    0,    0};
+float metMinCut[]  = {69.,  83.,  97.,  112., 126., 141., 155., 170.};
 float mtMinCut[]   = {216., 242., 267., 292., 315., 336., 357., 377.};
 float mtMaxCut[]   = {272., 320., 386., 471., 540., 600., 660., 720.};
 
@@ -142,10 +142,12 @@ void higgsAnalyzer::Begin(TTree * /*tree*/)
 	jet_N[n]      = new TH1F(Form("jet_N_%i",n), "Number of jets", 20,0,20);
 	jet_dRlep1[n] = new TH1F(Form("jet_dRlep1_%i",n), "dR(jet, lepton1)", 50, 0,1);
 	jet_dRlep2[n] = new TH1F(Form("jet_dRlep2_%i",n), "dR(jet, lepton2)", 50, 0,1);
-	jet_b_N[n]    = new TH1F(Form("jet_b_N_%i",n), "Number of b-jets", 10,0,10);
+	jet_pt[n]     = new TH1F(Form("jet_pt_%i",n), "Pt of jets, eta<2.4", 40,0,200);
 
-	jet_pt[n]   = new TH1F(Form("jet_pt_%i",n), "Pt of jets, eta<2.4", 40,0,200);
-	jet_b_pt[n] = new TH1F(Form("jet_b_pt_%i",n), "Pt of b-jets, eta<2.4", 40,0,200);
+	jet_b_N[n]    = new TH1F(Form("jet_b_N_%i",n), "Number of b-jets pt>default", 10,0,10);
+	jet_b_N25[n]  = new TH1F(Form("jet_b_N25_%i",n), "Number of b-jets pt>25", 10,0,10);
+	jet_b_N30[n]  = new TH1F(Form("jet_b_N30_%i",n), "Number of b-jets pt>30", 10,0,10);
+	jet_b_pt[n]   = new TH1F(Form("jet_b_pt_%i",n), "Pt of b-jets, eta<2.4", 40,0,200);
 
 
 	vtx_nPV_raw[n]    = new  TH1F(Form("vtx_nPV_raw_%i",n), "Number of PVs, raw", 20,0,20);
@@ -359,7 +361,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
     for (int i = 0; i <  recoElectrons->GetSize(); ++i) {
         TCElectron* thisElec = (TCElectron*) recoElectrons->At(i);    
 
-        if (fabs(thisElec->Eta()) > 2.5 || !thisElec->PassID(95)) continue;
+        if (fabs(thisElec->Eta()) > 2.5) continue;// || !thisElec->PassID(95)) continue;
 
         float eleISOendcap = (thisElec->TrkIso() + thisElec->EmIso() + thisElec->HadIso() - rhoFactor*TMath::Pi()*0.09)/thisElec->Pt(); 
         float eleISObarrel = (thisElec->TrkIso() + TMath::Max(0.0, thisElec->EmIso()-1.0)+ thisElec->HadIso() - rhoFactor*TMath::Pi()*0.09)/thisElec->Pt(); 
@@ -503,18 +505,16 @@ bool higgsAnalyzer::Process(Long64_t entry)
 	    && (thisJet->NeuHadFrac() + thisJet->NeuEmFrac()) < 0.9
 	    && thisJet->P4(JC_LVL).Pt() > jetPtCut[0]
 	    ) {
-	  if (thisJet->BDiscrTCHE() > 2. && thisJet->P4(JC_LVL).Pt() > bJetPtCut){
-	    bJetP4.push_back(thisJet->P4(JC_LVL));
-	  }
 	  
-	  testJetP4.push_back(thisJet->P4(JC_LVL));
+	  //testJetP4.push_back(thisJet->P4(JC_LVL));
 	  //h1_TESTS[7]->Fill(thisJet->VtxIndex());
-	  
+
 	  if (
 	      thisJet->VtxNTracks() > 0
 	      && thisJet->VtxSumPtFrac() > 0. 
 	      && thisJet->VtxSumPtIndex() == 1
 	      ) {
+	    if (thisJet->BDiscrTCHE() > 2. && thisJet->P4(JC_LVL).Pt() > bJetPtCut) bJetP4.push_back(thisJet->P4(JC_LVL));
 	    jetP4.push_back(thisJet->P4(JC_LVL));
 	    sumJetP4 += thisJet->P4();
 	  }
@@ -539,7 +539,11 @@ bool higgsAnalyzer::Process(Long64_t entry)
 
     nJets  = jetP4.size();
     nJetsB = bJetP4.size();
-
+    nJetsB25=0; nJetsB30=0;
+    for (Int_t i = 0; i < (Int_t)bJetP4.size(); ++i) {
+      if(bJetP4[i].Pt() >25)  nJetsB25++;
+      if(bJetP4[i].Pt() >30)  nJetsB30++;
+    }
 
     /////////
     // MET //
@@ -560,6 +564,8 @@ bool higgsAnalyzer::Process(Long64_t entry)
     TLorentzVector ZP4;
     MET        = metP4.Pt();
     puCorrMET  = PUCorrectedMET(met->Met(), nVtx, "pfMet");
+    MET1       = met->CorrectedMet();
+
     ///////////////////////
     // Cosmics rejection //
     ///////////////////////
@@ -1202,19 +1208,8 @@ float higgsAnalyzer::getNevents(string dataset, TH1F* h)
 }
 
 void higgsAnalyzer::FillHistosNoise(Int_t num, Double_t weight){
-
-  // met0_over_qt[num] -> Fill(METqt, weight);
   met0_et[num]      -> Fill(MET, weight);
-  //met0_et_ovQt[num] -> Fill(MET, METqt, weight);
-  //met0_phi[num]     -> Fill(MET_phi, weight);
-
-  //met1_over_qt[num] -> Fill(MET1qt, weight);
-  //met1_et[num]      -> Fill(MET1, weight);
-  //met1_et_ovQt[num] -> Fill(MET1, MET1qt, weight);
-  //met1_phi[num]     -> Fill(MET1_phi, weight);
-
-  //mt0[num]          -> Fill(MT, weight);
-
+  //Fill with nVtx??
 }
 
 void higgsAnalyzer::FillHistos(Int_t num, Double_t weight){
@@ -1224,6 +1219,7 @@ void higgsAnalyzer::FillHistos(Int_t num, Double_t weight){
   met2_et_ovQt[num] -> Fill(MET, METqt, weight);
   met2_phi[num]     -> Fill(MET_phi, weight);
 
+  met1_et[num]      -> Fill(MET1, weight);
   met3_et[num]      -> Fill(puCorrMET, weight);
 
   //met4_over_qt[num] -> Fill(puCorrMETqt, weight);
@@ -1245,8 +1241,10 @@ void higgsAnalyzer::FillHistos(Int_t num, Double_t weight){
   if(Mll_EE!=0) di_mass_EE[num]  -> Fill(Mll_EE, weight);
   if(Mll_EX!=0) di_mass_EX[num]  -> Fill(Mll_EX, weight);
 
-  jet_N[num]    -> Fill(nJets, weight);
-  jet_b_N[num]  -> Fill(nJetsB, weight);
+  jet_N[num]     -> Fill(nJets, weight);
+  jet_b_N[num]   -> Fill(nJetsB, weight);
+  jet_b_N25[num] -> Fill(nJetsB25, weight);
+  jet_b_N30[num] -> Fill(nJetsB30, weight);
 
   vtx_nPV_raw[num]    -> Fill(nVtx);
   vtx_nPV_weight[num] -> Fill(nVtx, weight);

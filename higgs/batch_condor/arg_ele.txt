@@ -2,6 +2,7 @@ DATA  12 DoubleElectron_May10 electron
 DATA  12 DoubleElectron_PromptV4_1 electron
 DATA  12 DoubleElectron_PromptV4_2 electron
 DATA  12 DoubleElectron_PromptV4_3 electron
+DATA  12 DoubleElectron_PromptV4_4 electron
 ZJets 0 DYToEE_1 electron
 ZJets 0 DYToEE_2 electron
 ZJets 0 DYToEE_3 electron
