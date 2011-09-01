@@ -2,3 +2,11 @@ DATA  4,8 DoubleMu_May10 muon
 DATA  4,8 DoubleMu_PromptV4 muon
 DATA  4,8 DoubleMu_Aug05 muon
 DATA  4,8 DoubleMu_PromptV6 muon
+DATA  12 DoubleElectron_May10 electron
+DATA  12 DoubleElectron_Aug05 electron
+DATA  12 DoubleElectron_PromptV4_1 electron
+DATA  12 DoubleElectron_PromptV4_2 electron
+DATA  12 DoubleElectron_PromptV4_3 electron
+DATA  12 DoubleElectron_PromptV4_4 electron
+DATA  12 DoubleElectron_PromptV6 electron
+
