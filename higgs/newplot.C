@@ -2,7 +2,7 @@
 
 using namespace std;
 
-void newplot(Int_t sel =1, TString hPath ="v30") {
+void newplot(Int_t sel =1, TString hPath ="v00") {
   gROOT->LoadMacro("./makePlot.C");
   gROOT->LoadMacro("./merge.C");
   //gROOT->ProcessLine(".L ../data/tdrstyle.C");
@@ -18,26 +18,37 @@ void newplot(Int_t sel =1, TString hPath ="v30") {
   TStopwatch timer;	
   timer.Start();
 
-  TFile* fda_2011A_DoubleMu_May10  = new TFile(Form("./%s/hhhh_DoubleMu_May10.root",histoPath.Data()));
-  TFile* fda_2011A_DoubleMu_PromptV4 = new TFile(Form("./%s/hhhh_DoubleMu_PromptV4.root",histoPath.Data()));
-  TFile* fda_2011A_DoubleMu_Aug05    = new TFile(Form("./%s/hhhh_DoubleMu_Aug05.root",histoPath.Data()));
-  TFile* fda_2011A_DoubleMu_PromptV6 = new TFile(Form("./%s/hhhh_DoubleMu_PromptV6.root",histoPath.Data()));
+  TFile* fda_2011A_DoubleMu_May10    = new TFile(Form("./%s/muon/hhhh_DoubleMu_May10.root",hPath.Data()));
+  TFile* fda_2011A_DoubleMu_PromptV4 = new TFile(Form("./%s/muon/hhhh_DoubleMu_PromptV4.root",hPath.Data()));
+  TFile* fda_2011A_DoubleMu_Aug05    = new TFile(Form("./%s/muon/hhhh_DoubleMu_Aug05.root",hPath.Data()));
+  TFile* fda_2011A_DoubleMu_PromptV6 = new TFile(Form("./%s/muon/hhhh_DoubleMu_PromptV6.root",hPath.Data()));
 
-  TFile* fda_2011A_DoubleEl_May10  = new TFile(Form("./%s/hhhh_DoubleMu_May10.root",histoPath.Data()));
-  TFile* fda_2011A_DoubleEl_PromptV4 = new TFile(Form("./%s/hhhh_DoubleMu_PromptV4.root",histoPath.Data()));
-  TFile* fda_2011A_DoubleEl_Aug05    = new TFile(Form("./%s/hhhh_DoubleMu_Aug05.root",histoPath.Data()));
-  TFile* fda_2011A_DoubleEl_PromptV6 = new TFile(Form("./%s/hhhh_DoubleMu_PromptV6.root",histoPath.Data()));
+  TFile* fda_2011A_DoubleEl_May10      = new TFile(Form("./%s/electron/hhhh_DoubleElectron_May10.root",hPath.Data()));
+  TFile* fda_2011A_DoubleEl_PromptV4_1 = new TFile(Form("./%s/electron/hhhh_DoubleElectron_PromptV4_1.root",hPath.Data()));
+  TFile* fda_2011A_DoubleEl_PromptV4_2 = new TFile(Form("./%s/electron/hhhh_DoubleElectron_PromptV4_2.root",hPath.Data()));
+  TFile* fda_2011A_DoubleEl_PromptV4_3 = new TFile(Form("./%s/electron/hhhh_DoubleElectron_PromptV4_3.root",hPath.Data()));
+  TFile* fda_2011A_DoubleEl_PromptV4_4 = new TFile(Form("./%s/electron/hhhh_DoubleElectron_PromptV4_4.root",hPath.Data()));
+  TFile* fda_2011A_DoubleEl_Aug05      = new TFile(Form("./%s/electron/hhhh_DoubleElectron_Aug05.root",hPath.Data()));
+  TFile* fda_2011A_DoubleEl_PromptV6   = new TFile(Form("./%s/electron/hhhh_DoubleElectron_PromptV6.root",hPath.Data()));
 
 
-  TFile* fmc_DYmumu_1     = new TFile(Form("./%s/hhhh_DYToMuMu_1.root",histoPath.Data() ));
-  TFile* fmc_DYmumu_2     = new TFile(Form("./%s/hhhh_DYToMuMu_2.root",histoPath.Data() ));
-  TFile* fmc_DYmumu_3     = new TFile(Form("./%s/hhhh_DYToMuMu_3.root",histoPath.Data() ));
-  TFile* fmc_DYmumu_4     = new TFile(Form("./%s/hhhh_DYToMuMu_4.root",histoPath.Data() ));
-  // TFile* fmc_Wjets     = new TFile(Form("./%s/hhhh_Wjets.root",histoPath.Data() ));
+  TFile* fmc_DYmumu_1     = new TFile(Form("./%s/muon/hhhh_DYToMuMu_1.root",hPath.Data() ));
+  TFile* fmc_DYmumu_2     = new TFile(Form("./%s/muon/hhhh_DYToMuMu_2.root",hPath.Data() ));
+  TFile* fmc_DYmumu_3     = new TFile(Form("./%s/muon/hhhh_DYToMuMu_3.root",hPath.Data() ));
+  TFile* fmc_DYmumu_4     = new TFile(Form("./%s/muon/hhhh_DYToMuMu_4.root",hPath.Data() ));
+ 
+  TFile* fmc_DYee_1     = new TFile(Form("./%s/electron/hhhh_DYToEE_1.root",hPath.Data() ));
+  TFile* fmc_DYee_2     = new TFile(Form("./%s/electron/hhhh_DYToEE_2.root",hPath.Data() ));
+  TFile* fmc_DYee_3     = new TFile(Form("./%s/electron/hhhh_DYToEE_3.root",hPath.Data() ));
+  TFile* fmc_DYee_4     = new TFile(Form("./%s/electron/hhhh_DYToEE_4.root",hPath.Data() ));
+
+ // TFile* fmc_Wjets     = new TFile(Form("./%s/hhhh_Wjets.root",histoPath.Data() ));
 
   TFile* fmc_ZZtoAny   = new TFile(Form("./%s/hhhh_ZZ.root",histoPath.Data() ));
   TFile* fmc_tt_1      = new TFile(Form("./%s/hhhh_ttbar_1.root",histoPath.Data() ));
   TFile* fmc_tt_2      = new TFile(Form("./%s/hhhh_ttbar_2.root",histoPath.Data() ));
+  TFile* fmc_tt_3      = new TFile(Form("./%s/hhhh_ttbar_3.root",histoPath.Data() ));
+  TFile* fmc_tt_4      = new TFile(Form("./%s/hhhh_ttbar_4.root",histoPath.Data() ));
   TFile* fmc_WW        = new TFile(Form("./%s/hhhh_WW.root",histoPath.Data() ));
   TFile* fmc_WZ        = new TFile(Form("./%s/hhhh_WZ.root",histoPath.Data() ));
   TFile* fmc_tW        = new TFile(Form("./%s/hhhh_tW.root",histoPath.Data() ));
@@ -57,7 +68,10 @@ void newplot(Int_t sel =1, TString hPath ="v30") {
   }
   if(sel==2){
     list_Data -> Add(fda_2011A_DoubleEl_May10);
-    list_Data -> Add(fda_2011A_DoubleEl_PromptV4);
+    list_Data -> Add(fda_2011A_DoubleEl_PromptV4_1);
+    list_Data -> Add(fda_2011A_DoubleEl_PromptV4_2);
+    list_Data -> Add(fda_2011A_DoubleEl_PromptV4_3);
+    list_Data -> Add(fda_2011A_DoubleEl_PromptV4_4);
     list_Data -> Add(fda_2011A_DoubleEl_Aug05);
     list_Data -> Add(fda_2011A_DoubleEl_PromptV6);
   } 
@@ -66,11 +80,18 @@ void newplot(Int_t sel =1, TString hPath ="v30") {
   
   list_Zjets = new TList();
   
-  list_Zjets->Add(fmc_DYmumu_1);
-  list_Zjets->Add(fmc_DYmumu_2);
-  list_Zjets->Add(fmc_DYmumu_3);
-  list_Zjets->Add(fmc_DYmumu_4);
-  //list_Zjets->Add(fmc_DYee);
+  if(sel==1){
+    list_Zjets->Add(fmc_DYmumu_1);
+    list_Zjets->Add(fmc_DYmumu_2);
+    list_Zjets->Add(fmc_DYmumu_3);
+    list_Zjets->Add(fmc_DYmumu_4);
+  }
+  if(sel==2){
+    list_Zjets->Add(fmc_DYee_1);
+    list_Zjets->Add(fmc_DYee_2);
+    list_Zjets->Add(fmc_DYee_3);
+    list_Zjets->Add(fmc_DYee_4);
+  }
   //list_Zjets->Add(fmc_DYtautau);
   
   MergeRootfile(m_Zjets, list_Zjets, kGreen+2, kRed+1);
@@ -79,6 +100,8 @@ void newplot(Int_t sel =1, TString hPath ="v30") {
   list_ttbar = new TList();
   list_ttbar -> Add(fmc_tt_1);
   list_ttbar -> Add(fmc_tt_2);
+  list_ttbar -> Add(fmc_tt_3);
+  list_ttbar -> Add(fmc_tt_4);
   MergeRootfile(m_ttbar, list_ttbar, kOrange+1, kGreen+2);
 
 

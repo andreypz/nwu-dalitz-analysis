@@ -1,0 +1,11 @@
+/uscms/home/naodell/nobackup/MC/VBF_ToHToZZTo2L2Nu_M-200/nuTuple_10_1_42s.root
+/uscms/home/naodell/nobackup/MC/VBF_ToHToZZTo2L2Nu_M-200/nuTuple_11_1_q6X.root
+/uscms/home/naodell/nobackup/MC/VBF_ToHToZZTo2L2Nu_M-200/nuTuple_1_1_MXV.root
+/uscms/home/naodell/nobackup/MC/VBF_ToHToZZTo2L2Nu_M-200/nuTuple_2_1_sqU.root
+/uscms/home/naodell/nobackup/MC/VBF_ToHToZZTo2L2Nu_M-200/nuTuple_3_1_a1q.root
+/uscms/home/naodell/nobackup/MC/VBF_ToHToZZTo2L2Nu_M-200/nuTuple_4_1_hQ7.root
+/uscms/home/naodell/nobackup/MC/VBF_ToHToZZTo2L2Nu_M-200/nuTuple_5_1_XdC.root
+/uscms/home/naodell/nobackup/MC/VBF_ToHToZZTo2L2Nu_M-200/nuTuple_6_1_p9s.root
+/uscms/home/naodell/nobackup/MC/VBF_ToHToZZTo2L2Nu_M-200/nuTuple_7_1_gtl.root
+/uscms/home/naodell/nobackup/MC/VBF_ToHToZZTo2L2Nu_M-200/nuTuple_8_1_9Z1.root
+/uscms/home/naodell/nobackup/MC/VBF_ToHToZZTo2L2Nu_M-200/nuTuple_9_1_fjU.root

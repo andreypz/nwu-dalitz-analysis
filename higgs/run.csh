@@ -32,11 +32,12 @@ gROOT->LoadMacro("../src/TCPhoton.cc+");
 gROOT->LoadMacro("../src/TCGenJet.cc+");
 gROOT->LoadMacro("../src/TCGenParticle.cc+");
 gROOT->LoadMacro("../src/TCPrimaryVtx.cc+");
+gROOT->LoadMacro("../src/TCTrigger.cc+");
+gROOT->LoadMacro("../src/TCTriggerObject.cc+");
 
 TChain* fChain = new TChain("ntupleProducer/eventTree");
 
 ifstream sourceFiles("./sourceFiles/$3.txt");
-  //char line[128];
 string line;
 int  count = 0;
   cout<<"Adding files from $3 to chain..."<<endl;
@@ -86,6 +87,6 @@ cout << "\n";
 root -l -b -q run.C
 
 rm run.C
-mv higgsHistograms.root hhhh_$3.root
+mv a_higgsHistograms.root hhhh_$3.root
 
 echo "End runninng"

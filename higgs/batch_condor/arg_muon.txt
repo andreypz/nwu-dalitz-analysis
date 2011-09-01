@@ -15,8 +15,10 @@ WW    0 WW muon
 ZZ    0 ZZ muon
 WZ    0 WZ muon
 ggHZZ200 0 ggHZZ200 muon
+ggHZZ250 0 ggHZZ250 muon
 ggHZZ300 0 ggHZZ300 muon
 ggHZZ350 0 ggHZZ350 muon
 ggHZZ400 0 ggHZZ400 muon
 ggHZZ450 0 ggHZZ450 muon
-VBFHZZ200 0 VBFHZZ200 muon
+ggHZZ500 0 ggHZZ500 muon
+ggHZZ550 0 ggHZZ550 muon

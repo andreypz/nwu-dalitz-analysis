@@ -1,0 +1,7 @@
+dcap://cmsdca1.fnal.gov:24140/pnfs/fnal.gov/usr/cms/WAX/11/store/user/radek/Data/Photon_Run2011A_PromptReco-v6/nuTuple_94_1_oEv.root
+dcap://cmsdca1.fnal.gov:24140/pnfs/fnal.gov/usr/cms/WAX/11/store/user/radek/Data/Photon_Run2011A_PromptReco-v6/nuTuple_95_1_lyV.root
+dcap://cmsdca1.fnal.gov:24140/pnfs/fnal.gov/usr/cms/WAX/11/store/user/radek/Data/Photon_Run2011A_PromptReco-v6/nuTuple_96_1_vPk.root
+dcap://cmsdca1.fnal.gov:24140/pnfs/fnal.gov/usr/cms/WAX/11/store/user/radek/Data/Photon_Run2011A_PromptReco-v6/nuTuple_97_1_0df.root
+dcap://cmsdca1.fnal.gov:24140/pnfs/fnal.gov/usr/cms/WAX/11/store/user/radek/Data/Photon_Run2011A_PromptReco-v6/nuTuple_98_1_sNT.root
+dcap://cmsdca1.fnal.gov:24140/pnfs/fnal.gov/usr/cms/WAX/11/store/user/radek/Data/Photon_Run2011A_PromptReco-v6/nuTuple_99_1_6TP.root
+dcap://cmsdca1.fnal.gov:24140/pnfs/fnal.gov/usr/cms/WAX/11/store/user/radek/Data/Photon_Run2011A_PromptReco-v6/nuTuple_9_1_xZm.root

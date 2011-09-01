@@ -1,0 +1,11 @@
+/uscms/home/naodell/nobackup/MC/VBF_ToHToZZTo2L2Nu_M-140/nuTuple_10_1_YS6.root
+/uscms/home/naodell/nobackup/MC/VBF_ToHToZZTo2L2Nu_M-140/nuTuple_11_1_lj8.root
+/uscms/home/naodell/nobackup/MC/VBF_ToHToZZTo2L2Nu_M-140/nuTuple_1_1_Y5X.root
+/uscms/home/naodell/nobackup/MC/VBF_ToHToZZTo2L2Nu_M-140/nuTuple_2_1_wn8.root
+/uscms/home/naodell/nobackup/MC/VBF_ToHToZZTo2L2Nu_M-140/nuTuple_3_1_svM.root
+/uscms/home/naodell/nobackup/MC/VBF_ToHToZZTo2L2Nu_M-140/nuTuple_4_1_UyK.root
+/uscms/home/naodell/nobackup/MC/VBF_ToHToZZTo2L2Nu_M-140/nuTuple_5_1_BQ5.root
+/uscms/home/naodell/nobackup/MC/VBF_ToHToZZTo2L2Nu_M-140/nuTuple_6_1_tlS.root
+/uscms/home/naodell/nobackup/MC/VBF_ToHToZZTo2L2Nu_M-140/nuTuple_7_1_iNo.root
+/uscms/home/naodell/nobackup/MC/VBF_ToHToZZTo2L2Nu_M-140/nuTuple_8_1_fHz.root
+/uscms/home/naodell/nobackup/MC/VBF_ToHToZZTo2L2Nu_M-140/nuTuple_9_1_hZs.root

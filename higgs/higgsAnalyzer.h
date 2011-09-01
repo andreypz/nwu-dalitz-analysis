@@ -29,7 +29,6 @@
 #include "TFile.h"
 #include "TProfile.h"
 
-
 #include "../src/TCJet.h"
 #include "../src/TCMET.h"
 #include "../src/TCElectron.h"
@@ -38,6 +37,8 @@
 #include "../src/TCPhoton.h"
 #include "../src/TCGenJet.h"
 #include "../src/TCPrimaryVtx.h"
+#include "../src/TCTrigger.h"
+#include "../src/TCTriggerObject.h"
 
 #define nC 20  //nCuts in the analysis. make plots after each cut
 
@@ -51,7 +52,7 @@ class higgsAnalyzer : public TSelector {
   Float_t qT, diEta, Mll, Mll_EB, Mll_EE, Mll_EX;
   Float_t MET, MET_phi, MET1, MET1_phi;
   Float_t puCorrMET;
-  Float_t MT, MTZ, pTll;
+  Float_t MT, MT1, MTZ, pTll;
   Float_t METqt, MET1qt;
   Int_t nVtx;
   Float_t nDofVtx1, nDofVtx2;
@@ -96,69 +97,10 @@ class higgsAnalyzer : public TSelector {
 		TH2D*     h2_nEventsByHMass;
 		TProfile* p1_nVtcs;
 
-		//leptons
-		TH1D*     h1_leadLeptonPt;     
-		TH1D*     h1_leadLeptonEta;    
-		TH1D*     h1_leadLeptonPhi;    
-		TH1D*     h1_trailingLeptonPt; 
-		TH1D*     h1_trailingLeptonEta;
-		TH1D*     h1_trailingLeptonPhi;
-		TH1D*     h1_diLeptonMass;
-		TH1D*     h1_diLeptonTransMass;
-		TH1D*     h1_diLeptonQt;
-		TH1D*     h1_diLeptonPtRatio;
-		TH1D*     h1_diLeptonDeltaEta;
-		TH1D*     h1_diLeptonDeltaPhi;
-		TH1D*     h1_diLeptonDeltaR;
-
-		//jets
-		TH1D*     h1_jetMult;
-		TH1D*     h1_leadJetPt;
-		TH1D*     h1_leadJetEta;
-		TH1D*     h1_leadJetPhi;
-		TH1D*     h1_tailJetPt;
-		TH1D*     h1_tailJetEta;
-		TH1D*     h1_tailJetPhi;
-		TH1D*     h1_nearestJetEta;
-
 		TH1D*     h1_bJetMultPreVeto;
 		TH1D*     h1_bJetMultPostVeto;
-		TH1D*     h1_leadBJetPt;
-		TH1D*     h1_leadBJetEta;
-		TH1D*     h1_leadBJetPhi;
 
-		//MET
 		TH1D*     h1_Met;
-		TH1D*     h1_MetPhi;
-		TH1D*     h1_MetSumEt;
-		TH1D*     h1_ProjMetByQt;
-		TH1D*     h1_OrthoMetByQt;
-		TH1D*     h1_ReducedMET;
-		TH1D*     h1_ReducedMETTransverse;
-		TH1D*     h1_ReducedMETLongitudinal;
-		TH1D*     h1_ProjectedMet;
-		TH1D*     h1_MetNearestJetDeltaPhi;
-
-		//MET + Lepton
-		TH1D*     h1_MetOverQt;
-		TH1D*     h1_MetPlusQtMagnitude;
-		TH1D*     h1_MetQtDeltaPhi;
-		TH1D*     h1_MetLeadLeptonDeltaPhi;
-		TH1D*     h1_MetTrailingLeptonDeltaPhi;
-		TH1D*     h1_ZPlusJetMHT;
-		TH1D*     h1_MetDileptonMT;
-		TH1D*     h1_MetLeadLeptonMT;
-		TH1D*     h1_MetTrailingLeptonMT;
-
-		// 2D histograms
-		TH2D*     h2_MetByMetOverQt;
-		TH2D*     h2_MetByMetPlusQtMag;
-		TH2D*     h2_JetMultVsPVMult;
-		TH2D*     h2_MetLeptonMT;
-
-		// For testing
-		TH1D*     h1_TESTS[10];
-        TH2D*     h2_TESTS[10];
 
 	public :
 		TTree          *fChain;   //!pointer to the analyzed TTree or TChain
@@ -206,12 +148,12 @@ class higgsAnalyzer : public TSelector {
 		//For counting events
 		//        int          nEvents[16];
 		//For counting weighted events
-		float        nEventsWeighted[16];
+		float        nEventsWeighted[nC];
 		
-		UInt_t nEvents[20];
-		UInt_t nEventsPassNoiseFilter[6][20]; //1-Hcal, 2-Ecal, 3- Scraping, 4-CSCTight, 5-CSCLoose,   0-passed all                                                  
+		UInt_t nEvents[nC];
+		UInt_t nEventsPassNoiseFilter[6][nC]; //1-Hcal, 2-Ecal, 3- Scraping, 4-CSCTight, 5-CSCLoose,   0-passed all
 		
-
+/*
 		//MET corrections
 		struct metCorrs {
 			float Sigma0;
@@ -220,6 +162,7 @@ class higgsAnalyzer : public TSelector {
 		} metCorr;
 
 		std::map<string, metCorrs> metCorrMap;
+*/
 
 		higgsAnalyzer(TTree * /*tree*/ =0) { }
 		virtual ~higgsAnalyzer() { }
@@ -240,10 +183,10 @@ class higgsAnalyzer : public TSelector {
 		virtual float   Dz(TVector3 objVtx, TLorentzVector objP4, TVector3 vtx);
 		virtual float   Dxy(TVector3 objVtx, TLorentzVector objP4, TVector3 vtx);
 		virtual void    PostSelectionYieldCounter(float nEventsPS, TLorentzVector metP4, TLorentzVector zP4, float dPhiJetMet, float evtWeight);
-		virtual void    MetPlusZPlots(TLorentzVector metP4, TLorentzVector ZP4, float evtWeight);
-		virtual void    MetPlusLeptonPlots(TLorentzVector metP4, TLorentzVector p1, TLorentzVector p2, float evtWeight);
-		virtual void    LeptonBasicPlots(TLorentzVector p1, TLorentzVector p2, float evtWeight);
-		virtual void    DileptonBasicPlots(TLorentzVector ZP4, float evtWeight);
+		//virtual void    MetPlusZPlots(TLorentzVector metP4, TLorentzVector ZP4, float evtWeight);
+		//virtual void    MetPlusLeptonPlots(TLorentzVector metP4, TLorentzVector p1, TLorentzVector p2, float evtWeight);
+		//virtual void    LeptonBasicPlots(TLorentzVector p1, TLorentzVector p2, float evtWeight);
+		//virtual void    DileptonBasicPlots(TLorentzVector ZP4, float evtWeight);
 		virtual bool    CosmicMuonFilter(TCMuon , TCMuon );
 		virtual float   CalculateTransMass(TLorentzVector p1, TLorentzVector p2);
 		virtual float   CalculateTransMassAlt(TLorentzVector p1, TLorentzVector p2);
