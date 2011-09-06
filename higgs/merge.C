@@ -2,8 +2,8 @@
    http://root.cern.ch/root/html/tutorials/io/hadd.C.html
 */
 
-void MergeRootfile( TDirectory *target, TList *sourcelist , Int_t color1, Int_t color2) {
-  // cout << "Merging into file: " << target->GetPath() << endl;
+void MergeRootfile( TDirectory *target, TList *sourcelist, Int_t color1, Int_t color2) {
+  cout << "Merging into file: " << target->GetPath() << endl;
   TString path( (char*)strstr( target->GetPath(), ":" ) );
   path.Remove( 0, 2 );
 
@@ -35,6 +35,8 @@ void MergeRootfile( TDirectory *target, TList *sourcelist , Int_t color1, Int_t 
       h1 -> SetLineColor(color1);
       h1 -> SetFillColor(color2);
       h1 -> SetLineWidth(2);
+      //scale to 1000pb. Reminder the initial MC samples are already scaled to 1000, this is needed only for Photon+jets.
+      //h1 -> Scale(1000/lumiInput); 
       //  h1 -> UseCurrentStyle();
       // loop over all source files and add the content of the
       // correspondant histogram to the one pointed to by "h1"
@@ -46,6 +48,7 @@ void MergeRootfile( TDirectory *target, TList *sourcelist , Int_t color1, Int_t 
 	TKey *key2 = (TKey*)gDirectory->GetListOfKeys()->FindObject(h1->GetName());
 	if (key2) {
 	  TH1 *h2 = (TH1*)key2->ReadObj();
+	  //h2 -> Scale(1000/lumiInput);
 	  h1->Add( h2 );
 	  delete h2;
 	}
@@ -60,11 +63,13 @@ void MergeRootfile( TDirectory *target, TList *sourcelist , Int_t color1, Int_t 
 
       globChain = new TChain(obj_name);
       globChain->Add(first_source->GetName());
+     
       TFile *nextsource = (TFile*)sourcelist->After( first_source );
-      //      const char* file_name = nextsource->GetName();
-       //cout << "file name  " << file_name << endl;
+      const char* file_name = nextsource->GetName();
+      //cout << "file name  " << file_name << endl;
       while ( nextsource ) {
 
+	//	nextsource->cd( path );
 	globChain->Add(nextsource->GetName());
 	nextsource = (TFile*)sourcelist->After( nextsource );
       }
@@ -72,7 +77,7 @@ void MergeRootfile( TDirectory *target, TList *sourcelist , Int_t color1, Int_t 
     } else if ( obj->IsA()->InheritsFrom( TDirectory::Class() ) ) {
       // it's a subdirectory
 
-      // cout << "Found subdirectory " << obj->GetName() << endl;
+      //cout << "Found subdirectory " << obj->GetName() << endl;
 
       // create a new subdir of same name and title in the target file
       target->cd();
@@ -81,7 +86,7 @@ void MergeRootfile( TDirectory *target, TList *sourcelist , Int_t color1, Int_t 
       // newdir is now the starting point of another round of merging
       // newdir still knows its depth within the target file via
       // GetPath(), so we can still figure out where we are in the recursion
-      MergeRootfile( newdir, sourcelist , color1, color2);
+      MergeRootfile( newdir, sourcelist, color1, color2);
 
     } else {
 
@@ -110,4 +115,31 @@ void MergeRootfile( TDirectory *target, TList *sourcelist , Int_t color1, Int_t 
   target->SaveSelf(kTRUE);
   TH1::AddDirectory(status);
 
+}
+
+void RescaleToLumiAndColors( TFile *HistoFile, Float_t lumiInput=1, Float_t lumiToScale =1, Int_t lineColor, Int_t fillColor) {
+
+  HistoFile -> cd("Andrey");
+  TIter nextkey( gDirectory->GetListOfKeys() );
+  //gDirectory->Print();
+
+  TKey *key, *oldkey=0;
+  while ( (key = (TKey*)nextkey()))
+    {
+      if (oldkey && !strcmp(oldkey->GetName(),key->GetName())) continue;
+      TObject *obj = key->ReadObj();
+      //cout<<obj->GetName()<<endl;
+      
+      if ( ! (obj->IsA()->InheritsFrom( TH1::Class() )) ) continue;
+      TH1 *hist = (TH1*)key->ReadObj();
+      hist -> Scale(lumiToScale/lumiInput);
+      hist -> SetLineColor(lineColor);
+      hist -> SetFillColor(fillColor);
+      hist -> SetLineWidth(2);
+      hist->Write("",TH1::kWriteDelete); //overwrite the object in the file
+      delete obj;
+	//cout<<sample1<<"  nEv: "<<nTotEv<<"   cs: "<<cs<<"   Rescaling all the histogram "<<hist->GetName()<<" by: "<<scaleFactor<<endl; 
+       
+  }
+  
 }

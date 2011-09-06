@@ -39,17 +39,17 @@ void makePlot(Int_t sel=1, TString hPath="00")
   if (sel==1)  {ssel = "muon"; TString imgpath("~/afs/public_html/higgs/overview/muon/"); }
   if (sel==2)  {ssel = "electron"; TString imgpath("~/afs/public_html/higgs/overview/electron/"); }
 
-  TString histoPath =  hPath.Data();
+  TString histoPath = Form("%s/%s", hPath.Data(), ssel.Data());
   cout<<"histoPath:  "<<histoPath.Data()<<"  int Lumi: "<<intLumi<<endl;
 
-  Bool_t doPhotons = 0, makeZjetsQt=0, doEBEE=0, doOverview=0;
-  Bool_t doSB = 0, doTest=1;
+  Bool_t doTest=1, doEBEE=0;
+  Bool_t doPhotons = 0, makeZjetsQt=0, doOverview=0, doSB = 0;
 
   if(sel==1){
     TFile* fda_2011A_DoubleMu_May10  = new TFile(Form("./%s/hhhh_DoubleMu_May10.root",histoPath.Data()));
     TFile* fda_2011A_DoubleMu_PromptV4  = new TFile(Form("./%s/hhhh_DoubleMu_PromptV4.root",histoPath.Data()));
   }
-  TFile* fda_Data  = new TFile(Form("./m_Data_%i.root", sel));  //Merged Data
+  TFile* fda_Data  = new TFile(Form("./%s/m_Data_%i.root", hPath.Data(),  sel));  //Merged Data
   TFile  *fData = (TFile*)fda_Data;
   
   //if (sel==1) TFile  *fData = (TFile*)fda_2011A_DoubleMu_May10;
@@ -73,9 +73,10 @@ void makePlot(Int_t sel=1, TString hPath="00")
 
   //TFile* fmc_ggH600    = new TFile(Form("./%s/hhhh_SignalM600_HToZZ.root",histoPath.Data() ));
 
-  TFile* fmc_Zjets  = new TFile(Form("./m_Zjets_%i.root",sel ));
-  TFile* fmc_tt     = new TFile(Form("./m_ttbar_%i.root",sel ));
-  TFile* fmc_Top    = new TFile(Form("./m_Top_%i.root",sel ));
+  if(doPhotons)  TFile* fmc_Zjets  = new TFile(Form("./%s/m_DataPh_%i.root", hPath.Data(), sel ));
+  else           TFile* fmc_Zjets  = new TFile(Form("./%s/m_Zjets_%i.root", hPath.Data(), sel ));
+  TFile* fmc_tt     = new TFile(Form("./%s/m_ttbar_%i.root", hPath.Data(), sel ));
+  TFile* fmc_Top    = new TFile(Form("./%s/m_Top_%i.root", hPath.Data(), sel ));
  
   //List of background samples to Stack
   list_bg = new TList();
@@ -131,7 +132,7 @@ void makePlot(Int_t sel=1, TString hPath="00")
       hs_met0_et[n]      = makeStack(list_bg, Form("met0_et_%i", n), intLumi);
       hs_met1_et[n]      = makeStack(list_bg, Form("met1_et_%i", n), intLumi);
       hs_met3_et[n]      = makeStack(list_bg, Form("met3_et_%i", n), intLumi);
-
+      
       hs_di_qt[n]      = makeStack(list_bg, Form("di_qt_%i",n), intLumi);
       hs_di_mass[n]    = makeStack(list_bg, Form("di_mass_%i",n), intLumi);
       hs_di_mass_EB[n] = makeStack(list_bg, Form("di_mass_EB_%i",n), intLumi);
@@ -176,7 +177,7 @@ void makePlot(Int_t sel=1, TString hPath="00")
   for(Int_t n=0; n<size; n++)
     {
       ff[n] = (TFile*)list_legend->At(n);
-      hh[n] = (TH1*) ff[n]->Get("Andrey/met0_et_0")->Clone();
+      hh[n] = (TH1*) ff[n]->Get("Andrey/met1_et_8")->Clone();
       cout<<n<<"   "<<ff[n] -> GetName()<<endl;
       forLegend[n] = (TH1F*)hh[n];
     }
@@ -198,7 +199,7 @@ void makePlot(Int_t sel=1, TString hPath="00")
   
   leg01->SetFillColor(kWhite);
   
-  hs_met0_et[F0] -> Draw("hist");
+  hs_vtx_nPV_raw[F0] -> Draw("hist");
   c1 -> SaveAs(imgpath+"ov01.png");
   TCanvas *c2 = new TCanvas("c2","example",600,700);
   
@@ -250,6 +251,111 @@ void makePlot(Int_t sel=1, TString hPath="00")
     TString testpath("~/afs/public_html/test/");  
     
 
+    Double_t x_dPhi[200], x_met[200], x_err[200];
+    Double_t StoB[200], StoB_err[200];
+    Double_t sqrtStoB[200], sqrtStoB_err[200];
+    
+    for(Int_t i=0; i<100; i++)
+      {
+	x_dPhi[i] = 0.04*i;
+	x_met[i]  = 4*i;
+	//cout<<i<<"  "<<intLumi<<endl;
+	fmc_Zjets -> cd("Andrey");
+	Double_t cs, nEv, scaleFactor;
+	cs = 1666;
+	nEv = 29.7e6;
+	scaleFactor      = intLumi*cs/nEv;
+
+	cutTree -> Draw("ct_pfMet>>h_pfMet",Form("ct_evtWeight*(ct_dPhiMetJet>0.28 && ct_pfMet>%f)", x_met[i]),"hist");
+	//cutTree -> Draw("ct_pfMet>>h_pfMet",Form("ct_evtWeight*(ct_dPhiMetJet>%f)", x_dPhi[i]),"hist");
+	//	cutTree -> Draw("ct_pfMet>>h_pfMet",Form("ct_evtWeight*(ct_pfMet>83 && ct_dPhiMetJet>%f)", x_dPhi[i]),"hist");
+	//cutTree -> Draw("ct_pfMet>>h_pfMet","ct_evtWeight*(ct_pfMet>83 && ct_MT>242 && ct_MT<320 && ct_dPhiMetJet>0.28)","hist");
+
+	TH1F * temp = (TH1F*)h_pfMet;
+	temp->Scale(scaleFactor);
+	Double_t bg_err =0 ;
+	//temp -> Print();
+
+	//	Double_t bg = 	temp -> Integral();
+	Double_t bg =  temp->TH1::IntegralAndError(-1,2000, bg_err);
+	
+	fmc_ggH300 -> cd("Andrey");
+	cs = 0.0301;
+	nEv = 99.990e3;
+	scaleFactor      = intLumi*cs/nEv;
+
+	cutTree -> Draw("ct_pfMet>>h_pfMet2",Form("ct_evtWeight*(ct_dPhiMetJet>0.28 && ct_pfMet>%f)", x_met[i]),"hist");
+	//cutTree -> Draw("ct_pfMet>>h_pfMet2",Form("ct_evtWeight*(ct_dPhiMetJet>%f)",x_dPhi[i]),"hist");
+	//cutTree -> Draw("ct_pfMet>>h_pfMet2",Form("ct_evtWeight*(ct_pfMet>83 && ct_dPhiMetJet>%f)",x_dPhi[i]),"hist");
+	//  cutTree -> Draw("ct_pfMet>>h_pfMet2","ct_evtWeight*(ct_pfMet>83 && ct_MT>242 && ct_MT<320 && ct_dPhiMetJet>0.28)","hist");
+
+	TH1F * temp = (TH1F*)h_pfMet2;
+	temp->Scale(scaleFactor);
+	Double_t sig_err = 0;
+	//Double_t sig = 	temp -> Integral();
+	Double_t sig = temp->TH1::IntegralAndError(-1,2000, sig_err);
+	
+
+	if(bg!=0) {
+	  StoB[i] = sig/bg;
+	  StoB_err[i] = StoB[i]*sqrt( pow(sig_err/sig,2) + pow(bg_err/bg,2));
+	}
+	else {StoB[i]=0; StoB_err[i]=0;}
+	x_err[i] =0;
+
+	if(sig+bg!=0) {
+	  sqrtStoB[i] = sig/sqrt(sig+bg) /1.;
+	  sqrtStoB_err[i] =  sqrtStoB[i]*sqrt( pow(sig_err/sig,2) + 0.25* (pow(sig_err,2) + pow(bg_err,2))/pow(sig+bg,2)  );
+	}
+	else {sqrtStoB[i] = 0; sqrtStoB_err[i] =0;}
+
+	//is this correct error propagation?	
+
+	//cout<<i<<"  "<<x_met[i]<<"    B="<<bg<<" S="<<sig<<"  S/B="<<StoB[i]<<"   S/sq(S+B)="<<sqrtStoB[i]<<endl;
+
+      }
+
+    gr1 = new TGraphErrors(100, x_met, StoB, x_err, StoB_err);
+    gr2 = new TGraphErrors(100, x_met, sqrtStoB, x_err, sqrtStoB_err);
+
+    //gr1 = new TGraphErrors(100, x_dPhi, StoB, x_err, StoB_err);
+    //gr2 = new TGraphErrors(100, x_dPhi, sqrtStoB, x_err, sqrtStoB_err);
+
+    c1->cd();
+    gr1->SetFillColor(4);
+    gr1->SetFillStyle(3010);
+    gr1 -> Draw("A3");
+    gr1 -> SetTitle(";pfMet cut; S/B");
+    //gr1 -> SetTitle(";dPhi(Met,Jet) cut; S/B");
+    c1 -> SaveAs(testpath+"p01.png");
+
+    //gr1 -> SetMinimum(0.0);
+    //gr1 -> SetMaximum(10);
+
+    gr2 -> SetFillColor(kRed);
+    gr2 -> SetFillStyle(3010);
+    gr2 -> Draw("same 3");
+    leg02 = new TLegend(0.55,0.75,0.9,0.89);
+    leg02 -> SetTextSize(0.04);
+    leg02->AddEntry(gr1, "S/B", "f");
+    leg02->AddEntry(gr2, "#frac{S}{#sqrt{S+B}} scaled", "f");
+    leg02->SetFillColor(kWhite);
+    leg02 -> Draw();
+	
+    c1 -> SaveAs(testpath+"p02.png");
+    
+    fData->cd("Andrey");
+    cutTree -> Draw("ct_dPhiMetJet>>h_h1",Form("ct_evtWeight*(ct_dPhiMetJet>%f)", 0),"hist");
+    fmc_ggH300 -> cd("Andrey");
+    cutTree -> Draw("ct_dPhiMetJet>>h_h2",Form("ct_evtWeight*(ct_dPhiMetJet>%f)", 0),"hist same");
+    h_h2->SetLineColor(kBlue);
+    c1 -> SetLogy();
+    c1 -> SaveAs(testpath+"p03.png");
+
+    //drawMuliPlot("#Delta#phi(MET, closest jet), p_{T}>20, |#eta|<2.4", 1, 0.001, 1000000, 0,5, hs_met_dPhiClosJet2[F0], c2, leg01, list_overlay, intLumi);
+    //c2 -> SaveAs(testpath+"p03.png");
+
+    /*
     drawMuliPlot("pfMET", 1, 0.001, 1000000, 0,3, hs_met_et[6], c2, leg01, list_overlay, intLumi); 
     c2 -> SaveAs(testpath+"p01.png");
     drawMuliPlot("MT", 1, 0.001, 1000000, 0,3, hs_mt[6], c2, leg01, list_overlay, intLumi); 
@@ -290,7 +396,7 @@ void makePlot(Int_t sel=1, TString hPath="00")
     c2 -> SaveAs(testpath+"p13.png");
     drawMuliPlot("nVtx reweighted", 0, 0.001, 30, 0,5, hs_vtx_nPV_weight[8], c2, leg01, list_overlay, intLumi); 
     c2 -> SaveAs(testpath+"p14.png");
-
+    */
 
     //drawMuliPlot("N b-jets pt>25", 0, 0.0, 30, 0.,5, hs_jet_b_N25[7], c2, leg01, list_overlay, intLumi);
     //c2 -> SaveAs(testpath+"p13.png");
@@ -634,7 +740,7 @@ void drawMuliPlot(TString xtitle, Int_t isLog, Float_t y1min, Float_t y1max, Flo
 
 
   for(Int_t n=1; n<size; n++)
-    hh[n] ->Scale(lumi/1000./10);
+    hh[n] ->Scale(lumi/1000.);
 
   TH1 *h_data = hh[0]->Clone();
 
@@ -703,30 +809,6 @@ TH1 *THStack::Sum()
   //cout<<"end of sum"<<endl;
   return hh;
 }
-
-
-
-
-void PrintYields(THStack *stack[], TH1 *signal, TH1 *data, Int_t sel, Int_t num, TString ver, string option="tex")
-{
-  TList * mylist = (TList*)stack[0]->GetHists();
-  TIter next(mylist);
-  TH1 *hh  = (TH1*) mylist -> First() ->Clone();
-  bins = hh -> GetNbinsX();
-
-  TObject *obj; 
-  while ((obj = next()))
-    {
-      // cout<<obj->GetName()<<endl;
-      if(obj == mylist->First()) continue;
-      hh = (TH1*)obj;     
-      if(option=="tex")    oo<<hh->Integral(0,bins+1)<<"\t& ";
-      if(option=="twiki")  oo<<hh->Integral(0,bins+1)<<"\t& ";
-    }
-
-}
-
-
 
 void PrintYields(TList *bgList, TList *sigList, TFile *dataFile, Float_t lumi, TString path, string option="tex")
 {
@@ -799,7 +881,7 @@ void PrintYields(TList *bgList, TList *sigList, TFile *dataFile, Float_t lumi, T
 	{
 	  ff[n] = (TFile*)bgList->At(n);
 	  if(j<6) hh[n] = (TH1*)ff[n]->Get( Form("Andrey/met0_et_%i",j) )->Clone();
-	  else hh[n] = (TH1*)ff[n]->Get( Form("Andrey/mt2_%i",j) )->Clone();
+	  else hh[n] = (TH1*)ff[n]->Get( Form("Andrey/met0_et_%i",j) )->Clone();
 	  //cout<<n<<"Yields:: file  "<<ff[n] -> GetName()<<"   histoname: "<<hh[n]->GetName()<<endl;
 	
 	  hh[n] -> Scale(lumi/1000);
@@ -814,42 +896,48 @@ void PrintYields(TList *bgList, TList *sigList, TFile *dataFile, Float_t lumi, T
 	}      
 
 
-      TFile* sigFile  = (TFile*)sigList->At(j-8); //higgs 
-      if(j==15)
-	TFile* sigFile  = (TFile*)sigList->At(1); //300 
+      if(j<=7){
+	TH1* data = (TH1*)dataFile->Get(  Form("Andrey/met0_et_%i",j) )->Clone();
+	Int_t nBins = data->GetNbinsX();
+	Float_t iBkg = total_bg;
+	oo.precision(0);
+	oo<<data->Integral(0,nBins+1);
 
-      if(j<6){
-	TH1* data = (TH1*)dataFile->Get( Form("Andrey/met0_et_%i",j) )->Clone();
-	TH1* sig  = (TH1*)sigFile ->Get( Form("Andrey/met0_et_%i",j))->Clone();
+	oo<<separator<<iBkg<<endLine<<endl;
       }
       else{
-	TH1* data = (TH1*)dataFile->Get(  Form("Andrey/mt2_%i",j) )->Clone();
-	TH1* sig  = (TH1*)sigFile ->Get(  Form("Andrey/mt2_%i",j))->Clone();
-      }
-      
-      Int_t sig_nBins = sig->GetNbinsX();
-      Int_t bkg_nBins = hh[0]->GetNbinsX();
-      Int_t nBins=0;
-      if (sig_nBins!=bkg_nBins) cout<<" IN yields \n WARNING:  different number of bis"<<endl;
-      else nBins = sig_nBins;
-      
-      Float_t iSig = sig -> Integral(0,nBins+1);  //Count overflows
-      Float_t iBkg = total_bg;
-      Float_t iBkg_err = total_bgError;
-      Float_t SB   = 0.1*iSig/iBkg;        //Higgs signal is 10*real in the histograms
-      //Float_t SrootB  = 0.1*iSig/sqrt(iBkg);
-      //Float_t SrootSB = 0.1*iSig/sqrt(iBkg + 0.1*iSig);
-      
-      oo.precision(0);
-      oo<<data->Integral(0,nBins+1);
-      if(j<=7) 
-	oo<<separator<<iBkg<<endLine<<endl;
-      if(j>6){
+	TH1* data = (TH1*)dataFile->Get(  Form("Andrey/met0_et_%i",j) )->Clone();
+
+	TFile* sigFile  = (TFile*)sigList->At(j-8); //higgs 
+	if(j==15)  
+	  TFile* sigFile  = (TFile*)sigList->At(1);
+       
+	TH1* sig  = (TH1*)sigFile ->Get(  Form("Andrey/met0_et_%i",j))->Clone();
+	sig -> Scale(lumi/1000);
+	Int_t sig_nBins = sig->GetNbinsX();
+	Int_t bkg_nBins = hh[0]->GetNbinsX();
+	Int_t nBins=0;
+	if (sig_nBins!=bkg_nBins) cout<<" IN yields \n WARNING:  different number of bis"<<endl;
+	else nBins = sig_nBins;
+	
+	//Float_t iSig = sig -> Integral();  //Count overflows
+	Float_t iSig = sig -> Integral(0,nBins+1);  //Count overflows
+	Float_t iBkg = total_bg;
+	Float_t iBkg_err = total_bgError;
+	Float_t SB   = 0.1*iSig/iBkg;        //Higgs signal is 10*real in the histograms
+	//Float_t SrootB  = 0.1*iSig/sqrt(iBkg);
+	//Float_t SrootSB = 0.1*iSig/sqrt(iBkg + 0.1*iSig);
+
+	oo.precision(0);
+	oo<<data->Integral(0,nBins+1);
+
 	oo.precision(2);
 	oo<<separator<<iBkg<<pmSign<<iBkg_err<<separator<<0.1*iSig<<separator;
 	oo.precision(3);
 	oo<<SB<<endLine<<endl;  
+
       }
+      
   }
 
 

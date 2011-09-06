@@ -14,3 +14,38 @@ DATA 14,15,16,17,18,19,20,21,22,23 Photon_PromptV6_2 gamma
 DATA 14,15,16,17,18,19,20,21,22,23 Photon_PromptV6_3 gamma
 DATA 14,15,16,17,18,19,20,21,22,23 Photon_PromptV6_4 gamma
 DATA 14,15,16,17,18,19,20,21,22,23 Photon_PromptV6_5 gamma
+
+DATA 14,15,16,17,18,19,20,21,22,23 Photon_May10_1 muGamma
+DATA 14,15,16,17,18,19,20,21,22,23 Photon_May10_2 muGamma
+DATA 14,15,16,17,18,19,20,21,22,23 Photon_May10_3 muGamma
+DATA 14,15,16,17,18,19,20,21,22,23 Photon_Aug05_1 muGamma
+DATA 14,15,16,17,18,19,20,21,22,23 Photon_Aug05_2 muGamma
+DATA 14,15,16,17,18,19,20,21,22,23 Photon_Aug05_3 muGamma
+DATA 14,15,16,17,18,19,20,21,22,23 Photon_PromptV4_1 muGamma
+DATA 14,15,16,17,18,19,20,21,22,23 Photon_PromptV4_2 muGamma
+DATA 14,15,16,17,18,19,20,21,22,23 Photon_PromptV4_3 muGamma
+DATA 14,15,16,17,18,19,20,21,22,23 Photon_PromptV4_4 muGamma
+DATA 14,15,16,17,18,19,20,21,22,23 Photon_PromptV4_5 muGamma
+DATA 14,15,16,17,18,19,20,21,22,23 Photon_PromptV6_1 muGamma
+DATA 14,15,16,17,18,19,20,21,22,23 Photon_PromptV6_2 muGamma
+DATA 14,15,16,17,18,19,20,21,22,23 Photon_PromptV6_3 muGamma
+DATA 14,15,16,17,18,19,20,21,22,23 Photon_PromptV6_4 muGamma
+DATA 14,15,16,17,18,19,20,21,22,23 Photon_PromptV6_5 muGamma
+
+DATA 14,15,16,17,18,19,20,21,22,23 Photon_May10_1 eGamma
+DATA 14,15,16,17,18,19,20,21,22,23 Photon_May10_2 eGamma
+DATA 14,15,16,17,18,19,20,21,22,23 Photon_May10_3 eGamma
+DATA 14,15,16,17,18,19,20,21,22,23 Photon_Aug05_1 eGamma
+DATA 14,15,16,17,18,19,20,21,22,23 Photon_Aug05_2 eGamma
+DATA 14,15,16,17,18,19,20,21,22,23 Photon_Aug05_3 eGamma
+DATA 14,15,16,17,18,19,20,21,22,23 Photon_PromptV4_1 eGamma
+DATA 14,15,16,17,18,19,20,21,22,23 Photon_PromptV4_2 eGamma
+DATA 14,15,16,17,18,19,20,21,22,23 Photon_PromptV4_3 eGamma
+DATA 14,15,16,17,18,19,20,21,22,23 Photon_PromptV4_4 eGamma
+DATA 14,15,16,17,18,19,20,21,22,23 Photon_PromptV4_5 eGamma
+DATA 14,15,16,17,18,19,20,21,22,23 Photon_PromptV6_1 eGamma
+DATA 14,15,16,17,18,19,20,21,22,23 Photon_PromptV6_2 eGamma
+DATA 14,15,16,17,18,19,20,21,22,23 Photon_PromptV6_3 eGamma
+DATA 14,15,16,17,18,19,20,21,22,23 Photon_PromptV6_4 eGamma
+DATA 14,15,16,17,18,19,20,21,22,23 Photon_PromptV6_5 eGamma
+
