@@ -1065,7 +1065,8 @@ float higgsAnalyzer::getNevents(string dataset, TH1F* h)
   else if(dataset=="DYee")     nEv2 = 29.5e6;
   else if(dataset=="DYtautau") nEv2 = 29.5e6;
   else if(dataset=="ttbar")    nEv2 = 10.34e6;
-  else if(dataset=="tW")       nEv2 = 795e3;
+  else if(dataset=="tW")       nEv2 = 814390;
+  else if(dataset=="tbarW")    nEv2 = 809984;
   else if(dataset=="WW")       nEv2 = 220e3;
   else if(dataset=="ZZ")       nEv2 = 220e3;
   else if(dataset=="WZ")       nEv2 = 205e3;
