@@ -84,16 +84,16 @@ void higgsAnalyzer::Begin(TTree * /*tree*/)
       {
 	//cout<<n<<"  dbg hists"<<endl;
 
-	met1_et[n]      = new TH1F(Form("met1_et_%i",n), "met1_et", 40, 0,400);
-	met2_et[n]      = new TH1F(Form("met2_et_%i",n), "met2_et", 40, 0,400);
-	met3_et[n]      = new TH1F(Form("met3_et_%i",n), "met3_et", 40, 0,400);
-	met4_et[n]      = new TH1F(Form("met4_et_%i",n), "met4_et", 42, -20,400);
-	met5_et[n]      = new TH1F(Form("met5_et_%i",n), "met5_et", 42, -20,400);
-	met6_et[n]      = new TH1F(Form("met6_et_%i",n), "met6_et", 42, -20,400);
-	met7_et[n]      = new TH1F(Form("met7_et_%i",n), "met7_et", 42, -20,400);
-	met8_et[n]      = new TH1F(Form("met8_et_%i",n), "met8_et", 42, -20,400);
-	met9_et[n]      = new TH1F(Form("met9_et_%i",n), "met9_et", 42, -20,400);
-	met10_et[n]     = new TH1F(Form("met10_et_%i",n), "met10_et", 42, -20,400);
+	met1_et[n]      = new TH1F(Form("met1_et_%i",n), "met1_et", 80, 0,400);
+	met2_et[n]      = new TH1F(Form("met2_et_%i",n), "met2_et", 80, 0,400);
+	met3_et[n]      = new TH1F(Form("met3_et_%i",n), "met3_et", 84, -20,400);
+	met4_et[n]      = new TH1F(Form("met4_et_%i",n), "met4_et", 80, 0,400);
+	met5_et[n]      = new TH1F(Form("met5_et_%i",n), "met5_et", 80, 0,400);
+	met6_et[n]      = new TH1F(Form("met6_et_%i",n), "met6_et", 80, 0,400);
+	met7_et[n]      = new TH1F(Form("met7_et_%i",n), "met7_et", 80, 0,400);
+	met8_et[n]      = new TH1F(Form("met8_et_%i",n), "met8_et", 80, 0,400);
+	met9_et[n]      = new TH1F(Form("met9_et_%i",n), "met9_et", 80, 0,400);
+	met10_et[n]     = new TH1F(Form("met10_et_%i",n), "met10_et", 80, 0,400);
 
 
 	//met0_et_ovQt[n]  = new TH2F(Form("met0_et_ovQt_%i",n), "pfMET vs Met/qt", 40, 0,400, 40, 0,4);
@@ -115,10 +115,10 @@ void higgsAnalyzer::Begin(TTree * /*tree*/)
 	//met4_over_qt[n] = new TH1F(Form("met4_over_qt_%i",n), "met4_over_qt", 42, -0.2,4);
 	//	met4_puSig[n]   = new TH1F(Form("met4_sig_%i",n), "met4_sig", 42, -0.4,8);
 
-	met2_dPhiLeadJet1[n] =  new TH1F(Form("met2_dPhiLeadJet1_%i",n), "delta phi to lead jets", 40, 0, TMath::Pi());
-	met2_dPhiLeadJet2[n] =  new TH1F(Form("met2_dPhiLeadJet2_%i",n), "delta phi to lead jets", 40, 0, TMath::Pi());
-	met2_dPhiClosJet1[n] =  new TH1F(Form("met2_dPhiClosJet1_%i",n), "delta phi to closest jets", 40, 0, TMath::Pi());
-	met2_dPhiClosJet2[n] =  new TH1F(Form("met2_dPhiClosJet2_%i",n), "delta phi to closest jets", 40, 0, TMath::Pi());
+	met2_dPhiLeadJet1[n] =  new TH1F(Form("met2_dPhiLeadJet1_%i",n), "delta phi to lead jets", 50, 0, TMath::Pi());
+	met2_dPhiLeadJet2[n] =  new TH1F(Form("met2_dPhiLeadJet2_%i",n), "delta phi to lead jets", 50, 0, TMath::Pi());
+	met2_dPhiClosJet1[n] =  new TH1F(Form("met2_dPhiClosJet1_%i",n), "delta phi to closest jets", 50, 0, TMath::Pi());
+	met2_dPhiClosJet2[n] =  new TH1F(Form("met2_dPhiClosJet2_%i",n), "delta phi to closest jets", 50, 0, TMath::Pi());
 
 
 	//mu1_phi[n] = new TH1F(Form("mu1_phi_%i",n), "mu1_phi", 40, -TMath::Pi(), TMath::Pi());
@@ -142,8 +142,8 @@ void higgsAnalyzer::Begin(TTree * /*tree*/)
 	//mtZ_met3[n]   = new TH2F(Form("mtZ_met3_%i",n), "MTZ pf vs projMet noise", 50, 100, 600, 40, 0,400);
 	//mt2_met3[n]   = new TH2F(Form("mt2_met3_%i",n), "MT pf vs projfMet noise", 50, 100, 600, 40, 0,400);
 
-	di_qt[n]      = new TH1F(Form("di_qt_%i",n), "di-lepton qt", 40, 0,400);
-	di_eta[n]     = new TH1F(Form("di_eta_%i",n), "di-lepton Eta", 40, -2.6,2.6);
+	di_qt[n]      = new TH1F(Form("di_qt_%i",n), "di-lepton qt", 80, 0,400);
+	di_eta[n]     = new TH1F(Form("di_eta_%i",n), "di-lepton Eta", 50, -2.6,2.6);
 	di_mass[n]    = new TH1F(Form("di_mass_%i",n), "di-lepton Mass", 50, 70,120);
 	di_mass_EB[n] = new TH1F(Form("di_mass_EB_%i",n), "di-lepton Mass in Ecal Barrel", 50, 70,120);
 	di_mass_EE[n] = new TH1F(Form("di_mass_EE_%i",n), "di-lepton Mass in Ecal Endcap", 50, 70,120);
@@ -352,13 +352,13 @@ bool higgsAnalyzer::Process(Long64_t entry)
                ) electrons.push_back(*thisElec);			
         } else if (
 		   (
-		    (fabs(thisElec->Eta()) < 1.442
+		    (fabs(thisElec->Eta()) < 1.499
 		     && thisElec->SigmaIetaIeta()           < 0.01
 		     && fabs(thisElec->DphiSuperCluster())  < 0.8
 		     && fabs(thisElec->DetaSuperCluster())  < 0.007
 		     && thisElec->HadOverEm()               < 0.15
 		     ) ||
-		    (fabs(thisElec->Eta()) >  1.556
+		    (fabs(thisElec->Eta()) >  1.499
 		     && thisElec->SigmaIetaIeta()           < 0.03
 		     && fabs(thisElec->DphiSuperCluster())  < 0.7
 		     && fabs(thisElec->DetaSuperCluster())  < 0.01
@@ -456,7 +456,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
     //////////
 
     vector<TLorentzVector> jetP4, bJetP4, bSSVJetP4, testJetP4;
-    TLorentzVector sumJetP4;
+    TLorentzVector sumJetP4(0,0,0,0);
     int jetCount = 0;
     float fwdJetSumPt = 0.;
     int fwdJetCount = 0;
@@ -660,7 +660,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
     projMET = projectedMET(MET1, MET1_phi, Lepton1, Lepton2);
     ZprojMET= ZprojectedMET(MET1, MET1_phi, Lepton1, Lepton2);
     redMET1 = reducedMet1P4.Pt();
-    redMET2 = reducedMet1P4.Pt();
+    redMET2 = reducedMet2P4.Pt();
     compMET = (sumJetP4 + ZP4).Pt();
 
     if(selection=="muon" || selection=="electron"){
@@ -874,9 +874,6 @@ void higgsAnalyzer::Terminate()
     params>>sample;  params>>nEv;  params>>CS;  params>>lColor;  params>>fColor;
     cout<<"sample: "<<sample<<"  cs: "<<CS<<"  events: "<<nEv<<" colors: "<<lColor<<"  "<<fColor<<endl;
     //ncout<<endl;
-
-    //Getting total number of events fro ma histogram filled at the beginning
-    // Float_t nEv1 = getNevents(sample.c_str(), met0_et[0]);
 
     histoFile->Write();
     histoFile->cd("Andrey");
@@ -1136,6 +1133,7 @@ float higgsAnalyzer::getNevents(string dataset, TH1F* h)
 {
 
   Int_t nEv2 = 0;
+/*
   //Get total number of Events  from the histogram (needs to be filled before any cuts applied)
   nEv2 = h       -> GetEntries();
   //nEv2 = 10000;
@@ -1164,6 +1162,7 @@ float higgsAnalyzer::getNevents(string dataset, TH1F* h)
   else if(dataset=="VBFHZZ200") nEv2  = 93.90e3;
 
   cout<<"Getting events for sample: "<<dataset<<"  :  "<<nEv2<<endl;
+ */
   return nEv2;
 }
 

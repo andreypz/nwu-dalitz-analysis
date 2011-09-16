@@ -29,9 +29,9 @@ void makePlot(Int_t sel=1, TString hPath="00")
   Float_t intLumi = 201.2. + 928.2 + 407.5 +450.6 ; //double ele
   //Float_t intLumi = 1600;
 
-  Bool_t doTest = 1, doEBEE=0;
+  Bool_t doTest = 0, doEBEE=0;
   Bool_t doPhotons = 0, makeZjetsQt = 0;
-  Bool_t doOverview= 0, doSB = 0; 
+  Bool_t doOverview= 0, doSB = 1; 
 
   //Types of met: met - pfMet, met1 - type1 corrected, met2 - pfMet passed Noise filters, 
   //met3 - projMet, met4 - puProj corrected met (those two are passed Noise filters) 
@@ -230,8 +230,8 @@ void makePlot(Int_t sel=1, TString hPath="00")
     scaleFactor1      = intLumi*cs/nEv;
     cout<<cs<<"  "<<nEv<<"  "<<scaleFactor1<<endl;
 
-    cs  = getXsecOrColors("ggHZZ250", 3);
-    nEv = getXsecOrColors("ggHZZ250", 4);
+    cs  = getXsecOrColors("ggHZZ400", 3);
+    nEv = getXsecOrColors("ggHZZ400", 4);
     scaleFactor2      = intLumi*cs/nEv;
 
 
@@ -245,14 +245,14 @@ void makePlot(Int_t sel=1, TString hPath="00")
 	Float_t dPhiCut = 0.28;
 
 	//cutTree -> Draw("ct_pfMet/ct_qT>>h1",Form("ct_evtWeight*(ct_dPhiMetJet>%f && ct_pfMet/ct_qT>%f)", dPhiCut,  x_mQt[i]),"hist");
-	cutTree -> Draw("ct_redMet1>>h1",Form("ct_evtWeight*(ct_dPhiMetJet>%f && ct_redMet1>%f)", dPhiCut,  x_met[i]),"hist");
+	//cutTree -> Draw("ct_redMet1>>h1",Form("ct_evtWeight*(ct_dPhiMetJet>%f && ct_redMet1>%f)", dPhiCut,  x_met[i]),"hist");
 	//cutTree -> Draw("ct_redMet2>>h1",Form("ct_evtWeight*(ct_dPhiMetJet>%f && ct_redMet2>%f)", dPhiCut,  x_met[i]),"hist");
 	//cutTree -> Draw("ct_compMet>>h1",Form("ct_evtWeight*(ct_dPhiMetJet>%f && ct_compMet>%f)", dPhiCut,  x_met[i]),"hist");
 	//cutTree -> Draw("ct_projMet>>h1",Form("ct_evtWeight*(ct_dPhiMetJet>%f && ct_projMet>%f)", dPhiCut,  x_met[i]),"hist");
 	//cutTree -> Draw("ct_ZprojMet>>h1",Form("ct_evtWeight*(ct_dPhiMetJet>%f && ct_ZprojMet>%f)", dPhiCut,  x_met[i]),"hist");
 	//cutTree -> Draw("ct_puCorrMet>>h1",Form("ct_evtWeight*(ct_dPhiMetJet>%f && ct_puCorrMet>%f)", dPhiCut,  x_met[i]),"hist");
 	//cutTree -> Draw("ct_pfMet1>>h1",Form("ct_evtWeight*(ct_dPhiMetJet>%f && ct_pfMet1>%f)", dPhiCut,  x_met[i]),"hist");
-	//cutTree -> Draw("ct_pfMet>>h1",Form("ct_evtWeight*(ct_dPhiMetJet>%f && ct_pfMet>%f)", dPhiCut,  x_met[i]),"hist");
+	cutTree -> Draw("ct_pfMet>>h1",Form("ct_evtWeight*(ct_dPhiMetJet>%f && ct_pfMet>%f)", dPhiCut,  x_met[i]),"hist");
 	
 	//cutTree -> Draw("ct_pfMet>>h_pfMet",Form("ct_evtWeight*(ct_dPhiMetJet>%f)", dPhiCut,  x_dPhi[i]),"hist");
 	//cutTree -> Draw("ct_pfMet>>h_pfMet",Form("ct_evtWeight*(ct_pfMet>83 && ct_dPhiMetJet>%f)", dPhiCut,  x_dPhi[i]),"hist");
@@ -266,21 +266,21 @@ void makePlot(Int_t sel=1, TString hPath="00")
 	//	Double_t bg = 	temp -> Integral();
 	Double_t bg =  temp->TH1::IntegralAndError(-1,2000, bg_err);
 	
-	fmc_ggH250 -> cd("Andrey");
+	fmc_ggH400 -> cd("Andrey");
 
 	//cutTree -> Draw("ct_pfMet/ct_qT>>h2",Form("ct_evtWeight*(ct_dPhiMetJet>%f && ct_pfMet/ct_qT>%f)", dPhiCut,  x_mQt[i]),"hist");
-	cutTree -> Draw("ct_redMet1>>h2",Form("ct_evtWeight*(ct_dPhiMetJet>%f && ct_redMet1>%f)", dPhiCut,  x_met[i]),"hist");
+	//cutTree -> Draw("ct_redMet1>>h2",Form("ct_evtWeight*(ct_dPhiMetJet>%f && ct_redMet1>%f)", dPhiCut,  x_met[i]),"hist");
 	//cutTree -> Draw("ct_redMet2>>h2",Form("ct_evtWeight*(ct_dPhiMetJet>%f && ct_redMet2>%f)", dPhiCut,  x_met[i]),"hist");
 	//cutTree -> Draw("ct_compMet>>h2",Form("ct_evtWeight*(ct_dPhiMetJet>%f && ct_compMet>%f)", dPhiCut,  x_met[i]),"hist");
 	//cutTree -> Draw("ct_projMet>>h2",Form("ct_evtWeight*(ct_dPhiMetJet>%f && ct_projMet>%f)", dPhiCut,  x_met[i]),"hist");
 	//cutTree -> Draw("ct_ZprojMet>>h2",Form("ct_evtWeight*(ct_dPhiMetJet>%f && ct_ZprojMet>%f)", dPhiCut,  x_met[i]),"hist");
 	//cutTree -> Draw("ct_puCorrMet>>h2",Form("ct_evtWeight*(ct_dPhiMetJet>%f && ct_puCorrMet>%f)", dPhiCut,  x_met[i]),"hist");
 	//cutTree -> Draw("ct_pfMet1>>h2",Form("ct_evtWeight*(ct_dPhiMetJet>%f && ct_pfMet1>%f)", dPhiCut,  x_met[i]),"hist");
-	//cutTree -> Draw("ct_pfMet>>h2",Form("ct_evtWeight*(ct_dPhiMetJet>%f && ct_pfMet>%f)", dPhiCut, x_met[i]),"hist");
+	cutTree -> Draw("ct_pfMet>>h2",Form("ct_evtWeight*(ct_dPhiMetJet>%f && ct_pfMet>%f)", dPhiCut, x_met[i]),"hist");
 	
 	//cutTree -> Draw("ct_pfMet>>h_pfMet2",Form("ct_evtWeight*(ct_dPhiMetJet>%f)", dPhiCut, x_dPhi[i]),"hist");
 	//cutTree -> Draw("ct_pfMet>>h_pfMet2",Form("ct_evtWeight*(ct_pfMet>83 && ct_dPhiMetJet>%f)", dPhiCut, x_dPhi[i]),"hist");
-	//  cutTree -> Draw("ct_pfMet>>h_pfMet2","ct_evtWeight*(ct_pfMet>83 && ct_MT>242 && ct_MT<320 && ct_dPhiMetJet>dPhiCut)","hist");
+	//cutTree -> Draw("ct_pfMet>>h_pfMet2","ct_evtWeight*(ct_pfMet>83 && ct_MT>242 && ct_MT<320 && ct_dPhiMetJet>dPhiCut)","hist");
 
 	TH1F * temp = (TH1F*)h2;
 	temp->Scale(scaleFactor2);
@@ -329,11 +329,11 @@ void makePlot(Int_t sel=1, TString hPath="00")
 
     gr2 -> SetFillColor(kRed);
     gr2 -> SetFillStyle(3010);
-    gr2 -> Draw("same 3");
+    gr2 -> Draw("A3");
     leg02 = new TLegend(0.55,0.75,0.9,0.89);
     leg02 -> SetTextSize(0.04);
     leg02->AddEntry(gr1, "S/B", "f");
-    leg02->AddEntry(gr2, "#frac{S}{#sqrt{S+B}} scaled", "f");
+    leg02->AddEntry(gr2, "#frac{S}{#sqrt{S+B}}", "f");
     leg02->SetFillColor(kWhite);
     leg02 -> Draw();
 	
@@ -341,9 +341,9 @@ void makePlot(Int_t sel=1, TString hPath="00")
     
     // gr1 -> SetTitle(";pfMet/qT cut; S/B");
     //gr1 -> SetTitle(";dPhi(Met,Jet) cut; S/B");
-    gr1 -> SetTitle(";redMet1 cut; S/B");
+    //gr1 -> SetTitle(";redMet1 cut; S/B");
     //gr1 -> SetTitle(";redMet2 cut; S/B");
-    //gr1 -> SetTitle(";compMet (vert assoc) cut; S/B");
+    gr1 -> SetTitle(";compMet (vert assoc) cut; S/B");
     //gr1 -> SetTitle(";projMet cut; S/B");
     //gr1 -> SetTitle(";ZprojMet cut; S/B");
     //gr1 -> SetTitle(";pu Corr Met cut; S/B");
@@ -351,10 +351,10 @@ void makePlot(Int_t sel=1, TString hPath="00")
     //gr1 -> SetTitle(";pfMet cut; S/B");
    
     TCanvas *c3 = new TCanvas("c3","for s/b plots",600,500);
-    transpad(gr1, gr2, 0,200, 0,3,  5, c3);
-    setTDRStyle(); //the style was changed in the above function, go back to tdr
+    twoScales(gr1, gr2, 0,200, 0,3,  5, c3);
     c3 -> SaveAs(testpath+"p10.png");
-
+    
+    //setTDRStyle(); //the style was changed in the above function, go back to tdr
 
     optimalCuts result;
 
@@ -404,17 +404,17 @@ void makePlot(Int_t sel=1, TString hPath="00")
     c2 -> SaveAs(testpath+"p01.png");
     drawMuliPlot("pfMET", 1, 0.001, 1000000, 0,3, hs_met2_et[6], c2, leg01, list_overlay, intLumi); 
     c2 -> SaveAs(testpath+"p02.png");
-    drawMuliPlot("pfMET", 1, 0.001, 1000000, 0,3, hs_met3_et[6], c2, leg01, list_overlay, intLumi); 
+    drawMuliPlot("puCorrMET", 1, 0.001, 1000000, 0,3, hs_met3_et[6], c2, leg01, list_overlay, intLumi); 
     c2 -> SaveAs(testpath+"p03.png");
-    drawMuliPlot("pfMET", 1, 0.001, 1000000, 0,3, hs_met4_et[6], c2, leg01, list_overlay, intLumi); 
+    drawMuliPlot("projMET", 1, 0.001, 1000000, 0,3, hs_met4_et[6], c2, leg01, list_overlay, intLumi); 
     c2 -> SaveAs(testpath+"p04.png");
-    drawMuliPlot("pfMET", 1, 0.001, 1000000, 0,3, hs_met5_et[6], c2, leg01, list_overlay, intLumi); 
+    drawMuliPlot("ZprojMET", 1, 0.001, 1000000, 0,3, hs_met5_et[6], c2, leg01, list_overlay, intLumi); 
     c2 -> SaveAs(testpath+"p05.png");
-    drawMuliPlot("pfMET", 1, 0.001, 1000000, 0,3, hs_met6_et[6], c2, leg01, list_overlay, intLumi); 
+    drawMuliPlot("redMET1", 1, 0.001, 1000000, 0,3, hs_met6_et[6], c2, leg01, list_overlay, intLumi); 
     c2 -> SaveAs(testpath+"p06.png");
-    drawMuliPlot("pfMET", 1, 0.001, 1000000, 0,3, hs_met7_et[6], c2, leg01, list_overlay, intLumi); 
+    drawMuliPlot("redMET2", 1, 0.001, 1000000, 0,3, hs_met7_et[6], c2, leg01, list_overlay, intLumi); 
     c2 -> SaveAs(testpath+"p07.png");
-    drawMuliPlot("pfMET", 1, 0.001, 1000000, 0,3, hs_met8_et[6], c2, leg01, list_overlay, intLumi); 
+    drawMuliPlot("compMET", 1, 0.001, 1000000, 0,3, hs_met8_et[6], c2, leg01, list_overlay, intLumi); 
     c2 -> SaveAs(testpath+"p08.png");
     //drawMuliPlot("pfMET", 1, 0.001, 1000000, 0,3, hs_met9_et[6], c2, leg01, list_overlay, intLumi); 
     //c2 -> SaveAs(testpath+"p09.png");
@@ -1118,21 +1118,9 @@ optimalCuts calculateOptimalCuts(Int_t opt = 1, TH1 *bkg, TH1 *sig) {
 
 
 
-void transpad(TGraph *g1, TGraph *g2, Float_t x1, Float_t x2, Float_t y1, Float_t y2, Float_t y3, TCanvas *c1) {
+void trwoScales(TGraph *g1, TGraph *g2, Float_t x1, Float_t x2, Float_t y1, Float_t y2, Float_t y3, TCanvas *c1) {
   c1 -> Clear();
 
-  // Margins:
-  gStyle->SetPadTopMargin(0.1);
-  gStyle->SetPadBottomMargin(0.14);
-  gStyle->SetPadLeftMargin(0.14);
-  gStyle->SetPadRightMargin(0.1);
-
-  //gStyle->SetTitleSize(0.05, "XYZ");
-  //gStyle->SetTitleYSize(0.02); // Another way to set the size?
-  //gStyle->SetTitleXOffset(0.3);
-  //gStyle->SetTitleYOffset(0.3);
-  //gStyle->SetLabelSize(0.03, "XYZ");
-  gStyle->SetPadTickY(0);
 
   //compute the pad range with suitable margins
   Double_t ymin = y1;
@@ -1148,6 +1136,13 @@ void transpad(TGraph *g1, TGraph *g2, Float_t x1, Float_t x2, Float_t y1, Float_
   
   pad1->Draw();
   pad1->cd();
+  // Margins:
+  pad1->SetPadTopMargin(0.1);
+  pad1->SetPadBottomMargin(0.14);
+  pad1->SetPadLeftMargin(0.14);
+  pad1->SetPadRightMargin(0.1);
+
+  pad1->SetPadTickY(0);
 
   g1->Draw("AL3");
   g1-> SetMaximum(y3);
