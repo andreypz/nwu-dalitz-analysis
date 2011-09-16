@@ -242,7 +242,10 @@ void makePlot(Int_t sel=1, TString hPath="00")
 	x_mQt[i]  = 0.04*i;
 	//cout<<i<<"  "<<intLumi<<endl;
 	fmc_Zjets -> cd("Andrey");
-	Float_t dPhiCut = 0.28;
+	//Float_t dPhiCut = 0.62; //250
+	//Float_t dPhiCut = 0.28; //300
+	//Float_t dPhiCut = 0.14; //350
+	Float_t dPhiCut = 0.; //400 etc
 
 	//cutTree -> Draw("ct_pfMet/ct_qT>>h1",Form("ct_evtWeight*(ct_dPhiMetJet>%f && ct_pfMet/ct_qT>%f)", dPhiCut,  x_mQt[i]),"hist");
 	//cutTree -> Draw("ct_redMet1>>h1",Form("ct_evtWeight*(ct_dPhiMetJet>%f && ct_redMet1>%f)", dPhiCut,  x_met[i]),"hist");
@@ -351,7 +354,7 @@ void makePlot(Int_t sel=1, TString hPath="00")
     //gr1 -> SetTitle(";pfMet cut; S/B");
    
     TCanvas *c3 = new TCanvas("c3","for s/b plots",600,500);
-    twoScales(gr1, gr2, 0,200, 0,3,  5, c3);
+    twoScales(gr1, gr2, 0,200, 0,4,  30, c3);
     c3 -> SaveAs(testpath+"p10.png");
     
     //setTDRStyle(); //the style was changed in the above function, go back to tdr
@@ -1118,7 +1121,7 @@ optimalCuts calculateOptimalCuts(Int_t opt = 1, TH1 *bkg, TH1 *sig) {
 
 
 
-void trwoScales(TGraph *g1, TGraph *g2, Float_t x1, Float_t x2, Float_t y1, Float_t y2, Float_t y3, TCanvas *c1) {
+void twoScales(TGraph *g1, TGraph *g2, Float_t x1, Float_t x2, Float_t y1, Float_t y2, Float_t y3, TCanvas *c1) {
   c1 -> Clear();
 
 
@@ -1137,12 +1140,11 @@ void trwoScales(TGraph *g1, TGraph *g2, Float_t x1, Float_t x2, Float_t y1, Floa
   pad1->Draw();
   pad1->cd();
   // Margins:
-  pad1->SetPadTopMargin(0.1);
-  pad1->SetPadBottomMargin(0.14);
-  pad1->SetPadLeftMargin(0.14);
-  pad1->SetPadRightMargin(0.1);
-
-  pad1->SetPadTickY(0);
+  pad1->SetTopMargin(0.1);
+  pad1->SetBottomMargin(0.14);
+  pad1->SetLeftMargin(0.14);
+  pad1->SetRightMargin(0.1);
+  pad1->SetTicky(0);
 
   g1->Draw("AL3");
   g1-> SetMaximum(y3);
