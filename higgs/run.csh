@@ -55,17 +55,18 @@ sourceFiles.close();
 cout<<"sample:  "<<sample1<<"  selection:  $4"<<endl;
 
 gROOT->LoadMacro("./xSecAndColors.C");
-Float_t cs;
+Float_t cs, Ne;
 Int_t fillColor, lineColor;
 fillColor = (Int_t)getXsecOrColors(sample1.Data(), 1);
 lineColor = (Int_t)getXsecOrColors(sample1.Data(), 2);
 cs = getXsecOrColors(sample1.Data(), 3);
+Ne = getXsecOrColors(sample1.Data(), 4);
 
 ofstream params;   //Parameters as an input to main analyzer!                                                                                              
 params.open("./params.txt");
 params<<"$4"<<endl;  //muon or electron selection                                                                                                     
 params<<sample1<<endl;    // sample  (e.g. MC_DYmumu)                                                                                                      
-params<<1000000<<endl;  //total number of events in the sample
+params<<Ne<<endl;  //total number of events in the sample
 params<<cs<<endl;   //cross section for this ssample                                                                                                       
 params<<fillColor<<endl;  //Color for fill histograms                                                                                                      
 params<<lineColor<<endl;  //Colors for line

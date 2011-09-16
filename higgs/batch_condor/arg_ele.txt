@@ -14,6 +14,7 @@ ttbar 0 ttbar_2 electron
 ttbar 0 ttbar_3 electron
 ttbar 0 ttbar_4 electron
 tW    0 tW electron
+tbarW 0 tbarW electron
 WW    0 WW electron
 ZZ    0 ZZ electron
 WZ    0 WZ electron
