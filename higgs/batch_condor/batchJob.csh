@@ -6,17 +6,17 @@ cmsenv
 
 set dir = /uscms_data/d2/andreypz/cmssw/higgs7/CMSSW_4_2_8/src/NWU/Higgs/higgs
 
-echo "Copy files"
-
 cp $dir/higgsAnalyzer.h .
 cp $dir/*.C .
 cp $dir/../src/TC*.cc .
 cp $dir/../src/TC*.h .
-cp -r $dir/sourceFiles .
+mkdir sourceFiles
+cp $dir/sourceFiles/*.txt ./sourceFiles/
 
 mkdir ../data
-cp -r $dir/../data/*.root ../data/
+cp -r $dir/../data/*root ../data/.
 
+cp $dir/template.C .
 cp $dir/run.csh .
 chmod 755 run.csh
 ./run.csh $1 $2 $3 $4
@@ -30,4 +30,4 @@ cp hhhh_*.root $newDir
 cp -r $newDir $dir/batch_condor/
 
 cd ../../
-#rm -rf ./*
+rm -rf ./*

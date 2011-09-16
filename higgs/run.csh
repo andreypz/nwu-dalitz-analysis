@@ -32,12 +32,11 @@ gROOT->LoadMacro("../src/TCPhoton.cc+");
 gROOT->LoadMacro("../src/TCGenJet.cc+");
 gROOT->LoadMacro("../src/TCGenParticle.cc+");
 gROOT->LoadMacro("../src/TCPrimaryVtx.cc+");
-gROOT->LoadMacro("../src/TCTrigger.cc+");
-gROOT->LoadMacro("../src/TCTriggerObject.cc+");
 
 TChain* fChain = new TChain("ntupleProducer/eventTree");
 
 ifstream sourceFiles("./sourceFiles/$3.txt");
+  //char line[128];
 string line;
 int  count = 0;
   cout<<"Adding files from $3 to chain..."<<endl;
@@ -55,18 +54,17 @@ sourceFiles.close();
 cout<<"sample:  "<<sample1<<"  selection:  $4"<<endl;
 
 gROOT->LoadMacro("./xSecAndColors.C");
-Float_t cs, Ne;
+Float_t cs;
 Int_t fillColor, lineColor;
 fillColor = (Int_t)getXsecOrColors(sample1.Data(), 1);
 lineColor = (Int_t)getXsecOrColors(sample1.Data(), 2);
 cs = getXsecOrColors(sample1.Data(), 3);
-Ne = getXsecOrColors(sample1.Data(), 4);
 
 ofstream params;   //Parameters as an input to main analyzer!                                                                                              
 params.open("./params.txt");
 params<<"$4"<<endl;  //muon or electron selection                                                                                                     
 params<<sample1<<endl;    // sample  (e.g. MC_DYmumu)                                                                                                      
-params<<Ne<<endl;  //total number of events in the sample
+params<<1000000<<endl;  //total number of events in the sample
 params<<cs<<endl;   //cross section for this ssample                                                                                                       
 params<<fillColor<<endl;  //Color for fill histograms                                                                                                      
 params<<lineColor<<endl;  //Colors for line
@@ -88,6 +86,6 @@ cout << "\n";
 root -l -b -q run.C
 
 rm run.C
-mv a_higgsHistograms.root hhhh_$3.root
+mv higgsHistograms.root hhhh_$3.root
 
 echo "End runninng"
