@@ -345,7 +345,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
 
         if (elecPass) { 
             if (
-                    thisElec->Pt() > elePtCut[0]  
+                    thisElec->Pt() > 10  
                     && thisElec->PassConversion(80)
                     && fabs(thisElec->Dxy(pvPosition)) < 0.02
                     && fabs(thisElec->Dz(pvPosition))  < 0.1
@@ -365,7 +365,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
 		     && thisElec->HadOverEm()               < 0.15
 		     )
 		    )
-		   && thisElec->Pt() > elePtCut[1]
+		   && thisElec->Pt() > 10
 		   && thisElec->PassConversion(95)
 		   && fabs(thisElec->Dxy(pvPosition)) < 0.02
 		   && fabs(thisElec->Dz(pvPosition)) < 0.1
@@ -392,7 +392,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
              )) continue;
 
         if (
-                thisMuon->Pt() > muPtCut[0]
+                thisMuon->Pt() > 10
                 && thisMuon->NumberOfValidMuonHits()    > 0
                 && thisMuon->NumberOfValidTrackerHits() > 10
                 && thisMuon->NumberOfValidPixelHits()   > 0
@@ -405,7 +405,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
            ) {
             muons.push_back(*thisMuon);
         } else if (
-                thisMuon->Pt() > muPtCut[1] 
+                thisMuon->Pt() > 10 
                 //&& thisMuon->Pt() <= muPtCut[0] 
                 && thisMuon->NumberOfValidMuonHits()    > 0
                 && thisMuon->NumberOfValidTrackerHits() > 2 
@@ -486,7 +486,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
 	  if (
 	      thisJet->VtxNTracks() > 0
 	      && thisJet->VtxSumPtFrac() > 0. 
-	      && thisJet->VtxSumPtIndex() == 1
+	      && thisJet->VtxSumPtIndex() == (UInt_t)PVind[0] //index in pv collection (passed vtx selection)
 	      ) {
 	    if (thisJet->BDiscrTCHE() > 2. && thisJet->P4(JC_LVL).Pt() > bJetPtCut) 
 	      bJetP4.push_back(thisJet->P4(JC_LVL));
@@ -574,9 +574,9 @@ bool higgsAnalyzer::Process(Long64_t entry)
 
     } else if (selection == "muon") {
 
-        ////////////////////////////////
-        // 2 oppositely charged muons //
-        ////////////////////////////////
+        //////////////////////////////////////////
+        // 2 oppositely charged muons  w/ pt>20 //
+        //////////////////////////////////////////
 
         if (muons.size() < 2) return kTRUE;
         if (muons[0].Charge() == muons[1].Charge()) return kTRUE;
@@ -606,6 +606,9 @@ bool higgsAnalyzer::Process(Long64_t entry)
     }
 
 
+
+   if (Lepton1.Pt() < 20 || Lepton2.Pt() < 20) return kTRUE;
+
     CountEvents(2);
     nEventsWeighted[2] += evtWeight;
     FillHistosNoise(2, evtWeight);
@@ -633,10 +636,12 @@ bool higgsAnalyzer::Process(Long64_t entry)
     // 3rd lepton veto //
     /////////////////////
 
-    if (extraLeptons.size() > 0) return kTRUE;
     if ((electrons.size() > 0 || muons.size() > 2) && selection  == "muon") return kTRUE;
     if ((muons.size() > 0 || electrons.size() > 2) && selection  == "electron") return kTRUE;
     if ((muons.size() > 0 || electrons.size() > 0) && (selection == "eGamma" || selection == "muGamma" || selection == "gamma")) return kTRUE;
+
+    //Loose third lepton veto:
+    if (extraLeptons.size() > 0) return kTRUE;
 
     CountEvents(5);
     nEventsWeighted[5] += evtWeight;
@@ -956,112 +961,6 @@ float higgsAnalyzer::GetEventWeight(int nPV, TLorentzVector l1, TLorentzVector l
     return weight;
   
 }
-/*
-float higgsAnalyzer::PUCorrectedMET(float met, int nPV, string metType)
-{
-    Float_t sigma0=0, shift=0, sigmaT=0, shift0=0, puCorMet=0;
-    if (metType == "pfMet") {
-        if (isRealData) {
-            sigma0 = 5.868;
-            shift0 = 8.231;
-            shift  = 0.5761*(nPV - 1);
-            sigmaT = sqrt(pow(sigma0, 2) + (nPV - 1)*pow(2.112, 2));
-        } else {
-            sigma0 = 4.569;
-            shift0 = 6.282;
-            shift  = 0.8064*(nPV - 1);
-            sigmaT = sqrt(pow(sigma0, 2) + (nPV - 1)*pow(2.387, 2));
-        }
-    }
-    puCorMet = (met - (shift0 + shift))*sigma0/sigmaT + shift0;
-    return puCorMet;
-}
-*/
-/*
-TLorentzVector higgsAnalyzer::GetReducedMET(TLorentzVector sumJet, TLorentzVector lep1, TLorentzVector lep2, TLorentzVector metP4, int version) 
-{
-    TLorentzVector Q  = lep1 + lep2;
-    float bisectorPhi = min(lep1.Phi(), lep2.Phi()) + lep1.DeltaPhi(lep2)/2;
-
-    TVector2 projectDilepton(Q.Px(), Q.Py());
-    TVector2 projectSumJet(sumJet.Px(), sumJet.Py());
-    TVector2 projectMET(metP4.Pt()*cos(metP4.Phi()), metP4.Pt()*sin(metP4.Phi()));
-
-    //TVector2 delta;
-    //TLorentzVector Thrust = lep1 - lep2; 
-    //if (fabs(lep1.DeltaPhi(lep2)) > TMath::Pi()/2) {
-    //	delta.Set(0., projDilepton.Rotate(-Thrust.Phi()).Py() + projDilepton.Py());
-    //} else {
-    //	delta.Set(0, projDilepton.Rotate(-Q.Phi()).Py() + projDilepton.Py());
-    //}
-
-    if (version == 1) {
-        projectDilepton = projectDilepton.Rotate(-bisectorPhi);
-        projectSumJet   = projectSumJet.Rotate(-bisectorPhi);
-        projectMET      = projectMET.Rotate(-bisectorPhi);
-    } else if (version == 2) {
-        projectDilepton = projectDilepton.Rotate(-Q.Phi());
-        projectSumJet   = projectSumJet.Rotate(-Q.Phi());
-        projectMET      = projectMET.Rotate(-Q.Phi());
-    }
-
-    TVector2 unclustered = -1*projectMET;                        //projectDilepton - 1.*(projectMET + projectDilepton) + delta;
-    TVector2 clustered   = projectDilepton + 1.*projectSumJet;   // + delta;
-
-    TVector2 reducedMET = TVector2((fabs(unclustered.Px()) < fabs(clustered.Px()) ? unclustered.Px() : clustered.Px()),
-            (fabs(unclustered.Py()) < fabs(clustered.Py()) ? unclustered.Py() : clustered.Py()));
-
-    return TLorentzVector(reducedMET.Px(), reducedMET.Py(), 0, reducedMET.Mod());
-}
-*/
-
-/*
-double higgsAnalyzer::projectedMET(Float_t f_MET, Float_t f_MET_phi, TLorentzVector f_Lepton1, TLorentzVector f_Lepton2)
-{
-  Float_t deltaPhiMin =   TMath::Min( fabs(TVector2::Phi_mpi_pi(f_Lepton1.Phi() - f_MET_phi)), fabs(TVector2::Phi_mpi_pi(f_Lepton2.Phi() - f_MET_phi)));
-  //cout<<deltaPhiMin<<endl;
-  Float_t f_projMET = 0;
-  if (deltaPhiMin > TMath::Pi()/2) f_projMET = f_MET;
-  else f_projMET = f_MET*sin(deltaPhiMin);
-  return f_projMET;
-}
-*/
-
- /*
-double higgsAnalyzer::ZprojectedMET(Float_t f_MET, Float_t f_MET_phi, TLorentzVector f_Lepton1, TLorentzVector f_Lepton2)
-{
-  TLorentzVector di = f_Lepton1 + f_Lepton2;
-  Float_t deltaPhiMin =   fabs(TVector2::Phi_mpi_pi(di.Phi() - f_MET_phi));
-  
-  Float_t f_projMET = 0;
-  if (deltaPhiMin > TMath::Pi()/2) f_projMET = f_MET;
-  else f_projMET = f_MET*sin(deltaPhiMin);
-  return f_projMET;
-}
- */
-
-  /*
-float higgsAnalyzer::Dz(TVector3 objVtx, TLorentzVector objP4, TVector3 vtx)
-{
-    float vx  = objVtx.x(), vy = objVtx.y(), vz = objVtx.z();
-    float px  = objP4.Px(), py = objP4.Py();
-    float pz  = objP4.Pz(), pt = objP4.Pt();
-    float pvx = vtx.x(), pvy = vtx.y(), pvz = vtx.z();
-
-    float dZ =  (vz-pvz)-((vx-pvx)*px +(vy-pvy)*py)/pt*(pz/pt);
-    return dZ;
-}
-
-float higgsAnalyzer::Dxy(TVector3 objVtx, TLorentzVector objP4, TVector3 vtx)
-{
-    float vx  = objVtx.x(), vy = objVtx.y();
-    float px  = objP4.Px(), py = objP4.Py(), pt = objP4.Pt();
-    float pvx = vtx.x(), pvy = vtx.y();
-
-    double dXY =  (-(vx-pvx)*py + (vy-pvy)*px)/pt;
-    return dXY;
-}
-  */
 
 void higgsAnalyzer::PostSelectionYieldCounter(float nEventsPS, TLorentzVector metP4, TLorentzVector ZP4, float dPhiJetMet, float evtWeight)
 {

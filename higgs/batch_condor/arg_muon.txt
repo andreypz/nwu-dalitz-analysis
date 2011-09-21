@@ -6,6 +6,7 @@ DYmumu 0 DYToMuMu_1 muon
 DYmumu 0 DYToMuMu_2 muon 
 DYmumu 0 DYToMuMu_3 muon 
 DYmumu 0 DYToMuMu_4 muon 
+DYtautau 0 DYTauTau muon 
 ttbar 0 ttbar_1 muon
 ttbar 0 ttbar_2 muon
 ttbar 0 ttbar_3 muon
@@ -23,3 +24,4 @@ ggHZZ400 0 ggHZZ400 muon
 ggHZZ450 0 ggHZZ450 muon
 ggHZZ500 0 ggHZZ500 muon
 ggHZZ550 0 ggHZZ550 muon
+ggHZZ600 0 ggHZZ600 muon

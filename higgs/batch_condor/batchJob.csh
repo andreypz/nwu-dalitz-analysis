@@ -10,8 +10,8 @@ echo "Copy files"
 
 cp $dir/higgsAnalyzer.h .
 cp $dir/*.C .
-cp $dir/../src/TC*.cc .
-cp $dir/../src/TC*.h .
+cp $dir/../src/*.cc .
+cp $dir/../src/*.h .
 cp -r $dir/sourceFiles .
 
 mkdir ../data
