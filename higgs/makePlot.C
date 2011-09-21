@@ -14,6 +14,7 @@ struct optimalCuts {
 
 void makePlot(Int_t sel=1, TString hPath="00")
 {
+  gROOT->ProcessLine(".L ./utils.C");
   gROOT->ProcessLine(".L ../data/tdrstyle.C");
   setTDRStyle();
 
@@ -29,9 +30,9 @@ void makePlot(Int_t sel=1, TString hPath="00")
   Float_t intLumi = 201.2. + 928.2 + 407.5 +450.6 ; //double ele
   //Float_t intLumi = 1600;
 
-  Bool_t doTest = 0, doEBEE=0;
+  Bool_t doTest = 1, doSB = 0, doEBEE=0;
   Bool_t doPhotons = 0, makeZjetsQt = 0;
-  Bool_t doOverview= 0, doSB = 1; 
+  Bool_t doOverview= 0;
 
   //Types of met: met - pfMet, met1 - type1 corrected, met2 - pfMet passed Noise filters, 
   //met3 - projMet, met4 - puProj corrected met (those two are passed Noise filters) 
@@ -97,9 +98,9 @@ void makePlot(Int_t sel=1, TString hPath="00")
 
   list_overlay = new TList();
   list_overlay->Add(fData); 
-  list_overlay->Add(fmc_ggH200);
-  list_overlay->Add(fmc_ggH300);
-  //  list_overlay->Add(fmc_ggH400);
+  list_overlay->Add(fmc_ggH250);
+  //list_overlay->Add(fmc_ggH300);
+  list_overlay->Add(fmc_ggH400);
 
   list_signal = new TList();
   //list_signal->Add(fmc_ggH200);
@@ -159,7 +160,7 @@ void makePlot(Int_t sel=1, TString hPath="00")
       hs_met_dPhiClosJet1[n] = makeStack(list_bg, Form("met2_dPhiClosJet1_%i",n), intLumi);
       hs_met_dPhiClosJet2[n] = makeStack(list_bg, Form("met2_dPhiClosJet2_%i",n), intLumi);
 
-      /*      hs_mtZ[n]          = makeStack(list_bg, Form("mtZ_%i", n), intLumi);
+      /*hs_mtZ[n]          = makeStack(list_bg, Form("mtZ_%i", n), intLumi);
 
       hs_met_over_qt[n]  = makeStack(list_bg, Form("%s_over_qt_%i", metType.Data(), n), intLumi);
       hs_met2_over_qt[n] = makeStack(list_bg, Form("met2_over_qt_%i", n), intLumi);
@@ -202,8 +203,8 @@ void makePlot(Int_t sel=1, TString hPath="00")
   leg01->AddEntry(forLegend[0],  "tW","f");
   leg01->AddEntry(forLegend[2],  "WZ","f");
   leg01->AddEntry(forLegend[1], "ttbar","f");  
-  //leg01->AddEntry(forLegend[7], "10xH200","f");
-  leg01->AddEntry(forLegend[8], "10xH300","f");
+  leg01->AddEntry(forLegend[7], "10xH250","f");
+  //leg01->AddEntry(forLegend[8], "10xH400","f");
   //  leg01->AddEntry(forLegend[9], "10xH400","f");
   
   leg01->SetFillColor(kWhite);
@@ -230,169 +231,89 @@ void makePlot(Int_t sel=1, TString hPath="00")
     scaleFactor1      = intLumi*cs/nEv;
     cout<<cs<<"  "<<nEv<<"  "<<scaleFactor1<<endl;
 
-    cs  = getXsecOrColors("ggHZZ400", 3);
-    nEv = getXsecOrColors("ggHZZ400", 4);
+    cs  = getXsecOrColors("ggHZZ250", 3);
+    nEv = getXsecOrColors("ggHZZ250", 4);
     scaleFactor2      = intLumi*cs/nEv;
+    TFile * sigFile = fmc_ggH250;
+    Float_t  y1 = 3, y2 = 10;
+    Int_t nDots    = 100;
+    Float_t phiCut = 0.62;
 
-
-    for(Int_t i=0; i<100; i++)
-      {
-	x_dPhi[i] = 0.04*i;
-	x_met[i]  = 2*i;
-	x_mQt[i]  = 0.04*i;
-	//cout<<i<<"  "<<intLumi<<endl;
-	fmc_Zjets -> cd("Andrey");
-	//Float_t dPhiCut = 0.62; //250
-	//Float_t dPhiCut = 0.28; //300
-	//Float_t dPhiCut = 0.14; //350
-	Float_t dPhiCut = 0.; //400 etc
-
-	//cutTree -> Draw("ct_pfMet/ct_qT>>h1",Form("ct_evtWeight*(ct_dPhiMetJet>%f && ct_pfMet/ct_qT>%f)", dPhiCut,  x_mQt[i]),"hist");
-	//cutTree -> Draw("ct_redMet1>>h1",Form("ct_evtWeight*(ct_dPhiMetJet>%f && ct_redMet1>%f)", dPhiCut,  x_met[i]),"hist");
-	//cutTree -> Draw("ct_redMet2>>h1",Form("ct_evtWeight*(ct_dPhiMetJet>%f && ct_redMet2>%f)", dPhiCut,  x_met[i]),"hist");
-	//cutTree -> Draw("ct_compMet>>h1",Form("ct_evtWeight*(ct_dPhiMetJet>%f && ct_compMet>%f)", dPhiCut,  x_met[i]),"hist");
-	//cutTree -> Draw("ct_projMet>>h1",Form("ct_evtWeight*(ct_dPhiMetJet>%f && ct_projMet>%f)", dPhiCut,  x_met[i]),"hist");
-	//cutTree -> Draw("ct_ZprojMet>>h1",Form("ct_evtWeight*(ct_dPhiMetJet>%f && ct_ZprojMet>%f)", dPhiCut,  x_met[i]),"hist");
-	//cutTree -> Draw("ct_puCorrMet>>h1",Form("ct_evtWeight*(ct_dPhiMetJet>%f && ct_puCorrMet>%f)", dPhiCut,  x_met[i]),"hist");
-	//cutTree -> Draw("ct_pfMet1>>h1",Form("ct_evtWeight*(ct_dPhiMetJet>%f && ct_pfMet1>%f)", dPhiCut,  x_met[i]),"hist");
-	cutTree -> Draw("ct_pfMet>>h1",Form("ct_evtWeight*(ct_dPhiMetJet>%f && ct_pfMet>%f)", dPhiCut,  x_met[i]),"hist");
-	
-	//cutTree -> Draw("ct_pfMet>>h_pfMet",Form("ct_evtWeight*(ct_dPhiMetJet>%f)", dPhiCut,  x_dPhi[i]),"hist");
-	//cutTree -> Draw("ct_pfMet>>h_pfMet",Form("ct_evtWeight*(ct_pfMet>83 && ct_dPhiMetJet>%f)", dPhiCut,  x_dPhi[i]),"hist");
-	//cutTree -> Draw("ct_pfMet>>h_pfMet","ct_evtWeight*(ct_pfMet>83 && ct_MT>242 && ct_MT<320 && ct_dPhiMetJet>%f)", dPhiCut, "hist");
-
-	TH1F * temp = (TH1F*)h1;
-	temp->Scale(scaleFactor1);
-	Double_t bg_err =0 ;
-	//temp -> Print();
-	
-	//	Double_t bg = 	temp -> Integral();
-	Double_t bg =  temp->TH1::IntegralAndError(-1,2000, bg_err);
-	
-	fmc_ggH400 -> cd("Andrey");
-
-	//cutTree -> Draw("ct_pfMet/ct_qT>>h2",Form("ct_evtWeight*(ct_dPhiMetJet>%f && ct_pfMet/ct_qT>%f)", dPhiCut,  x_mQt[i]),"hist");
-	//cutTree -> Draw("ct_redMet1>>h2",Form("ct_evtWeight*(ct_dPhiMetJet>%f && ct_redMet1>%f)", dPhiCut,  x_met[i]),"hist");
-	//cutTree -> Draw("ct_redMet2>>h2",Form("ct_evtWeight*(ct_dPhiMetJet>%f && ct_redMet2>%f)", dPhiCut,  x_met[i]),"hist");
-	//cutTree -> Draw("ct_compMet>>h2",Form("ct_evtWeight*(ct_dPhiMetJet>%f && ct_compMet>%f)", dPhiCut,  x_met[i]),"hist");
-	//cutTree -> Draw("ct_projMet>>h2",Form("ct_evtWeight*(ct_dPhiMetJet>%f && ct_projMet>%f)", dPhiCut,  x_met[i]),"hist");
-	//cutTree -> Draw("ct_ZprojMet>>h2",Form("ct_evtWeight*(ct_dPhiMetJet>%f && ct_ZprojMet>%f)", dPhiCut,  x_met[i]),"hist");
-	//cutTree -> Draw("ct_puCorrMet>>h2",Form("ct_evtWeight*(ct_dPhiMetJet>%f && ct_puCorrMet>%f)", dPhiCut,  x_met[i]),"hist");
-	//cutTree -> Draw("ct_pfMet1>>h2",Form("ct_evtWeight*(ct_dPhiMetJet>%f && ct_pfMet1>%f)", dPhiCut,  x_met[i]),"hist");
-	cutTree -> Draw("ct_pfMet>>h2",Form("ct_evtWeight*(ct_dPhiMetJet>%f && ct_pfMet>%f)", dPhiCut, x_met[i]),"hist");
-	
-	//cutTree -> Draw("ct_pfMet>>h_pfMet2",Form("ct_evtWeight*(ct_dPhiMetJet>%f)", dPhiCut, x_dPhi[i]),"hist");
-	//cutTree -> Draw("ct_pfMet>>h_pfMet2",Form("ct_evtWeight*(ct_pfMet>83 && ct_dPhiMetJet>%f)", dPhiCut, x_dPhi[i]),"hist");
-	//cutTree -> Draw("ct_pfMet>>h_pfMet2","ct_evtWeight*(ct_pfMet>83 && ct_MT>242 && ct_MT<320 && ct_dPhiMetJet>dPhiCut)","hist");
-
-	TH1F * temp = (TH1F*)h2;
-	temp->Scale(scaleFactor2);
-	Double_t sig_err = 0;
-	//Double_t sig = 	temp -> Integral();
-	Double_t sig = temp->TH1::IntegralAndError(-1,2000, sig_err);
-	
-
-	if(bg!=0) {
-	  StoB[i]    = sig/bg;
-	  StoB_err[i] = StoB[i]*sqrt( pow(sig_err/sig,2) + pow(bg_err/bg,2));
-	}
-	else {StoB[i]=0; StoB_err[i]=0;}
-	x_err[i] =0;
-
-	if((sig+bg)  != 0) {
-	  sqrtStoB[i]     = sig/sqrt(sig+bg);
-	  sqrtStoB_err[i] =  sqrtStoB[i]*sqrt( pow(sig_err/sig,2) + 0.25* (pow(sig_err,2) + pow(bg_err,2))/pow(sig+bg,2)  );
-	}
-	else {sqrtStoB[i] = 0; sqrtStoB_err[i] =0;}
-
-	//is this correct error propagation?	
-
-	cout<<i<<"  "<<x_met[i]<<"    B="<<bg<<" S="<<sig<<"  S/B="<<StoB[i]<<"   S/sq(S+B)="<<sqrtStoB[i]<<endl;
-
-      }
-
-    //gr1 = new TGraphErrors(20, x_mQt, StoB, x_err, StoB_err);
-    //gr2 = new TGraphErrors(20, x_mQt, sqrtStoB, x_err, sqrtStoB_err);
-
-    gr1 = new TGraphErrors(100, x_met, StoB, x_err, StoB_err);
-    gr2 = new TGraphErrors(100, x_met, sqrtStoB, x_err, sqrtStoB_err);
-
-
-    //gr1 = new TGraphErrors(100, x_dPhi, StoB, x_err, StoB_err);
-    //gr2 = new TGraphErrors(100, x_dPhi, sqrtStoB, x_err, sqrtStoB_err);
-
-    c1->cd();
-    gr1->SetFillColor(4);
-    gr1->SetFillStyle(3010);
-    gr1 -> Draw("A3");
-    c1 -> SaveAs(testpath+"p01.png");
-
-    gr2 -> SetMinimum(0.0);
-    //gr1 -> SetMaximum(10);
-
-    gr2 -> SetFillColor(kRed);
-    gr2 -> SetFillStyle(3010);
-    gr2 -> Draw("A3");
-    leg02 = new TLegend(0.55,0.75,0.9,0.89);
-    leg02 -> SetTextSize(0.04);
-    leg02->AddEntry(gr1, "S/B", "f");
-    leg02->AddEntry(gr2, "#frac{S}{#sqrt{S+B}}", "f");
-    leg02->SetFillColor(kWhite);
-    leg02 -> Draw();
-	
-    c1 -> SaveAs(testpath+"p02.png");
-    
-    // gr1 -> SetTitle(";pfMet/qT cut; S/B");
-    //gr1 -> SetTitle(";dPhi(Met,Jet) cut; S/B");
-    //gr1 -> SetTitle(";redMet1 cut; S/B");
-    //gr1 -> SetTitle(";redMet2 cut; S/B");
-    gr1 -> SetTitle(";compMet (vert assoc) cut; S/B");
-    //gr1 -> SetTitle(";projMet cut; S/B");
-    //gr1 -> SetTitle(";ZprojMet cut; S/B");
-    //gr1 -> SetTitle(";pu Corr Met cut; S/B");
-    //gr1 -> SetTitle(";type 1 pfMet cut; S/B");
-    //gr1 -> SetTitle(";pfMet cut; S/B");
-   
     TCanvas *c3 = new TCanvas("c3","for s/b plots",600,500);
-    twoScales(gr1, gr2, 0,200, 0,4,  30, c3);
-    c3 -> SaveAs(testpath+"p10.png");
+    c3 -> cd();
+    for(Int_t i =0; i<nDots; i++) x_err[i]=0;
     
-    //setTDRStyle(); //the style was changed in the above function, go back to tdr
+    StoBPlot("pfMet",phiCut, fmc_Zjets,scaleFactor1,  sigFile,scaleFactor2,  StoB, StoB_err, sqrtStoB, sqrtStoB_err, x_met);
+    gr1 = new TGraphErrors(nDots, x_met, StoB, x_err, StoB_err);
+    gr2 = new TGraphErrors(nDots, x_met, sqrtStoB, x_err, sqrtStoB_err);
+    gr1 -> SetTitle(";pfMet cut; S/B");   
+    twoScales(gr1, gr2, 0,200, 0,y1,  y2, c3);
+    c3 -> SaveAs(testpath+"p01.png");
 
-    optimalCuts result;
+    StoBPlot("pfMet1",phiCut, fmc_Zjets,scaleFactor1,  sigFile,scaleFactor2,  StoB, StoB_err, sqrtStoB, sqrtStoB_err, x_met);
+    gr1 = new TGraphErrors(nDots, x_met, StoB, x_err, StoB_err);
+    gr2 = new TGraphErrors(nDots, x_met, sqrtStoB, x_err, sqrtStoB_err);
+    gr1 -> SetTitle(";type 1 pfMet cut; S/B");   
+    twoScales(gr1, gr2, 0,200, 0,y1,  y2, c3);
+    c3 -> SaveAs(testpath+"p02.png");
+    
+    StoBPlot("projMet",phiCut, fmc_Zjets,scaleFactor1,  sigFile,scaleFactor2,  StoB, StoB_err, sqrtStoB, sqrtStoB_err, x_met);
+    gr1 = new TGraphErrors(nDots, x_met, StoB, x_err, StoB_err);
+    gr2 = new TGraphErrors(nDots, x_met, sqrtStoB, x_err, sqrtStoB_err);
+    gr1 -> SetTitle(";projMet cut; S/B");   
+    twoScales(gr1, gr2, 0,200, 0,y1,  y2, c3);
+    c3 -> SaveAs(testpath+"p03.png");
 
-    /*
-    result =  calculateOptimalCuts(1, hs_met_dPhiClosJet2[5]->Sum(), (TH1*)fmc_ggH400->Get("met2_dPhiClosJet2_5"));
-    cout<<"from "<<(TMath::Pi()/40)*(result.bin1-1)<<" to "<< (TMath::Pi()/40)*result.bin2<<"\n S/B = "<<result.SB<<"  S/sqrt(B) = "<<result.SrootB<<"  S/sqrt(S+B) = "<<result.SrootSB<<endl;
-    result =  calculateOptimalCuts(2, hs_met_dPhiClosJet2[5]->Sum(), (TH1*)fmc_ggH400->Get("met2_dPhiClosJet2_5"));
-    cout<<"from "<<(TMath::Pi()/40)*(result.bin1-1)<<" to "<< (TMath::Pi()/40)*result.bin2<<"\n S/B = "<<result.SB<<"  S/sqrt(B) = "<<result.SrootB<<"  S/sqrt(S+B) = "<<result.SrootSB<<endl;
-    result =  calculateOptimalCuts(3, hs_met_dPhiClosJet2[5]->Sum(), (TH1*)fmc_ggH400->Get("met2_dPhiClosJet2_5"));
-    cout<<"from "<<(TMath::Pi()/40)*(result.bin1-1)<<" to "<< (TMath::Pi()/40)*result.bin2<<"\n S/B = "<<result.SB<<"  S/sqrt(B) = "<<result.SrootB<<"  S/sqrt(S+B) = "<<result.SrootSB<<endl;
+    StoBPlot("ZprojMet",phiCut, fmc_Zjets,scaleFactor1,  sigFile,scaleFactor2,  StoB, StoB_err, sqrtStoB, sqrtStoB_err, x_met);
+    gr1 = new TGraphErrors(nDots, x_met, StoB, x_err, StoB_err);
+    gr2 = new TGraphErrors(nDots, x_met, sqrtStoB, x_err, sqrtStoB_err);
+    gr1 -> SetTitle(";ZprojMet cut; S/B");   
+    twoScales(gr1, gr2, 0,200, 0,y1,  y2, c3);
+    c3 -> SaveAs(testpath+"p04.png");
+    
+
+    StoBPlot("redMet1",phiCut, fmc_Zjets,scaleFactor1,  sigFile,scaleFactor2,  StoB, StoB_err, sqrtStoB, sqrtStoB_err, x_met);
+    gr1 = new TGraphErrors(nDots, x_met, StoB, x_err, StoB_err);
+    gr2 = new TGraphErrors(nDots, x_met, sqrtStoB, x_err, sqrtStoB_err);
+    gr1 -> SetTitle(";redMet1 cut; S/B");   
+    twoScales(gr1, gr2, 0,200, 0,y1,  y2, c3);
+    c3 -> SaveAs(testpath+"p05.png");
+
+    StoBPlot("redMet2",phiCut, fmc_Zjets,scaleFactor1,  sigFile,scaleFactor2,  StoB, StoB_err, sqrtStoB, sqrtStoB_err, x_met);
+    gr1 = new TGraphErrors(nDots, x_met, StoB, x_err, StoB_err);
+    gr2 = new TGraphErrors(nDots, x_met, sqrtStoB, x_err, sqrtStoB_err);
+    gr1 -> SetTitle(";redMet2 cut; S/B");   
+    twoScales(gr1, gr2, 0,200, 0,y1,  y2, c3);
+    c3 -> SaveAs(testpath+"p06.png");
+
+    StoBPlot("puCorrMet",phiCut, fmc_Zjets,scaleFactor1,  sigFile,scaleFactor2,  StoB, StoB_err, sqrtStoB, sqrtStoB_err, x_met);
+    gr1 = new TGraphErrors(nDots, x_met, StoB, x_err, StoB_err);
+    gr2 = new TGraphErrors(nDots, x_met, sqrtStoB, x_err, sqrtStoB_err);
+    gr1 -> SetTitle(";pu corr Met cut; S/B");   
+    twoScales(gr1, gr2, 0,200, 0,y1,  y2, c3);
+    c3 -> SaveAs(testpath+"p07.png");
+    
+
+    StoBPlot("compMet",phiCut, fmc_Zjets,scaleFactor1,  sigFile,scaleFactor2,  StoB, StoB_err, sqrtStoB, sqrtStoB_err, x_met);
+    gr1 = new TGraphErrors(nDots, x_met, StoB, x_err, StoB_err);
+    gr2 = new TGraphErrors(nDots, x_met, sqrtStoB, x_err, sqrtStoB_err);
+    gr1 -> SetTitle(";compMet (vert assoc) cut; S/B");   
+    twoScales(gr1, gr2, 0,200, 0, 1., 0.4, c3);
+    c3 -> SaveAs(testpath+"p08.png");
+
+  /*
+    fmc_Zjets->cd("Andrey");
+    cutTree -> Draw("ct_compMet>>h1(80,0,400)","ct_evtWeight*(ct_dPhiMetJet>0.28 &&  ct_nJets>=2)","hist");
+    sigFile->cd("Andrey");
+    h1 -> Scale(scaleFactor1);
+    cutTree -> Draw("ct_compMet>>h2(80,0,400)","ct_evtWeight*(ct_dPhiMetJet>0.28 &&  ct_nJets>=2)","hist same");
+    h1 -> SetTitle("nJet >= 2; compMet (vert assoc); Events; ");
+    h2 -> SetLineColor(kBlue);
+    h2 -> Scale(scaleFactor2);
+    c3 -> SetLogy();
+    c3 -> SaveAs(testpath+"p05.png");
+    c3 -> SetLogy(0);
     */
-
-    //    for(Int_t ii=1; ii<=3; ii++){
-    // result =  calculateOptimalCuts(ii, hs_met_over_qt[6]->Sum(), (TH1*)fmc_ggH400->Get("met3_over_qt_6"));
-    //cout<<"from "<<0.1*(result.bin1-1)<<" to "<< 0.1*result.bin2<<"\n S/B = "<<result.SB<<"  S/sqrt(B) = "<<result.SrootB<<"  S/sqrt(S+B) = "<<result.SrootSB<<endl;
-    //    }
-
-    /*
-    Float_t iSig = ((TH1*)fmc_ggH400->Get("met3_over_qt_6")) -> Integral(7,18); //from 0.6 to 1.8
-    Float_t iBkg = (hs_met_over_qt[6]->Sum()) -> Integral(7,18);
-    Float_t SB      = 0.1*iSig/iBkg;        //Higgs signal is 10*real in the histograms
-    Float_t SrootB  = 0.1*iSig/sqrt(iBkg);
-    Float_t SrootSB = 0.1*iSig/sqrt(iBkg + 0.1*iSig);
-    cout<<"After cuts of projMET/qT from 0.6 to 1.8 "<<endl;
-    cout<<iSig<<"  "<<iBkg<<" SB = "<<SB<<" SrootB = "<<SrootB<<" SrootSB = "<<SrootSB<<endl;
-    cout<<endl;
-        
-    result =  calculateOptimalCuts(3, hs_mt[7]->Sum(), (TH1*)fmc_ggH400->Get("mt2_7"));
-    cout<<"from "<<100+10*(result.bin1-1)<<" to "<< 100+10*result.bin2<<"\n S/B = "<<result.SB<<"  S/sqrt(B) = "<<result.SrootB<<"  S/sqrt(S+B) = "<<result.SrootSB<<endl;
-
-    result =  calculateOptimalCuts(3, hs_mt[6]->Sum(), (TH1*)fmc_ggH400->Get("mt2_6"));
-    cout<<"from "<<100+10*(result.bin1-1)<<" to "<< 100+10*result.bin2<<"\n S/B = "<<result.SB<<"  S/sqrt(B) = "<<result.SrootB<<"  S/sqrt(S+B) = "<<result.SrootSB<<endl;
-
-    */
-
   }
   
   
@@ -403,19 +324,19 @@ void makePlot(Int_t sel=1, TString hPath="00")
     //drawMuliPlot("#Delta#phi(MET, closest jet), p_{T}>20, |#eta|<2.4", 1, 0.001, 1000000, 0,5, hs_met_dPhiClosJet2[F0], c2, leg01, list_overlay, intLumi);
     //c2 -> SaveAs(testpath+"p03.png");
 
-    drawMuliPlot("pfMET type1", 1, 0.001, 1000000, 0,3, hs_met1_et[6], c2, leg01, list_overlay, intLumi); 
-    c2 -> SaveAs(testpath+"p01.png");
     drawMuliPlot("pfMET", 1, 0.001, 1000000, 0,3, hs_met2_et[6], c2, leg01, list_overlay, intLumi); 
+    c2 -> SaveAs(testpath+"p01.png");
+    drawMuliPlot("pfMET type1", 1, 0.001, 1000000, 0,3, hs_met1_et[6], c2, leg01, list_overlay, intLumi); 
     c2 -> SaveAs(testpath+"p02.png");
-    drawMuliPlot("puCorrMET", 1, 0.001, 1000000, 0,3, hs_met3_et[6], c2, leg01, list_overlay, intLumi); 
-    c2 -> SaveAs(testpath+"p03.png");
     drawMuliPlot("projMET", 1, 0.001, 1000000, 0,3, hs_met4_et[6], c2, leg01, list_overlay, intLumi); 
-    c2 -> SaveAs(testpath+"p04.png");
+    c2 -> SaveAs(testpath+"p03.png");
     drawMuliPlot("ZprojMET", 1, 0.001, 1000000, 0,3, hs_met5_et[6], c2, leg01, list_overlay, intLumi); 
-    c2 -> SaveAs(testpath+"p05.png");
+    c2 -> SaveAs(testpath+"p04.png");
     drawMuliPlot("redMET1", 1, 0.001, 1000000, 0,3, hs_met6_et[6], c2, leg01, list_overlay, intLumi); 
-    c2 -> SaveAs(testpath+"p06.png");
+    c2 -> SaveAs(testpath+"p05.png");
     drawMuliPlot("redMET2", 1, 0.001, 1000000, 0,3, hs_met7_et[6], c2, leg01, list_overlay, intLumi); 
+    c2 -> SaveAs(testpath+"p06.png");
+    drawMuliPlot("puCorrMET", 1, 0.001, 1000000, 0,3, hs_met3_et[6], c2, leg01, list_overlay, intLumi); 
     c2 -> SaveAs(testpath+"p07.png");
     drawMuliPlot("compMET", 1, 0.001, 1000000, 0,3, hs_met8_et[6], c2, leg01, list_overlay, intLumi); 
     c2 -> SaveAs(testpath+"p08.png");
@@ -736,24 +657,10 @@ void makePlot(Int_t sel=1, TString hPath="00")
   
   }
 
-
-  /*
-
-  c1 -> SetLogy(0);
-  fmc_ggH200 -> cd();
-  met3_et_ovQt_9 -> Draw("colz");
-  met3_et_ovQt_9 -> SetTitle(";projMET; projMET/q_{T}");
-  c1 -> SaveAs(imgpath+"ov05.png");
-
-  hs_met_et_ovQt[F1] -> Draw("colz");
-  hs_met_et_ovQt[F1] -> SetTitle(";projMET; projMET/q_{T}");
-    c1 -> SaveAs(imgpath+"ov06.png");
-  */
-
   cout<<"\n\n   -- end of job  --"<<endl;
   
 }
-
+/*
 THStack* makeStack(TList *sourcelist, TString name, Float_t lumi)
 {
   //cout<<"making stack!"<<endl;
@@ -815,7 +722,8 @@ THStack* makeStack(TList *sourcelist, TString name, Float_t lumi)
 
   return hs;
 }
-
+*/
+ /*
 void drawMuliPlot(TString xtitle, Int_t isLog, Float_t y1min, Float_t y1max, Float_t y2min, Float_t y2max, THStack *hs, TCanvas *cc, TLegend *leg, TList *list, Float_t lumi)
 {
   //Find the samm objects as in hs stack
@@ -884,7 +792,8 @@ void drawMuliPlot(TString xtitle, Int_t isLog, Float_t y1min, Float_t y1max, Flo
   prelim -> Draw();
 
 }
-
+ */
+  /*
 TH1 *THStack::Sum()
 {
   //cout<<"doing sum  " <<endl;
@@ -904,7 +813,9 @@ TH1 *THStack::Sum()
   //cout<<"end of sum"<<endl;
   return hh;
 }
+*/
 
+/*
 void PrintYields(TList *bgList, TList *sigList, TFile *dataFile, Float_t lumi, TString path, string option="tex")
 {
   Int_t bins = 0;
@@ -1030,17 +941,14 @@ void PrintYields(TList *bgList, TList *sigList, TFile *dataFile, Float_t lumi, T
 	oo<<separator<<iBkg<<pmSign<<iBkg_err<<separator<<0.1*iSig<<separator;
 	oo.precision(3);
 	oo<<SB<<endLine<<endl;  
-
-      }
-      
+      }      
   }
-
-
 
   oo<<"end of printing yields"<<endl;
   oo.close();
   
 }
+*/
 
 
  
@@ -1124,6 +1032,11 @@ optimalCuts calculateOptimalCuts(Int_t opt = 1, TH1 *bkg, TH1 *sig) {
 void twoScales(TGraph *g1, TGraph *g2, Float_t x1, Float_t x2, Float_t y1, Float_t y2, Float_t y3, TCanvas *c1) {
   c1 -> Clear();
 
+    g1->SetFillColor(kBlue);
+    g1->SetFillStyle(3010);
+    g2->SetFillColor(kRed);
+    g2->SetFillStyle(3010);
+
 
   //compute the pad range with suitable margins
   Double_t ymin = y1;
@@ -1187,3 +1100,65 @@ void twoScales(TGraph *g1, TGraph *g2, Float_t x1, Float_t x2, Float_t y1, Float
   	
 
 }
+
+StoBPlot(string var= "pfMet", Float_t phiCut = 0, TFile *bgFile, Float_t sc1, TFile *sigFile, Float_t sc2,  Double_t StoB[], Double_t StoB_err[], Double_t sqrtStoB[],Double_t  sqrtStoB_err[], Double_t x_met[]){
+
+  /*  bgFile -> cd("Andrey");
+  TString ct_sample("a");
+
+  TBranch *branch  = cutTree->GetBranch("ct_sample");
+  branch->SetAddress(&ct_sample);
+  cutTree -> GetEntry(0);
+  cout<<"test:  "<<ct_sample<<endl;
+  */
+
+  Float_t dPhiCut = phiCut; //400 etc
+  
+  for(Int_t i=0; i<100; i++)
+    {
+      x_met[i]  = 2*i;
+
+      //cout<<i<<"  "<<intLumi<<endl;
+      bgFile -> cd("Andrey");
+      cutTree -> Draw(Form("ct_%s>>h1",var.c_str()),Form("ct_evtWeight*(ct_dPhiMetJet>%f && ct_MT>216 &&ct_MT<272 && ct_%s>%f)", dPhiCut, var.c_str(), x_met[i]),"hist");
+      //cutTree -> Draw(Form("ct_%s>>h1",var.c_str()),Form("ct_evtWeight*(ct_dPhiMetJet>%f && ct_%s>%f)", dPhiCut, var.c_str(), x_met[i]),"hist");
+      //cutTree -> Draw(Form("ct_%s>>h1",var.c_str()),Form("ct_evtWeight*(ct_dPhiMetJet>%f && ct_%s>%f && ct_nJets>=2)", dPhiCut, var.c_str(), x_met[i]),"hist");
+      
+      TH1F * temp = (TH1F*)h1;
+      temp->Scale(sc1);
+      Double_t bg_err =0 ;
+      //temp -> Print();
+      Double_t bg =  temp->TH1::IntegralAndError(-1,2000, bg_err);
+      
+      sigFile -> cd("Andrey");
+      cutTree -> Draw(Form("ct_%s>>h2",var.c_str()),Form("ct_evtWeight*(ct_dPhiMetJet>%f && ct_MT>216 &&ct_MT<272 && ct_%s>%f)", dPhiCut, var.c_str(), x_met[i]),"hist");
+      //cutTree -> Draw(Form("ct_%s>>h2",var.c_str()),Form("ct_evtWeight*(ct_dPhiMetJet>%f && ct_%s>%f)", dPhiCut, var.c_str(), x_met[i]),"hist");
+//cutTree -> Draw(Form("ct_%s>>h2",var.c_str()),Form("ct_evtWeight*(ct_dPhiMetJet>%f && ct_%s>%f && ct_nJets>=2)", dPhiCut, var.c_str(), x_met[i]),"hist");
+
+            
+      TH1F * temp = (TH1F*)h2;
+      temp->Scale(sc2);
+      Double_t sig_err = 0;
+      //Double_t sig = 	temp -> Integral();
+      Double_t sig = temp->TH1::IntegralAndError(-1,2000, sig_err);
+            
+      if(bg!=0) {
+	StoB[i]    = sig/bg;
+	StoB_err[i] = StoB[i]*sqrt( pow(sig_err/sig,2) + pow(bg_err/bg,2));
+      }
+      else {StoB[i]=0; StoB_err[i]=0;}
+      //x_err[i] =0;
+      
+      if((sig+bg)  != 0) {
+	sqrtStoB[i]     = sig/sqrt(sig+bg);
+	sqrtStoB_err[i] =  sqrtStoB[i]*sqrt( pow(sig_err/sig,2) + 0.25* (pow(sig_err,2) + pow(bg_err,2))/pow(sig+bg,2)  );
+      }
+      else {sqrtStoB[i] = 0; sqrtStoB_err[i] =0;}
+      
+      //is this correct error propagation?	
+      
+      cout<<i<<"  "<<x_met[i]<<"    B="<<bg<<" S="<<sig<<"  S/B="<<StoB[i]<<"   S/sq(S+B)="<<sqrtStoB[i]<<endl;
+      
+    }
+}
+

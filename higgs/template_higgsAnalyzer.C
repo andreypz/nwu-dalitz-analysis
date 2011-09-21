@@ -3,7 +3,7 @@
 
 #include "higgsAnalyzer.h"
 #include <string>
-
+#include "../src/MetDefinitions.h"                                                                                                                         
 using namespace std;
 
 /////////////////////////////
@@ -15,7 +15,7 @@ int     JC_LVL         = 4;
 int     trigger[]      = {TRIGGER};
 string  suffix         = "SUFFIX";
 
-UInt_t verboseLvl = 1;
+UInt_t verboseLvl = 0;
 
 /////////////////
 //Analysis cuts//
@@ -25,13 +25,10 @@ float   jetPtCut[]     = {20.};
 float   muPtCut[]      = {20., 10.};
 float   elePtCut[]     = {20., 10.};
 float   zMassCut[]     = {76.2, 106.2};
-float   metCut[]       = {83., 9999.};
-float   mtCut[]        = {242., 320.};
 float   metPlusQtCut[] = {0., 9999.};
 float   metByQtCut[]   = {0., 9999.};
 float   bJetPtCut      = 20.;
 float   qtCut          = 25.;
-float   dPhiJetMETCut  = 0.28;
 int     nJetsCut[]     = {0, 99};
 Float_t cut_vz = 24, cut_vd0 = 2, cut_vndof = 4;  //PV filter cuts
 
@@ -44,6 +41,7 @@ float mtMaxCut[]   = {272., 320., 386., 471., 540., 600., 660., 720.};
 
  //variables for cutTree
 Float_t ct_pfMet, ct_pfMet1, ct_puCorrMet, ct_projMet, ct_ZprojMet, ct_redMet1, ct_redMet2, ct_compMet;
+UInt_t ct_nJets;
 Float_t ct_MT, ct_MT1, ct_evtWeight, ct_qT, ct_dPhiMetJet;
 
 TString ct_sample("SUFFIX");
@@ -167,26 +165,27 @@ void higgsAnalyzer::Begin(TTree * /*tree*/)
 	vtx_ndof_2[n]     = new  TH1F(Form("vtx_ndof_2_%i",n), "Ndof of second PV", 50,0,100);
 
       }
-    ffout.open("./events_printout_SUFFIX_final.txt",ofstream::out);
-    ncout.open("./counts_for_tex_SUFFIX.txt",ofstream::out);
-
-    ffout.precision(4); ffout.setf(ios::fixed, ios::floatfield);
-    for(Int_t i=6; i<nC; i++)
-      {
-	fout[i].open(Form("./events_printout_SUFFIX_%i.txt",i),ofstream::out);
-	fout[i].precision(3); fout[i].setf(ios::fixed, ios::floatfield);
-	fout[i]<<
-	  "******\t*********\t*****\t********\t************\t*********\t********\t*****\t*\n"<<
-	  "* Run \t* Event  \t* LS \t*  m(ll)\t*   MT(llvv)\t* PFMET  \t* PT(ll)\t* rho\t*\n"<<
-	  "******\t*********\t*****\t********\t************\t*********\t********\t*****\t*\n";
-	nout[i].open(Form("./events_filtered_SUFFIX_%i.txt",i),ofstream::out);
-	nout[i].precision(3); fout[i].setf(ios::fixed, ios::floatfield);
-	nout[i]<<
-	  "******\t*********\t*********\t******************************************\n"<<
-	  "* Run \t* Event  \t*  LS   \t*  PFMET * Hcal * Ecal * scrap * CSCTight * \n"<<
-	  "******\t*********\t*********\t******************************************\n";
+    if (verboseLvl>0){
+      ffout.open("./events_printout_SUFFIX_final.txt",ofstream::out);
+      ncout.open("./counts_for_tex_SUFFIX.txt",ofstream::out);
+      
+      ffout.precision(4); ffout.setf(ios::fixed, ios::floatfield);
+      for(Int_t i=6; i<nC; i++)
+	{
+	  fout[i].open(Form("./events_printout_SUFFIX_%i.txt",i),ofstream::out);
+	  fout[i].precision(3); fout[i].setf(ios::fixed, ios::floatfield);
+	  fout[i]<<
+	    "******\t*********\t*****\t********\t************\t*********\t********\t*****\t*\n"<<
+	    "* Run \t* Event  \t* LS \t*  m(ll)\t*   MT(llvv)\t* PFMET  \t* PT(ll)\t* rho\t*\n"<<
+	    "******\t*********\t*****\t********\t************\t*********\t********\t*****\t*\n";
+	  nout[i].open(Form("./events_filtered_SUFFIX_%i.txt",i),ofstream::out);
+	  nout[i].precision(3); fout[i].setf(ios::fixed, ios::floatfield);
+	  nout[i]<<
+	    "******\t*********\t*********\t******************************************\n"<<
+	    "* Run \t* Event  \t*  LS   \t*  PFMET * Hcal * Ecal * scrap * CSCTight * \n"<<
+	    "******\t*********\t*********\t******************************************\n";
       }
-
+    }
     cutTree = new TTree("cutTree","Tree for cuts");
     cutTree->Branch("ct_pfMet",&ct_pfMet, "ct_pfMet/F");
     cutTree->Branch("ct_pfMet1",&ct_pfMet1, "ct_pfMet1/F");
@@ -202,6 +201,7 @@ void higgsAnalyzer::Begin(TTree * /*tree*/)
     cutTree->Branch("ct_evtWeight",&ct_evtWeight, "ct_evtWeight/F");
     cutTree->Branch("ct_dPhiMetJet",&ct_dPhiMetJet, "ct_dPhiMetJet/F");
     cutTree->Branch("ct_sample",&ct_sample, "ct_sample/C");
+    cutTree->Branch("ct_nJets",&ct_nJets, "ct_nJets/i");
 
     histoFile->cd("Misc");
     h1_ptHat                        = new TH1D("h1_ptHat_SUFFIX", "ptHat", 37, 15.0, 200.0);
@@ -543,7 +543,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
     TLorentzVector ZP4;
     MET        = metP4.Pt();
     MET1       = met->CorrectedMet();
-    puCorrMET  = PUCorrectedMET(met->Met(), nVtx, "pfMet");
+    puCorrMET  = PUCorrectedMET(met->Met(), nVtx, "pfMet", isRealData);
 
     ///////////////////////
     // Cosmics rejection //
@@ -699,6 +699,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
 	ct_evtWeight  = evtWeight;
 	ct_qT         = qT;
 	ct_dPhiMetJet = deltaPhiJetMET;
+	ct_nJets = nJets;
 	cutTree -> Fill();
 	//Yields for all Higgs masses//
 	//PostSelectionYieldCounter(nEventsWeighted[6], metP4, ZP4, deltaPhiJetMET, evtWeight); 
@@ -877,7 +878,7 @@ void higgsAnalyzer::Terminate()
 
     histoFile->Write();
     histoFile->cd("Andrey");
-    scaleAndColor(sample.c_str(), CS, nEv, 1000.0, lColor, fColor); //1fb
+    scaleAndColor(sample.c_str(), CS, nEv, 1000.0, lColor, fColor); //normalize to 1fb
 
     histoFile->Close();  
   
@@ -955,7 +956,7 @@ float higgsAnalyzer::GetEventWeight(int nPV, TLorentzVector l1, TLorentzVector l
     return weight;
   
 }
-
+/*
 float higgsAnalyzer::PUCorrectedMET(float met, int nPV, string metType)
 {
     Float_t sigma0=0, shift=0, sigmaT=0, shift0=0, puCorMet=0;
@@ -975,7 +976,8 @@ float higgsAnalyzer::PUCorrectedMET(float met, int nPV, string metType)
     puCorMet = (met - (shift0 + shift))*sigma0/sigmaT + shift0;
     return puCorMet;
 }
-
+*/
+/*
 TLorentzVector higgsAnalyzer::GetReducedMET(TLorentzVector sumJet, TLorentzVector lep1, TLorentzVector lep2, TLorentzVector metP4, int version) 
 {
     TLorentzVector Q  = lep1 + lep2;
@@ -1011,7 +1013,9 @@ TLorentzVector higgsAnalyzer::GetReducedMET(TLorentzVector sumJet, TLorentzVecto
 
     return TLorentzVector(reducedMET.Px(), reducedMET.Py(), 0, reducedMET.Mod());
 }
+*/
 
+/*
 double higgsAnalyzer::projectedMET(Float_t f_MET, Float_t f_MET_phi, TLorentzVector f_Lepton1, TLorentzVector f_Lepton2)
 {
   Float_t deltaPhiMin =   TMath::Min( fabs(TVector2::Phi_mpi_pi(f_Lepton1.Phi() - f_MET_phi)), fabs(TVector2::Phi_mpi_pi(f_Lepton2.Phi() - f_MET_phi)));
@@ -1021,18 +1025,22 @@ double higgsAnalyzer::projectedMET(Float_t f_MET, Float_t f_MET_phi, TLorentzVec
   else f_projMET = f_MET*sin(deltaPhiMin);
   return f_projMET;
 }
+*/
 
+ /*
 double higgsAnalyzer::ZprojectedMET(Float_t f_MET, Float_t f_MET_phi, TLorentzVector f_Lepton1, TLorentzVector f_Lepton2)
 {
   TLorentzVector di = f_Lepton1 + f_Lepton2;
   Float_t deltaPhiMin =   fabs(TVector2::Phi_mpi_pi(di.Phi() - f_MET_phi));
-
+  
   Float_t f_projMET = 0;
   if (deltaPhiMin > TMath::Pi()/2) f_projMET = f_MET;
   else f_projMET = f_MET*sin(deltaPhiMin);
   return f_projMET;
 }
+ */
 
+  /*
 float higgsAnalyzer::Dz(TVector3 objVtx, TLorentzVector objP4, TVector3 vtx)
 {
     float vx  = objVtx.x(), vy = objVtx.y(), vz = objVtx.z();
@@ -1053,6 +1061,7 @@ float higgsAnalyzer::Dxy(TVector3 objVtx, TLorentzVector objP4, TVector3 vtx)
     double dXY =  (-(vx-pvx)*py + (vy-pvy)*px)/pt;
     return dXY;
 }
+  */
 
 void higgsAnalyzer::PostSelectionYieldCounter(float nEventsPS, TLorentzVector metP4, TLorentzVector ZP4, float dPhiJetMet, float evtWeight)
 {
@@ -1127,43 +1136,6 @@ void higgsAnalyzer::scaleAndColor(TString sample1, Float_t cs, Float_t nTotEv, F
       //cout<<sample1<<"  nEv: "<<nTotEv<<"   cs: "<<cs<<"   Rescaling all the histogram "<<hist->GetName()<<" by: "<<scaleFactor<<endl;                     
     }
 
-}
-
-float higgsAnalyzer::getNevents(string dataset, TH1F* h)
-{
-
-  Int_t nEv2 = 0;
-/*
-  //Get total number of Events  from the histogram (needs to be filled before any cuts applied)
-  nEv2 = h       -> GetEntries();
-  //nEv2 = 10000;
-
-  if(dataset=="DATA")          nEv2 = -1.;
-  else if(dataset=="DYmumu")   nEv2 = 29.7e6;
-  else if(dataset=="DYee")     nEv2 = 29.5e6;
-  else if(dataset=="DYtautau") nEv2 = 29.5e6;
-  else if(dataset=="ttbar")    nEv2 = 10.34e6;
-  else if(dataset=="tW")       nEv2 = 814390;
-  else if(dataset=="tbarW")    nEv2 = 809984;
-  else if(dataset=="WW")       nEv2 = 220e3;
-  else if(dataset=="ZZ")       nEv2 = 220e3;
-  else if(dataset=="WZ")       nEv2 = 205e3;
-  else if(dataset=="Wjets")    nEv2 = 30e6;
-  else if(dataset=="ggHZZ140") nEv2 = 99.99e3;
-  else if(dataset=="ggHZZ200") nEv2 = 96.215e3;
-  else if(dataset=="ggHZZ250") nEv2 = 99.993e3;
-  else if(dataset=="ggHZZ300") nEv2 = 99.990e3;
-  else if(dataset=="ggHZZ350") nEv2 = 99.998e3;
-  else if(dataset=="ggHZZ400") nEv2 = 93.854e3;
-  else if(dataset=="ggHZZ450") nEv2 = 96.642e3; 
-  else if(dataset=="ggHZZ500") nEv2 = 96.980e3;
-  else if(dataset=="ggHZZ550") nEv2 = 94.585e3;
-  else if(dataset=="ggHZZ600") nEv2 = 99.972e3;
-  else if(dataset=="VBFHZZ200") nEv2  = 93.90e3;
-
-  cout<<"Getting events for sample: "<<dataset<<"  :  "<<nEv2<<endl;
- */
-  return nEv2;
 }
 
 void higgsAnalyzer::FillHistosNoise(Int_t num, Double_t weight){

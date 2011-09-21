@@ -36,6 +36,8 @@
 #include "../src/TCTrigger.h"
 #include "../src/TCTriggerObject.h"
 
+//#include "../src/MetDefinitions.h"
+
 #define nC 20  //nCuts in the analysis. make plots after each cut
 
 class higgsAnalyzer : public TSelector {
@@ -176,8 +178,8 @@ class higgsAnalyzer : public TSelector {
 		virtual void    SlaveTerminate() {};
 		virtual void    Terminate();
 
-		virtual float   Dz(TVector3 objVtx, TLorentzVector objP4, TVector3 vtx);
-		virtual float   Dxy(TVector3 objVtx, TLorentzVector objP4, TVector3 vtx);
+		//virtual float   Dz(TVector3 objVtx, TLorentzVector objP4, TVector3 vtx);
+		//virtual float   Dxy(TVector3 objVtx, TLorentzVector objP4, TVector3 vtx);
 		virtual void    PostSelectionYieldCounter(float nEventsPS, TLorentzVector metP4, TLorentzVector zP4, float dPhiJetMet, float evtWeight);
 		//virtual void    MetPlusZPlots(TLorentzVector metP4, TLorentzVector ZP4, float evtWeight);
 		//virtual void    MetPlusLeptonPlots(TLorentzVector metP4, TLorentzVector p1, TLorentzVector p2, float evtWeight);
@@ -188,16 +190,15 @@ class higgsAnalyzer : public TSelector {
 		virtual float   CalculateTransMassAlt(TLorentzVector p1, TLorentzVector p2);
 		virtual float   DeltaPhiJetMET(TLorentzVector , std::vector<TLorentzVector> ); 
 		virtual float   GetEventWeight(int, TLorentzVector, TLorentzVector);
-		virtual float   PUCorrectedMET(float, int, std::string);
+		//virtual float   PUCorrectedMET(float, int, std::string);
 
 		virtual float   GetPhotonMass();
 
-		virtual TLorentzVector GetReducedMET(TLorentzVector sumJet, TLorentzVector lep1, TLorentzVector lep2, TLorentzVector metP4, int version);
+		//virtual TLorentzVector GetReducedMET(TLorentzVector sumJet, TLorentzVector lep1, TLorentzVector lep2, TLorentzVector metP4, int version);
 
-                double projectedMET(Float_t, Float_t, TLorentzVector, TLorentzVector);
-                double ZprojectedMET(Float_t, Float_t, TLorentzVector, TLorentzVector);
+                //double projectedMET(Float_t, Float_t, TLorentzVector, TLorentzVector);
+                //double ZprojectedMET(Float_t, Float_t, TLorentzVector, TLorentzVector);
 
-		float getNevents(string, TH1F* );
 		void scaleAndColor(TString , Float_t , Float_t , Float_t , Int_t , Int_t );
 
 		//float weightZZ(Float_t );

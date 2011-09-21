@@ -1,5 +1,14 @@
+2011-Sep-21
+  Created MetDefinitions.h where to put all the Met functions (to share with others)
+  Put a several macros from makeplot to utils - this will be a general place to put such things
+  Deleted merge.C (included in utils.C)
+  
+2011-Sep-16
+  V00-07 	Fixes, matching Nate's yields; third lepton electron updated
+  V00-06 	typos, broken 
 
 2011-Aug-26
+  tagged with V00-06
   Moved to higgs7 directory
   Updated cs and Nev (few things were missed)
   Mote ttbar samples to run

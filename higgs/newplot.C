@@ -5,8 +5,7 @@ using namespace std;
 
 void newplot(Int_t sel =1, TString hPath ="v00", Int_t doMerge=0) {
   gROOT->LoadMacro("./makePlot.C");
-  gROOT->LoadMacro("./merge.C");
-  //gROOT->ProcessLine(".L ../data/tdrstyle.C");
+  gROOT->LoadMacro("./utils.C");
   
   TStopwatch timer;	
   timer.Start();
@@ -28,7 +27,7 @@ void newplot(Int_t sel =1, TString hPath ="v00", Int_t doMerge=0) {
   }
   //Else: do the merging first:
 
-  system (Form("rm ./%s/m_*.root ", hPath.Data()));
+  system (Form("rm ./%s/m_*%i.root ", hPath.Data(), sel));
 
   system (Form("hadd ./%s/m_DataPh_%i.root ./%s/muGamma/hhhh_Pho*", hPath.Data(), sel, hPath.Data()));
   
