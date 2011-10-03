@@ -13,7 +13,7 @@ Float_t getXsecOrColors(string dataset="ggHZZ300", Int_t b = 1)
 
   if(dataset=="DATA")          {lCol = -1;        fCol = -1;       cs = -1;       nevt = -1; }
   else if(dataset=="ZZ")       {lCol = kBlue;     fCol = kMagenta; cs = 0.214;    nevt = 220e3;}
-  else if(dataset=="Wjets")    {lCol = kGreen-2;  fCol = kCyan+1;  cs = 31314.0;  nevt = 30e6;}
+  else if(dataset=="Wjets")    {lCol = kGreen-2;  fCol = kCyan+1;  cs = 31314.0;  nevt = 81.251e6;}
   else if(dataset=="ttbar")    {lCol = kOrange+1; fCol = kGreen+2; cs = 16.71;    nevt = 10.34e6;}
   else if(dataset=="WW")       {lCol = kBlue-2;   fCol = kSpring;  cs = 4.51;     nevt = 210e3;}
   else if(dataset=="WZ")       {lCol = kRed+2;    fCol = kBlue-1;  cs = 0.596;    nevt = 205e3;}

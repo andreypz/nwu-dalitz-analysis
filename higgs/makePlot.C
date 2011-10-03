@@ -25,14 +25,14 @@ void makePlot(Int_t sel=1, TString hPath="00")
   cout.precision(3); cout.setf(ios::fixed, ios::floatfield);
   TH1::SetDefaultSumw2(kTRUE);
 
-  //Float_t intLumi = 201.2 + 928.2;
-  //Float_t intLumi = 201.2. + 928.2 + 407.5 +450.6;
-  Float_t intLumi = 201.2. + 928.2 + 407.5 +450.6 ; //double ele
+  Float_t intLumi = 928.2;
+  //Float_t intLumi = 215.1 + 930.2 + 370.9 + 663.0;
+  //Float_t intLumi = 201.2. + 928.2 + 407.5 +450.6 ; //double ele
   //Float_t intLumi = 1600;
 
-  Bool_t doTest = 1, doSB = 0, doEBEE=0;
+  Bool_t doTest = 0, doSB = 0, doEBEE=0;
   Bool_t doPhotons = 0, makeZjetsQt = 0;
-  Bool_t doOverview= 0;
+  Bool_t doOverview= 1;
 
   //Types of met: met - pfMet, met1 - type1 corrected, met2 - pfMet passed Noise filters, 
   //met3 - projMet, met4 - puProj corrected met (those two are passed Noise filters) 

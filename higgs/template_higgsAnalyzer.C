@@ -486,11 +486,12 @@ bool higgsAnalyzer::Process(Long64_t entry)
 	  if (
 	      thisJet->VtxNTracks() > 0
 	      && thisJet->VtxSumPtFrac() > 0. 
-	      && thisJet->VtxSumPtIndex() == (UInt_t)PVind[0] //index in pv collection (passed vtx selection)
+	      && thisJet->VtxSumPtIndex() == (UInt_t)(PVind[0]+1) //index in pv collection (passed vtx selection)
 	      ) {
-	    if (thisJet->BDiscrTCHE() > 2. && thisJet->P4(JC_LVL).Pt() > bJetPtCut) 
+	    if (( thisJet->BDiscrJBP() > 1.33 || thisJet->BDiscrSSVHE()> 1.74 )&& thisJet->P4(JC_LVL).Pt() > bJetPtCut) 
 	      bJetP4.push_back(thisJet->P4(JC_LVL));
-	    if (( thisJet->BDiscrTCHE() > 2. || thisJet->BDiscrSSVHE()> 1.74 )&& thisJet->P4(JC_LVL).Pt() > bJetPtCut) 
+	    //	    if (thisJet->BDiscrTCHE() > 2. && thisJet->P4(JC_LVL).Pt() > bJetPtCut) 
+	    if (( thisJet->BDiscrTCHE() > 1.33 || thisJet->BDiscrSSVHE()> 1.74 )&& thisJet->P4(JC_LVL).Pt() > bJetPtCut) 
 	      bSSVJetP4.push_back(thisJet->P4(JC_LVL));
 	    
 	    jetP4.push_back(thisJet->P4(JC_LVL));

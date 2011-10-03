@@ -16,6 +16,7 @@ tbarW 0 tbarW muon
 WW    0 WW muon
 ZZ    0 ZZ muon
 WZ    0 WZ muon
+Wjets 0 Wjets muon
 ggHZZ200 0 ggHZZ200 muon
 ggHZZ250 0 ggHZZ250 muon
 ggHZZ300 0 ggHZZ300 muon
