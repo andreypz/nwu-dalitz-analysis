@@ -33,16 +33,16 @@ int     nJetsCut[]     = {0, 99};
 Float_t cut_vz = 24, cut_vd0 = 2, cut_vndof = 4;  //PV filter cuts
 
 // Cuts for mass points in the PAS. 250,300,350 etc
-float dPhiMinCut[] = {0.47, 0.33,0.21,  0.12, 0.06, 0.01, 0.00, 0.00};
-float metMinCut[]  = {59,  76, 95,  115, 133, 148, 157, 159};
-float mtMinCut[]   = {222, 264, 298, 327, 354, 382, 413, 452};
-float mtMaxCut[]   = {272, 331, 393, 460, 531, 605, 684, 767};
+//float dPhiMinCut[] = {0.47, 0.33, 0.21, 0.12, 0.06, 0.01, 0.00, 0.00};
+//float metMinCut[]  = {59,     76,   95,  115,  133,  148, 157, 159};
+//float mtMinCut[]   = {222,   264,  298,  327,  354,  382, 413, 452};
+//float mtMaxCut[]   = {272,   331,  393,  460,  531,  605, 684, 767};
 
 //older optimal cuts
-//float dPhiMinCut[] = {0.62, 0.28, 0.14, 0,    0,    0,    0,    0};
-//float metMinCut[]  = {69.,  83.,  97.,  112., 126., 141., 155., 170.};
-//float mtMinCut[]   = {216., 242., 267., 292., 315., 336., 357., 377.};
-//float mtMaxCut[]   = {272., 320., 386., 471., 540., 600., 660., 720.};
+float dPhiMinCut[] = {0.62, 0.28, 0.14, 0,    0,    0,    0,    0};
+float metMinCut[]  = {69.,  83.,  97.,  112., 126., 141., 155., 170.};
+float mtMinCut[]   = {216., 242., 267., 292., 315., 336., 357., 377.};
+float mtMaxCut[]   = {272., 320., 386., 471., 540., 600., 660., 720.};
 
  //variables for cutTree
 //Float_t ct_pfMet, ct_pfMet1, ct_puCorrMet, ct_projMet, ct_ZprojMet, ct_redMet1, ct_redMet2, ct_compMet;
@@ -409,8 +409,8 @@ bool higgsAnalyzer::Process(Long64_t entry)
 	    && fabs(thisMuon->Dz(pvPosition))  < 0.1 
 	    && (thisMuon->TrkIso() + thisMuon->HadIso() + thisMuon->EmIso() - rhoFactor*TMath::Pi()*0.09)/thisMuon->Pt() < 0.15
 	    ) {
-	  if(thisMuon->Pt()>10)	  muons.push_back(*thisMuon);
 	  softMuons++;
+	  if(thisMuon->Pt()>10)	  muons.push_back(*thisMuon);
         } else if (
 		   thisMuon->Pt() > 10 
 		   //&& thisMuon->Pt() <= muPtCut[0] 
@@ -444,13 +444,13 @@ bool higgsAnalyzer::Process(Long64_t entry)
 	  if ( 
 	      thisPhoton->Pt() >10
 	      && thisPhoton->EmIso()                < (4.2 + 0.006 *thisPhoton->Pt())
-	      &&	thisPhoton->HadIso()        < (2.2 + 0.0025*thisPhoton->Pt())
-	      &&	thisPhoton->TrkIso()        < (2.0 + 0.001 *thisPhoton->Pt())
-	      &&	thisPhoton->HadOverEm()     < 0.05 
-	      &&	thisPhoton->SigmaIEtaIEta() > 0.001
-	      &&	thisPhoton->SigmaIEtaIEta() < 0.013
-	      &&	thisPhoton->TrackVeto() == 0
-	      &&	(thisPhoton->EtaSupercluster() < 1.442 || thisPhoton->EtaSupercluster() > 1.556) 
+	      && thisPhoton->HadIso()        < (2.2 + 0.0025*thisPhoton->Pt())
+	      && thisPhoton->TrkIso()        < (2.0 + 0.001 *thisPhoton->Pt())
+	      && thisPhoton->HadOverEm()     < 0.05 
+	      && thisPhoton->SigmaIEtaIEta() > 0.001
+	      && thisPhoton->SigmaIEtaIEta() < 0.013
+	      && thisPhoton->TrackVeto() == 0
+	      && (thisPhoton->EtaSupercluster() < 1.442 || thisPhoton->EtaSupercluster() > 1.556) 
 	      ) photons.push_back(thisPhoton->P4());
 	}
         sort(photons.begin(), photons.end(), P4SortCondition);
@@ -507,11 +507,11 @@ bool higgsAnalyzer::Process(Long64_t entry)
 	}
       } else {
 	if (
-	    thisJet->P4(JC_LVL).Eta() < 5.0
-	    && thisJet->P4(JC_LVL).Pt() > 15. //jetPtCut[0]
+	    thisJet->P4(JC_LVL).Eta() < 4.8
+	    && thisJet->P4(JC_LVL).Pt() > jetPtCut[0]
 	    ) {
-	  //jetP4.push_back(thisJet->P4(JC_LVL)); 
-	  //sumJetP4 += thisJet->P4();
+	  jetP4.push_back(thisJet->P4(JC_LVL)); 
+	  sumJetP4 += thisJet->P4();
 	  fwdJetSumPt += thisJet->Pt(JC_LVL);
 	  ++fwdJetCount;
 	  ++jetCount;

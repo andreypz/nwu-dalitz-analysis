@@ -46,7 +46,7 @@ void PrintYields(TList *bgList, TList *sigList, TFile *dataFile, Float_t lumi, T
     pmSign = " $\pm$ ";
   }
   if(option=="twiki"){
-    title1 = "| *cut*        | *top*  | *ttbar*  | *WZ*  | *WW* | *ZZ*  | *Zjets*  | *Data*  | *Total bg* | | | | | ";
+    title1 = "| *cut*        | *top*  | *ttbar*  | *WZ*  | *WW* | *ZZ*  | *Zjets*  | *Data*  | *Total bg* | | | |";
     title2 = "| *Higgs mass* | *top*  | *ttbar*  | *WZ*  | *WW* | *ZZ*  | *Zjets*  | *Data*  | *Total bg* | *higgs* | *S/&radic;S+B* | *S/B* |";
     beginLine = "| ";
     endLine   = "\t |";
@@ -81,7 +81,7 @@ void PrintYields(TList *bgList, TList *sigList, TFile *dataFile, Float_t lumi, T
       if(j<=6)  oo.precision(0);
       else  oo.precision(2);
       if(j==7) continue; //skip 200 mass
-      if(j==8) oo<<title2<<endl;
+      if(j==8) oo<<"\n"<<title2<<endl;
 
       Int_t size = bgList->GetSize();
       TFile *ff[10];    TH1 *hh[10];
@@ -117,7 +117,7 @@ void PrintYields(TList *bgList, TList *sigList, TFile *dataFile, Float_t lumi, T
 	oo.precision(0);
 	oo<<data->Integral(0,nBins+1);
 
-	oo<<separator<<iBkg<<separator<<separator<<endLine<<endl;
+	oo<<separator<<iBkg<<separator<<separator<<separator<<endLine<<endl;
       }
       else{
 	TH1* data = (TH1*)dataFile->Get(  Form("Andrey/met0_et_%i",j) )->Clone();
