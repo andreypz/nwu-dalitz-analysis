@@ -29,13 +29,14 @@ void newplot(Int_t sel =1, TString hPath ="v00", Int_t doMerge=0) {
 
   system (Form("rm ./%s/m_*%i.root ", hPath.Data(), sel));
 
-  system (Form("hadd ./%s/m_DataPh_%i.root ./%s/muGamma/hhhh_Pho*", hPath.Data(), sel, hPath.Data()));
+//  system (Form("hadd ./%s/m_DataPh_%i.root ./%s/muGamma/hhhh_Pho*", hPath.Data(), sel, hPath.Data()));
   
-  system (Form("hadd ./%s/m_Data_%i.root  ./%s/hhhh_Doub*PromptV4.root ",     hPath.Data(), sel, histoPath.Data()));
+  system (Form("hadd ./%s/m_Data_%i.root  ./%s/hhhh_Doub*.root ",     hPath.Data(), sel, histoPath.Data()));
   system (Form("hadd ./%s/m_Top_%i.root   ./%s/hhhh_t*W.root ", hPath.Data(), sel,  histoPath.Data()));
   system (Form("hadd ./%s/m_ttbar_%i.root ./%s/hhhh_tt*",       hPath.Data(), sel, histoPath.Data()));
-  //system (Form("hadd ./%s/m_Zjets_%i.root ./%s/hhhh_DYToMuMu*",       hPath.Data(), sel, histoPath.Data()));
-  system (Form("hadd ./%s/m_Zjets_%i.root ./%s/hhhh_DY*",       hPath.Data(), sel, histoPath.Data()));
+  if (sel==1) system (Form("hadd ./%s/m_Zjets_%i.root ./%s/hhhh_DYToMuMu*",       hPath.Data(), sel, histoPath.Data()));
+  if (sel==2) system (Form("hadd ./%s/m_Zjets_%i.root ./%s/hhhh_DYToEE*",       hPath.Data(), sel, histoPath.Data()));
+  //system (Form("hadd ./%s/m_Zjets_%i.root ./%s/hhhh_DY*",       hPath.Data(), sel, histoPath.Data()));
 
 
   //Float_t photonLumi = 201.2. + 928.2;// + 407.5 +450.6;
@@ -43,7 +44,7 @@ void newplot(Int_t sel =1, TString hPath ="v00", Int_t doMerge=0) {
   TFile *m_Top    = new TFile(Form("./%s/m_Top_%i.root",    hPath.Data(), sel), "UPDATE");
   TFile *m_ttbar  = new TFile(Form("./%s/m_ttbar_%i.root",  hPath.Data(), sel), "UPDATE");
   TFile *m_Data   = new TFile(Form("./%s/m_Data_%i.root",   hPath.Data(), sel), "UPDATE");
-  TFile *m_DataPh = new TFile(Form("./%s/m_DataPh_%i.root", hPath.Data(), sel), "UPDATE");
+//  TFile *m_DataPh = new TFile(Form("./%s/m_DataPh_%i.root", hPath.Data(), sel), "UPDATE");
   
   //RescaleToLumiAndColors(m_DataPh, photonLumi, 1000, kRed, -1);
   RescaleToLumiAndColors(m_ttbar, 1000,1000, kOrange+1, kGreen+2);

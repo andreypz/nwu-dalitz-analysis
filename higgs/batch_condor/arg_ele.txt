@@ -17,7 +17,6 @@ WW    0 WW electron
 ZZ    0 ZZ electron
 WZ    0 WZ electron
 Wjets 0 Wjets electron
-ggHZZ200 0 ggHZZ200 electron
 ggHZZ250 0 ggHZZ250 electron
 ggHZZ300 0 ggHZZ300 electron
 ggHZZ350 0 ggHZZ350 electron
@@ -26,4 +25,3 @@ ggHZZ450 0 ggHZZ450 electron
 ggHZZ500 0 ggHZZ500 electron
 ggHZZ550 0 ggHZZ550 electron
 ggHZZ600 0 ggHZZ600 electron
-VBFHZZ200 0 VBFHZZ200 electron

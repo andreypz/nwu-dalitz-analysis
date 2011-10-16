@@ -46,8 +46,8 @@ void PrintYields(TList *bgList, TList *sigList, TFile *dataFile, Float_t lumi, T
     pmSign = " $\pm$ ";
   }
   if(option=="twiki"){
-    title1 = "| *cut*        | *top*  | *ttbar*  | *WZ*  | *WW* | *ZZ*  | *Zjets*  | *Data*  | *Total bg* | | |";
-    title2 = "| *Higgs mass* | *top*  | *ttbar*  | *WZ*  | *WW* | *ZZ*  | *Zjets*  | *Data*  | *Total bg* | *higgs* | *S/B* |";
+    title1 = "| *cut*        | *top*  | *ttbar*  | *WZ*  | *WW* | *ZZ*  | *Zjets*  | *Data*  | *Total bg* | | | | | ";
+    title2 = "| *Higgs mass* | *top*  | *ttbar*  | *WZ*  | *WW* | *ZZ*  | *Zjets*  | *Data*  | *Total bg* | *higgs* | *S/&radic;S+B* | *S/B* |";
     beginLine = "| ";
     endLine   = "\t |";
     separator = "\t |";
@@ -57,10 +57,10 @@ void PrintYields(TList *bgList, TList *sigList, TFile *dataFile, Float_t lumi, T
   string cutNames[18] = {
     "0. Total",
     "1. trigger",
-    "2. Vtx, cosmic, 2 lept",
+    "2. Vtx,cosmic,3d lept veto",
     "3. Z mass",
-    "4. qT > 25",
-    "5. 3d lepton veto",
+    "4. soft 3d muon  veto",
+    "5. qT > 25",
     "6. b-veto",
     "7.  H200",
     "8.  H250",
@@ -140,7 +140,7 @@ void PrintYields(TList *bgList, TList *sigList, TFile *dataFile, Float_t lumi, T
 	Float_t iBkg_err = total_bgError;
 	Float_t SB   = 0.1*iSig/iBkg;        //Higgs signal is 10*real in the histograms
 	//Float_t SrootB  = 0.1*iSig/sqrt(iBkg);
-	//Float_t SrootSB = 0.1*iSig/sqrt(iBkg + 0.1*iSig);
+	Float_t SrootSB = 0.1*iSig/sqrt(iBkg + 0.1*iSig);
 
 	oo.precision(0);
 	oo<<data->Integral(0,nBins+1);
@@ -148,7 +148,7 @@ void PrintYields(TList *bgList, TList *sigList, TFile *dataFile, Float_t lumi, T
 	oo.precision(2);
 	oo<<separator<<iBkg<<pmSign<<iBkg_err<<separator<<0.1*iSig<<separator;
 	oo.precision(3);
-	oo<<SB<<endLine<<endl;  
+	oo<<SrootSB<<separator<<SB<<endLine<<endl;  
 
       }
       

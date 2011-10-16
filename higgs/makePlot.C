@@ -25,14 +25,11 @@ void makePlot(Int_t sel=1, TString hPath="00")
   cout.precision(3); cout.setf(ios::fixed, ios::floatfield);
   TH1::SetDefaultSumw2(kTRUE);
 
-  Float_t intLumi = 928.2;
-  //Float_t intLumi = 215.1 + 930.2 + 370.9 + 663.0;
-  //Float_t intLumi = 201.2. + 928.2 + 407.5 +450.6 ; //double ele
-  //Float_t intLumi = 1600;
+  Float_t intLumi = 215.1 + 927.6 + 370.9 + 663.0 ; //double mu	
 
   Bool_t doTest = 0, doSB = 0, doEBEE=0;
   Bool_t doPhotons = 0, makeZjetsQt = 0;
-  Bool_t doOverview= 1;
+  Bool_t doOverview= 0;
 
   //Types of met: met - pfMet, met1 - type1 corrected, met2 - pfMet passed Noise filters, 
   //met3 - projMet, met4 - puProj corrected met (those two are passed Noise filters) 
@@ -231,32 +228,42 @@ void makePlot(Int_t sel=1, TString hPath="00")
     scaleFactor1      = intLumi*cs/nEv;
     cout<<cs<<"  "<<nEv<<"  "<<scaleFactor1<<endl;
 
-    cs  = getXsecOrColors("ggHZZ250", 3);
-    nEv = getXsecOrColors("ggHZZ250", 4);
+    cs  = getXsecOrColors("ggHZZ400", 3);
+    nEv = getXsecOrColors("ggHZZ400", 4);
     scaleFactor2      = intLumi*cs/nEv;
-    TFile * sigFile = fmc_ggH250;
-    Float_t  y1 = 3, y2 = 10;
+    TFile * sigFile = fmc_ggH400;
+    Float_t  y1 = 4, y2 = 8;
     Int_t nDots    = 100;
-    Float_t phiCut = 0.62;
+    Int_t startpoint= 70;
+    Float_t phiCut = 0.;
 
     TCanvas *c3 = new TCanvas("c3","for s/b plots",600,500);
     c3 -> cd();
     for(Int_t i =0; i<nDots; i++) x_err[i]=0;
     
-    StoBPlot("pfMet",phiCut, fmc_Zjets,scaleFactor1,  sigFile,scaleFactor2,  StoB, StoB_err, sqrtStoB, sqrtStoB_err, x_met);
+    StoBPlot("pfMet",phiCut, fmc_Zjets,scaleFactor1,  sigFile,scaleFactor2,  StoB, StoB_err, sqrtStoB, sqrtStoB_err, x_met, startpoint);
     gr1 = new TGraphErrors(nDots, x_met, StoB, x_err, StoB_err);
     gr2 = new TGraphErrors(nDots, x_met, sqrtStoB, x_err, sqrtStoB_err);
     gr1 -> SetTitle(";pfMet cut; S/B");   
-    twoScales(gr1, gr2, 0,200, 0,y1,  y2, c3);
+    twoScales(gr1, gr2, startpoint,startpoint+100, 0,y1,  y2, c3);
     c3 -> SaveAs(testpath+"p01.png");
 
-    StoBPlot("pfMet1",phiCut, fmc_Zjets,scaleFactor1,  sigFile,scaleFactor2,  StoB, StoB_err, sqrtStoB, sqrtStoB_err, x_met);
+    StoBPlot("pfMet1",phiCut, fmc_Zjets,scaleFactor1,  sigFile,scaleFactor2,  StoB, StoB_err, sqrtStoB, sqrtStoB_err, x_met, startpoint);
     gr1 = new TGraphErrors(nDots, x_met, StoB, x_err, StoB_err);
     gr2 = new TGraphErrors(nDots, x_met, sqrtStoB, x_err, sqrtStoB_err);
     gr1 -> SetTitle(";type 1 pfMet cut; S/B");   
-    twoScales(gr1, gr2, 0,200, 0,y1,  y2, c3);
+    twoScales(gr1, gr2, startpoint,startpoint+100, 0,y1,  y2, c3);
     c3 -> SaveAs(testpath+"p02.png");
     
+    StoBPlot("redMet2",phiCut, fmc_Zjets,scaleFactor1,  sigFile,scaleFactor2,  StoB, StoB_err, sqrtStoB, sqrtStoB_err, x_met, startpoint);
+    gr1 = new TGraphErrors(nDots, x_met, StoB, x_err, StoB_err);
+    gr2 = new TGraphErrors(nDots, x_met, sqrtStoB, x_err, sqrtStoB_err);
+    gr1 -> SetTitle(";redMet2 cut; S/B");   
+    twoScales(gr1, gr2, startpoint,startpoint+100, 0,y1,  y2, c3);
+    c3 -> SaveAs(testpath+"p03.png");
+    c3 -> SaveAs(testpath+"p04.png");
+
+    /*
     StoBPlot("projMet",phiCut, fmc_Zjets,scaleFactor1,  sigFile,scaleFactor2,  StoB, StoB_err, sqrtStoB, sqrtStoB_err, x_met);
     gr1 = new TGraphErrors(nDots, x_met, StoB, x_err, StoB_err);
     gr2 = new TGraphErrors(nDots, x_met, sqrtStoB, x_err, sqrtStoB_err);
@@ -279,12 +286,6 @@ void makePlot(Int_t sel=1, TString hPath="00")
     twoScales(gr1, gr2, 0,200, 0,y1,  y2, c3);
     c3 -> SaveAs(testpath+"p05.png");
 
-    StoBPlot("redMet2",phiCut, fmc_Zjets,scaleFactor1,  sigFile,scaleFactor2,  StoB, StoB_err, sqrtStoB, sqrtStoB_err, x_met);
-    gr1 = new TGraphErrors(nDots, x_met, StoB, x_err, StoB_err);
-    gr2 = new TGraphErrors(nDots, x_met, sqrtStoB, x_err, sqrtStoB_err);
-    gr1 -> SetTitle(";redMet2 cut; S/B");   
-    twoScales(gr1, gr2, 0,200, 0,y1,  y2, c3);
-    c3 -> SaveAs(testpath+"p06.png");
 
     StoBPlot("puCorrMet",phiCut, fmc_Zjets,scaleFactor1,  sigFile,scaleFactor2,  StoB, StoB_err, sqrtStoB, sqrtStoB_err, x_met);
     gr1 = new TGraphErrors(nDots, x_met, StoB, x_err, StoB_err);
@@ -300,6 +301,7 @@ void makePlot(Int_t sel=1, TString hPath="00")
     gr1 -> SetTitle(";compMet (vert assoc) cut; S/B");   
     twoScales(gr1, gr2, 0,200, 0, 1., 0.4, c3);
     c3 -> SaveAs(testpath+"p08.png");
+    */
 
   /*
     fmc_Zjets->cd("Andrey");
@@ -838,7 +840,7 @@ void PrintYields(TList *bgList, TList *sigList, TFile *dataFile, Float_t lumi, T
     pmSign = " $\pm$ ";
   }
   if(option=="twiki"){
-    title1 = "| *cut*        | *top*  | *ttbar*  | *WZ*  | *WW* | *ZZ*  | *Zjets*  | *Data*  | *Total bg* | | |";
+    title1 = "| *cut*        | *top*  | *ttbar*  | *WZ*  | *WW* | *ZZ*  | *Zjets*  | *Data*  | *Total bg* | | | |";
     title2 = "| *Higgs mass* | *top*  | *ttbar*  | *WZ*  | *WW* | *ZZ*  | *Zjets*  | *Data*  | *Total bg* | *higgs* | *S/B* |";
     beginLine = "| ";
     endLine   = "\t |";
@@ -851,8 +853,8 @@ void PrintYields(TList *bgList, TList *sigList, TFile *dataFile, Float_t lumi, T
     "1. trigger",
     "2. Vtx, cosmic, 2 lept",
     "3. Z mass",
-    "4. qT > 25",
-    "5. 3d lepton veto",
+    "4. soft 3d muon veto",
+    "5. qT > 25",
     "6. b-veto",
     "7.  H200",
     "8.  H250",
@@ -1101,7 +1103,7 @@ void twoScales(TGraph *g1, TGraph *g2, Float_t x1, Float_t x2, Float_t y1, Float
 
 }
 
-StoBPlot(string var= "pfMet", Float_t phiCut = 0, TFile *bgFile, Float_t sc1, TFile *sigFile, Float_t sc2,  Double_t StoB[], Double_t StoB_err[], Double_t sqrtStoB[],Double_t  sqrtStoB_err[], Double_t x_met[]){
+StoBPlot(string var= "pfMet", Float_t phiCut = 0, TFile *bgFile, Float_t sc1, TFile *sigFile, Float_t sc2,  Double_t StoB[], Double_t StoB_err[], Double_t sqrtStoB[],Double_t  sqrtStoB_err[], Double_t x_met[], Int_t startpoint){
 
   /*  bgFile -> cd("Andrey");
   TString ct_sample("a");
@@ -1116,12 +1118,12 @@ StoBPlot(string var= "pfMet", Float_t phiCut = 0, TFile *bgFile, Float_t sc1, TF
   
   for(Int_t i=0; i<100; i++)
     {
-      x_met[i]  = 2*i;
+      x_met[i]  = startpoint+ 1*i;
 
       //cout<<i<<"  "<<intLumi<<endl;
       bgFile -> cd("Andrey");
-      cutTree -> Draw(Form("ct_%s>>h1",var.c_str()),Form("ct_evtWeight*(ct_dPhiMetJet>%f && ct_MT>216 &&ct_MT<272 && ct_%s>%f)", dPhiCut, var.c_str(), x_met[i]),"hist");
-      //cutTree -> Draw(Form("ct_%s>>h1",var.c_str()),Form("ct_evtWeight*(ct_dPhiMetJet>%f && ct_%s>%f)", dPhiCut, var.c_str(), x_met[i]),"hist");
+      //cutTree -> Draw(Form("ct_%s>>h1",var.c_str()),Form("ct_evtWeight*(ct_dPhiMetJet>%f && ct_MT>216 &&ct_MT<272 && ct_%s>%f)", dPhiCut, var.c_str(), x_met[i]),"hist");
+      cutTree -> Draw(Form("ct_%s>>h1",var.c_str()),Form("ct_evtWeight*(ct_dPhiMetJet>%f && ct_%s>%f)", dPhiCut, var.c_str(), x_met[i]),"hist");
       //cutTree -> Draw(Form("ct_%s>>h1",var.c_str()),Form("ct_evtWeight*(ct_dPhiMetJet>%f && ct_%s>%f && ct_nJets>=2)", dPhiCut, var.c_str(), x_met[i]),"hist");
       
       TH1F * temp = (TH1F*)h1;
@@ -1131,8 +1133,8 @@ StoBPlot(string var= "pfMet", Float_t phiCut = 0, TFile *bgFile, Float_t sc1, TF
       Double_t bg =  temp->TH1::IntegralAndError(-1,2000, bg_err);
       
       sigFile -> cd("Andrey");
-      cutTree -> Draw(Form("ct_%s>>h2",var.c_str()),Form("ct_evtWeight*(ct_dPhiMetJet>%f && ct_MT>216 &&ct_MT<272 && ct_%s>%f)", dPhiCut, var.c_str(), x_met[i]),"hist");
-      //cutTree -> Draw(Form("ct_%s>>h2",var.c_str()),Form("ct_evtWeight*(ct_dPhiMetJet>%f && ct_%s>%f)", dPhiCut, var.c_str(), x_met[i]),"hist");
+      //cutTree -> Draw(Form("ct_%s>>h2",var.c_str()),Form("ct_evtWeight*(ct_dPhiMetJet>%f && ct_MT>216 &&ct_MT<272 && ct_%s>%f)", dPhiCut, var.c_str(), x_met[i]),"hist");
+      cutTree -> Draw(Form("ct_%s>>h2",var.c_str()),Form("ct_evtWeight*(ct_dPhiMetJet>%f && ct_%s>%f)", dPhiCut, var.c_str(), x_met[i]),"hist");
 //cutTree -> Draw(Form("ct_%s>>h2",var.c_str()),Form("ct_evtWeight*(ct_dPhiMetJet>%f && ct_%s>%f && ct_nJets>=2)", dPhiCut, var.c_str(), x_met[i]),"hist");
 
             

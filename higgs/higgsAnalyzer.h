@@ -49,7 +49,7 @@ class higgsAnalyzer : public TSelector {
   
   Float_t qT, diEta, Mll, Mll_EB, Mll_EE, Mll_EX;
   
-  Float_t MET, MET1, puCorrMET, projMET, ZprojMET, redMET1, redMET2, compMET;
+  Float_t MET, pfMET, pfMET1, puCorrMET, projMET, ZprojMET, redMET1, redMET2, compMET;
   Float_t MET_phi, MET1_phi;
   Float_t MT, MT1, MTZ, pTll;
   Float_t METqt, MET1qt, projMETqt;
@@ -60,6 +60,7 @@ class higgsAnalyzer : public TSelector {
 
   ofstream nout[nC], fout[nC], ffout, ncout;
   TTree * cutTree;
+  TTree * _kinTree;
 
   TH1F *mtZ[nC], *mt0[nC], *mt1[nC], *mt2[nC], *mt3[nC], *mt4[nC];
   TH1F *met0_phi[nC], *met0_et[nC], *met0_over_qt[nC];
@@ -82,23 +83,6 @@ class higgsAnalyzer : public TSelector {
   TH2F *mtZ_met3[nC], *mt2_met3[nC];
 
   TH1F *vtx_nPV_raw[nC], *vtx_nPV_weight[nC], *vtx_ndof_1[nC], *vtx_ndof_2[nC];
-
-		//miscellaneous
-		TH1D*     h1_ptHat;
-		TH1D*     h1_triggerStatus;
-		TH1D*     h1_goodRuns;
-		TH1D*     h1_acceptanceByCut;
-		TH1D*     h1_acceptanceByCutRaw;
-		TH1D*     h1_pvMult;
-		TH1D*     h1_simVertexMult;
-		TH1D*     h1_eventWeight;
-		TH2D*     h2_nEventsByHMass;
-		TProfile* p1_nVtcs;
-
-		TH1D*     h1_bJetMultPreVeto;
-		TH1D*     h1_bJetMultPostVeto;
-
-		TH1D*     h1_Met;
 
 	public :
 		TTree          *fChain;   //!pointer to the analyzed TTree or TChain
@@ -180,7 +164,7 @@ class higgsAnalyzer : public TSelector {
 
 		//virtual float   Dz(TVector3 objVtx, TLorentzVector objP4, TVector3 vtx);
 		//virtual float   Dxy(TVector3 objVtx, TLorentzVector objP4, TVector3 vtx);
-		virtual void    PostSelectionYieldCounter(float nEventsPS, TLorentzVector metP4, TLorentzVector zP4, float dPhiJetMet, float evtWeight);
+		//virtual void    PostSelectionYieldCounter(float nEventsPS, TLorentzVector metP4, TLorentzVector zP4, float dPhiJetMet, float evtWeight);
 		//virtual void    MetPlusZPlots(TLorentzVector metP4, TLorentzVector ZP4, float evtWeight);
 		//virtual void    MetPlusLeptonPlots(TLorentzVector metP4, TLorentzVector p1, TLorentzVector p2, float evtWeight);
 		//virtual void    LeptonBasicPlots(TLorentzVector p1, TLorentzVector p2, float evtWeight);
