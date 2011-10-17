@@ -31,8 +31,16 @@ Float_t getXsecOrColors(string dataset="ggHZZ300", Int_t b = 1)
   else if(dataset=="ggHZZ450") {lCol = kYellow;   fCol  = -1; cs = 0.0143;        nevt = 96.642e3;}
   else if(dataset=="ggHZZ500") {lCol = kYellow;   fCol  = -1; cs = 0.00896;       nevt = 96.980e3;}
   else if(dataset=="ggHZZ550") {lCol = kYellow;   fCol  = -1; cs = 0.00568;       nevt = 94.585e3;}
-  else if(dataset=="ggHZZ600") {lCol = kCyan+1;   fCol  = -1; cs = 0.004232;      nevt = 99.972e3;}
-  else if(dataset=="VBFHZZ200"){lCol = kCyan+1;   fCol  = -1; cs = 0.004232;      nevt = 93.90e3;} //cs ???
+  else if(dataset=="ggHZZ600") {lCol = kCyan+1;   fCol  = -1; cs = 0.00359;       nevt = 99.972e3;}
+  else if(dataset=="VBFHZZ200"){lCol = kCyan+1;   fCol  = -1; cs = 0.005849;     nevt = 49.943e3;}
+  else if(dataset=="VBFHZZ250"){lCol = kCyan+1;   fCol  = -1; cs = 4.602e-3;     nevt = 49.957e3;}
+  else if(dataset=="VBFHZZ300"){lCol = kCyan+1;   fCol  = -1; cs = 3.328e-3;     nevt = 49.935e3;}
+  else if(dataset=="VBFHZZ350"){lCol = kCyan+1;   fCol  = -1; cs = 2.356e-3;     nevt = 46.002e3;}
+  else if(dataset=="VBFHZZ400"){lCol = kCyan+1;   fCol  = -1; cs = 1.568e-3;     nevt = 49.851e3;}
+  else if(dataset=="VBFHZZ450"){lCol = kCyan+1;   fCol  = -1; cs = 1.158e-3;     nevt = 46.065e3;}
+  else if(dataset=="VBFHZZ500"){lCol = kCyan+1;   fCol  = -1; cs = 0.892e-3;     nevt = 46.049e3;}
+  else if(dataset=="VBFHZZ550"){lCol = kCyan+1;   fCol  = -1; cs = 0.781e-3;     nevt = 49.729e3;}
+  else if(dataset=="VBFHZZ600"){lCol = kCyan+1;   fCol  = -1; cs = 0.565e-3;     nevt = 49.698e3;}
 
 
   Float_t ddd;
