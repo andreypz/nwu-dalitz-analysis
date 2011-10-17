@@ -24,7 +24,7 @@ void RescaleToLumiAndColors( TFile *HistoFile, Float_t lumiInput=1, Float_t lumi
   }
   
 }
-void PrintYields(TList *bgList, TList *sigList, TFile *dataFile, Float_t lumi, TString path, string option="tex")
+void PrintYields(TList *bgList, TList *ggHList, TList *vbfList, TFile *dataFile, Float_t lumi, TString path, string option="tex")
 {
   Int_t bins = 0;
   ofstream oo;
@@ -46,8 +46,8 @@ void PrintYields(TList *bgList, TList *sigList, TFile *dataFile, Float_t lumi, T
     pmSign = " $\pm$ ";
   }
   if(option=="twiki"){
-    title1 = "| *cut*        | *top*  | *ttbar*  | *WZ*  | *WW* | *ZZ*  | *Zjets*  | *Data*  | *Total bg* | | | |";
-    title2 = "| *Higgs mass* | *top*  | *ttbar*  | *WZ*  | *WW* | *ZZ*  | *Zjets*  | *Data*  | *Total bg* | *higgs* | *S/&radic;S+B* | *S/B* |";
+    title1 = "| *cut*        | *top*  | *ttbar*  | *WZ*  | *WW* | *ZZ*  | *Zjets*  | *Data*  | *Total bg* |";
+    title2 = "| *Higgs mass* | *top*  | *ttbar*  | *WZ*  | *WW* | *ZZ*  | *Zjets*  | *Data*  | *Total bg* | *ggH* | *vbf* | *S/&radic;S+B* | *S/B* |";
     beginLine = "| ";
     endLine   = "\t |";
     separator = "\t |";
@@ -117,25 +117,30 @@ void PrintYields(TList *bgList, TList *sigList, TFile *dataFile, Float_t lumi, T
 	oo.precision(0);
 	oo<<data->Integral(0,nBins+1);
 
-	oo<<separator<<iBkg<<separator<<separator<<separator<<endLine<<endl;
+	oo<<separator<<iBkg<<endLine<<endl;
       }
       else{
 	TH1* data = (TH1*)dataFile->Get(  Form("Andrey/met0_et_%i",j) )->Clone();
 
-	TFile* sigFile  = (TFile*)sigList->At(j-8); //higgs 
-	if(j==15)  
-	  TFile* sigFile  = (TFile*)sigList->At(1);
+	TFile* ggHFile  = (TFile*)ggHList->At(j-8); //higgs 
+	TFile* vbfFile  = (TFile*)vbfList->At(j-8); //higgs 
+
+	//if(j==15)  
+	//  TFile* ggHFile  = (TFile*)ggHList->At(1);
        
-	TH1* sig  = (TH1*)sigFile ->Get(  Form("Andrey/met0_et_%i",j))->Clone();
-	sig -> Scale(lumi/1000);
-	Int_t sig_nBins = sig->GetNbinsX();
+	TH1* ggH  = (TH1*)ggHFile ->Get(  Form("Andrey/met0_et_%i",j))->Clone();
+	TH1* vbf  = (TH1*)vbfFile ->Get(  Form("Andrey/met0_et_%i",j))->Clone();
+	ggH -> Scale(lumi/1000);
+	vbf -> Scale(lumi/1000);
+	Int_t sig_nBins = ggH->GetNbinsX();
 	Int_t bkg_nBins = hh[0]->GetNbinsX();
 	Int_t nBins=0;
 	if (sig_nBins!=bkg_nBins) cout<<" IN yields \n WARNING:  different number of bis"<<endl;
 	else nBins = sig_nBins;
 	
-	//Float_t iSig = sig -> Integral();  //Count overflows
-	Float_t iSig = sig -> Integral(0,nBins+1);  //Count overflows
+	Float_t iggH = ggH->Integral(0,nBins+1); //Count overflows
+	Float_t ivbf = vbf->Integral(0,nBins+1); //Count overflows
+	Float_t iSig = iggH + ivbf;
 	Float_t iBkg = total_bg;
 	Float_t iBkg_err = total_bgError;
 	Float_t SB   = 0.1*iSig/iBkg;        //Higgs signal is 10*real in the histograms
@@ -146,7 +151,7 @@ void PrintYields(TList *bgList, TList *sigList, TFile *dataFile, Float_t lumi, T
 	oo<<data->Integral(0,nBins+1);
 
 	oo.precision(2);
-	oo<<separator<<iBkg<<pmSign<<iBkg_err<<separator<<0.1*iSig<<separator;
+	oo<<separator<<iBkg<<pmSign<<iBkg_err<<separator<<0.1*iggH<<separator<<0.1*ivbf<<separator;
 	oo.precision(3);
 	oo<<SrootSB<<separator<<SB<<endLine<<endl;  
 

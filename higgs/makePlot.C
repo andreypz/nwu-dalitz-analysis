@@ -59,16 +59,12 @@ void makePlot(Int_t sel=1, TString hPath="00")
   TFile* fmc_WW        = new TFile(Form("./%s/hhhh_WW.root",histoPath.Data() ));
   TFile* fmc_WZ        = new TFile(Form("./%s/hhhh_WZ.root",histoPath.Data() ));
 
-  TFile* fmc_ggH200    = new TFile(Form("./%s/hhhh_ggHZZ200.root",histoPath.Data() ));
-  TFile* fmc_ggH250    = new TFile(Form("./%s/hhhh_ggHZZ250.root",histoPath.Data() ));
-  TFile* fmc_ggH300    = new TFile(Form("./%s/hhhh_ggHZZ300.root",histoPath.Data() ));
-  TFile* fmc_ggH350    = new TFile(Form("./%s/hhhh_ggHZZ350.root",histoPath.Data() ));
-  TFile* fmc_ggH400    = new TFile(Form("./%s/hhhh_ggHZZ400.root",histoPath.Data() ));
-  TFile* fmc_ggH450    = new TFile(Form("./%s/hhhh_ggHZZ450.root",histoPath.Data() ));
-  TFile* fmc_ggH500    = new TFile(Form("./%s/hhhh_ggHZZ500.root",histoPath.Data() ));
-  TFile* fmc_ggH550    = new TFile(Form("./%s/hhhh_ggHZZ550.root",histoPath.Data() ));
-
-  //TFile* fmc_ggH600    = new TFile(Form("./%s/hhhh_SignalM600_HToZZ.root",histoPath.Data() ));
+  TFile *fmc_ggH[8], *fmc_vbfH[8];
+  for(Int_t i=0; i<8; i++){
+    Int_t  m = 200+i*50;
+    fmc_ggH[i]   = new TFile(Form("./%s/hhhh_ggHZZ%i.root",histoPath.Data(),m ));
+    fmc_vbfH[i]  = new TFile(Form("./%s/hhhh_VBFHZZ%i.root",histoPath.Data(),m ));
+  }
 
   if(doPhotons)  TFile* fmc_Zjets  = new TFile(Form("./%s/m_DataPh_%i.root", hPath.Data(), sel ));
   else           TFile* fmc_Zjets  = new TFile(Form("./%s/m_Zjets_%i.root", hPath.Data(), sel ));
@@ -95,23 +91,20 @@ void makePlot(Int_t sel=1, TString hPath="00")
 
   list_overlay = new TList();
   list_overlay->Add(fData); 
-  list_overlay->Add(fmc_ggH250);
-  //list_overlay->Add(fmc_ggH300);
-  list_overlay->Add(fmc_ggH400);
+  list_overlay->Add(fmc_ggH[1]);//250
+  list_overlay->Add(fmc_ggH[4]);//400
 
-  list_signal = new TList();
-  //list_signal->Add(fmc_ggH200);
-  list_signal->Add(fmc_ggH250);
-  list_signal->Add(fmc_ggH300);
-  list_signal->Add(fmc_ggH350);
-  list_signal->Add(fmc_ggH400);
-  list_signal->Add(fmc_ggH450);
-  list_signal->Add(fmc_ggH500);
-  list_signal->Add(fmc_ggH550);
+  list_ggH = new TList();
+  for(Int_t i=1; i<8; i++)  
+    list_ggH->Add(fmc_ggH[i]);
 
-  PrintYields(list_bg, list_signal, fData, intLumi, histoPath, "twiki");
-  PrintYields(list_bg, list_signal, fData, intLumi, histoPath, "tex");
-
+  list_vbfH = new TList();
+  for(Int_t i=1; i<8; i++)  
+    list_vbfH->Add(fmc_vbfH[i]);
+  
+  PrintYields(list_bg, list_ggH, list_vbfH, fData, intLumi, histoPath, "twiki");
+  PrintYields(list_bg, list_ggH, list_vbfH, fData, intLumi, histoPath, "tex");
+  
 
   THStack *hs_met_et[nC], *hs_met2_et[nC], *hs_met_over_qt[nC], *hs_met2_over_qt[nC], *hs_di_qt[nC], *hs_met_et_ovQt[nC], *hs_mt[nC], *hs_mtZ[nC];
   THStack *hs_met0_et[nC], *hs_met1_et[nC], *hs_met2_et[nC], *hs_met3_et[nC], *hs_met4_et[nC], *hs_met5_et[nC], *hs_met6_et[nC], *hs_met7_et[nC], *hs_met8_et[nC], *hs_met9_et[nC], *hs_met10_et[nC];
