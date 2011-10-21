@@ -1,10 +1,1 @@
-/uscms/home/bpollack/nobackup/Data/DoubleMu_Run2011A_May10ReReco-v1/nuTuple_100_1_OAP.root
-/uscms/home/bpollack/nobackup/Data/DoubleMu_Run2011A_May10ReReco-v1/nuTuple_101_1_6v7.root
-/uscms/home/bpollack/nobackup/Data/DoubleMu_Run2011A_May10ReReco-v1/nuTuple_102_1_vwf.root
-/uscms/home/bpollack/nobackup/Data/DoubleMu_Run2011A_May10ReReco-v1/nuTuple_103_1_6QH.root
-/uscms/home/bpollack/nobackup/Data/DoubleMu_Run2011A_May10ReReco-v1/nuTuple_104_1_9y3.root
-/uscms/home/bpollack/nobackup/Data/DoubleMu_Run2011A_May10ReReco-v1/nuTuple_105_1_LwX.root
-/uscms/home/bpollack/nobackup/Data/DoubleMu_Run2011A_May10ReReco-v1/nuTuple_106_1_JeG.root
-/uscms/home/bpollack/nobackup/Data/DoubleMu_Run2011A_May10ReReco-v1/nuTuple_107_1_K6d.root
-/uscms/home/bpollack/nobackup/Data/DoubleMu_Run2011A_May10ReReco-v1/nuTuple_108_1_4OU.root
-/uscms/home/bpollack/nobackup/Data/DoubleMu_Run2011A_May10ReReco-v1/nuTuple_109_1_jPW.root
+/uscms/home/andreypz/nobackup/MC3/wjets.root

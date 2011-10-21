@@ -46,8 +46,8 @@ void PrintYields(TList *bgList, TList *ggHList, TList *vbfList, TFile *dataFile,
     pmSign = " $\pm$ ";
   }
   if(option=="twiki"){
-    title1 = "| *cut*        | *top*  | *ttbar*  | *WZ*  | *WW* | *ZZ*  | *Zjets*  | *Data*  | *Total bg* |";
-    title2 = "| *Higgs mass* | *top*  | *ttbar*  | *WZ*  | *WW* | *ZZ*  | *Zjets*  | *Data*  | *Total bg* | *ggH* | *vbf* | *S/&radic;S+B* | *S/B* |";
+    title1 = "| *cut*        | *top*  | *ttbar*  | *WZ*  | *WW* | *ZZ*  | *Zjets* | *Total bg* | *Data* |";
+    title2 = "| *Higgs mass* | *top*  | *ttbar*  | *WZ*  | *WW* | *ZZ*  | *Zjets* | *Total bg* | *Data* | *ggH* | *vbf* | *S/&radic;S+B* | *S/B* |";
     beginLine = "| ";
     endLine   = "\t |";
     separator = "\t |";
@@ -70,13 +70,13 @@ void PrintYields(TList *bgList, TList *ggHList, TList *vbfList, TFile *dataFile,
     "12. H450",
     "13. H500",
     "14. H550",
-    "15. H300 filt",
+    "15. H600",
     "16.",
     "17.",};
 
   oo<<title1<<endl;
 
-  for(Int_t j = 0; j<=14; j++)
+  for(Int_t j = 0; j<=15; j++)
     {
       if(j<=6)  oo.precision(0);
       else  oo.precision(2);
@@ -115,9 +115,10 @@ void PrintYields(TList *bgList, TList *ggHList, TList *vbfList, TFile *dataFile,
 	Int_t nBins = data->GetNbinsX();
 	Float_t iBkg = total_bg;
 	oo.precision(0);
-	oo<<data->Integral(0,nBins+1);
 
-	oo<<separator<<iBkg<<endLine<<endl;
+	Float_t iData = data->Integral(0,nBins+1);
+	oo<<iBkg<<separator<<iData<<endLine<<endl;
+
       }
       else{
 	TH1* data = (TH1*)dataFile->Get(  Form("Andrey/met0_et_%i",j) )->Clone();
@@ -147,11 +148,14 @@ void PrintYields(TList *bgList, TList *ggHList, TList *vbfList, TFile *dataFile,
 	//Float_t SrootB  = 0.1*iSig/sqrt(iBkg);
 	Float_t SrootSB = 0.1*iSig/sqrt(iBkg + 0.1*iSig);
 
-	oo.precision(0);
-	oo<<data->Integral(0,nBins+1);
+	Float_t iData = data->Integral(0,nBins+1);
 
 	oo.precision(2);
-	oo<<separator<<iBkg<<pmSign<<iBkg_err<<separator<<0.1*iggH<<separator<<0.1*ivbf<<separator;
+	oo<<iBkg<<pmSign<<iBkg_err<<separator;
+	oo.precision(0);
+	oo<<iData<<separator;
+	oo.precision(2);
+	oo<<0.1*iggH<<separator<<0.1*ivbf<<separator;
 	oo.precision(3);
 	oo<<SrootSB<<separator<<SB<<endLine<<endl;  
 

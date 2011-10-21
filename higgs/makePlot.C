@@ -27,7 +27,7 @@ void makePlot(Int_t sel=1, TString hPath="00")
 
   Float_t intLumi = 215.1 + 927.6 + 370.9 + 663.0 ; //double mu	
 
-  Bool_t doTest = 0, doSB = 0, doEBEE=0;
+  Bool_t doTest = 1, doSB = 0, doEBEE=0;
   Bool_t doPhotons = 0, makeZjetsQt = 0;
   Bool_t doOverview= 0;
 
@@ -59,8 +59,8 @@ void makePlot(Int_t sel=1, TString hPath="00")
   TFile* fmc_WW        = new TFile(Form("./%s/hhhh_WW.root",histoPath.Data() ));
   TFile* fmc_WZ        = new TFile(Form("./%s/hhhh_WZ.root",histoPath.Data() ));
 
-  TFile *fmc_ggH[8], *fmc_vbfH[8];
-  for(Int_t i=0; i<8; i++){
+  TFile *fmc_ggH[10], *fmc_vbfH[10];
+  for(Int_t i=0; i<9; i++){
     Int_t  m = 200+i*50;
     fmc_ggH[i]   = new TFile(Form("./%s/hhhh_ggHZZ%i.root",histoPath.Data(),m ));
     fmc_vbfH[i]  = new TFile(Form("./%s/hhhh_VBFHZZ%i.root",histoPath.Data(),m ));
@@ -95,11 +95,11 @@ void makePlot(Int_t sel=1, TString hPath="00")
   list_overlay->Add(fmc_ggH[4]);//400
 
   list_ggH = new TList();
-  for(Int_t i=1; i<8; i++)  
+  for(Int_t i=1; i<9; i++)  
     list_ggH->Add(fmc_ggH[i]);
 
   list_vbfH = new TList();
-  for(Int_t i=1; i<8; i++)  
+  for(Int_t i=1; i<9; i++)  
     list_vbfH->Add(fmc_vbfH[i]);
   
   PrintYields(list_bg, list_ggH, list_vbfH, fData, intLumi, histoPath, "twiki");

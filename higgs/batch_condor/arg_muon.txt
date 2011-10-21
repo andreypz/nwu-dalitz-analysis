@@ -2,11 +2,11 @@ DATA  4,8 DoubleMu_May10 muon
 DATA  4,8 DoubleMu_PromptV4 muon
 DATA  4,8 DoubleMu_Aug05 muon
 DATA  4,8 DoubleMu_PromptV6 muon
-DYmumu 0 DYToMuMu_1 muon 
-DYmumu 0 DYToMuMu_2 muon 
-DYmumu 0 DYToMuMu_3 muon 
-DYmumu 0 DYToMuMu_4 muon 
-DYtautau 0 DYTauTau muon 
+DYmumu 0 DYmumu_1 muon 
+DYmumu 0 DYmumu_2 muon 
+DYmumu 0 DYmumu_3 muon 
+DYmumu 0 DYmumu_4 muon 
+DYtautau 0 DYtautau muon 
 ttbar 0 ttbar_1 muon
 ttbar 0 ttbar_2 muon
 ttbar 0 ttbar_3 muon

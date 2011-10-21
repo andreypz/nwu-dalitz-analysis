@@ -33,16 +33,16 @@ int     nJetsCut[]     = {0, 99};
 Float_t cut_vz = 24, cut_vd0 = 2, cut_vndof = 4;  //PV filter cuts
 
 // Cuts for mass points in the PAS. 250,300,350 etc
-//float dPhiMinCut[] = {0.47, 0.33, 0.21, 0.12, 0.06, 0.01, 0.00, 0.00};
-//float metMinCut[]  = {59,     76,   95,  115,  133,  148, 157, 159};
-//float mtMinCut[]   = {222,   264,  298,  327,  354,  382, 413, 452};
-//float mtMaxCut[]   = {272,   331,  393,  460,  531,  605, 684, 767};
+float dPhiMinCut[] = {0.47, 0.33, 0.21, 0.12, 0.06, 0.01, 0.00, 0.00};
+float metMinCut[]  = {59,     76,   95,  115,  133,  148, 157, 159};
+float mtMinCut[]   = {222,   264,  298,  327,  354,  382, 413, 452};
+float mtMaxCut[]   = {272,   331,  393,  460,  531,  605, 684, 767};
 
 //older optimal cuts
-float dPhiMinCut[] = {0.62, 0.28, 0.14, 0,    0,    0,    0,    0};
-float metMinCut[]  = {69.,  83.,  97.,  112., 126., 141., 155., 170.};
-float mtMinCut[]   = {216., 242., 267., 292., 315., 336., 357., 377.};
-float mtMaxCut[]   = {272., 320., 386., 471., 540., 600., 660., 720.};
+//float dPhiMinCut[] = {0.62, 0.28, 0.14, 0,    0,    0,    0,    0};
+//float metMinCut[]  = {69.,  83.,  97.,  112., 126., 141., 155., 170.};
+//float mtMinCut[]   = {216., 242., 267., 292., 315., 336., 357., 377.};
+//float mtMaxCut[]   = {272., 320., 386., 471., 540., 600., 660., 720.};
 
  //variables for cutTree
 //Float_t ct_pfMet, ct_pfMet1, ct_puCorrMet, ct_projMet, ct_ZprojMet, ct_redMet1, ct_redMet2, ct_compMet;
@@ -652,8 +652,6 @@ bool higgsAnalyzer::Process(Long64_t entry)
     FillHistosNoise(4, evtWeight);
 
 
-    Bool_t passBasic = kTRUE;
-
     /////////////////////////////////////////////////
     // Variables for FillHistos() function (Andrey)//
     /////////////////////////////////////////////////
@@ -734,6 +732,8 @@ bool higgsAnalyzer::Process(Long64_t entry)
       FillHistosNoise(6, evtWeight);
     }    
         
+    Bool_t passBasic = kTRUE;
+
     ////////////////////////
     // DeltaPhi(MET, jet) //
     ////////////////////////
@@ -809,20 +809,18 @@ bool higgsAnalyzer::Process(Long64_t entry)
     	FillHistosNoise(14, evtWeight);
       }
 
-    if (passBasic && deltaPhiJetMET > dPhiMinCut[0] &&  MET>metMinCut[0]  && (MT > mtMinCut[0] && MT < mtMaxCut[0]))
+    if (passBveto && deltaPhiJetMET > dPhiMinCut[7] &&  MET>metMinCut[7]  && (MT > mtMinCut[7] && MT < mtMaxCut[7]))
       {
-	//NO b-veto, only basics cuts. For N-b jets distribution. For Higgs  250
+	//For Higgs  600
 	CountEvents(15);
 	nEventsWeighted[15] += evtWeight;
        	FillHistos(15, evtWeight);
-	FillHistosNoise(15, evtWeight);
-	//h1_bJetMultPreVeto->Fill(bJetP4.size(), evtWeight);
+    	FillHistosNoise(15, evtWeight);
       }
-
-
-    if (passBasic && deltaPhiJetMET > dPhiMinCut[1] &&  MET>metMinCut[1]  && (MT > mtMinCut[1] && MT < mtMaxCut[1]))
+    
+    if (passBasic && MET>metMinCut[0])
       {
-	//NO b-veto, only basics cuts. For N-b jets distribution. For Higgs  300
+	//NO b-veto, only basics cuts. For N-b jets distribution.
 	CountEvents(16);
 	nEventsWeighted[16] += evtWeight;
        	FillHistos(16, evtWeight);
@@ -867,12 +865,12 @@ void higgsAnalyzer::Terminate()
     cout<<"| Z Qt :                             |\t"<< nEvents[5]  <<"\t|"<<nEventsWeighted[5]  <<"\t|"<<endl;
     cout<<"| b-jet veto:                        |\t"<< nEvents[6]  <<"\t|"<<nEventsWeighted[6]  <<"\t|"<<endl;
     cout<<"|                            |\t"<< nEvents[7]  <<"\t|"<<nEventsWeighted[7]  <<"\t|"<<endl;
-    cout<<"|                            |\t"<< nEvents[8]  <<"\t|"<<nEventsWeighted[8]  <<"\t|"<<endl;
-    cout<<"| :                          |\t"<< nEvents[9] <<"\t|"<<nEventsWeighted[9] <<"\t|"<<endl;
-    cout<<"| :                          |\t"<< nEvents[10]  <<"\t|"<<nEventsWeighted[10]  <<"\t|"<<endl;
-    cout<<"| :                          |\t"<< nEvents[11] <<"\t|"<<nEventsWeighted[11] <<"\t|"<<endl;
-    cout<<"| :                          |\t"<< nEvents[12] <<"\t|"<<nEventsWeighted[12] <<"\t|"<<endl;
-    cout<<"| y:                         |\t"<< nEvents[13] <<"\t|"<<nEventsWeighted[13] <<"\t|"<<endl;
+    cout<<"| H250                         |\t"<< nEvents[8]  <<"\t|"<<nEventsWeighted[8]  <<"\t|"<<endl;
+    cout<<"| H300                       |\t"<< nEvents[9] <<"\t|"<<nEventsWeighted[9] <<"\t|"<<endl;
+    cout<<"|                        |\t"<< nEvents[10]  <<"\t|"<<nEventsWeighted[10]  <<"\t|"<<endl;
+    cout<<"| H400                        |\t"<< nEvents[11] <<"\t|"<<nEventsWeighted[11] <<"\t|"<<endl;
+    cout<<"|                           |\t"<< nEvents[12] <<"\t|"<<nEventsWeighted[12] <<"\t|"<<endl;
+    cout<<"| H500                       |\t"<< nEvents[13] <<"\t|"<<nEventsWeighted[13] <<"\t|"<<endl;
   
       
     //Normalization to 1fb and coloring the histograms
@@ -943,7 +941,7 @@ float higgsAnalyzer::GetEventWeight(int nPV, TLorentzVector l1, TLorentzVector l
         puWeight = h_puReweight->GetBinContent(nPV+1); 
 
         //weighting for the muon trigger;include parameterization for muons
-        if (selection == "muon") triggerWeight = 0.9;
+        if (selection == "muon") triggerWeight = 0.97;
         if (selection == "electron") triggerWeight = 0.99;
 
         //include dynamic scaling of ZZ samples
@@ -999,7 +997,6 @@ float higgsAnalyzer::GetPhotonMass()
         photonMass = h_mass->GetRandom();
     }
    
-
     return photonMass;
 }
 
