@@ -34,9 +34,9 @@ void newplot(Int_t sel =1, TString hPath ="v00", Int_t doMerge=0) {
   system (Form("hadd ./%s/m_Data_%i.root  ./%s/hhhh_Doub*.root ",     hPath.Data(), sel, histoPath.Data()));
   system (Form("hadd ./%s/m_Top_%i.root   ./%s/hhhh_t*W.root ", hPath.Data(), sel,  histoPath.Data()));
   system (Form("hadd ./%s/m_ttbar_%i.root ./%s/hhhh_tt*",       hPath.Data(), sel, histoPath.Data()));
-  if (sel==1) system (Form("hadd ./%s/m_Zjets_%i.root ./%s/hhhh_DYToMuMu*",       hPath.Data(), sel, histoPath.Data()));
-  if (sel==2) system (Form("hadd ./%s/m_Zjets_%i.root ./%s/hhhh_DYToEE*",       hPath.Data(), sel, histoPath.Data()));
-  //system (Form("hadd ./%s/m_Zjets_%i.root ./%s/hhhh_DY*",       hPath.Data(), sel, histoPath.Data()));
+  //if (sel==1) system (Form("hadd ./%s/m_Zjets_%i.root ./%s/hhhh_DYToMuMu*",       hPath.Data(), sel, histoPath.Data()));
+  //if (sel==2) system (Form("hadd ./%s/m_Zjets_%i.root ./%s/hhhh_DYToEE*",       hPath.Data(), sel, histoPath.Data()));
+  system (Form("hadd ./%s/m_Zjets_%i.root ./%s/hhhh_DYjets*",       hPath.Data(), sel, histoPath.Data()));
 
 
   //Float_t photonLumi = 201.2. + 928.2;// + 407.5 +450.6;

@@ -24,7 +24,7 @@ chmod 755 run.csh
 set newDir = $4
 mkdir $newDir
 cp hhhh_*.root $newDir
-#cp events_* $newDir
+cp events_* $newDir
 #cp counts* $newDir
 
 cp -r $newDir $dir/batch_condor/

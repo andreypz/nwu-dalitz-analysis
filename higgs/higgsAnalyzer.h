@@ -57,6 +57,8 @@ class higgsAnalyzer : public TSelector {
   Float_t nDofVtx1, nDofVtx2;
   Int_t nJets, nJetsB , nJetsBssv, nJetsB25, nJetsB30;
   Float_t dPhiClos1, dPhiClos2;
+Float_t lep1_eta, lep1_phi, lep1_pt;
+Float_t lep2_eta, lep2_phi, lep2_pt;
 
   ofstream nout[nC], fout[nC], ffout, ncout;
   TTree * cutTree;
@@ -69,14 +71,15 @@ class higgsAnalyzer : public TSelector {
   TH1F *met3_phi[nC], *met3_et[nC], *met3_over_qt[nC];
   TH1F *met4_phi[nC], *met4_et[nC], *met4_over_qt[nC], *met4_puSig[nC];
   TH1F *met5_et[nC],*met6_et[nC],*met7_et[nC],*met8_et[nC], *met9_et[nC], *met10_et[nC];
-  TH1F *mu1_phi[nC], *mu1_eta[nC], *mu1_pt[nC];
-  TH1F *mu2_phi[nC], *mu2_eta[nC], *mu2_pt[nC];
+  TH1F *l1_phi[nC], *l1_eta[nC], *l1_pt[nC];
+  TH1F *l2_phi[nC], *l2_eta[nC], *l2_pt[nC];
   TH1F *btag_hp[nC];
   TH1F *di_qt[nC], *di_eta[nC], *di_mass[nC], *di_mass_EB[nC], *di_mass_EE[nC], *di_mass_EX[nC];
   TH1F *jet_N[nC], *jet_dRlep1[nC], *jet_dRlep2[nC], *jet_pt[nC];
   TH1F *jet_b_N[nC], *jet_b_Nssv[nC], *jet_b_N25[nC],*jet_b_N30[nC], *jet_b_pt[nC];
 
-  TH1F *met2_dPhiLeadJet1[nC], *met2_dPhiLeadJet2[nC], *met2_dPhiClosJet1[nC], *met2_dPhiClosJet2[nC];
+  TH1F *met1_dPhiLeadJet1[nC], *met1_dPhiLeadJet2[nC], *met1_dPhiClosJet1[nC], *met1_dPhiClosJet2[nC];
+//  TH1F *met2_dPhiLeadJet1[nC], *met2_dPhiLeadJet2[nC], *met2_dPhiClosJet1[nC], *met2_dPhiClosJet2[nC];
 
   TH2F *met0_et_ovQt[nC], *met1_et_ovQt[nC], *met2_et_ovQt[nC], *met3_et_ovQt[nC], *met4_et_ovQt[nC];
   TH2F *mtZ_met2[nC], *mt2_met2[nC];
@@ -84,118 +87,106 @@ class higgsAnalyzer : public TSelector {
 
   TH1F *vtx_nPV_raw[nC], *vtx_nPV_weight[nC], *vtx_ndof_1[nC], *vtx_ndof_2[nC];
 
-	public :
-		TTree          *fChain;   //!pointer to the analyzed TTree or TChain
+  TH1F *run_events[nC];
+  
+ public :
+  TTree          *fChain;   //!pointer to the analyzed TTree or TChain
+  
+  // Declaration of leaf types
+  TClonesArray  *recoJets;
+  TClonesArray  *recoMET;
+  TClonesArray  *genJets;
+  TClonesArray  *recoMuons;
+  TClonesArray  *recoElectrons;
+  TClonesArray  *recoPhotons;
+  TClonesArray  *primaryVtx;
+  int           eventNumber;
+  int           runNumber;
+  int           lumiSection;
+  int           nPUVertices;
+  double        ptHat;
+  float         rhoFactor;
+  unsigned int  triggerStatus;
+  int           hltPrescale[64];
+  bool          isRealData, isNoiseHcal, isDeadEcalCluster, isScraping, isCSCTightHalo;
+  
+  // List of branches
+  TBranch        *b_recoJets;   //!
+  TBranch        *b_recoMET;   //!
+  TBranch        *b_genJets;   //!
+  TBranch        *b_recoMuons;
+  TBranch        *b_recoElectrons;
+  TBranch        *b_recoPhotons;
+  TBranch        *b_primaryVtx;   //!
+  TBranch        *b_eventNumber;   //!
+  TBranch        *b_runNumber;   //!
+  TBranch        *b_lumiSection;   //!
+  TBranch        *b_rhoFactor;   //!
+  TBranch        *b_ptHat;   //!
+  TBranch        *b_triggerStatus;   //!
+  TBranch        *b_hltPrescale;   //!
+  TBranch        *b_nPUVertices;   //!
+  TBranch        *b_isRealData;   //!
+  TBranch        *b_isNoiseHcal;   //!
+  TBranch        *b_isDeadEcalCluster;   //!
+  TBranch        *b_isScraping;   //!
+  TBranch        *b_isCSCTightHalo;   //!
+  
+  //For counting events
+  //        int          nEvents[16];
+  //For counting weighted events
+  float        nEventsWeighted[nC];
+  
+  UInt_t nEvents[nC];
+  UInt_t nEventsPassNoiseFilter[6][nC]; //1-Hcal, 2-Ecal, 3- Scraping, 4-CSCTight, 5-CSCLoose,   0-passed all
+  
+  /*
+  //MET corrections
+  struct metCorrs {
+  float Sigma0;
+  float SigmaPU;
+  float Shift;
+  } metCorr;
+  
+  std::map<string, metCorrs> metCorrMap;
+  */
+  
+  higgsAnalyzer(TTree * /*tree*/ =0) { }
+  virtual ~higgsAnalyzer() { }
+  virtual int     Version() const { return 2; }
+  virtual void    Begin(TTree *tree);
+  //virtual void    SlaveBegin(TTree *tree) { TString option = GetOption();};
+  virtual void    Init(TTree *tree);
+  virtual bool    Notify();
+  virtual bool    Process(Long64_t entry);
+  virtual int     GetEntry(Long64_t entry, int getall = 0) { return fChain ? fChain->GetTree()->GetEntry(entry, getall) : 0; }
+  virtual void    SetOption(const char *option) { fOption = option; }
+  virtual void    SetObject(TObject *obj) { fObject = obj; }
+  virtual void    SetInputList(TList *input) { fInput = input; }
+  virtual TList  *GetOutputList() const { return fOutput; }
+  virtual void    SlaveTerminate() {};
+  virtual void    Terminate();
+  
+  virtual bool    CosmicMuonFilter(TCMuon , TCMuon );
+  virtual float   CalculateTransMass(TLorentzVector p1, TLorentzVector p2);
+  virtual float   CalculateTransMassAlt(TLorentzVector p1, TLorentzVector p2);
+  virtual float   DeltaPhiJetMET(TLorentzVector , std::vector<TLorentzVector> ); 
+  virtual float   GetEventWeight(int, TLorentzVector, TLorentzVector);
+  virtual float   GetElectronEff(TLorentzVector );
+  virtual float   GetMuTriggerEff(TLorentzVector );
+  virtual float   GetPhotonMass();
 
-		// Declaration of leaf types
-		TClonesArray  *recoJets;
-		TClonesArray  *recoMET;
-		TClonesArray  *genJets;
-		TClonesArray  *recoMuons;
-		TClonesArray  *recoElectrons;
-		TClonesArray  *recoPhotons;
-		TClonesArray  *primaryVtx;
-		int           eventNumber;
-		int           runNumber;
-		int           lumiSection;
-		int           nPUVertices;
-		double        ptHat;
-		float         rhoFactor;
-		unsigned int  triggerStatus;
-		int           hltPrescale[64];
-		bool          isRealData, isNoiseHcal, isDeadEcalCluster, isScraping, isCSCTightHalo;
-
-		// List of branches
-		TBranch        *b_recoJets;   //!
-		TBranch        *b_recoMET;   //!
-		TBranch        *b_genJets;   //!
-		TBranch        *b_recoMuons;
-		TBranch        *b_recoElectrons;
-		TBranch        *b_recoPhotons;
-		TBranch        *b_primaryVtx;   //!
-		TBranch        *b_eventNumber;   //!
-		TBranch        *b_runNumber;   //!
-		TBranch        *b_lumiSection;   //!
-		TBranch        *b_rhoFactor;   //!
-		TBranch        *b_ptHat;   //!
-		TBranch        *b_triggerStatus;   //!
-		TBranch        *b_hltPrescale;   //!
-		TBranch        *b_nPUVertices;   //!
-		TBranch        *b_isRealData;   //!
-		TBranch        *b_isNoiseHcal;   //!
-		TBranch        *b_isDeadEcalCluster;   //!
-		TBranch        *b_isScraping;   //!
-		TBranch        *b_isCSCTightHalo;   //!
-
-		//For counting events
-		//        int          nEvents[16];
-		//For counting weighted events
-		float        nEventsWeighted[nC];
-		
-		UInt_t nEvents[nC];
-		UInt_t nEventsPassNoiseFilter[6][nC]; //1-Hcal, 2-Ecal, 3- Scraping, 4-CSCTight, 5-CSCLoose,   0-passed all
-		
-/*
-		//MET corrections
-		struct metCorrs {
-			float Sigma0;
-			float SigmaPU;
-			float Shift;
-		} metCorr;
-
-		std::map<string, metCorrs> metCorrMap;
-*/
-
-		higgsAnalyzer(TTree * /*tree*/ =0) { }
-		virtual ~higgsAnalyzer() { }
-		virtual int     Version() const { return 2; }
-		virtual void    Begin(TTree *tree);
-		//virtual void    SlaveBegin(TTree *tree) { TString option = GetOption();};
-		virtual void    Init(TTree *tree);
-		virtual bool    Notify();
-		virtual bool    Process(Long64_t entry);
-		virtual int     GetEntry(Long64_t entry, int getall = 0) { return fChain ? fChain->GetTree()->GetEntry(entry, getall) : 0; }
-		virtual void    SetOption(const char *option) { fOption = option; }
-		virtual void    SetObject(TObject *obj) { fObject = obj; }
-		virtual void    SetInputList(TList *input) { fInput = input; }
-		virtual TList  *GetOutputList() const { return fOutput; }
-		virtual void    SlaveTerminate() {};
-		virtual void    Terminate();
-
-		//virtual float   Dz(TVector3 objVtx, TLorentzVector objP4, TVector3 vtx);
-		//virtual float   Dxy(TVector3 objVtx, TLorentzVector objP4, TVector3 vtx);
-		//virtual void    PostSelectionYieldCounter(float nEventsPS, TLorentzVector metP4, TLorentzVector zP4, float dPhiJetMet, float evtWeight);
-		//virtual void    MetPlusZPlots(TLorentzVector metP4, TLorentzVector ZP4, float evtWeight);
-		//virtual void    MetPlusLeptonPlots(TLorentzVector metP4, TLorentzVector p1, TLorentzVector p2, float evtWeight);
-		//virtual void    LeptonBasicPlots(TLorentzVector p1, TLorentzVector p2, float evtWeight);
-		//virtual void    DileptonBasicPlots(TLorentzVector ZP4, float evtWeight);
-		virtual bool    CosmicMuonFilter(TCMuon , TCMuon );
-		virtual float   CalculateTransMass(TLorentzVector p1, TLorentzVector p2);
-		virtual float   CalculateTransMassAlt(TLorentzVector p1, TLorentzVector p2);
-		virtual float   DeltaPhiJetMET(TLorentzVector , std::vector<TLorentzVector> ); 
-		virtual float   GetEventWeight(int, TLorentzVector, TLorentzVector);
-		//virtual float   PUCorrectedMET(float, int, std::string);
-
-		virtual float   GetPhotonMass();
-
-		//virtual TLorentzVector GetReducedMET(TLorentzVector sumJet, TLorentzVector lep1, TLorentzVector lep2, TLorentzVector metP4, int version);
-
-                //double projectedMET(Float_t, Float_t, TLorentzVector, TLorentzVector);
-                //double ZprojectedMET(Float_t, Float_t, TLorentzVector, TLorentzVector);
-
-		void scaleAndColor(TString , Float_t , Float_t , Float_t , Int_t , Int_t );
-
-		//float weightZZ(Float_t );
-		//float puReweighting(Int_t );
-
-		void FillHistos(Int_t, Double_t);
-		void FillHistosNoise(Int_t, Double_t);
-		void CountEvents(Int_t);
-		void PrintOut(Int_t);
-		void PrintOutNoisy(Int_t);
-
-
-		ClassDef(higgsAnalyzer,0);
+  void scaleAndColor(TString , Float_t , Float_t , Float_t , Int_t , Int_t );
+  
+  
+  void FillHistos(Int_t, Double_t);
+  void FillHistosNoise(Int_t, Double_t);
+  void CountEvents(Int_t);
+  void PrintOut(Int_t);
+  void PrintOutNoisy(Int_t);
+  
+  
+  ClassDef(higgsAnalyzer,0);
 };
 
 #endif

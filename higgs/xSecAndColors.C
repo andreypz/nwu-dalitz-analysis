@@ -15,6 +15,7 @@ Float_t getXsecOrColors(string dataset="ggHZZ300", Int_t b = 1)
   else if(dataset=="ZZ")       {lCol = kBlue;     fCol = kMagenta; cs = 0.214;    nevt = 220e3;}
   else if(dataset=="Wjets")    {lCol = kGreen-2;  fCol = kCyan+1;  cs = 31314.0;  nevt = 81.251e6;}
   else if(dataset=="ttbar")    {lCol = kOrange+1; fCol = kGreen+2; cs = 16.71;    nevt = 10.34e6;}
+  else if(dataset=="ggWW")     {lCol = kBlue-2;   fCol = kSpring;  cs = 0.15048;  nevt = 109.99e3;}
   else if(dataset=="WW")       {lCol = kBlue-2;   fCol = kSpring;  cs = 4.51;     nevt = 210.67e3;}
   else if(dataset=="WZ")       {lCol = kRed+2;    fCol = kBlue-1;  cs = 0.596;    nevt = 205e3;}
   else if(dataset=="tW")       {lCol = kRed;      fCol = kWhite;   cs = 7.87;     nevt = 814390 ;}
@@ -35,15 +36,15 @@ Float_t getXsecOrColors(string dataset="ggHZZ300", Int_t b = 1)
   else if(dataset=="ggHZZ550") {lCol = kYellow;   fCol  = -1; cs = 0.00568;     nevt = 94.585e3;}
   else if(dataset=="ggHZZ600") {lCol = kCyan+1;   fCol  = -1; cs = 0.00359;     nevt = 99.972e3;}
 
-  else if(dataset=="VBFHZZ200"){lCol = kCyan+1;   fCol  = -1; cs = 0.005849;     nevt = 49.943e3;}
-  else if(dataset=="VBFHZZ250"){lCol = kCyan+1;   fCol  = -1; cs = 4.602e-3;     nevt = 49.957e3;}
-  else if(dataset=="VBFHZZ300"){lCol = kCyan+1;   fCol  = -1; cs = 3.328e-3;     nevt = 49.935e3;}
-  else if(dataset=="VBFHZZ350"){lCol = kCyan+1;   fCol  = -1; cs = 2.356e-3;     nevt = 46.002e3;}
-  else if(dataset=="VBFHZZ400"){lCol = kCyan+1;   fCol  = -1; cs = 1.568e-3;     nevt = 49.851e3;}
-  else if(dataset=="VBFHZZ450"){lCol = kCyan+1;   fCol  = -1; cs = 1.158e-3;     nevt = 46.065e3;}
-  else if(dataset=="VBFHZZ500"){lCol = kCyan+1;   fCol  = -1; cs = 0.892e-3;     nevt = 46.049e3;}
-  else if(dataset=="VBFHZZ550"){lCol = kCyan+1;   fCol  = -1; cs = 0.781e-3;     nevt = 49.729e3;}
-  else if(dataset=="VBFHZZ600"){lCol = kCyan+1;   fCol  = -1; cs = 0.565e-3;     nevt = 49.698e3;}
+  else if(dataset=="VBFHZZ200"){lCol = kCyan+1;   fCol  = -1; cs = 6.562e-3;     nevt = 49.943e3;}
+  else if(dataset=="VBFHZZ250"){lCol = kCyan+1;   fCol  = -1; cs = 5.163e-3;     nevt = 49.957e3;}
+  else if(dataset=="VBFHZZ300"){lCol = kCyan+1;   fCol  = -1; cs = 3.734e-3;     nevt = 49.935e3;}
+  else if(dataset=="VBFHZZ350"){lCol = kCyan+1;   fCol  = -1; cs = 2.644e-3;     nevt = 46.002e3;}
+  else if(dataset=="VBFHZZ400"){lCol = kCyan+1;   fCol  = -1; cs = 1.760e-3;     nevt = 49.851e3;}
+  else if(dataset=="VBFHZZ450"){lCol = kCyan+1;   fCol  = -1; cs = 1.299e-3;     nevt = 46.065e3;}
+  else if(dataset=="VBFHZZ500"){lCol = kCyan+1;   fCol  = -1; cs = 1.001e-3;     nevt = 46.049e3;}
+  else if(dataset=="VBFHZZ550"){lCol = kCyan+1;   fCol  = -1; cs = 0.876e-3;     nevt = 49.729e3;}
+  else if(dataset=="VBFHZZ600"){lCol = kCyan+1;   fCol  = -1; cs = 0.634e-3;     nevt = 49.698e3;}
 
 
   Float_t ddd;

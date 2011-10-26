@@ -1,3 +1,10 @@
+2011-Oct-17
+  VBF signal included
+
+2011-Oct-16
+  V00-08 - for PAS-like yields
+  PAS-like selection restored
+
 2011-Sep-21
   Created MetDefinitions.h where to put all the Met functions (to share with others)
   Put a several macros from makeplot to utils - this will be a general place to put such things
