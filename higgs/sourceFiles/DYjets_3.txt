@@ -1,51 +1,51 @@
--rw-r--r-- 1 bpollack us_cms 175820014 Oct 19 12:44 /uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_193_1_tdA.root
--rw-r--r-- 1 bpollack us_cms 175268204 Oct 19 12:44 /uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_194_1_cYm.root
--rw-r--r-- 1 bpollack us_cms 175380492 Oct 19 12:44 /uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_195_1_yEi.root
--rw-r--r-- 1 bpollack us_cms 175812851 Oct 19 12:44 /uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_196_1_lgr.root
--rw-r--r-- 1 bpollack us_cms 176096153 Oct 19 12:44 /uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_197_1_9Xv.root
--rw-r--r-- 1 bpollack us_cms 176406020 Oct 19 12:44 /uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_198_1_Npl.root
--rw-r--r-- 1 bpollack us_cms 177813772 Oct 19 12:44 /uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_199_1_neh.root
--rw-r--r-- 1 bpollack us_cms 175920262 Oct 19 12:44 /uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_19_1_MpQ.root
--rw-r--r-- 1 bpollack us_cms 174995330 Oct 19 12:39 /uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_1_1_OFm.root
--rw-r--r-- 1 bpollack us_cms 176137609 Oct 19 12:44 /uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_200_1_PBk.root
--rw-r--r-- 1 bpollack us_cms 175064274 Oct 19 12:44 /uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_201_1_RV1.root
--rw-r--r-- 1 bpollack us_cms 176158759 Oct 19 12:45 /uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_202_1_5Vx.root
--rw-r--r-- 1 bpollack us_cms 175458546 Oct 19 12:45 /uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_203_1_4vD.root
--rw-r--r-- 1 bpollack us_cms 174978622 Oct 19 12:45 /uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_204_1_qs7.root
--rw-r--r-- 1 bpollack us_cms 177198334 Oct 19 12:45 /uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_205_1_qcn.root
--rw-r--r-- 1 bpollack us_cms 174210786 Oct 19 12:45 /uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_206_1_dTI.root
--rw-r--r-- 1 bpollack us_cms 177062760 Oct 19 12:45 /uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_207_1_862.root
--rw-r--r-- 1 bpollack us_cms 174504258 Oct 19 12:45 /uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_208_1_6nl.root
--rw-r--r-- 1 bpollack us_cms 174236669 Oct 19 12:45 /uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_209_1_TXa.root
--rw-r--r-- 1 bpollack us_cms 175918769 Oct 19 12:45 /uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_20_1_m4D.root
--rw-r--r-- 1 bpollack us_cms 176373298 Oct 19 12:45 /uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_210_1_e1W.root
--rw-r--r-- 1 bpollack us_cms 175643478 Oct 19 12:45 /uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_211_1_ay6.root
--rw-r--r-- 1 bpollack us_cms 174257294 Oct 19 12:45 /uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_212_1_0Az.root
--rw-r--r-- 1 bpollack us_cms 177518896 Oct 19 12:45 /uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_213_1_qGi.root
--rw-r--r-- 1 bpollack us_cms 177020894 Oct 19 12:45 /uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_214_1_KST.root
--rw-r--r-- 1 bpollack us_cms 178943257 Oct 19 12:46 /uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_215_1_4sB.root
--rw-r--r-- 1 bpollack us_cms 175503028 Oct 19 12:46 /uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_216_1_Ye5.root
--rw-r--r-- 1 bpollack us_cms 175784253 Oct 19 12:46 /uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_217_1_f30.root
--rw-r--r-- 1 bpollack us_cms 175948564 Oct 19 12:46 /uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_218_1_bHU.root
--rw-r--r-- 1 bpollack us_cms 126449251 Oct 19 12:46 /uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_219_1_5GQ.root
--rw-r--r-- 1 bpollack us_cms 176049415 Oct 19 12:45 /uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_21_1_wkF.root
--rw-r--r-- 1 bpollack us_cms 178651707 Oct 19 12:46 /uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_220_1_3ZK.root
--rw-r--r-- 1 bpollack us_cms 176964627 Oct 19 12:46 /uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_221_1_s0s.root
--rw-r--r-- 1 bpollack us_cms 175240103 Oct 19 12:46 /uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_222_1_lH9.root
--rw-r--r-- 1 bpollack us_cms 176997194 Oct 19 12:46 /uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_223_1_SqR.root
--rw-r--r-- 1 bpollack us_cms 175376168 Oct 19 12:46 /uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_224_1_JpU.root
--rw-r--r-- 1 bpollack us_cms 176141904 Oct 19 12:46 /uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_225_1_X8r.root
--rw-r--r-- 1 bpollack us_cms 177982895 Oct 19 12:46 /uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_226_1_rMT.root
--rw-r--r-- 1 bpollack us_cms 174079623 Oct 19 12:47 /uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_227_1_Wr7.root
--rw-r--r-- 1 bpollack us_cms 176166951 Oct 19 12:47 /uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_228_1_M0R.root
--rw-r--r-- 1 bpollack us_cms 175635308 Oct 19 12:47 /uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_229_1_yVQ.root
--rw-r--r-- 1 bpollack us_cms 177378607 Oct 19 12:46 /uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_22_1_rbW.root
--rw-r--r-- 1 bpollack us_cms 175338826 Oct 19 12:47 /uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_230_1_VDS.root
--rw-r--r-- 1 bpollack us_cms 176015294 Oct 19 12:47 /uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_231_1_A8d.root
--rw-r--r-- 1 bpollack us_cms 175074832 Oct 19 12:47 /uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_232_1_TCz.root
--rw-r--r-- 1 bpollack us_cms 175826149 Oct 19 12:47 /uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_233_1_1eC.root
--rw-r--r-- 1 bpollack us_cms 175277229 Oct 19 12:47 /uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_234_1_cx8.root
--rw-r--r-- 1 bpollack us_cms 176450257 Oct 19 12:47 /uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_235_1_JRh.root
--rw-r--r-- 1 bpollack us_cms 176811738 Oct 19 12:47 /uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_236_1_RM6.root
--rw-r--r-- 1 bpollack us_cms 175169473 Oct 19 12:47 /uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_237_1_lbg.root
--rw-r--r-- 1 bpollack us_cms 175701832 Oct 19 12:47 /uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_238_1_w2A.root
+/uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_193_1_tdA.root
+/uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_194_1_cYm.root
+/uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_195_1_yEi.root
+/uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_196_1_lgr.root
+/uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_197_1_9Xv.root
+/uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_198_1_Npl.root
+/uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_199_1_neh.root
+/uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_19_1_MpQ.root
+/uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_1_1_OFm.root
+/uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_200_1_PBk.root
+/uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_201_1_RV1.root
+/uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_202_1_5Vx.root
+/uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_203_1_4vD.root
+/uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_204_1_qs7.root
+/uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_205_1_qcn.root
+/uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_206_1_dTI.root
+/uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_207_1_862.root
+/uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_208_1_6nl.root
+/uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_209_1_TXa.root
+/uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_20_1_m4D.root
+/uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_210_1_e1W.root
+/uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_211_1_ay6.root
+/uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_212_1_0Az.root
+/uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_213_1_qGi.root
+/uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_214_1_KST.root
+/uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_215_1_4sB.root
+/uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_216_1_Ye5.root
+/uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_217_1_f30.root
+/uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_218_1_bHU.root
+/uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_219_1_5GQ.root
+/uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_21_1_wkF.root
+/uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_220_1_3ZK.root
+/uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_221_1_s0s.root
+/uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_222_1_lH9.root
+/uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_223_1_SqR.root
+/uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_224_1_JpU.root
+/uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_225_1_X8r.root
+/uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_226_1_rMT.root
+/uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_227_1_Wr7.root
+/uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_228_1_M0R.root
+/uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_229_1_yVQ.root
+/uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_22_1_rbW.root
+/uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_230_1_VDS.root
+/uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_231_1_A8d.root
+/uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_232_1_TCz.root
+/uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_233_1_1eC.root
+/uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_234_1_cx8.root
+/uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_235_1_JRh.root
+/uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_236_1_RM6.root
+/uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_237_1_lbg.root
+/uscms/home/bpollack/nobackup/Oct09/MC/DYJetsToLL/nuTuple_238_1_w2A.root

@@ -23,6 +23,8 @@
 #include <TVector3.h>
 #include <TVector2.h>
 #include <TProfile.h>
+#include <TRandom.h>
+#include <TRandom2.h>
 
 #include "TClonesArray.h"
 #include "../src/TCJet.h"
@@ -63,6 +65,8 @@ Float_t lep2_eta, lep2_phi, lep2_pt;
   ofstream nout[nC], fout[nC], ffout, ncout;
   TTree * cutTree;
   TTree * _kinTree;
+
+ TH1F *evt_byCut;
 
   TH1F *mtZ[nC], *mt0[nC], *mt1[nC], *mt2[nC], *mt3[nC], *mt4[nC];
   TH1F *met0_phi[nC], *met0_et[nC], *met0_over_qt[nC];
@@ -184,7 +188,7 @@ Float_t lep2_eta, lep2_phi, lep2_pt;
   void CountEvents(Int_t);
   void PrintOut(Int_t);
   void PrintOutNoisy(Int_t);
-  
+  Int_t GetQtBin(Float_t);
   
   ClassDef(higgsAnalyzer,0);
 };

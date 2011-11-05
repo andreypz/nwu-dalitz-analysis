@@ -230,7 +230,7 @@ THStack* makeStack(TList *sourcelist, TString name, Float_t lumi)
   return hs;
 }
 
-void drawMuliPlot(TString xtitle, Int_t isLog, Float_t y1min, Float_t y1max, Float_t y2min, Float_t y2max, THStack *hs, TCanvas *cc, TLegend *leg, TList *list, Float_t lumi)
+void drawMuliPlot(TString maintitle, TString xtitle, Int_t isLog, Float_t y1min, Float_t y1max, Float_t y2min, Float_t y2max, THStack *hs, TCanvas *cc, TLegend *leg, TList *list, Float_t lumi)
 {
   //Find the samm objects as in hs stack
   TString name = Form("Andrey/%s", hs->GetHists()->First()->GetName());
@@ -264,7 +264,7 @@ void drawMuliPlot(TString xtitle, Int_t isLog, Float_t y1min, Float_t y1max, Flo
   pad1 -> SetLogy(isLog);
 
   hs -> Draw("hist");
-  hs -> SetTitle(";; Events");
+  hs -> SetTitle(Form("%s;; Events", maintitle.Data()));
   hs -> SetMinimum(y1min);
   hs -> SetMaximum(y1max);
   h_data  -> Draw("same e1pl"); //DATA

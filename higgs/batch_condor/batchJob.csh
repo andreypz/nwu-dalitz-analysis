@@ -22,9 +22,12 @@ chmod 755 run.csh
 ./run.csh $1 $2 $3 $4
 
 set newDir = $4
+set printDir =  printout_$3
 mkdir $newDir
+mkdir $printDir
 cp hhhh_*.root $newDir
-cp events_* $newDir
+cp events_* $printDir
+cp -r $printDir $newDir
 #cp counts* $newDir
 
 cp -r $newDir $dir/batch_condor/

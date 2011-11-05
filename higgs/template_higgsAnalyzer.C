@@ -16,6 +16,7 @@ int     trigger[]      = {TRIGGER};
 string  suffix         = "SUFFIX";
 
 UInt_t verboseLvl = 1;
+Bool_t doZlibrary = 1;
 
 /////////////////
 //Analysis cuts//
@@ -74,17 +75,76 @@ bool P4SortCondition(const TLorentzVector& p1, const TLorentzVector& p2) {return
 bool MuonSortCondition(const TCMuon& m1, const TCMuon& m2) {return (m1.Pt() > m2.Pt());}
 bool ElectronSortCondition(const TCElectron& e1, const TCElectron& e2) {return (e1.Pt() > e2.Pt());}
 
+TFile * Zlibrary = new TFile("v54/m_Zjets_1.root","OPEN");
+int qt_bins[10] =  {0,25,26,28,32,40,56,88,152,280};
+std::vector<int>  EntryMap[10];
+//Caution: the size of EntryMap has to be the same as qt_bins
+
+TLorentzVector *lep1, *lep2;
+TTree *libTree = (TTree*)Zlibrary->Get("Anton/kinTree");
+
+
+Int_t higgsAnalyzer::GetQtBin(Float_t myQT){
+  //loop over qt_bins and see where our events belong
+  
+  // Need to know the size of qt_bins array
+  int len=sizeof(qt_bins)/sizeof(int); 
+  Int_t bin = -1;
+  for(Int_t q = len-1; q>=0; q--){	
+    if(myQT>=qt_bins[q]){
+      bin = q;
+      //bin is assigned - exit for loop
+      break;
+    }
+  }
+  if(bin==-1) cout<<"Warning: bin is not assigned!  bin="<<bin<<endl;
+  // else 	    cout<<"Assigning bin = "<<bin<<"   in qt = ["<< qt_bins[bin]<<", ]"<<endl;
+
+  return bin;
+}	
+
+TRandom2 *myRandom;
 
 void higgsAnalyzer::Begin(TTree * /*tree*/) 
 {
     TString option = GetOption();
     TH1::SetDefaultSumw2(kTRUE);
+
+
+    myRandom = new TRandom2(); //Need a random number generator
+    if (doZlibrary){
+      cout<<"\n    Doing the library thing now"<<endl;
+      //libTree->SetBranchStatus("*",0);
+      //libTree->SetBranchStatus("lep1", 1); //doesn't work if *,0 set
+      //libTree->SetBranchStatus("lep2", 1);
+      libTree->SetBranchAddress("lep1", &lep1);
+      libTree->SetBranchAddress("lep2", &lep2);
+      //libTree->Print();
+      
+      Int_t nentries = libTree->GetEntries();
+      for(Int_t j = 0; j<nentries; j++){
+	libTree-> GetEntry(j);
+	
+	Float_t myQT = (*lep1 + *lep2).Pt() ;
+	//cout<<j<<"  myQT= "<<	myQT<<endl;
+	Int_t bin = GetQtBin(myQT);
+	//Now fill an entry to the qt_bin number
+	EntryMap[bin].push_back(j);
+      }
+    
+
+      cout<<"Done with the library. Moving on. \n"<<endl;
+    }
+
     histoFile = new TFile("a_higgsHistograms.root", "RECREATE");
 
     histoFile->mkdir("Andrey", "Andrey");
     histoFile->mkdir("Anton", "Anton");
     
     histoFile->cd("Andrey");
+
+    evt_byCut       = new TH1F("evt_byCut", "Events by Cut", 20, 0,20);
+
     for(Int_t n=0; n<nC; n++)
       met0_et[n]       = new TH1F(Form("met0_et_%i",n), "met0_et", 40, 0,400);
 
@@ -136,10 +196,10 @@ void higgsAnalyzer::Begin(TTree * /*tree*/)
 
 
 	l1_phi[n] = new TH1F(Form("l1_phi_%i",n), "l1_phi", 40, -TMath::Pi(), TMath::Pi());
-	l1_eta[n] = new TH1F(Form("l1_eta_%i",n), "l1_eta", 40, -2.6, 2.6);
+	l1_eta[n] = new TH1F(Form("l1_eta_%i",n), "l1_eta", 52, -2.6, 2.6);
 	l1_pt[n]  = new TH1F(Form("l1_pt_%i",n), "l1_pt", 40, 0, 200);
 	l2_phi[n] = new TH1F(Form("l2_phi_%i",n), "l2_phi", 40, -TMath::Pi(), TMath::Pi());
-	l2_eta[n] = new TH1F(Form("l2_eta_%i",n), "l2_eta", 40, -2.6, 2.6);
+	l2_eta[n] = new TH1F(Form("l2_eta_%i",n), "l2_eta", 52, -2.6, 2.6);
 	l2_pt[n]  = new TH1F(Form("l2_pt_%i",n), "l2_pt", 40, 0, 200);
 	btag_hp[n] = new TH1F(Form("btag_hp_%i",n), "btag_hp", 40, -10, 10);
 
@@ -157,7 +217,7 @@ void higgsAnalyzer::Begin(TTree * /*tree*/)
 	//mt2_met3[n]   = new TH2F(Form("mt2_met3_%i",n), "MT pf vs projfMet noise", 50, 100, 600, 40, 0,400);
 
 	di_qt[n]      = new TH1F(Form("di_qt_%i",n), "di-lepton qt", 80, 0,400);
-	di_eta[n]     = new TH1F(Form("di_eta_%i",n), "di-lepton Eta", 50, -2.6,2.6);
+	di_eta[n]     = new TH1F(Form("di_eta_%i",n), "di-lepton Eta", 100, -6,6);
 	di_mass[n]    = new TH1F(Form("di_mass_%i",n), "di-lepton Mass", 50, 70,120);
 	di_mass_EB[n] = new TH1F(Form("di_mass_EB_%i",n), "di-lepton Mass in Ecal Barrel", 50, 70,120);
 	di_mass_EE[n] = new TH1F(Form("di_mass_EE_%i",n), "di-lepton Mass in Ecal Endcap", 50, 70,120);
@@ -192,15 +252,17 @@ void higgsAnalyzer::Begin(TTree * /*tree*/)
 	  fout[i].open(Form("./events_printout_SUFFIX_%i.txt",i),ofstream::out);
 	  fout[i].precision(3); fout[i].setf(ios::fixed, ios::floatfield);
 	  fout[i]<<
-	    "******\t*********\t*****\t********\t************\t*********\t********\t*****\t*\n"<<
-	    "* Run \t* Event  \t* LS \t*  m(ll)\t*   MT(llvv)\t* PFMET  \t* PT(ll)\t* rho\t*\n"<<
-	    "******\t*********\t*****\t********\t************\t*********\t********\t*****\t*\n";
-	  nout[i].open(Form("./events_filtered_SUFFIX_%i.txt",i),ofstream::out);
-	  nout[i].precision(3); fout[i].setf(ios::fixed, ios::floatfield);
-	  nout[i]<<
-	    "******\t*********\t*********\t******************************************\n"<<
-	    "* Run \t* Event  \t*  LS   \t*  PFMET * Hcal * Ecal * scrap * CSCTight * \n"<<
-	    "******\t*********\t*********\t******************************************\n";
+	    "*********\t*********\t*****\t***\t****\t****\t************\t*********\t********\t*****\t*\n"<<
+	    "* Run    \t* Event  \t* LS \t* nVtx\t* nJets\t* m(ll)\t*   MT(llvv)\t* PFMET  \t* PT(ll)\t* rho\t*\n"<<
+	    "*********\t*********\t*****\t****\t****\t***\t************\t*********\t********\t*****\t*\n";
+	  if (verboseLvl>2){
+	    nout[i].open(Form("./events_filtered_SUFFIX_%i.txt",i),ofstream::out);
+	    nout[i].precision(3); fout[i].setf(ios::fixed, ios::floatfield);
+	    nout[i]<<
+	      "*********\t*********\t*********\t******************************************\n"<<
+	      "* Run    \t* Event  \t*  LS   \t*  PFMET * Hcal * Ecal * scrap * CSCTight * \n"<<
+	      "*********\t*********\t*********\t******************************************\n";
+	  }
       }
     }
     /*
@@ -248,7 +310,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
     MET = 0;
     FillHistosNoise(0, 1);
 
-    //if(nEvents[0]>500) return kTRUE;
+    if(nEvents[0]>1000) return kTRUE;
 
     // cout<<"dbg beginning"<<endl;
 
@@ -661,6 +723,34 @@ bool higgsAnalyzer::Process(Long64_t entry)
     FillHistosNoise(3, evtWeight);
 
 
+    //////////////////////////////////
+    //  di-Leptons library //////////
+    ////////////////////////////////
+
+    if (doZlibrary){
+
+      //Find out which qT bin we are
+      Int_t bin = GetQtBin(qT);
+      
+      //Look how many events are in this bin:
+      Int_t mySize = EntryMap[bin].size(); 
+      cout<<"There are --"<<mySize<<"--  events in bin "<<bin<<endl;
+      
+      //Throw a random number 
+      Double_t rndm = myRandom->Integer(mySize); 
+       
+      //Pick an entry form the Library
+      Int_t myEntry = EntryMap[bin].at(rndm);
+      libTree -> GetEntry(myEntry);
+      
+      cout<<"Random number out of --"<<mySize<<"--   is going to be: *"<<rndm<<"*   corresponding to the entry number= "<<myEntry<<endl;
+      Float_t myQT = (*lep1 + *lep2).Pt();
+      cout<<"From the library, at entry "<<myEntry<<":  QT of two leptons from library = "<<myQT<<";     original  qT = "<<qT<<endl;
+    }
+  
+  ///////////////////////////////
+
+
     //////////
     // Z Qt //
     //////////
@@ -736,7 +826,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
 	*/
     }
 
-    /*
+    
     kt_lep1 = Lepton1;
     kt_lep2 = Lepton2;
     kt_met = metP4;
@@ -750,7 +840,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
     kt_dPhiJetMet = deltaPhiJetMET;
     kt_evNumber = eventNumber;
     _kinTree -> Fill();
-    */
+    
 
     if (ZP4.Pt() < qtCut) return kTRUE;  
     CountEvents(5);
@@ -807,7 +897,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
 	nEventsWeighted[10] += evtWeight;
        	FillHistos(10, evtWeight);
 	FillHistosNoise(10, evtWeight);
-
+	PrintOut(10);
       }
     if (passBveto && deltaPhiJetMET > dPhiMinCut[3] &&  MET>metMinCut[3]  && (MT > mtMinCut[3] && MT < mtMaxCut[3]))
       {
@@ -816,6 +906,8 @@ bool higgsAnalyzer::Process(Long64_t entry)
 	nEventsWeighted[11] += evtWeight;
        	FillHistos(11, evtWeight);
 	FillHistosNoise(11, evtWeight);
+	PrintOut(11);
+
       }
     if (passBveto && deltaPhiJetMET > dPhiMinCut[4] &&  MET>metMinCut[4]  && (MT > mtMinCut[4] && MT < mtMaxCut[4]))
       {
@@ -890,6 +982,9 @@ bool higgsAnalyzer::Process(Long64_t entry)
 
 void higgsAnalyzer::Terminate()
 {
+  for (int i = 6; i < nC; ++i) fout[i].close();
+  Zlibrary -> Close();
+
   cout<<"\nRunning over "<<suffix<<" dataset with "<<selection<<" selection."<<"\n"<<endl;
     cout<<"| CUT DESCRIPTION                    |\t"<< "\t|"<<endl;
     cout<<"| Initial number of events:          |\t"<< nEvents[0]  <<"\t|"<<nEventsWeighted[0]  <<"\t|"<<endl;
@@ -1121,8 +1216,9 @@ void higgsAnalyzer::PrintOutNoisy(Int_t num){
 }
 
 void higgsAnalyzer::PrintOut(Int_t num){
-  fout[num]<<"* "<<runNumber<<"\t* "<<eventNumber<<"  \t* "<<lumiSection<<"\t* "<<Mll<<"\t* "<<MT<<"\t* "<<MET<<"\t* "
-	   <<pTll<<"\t* "<<rhoFactor<<"\t* "<<endl;//<<muCountLoose<<"\t* "<<eleCountLoose<<endl;
+  fout[num]<<"* "<<runNumber<<"\t* "<<eventNumber<<"  \t* "<<lumiSection<<"\t* "<<nVtx<<"\t* "<<nJets<<"\t* "
+	   <<Mll<<"\t* "<<MT<<"\t* "<<MET<<"\t* "
+	   <<qT<<"\t* "<<rhoFactor<<"\t* "<<endl;//<<muCountLoose<<"\t* "<<eleCountLoose<<endl;
 }
 
 void higgsAnalyzer::scaleAndColor(TString sample1, Float_t cs, Float_t nTotEv, Float_t lumi, Int_t line, Int_t fill)
@@ -1181,11 +1277,9 @@ void higgsAnalyzer::FillHistos(Int_t num, Double_t weight){
   l1_phi[num]  -> Fill(lep1_phi);
   l1_pt[num]   -> Fill(lep1_pt);
 
-  l2_eta[num]  -> Fill(lep1_eta);
-  l2_phi[num]  -> Fill(lep1_phi);
-  l2_pt[num]   -> Fill(lep1_pt);
-
-  //met4_et[num]      -> Fill(puCorrMET, weight);
+  l2_eta[num]  -> Fill(lep2_eta);
+  l2_phi[num]  -> Fill(lep2_phi);
+  l2_pt[num]   -> Fill(lep2_pt);
 
   //met4_over_qt[num] -> Fill(puCorrMETqt, weight);
   //met4_et_ovQt[num] -> Fill(puCorrMET, puCorrMETqt, weight);
@@ -1217,7 +1311,8 @@ void higgsAnalyzer::FillHistos(Int_t num, Double_t weight){
   vtx_ndof_2[num]     -> Fill(nDofVtx2, weight);
 
   if(isRealData)  run_events[num] -> Fill(runNumber);
-  
+
+  evt_byCut -> Fill(num, weight);  
 
   if(nJets>0)
     {
