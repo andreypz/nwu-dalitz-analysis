@@ -39,19 +39,8 @@ float metMinCut[]  = {59,     76,   95,  115,  133,  148, 157, 159};
 float mtMinCut[]   = {222,   264,  298,  327,  354,  382, 413, 452};
 float mtMaxCut[]   = {272,   331,  393,  460,  531,  605, 684, 767};
 
-//older optimal cuts
-//float dPhiMinCut[] = {0.62, 0.28, 0.14, 0,    0,    0,    0,    0};
-//float metMinCut[]  = {69.,  83.,  97.,  112., 126., 141., 155., 170.};
-//float mtMinCut[]   = {216., 242., 267., 292., 315., 336., 357., 377.};
-//float mtMaxCut[]   = {272., 320., 386., 471., 540., 600., 660., 720.};
-
- //variables for cutTree
-//Float_t ct_pfMet, ct_pfMet1, ct_puCorrMet, ct_projMet, ct_ZprojMet, ct_redMet1, ct_redMet2, ct_compMet;
-//UInt_t ct_nJets;
-//Float_t ct_MT, ct_MT1, ct_evtWeight, ct_qT, ct_dPhiMetJet;
-//TString ct_sample("SUFFIX");
 //For Anton's tree:
-TLorentzVector  kt_lep1, kt_lep2, kt_met, kt_corrMet, kt_allJets;
+TLorentzVector  kt_lep1, kt_lep2, kt_met, kt_corrMet, kt_allJets, kt_V;
 UInt_t kt_nPV, kt_nSimPV, kt_nJets;
 Bool_t kt_isMC, kt_hasBJet;
 Float_t kt_dPhiJetMet;
@@ -75,13 +64,13 @@ bool P4SortCondition(const TLorentzVector& p1, const TLorentzVector& p2) {return
 bool MuonSortCondition(const TCMuon& m1, const TCMuon& m2) {return (m1.Pt() > m2.Pt());}
 bool ElectronSortCondition(const TCElectron& e1, const TCElectron& e2) {return (e1.Pt() > e2.Pt());}
 
-TFile * Zlibrary = new TFile("v54/m_Zjets_1.root","OPEN");
+//--- Stuff for Z-library -------//
 int qt_bins[10] =  {0,25,26,28,32,40,56,88,152,280};
-std::vector<int>  EntryMap[10];
-//Caution: the size of EntryMap has to be the same as qt_bins
-
+TFile *libFile = new TFile("/uscms_data/d2/andreypz/cmssw/higgs7/CMSSW_4_2_8/src/NWU/Higgs/higgs/v54/m_Zjets_1.root","OPEN");
 TLorentzVector *lep1, *lep2;
-TTree *libTree = (TTree*)Zlibrary->Get("Anton/kinTree");
+//std::vector<int>  EntryMap[10];
+std::vector< pair<TLorentzVector, TLorentzVector> >  diMap[10];
+//Caution: the size of EntryMap has to be the same as qt_bins
 
 
 Int_t higgsAnalyzer::GetQtBin(Float_t myQT){
@@ -114,6 +103,8 @@ void higgsAnalyzer::Begin(TTree * /*tree*/)
     myRandom = new TRandom2(); //Need a random number generator
     if (doZlibrary){
       cout<<"\n    Doing the library thing now"<<endl;
+      TTree *libTree = (TTree*)libFile->Get("Anton/kinTree");
+      
       //libTree->SetBranchStatus("*",0);
       //libTree->SetBranchStatus("lep1", 1); //doesn't work if *,0 set
       //libTree->SetBranchStatus("lep2", 1);
@@ -128,11 +119,20 @@ void higgsAnalyzer::Begin(TTree * /*tree*/)
 	Float_t myQT = (*lep1 + *lep2).Pt() ;
 	//cout<<j<<"  myQT= "<<	myQT<<endl;
 	Int_t bin = GetQtBin(myQT);
+
 	//Now fill an entry to the qt_bin number
-	EntryMap[bin].push_back(j);
+	//EntryMap[bin].push_back(j);
+
+
+	pair <TLorentzVector, TLorentzVector> diLeptonPair;
+	diLeptonPair = make_pair (*lep1,*lep2);
+	//cout<<"Orig 1: "<<lep1->Pt()<<" 2: "<<lep2->Pt()<<endl;
+	//cout<<"Pair 1: "<< diLeptonPair.first.Pt()<<" 2: "<< diLeptonPair.second.Pt()<<endl;
+
+	diMap[bin].push_back(diLeptonPair);
       }
     
-
+      //libFile->Close();
       cout<<"Done with the library. Moving on. \n"<<endl;
     }
 
@@ -265,29 +265,12 @@ void higgsAnalyzer::Begin(TTree * /*tree*/)
 	  }
       }
     }
-    /*
-    cutTree = new TTree("cutTree","Tree for cuts");
-    cutTree->Branch("ct_pfMet",&ct_pfMet, "ct_pfMet/F");
-    cutTree->Branch("ct_pfMet1",&ct_pfMet1, "ct_pfMet1/F");
-    cutTree->Branch("ct_puCorrMet",&ct_puCorrMet, "ct_puCorrMet/F");
-    cutTree->Branch("ct_ZprojMet",&ct_ZprojMet, "ct_ZprojMet/F");
-    cutTree->Branch("ct_projMet",&ct_projMet, "ct_projMet/F");
-    cutTree->Branch("ct_redMet1",&ct_redMet1, "ct_redMet1/F");
-    cutTree->Branch("ct_redMet2",&ct_redMet2, "ct_redMet2/F");
-    cutTree->Branch("ct_compMet",&ct_compMet, "ct_compMet/F");
-    cutTree->Branch("ct_MT",&ct_MT, "ct_MT/F");
-    cutTree->Branch("ct_MT1",&ct_MT, "ct_MT1/F");
-    cutTree->Branch("ct_qT",&ct_qT, "ct_qT/F");
-    cutTree->Branch("ct_evtWeight",&ct_evtWeight, "ct_evtWeight/F");
-    cutTree->Branch("ct_dPhiMetJet",&ct_dPhiMetJet, "ct_dPhiMetJet/F");
-    cutTree->Branch("ct_sample",&ct_sample, "ct_sample/C");
-    cutTree->Branch("ct_nJets",&ct_nJets, "ct_nJets/i");
-    */
 
     histoFile->cd("Anton");    
    
     TString kinTreeName = "kinTree";
     _kinTree = new TTree(kinTreeName, "Tree with kinematic info");
+    _kinTree->Branch("V", "TLorentzVector",  &kt_V);
     _kinTree->Branch("lep1", "TLorentzVector",  &kt_lep1);
     _kinTree->Branch("lep2", "TLorentzVector",  &kt_lep2);
     _kinTree->Branch("met", "TLorentzVector",  &kt_met);
@@ -310,7 +293,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
     MET = 0;
     FillHistosNoise(0, 1);
 
-    if(nEvents[0]>1000) return kTRUE;
+    //if(nEvents[0]>30000) return kTRUE;
 
     // cout<<"dbg beginning"<<endl;
 
@@ -672,8 +655,8 @@ bool higgsAnalyzer::Process(Long64_t entry)
         if (muons.size() < 2) return kTRUE;
         if (muons[0].Charge() == muons[1].Charge()) return kTRUE;
 
-        ZP4          = muons[0].P4() + muons[1].P4();
-        evtWeight    = GetEventWeight(nPUVertices, muons[0].P4(), muons[1].P4());
+        ZP4           = muons[0].P4() + muons[1].P4();
+        evtWeight     = GetEventWeight(nPUVertices, muons[0].P4(), muons[1].P4());
         reducedMet1P4 = GetReducedMET(sumJetP4,  muons[0].P4(), muons[1].P4(), metP4, 1);
         reducedMet2P4 = GetReducedMET(sumJetP4,  muons[0].P4(), muons[1].P4(), metP4, 2);
 
@@ -689,7 +672,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
         if (photons.size() < 1) return kTRUE;
 	
 	ZP4.SetPtEtaPhiM(photons[0].Pt(), photons[0].Eta(), photons[0].Phi(), GetPhotonMass());
-        evtWeight    = GetEventWeight(primaryVtx->GetSize(), ZP4, TLorentzVector(0, 0, 0, 0));
+        evtWeight     = GetEventWeight(primaryVtx->GetSize(), ZP4, TLorentzVector(0, 0, 0, 0));
         reducedMet1P4 = GetReducedMET(sumJetP4,  photons[0], TLorentzVector(0, 0, 0, 0), metP4, 1);
 	reducedMet2P4 = GetReducedMET(sumJetP4,  photons[0], TLorentzVector(0, 0, 0, 0), metP4, 2);
     } else {
@@ -702,7 +685,8 @@ bool higgsAnalyzer::Process(Long64_t entry)
     // 3rd lepton veto //
     /////////////////////
 
-   if (Lepton1.Pt() < 20 || Lepton2.Pt() < 20) return kTRUE;
+   if(selection  == "muon" ||  selection  == "electron")
+     if (Lepton1.Pt() < 20 || Lepton2.Pt() < 20) return kTRUE;
 
     if ((electrons.size() > 0 || muons.size() > 2) && selection  == "muon") return kTRUE;
     if ((muons.size() > 0 || electrons.size() > 2) && selection  == "electron") return kTRUE;
@@ -723,6 +707,15 @@ bool higgsAnalyzer::Process(Long64_t entry)
     FillHistosNoise(3, evtWeight);
 
 
+    //Soft third muon veto:
+    if (softMuons > 2) return kTRUE;
+
+    CountEvents(4);
+    nEventsWeighted[4] += evtWeight;
+    FillHistosNoise(4, evtWeight);
+
+    
+    qT      = ZP4.Pt();
     //////////////////////////////////
     //  di-Leptons library //////////
     ////////////////////////////////
@@ -733,46 +726,45 @@ bool higgsAnalyzer::Process(Long64_t entry)
       Int_t bin = GetQtBin(qT);
       
       //Look how many events are in this bin:
-      Int_t mySize = EntryMap[bin].size(); 
-      cout<<"There are --"<<mySize<<"--  events in bin "<<bin<<endl;
-      
+      //Int_t mySize = EntryMap[bin].size(); 
+      //cout<<"There are --"<<mySize<<"--  events in bin "<<bin<<endl;
+      //if (mySize==0){cout<<"No events found in the library for that bin! return kTRUE"<<endl; return kTRUE;}      
       //Throw a random number 
-      Double_t rndm = myRandom->Integer(mySize); 
+      //Double_t rndm = myRandom->Integer(mySize); 
        
       //Pick an entry form the Library
-      Int_t myEntry = EntryMap[bin].at(rndm);
-      libTree -> GetEntry(myEntry);
+      //Int_t myEntry = EntryMap[bin].at(rndm);
+      //libTree -> GetEntry(myEntry);
       
-      cout<<"Random number out of --"<<mySize<<"--   is going to be: *"<<rndm<<"*   corresponding to the entry number= "<<myEntry<<endl;
-      Float_t myQT = (*lep1 + *lep2).Pt();
-      cout<<"From the library, at entry "<<myEntry<<":  QT of two leptons from library = "<<myQT<<";     original  qT = "<<qT<<endl;
+      //cout<<"Random number out of --"<<mySize<<"--   is going to be: *"<<rndm<<"*   corresponding to the entry number= "<<myEntry<<endl;
+      //Float_t myQT = (*lep1 + *lep2).Pt();
+
+      //cout<<"From the library, at entry "<<myEntry<<":  QT of two leptons from library = "<<myQT<<";     original  qT = "<<qT<<endl;
+      //Lepton1 = *lep1;
+      //Lepton2 = *lep2;
+
+      //Look how many events are in this bin:
+      Int_t mySize = diMap[bin].size(); 
+      //Throw a random number 
+      Double_t rndm = myRandom->Integer(mySize); 
+      //cout<<"Random number out of --"<<mySize<<"--   is going to be: *"<<rndm<<endl;
+      pair<TLorentzVector, TLorentzVector> myPair = diMap[bin].at(rndm);
+      Float_t myQT = (myPair.first + myPair.second).Pt();
+      Lepton1 = myPair.first;
+      Lepton2 = myPair.second;
+      //cout<<":  QT of two leptons from library = "<<myQT<<";     original  qT = "<<qT<<endl;
     }
   
-  ///////////////////////////////
-
-
-    //////////
-    // Z Qt //
-    //////////
-    // if (ZP4.Pt() < qtCut) return kTRUE;  
-  
-    //Soft third muon veto:
-    if (softMuons > 2) return kTRUE;
-
-    CountEvents(4);
-    nEventsWeighted[4] += evtWeight;
-    FillHistosNoise(4, evtWeight);
-
-
+    ///////////////////////////////
+    
     /////////////////////////////////////////////////
     // Variables for FillHistos() function (Andrey)//
     /////////////////////////////////////////////////
     MT      = CalculateTransMass(metP4, ZP4);
     MT1     = CalculateTransMass(metP4, ZP4);
-    METqt   = metP4.Pt()/ZP4.Pt();
+    METqt   = metP4.Pt()/qT;
     MET_phi = metP4.Phi();
     Mll     = ZP4.M(), Mll_EE=0, Mll_EB=0, Mll_EX=0;
-    qT      = ZP4.Pt();
     diEta   = ZP4.Eta();
     projMET = projectedMET(MET, MET_phi, Lepton1, Lepton2);
     ZprojMET= ZprojectedMET(MET, MET_phi, Lepton1, Lepton2);
@@ -806,27 +798,9 @@ bool higgsAnalyzer::Process(Long64_t entry)
     
     Bool_t passBveto = kFALSE;
     if (nJetsB == 0)
-      {
-	passBveto = kTRUE;
-	/*	ct_pfMet      = pfMET;
-	ct_pfMet1     = pfMET1;
-	ct_puCorrMet  = puCorrMET;
-	ct_projMet    = projMET;
-	ct_compMet    = compMET;
-	ct_ZprojMet   = ZprojMET;
-	ct_redMet1    = redMET1;
-	ct_redMet2    = redMET2;
-	ct_MT         = MT;
-	ct_MT1        = MT1;
-	ct_evtWeight  = evtWeight;
-	ct_qT         = qT;
-	ct_dPhiMetJet = deltaPhiJetMET;
-	ct_nJets = nJets;
-	cutTree -> Fill();
-	*/
-    }
+      passBveto = kTRUE;
 
-    
+    kt_V = ZP4;  //Z or Gamma
     kt_lep1 = Lepton1;
     kt_lep2 = Lepton2;
     kt_met = metP4;
@@ -983,24 +957,23 @@ bool higgsAnalyzer::Process(Long64_t entry)
 void higgsAnalyzer::Terminate()
 {
   for (int i = 6; i < nC; ++i) fout[i].close();
-  Zlibrary -> Close();
 
   cout<<"\nRunning over "<<suffix<<" dataset with "<<selection<<" selection."<<"\n"<<endl;
-    cout<<"| CUT DESCRIPTION                    |\t"<< "\t|"<<endl;
-    cout<<"| Initial number of events:          |\t"<< nEvents[0]  <<"\t|"<<nEventsWeighted[0]  <<"\t|"<<endl;
-    cout<<"| Pass HLT selection:                |\t"<< nEvents[1]  <<"\t|"<<nEventsWeighted[1]  <<"\t|"<<endl;
-    cout<<"| Two oppositely charged leptons:    |\t"<< nEvents[2]  <<"\t|"<<nEventsWeighted[2]  <<"\t|"<<endl;
-    cout<<"| Z mass window:                     |\t"<< nEvents[3]  <<"\t|"<<nEventsWeighted[3]  <<"\t|"<<endl;
-    cout<<"| Third lepton veto:                 |\t"<< nEvents[4]  <<"\t|"<<nEventsWeighted[4]  <<"\t|"<<endl;
-    cout<<"| Z Qt :                             |\t"<< nEvents[5]  <<"\t|"<<nEventsWeighted[5]  <<"\t|"<<endl;
-    cout<<"| b-jet veto:                        |\t"<< nEvents[6]  <<"\t|"<<nEventsWeighted[6]  <<"\t|"<<endl;
-    cout<<"|                            |\t"<< nEvents[7]  <<"\t|"<<nEventsWeighted[7]  <<"\t|"<<endl;
-    cout<<"| H250                         |\t"<< nEvents[8]  <<"\t|"<<nEventsWeighted[8]  <<"\t|"<<endl;
-    cout<<"| H300                       |\t"<< nEvents[9] <<"\t|"<<nEventsWeighted[9] <<"\t|"<<endl;
-    cout<<"|                        |\t"<< nEvents[10]  <<"\t|"<<nEventsWeighted[10]  <<"\t|"<<endl;
-    cout<<"| H400                        |\t"<< nEvents[11] <<"\t|"<<nEventsWeighted[11] <<"\t|"<<endl;
-    cout<<"|                           |\t"<< nEvents[12] <<"\t|"<<nEventsWeighted[12] <<"\t|"<<endl;
-    cout<<"| H500                       |\t"<< nEvents[13] <<"\t|"<<nEventsWeighted[13] <<"\t|"<<endl;
+  cout<<"| CUT DESCRIPTION                    |\t"<< "\t|"<<endl;
+  cout<<"| Initial number of events:          |\t"<< nEvents[0]  <<"\t|"<<nEventsWeighted[0]  <<"\t|"<<endl;
+  cout<<"| Pass HLT selection:                |\t"<< nEvents[1]  <<"\t|"<<nEventsWeighted[1]  <<"\t|"<<endl;
+  cout<<"| Two oppositely charged leptons:    |\t"<< nEvents[2]  <<"\t|"<<nEventsWeighted[2]  <<"\t|"<<endl;
+  cout<<"| Z mass window:                     |\t"<< nEvents[3]  <<"\t|"<<nEventsWeighted[3]  <<"\t|"<<endl;
+  cout<<"| Third lepton veto:                 |\t"<< nEvents[4]  <<"\t|"<<nEventsWeighted[4]  <<"\t|"<<endl;
+  cout<<"| Z Qt :                             |\t"<< nEvents[5]  <<"\t|"<<nEventsWeighted[5]  <<"\t|"<<endl;
+  cout<<"| b-jet veto:                        |\t"<< nEvents[6]  <<"\t|"<<nEventsWeighted[6]  <<"\t|"<<endl;
+  cout<<"|                            |\t"<< nEvents[7]  <<"\t|"<<nEventsWeighted[7]  <<"\t|"<<endl;
+  cout<<"| H250                         |\t"<< nEvents[8]  <<"\t|"<<nEventsWeighted[8]  <<"\t|"<<endl;
+  cout<<"| H300                       |\t"<< nEvents[9] <<"\t|"<<nEventsWeighted[9] <<"\t|"<<endl;
+  cout<<"|                        |\t"<< nEvents[10]  <<"\t|"<<nEventsWeighted[10]  <<"\t|"<<endl;
+  cout<<"| H400                        |\t"<< nEvents[11] <<"\t|"<<nEventsWeighted[11] <<"\t|"<<endl;
+  cout<<"|                           |\t"<< nEvents[12] <<"\t|"<<nEventsWeighted[12] <<"\t|"<<endl;
+  cout<<"| H500                       |\t"<< nEvents[13] <<"\t|"<<nEventsWeighted[13] <<"\t|"<<endl;
   
       
     //Normalization to 1fb and coloring the histograms
