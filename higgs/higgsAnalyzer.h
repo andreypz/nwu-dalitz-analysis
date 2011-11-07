@@ -38,8 +38,6 @@
 #include "../src/TCTrigger.h"
 #include "../src/TCTriggerObject.h"
 
-//#include "../src/MetDefinitions.h"
-
 #define nC 20  //nCuts in the analysis. make plots after each cut
 
 class higgsAnalyzer : public TSelector {
@@ -49,18 +47,19 @@ class higgsAnalyzer : public TSelector {
   TFile* histoFile;
   //Variables to Fill into histos. Have to be global
   
-  Float_t qT, diEta, Mll, Mll_EB, Mll_EE, Mll_EX;
+  Float_t qT, diEta, diPhi, Mll, Mll_EB, Mll_EE, Mll_EX;
   
   Float_t MET, pfMET, pfMET1, puCorrMET, projMET, ZprojMET, redMET1, redMET2, compMET;
   Float_t MET_phi, MET1_phi;
   Float_t MT, MT1, MTZ, pTll;
   Float_t METqt, MET1qt, projMETqt;
-  Int_t nVtx;
+  Int_t nVtx, nVtxTotal;
   Float_t nDofVtx1, nDofVtx2;
   Int_t nJets, nJetsB , nJetsBssv, nJetsB25, nJetsB30;
+  Int_t nGamma;
   Float_t dPhiClos1, dPhiClos2;
-Float_t lep1_eta, lep1_phi, lep1_pt;
-Float_t lep2_eta, lep2_phi, lep2_pt;
+  Float_t lep1_eta, lep1_phi, lep1_pt;
+  Float_t lep2_eta, lep2_phi, lep2_pt;
 
   ofstream nout[nC], fout[nC], ffout, ncout;
   TTree * cutTree;
@@ -78,9 +77,10 @@ Float_t lep2_eta, lep2_phi, lep2_pt;
   TH1F *l1_phi[nC], *l1_eta[nC], *l1_pt[nC];
   TH1F *l2_phi[nC], *l2_eta[nC], *l2_pt[nC];
   TH1F *btag_hp[nC];
-  TH1F *di_qt[nC], *di_eta[nC], *di_mass[nC], *di_mass_EB[nC], *di_mass_EE[nC], *di_mass_EX[nC];
+  TH1F *di_qt[nC], *di_eta[nC], *di_phi[nC], *di_mass[nC], *di_mass_EB[nC], *di_mass_EE[nC], *di_mass_EX[nC];
   TH1F *jet_N[nC], *jet_dRlep1[nC], *jet_dRlep2[nC], *jet_pt[nC];
   TH1F *jet_b_N[nC], *jet_b_Nssv[nC], *jet_b_N25[nC],*jet_b_N30[nC], *jet_b_pt[nC];
+  TH1 *ph_nGamma[nC];
 
   TH1F *met1_dPhiLeadJet1[nC], *met1_dPhiLeadJet2[nC], *met1_dPhiClosJet1[nC], *met1_dPhiClosJet2[nC];
 //  TH1F *met2_dPhiLeadJet1[nC], *met2_dPhiLeadJet2[nC], *met2_dPhiClosJet1[nC], *met2_dPhiClosJet2[nC];
@@ -89,7 +89,7 @@ Float_t lep2_eta, lep2_phi, lep2_pt;
   TH2F *mtZ_met2[nC], *mt2_met2[nC];
   TH2F *mtZ_met3[nC], *mt2_met3[nC];
 
-  TH1F *vtx_nPV_raw[nC], *vtx_nPV_weight[nC], *vtx_ndof_1[nC], *vtx_ndof_2[nC];
+  TH1F *vtx_nPV_tot[nC], *vtx_nPV_raw[nC], *vtx_nPV_weight[nC], *vtx_ndof_1[nC], *vtx_ndof_2[nC];
 
   TH1F *run_events[nC];
   
@@ -175,7 +175,7 @@ Float_t lep2_eta, lep2_phi, lep2_pt;
   virtual float   CalculateTransMass(TLorentzVector p1, TLorentzVector p2);
   virtual float   CalculateTransMassAlt(TLorentzVector p1, TLorentzVector p2);
   virtual float   DeltaPhiJetMET(TLorentzVector , std::vector<TLorentzVector> ); 
-  virtual float   GetEventWeight(int, TLorentzVector, TLorentzVector);
+  virtual float   GetEventWeight(int, int, TLorentzVector, TLorentzVector);
   virtual float   GetElectronEff(TLorentzVector );
   virtual float   GetMuTriggerEff(TLorentzVector );
   virtual float   GetPhotonMass();

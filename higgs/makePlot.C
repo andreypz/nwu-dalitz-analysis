@@ -20,10 +20,11 @@ void makePlot(Int_t sel=1, TString hPath="00")
   Float_t intLumi = 1;
   if(sel==1)  intLumi = 215.1 + 927.6 + 370.9 + 663.0 ; //double mu	
   if(sel==2)  intLumi = 215.1 + 789.2 + 313.2 + 662.2 ; //double ele	
-  TString dir("test");
+  //TString dir("test");
+  TString dir("test_lib_ph");
 
   Bool_t doTest = 0, doSB = 0, doEBEE=0;
-  Bool_t doPhotons = 0, makeZjetsQt = 0;
+  Bool_t doPhotons = 1, makeZjetsQt = 0;
   Bool_t doOverview= 1;
 
   //Types of met: met - pfMet, met1 - type1 corrected, met2 - pfMet passed Noise filters, 
@@ -112,7 +113,9 @@ void makePlot(Int_t sel=1, TString hPath="00")
   THStack *hs_vtx_ndof_1[nC], *hs_vtx_ndof_2[nC];
   THStack *hs_l1_eta[nC], *hs_l1_phi[nC], *hs_l1_pt[nC];
   THStack *hs_l2_eta[nC], *hs_l2_phi[nC], *hs_l2_pt[nC];
+  THStack *hs_evt_byCut;
 
+  hs_evt_byCut         = makeStack(list_bg, "evt_byCut", intLumi);
   for(Int_t n = 0; n<nC; n++)
     {
       hs_mt[n]           = makeStack(list_bg, Form("%s_%i", mtType.Data(), n), intLumi);
@@ -541,51 +544,54 @@ void makePlot(Int_t sel=1, TString hPath="00")
       //------- Di-Lepton plots--------//
       //-------------------------------//  
       drawMuliPlot("","M(ll)", 1, 0.001, 1000000, 0,1.9, hs_di_mass[F0], c2, leg01, list_overlay, intLumi);
-      c2 -> SaveAs(imgpath+"/diLepton/di01.png");
+      c2 -> SaveAs(imgpath+"diLepton/di01.png");
       drawMuliPlot("","Leptons in Barrel, |#eta|<1.444,  M(ll)", 1, 0.001, 1000000, 0,1.9, hs_di_mass_EB[F0], c2, leg01, list_overlay, intLumi);
-      c2 -> SaveAs(imgpath+"/diLepton/di02.png");
+      c2 -> SaveAs(imgpath+"diLepton/di02.png");
       drawMuliPlot("","Leptons in Endcap, |#eta|>1.566, M(ll)", 1, 0.001, 1000000, 0,1.9, hs_di_mass_EE[F0], c2, leg01, list_overlay, intLumi);
-      c2 -> SaveAs(imgpath+"/diLepton/di03.png");
+      c2 -> SaveAs(imgpath+"diLepton/di03.png");
       drawMuliPlot("","Leptons in EB/EE, mixed, M(ll)", 1, 0.001, 1000000, 0,1.9, hs_di_mass_EX[F0], c2, leg01, list_overlay, intLumi);
-      c2 -> SaveAs(imgpath+"/diLepton/di04.png");
+      c2 -> SaveAs(imgpath+"diLepton/di04.png");
 
       drawMuliPlot("","q_{T} (di-lepton p_{T})", 1, 0.001, 1000000, 0,2.9, hs_di_qt[F0], c2, leg01, list_overlay, intLumi);
-      c2 -> SaveAs(imgpath+"/diLepton/di05.png");
+      c2 -> SaveAs(imgpath+"diLepton/di05.png");
 
       drawMuliPlot("","Di-lepton Eta", 1, 0.001, 1000000, 0.5,1.9, hs_di_eta[F0], c2, leg01, list_overlay, intLumi);
-      c2 -> SaveAs(imgpath+"/diLepton/di06.png");
+      c2 -> SaveAs(imgpath+"diLepton/di06.png");
 
       //----------------------------//
       //------- Lepton plots--------//
       //----------------------------//  
       drawMuliPlot("","Leading Lepton eta", 1, 0.001, 1000000, 0.5,1.4, hs_l1_eta[F0], c2, leg01, list_overlay, intLumi); 
-      c2 -> SaveAs(imgpath+"/Lepton/l01.png");
+      c2 -> SaveAs(imgpath+"Lepton/l01.png");
       drawMuliPlot("","Trailing Lepton eta", 1, 0.001, 1000000, 0.5,1.4, hs_l2_eta[F0], c2, leg01, list_overlay, intLumi); 
-      c2 -> SaveAs(imgpath+"/Lepton/l02.png");
+      c2 -> SaveAs(imgpath+"Lepton/l02.png");
 
       drawMuliPlot("","Leading Lepton phi", 1, 0.001, 1000000, 0.5,1.4, hs_l1_phi[F0], c2, leg01, list_overlay, intLumi); 
-      c2 -> SaveAs(imgpath+"/Lepton/l03.png");
+      c2 -> SaveAs(imgpath+"Lepton/l03.png");
       drawMuliPlot("","Trailing Lepton phi", 1, 0.001, 1000000, 0.5,1.4, hs_l2_phi[F0], c2, leg01, list_overlay, intLumi); 
-      c2 -> SaveAs(imgpath+"/Lepton/l04.png");
+      c2 -> SaveAs(imgpath+"Lepton/l04.png");
 
       drawMuliPlot("","Leading Lepton pt", 1, 0.001, 1000000, 0.5,1.4, hs_l1_pt[F0], c2, leg01, list_overlay, intLumi); 
-      c2 -> SaveAs(imgpath+"/Lepton/l05.png");
+      c2 -> SaveAs(imgpath+"Lepton/l05.png");
       drawMuliPlot("","Trailing Lepton pt", 1, 0.001, 1000000, 0.5,1.4, hs_l2_pt[F0], c2, leg01, list_overlay, intLumi); 
-      c2 -> SaveAs(imgpath+"/Lepton/l06.png");
+      c2 -> SaveAs(imgpath+"Lepton/l06.png");
 
       //----------------------------//
       //---Misc plots: vtx etc -----//
       //----------------------------//  
       drawMuliPlot("","nVtx raw", 1, 0.001, 1000000, 0,2.9, hs_vtx_nPV_raw[F0], c2, leg01, list_overlay, intLumi); 
-      c2 -> SaveAs(imgpath+"/Misc/mis01.png");
+      c2 -> SaveAs(imgpath+"Misc/mis01.png");
       drawMuliPlot("","nVtx reweighted", 1, 0.001, 1000000, 0,2.9, hs_vtx_nPV_weight[F0], c2, leg01, list_overlay, intLumi); 
-      c2 -> SaveAs(imgpath+"/Misc/mis02.png");
+      c2 -> SaveAs(imgpath+"Misc/mis02.png");
 
       drawMuliPlot("","vtx 1 nDof", 1, 0.001, 1000000, 0,2.9, hs_vtx_ndof_1[F0], c2, leg01, list_overlay, intLumi); 
-      c2 -> SaveAs(imgpath+"/Misc/mis03.png");
+      c2 -> SaveAs(imgpath+"Misc/mis03.png");
 
       drawMuliPlot("","vtx 2 nDof", 1, 0.001, 1000000, 0,2.9, hs_vtx_ndof_2[F0], c2, leg01, list_overlay, intLumi); 
-      c2 -> SaveAs(imgpath+"/Misc/mis04.png");
+      c2 -> SaveAs(imgpath+"Misc/mis04.png");
+
+      drawMuliPlot("","evts cut by cut", 1, 0.001, 1000000, 0,2.9, hs_evt_byCut, c2, leg01, list_overlay, intLumi); 
+      c2 -> SaveAs(imgpath+"Misc/mis05.png");
 
 
       //--------------------//
