@@ -34,7 +34,8 @@ gROOT->LoadMacro("../src/TCGenParticle.cc+");
 gROOT->LoadMacro("../src/TCPrimaryVtx.cc+");
 gROOT->LoadMacro("../src/TCTrigger.cc+");
 gROOT->LoadMacro("../src/TCTriggerObject.cc+");
-
+gROOT->LoadMacro("../src/WeightUtils.cc+");
+     
 TChain* fChain = new TChain("ntupleProducer/eventTree");
 
 ifstream sourceFiles("./sourceFiles/$3.txt");

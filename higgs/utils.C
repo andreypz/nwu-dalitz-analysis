@@ -1,4 +1,4 @@
-void RescaleToLumiAndColors( TFile *HistoFile, Float_t lumiInput=1, Float_t lumiToScale =1, Int_t lineColor, Int_t fillColor) {
+void RescaleToLumiAndColors( TFile *HistoFile, Float_t lumiInput=1, Float_t lumiToScale =1, Int_t lineColor, Int_t fillColor, Int_t fillStyle) {
 
   HistoFile -> cd("Andrey");
   TIter nextkey( gDirectory->GetListOfKeys() );
@@ -16,6 +16,7 @@ void RescaleToLumiAndColors( TFile *HistoFile, Float_t lumiInput=1, Float_t lumi
       hist -> Scale(lumiToScale/lumiInput);
       hist -> SetLineColor(lineColor);
       hist -> SetFillColor(fillColor);
+      hist -> SetFillStyle(fillStyle);
       hist -> SetLineWidth(2);
       hist->Write("",TH1::kWriteDelete); //overwrite the object in the file
       delete obj;
@@ -37,13 +38,17 @@ void PrintYields(TList *bgList, TList *ggHList, TList *vbfList, TFile *dataFile,
   TString title1("");
   TString title2("");
   TString pmSign("");
+  TString tabBegin1("\\begin{tabular}{lllllllll}");
+  TString tabBegin2("\\begin{tabular}{lllllllllllll}");
+  TString tabEnd("\\end{tabular}");
   if(option=="tex"){
-    title1 = " sel & WW & WZ   \\\\ \\hline";
-    title2 = " sel & WW & WZ   \\\\ \\hline";
+
+    title1 = "  cut         &  top   &  ttbar   &  WZ   &  WW  &  ZZ   &  Zjets  &  Total bg  &  Data  \\\\ \\hline";
+    title2 = "  Higgs mass  &  top   &  ttbar   &  WZ   &  WW  &  ZZ   &  Zjets  &  Total bg  &  Data  &  ggH  &  vbf  &  S/$\\sqrt{S+B}$  &  S/B  \\\\ \\hline";
     beginLine = " ";
     endLine   = "\\\\ \\hline";
     separator = "\t &";
-    pmSign = " $\pm$ ";
+    pmSign = " $\\pm$ ";
   }
   if(option=="twiki"){
     title1 = "| *cut*        | *top*  | *ttbar*  | *WZ*  | *WW* | *ZZ*  | *Zjets* | *Total bg* | *Data* |";
@@ -74,6 +79,7 @@ void PrintYields(TList *bgList, TList *ggHList, TList *vbfList, TFile *dataFile,
     "16.",
     "17.",};
 
+  if(option=="tex")  oo<<tabBegin1<<endl;
   oo<<title1<<endl;
 
   for(Int_t j = 0; j<=15; j++)
@@ -81,6 +87,7 @@ void PrintYields(TList *bgList, TList *ggHList, TList *vbfList, TFile *dataFile,
       if(j<=6)  oo.precision(0);
       else  oo.precision(2);
       if(j==7) continue; //skip 200 mass
+      if(j==8 && option=="tex")  oo<<tabEnd<<"\n"<<tabBegin2<<endl;
       if(j==8) oo<<"\n"<<title2<<endl;
 
       Int_t size = bgList->GetSize();
@@ -163,7 +170,7 @@ void PrintYields(TList *bgList, TList *ggHList, TList *vbfList, TFile *dataFile,
       
     }
 
-  oo<<"end of printing yields"<<endl;
+  if(option=="tex")  oo<<tabEnd<<endl;
   oo.close();
   
 }

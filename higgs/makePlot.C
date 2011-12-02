@@ -10,45 +10,39 @@ void makePlot(Int_t sel=1, TString hPath="00")
   gROOT->ProcessLine(".L ../data/tdrstyle.C");
   setTDRStyle();
 
-  gStyle->SetPadGridX(1);
-  gStyle->SetPadGridY(1);
-  gStyle->SetHistLineWidth(2);
-  gStyle->SetLegendBorderSize(0);
+  gStyle->SetPadGridX(1); gStyle->SetPadGridY(1);
+  gStyle->SetHistLineWidth(2);  gStyle->SetLegendBorderSize(0);
   cout.precision(3); cout.setf(ios::fixed, ios::floatfield);
   TH1::SetDefaultSumw2(kTRUE);
 
   Float_t intLumi = 1;
-  if(sel==1)  intLumi = 215.1 + 927.6 + 370.9 + 663.0 ; //double mu	
-  if(sel==2)  intLumi = 215.1 + 789.2 + 313.2 + 662.2 ; //double ele	
+  if(sel==1)  intLumi = 215.1 + 927.6 + 370.9 + 663.0 + 2511; //double mu	
+  if(sel==2)  intLumi = 215.1 + 789.2 + 313.2 + 662.2 + 2511; //double ele	
   //TString dir("test");
-  TString dir("test_lib_ph");
+  TString dir("test");
 
-  Bool_t doTest = 0, doSB = 0, doEBEE=0;
-  Bool_t doPhotons = 1, makeZjetsQt = 0;
+  Bool_t doTest    = 0;
+  Bool_t doPhotons = 0;
   Bool_t doOverview= 1;
 
-  //Types of met: met - pfMet, met1 - type1 corrected, met2 - pfMet passed Noise filters, 
-  //met3 - projMet, met4 - puProj corrected met (those two are passed Noise filters) 
-  TString metType("met2");   TString mtType("mt2"); 
-  TString ssel("none");
-
-  if (sel==1)  {ssel = "muon";     TString imgpath(Form("~/afs/public_html/higgs/%s/muon/", dir.Data())); }
-  if (sel==2)  {ssel = "electron"; TString imgpath(Form("~/afs/public_html/higgs/%s/electron/", dir.Data())); }
+  TString ssel("none"), gsel("none");
+  if (sel==1)  {
+    ssel = "muon";  gsel ="muGamma";
+    if(doPhotons)  TString imgpath(Form("~/afs/public_html/higgs/%s/%s/", dir.Data(), gsel.Data() ) ); 
+    else           TString imgpath(Form("~/afs/public_html/higgs/%s/%s/", dir.Data(), ssel.Data() ) ); 
+  }
+  if (sel==2)  {
+    ssel = "electron";  gsel ="eGamma";
+    if(doPhotons)  TString imgpath(Form("~/afs/public_html/higgs/%s/%s/", dir.Data(), gsel.Data() ) ); 
+    else           TString imgpath(Form("~/afs/public_html/higgs/%s/%s/", dir.Data(), ssel.Data() ) ); 
+  }
 
   TString histoPath = Form("%s/%s", hPath.Data(), ssel.Data());
   cout<<"histoPath:  "<<histoPath.Data()<<"  int Lumi: "<<intLumi<<endl;
 
-  if(sel==1){
-    TFile* fda_2011A_DoubleMu_May10  = new TFile(Form("./%s/hhhh_DoubleMu_May10.root",histoPath.Data()));
-    TFile* fda_2011A_DoubleMu_PromptV4  = new TFile(Form("./%s/hhhh_DoubleMu_PromptV4.root",histoPath.Data()));
-  }
-  TFile* fda_Data  = new TFile(Form("./%s/m_Data_%i.root", hPath.Data(),  sel));  //Merged Data
+  TFile  *fda_Data  = new TFile(Form("./%s/m_Data_%i.root", hPath.Data(),  sel));  //Merged Data
   TFile  *fData = (TFile*)fda_Data;
   
-  //if (sel==1) TFile  *fData = (TFile*)fda_2011A_DoubleMu_May10;
-  //if (sel==1) TFile  *fData = (TFile*)fda_2011A_DoubleMu_PromptV4;
-  
-  // TFile* fmc_ZllG      = new TFile(Form("./%s/hhhh_WZ.root", histoPath.Data() ));
   // TFile* fmc_Wjets     = new TFile(Form("./%s/hhhh_Wjets.root",histoPath.Data() ));
 
   TFile* fmc_ZZ        = new TFile(Form("./%s/hhhh_ZZ.root",histoPath.Data() ));
@@ -62,10 +56,13 @@ void makePlot(Int_t sel=1, TString hPath="00")
     fmc_vbfH[i]  = new TFile(Form("./%s/hhhh_VBFHZZ%i.root",histoPath.Data(),m ));
   }
 
-  if(doPhotons)  TFile* fmc_Zjets  = new TFile(Form("./%s/m_DataPh_%i.root", hPath.Data(), sel ));
-  else           TFile* fmc_Zjets  = new TFile(Form("./%s/m_Zjets_%i.root", hPath.Data(), sel ));
   TFile* fmc_tt     = new TFile(Form("./%s/m_ttbar_%i.root", hPath.Data(), sel ));
   TFile* fmc_Top    = new TFile(Form("./%s/m_Top_%i.root", hPath.Data(), sel ));
+
+  TFile* fmc_Zjets  = new TFile(Form("./%s/m_Zjets_%i.root", hPath.Data(), sel ));
+  //TFile* fmc_Zjets  = new TFile(Form("./%s/m_libZjets_%i.root", hPath.Data(), sel ));
+  if(doPhotons)  fmc_Zjets  = new TFile(Form("./%s/m_DataPh_%i.root", hPath.Data(), sel ));
+    
  
   //List of background samples to Stack
   list_bg = new TList();
@@ -88,7 +85,7 @@ void makePlot(Int_t sel=1, TString hPath="00")
   list_overlay = new TList();
   list_overlay->Add(fData); 
   list_overlay->Add(fmc_ggH[1]);//250
-  list_overlay->Add(fmc_ggH[4]);//400
+  //list_overlay->Add(fmc_ggH[4]);//400
 
   list_ggH = new TList();
   for(Int_t i=1; i<9; i++)  
@@ -113,14 +110,16 @@ void makePlot(Int_t sel=1, TString hPath="00")
   THStack *hs_vtx_ndof_1[nC], *hs_vtx_ndof_2[nC];
   THStack *hs_l1_eta[nC], *hs_l1_phi[nC], *hs_l1_pt[nC];
   THStack *hs_l2_eta[nC], *hs_l2_phi[nC], *hs_l2_pt[nC];
-  THStack *hs_evt_byCut;
+  THStack *hs_evt_byCut, *hs_evt_libQt;
 
   hs_evt_byCut         = makeStack(list_bg, "evt_byCut", intLumi);
+  hs_evt_libQt         = makeStack(list_bg, "evt_libQt", intLumi);
   for(Int_t n = 0; n<nC; n++)
+    hs_met0_et[n]      = makeStack(list_bg, Form("met0_et_%i", n), intLumi); //pfMet, no noise filters
+  for(Int_t n = 4; n<nC; n++)
     {
-      hs_mt[n]           = makeStack(list_bg, Form("%s_%i", mtType.Data(), n), intLumi);
+      hs_mt[n]           = makeStack(list_bg, Form("%s_%i", "mt2", n), intLumi);
 
-      hs_met0_et[n]      = makeStack(list_bg, Form("met0_et_%i", n), intLumi); //pfMet, no noise filters
       hs_met1_et[n]      = makeStack(list_bg, Form("met1_et_%i", n), intLumi); // pfMet 
       hs_met2_et[n]      = makeStack(list_bg, Form("met2_et_%i", n), intLumi); //pfMet type 1
       hs_met3_et[n]      = makeStack(list_bg, Form("met3_et_%i", n), intLumi); //puCorr
@@ -179,7 +178,7 @@ void makePlot(Int_t sel=1, TString hPath="00")
       */
     }
     
-
+  
   TH1 * forLegend[21];
   list_legend = new TList();
   list_legend -> AddAll(list_bg);
@@ -197,20 +196,21 @@ void makePlot(Int_t sel=1, TString hPath="00")
       forLegend[n] = (TH1F*)hh[n];
     }
  
-  leg01 = new TLegend(0.53,0.7,0.95,0.95);
+  leg01 = new TLegend(0.53,0.7,0.95,0.90);
   leg01 -> SetNColumns(2);
   leg01 -> SetTextSize(0.04);
   leg01->AddEntry(forLegend[6], "Data","epl");
-  leg01->AddEntry(forLegend[5],  "Z + jets","f");
+  if(doPhotons) leg01->AddEntry(forLegend[5],  "Z+jets (#gamma data)","f");
+  else          leg01->AddEntry(forLegend[5],  "Z + jets","f");
   leg01->AddEntry(forLegend[4],  "ZZ","f");
   //leg01->AddEntry(forLegend[10],  "W + jets","f");
   leg01->AddEntry(forLegend[3],  "WW","f");
   leg01->AddEntry(forLegend[0],  "tW","f");
   leg01->AddEntry(forLegend[2],  "WZ","f");
   leg01->AddEntry(forLegend[1], "ttbar","f");  
-  leg01->AddEntry(forLegend[7], "10xH250","f");
+  leg01->AddEntry(forLegend[7], "10xH250","l");
   //leg01->AddEntry(forLegend[8], "10xH400","f");
-  //  leg01->AddEntry(forLegend[9], "10xH400","f");
+  //leg01->AddEntry(forLegend[9], "10xH400","f");
   
   leg01->SetFillColor(kWhite);
   
@@ -218,263 +218,33 @@ void makePlot(Int_t sel=1, TString hPath="00")
   c1 -> SaveAs(imgpath+"ov01.png");
   TCanvas *c2 = new TCanvas("c2","example",600,700);
   
-
-  if(doSB){
-    cout<<"doing S/B"<<endl;
-
-    TString testpath("~/afs/public_html/test/");  
-
-    Double_t x_dPhi[200], x_met[200], x_mQt[200], x_err[200];
-    Double_t StoB[200], StoB_err[200];
-    Double_t sqrtStoB[200], sqrtStoB_err[200];
-    
-    gROOT->ProcessLine(".L ./xSecAndColors.C");
-
-    Float_t nEv, scaleFactor1, scaleFactor2, cs;
-    cs  = getXsecOrColors("DYmumu", 3);
-    nEv = getXsecOrColors("DYmumu", 4);
-    scaleFactor1      = intLumi*cs/nEv;
-    cout<<cs<<"  "<<nEv<<"  "<<scaleFactor1<<endl;
-
-    cs  = getXsecOrColors("ggHZZ400", 3);
-    nEv = getXsecOrColors("ggHZZ400", 4);
-    scaleFactor2      = intLumi*cs/nEv;
-    TFile * sigFile = fmc_ggH400;
-    Float_t  y1 = 4, y2 = 8;
-    Int_t nDots    = 100;
-    Int_t startpoint= 70;
-    Float_t phiCut = 0.;
-
-    TCanvas *c3 = new TCanvas("c3","for s/b plots",600,500);
-    c3 -> cd();
-    for(Int_t i =0; i<nDots; i++) x_err[i]=0;
-    
-    StoBPlot("pfMet",phiCut, fmc_Zjets,scaleFactor1,  sigFile,scaleFactor2,  StoB, StoB_err, sqrtStoB, sqrtStoB_err, x_met, startpoint);
-    gr1 = new TGraphErrors(nDots, x_met, StoB, x_err, StoB_err);
-    gr2 = new TGraphErrors(nDots, x_met, sqrtStoB, x_err, sqrtStoB_err);
-    gr1 -> SetTitle(";pfMet cut; S/B");   
-    twoScales(gr1, gr2, startpoint,startpoint+100, 0,y1,  y2, c3);
-    c3 -> SaveAs(testpath+"p01.png");
-
-    StoBPlot("pfMet1",phiCut, fmc_Zjets,scaleFactor1,  sigFile,scaleFactor2,  StoB, StoB_err, sqrtStoB, sqrtStoB_err, x_met, startpoint);
-    gr1 = new TGraphErrors(nDots, x_met, StoB, x_err, StoB_err);
-    gr2 = new TGraphErrors(nDots, x_met, sqrtStoB, x_err, sqrtStoB_err);
-    gr1 -> SetTitle(";type 1 pfMet cut; S/B");   
-    twoScales(gr1, gr2, startpoint,startpoint+100, 0,y1,  y2, c3);
-    c3 -> SaveAs(testpath+"p02.png");
-    
-    StoBPlot("redMet2",phiCut, fmc_Zjets,scaleFactor1,  sigFile,scaleFactor2,  StoB, StoB_err, sqrtStoB, sqrtStoB_err, x_met, startpoint);
-    gr1 = new TGraphErrors(nDots, x_met, StoB, x_err, StoB_err);
-    gr2 = new TGraphErrors(nDots, x_met, sqrtStoB, x_err, sqrtStoB_err);
-    gr1 -> SetTitle(";redMet2 cut; S/B");   
-    twoScales(gr1, gr2, startpoint,startpoint+100, 0,y1,  y2, c3);
-    c3 -> SaveAs(testpath+"p03.png");
-    c3 -> SaveAs(testpath+"p04.png");
-
-    /*
-    StoBPlot("projMet",phiCut, fmc_Zjets,scaleFactor1,  sigFile,scaleFactor2,  StoB, StoB_err, sqrtStoB, sqrtStoB_err, x_met);
-    gr1 = new TGraphErrors(nDots, x_met, StoB, x_err, StoB_err);
-    gr2 = new TGraphErrors(nDots, x_met, sqrtStoB, x_err, sqrtStoB_err);
-    gr1 -> SetTitle(";projMet cut; S/B");   
-    twoScales(gr1, gr2, 0,200, 0,y1,  y2, c3);
-    c3 -> SaveAs(testpath+"p03.png");
-
-    StoBPlot("ZprojMet",phiCut, fmc_Zjets,scaleFactor1,  sigFile,scaleFactor2,  StoB, StoB_err, sqrtStoB, sqrtStoB_err, x_met);
-    gr1 = new TGraphErrors(nDots, x_met, StoB, x_err, StoB_err);
-    gr2 = new TGraphErrors(nDots, x_met, sqrtStoB, x_err, sqrtStoB_err);
-    gr1 -> SetTitle(";ZprojMet cut; S/B");   
-    twoScales(gr1, gr2, 0,200, 0,y1,  y2, c3);
-    c3 -> SaveAs(testpath+"p04.png");
-    
-
-    StoBPlot("redMet1",phiCut, fmc_Zjets,scaleFactor1,  sigFile,scaleFactor2,  StoB, StoB_err, sqrtStoB, sqrtStoB_err, x_met);
-    gr1 = new TGraphErrors(nDots, x_met, StoB, x_err, StoB_err);
-    gr2 = new TGraphErrors(nDots, x_met, sqrtStoB, x_err, sqrtStoB_err);
-    gr1 -> SetTitle(";redMet1 cut; S/B");   
-    twoScales(gr1, gr2, 0,200, 0,y1,  y2, c3);
-    c3 -> SaveAs(testpath+"p05.png");
-
-
-    StoBPlot("puCorrMet",phiCut, fmc_Zjets,scaleFactor1,  sigFile,scaleFactor2,  StoB, StoB_err, sqrtStoB, sqrtStoB_err, x_met);
-    gr1 = new TGraphErrors(nDots, x_met, StoB, x_err, StoB_err);
-    gr2 = new TGraphErrors(nDots, x_met, sqrtStoB, x_err, sqrtStoB_err);
-    gr1 -> SetTitle(";pu corr Met cut; S/B");   
-    twoScales(gr1, gr2, 0,200, 0,y1,  y2, c3);
-    c3 -> SaveAs(testpath+"p07.png");
-    
-
-    StoBPlot("compMet",phiCut, fmc_Zjets,scaleFactor1,  sigFile,scaleFactor2,  StoB, StoB_err, sqrtStoB, sqrtStoB_err, x_met);
-    gr1 = new TGraphErrors(nDots, x_met, StoB, x_err, StoB_err);
-    gr2 = new TGraphErrors(nDots, x_met, sqrtStoB, x_err, sqrtStoB_err);
-    gr1 -> SetTitle(";compMet (vert assoc) cut; S/B");   
-    twoScales(gr1, gr2, 0,200, 0, 1., 0.4, c3);
-    c3 -> SaveAs(testpath+"p08.png");
-    */
-
-  /*
-    fmc_Zjets->cd("Andrey");
-    cutTree -> Draw("ct_compMet>>h1(80,0,400)","ct_evtWeight*(ct_dPhiMetJet>0.28 &&  ct_nJets>=2)","hist");
-    sigFile->cd("Andrey");
-    h1 -> Scale(scaleFactor1);
-    cutTree -> Draw("ct_compMet>>h2(80,0,400)","ct_evtWeight*(ct_dPhiMetJet>0.28 &&  ct_nJets>=2)","hist same");
-    h1 -> SetTitle("nJet >= 2; compMet (vert assoc); Events; ");
-    h2 -> SetLineColor(kBlue);
-    h2 -> Scale(scaleFactor2);
-    c3 -> SetLogy();
-    c3 -> SaveAs(testpath+"p05.png");
-    c3 -> SetLogy(0);
-    */
-  }
-  
   
   if(doTest){
     TString testpath("~/afs/public_html/test/");  
     
-
-    //drawMuliPlot("","#Delta#phi(MET, closest jet), p_{T}>20, |#eta|<2.4", 1, 0.001, 1000000, 0,5, hs_met_dPhiClosJet2[F0], c2, leg01, list_overlay, intLumi);
-    //c2 -> SaveAs(testpath+"p03.png");
-
-    drawMuliPlot("","pfMET", 1, 0.001, 1000000, 0,3, hs_met2_et[6], c2, leg01, list_overlay, intLumi); 
+    drawMuliPlot("","di qT", 1, 0.001, 1000000, 0,3, hs_di_qt[6], c2, leg01, list_overlay, intLumi); 
     c2 -> SaveAs(testpath+"p01.png");
-    drawMuliPlot("","pfMET type1", 1, 0.001, 1000000, 0,3, hs_met1_et[6], c2, leg01, list_overlay, intLumi); 
-    c2 -> SaveAs(testpath+"p02.png");
-    drawMuliPlot("","projMET", 1, 0.001, 1000000, 0,3, hs_met4_et[6], c2, leg01, list_overlay, intLumi); 
-    c2 -> SaveAs(testpath+"p03.png");
-    drawMuliPlot("","ZprojMET", 1, 0.001, 1000000, 0,3, hs_met5_et[6], c2, leg01, list_overlay, intLumi); 
-    c2 -> SaveAs(testpath+"p04.png");
-    drawMuliPlot("","redMET1", 1, 0.001, 1000000, 0,3, hs_met6_et[6], c2, leg01, list_overlay, intLumi); 
-    c2 -> SaveAs(testpath+"p05.png");
-    drawMuliPlot("","redMET2", 1, 0.001, 1000000, 0,3, hs_met7_et[6], c2, leg01, list_overlay, intLumi); 
-    c2 -> SaveAs(testpath+"p06.png");
-    drawMuliPlot("","puCorrMET", 1, 0.001, 1000000, 0,3, hs_met3_et[6], c2, leg01, list_overlay, intLumi); 
-    c2 -> SaveAs(testpath+"p07.png");
-    drawMuliPlot("","compMET", 1, 0.001, 1000000, 0,3, hs_met8_et[6], c2, leg01, list_overlay, intLumi); 
-    c2 -> SaveAs(testpath+"p08.png");
-    //drawMuliPlot("","pfMET", 1, 0.001, 1000000, 0,3, hs_met9_et[6], c2, leg01, list_overlay, intLumi); 
-    //c2 -> SaveAs(testpath+"p09.png");
-    //drawMuliPlot("","pfMET", 1, 0.001, 1000000, 0,3, hs_met10_et[6], c2, leg01, list_overlay, intLumi); 
-    //c2 -> SaveAs(testpath+"p10.png");
+
+    hs_di_qt[6] -> GetHists() -> Print();
+    c1 -> Clear();
+    TH1F * qt1 =   hs_di_qt[6] -> Sum() -> Clone();
+    TH1F * qt2  = (TH1F*) hs_di_qt[6] -> GetHists()->At(5)->Clone(); 
+    qt2->Divide(qt1);
+    qt2 -> Draw("hist");
+    qt2->SetMaximum(1.01);
+    qt2->SetMinimum(0.98);
+    qt2 -> SetFillColor(kWhite);
+    qt2 -> SetTitle("; qT; Fraction of DY events");
+    //qt3 -> Draw("same");
+    //c1 -> SetLogy();
+    c1->SaveAs(testpath+"p03.png");
+    fmc_Zjets -> cd("Andrey");
+    TH2F * evt_libQt = (TH2F*)fmc_Zjets->Get("Andrey/evt_libQt")->Clone();
+    evt_libQt - > Draw();
+    c1->SaveAs(testpath+"p04.png");
 
     /*
-    drawMuliPlot("","MT", 1, 0.001, 1000000, 0,3, hs_mt[6], c2, leg01, list_overlay, intLumi); 
-    c2 -> SaveAs(testpath+"p02.png");
 
-    cout<<"dbg"<<endl;
-
-    drawMuliPlot("","MT 250", 0, 0.001, 20, 0,5, hs_mt[7], c2, leg01, list_overlay, intLumi); 
-    c2 -> SaveAs(testpath+"p03.png");
-    drawMuliPlot("","MT 300", 0, 0.001, 20, 0,5, hs_mt[8], c2, leg01, list_overlay, intLumi); 
-    c2 -> SaveAs(testpath+"p04.png");
-
-    drawMuliPlot("","N b-jets", 0, 0.001, 30, 0.,3, hs_jet_b_N[15], c2, leg01, list_overlay, intLumi);
-    c2 -> SaveAs(testpath+"p05.png");
-    drawMuliPlot("","N b-jets ssv", 0, 0.001, 30, 0.,3, hs_jet_b_Nssv[15], c2, leg01, list_overlay, intLumi);
-    c2 -> SaveAs(testpath+"p06.png");
-
-    drawMuliPlot("","N b-jets 25", 0, 0.001, 30, 0.,3, hs_jet_b_N25[15], c2, leg01, list_overlay, intLumi);
-    c2 -> SaveAs(testpath+"p07.png");
-    drawMuliPlot("","N b-jets 30", 0, 0.001, 30, 0.,3, hs_jet_b_N30[15], c2, leg01, list_overlay, intLumi);
-    c2 -> SaveAs(testpath+"p08.png");
-    //drawMuliPlot("","N jets", 0, 0.001, 30, 0.,3, hs_jet_N[15], c2, leg01, list_overlay, intLumi);
-    //c2 -> SaveAs(testpath+"p06.png");
-
-    fData -> cd("Andrey");
-    Float_t a = 0, aer=0;
-    for(Int_t i=1; i<=4; i++){
-      a = jet_b_N_15 -> GetBinContent(i);
-      cout<<a<<endl;
-    }
-    fmc_tt -> cd("Andrey");
-    jet_b_N_15 -> Scale(intLumi/1000);
-    for(Int_t i=1; i<=4; i++){
-      a   = jet_b_N_15 -> GetBinContent(i);
-      aer = jet_b_N_15 -> GetBinError(i);
-      cout<<a<<" +/- "<<aer<<endl;
-    }
-
-    fmc_Top -> cd("Andrey");
-    jet_b_N_15 -> Scale(intLumi/1000);
-    for(Int_t i=1; i<=4; i++){
-      a   = jet_b_N_15 -> GetBinContent(i);
-      aer = jet_b_N_15 -> GetBinError(i);
-      cout<<a<<" +/- "<<aer<<endl;
-    }
-*/
-    
-    /*
-
-    //drawMuliPlot("","projMET/q_{T}", 1, 0.001, 1000000, 0,3, hs_met_over_qt[5], c2, leg01, list_overlay, intLumi);
-    //c2 -> SaveAs(testpath+"p03.png");
-    
-    c1 -> cd();
-    TH2 *hh2 = (TH2*)fmc_ggH400 -> Get("met3_et_ovQt_6") ;
-    hh2-> SetFillColor(kCyan);
-    hh2 -> SetTitle(";projMET; projMET/q_{T}");
-    hh2-> Draw("box1");
-    hs_met_et_ovQt[6]->Sum()-> Clone("h_bkg1");
-    h_bkg1->Draw("box1 same");
-    c1 -> SaveAs(testpath+"p07.png");
-    hh2->Delete();
-    h_bkg1 -> Delete();
-
-    c1 -> SetLogz(0);
-    TH2 *hh2 = (TH2*)fmc_ggH400 -> Get("met3_et_ovQt_5") ;
-    hh2-> SetFillColor(kCyan);
-    hh2 -> SetTitle(";projMET; projMET/q_{T}");
-    hh2-> Draw("box1");
-    hs_met_et_ovQt[5]->Sum()-> Clone("h_bkg");
-    h_bkg->SetLineColor(kOrange);
-    h_bkg->Draw("box1 same");
-
-    leg02 = new TLegend(0.75,0.8,0.9,0.89);
-    leg02 -> SetTextSize(0.04);
-    leg02->AddEntry(hh2, "ggH400", "f");
-    leg02->AddEntry(h_bkg, "All bkg", "f");
-    leg02->SetFillColor(kWhite);
-    leg02 -> Draw();
-    c1 -> SaveAs(testpath+"p09.png");
-
-
-
-    TCutG *mg1 = new TCutG("mg1",5);
-    mg1-> SetPoint(0,110,0.5);
-    mg1-> SetPoint(1,110,0.9);
-    mg1-> SetPoint(2,400,2.5);
-    mg1-> SetPoint(3,400,1.9);
-    mg1-> SetPoint(4,110,0.5);
-
-
-    Double_t mg1_iBkg = mg1->IntegralHist(h_bkg);     
-    Double_t mg1_iSig = mg1->IntegralHist(hh2);     
-
-    Double_t iBkg = h_bkg -> Integral(12,41, 0,41);
-    Double_t iSig = hh2   -> Integral(12,41, 0,41);
-    cout<<endl;
-    cout<<"at 110: S/B = "<<0.1*iSig<<"/"<<iBkg<<" = "<<0.1*iSig/iBkg<<endl;
-    cout<<"    2D, S/B = "<<0.1*mg1_iSig<<"/"<<mg1_iBkg<<" = "<<0.1*mg1_iSig/mg1_iBkg<<endl;
-    cout<<endl;
-
-    hh2->Draw(Form("[%s] box1", mg1->GetName()));
-    h_bkg->Draw(Form("[%s] box1 same", mg1->GetName()));
-   
-    leg02-> Draw();
-    c1 -> SaveAs(testpath+"p10.png");
-
-
-    TCutG *mg2 = new TCutG("mg2",5);
-    mg2-> SetPoint(0,110,0);
-    mg2-> SetPoint(1,110,4);
-    mg2-> SetPoint(2,400,4);
-    mg2-> SetPoint(3,400,0);
-    mg2-> SetPoint(4,100,0);
-    hh2->Draw(Form("[%s] box1", mg2->GetName()));
-    h_bkg->Draw(Form("[%s] box1 same", mg2->GetName()));
-
-    leg02-> Draw();
-    c1 -> SaveAs(testpath+"p11.png");
-    */
-
-    /*
     TF1 * f1 = new TF1 ("f1","[0] + [1]*x +[2]*x*x",0,400);
     f1->SetParameter(0, 1.108);
     f1->SetParameter(1, 0.002429);
@@ -530,7 +300,7 @@ void makePlot(Int_t sel=1, TString hPath="00")
 
       drawMuliPlot("Post b-veto","N b-jets", 1, 0.001, 1000000, 0,1.9, hs_jet_b_N[F0], c2, leg01, list_overlay, intLumi);
       c2 -> SaveAs(imgpath+"Jet/j03.png");
-      drawMuliPlot("No b-veto, MET>70","N b-jets", 0, 0.1, 200, 0,1.9, hs_jet_b_N[F1], c2, leg01, list_overlay, intLumi);
+      drawMuliPlot("No b-veto, MET>70","N b-jets", 0, 0.1, 350, 0,1.9, hs_jet_b_N[F1], c2, leg01, list_overlay, intLumi);
       c2 -> SaveAs(imgpath+"Jet/j04.png");
 
       drawMuliPlot("","pt of all jets", 1, 0.001, 1000000, 0,4.9, hs_jet_pt[F0], c2, leg01, list_overlay, intLumi);
@@ -638,14 +408,6 @@ void makePlot(Int_t sel=1, TString hPath="00")
 
   cout<<"\n\n   -- end of job  --"<<endl;
   
-}
-
- 
-void AddPhoton(TH1 *ph, THStack *st, Float_t lumiToScale, Float_t lumiUsed){
-  ph -> SetLineColor(kRed);
-  ph -> SetLineWidth(2);
-  ph -> Scale(lumiToScale/lumiUsed);
-  st  -> Add(ph);
 }
 
 /*struct optimalCuts {

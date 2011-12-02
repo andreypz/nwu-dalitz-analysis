@@ -1,3 +1,24 @@
+Here is Higgs to ZZ to 2l2nu Analythis.
+More details on this code with the instructions how to run it can be found here:
+https://twiki.cern.ch/twiki/bin/view/CMS/UserCodeNWUHiggs
+
+
+The log of changes:
+
+2011-Dec-01 
+  * Weighting utils class is implemented (from Nate) 
+  * dPhi is changed for 0-jet bin (adding soft jets)
+  * WW,WZ,ZZ samples switching to Madgraph
+  * Trigger prescale bug fixed
+  
+2011-Nov-24
+  The following updates are added to the code:
+  * Some more histograms added: angle correlationsleptons of leptons, di-lepton, met
+  * Z-library implementation
+  * Photon+gets reweighting for Z+jets background estimation
+  * Ntuples for MVA, in "Anton" directory of a root file
+  * The H-mass dependent cuts are changed to new PAS-like cuts
+  
 2011-Oct-17
   VBF signal included
 
