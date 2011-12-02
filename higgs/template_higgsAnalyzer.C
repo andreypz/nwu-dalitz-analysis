@@ -1,4 +1,4 @@
-// $Id: template_higgsAnalyzer.C,v 1.1 2011/08/26 10:03:29 andrey Exp $
+// $Id: template_higgsAnalyzer.C,v 1.20 2011/12/02 13:28:43 andrey Exp $
 
 #define higgsAnalyzer_cxx
 
@@ -678,7 +678,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
 	  fwdJetSumPt += thisJet->Pt(JC_LVL);
 	  ++fwdJetCount;
 	  ++jetCount;
-	}
+	} else if (thisJet->P4(JC_LVL).Pt() > jetPtCut[1]) softJetP4.push_back(thisJet->P4(JC_LVL));
       }
     }
 

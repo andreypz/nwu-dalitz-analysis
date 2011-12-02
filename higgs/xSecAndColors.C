@@ -12,12 +12,12 @@ Float_t getXsecOrColors(string dataset="ggHZZ300", Int_t b = 1)
   Float_t cs =-1, nevt = -1;
 
   if(dataset=="DATA")          {lCol = -1;        fCol = -1;       cs = -1;       nevt = -1; }
-  else if(dataset=="ZZ")       {lCol = kBlue;     fCol = kMagenta; cs = 0.214;    nevt = 220e3;}
+  else if(dataset=="ZZ")       {lCol = kBlue;     fCol = kMagenta; cs = 0.1787;   nevt = 1103468;}
   else if(dataset=="Wjets")    {lCol = kGreen-2;  fCol = kCyan+1;  cs = 31314.0;  nevt = 81.251e6;}
   else if(dataset=="ttbar")    {lCol = kOrange+1; fCol = kGreen+2; cs = 16.71;    nevt = 10.34e6;}
   else if(dataset=="ggWW")     {lCol = kBlue-2;   fCol = kSpring;  cs = 0.15048;  nevt = 109.99e3;}
-  else if(dataset=="WW")       {lCol = kBlue-2;   fCol = kSpring;  cs = 4.51;     nevt = 210.67e3;}
-  else if(dataset=="WZ")       {lCol = kRed+2;    fCol = kBlue-1;  cs = 0.596;    nevt = 205e3;}
+  else if(dataset=="WW")       {lCol = kBlue-2;   fCol = kSpring;  cs = 4.783;    nevt = 1197558;}
+  else if(dataset=="WZ")       {lCol = kRed+2;    fCol = kBlue-1;  cs = 0.856;    nevt = 1221134;}
   else if(dataset=="tW")       {lCol = kRed;      fCol = kWhite;   cs = 7.87;     nevt = 814390 ;}
   else if(dataset=="tbarW")    {lCol = kRed;      fCol = kWhite;   cs = 7.87;     nevt = 809984;}
   else if(dataset=="DYmumu")   {lCol = kRed;      fCol = kWhite;   cs = 1666.0;   nevt = 29.7e6;}
