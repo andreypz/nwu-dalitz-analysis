@@ -315,7 +315,7 @@ void drawMuliPlot(TString maintitle, TString xtitle, Int_t isLog, Float_t y1min,
     selection -> SetTextColor(kBlue-3);
   }
   if(sel==2){
-    selection  = new TLatex(0.70,0.95, "#e#e selection");
+    selection  = new TLatex(0.70,0.95, "#font[32]{ee} selection");
     selection -> SetTextColor(kGreen-3);
   }
   selection -> SetNDC(); prelim->SetTextSize(0.03); 

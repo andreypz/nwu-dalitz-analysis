@@ -1,4 +1,4 @@
-// $Id: template_higgsAnalyzer.C,v 1.21 2011/12/02 13:56:56 andrey Exp $
+// $Id: template_higgsAnalyzer.C,v 1.22 2011/12/04 07:59:20 andrey Exp $
 
 #define higgsAnalyzer_cxx
 
@@ -12,7 +12,7 @@ using namespace std;
 /////////////////////////////
 
 string  selection      = "SELECTION";
-string  period         = "2011A";
+string  period         = "Combined";
 int     JC_LVL         = 4;
 int     trigger[]      = {TRIGGER};
 string  suffix         = "SUFFIX";
@@ -21,7 +21,7 @@ vector<int> triggers (trigger, trigger + sizeof(trigger)/sizeof(int));
 
 UInt_t verboseLvl  = 0;
 Bool_t doZlibrary  = 1;
-Bool_t makeKinTree = 1;
+Bool_t makeKinTree = 0;
 
 /////////////////
 //Analysis cuts//
