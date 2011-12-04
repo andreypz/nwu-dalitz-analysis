@@ -1,4 +1,4 @@
-void RescaleToLumiAndColors( TFile *HistoFile, Float_t lumiInput=1, Float_t lumiToScale =1, Int_t lineColor, Int_t fillColor, Int_t fillStyle) {
+void RescaleToLumiAndColors( TFile *HistoFile, Bool_t write, Float_t lumiInput=1, Float_t lumiToScale =1, Int_t lineColor, Int_t fillColor, Int_t fillStyle) {
 
   HistoFile -> cd("Andrey");
   TIter nextkey( gDirectory->GetListOfKeys() );
@@ -18,7 +18,8 @@ void RescaleToLumiAndColors( TFile *HistoFile, Float_t lumiInput=1, Float_t lumi
       hist -> SetFillColor(fillColor);
       hist -> SetFillStyle(fillStyle);
       hist -> SetLineWidth(2);
-      hist->Write("",TH1::kWriteDelete); //overwrite the object in the file
+      if(write)
+	hist->Write("",TH1::kWriteDelete); //overwrite the object in the file
       delete obj;
 	//cout<<sample1<<"  nEv: "<<nTotEv<<"   cs: "<<cs<<"   Rescaling all the histogram "<<hist->GetName()<<" by: "<<scaleFactor<<endl; 
        
@@ -237,7 +238,7 @@ THStack* makeStack(TList *sourcelist, TString name, Float_t lumi)
   return hs;
 }
 
-void drawMuliPlot(TString maintitle, TString xtitle, Int_t isLog, Float_t y1min, Float_t y1max, Float_t y2min, Float_t y2max, THStack *hs, TCanvas *cc, TLegend *leg, TList *list, Float_t lumi)
+void drawMuliPlot(TString maintitle, TString xtitle, Int_t isLog, Float_t y1min, Float_t y1max, Float_t y2min, Float_t y2max, THStack *hs, TCanvas *cc, TLegend *leg, TList *list, Float_t lumi, Int_t sel)
 {
   //Find the samm objects as in hs stack
   TString name = Form("Andrey/%s", hs->GetHists()->First()->GetName());
@@ -292,17 +293,33 @@ void drawMuliPlot(TString maintitle, TString xtitle, Int_t isLog, Float_t y1min,
   h1 -> SetTitle(Form(";%s; Data/MC",xtitle.Data()));
   h1 -> SetMaximum(y2max);
   h1 -> SetMinimum(y2min);
-  h1->GetYaxis()->SetNdivisions(206);
-  h1->GetYaxis()->SetTitleOffset(0.4);
-  h1->SetTitleSize(0.1,"XYZ");
-  h1 ->SetLabelSize(0.1,"XY");
-  h1 -> Draw("ep");
+  h1 -> GetYaxis()->SetNdivisions(206);
+  h1 -> GetYaxis()->SetTitleOffset(0.4);
+  h1 -> SetTitleSize(0.1,"XYZ");
+  h1 -> SetLabelSize(0.1,"XY");
+  //h1 -> SetFillStyle(3024);
+ // h1 -> SetFillColor(kGray+2);
+  //h1 -> SetMarkerStyle(20);
+  h1 -> Draw("e1p");
 
   pad1->cd();
   TLatex *prelim;
-  prelim = new TLatex(0.30,0.95, Form("CMS Preliminary       #it{L_{int}} = %5.f pb^{-1}",lumi));
+  prelim = new TLatex(0.25,0.95, Form("CMS Preliminary       #it{L_{int}} = %5.f pb^{-1}",lumi));
   prelim -> SetNDC(); prelim->SetTextSize(0.03); 
   prelim -> Draw();
+
+
+  TLatex *selection;
+  if(sel==1){
+    selection = new TLatex(0.70,0.95, "#mu#mu selection");
+    selection -> SetTextColor(kBlue-3);
+  }
+  if(sel==2){
+    selection  = new TLatex(0.70,0.95, "#e#e selection");
+    selection -> SetTextColor(kGreen-3);
+  }
+  selection -> SetNDC(); prelim->SetTextSize(0.03); 
+  selection -> Draw();
 
 }
 

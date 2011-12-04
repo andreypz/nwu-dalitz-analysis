@@ -35,6 +35,7 @@ gROOT->LoadMacro("../src/TCPrimaryVtx.cc+");
 gROOT->LoadMacro("../src/TCTrigger.cc+");
 gROOT->LoadMacro("../src/TCTriggerObject.cc+");
 gROOT->LoadMacro("../src/WeightUtils.cc+");
+gROOT->LoadMacro("../src/TriggerSelector.cc+");
      
 TChain* fChain = new TChain("ntupleProducer/eventTree");
 

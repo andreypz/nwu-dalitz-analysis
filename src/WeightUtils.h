@@ -1,6 +1,6 @@
 /*
-    Utilities for retrieving weights for PU,etc.
-*/
+   Utilities for retrieving weights for PU,etc.
+ */
 
 #ifndef _WeightUtils_H
 #define _WeightUtils_H
@@ -25,6 +25,9 @@ class WeightUtils: public TObject {
         WeightUtils(string sampleName, string dataPeriod, string selection, bool isRealData);
         void  Initialize();
         void  SetDataBit(bool isRealData);
+        void  SetDataPeriod(string dataPeriod);
+        void  SetSampleName(string sampleName);
+        void  SetSelection(string selection);
         float GetTotalWeight(int nPV, int nJets, TLorentzVector l1, TLorentzVector l2);
         float PUWeight(int nPU);
         float RecoWeight(TLorentzVector l1, TLorentzVector l2);
@@ -34,6 +37,7 @@ class WeightUtils: public TObject {
         float VBFHiggsWeight(float higgsMass);
         float GetElectronEff(TLorentzVector l1) const;
         float GetMuTriggerEff(TLorentzVector l1) const;
+        float GetPhotonMass() const;
 
         ClassDef(WeightUtils, 0);
 
@@ -54,6 +58,15 @@ class WeightUtils: public TObject {
         TH1D  *h1_muGammaMass;
         TH1D  *h1_puReweight2011A;
         TH1D  *h1_puReweight2011B;
+
+        TH1D  *h1_Higgs250;
+        TH1D  *h1_Higgs300;
+        TH1D  *h1_Higgs350;
+        TH1D  *h1_Higgs400;
+        TH1D  *h1_Higgs450;
+        TH1D  *h1_Higgs500;
+        TH1D  *h1_Higgs550;
+        TH1D  *h1_Higgs600;
 
         //weights
         float _puWeight;

@@ -16,7 +16,7 @@ Float_t getXsecOrColors(string dataset="ggHZZ300", Int_t b = 1)
   else if(dataset=="Wjets")    {lCol = kGreen-2;  fCol = kCyan+1;  cs = 31314.0;  nevt = 81.251e6;}
   else if(dataset=="ttbar")    {lCol = kOrange+1; fCol = kGreen+2; cs = 16.71;    nevt = 10.34e6;}
   else if(dataset=="ggWW")     {lCol = kBlue-2;   fCol = kSpring;  cs = 0.15048;  nevt = 109.99e3;}
-  else if(dataset=="WW")       {lCol = kBlue-2;   fCol = kSpring;  cs = 4.783;    nevt = 1197558;}
+  else if(dataset=="WW")       {lCol = kOrange+1; fCol = kSpring;  cs = 4.783;    nevt = 1197558;}
   else if(dataset=="WZ")       {lCol = kRed+2;    fCol = kBlue-1;  cs = 0.856;    nevt = 1221134;}
   else if(dataset=="tW")       {lCol = kRed;      fCol = kWhite;   cs = 7.87;     nevt = 814390 ;}
   else if(dataset=="tbarW")    {lCol = kRed;      fCol = kWhite;   cs = 7.87;     nevt = 809984;}
@@ -27,9 +27,9 @@ Float_t getXsecOrColors(string dataset="ggHZZ300", Int_t b = 1)
 
   else if(dataset=="ggHZZ140") {lCol = kBlue-1;   fCol  = -1; cs = 0.022;       nevt = 99.99e3;}
   else if(dataset=="ggHZZ200") {lCol = kPink;     fCol  = -1; cs = 0.06277;     nevt = 96.215e3;}
-  else if(dataset=="ggHZZ250") {lCol = kBlue-1;   fCol  = -1; cs = 0.0398;      nevt = 99.993e3;}
-  else if(dataset=="ggHZZ300") {lCol = kCyan;     fCol  = -1; cs = 0.0301;      nevt = 99.990e3;}
-  else if(dataset=="ggHZZ350") {lCol = kCyan;     fCol  = -1; cs = 0.0286;      nevt = 99.998e3;}
+  else if(dataset=="ggHZZ250") {lCol = kCyan;     fCol  = -1; cs = 0.0398;      nevt = 99.993e3;}
+  else if(dataset=="ggHZZ300") {lCol = kCyan-1;   fCol  = -1; cs = 0.0301;      nevt = 99.990e3;}
+  else if(dataset=="ggHZZ350") {lCol = kCyan+2;   fCol  = -1; cs = 0.0286;      nevt = 99.998e3;}
   else if(dataset=="ggHZZ400") {lCol = kYellow;   fCol  = -1; cs = 0.0221;      nevt = 93.854e3;}
   else if(dataset=="ggHZZ450") {lCol = kYellow;   fCol  = -1; cs = 0.0143;      nevt = 96.642e3;}
   else if(dataset=="ggHZZ500") {lCol = kYellow;   fCol  = -1; cs = 0.00896;     nevt = 99.980e3;}

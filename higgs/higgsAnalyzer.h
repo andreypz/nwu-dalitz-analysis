@@ -1,4 +1,4 @@
-// $Id: higgsAnalyzer.h,v 1.3 2011/08/25 10:18:29 andrey Exp $
+// $Id: higgsAnalyzer.h,v 1.12 2011/12/02 13:28:43 andrey Exp $
 
 #ifndef higgsAnalyzer_h
 #define higgsAnalyzer_h
@@ -23,7 +23,7 @@
 #include <TVector3.h>
 #include <TVector2.h>
 #include <TProfile.h>
-#include <TRandom2.h>
+#include <TRandom3.h>
 
 #include "TClonesArray.h"
 #include "../src/TCJet.h"
@@ -38,6 +38,7 @@
 #include "../src/TCTriggerObject.h"
 
 #include "../src/WeightUtils.h"
+#include "../src/TriggerSelector.h"
 
 #define nC 20  //nCuts in the analysis. make plots after each cut
 
@@ -63,23 +64,13 @@ class higgsAnalyzer : public TSelector {
   Float_t dPhiClos1, dPhiClos2;
   Float_t lep1_eta, lep1_phi, lep1_pt;
   Float_t lep2_eta, lep2_phi, lep2_pt;
-  //Float_t lep_dPhi, lep_dEta, lep_dR, lep_ptRatio;
-  //Float_t dPhiMetZ;
+  Float_t dRjetlep1, dRjetlep2, ptLeadJet, etaLeadJet, phiLeadJet, ptLeadBJet;
 
   ofstream nout[nC], fout[nC], ffout, ncout;
   TTree * _kinTree;
 
-  // Histograms for extracting weights
-  TFile *reweightFile;
-  TH1D  *h1_eGammaPt;   
-  TH1D  *h1_muGammaPt;  
-  TH1D  *h1_eGammaPV;   
-  TH1D  *h1_muGammaPV;  
-  TH1D  *h1_eGammaMass; 
-  TH1D  *h1_muGammaMass;
-  TH1D  *h1_puReweight2011A;
-  TH1D  *h1_puReweight2011B;
 
+        TriggerSelector *triggerSelector;
   WeightUtils *weighter;
 
   TH1F *evt_byCut;
@@ -96,7 +87,7 @@ class higgsAnalyzer : public TSelector {
   TH1F *btag_hp[nC];
   TH1F *di_qt[nC], *di_eta[nC], *di_phi[nC], *di_mass[nC], *di_mass_EB[nC], *di_mass_EE[nC], *di_mass_EX[nC];
   TH1F *di_dPhiMet[nC];
-  TH1F *jet_N[nC], *jet_dRlep1[nC], *jet_dRlep2[nC], *jet_pt[nC];
+  TH1F *jet_N[nC], *jet_dRlep1[nC], *jet_dRlep2[nC], *jet_pt[nC], *jet_eta[nC], *jet_phi[nC];
   TH1F *jet_b_N[nC], *jet_b_Nssv[nC], *jet_b_N25[nC],*jet_b_N30[nC], *jet_b_pt[nC];
   TH1F *ph_nGamma[nC];
   TH1F *l0_dPhi[nC], *l0_dEta[nC], *l0_dR[nC], *l0_ptRatio[nC];
@@ -192,10 +183,7 @@ class higgsAnalyzer : public TSelector {
   virtual float   CalculateTransMass(TLorentzVector p1, TLorentzVector p2);
   virtual float   CalculateTransMassAlt(TLorentzVector p1, TLorentzVector p2);
   virtual float   DeltaPhiJetMET(TLorentzVector , std::vector<TLorentzVector> ); 
-  //virtual float   GetEventWeight(int, int, TLorentzVector, TLorentzVector);
-  // virtual float   GetElectronEff(TLorentzVector );
-  //virtual float   GetMuTriggerEff(TLorentzVector );
-  virtual float   GetPhotonMass();
+  //virtual float   GetPhotonMass();
 
   void scaleAndColor(TString , Float_t , Float_t , Float_t , Int_t , Int_t );
   

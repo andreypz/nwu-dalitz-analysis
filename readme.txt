@@ -1,14 +1,23 @@
-Here is Higgs to ZZ to 2l2nu Analythis.
+Here is Higgs to ZZ to 2l2nu Analysis.
 More details on this code with the instructions how to run it can be found here:
 https://twiki.cern.ch/twiki/bin/view/CMS/UserCodeNWUHiggs
 
 
 The log of changes:
 
+2011-Dec-04
+  * TriggerSelector added (Nate's)
+  * Z+jets Library update: more eta-bins
+  * Overflow and underflow bins are now added to the last/first bins of all hists
+  
+2011-Dec-03
+  * Weight utils updated: GetPhotonMass moved to Weight Utils
+  * Changed the colors for the histograms   
+
 2011-Dec-01 
   * Weighting utils class is implemented (from Nate) 
   * dPhi is changed for 0-jet bin (adding soft jets)
-  * WW,WZ,ZZ samples switching to Madgraph
+  * WW,WZ,ZZ samples switching to Madgraph (xSec and source files updated)
   * Trigger prescale bug fixed
   
 2011-Nov-24

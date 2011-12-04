@@ -23,6 +23,7 @@ WeightUtils::WeightUtils(string sampleName, string dataPeriod, string selection,
 
     _inFile = new TFile("../data/Reweight.root", "OPEN");
 
+    // Photon weights
     if (_dataPeriod == "2011A") {
         h1_eGammaPt     = (TH1D*)_inFile->Get("h1_eGammaPtWeight2011A");
         h1_muGammaPt    = (TH1D*)_inFile->Get("h1_muGammaPtWeight2011A");
@@ -38,8 +39,15 @@ WeightUtils::WeightUtils(string sampleName, string dataPeriod, string selection,
         h1_eGammaMass   = (TH1D*)_inFile->Get("h1_diElectronMass2011B");
         h1_muGammaMass  = (TH1D*)_inFile->Get("h1_diMuonMass2011B");
     }
+    // PU weights
     h1_puReweight2011A  = (TH1D*)_inFile->Get("h1_PU2011A");
     h1_puReweight2011B  = (TH1D*)_inFile->Get("h1_PU2011B");
+
+    // Higgs pt weights
+    //for (int i = 0; i < 8; ++i) {
+    //    TFile *higgsFile = new TFile(sprintf("data/Kfactors_%i_AllScales.root", 250+50*i), "OPEN");
+    //    h1_Higgs[i] = (TH1D*)higgsFile->Get("h1_Higgs250").Clone();
+    //}
 }
 
 void WeightUtils::Initialize()
@@ -56,6 +64,21 @@ void WeightUtils::Initialize()
 void WeightUtils::SetDataBit(bool isRealData)
 {
     _isRealData = isRealData;
+}
+
+void WeightUtils::SetDataPeriod(string dataPeriod)
+{
+    _dataPeriod = dataPeriod;
+}
+
+void WeightUtils::SetSampleName(string sampleName)
+{
+    _sampleName = sampleName;
+}
+
+void WeightUtils::SetSelection(string selection)
+{
+    _selection = selection;
 }
 
 float WeightUtils::GetTotalWeight(int nPV, int nJets, TLorentzVector l1, TLorentzVector l2)
@@ -106,7 +129,7 @@ float WeightUtils::ZZWeight(TLorentzVector l1, TLorentzVector l2)
 
 float WeightUtils::GluGluHiggsWeight(float higgsPt, float higgsMass) 
 {
-    _glugluWeight = higgsPt;
+    _glugluWeight = higgsPt+higgsMass;
     return _glugluWeight;
 }
 
@@ -224,4 +247,16 @@ float WeightUtils::GetElectronEff(TLorentzVector l1) const
     }
     weight = eleScale[etaBin][ptBin];
     return weight;
+}
+
+float WeightUtils::GetPhotonMass() const
+{
+    float photonMass = 91.2;
+    if (_selection == "eGamma") {
+        photonMass = h1_eGammaMass->GetRandom();
+    }
+    if (_selection == "muGamma") {
+        photonMass = h1_muGammaMass->GetRandom();
+    }
+    return photonMass;
 }
