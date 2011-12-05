@@ -5,7 +5,12 @@ https://twiki.cern.ch/twiki/bin/view/CMS/UserCodeNWUHiggs
 
 The log of changes:
 
+2011-Dec-05
+  V01-02 tag
+  * gluglu Higgs reweighting is implemented, kinTree ntuples are reproduced for higgs
+  
 2011-Dec-04
+  V01-01 tag
   * TriggerSelector added (Nate's)
   * Z+jets Library update: more eta-bins
   * Overflow and underflow bins are now added to the last/first bins of all hists

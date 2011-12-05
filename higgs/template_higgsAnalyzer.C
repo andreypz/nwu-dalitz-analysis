@@ -1,4 +1,4 @@
-// $Id: template_higgsAnalyzer.C,v 1.22 2011/12/04 07:59:20 andrey Exp $
+// $Id: template_higgsAnalyzer.C,v 1.23 2011/12/04 11:55:10 andrey Exp $
 
 #define higgsAnalyzer_cxx
 
@@ -20,8 +20,8 @@ string  suffix         = "SUFFIX";
 vector<int> triggers (trigger, trigger + sizeof(trigger)/sizeof(int));
 
 UInt_t verboseLvl  = 0;
-Bool_t doZlibrary  = 1;
-Bool_t makeKinTree = 0;
+Bool_t doZlibrary  = 0;
+Bool_t makeKinTree = 1;
 
 /////////////////
 //Analysis cuts//
@@ -419,6 +419,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
     TVector3* pvPosition = new TVector3();
     *pvPosition = mainPrimaryVertex->Position();
     
+
     ///////////////
     // electrons //
     ///////////////
@@ -670,8 +671,6 @@ bool higgsAnalyzer::Process(Long64_t entry)
     // Analysis selection //
     ////////////////////////
 
-    float evtWeight = 1;
-
     TLorentzVector ZP4;
     MET       = met->Met();
     pfMET     = met->Met();
@@ -740,7 +739,48 @@ bool higgsAnalyzer::Process(Long64_t entry)
 
 
     //Event Weight
+    float evtWeight = 1;
+
     evtWeight   = weighter->GetTotalWeight(primaryVtx->GetSize(), jetP4.size(), Lepton1, Lepton2);
+
+    /////////////////// 
+    // Gen particles //
+    ///////////////////
+    
+    if (!isRealData && (suffix.compare(2, 3, "HZZ") == 0 || suffix.compare(2, 3, "HWW") == 0)) {
+      vector<TLorentzVector> genLeptons;
+      vector<TLorentzVector> genNeutrinos;
+    
+      for (int i = 0; i < genParticles->GetSize(); ++i) {
+	TCGenParticle* thisParticle = (TCGenParticle*) genParticles->At(i);    
+	
+	if (
+	    (fabs(thisParticle->GetPDGId()) == 11 
+	     || fabs(thisParticle->GetPDGId()) == 13 
+	     || fabs(thisParticle->GetPDGId()) == 15) 
+	    && thisParticle->Mother() ==23
+	    ) genLeptons.push_back(thisParticle->P4());
+	
+	if (
+	    (fabs(thisParticle->GetPDGId()) == 12 
+	     || fabs(thisParticle->GetPDGId()) == 14 
+	     || fabs(thisParticle->GetPDGId()) == 16) 
+	    && thisParticle->Mother() ==23
+	    ) genNeutrinos.push_back(thisParticle->P4());
+      }
+      if (genLeptons.size() > 1 && genNeutrinos.size() > 1) {
+	float higgsPt   = (genLeptons[0]+genLeptons[1]+genNeutrinos[0]+genNeutrinos[1]).Pt();
+	//float genMass = (genLeptons[0]+genLeptons[1]+genNeutrinos[0]+genNeutrinos[1]).M();
+	//h1_HiggsPt->Fill(higgsPt);
+	//h1_HiggsMass->Fill(genMass);
+	if (suffix.compare(2, 3, "HZZ") == 0 || suffix.compare(2, 3, "HWW") == 0) {
+	  evtWeight *= weighter->GluGluHiggsWeight(higgsPt, atoi(suffix.substr(3,3).c_str()));
+	  
+	  //if (suffix.compare(0, 3, "VBF") == 0 ) evtWeight *= weighter->VBFHiggsWeight(genMass, atoi(suffix.substr(3,3).c_str()));
+	}
+      }
+    }
+   
 
 
     /////////////////////

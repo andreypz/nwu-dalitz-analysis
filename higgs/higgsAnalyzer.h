@@ -1,4 +1,4 @@
-// $Id: higgsAnalyzer.h,v 1.12 2011/12/02 13:28:43 andrey Exp $
+// $Id: higgsAnalyzer.h,v 1.13 2011/12/04 07:59:20 andrey Exp $
 
 #ifndef higgsAnalyzer_h
 #define higgsAnalyzer_h
@@ -32,6 +32,7 @@
 #include "../src/TCMuon.h"
 #include "../src/TCTau.h"
 #include "../src/TCPhoton.h"
+#include "../src/TCGenParticle.h"
 #include "../src/TCGenJet.h"
 #include "../src/TCPrimaryVtx.h"
 #include "../src/TCTrigger.h"
@@ -70,7 +71,7 @@ class higgsAnalyzer : public TSelector {
   TTree * _kinTree;
 
 
-        TriggerSelector *triggerSelector;
+  TriggerSelector *triggerSelector;
   WeightUtils *weighter;
 
   TH1F *evt_byCut;
@@ -110,6 +111,7 @@ class higgsAnalyzer : public TSelector {
   TClonesArray  *recoJets;
   TClonesArray  *recoMET;
   TClonesArray  *genJets;
+  TClonesArray  *genParticles;
   TClonesArray  *recoMuons;
   TClonesArray  *recoElectrons;
   TClonesArray  *recoPhotons;
@@ -127,6 +129,7 @@ class higgsAnalyzer : public TSelector {
   // List of branches
   TBranch        *b_recoJets;   //!
   TBranch        *b_recoMET;   //!
+  TBranch        *b_genParticles;   //!
   TBranch        *b_genJets;   //!
   TBranch        *b_recoMuons;
   TBranch        *b_recoElectrons;
@@ -214,6 +217,7 @@ void higgsAnalyzer::Init(TTree *tree)
 	// Set object pointer
 	recoJets = 0;
 	recoMET = 0;
+	genParticles = 0;
 	genJets = 0;
 	primaryVtx = 0;
 	recoMuons = 0;
@@ -246,6 +250,8 @@ void higgsAnalyzer::Init(TTree *tree)
 	fChain->SetBranchAddress("isDeadEcalCluster", &isDeadEcalCluster, &b_isDeadEcalCluster);
 	fChain->SetBranchAddress("isScraping", &isScraping, &b_isScraping);
 	fChain->SetBranchAddress("isCSCTightHalo", &isCSCTightHalo, &b_isCSCTightHalo);
+
+	fChain->SetBranchAddress("genParticles", &genParticles, &b_genParticles);
 
 	// ADD THESE!
 	//eventTree->Branch("recoTaus",&recoTaus, 6400, 0);

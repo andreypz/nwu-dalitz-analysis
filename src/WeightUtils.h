@@ -28,16 +28,20 @@ class WeightUtils: public TObject {
         void  SetDataPeriod(string dataPeriod);
         void  SetSampleName(string sampleName);
         void  SetSelection(string selection);
-        float GetTotalWeight(int nPV, int nJets, TLorentzVector l1, TLorentzVector l2);
+
         float PUWeight(int nPU);
         float RecoWeight(TLorentzVector l1, TLorentzVector l2);
         float GammaWeight(int nPV, int nJets, TLorentzVector p1);
         float ZZWeight(TLorentzVector l1, TLorentzVector l2);
-        float GluGluHiggsWeight(float higgsPt, float higgsMass);
-        float VBFHiggsWeight(float higgsMass);
+        float GluGluHiggsWeight(float higgsPt, int higgsMass);
+        float VBFHiggsWeight(float genMass, int higgsMass);
+        float GetTotalWeight(int nPV, int nJets, TLorentzVector l1, TLorentzVector l2);
+
         float GetElectronEff(TLorentzVector l1) const;
         float GetMuTriggerEff(TLorentzVector l1) const;
         float GetPhotonMass() const;
+
+        float GetGammaPtWeight() {return _gammaPtWeight;}
 
         ClassDef(WeightUtils, 0);
 
@@ -59,14 +63,7 @@ class WeightUtils: public TObject {
         TH1D  *h1_puReweight2011A;
         TH1D  *h1_puReweight2011B;
 
-        TH1D  *h1_Higgs250;
-        TH1D  *h1_Higgs300;
-        TH1D  *h1_Higgs350;
-        TH1D  *h1_Higgs400;
-        TH1D  *h1_Higgs450;
-        TH1D  *h1_Higgs500;
-        TH1D  *h1_Higgs550;
-        TH1D  *h1_Higgs600;
+        TH1D  *h1_Higgs[8];
 
         //weights
         float _puWeight;
