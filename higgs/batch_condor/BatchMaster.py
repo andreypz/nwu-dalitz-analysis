@@ -38,7 +38,7 @@ class BatchMaster():
         
         if nJobs > nFiles:
             nJobs = nFiles
-        nFilesPerJob = int(math.ceil(nFiles/nJobs))
+        nFilesPerJob = int(math.ceil(float(nFiles)/nJobs))
         fileSplit = [fileList[i:i+nFilesPerJob] for i in range(0, len(fileList), nFilesPerJob)]
 
         return fileSplit
