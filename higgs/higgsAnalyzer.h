@@ -1,4 +1,4 @@
-// $Id: higgsAnalyzer.h,v 1.13 2011/12/04 07:59:20 andrey Exp $
+// $Id: higgsAnalyzer.h,v 1.14 2011/12/05 22:06:54 andrey Exp $
 
 #ifndef higgsAnalyzer_h
 #define higgsAnalyzer_h
@@ -38,8 +38,8 @@
 #include "../src/TCTrigger.h"
 #include "../src/TCTriggerObject.h"
 
-#include "../src/WeightUtils.h"
-#include "../src/TriggerSelector.h"
+#include "../plugins/WeightUtils.h"
+#include "../plugins/TriggerSelector.h"
 
 #define nC 20  //nCuts in the analysis. make plots after each cut
 

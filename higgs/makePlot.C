@@ -18,11 +18,10 @@ void makePlot(Int_t sel=1, TString hPath="00")
   Float_t intLumi = 1;
   if(sel==1)  intLumi = 215.1 + 927.6 + 370.9 + 663.0 + 2511; //double mu	
   if(sel==2)  intLumi = 215.1 + 789.2 + 313.2 + 662.2 + 2511; //double ele	
-  //TString dir("test");
-  TString dir("2011_Dec_04");
+  TString dir("test");
 
   Bool_t doTest    = 0;
-  Bool_t doPhotons = 0;
+  Bool_t doPhotons = 1;
   Bool_t doOverview= 1;
 
   TString ssel("none"), gsel("none");
@@ -111,7 +110,7 @@ void makePlot(Int_t sel=1, TString hPath="00")
   THStack *hs_jet_b_N[nC], *hs_jet_b_Nssv[nC], *hs_jet_b_N25[nC], *hs_jet_b_N30[nC], hs_jet_b_pt[nC];
   THStack *hs_di_eta[nC], *hs_di_qt[nC], *hs_di_mass[nC], *hs_di_mass_EB[nC], *hs_di_mass_EE[nC], *hs_di_mass_EX[nC];
   THStack *hs_met_dPhiLeadJet1[nC], *hs_met_dPhiLeadJet2[nC], *hs_met_dPhiClosJet1[nC], *hs_met_dPhiClosJet2[nC];
-  THStack *hs_vtx_nPV_raw[nC], *hs_vtx_nPV_weight[nC];
+  THStack *hs_vtx_nPV_raw[nC], *hs_vtx_nPV_weight[nC], *hs_vtx_nPV_tot[nC];
   THStack *hs_vtx_ndof_1[nC], *hs_vtx_ndof_2[nC];
   THStack *hs_l1_eta[nC], *hs_l1_phi[nC], *hs_l1_pt[nC];
   THStack *hs_l2_eta[nC], *hs_l2_phi[nC], *hs_l2_pt[nC];
@@ -119,6 +118,7 @@ void makePlot(Int_t sel=1, TString hPath="00")
   THStack *hs_l0_dPhi[nC], *hs_l0_dEta[nC], *hs_l0_dR[nC], *hs_l0_ptRatio[nC];
   THStack *hs_di_dPhiMet[nC];
   THStack *hs_met1_lg[nC], *hs_met1_recoil_lg[nC];
+  THStack *hs_ph_nGamma[nC];
 
   hs_evt_byCut         = makeStack(list_bg, "evt_byCut", intLumi);
   hs_evt_libQt         = makeStack(list_bg, "evt_libQt", intLumi);
@@ -177,6 +177,9 @@ void makePlot(Int_t sel=1, TString hPath="00")
       hs_jet_dRlep1[n]  = makeStack(list_bg, Form("jet_dRlep1_%i",n), intLumi); 
       hs_jet_dRlep2[n]  = makeStack(list_bg, Form("jet_dRlep2_%i",n), intLumi); 
 
+      //hs_ph_nGamma[n]      = makeStack(list_bg, Form("ph_nGamma_%i",n), intLumi);
+
+      hs_vtx_nPV_tot[n]    = makeStack(list_bg, Form("vtx_nPV_tot_%i",n), intLumi); 
       hs_vtx_nPV_raw[n]    = makeStack(list_bg, Form("vtx_nPV_raw_%i",n), intLumi); 
       hs_vtx_nPV_weight[n] = makeStack(list_bg, Form("vtx_nPV_weight_%i",n), intLumi); 
       hs_vtx_ndof_1[n]     = makeStack(list_bg, Form("vtx_ndof_1_%i",n), intLumi);
@@ -397,19 +400,26 @@ void makePlot(Int_t sel=1, TString hPath="00")
       //----------------------------//
       //---Misc plots: vtx etc -----//
       //----------------------------//  
-      drawMuliPlot("","nVtx raw", 1, 0.1, 1e6, 0,1.9, hs_vtx_nPV_raw[F0], c2, leg01, list_overlay, intLumi, sel); 
+      drawMuliPlot("","evts cut by cut", 1, 0.1, 1000000, 0,2.9, hs_evt_byCut, c2, leg01, list_overlay, intLumi, sel); 
       c2 -> SaveAs(imgpath+"Misc/mis01.png");
-      drawMuliPlot("","nVtx reweighted", 1, 0.1, 1e6, 0,1.9, hs_vtx_nPV_weight[F0], c2, leg01, list_overlay, intLumi, sel); 
+      drawMuliPlot("","nVtx total", 1, 0.1, 1e6, 0,1.9, hs_vtx_nPV_tot[F0], c2, leg01, list_overlay, intLumi, sel); 
       c2 -> SaveAs(imgpath+"Misc/mis02.png");
 
-      drawMuliPlot("","vtx 1 nDof", 1, 0.1, 1e6, 0.5,2.9, hs_vtx_ndof_1[F0], c2, leg01, list_overlay, intLumi, sel); 
+      drawMuliPlot("","nVtx raw", 1, 0.1, 1e6, 0,1.9, hs_vtx_nPV_raw[F0], c2, leg01, list_overlay, intLumi, sel); 
       c2 -> SaveAs(imgpath+"Misc/mis03.png");
-
-      drawMuliPlot("","vtx 2 nDof", 1, 0.1, 1e6, 0.5,2.9, hs_vtx_ndof_2[F0], c2, leg01, list_overlay, intLumi, sel); 
+      drawMuliPlot("","nVtx reweighted", 1, 0.1, 1e6, 0,1.9, hs_vtx_nPV_weight[F0], c2, leg01, list_overlay, intLumi, sel); 
       c2 -> SaveAs(imgpath+"Misc/mis04.png");
 
-      drawMuliPlot("","evts cut by cut", 1, 0.1, 1000000, 0,2.9, hs_evt_byCut, c2, leg01, list_overlay, intLumi, sel); 
+
+      drawMuliPlot("","vtx 1 nDof", 1, 0.1, 1e6, 0.5,2.9, hs_vtx_ndof_1[F0], c2, leg01, list_overlay, intLumi, sel); 
       c2 -> SaveAs(imgpath+"Misc/mis05.png");
+
+      drawMuliPlot("","vtx 2 nDof", 1, 0.1, 1e6, 0.5,2.9, hs_vtx_ndof_2[F0], c2, leg01, list_overlay, intLumi, sel); 
+      c2 -> SaveAs(imgpath+"Misc/mis06.png");
+
+      //drawMuliPlot("","N photons", 1, 0.1, 1e6, 0.5,2.9, hs_ph_nGamma[F0], c2, leg01, list_overlay, intLumi, sel); 
+      //c2 -> SaveAs(imgpath+"Misc/mis07.png");
+
 
 
       //--------------------//

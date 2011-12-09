@@ -5,6 +5,12 @@ https://twiki.cern.ch/twiki/bin/view/CMS/UserCodeNWUHiggs
 
 The log of changes:
 
+2011-Dec-09
+  * Switching to B-master for condor jobs submitions
+  * Created plugins directory where all new classes will go
+  (moved there weight utils and trigger selector)
+  * Starting ZedEvensLibrary class
+
 2011-Dec-05
   V01-02 tag
   * gluglu Higgs reweighting is implemented, kinTree ntuples are reproduced for higgs

@@ -1,10 +1,10 @@
-// $Id: template_higgsAnalyzer.C,v 1.23 2011/12/04 11:55:10 andrey Exp $
+// $Id: template_higgsAnalyzer.C,v 1.24 2011/12/05 22:06:54 andrey Exp $
 
 #define higgsAnalyzer_cxx
 
 #include "higgsAnalyzer.h"
 #include <string>
-#include "../src/MetDefinitions.h"                                                                                                                         
+#include "../plugins/MetDefinitions.h"
 using namespace std;
 
 /////////////////////////////
@@ -12,7 +12,7 @@ using namespace std;
 /////////////////////////////
 
 string  selection      = "SELECTION";
-string  period         = "Combined";
+string  period         = "PERIOD";
 int     JC_LVL         = 4;
 int     trigger[]      = {TRIGGER};
 string  suffix         = "SUFFIX";
@@ -21,7 +21,7 @@ vector<int> triggers (trigger, trigger + sizeof(trigger)/sizeof(int));
 
 UInt_t verboseLvl  = 0;
 Bool_t doZlibrary  = 0;
-Bool_t makeKinTree = 1;
+Bool_t makeKinTree = 0;
 
 /////////////////
 //Analysis cuts//
@@ -31,9 +31,8 @@ Float_t jetPtCut[]     = {30., 15.};
 Float_t bJetPtCut      = 30.;
 Float_t muPtCut[]      = {20., 10.};
 Float_t elePtCut[]     = {20., 10.};
+float   photonPtCut[]  = {25., 1e9};
 Float_t zMassCut[]     = {76.2, 106.2};
-Float_t metPlusQtCut[] = {0., 9999.};
-Float_t metByQtCut[]   = {0., 9999.};
 Float_t qtCut          = 55.;
 Int_t   nJetsCut[]     = {0, 99};
 Float_t cut_vz = 24, cut_vd0 = 2, cut_vndof = 4;  //PV filter cuts
@@ -328,7 +327,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
     ++nEventsWeighted[0];
     MET = 0;
     FillHistosNoise(0, 1);
-    
+  
     if (period == "Combined") {
       if (myRandom->Rndm() < 0.46) {
 	weighter->SetDataPeriod("2011A");
@@ -336,14 +335,12 @@ bool higgsAnalyzer::Process(Long64_t entry)
 	weighter->SetDataPeriod("2011B");
       }
     }
-
+    
     if (nEvents[0] == 1) weighter->SetDataBit(isRealData);
     //if(nEvents[0]>1500) return kTRUE;
-
-    // cout<<"dbg beginning"<<endl;
-
-
-    if (nEvents[0] % (int)5e4 == 0) cout<<nEvents[8]<<" events passed of "<<nEvents[0]<<" checked!"<<endl;
+    
+    
+    if (nEvents[0] % (int)5e4 == 0) cout<<nEvents[3]<<" events passed of "<<nEvents[0]<<" checked! (at Z-peak cut)"<<endl;
 
     //if (selection == "gamma"   && (eventNumber % 3) != 0) return kTRUE;
     //if (selection == "eGamma"  && (eventNumber % 3) != 1) return kTRUE;
@@ -362,14 +359,11 @@ bool higgsAnalyzer::Process(Long64_t entry)
     */
     
     bool triggerPass   = triggerSelector->SelectTriggers(triggerStatus, hltPrescale);
-    int  eventPrescale = triggerSelector->GetEventPrescale();
-    int  passTrigger   = triggerSelector->GetPassTrigger();
-    
+    if (!triggerPass) return kTRUE;
     // Double electron workaround.  Gets rid of hopelessly prescaled events fo July 20-26, 2011
     if (selection == "electron" && (runNumber > 171200 && runNumber < 171600)) return kTRUE;
 
-
-    if (!triggerPass) return kTRUE;
+    int  eventPrescale = triggerSelector->GetEventPrescale();
 
     CountEvents(1);
     ++nEventsWeighted[1];
@@ -541,7 +535,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
         {
 	  TCPhoton* thisPhoton = (TCPhoton*) recoPhotons->At(i);
 	  //cout<<i+1<<" dbg  pt: "<<thisPhoton->Pt()<<"  eta: "<< thisPhoton->Eta()<<endl;
-	  
+	  if (thisPhoton->Pt() < photonPtCut[0] || thisPhoton->Pt() > photonPtCut[1]) continue;	  
 	  if ( 
 	      thisPhoton->Pt() >10
 	      && thisPhoton->EmIso()         < (4.2 + 0.006 *thisPhoton->Pt())
@@ -563,23 +557,9 @@ bool higgsAnalyzer::Process(Long64_t entry)
 	}
 	sort(photons.begin(), photons.end(), PhotonSortCondition);
 	  
-	// Check photon pt bins //
-	
-	if (photons.size() > 0 && eventPrescale > 1) {
-	  if (passTrigger == triggers[triggers.size()-1] && period == "2011B") {
-	    if (photons[0].Pt() < 140.) return kTRUE;
-	  } else if (passTrigger == triggers[8] || passTrigger == triggers[9]) {
-	    if (photons[0].Pt() < 95. || (photons[0].Pt() < 140. && period == "2011B")) return kTRUE;
-	  } else if (passTrigger == triggers[6] || passTrigger == triggers[7]) {
-	    if (photons[0].Pt() < 80. || photons[0].Pt() > 95.) return kTRUE;
-	  } else if (passTrigger == triggers[4] || passTrigger == triggers[5]) {
-	    if (photons[0].Pt() < 55. || photons[0].Pt() > 80.) return kTRUE;
-	  } else if (passTrigger == triggers[2] || passTrigger == triggers[3]) {
-	    if (photons[0].Pt() < 35. || photons[0].Pt() > 55.) return kTRUE;
-	  } else if (passTrigger == triggers[0]) {
-	    if (photons[0].Pt() < 25. || photons[0].Pt() > 35.) return kTRUE;
-	  }
-        }	
+        if (photons.size() > 0 && eventPrescale > 1) {
+	  if (!triggerSelector->PhotonTriggerBins(photons[0].Pt(), true)) return kTRUE;
+        }
     }
 
 
@@ -728,8 +708,20 @@ bool higgsAnalyzer::Process(Long64_t entry)
 	ZP4.SetPtEtaPhiM(photons[0].Pt(), photons[0].Eta(), photons[0].Phi(), photonMass);
         reducedMet1P4 = GetReducedMET(sumJetP4,  photons[0].P4(), TLorentzVector(0, 0, 0, 0), metP4, 1);
 	reducedMet2P4 = GetReducedMET(sumJetP4,  photons[0].P4(), TLorentzVector(0, 0, 0, 0), metP4, 2);
+
+	//needed for weights
+	Lepton1 = ZP4;  
+	//Lepton2 = 0;
+
     } else {
         return kTRUE;
+    }
+    //Event Weight
+    float evtWeight = 1;
+    evtWeight   = weighter->GetTotalWeight(primaryVtx->GetSize(), jetP4.size(), Lepton1, Lepton2);
+
+    if (selection == "gamma" || selection == "muGamma" || selection == "eGamma") {
+      evtWeight  *= eventPrescale;
     }
 
     //DeltaPhi
@@ -738,10 +730,6 @@ bool higgsAnalyzer::Process(Long64_t entry)
     else if (softJetP4.size() > 0)   deltaPhiJetMET = DeltaPhiJetMET(metP4, softJetP4);
 
 
-    //Event Weight
-    float evtWeight = 1;
-
-    evtWeight   = weighter->GetTotalWeight(primaryVtx->GetSize(), jetP4.size(), Lepton1, Lepton2);
 
     /////////////////// 
     // Gen particles //
@@ -1092,8 +1080,6 @@ bool higgsAnalyzer::Process(Long64_t entry)
 	FillHistosNoise(16, evtWeight);
       }
 
-    
-
     if (passBasic && passBveto && MET> 40)
       {
 	CountEvents(17);
@@ -1203,19 +1189,6 @@ float higgsAnalyzer::DeltaPhiJetMET(TLorentzVector metP4, vector<TLorentzVector>
     //return fabs(nearestJet.DeltaPhi(metP4));
     return minDeltaPhi;
 }
-/*
-float higgsAnalyzer::GetPhotonMass()
-{
-  float photonMass = 91.2;
-  if (selection == "eGamma") {
-    photonMass = h1_eGammaMass->GetRandom();
-  }
-  if (selection == "muGamma") {
-    photonMass = h1_muGammaMass->GetRandom();
-  }
-  return photonMass;
-}
-*/
 
 void higgsAnalyzer::PrintOutNoisy(Int_t num){
   nout[num]<<"* "<<runNumber<<"\t* "<<eventNumber<<"  \t* "<<lumiSection<<"\t* "<<MET<<"\t* "
@@ -1372,7 +1345,8 @@ void higgsAnalyzer::FillHistos(Int_t num, Double_t weight){
     }
 
   // if(selection =="muGamma" || selection =="eGamma" || selection =="gamma"){
-  //  ph_nGamma[num] -> Fill(nGamma);
+  
+  ph_nGamma[num] -> Fill(nGamma);
 }
 
 

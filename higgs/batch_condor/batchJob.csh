@@ -4,7 +4,23 @@ scram pro CMSSW CMSSW_4_2_8
 cd CMSSW_4_2_8/src
 cmsenv 
 
-set dir = /uscms_data/d2/andreypz/cmssw/higgs7/CMSSW_4_2_8/src/NWU/Higgs/higgs
+#### Leave this blank #######
+
+#############################
+
+set srcDir    = $1
+set outDir    = $2
+set count     = $3
+set dataName  = $4
+
+### Specify addtional arguments here ####
+set suffix    = $5
+set trigger   = $6
+set selection = $7
+set period    = $8
+
+
+set dir = ${srcDir}/..
 
 echo "Copy files"
 
@@ -12,25 +28,24 @@ cp $dir/higgsAnalyzer.h .
 cp $dir/*.C .
 cp $dir/../src/*.cc .
 cp $dir/../src/*.h .
-cp -r $dir/sourceFiles .
+
+mkdir ../plugins
+cp $dir/../plugins/*.h  ../plugins
+cp $dir/../plugins/*.cc ../plugins
+
 
 mkdir ../data
 cp -r $dir/../data/*.root ../data/
 
 cp $dir/run.csh .
 chmod 755 run.csh
-./run.csh $1 $2 $3 $4
+./run.csh ${suffix} ${trigger} ${dataName} ${selection} ${period} b
 
-set newDir = $4
-set printDir =  printout_$3
-mkdir $newDir
+
+set printDir =  printout_${dataName}
 mkdir $printDir
-cp hhhh_*.root $newDir
 cp events_* $printDir
-cp -r $printDir $newDir
+cp -r $printDir $outDir
+cp hhhh_{suffix}.root $outDir/hhhh_{suffix}_{dataName}_${count}.root
+
 #cp counts* $newDir
-
-cp -r $newDir $dir/batch_condor/
-
-cd ../../
-#rm -rf ./*

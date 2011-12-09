@@ -1,24 +1,24 @@
 #!/bin/csh
-
 echo "Start runninng"
-
-set dir=`echo $1 | cut -d _ -f 1 `
 
 cp template_higgsAnalyzer.C higgsAnalyzer.C
 
 sed -i "s/SUFFIX/$1/g" higgsAnalyzer.C
 sed -i "s/TRIGGER/$2/g" higgsAnalyzer.C
 sed -i "s/SELECTION/$4/g" higgsAnalyzer.C
+sed -i "s/PERIOD/$5/g" higgsAnalyzer.C
+
+
+if($6 == "b") then
+    set sourceFiles = "./input.txt"
+    echo "Do batch, source files: \n ${sourceFiles}"
+else
+    set sourceFiles = "./sourceFiles/$3.txt"
+    echo "Do batch, source files: \n ${sourceFiles}"
+endif
 
 cat > run.C << +EOF
     
-
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <vector>
-#include <cstdlib>
-
 using namespace std;
 
 void run() {
@@ -34,15 +34,15 @@ gROOT->LoadMacro("../src/TCGenParticle.cc+");
 gROOT->LoadMacro("../src/TCPrimaryVtx.cc+");
 gROOT->LoadMacro("../src/TCTrigger.cc+");
 gROOT->LoadMacro("../src/TCTriggerObject.cc+");
-gROOT->LoadMacro("../src/WeightUtils.cc+");
-gROOT->LoadMacro("../src/TriggerSelector.cc+");
+gROOT->LoadMacro("../plugins/WeightUtils.cc+");
+gROOT->LoadMacro("../plugins/TriggerSelector.cc+");
      
 TChain* fChain = new TChain("ntupleProducer/eventTree");
 
-ifstream sourceFiles("./sourceFiles/$3.txt");
+ifstream sourceFiles("${sourceFiles}");
 string line;
 int  count = 0;
-  cout<<"Adding files from $3 to chain..."<<endl;
+  cout<<"Adding files from ${vsourceFiles} to chain..."<<endl;
 
 	  while (sourceFiles >> line) {
 	    fChain->Add(line.c_str());      
