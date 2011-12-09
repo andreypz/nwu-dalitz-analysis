@@ -2,7 +2,7 @@ import sys, os, subprocess, fileinput, pickle, math, tempfile
 
 class JobConfig():
     '''Class for storing configuration for each dataset'''
-    def __init__(self, dataName = 'TEST', inDir = '/uscms/home/andreypz/nobackup/TEST', nJobs = 1, arguments = 'TEST 0 muon', selection = 'muon'):
+    def __init__(self, dataName = 'TEST', inDir = '/uscms/home/andreypz/nobackup/TEST', nJobs = 1, arguments = 'TEST 0 muon 2011A', selection = 'muon'):
         self._dataName  = dataName
         self._inDir     = inDir
         self._nJobs     = nJobs

@@ -44,13 +44,13 @@ if selection == 'gamma' or selection == 'muGamma' or selection == 'eGamma':
     data = []
     if period in ['2011A', 'Combined']:
         data.extend([
-        b.JobConfig('Aug05', dCache+'/radek/Data3/Photon_Run2011A_05Aug2011-v1', 10, 'PhotonJets  14,15,16,17,18,19,20,21,22,23 '+selection+' 2011A', selection)
+#        b.JobConfig('Aug05', dCache+'/radek/Data3/Photon_Run2011A_05Aug2011-v1', 20, 'PhotonJets  14,15,16,17,18,19,20,21,22,23 '+selection+' 2011A', selection)
 #        b.JobConfig('May10', dCache+'/radek/Data3/Photon_Run2011A_May10ReReco-v1', 10, 'PhotonJets  14,15,16,17,18,19,20,21,22,23 '+selection+' 2011A', selection),
  #       b.JobConfig('PromptV4', dCache+'/radek/Data3/Photon_Run2011A_PromptReco-v4-r2', 20, 'PhotonJets  14,15,16,17,18,19,20,21,22,23 '+selection+' 2011A', selection),
   #      b.JobConfig('PromptV6', dCache+'/radek/Data3/Photon_Run2011A_PromptReco-v6-r2', 10, 'PhotonJets  14,15,16,17,18,19,20,21,22,23 '+selection+' 2011A', selection),
         ])
-#    if period in ['2011B', 'Combined']:
-#        data.append(b.JobConfig('Run2011B', dCache+'/naodell/Nov09/Photon_Run2011B', 30, 'PhotonJets 15,16,17,18,19,20,21,22,23,24,25 '+selection+' 2011B', selection))
+    if period in ['2011B', 'Combined']:
+        data.append(b.JobConfig('Run2011B', dCache+'/naodell/Nov09/Photon_Run2011B', 30, 'PhotonJets 15,16,17,18,19,20,21,22,23,24,25 '+selection+' 2011B', selection))
 
 if selection == 'muEG':
     data = []

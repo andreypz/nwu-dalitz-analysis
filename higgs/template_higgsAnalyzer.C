@@ -1,4 +1,4 @@
-// $Id: template_higgsAnalyzer.C,v 1.24 2011/12/05 22:06:54 andrey Exp $
+// $Id: template_higgsAnalyzer.C,v 1.25 2011/12/09 11:29:34 andrey Exp $
 
 #define higgsAnalyzer_cxx
 
@@ -20,8 +20,8 @@ string  suffix         = "SUFFIX";
 vector<int> triggers (trigger, trigger + sizeof(trigger)/sizeof(int));
 
 UInt_t verboseLvl  = 0;
-Bool_t doZlibrary  = 0;
-Bool_t makeKinTree = 0;
+Bool_t doZlibrary  = 1;
+Bool_t makeKinTree = 1;
 
 /////////////////
 //Analysis cuts//

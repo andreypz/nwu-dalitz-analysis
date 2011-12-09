@@ -42,10 +42,10 @@ chmod 755 run.csh
 ./run.csh ${suffix} ${trigger} ${dataName} ${selection} ${period} b
 
 
-set printDir =  printout_${dataName}
-mkdir $printDir
-cp events_* $printDir
-cp -r $printDir $outDir
-cp hhhh_{suffix}.root $outDir/hhhh_{suffix}_{dataName}_${count}.root
+#set printDir =  printout_${dataName}
+#mkdir $printDir
+#cp events_* $printDir
+#cp -r $printDir $outDir
+cp hhhh_${dataName}.root $outDir/hhhh_${dataName}_${suffix}_${count}.root
 
 #cp counts* $newDir

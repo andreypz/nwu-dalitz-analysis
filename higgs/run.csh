@@ -42,7 +42,7 @@ TChain* fChain = new TChain("ntupleProducer/eventTree");
 ifstream sourceFiles("${sourceFiles}");
 string line;
 int  count = 0;
-  cout<<"Adding files from ${vsourceFiles} to chain..."<<endl;
+  cout<<"Adding files from ${sourceFiles} to chain..."<<endl;
 
 	  while (sourceFiles >> line) {
 	    fChain->Add(line.c_str());      
