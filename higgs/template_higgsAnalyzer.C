@@ -1,4 +1,4 @@
-// $Id: template_higgsAnalyzer.C,v 1.26 2011/12/09 13:50:43 andrey Exp $
+// $Id: template_higgsAnalyzer.C,v 1.27 2011/12/13 16:48:06 andrey Exp $
 
 #define higgsAnalyzer_cxx
 
@@ -21,7 +21,7 @@ vector<int> triggers (trigger, trigger + sizeof(trigger)/sizeof(int));
 
 UInt_t verboseLvl  = 0;
 Bool_t doZlibrary  = 1;
-Bool_t makeKinTree = 0;
+Bool_t makeKinTree = 1;
 
 /////////////////
 //Analysis cuts//
@@ -65,7 +65,7 @@ void higgsAnalyzer::Begin(TTree * /*tree*/)
     TH1::SetDefaultSumw2(kTRUE);
     
     cout<<"Begin"<<endl;
-    //myRandom = new TRandom3();
+    myRandom = new TRandom3();
 
     // Initialize utilities and selectors here //
     zLib            = new ZedEventsLibrary(selection, true);
@@ -283,7 +283,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
     
     bool triggerPass   = triggerSelector->SelectTriggers(triggerStatus, hltPrescale);
     if (!triggerPass) return kTRUE;
-    // Double electron workaround.  Gets rid of hopelessly prescaled events fo July 20-26, 2011
+    // Double electron workaround.  Gets rid of hopelessly prescaled events of July 20-26, 2011
     if (selection == "electron" && (runNumber > 171200 && runNumber < 171600)) return kTRUE;
 
     int  eventPrescale = triggerSelector->GetEventPrescale();
@@ -634,7 +634,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
 
 	//needed for weights
 	Lepton1 = ZP4;  
-	//Lepton2 = 0;
+	Lepton2.SetXYZT(0,0,0,0);
 
     } else {
         return kTRUE;
@@ -644,9 +644,10 @@ bool higgsAnalyzer::Process(Long64_t entry)
     evtWeight   = weighter->GetTotalWeight(primaryVtx->GetSize(), jetP4.size(), Lepton1, Lepton2);
 
     if (selection == "gamma" || selection == "muGamma" || selection == "eGamma") {
-      cout<<"Weight, before prescale,  after prescale   "<<evtWeight;
+      //cout<<"Weight, before/after prescale   "<<evtWeight;
       evtWeight  *= eventPrescale;
-      cout<<"\t\t"<<evtWeight<<endl;
+      //cout<<"\t\t"<<evtWeight<<endl;
+      //cout<<"nPVs = "<<primaryVtx->GetSize()<<"\t gamma pt= "<<ZP4.Pt()<<endl;
     }
 
     //DeltaPhi

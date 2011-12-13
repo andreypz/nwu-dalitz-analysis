@@ -11,10 +11,10 @@ cmsenv
 set srcDir    = $1
 set outDir    = $2
 set count     = $3
-set dataName  = $4
+set dataName  = $4  #e.g. Photon_Aug05, Run2011B , May10
 
 ### Specify addtional arguments here ####
-set suffix    = $5
+set suffix    = $5  #e.g. DATA. WZ, ZZ etc
 set trigger   = $6
 set selection = $7
 set period    = $8
@@ -46,6 +46,6 @@ chmod 755 run.csh
 #mkdir $printDir
 #cp events_* $printDir
 #cp -r $printDir $outDir
-cp hhhh_${dataName}.root $outDir/hhhh_${dataName}_${suffix}_${count}.root
+cp hhhh_${dataName}.root $outDir/hhhh_${dataName}_${count}.root
 
 #cp counts* $newDir

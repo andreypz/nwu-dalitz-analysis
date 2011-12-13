@@ -18,7 +18,8 @@ void makePlot(Int_t sel=1, TString hPath="00")
   Float_t intLumi = 1;
   if(sel==1)  intLumi = 215.1 + 927.6 + 370.9 + 663.0 + 2511; //double mu	
   if(sel==2)  intLumi = 215.1 + 789.2 + 313.2 + 662.2 + 2511; //double ele	
-  TString dir("test");
+  TString dir("2011_Dec_13");
+//  TString dir("test");
 
   Bool_t doTest    = 0;
   Bool_t doPhotons = 0;

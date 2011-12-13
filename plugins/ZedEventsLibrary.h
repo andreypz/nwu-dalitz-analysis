@@ -1,5 +1,6 @@
 /*
-    Utilities for making a library of Z events and retrieving them.
+// $Id: andrey Exp $
+Utilities for making a library of Z events and retrieving them.
 */
 
 #ifndef _ZedEventsLibrary_H
