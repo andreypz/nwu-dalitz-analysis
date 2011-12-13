@@ -21,7 +21,7 @@ void makePlot(Int_t sel=1, TString hPath="00")
   TString dir("test");
 
   Bool_t doTest    = 0;
-  Bool_t doPhotons = 1;
+  Bool_t doPhotons = 0;
   Bool_t doOverview= 1;
 
   TString ssel("none"), gsel("none");

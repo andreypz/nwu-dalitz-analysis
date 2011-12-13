@@ -25,8 +25,7 @@ Float_t getXsecOrColors(string dataset="ggHZZ300", Int_t b = 1)
   else if(dataset=="DYtautau") {lCol = kRed;      fCol = kWhite;   cs = 1666.0;   nevt = 29.5e6;}
   else if(dataset=="DYjets")   {lCol = kRed;      fCol = kWhite;   cs = 3048.0;   nevt = 36.278e6;}
 
-  else if(dataset=="ggHZZ140") {lCol = kBlue-1;   fCol  = -1; cs = 0.022;       nevt = 99.99e3;}
-  else if(dataset=="ggHZZ200") {lCol = kPink;     fCol  = -1; cs = 0.06277;     nevt = 96.215e3;}
+  else if(dataset=="ggHZZ200") {lCol = kPink;     fCol  = -1; cs = 0.05406;     nevt = 96.20e3;}
   else if(dataset=="ggHZZ250") {lCol = kCyan;     fCol  = -1; cs = 0.0398;      nevt = 99.993e3;}
   else if(dataset=="ggHZZ300") {lCol = kCyan-1;   fCol  = -1; cs = 0.0301;      nevt = 99.990e3;}
   else if(dataset=="ggHZZ350") {lCol = kCyan+2;   fCol  = -1; cs = 0.0286;      nevt = 99.998e3;}

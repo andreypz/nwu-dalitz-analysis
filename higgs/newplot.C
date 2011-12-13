@@ -30,7 +30,7 @@ void newplot(Int_t sel = 1, TString hPath ="v00", Int_t doMerge=0) {
 
   system (Form("rm ./%s/m_*%i.root ", hPath.Data(), sel));
 
-  system (Form("hadd ./%s/m_DataPh_%i.root ./%s/hhhh_Pho*", hPath.Data(), sel, gammaPath.Data()));
+  system (Form("hadd ./%s/m_DataPh_%i.root ./%s/hhhh_*Photon*", hPath.Data(), sel, gammaPath.Data()));
   
   system (Form("hadd ./%s/m_Data_%i.root  ./%s/hhhh_Doub*.root ", hPath.Data(), sel, histoPath.Data()));
   system (Form("hadd ./%s/m_Top_%i.root   ./%s/hhhh_t*W.root ",   hPath.Data(), sel,  histoPath.Data()));

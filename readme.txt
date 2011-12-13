@@ -5,7 +5,11 @@ https://twiki.cern.ch/twiki/bin/view/CMS/UserCodeNWUHiggs
 
 The log of changes:
 
+2011-Dec-13
+  * Z library class is working
+
 2011-Dec-09
+  V01-03 tag
   * Switching to B-master for condor jobs submitions
   * Created plugins directory where all new classes will go
   (moved there weight utils and trigger selector)

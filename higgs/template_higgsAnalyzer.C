@@ -1,4 +1,4 @@
-// $Id: template_higgsAnalyzer.C,v 1.25 2011/12/09 11:29:34 andrey Exp $
+// $Id: template_higgsAnalyzer.C,v 1.26 2011/12/09 13:50:43 andrey Exp $
 
 #define higgsAnalyzer_cxx
 
@@ -21,7 +21,7 @@ vector<int> triggers (trigger, trigger + sizeof(trigger)/sizeof(int));
 
 UInt_t verboseLvl  = 0;
 Bool_t doZlibrary  = 1;
-Bool_t makeKinTree = 1;
+Bool_t makeKinTree = 0;
 
 /////////////////
 //Analysis cuts//
@@ -57,52 +57,6 @@ bool MuonSortCondition(const TCMuon& m1, const TCMuon& m2) {return (m1.Pt() > m2
 bool ElectronSortCondition(const TCElectron& e1, const TCElectron& e2) {return (e1.Pt() > e2.Pt());}
 bool PhotonSortCondition(const TCPhoton& g1, const TCPhoton& g2) {return (g1.Pt() > g2.Pt());}
 
-//--- Stuff for Z-library -------//
-int   qt_bins[10] =  {0,25,26,28,32,40,56,88,152,280};
-float eta_bins[7] =  {-15, -1.5, -1.0, 0, 1.0, 1.5, 15};
-
-TFile *libFile = new TFile("/uscms_data/d2/andreypz/cmssw/higgs7/CMSSW_4_2_8/src/NWU/Higgs/higgs/v60/m_Zjets_1.root","OPEN");
-//TFile *libFile = new TFile("/uscms_data/d2/andreypz/cmssw/higgs7/CMSSW_4_2_8/src/NWU/Higgs/higgs/v60/m_Data_1.root","OPEN");
-TLorentzVector *lep1, *lep2;
-std::vector< pair<TLorentzVector, TLorentzVector> >  diMap[6][10];
-//Caution: the size of diMap has to be the same as qt_bins
-
-
-pair <int, int> higgsAnalyzer::GetQtBin(Float_t myEta, Float_t myQT){
-
-  pair <int, int> myBins = make_pair(0,0); 
-  // Need to know the size of qt_bins array
-  int len = (int)sizeof(eta_bins)/sizeof(float); 
-  Int_t ebin = -1;
-  for(Int_t e = len-2; e>=0; e--){	
-    if(myEta>=eta_bins[e]){
-      ebin = e;
-      //bin is assigned - exit for loop
-      break;
-    }
-  }
- 
-  //cout<<"Assigning ebin = "<<ebin<<"   in eta = ["<< eta_bins[ebin]<<", "<<eta_bins[ebin+1]<<"]"<<endl;
-
-  //loop over qt_bins and see where our events belongs  
-
-  len=sizeof(qt_bins)/sizeof(int); 
-  Int_t qbin = -1;
-  for(Int_t q = len-1; q>=0; q--){	
-    if(myQT>=qt_bins[q]){
-      qbin = q;
-      //bin is assigned - exit for loop
-      break;
-    }
-  }
-  //cout<<"Assigning qbin = "<<qbin<<"   in qt = ["<< qt_bins[qbin]<<", ]"<<endl;
-
-  if(ebin==-1 || qbin==-1) cout<<"Warning: ebin or qbin is not assigned!  eta="<<myEta<<"   qt="<<myQT<<endl;
-  myBins = make_pair(ebin,qbin); 
-  return myBins;
-
-}	
-
 TRandom3 *myRandom;
 
 void higgsAnalyzer::Begin(TTree * /*tree*/) 
@@ -111,9 +65,10 @@ void higgsAnalyzer::Begin(TTree * /*tree*/)
     TH1::SetDefaultSumw2(kTRUE);
     
     cout<<"Begin"<<endl;
-    myRandom = new TRandom3();
+    //myRandom = new TRandom3();
 
     // Initialize utilities and selectors here //
+    zLib            = new ZedEventsLibrary(selection, true);
     weighter        = new WeightUtils(suffix, period, selection, isRealData);
     triggerSelector = new TriggerSelector(selection, period, triggers);
     
@@ -126,40 +81,8 @@ void higgsAnalyzer::Begin(TTree * /*tree*/)
     evt_byCut = new TH1F("evt_byCut", "SUFFIX", 20, 0,20);
     evt_libQt = new TH2F("evt_libQt", "Events in a library", 4, 0,4,  10, 0,10);
 
-    if (doZlibrary){
-      cout<<"\n    Doing the library thing now"<<endl;
-      TTree *libTree = (TTree*)libFile->Get("Anton/kinTree");
-      
-      //libTree->SetBranchStatus("*",0);
-      //libTree->SetBranchStatus("lep1", 1); //doesn't work if *,0 set
-      //libTree->SetBranchStatus("lep2", 1);
-      libTree->SetBranchAddress("lep1", &lep1);
-      libTree->SetBranchAddress("lep2", &lep2);
-      //libTree->Print();
-      
-      Int_t nentries = libTree->GetEntries();
-      for(Int_t j = 0; j<nentries; j++){
-	libTree-> GetEntry(j);
-	
-	Float_t myQT  = (*lep1 + *lep2).Pt() ;
-	Float_t myEta = (*lep1 + *lep2).Eta() ;
-	//cout<<j<<"  myQT= "<<	myQT<<endl;
-	pair <int, int> myBin = GetQtBin(myEta,myQT);
-
-	pair <TLorentzVector, TLorentzVector> diLeptonPair;
-	diLeptonPair = make_pair (*lep1,*lep2);
-	//cout<<"Orig 1: "<<lep1->Pt()<<" 2: "<<lep2->Pt()<<endl;
-	//cout<<"Pair 1: "<< diLeptonPair.first.Pt()<<" 2: "<< diLeptonPair.second.Pt()<<endl;
-
-	diMap[myBin.first][myBin.second].push_back(diLeptonPair);
-      }
-      for(Int_t q=0; q<10; q++){
-	for(Int_t e=0; e<4; e++)
-	  evt_libQt -> SetBinContent(q+1, e+1,diMap[e][q].size());
-      }
-      //libFile->Close();
-      cout<<"Done with the library. Moving on. \n"<<endl;
-    }
+    if (doZlibrary)  zLib->CreateLibrary();
+    
 
 
     for(Int_t n=0; n<nC; n++)
@@ -721,7 +644,9 @@ bool higgsAnalyzer::Process(Long64_t entry)
     evtWeight   = weighter->GetTotalWeight(primaryVtx->GetSize(), jetP4.size(), Lepton1, Lepton2);
 
     if (selection == "gamma" || selection == "muGamma" || selection == "eGamma") {
+      cout<<"Weight, before prescale,  after prescale   "<<evtWeight;
       evtWeight  *= eventPrescale;
+      cout<<"\t\t"<<evtWeight<<endl;
     }
 
     //DeltaPhi
@@ -834,72 +759,19 @@ bool higgsAnalyzer::Process(Long64_t entry)
     ////////////////////////////////
 
     if (doZlibrary){
+      pair<TLorentzVector, TLorentzVector> myLeptons = zLib->GetLeptonsFromLibrary(ZP4);
+      Lepton1 = myLeptons.first;
+      Lepton2 = myLeptons.second;
 
-      //Find out which qT bin we are
-      pair <int, int> myBin = GetQtBin(diEta, qT);
-      Int_t etaBin = myBin.first;
-      Int_t qtBin  = myBin.second;
-
-      //Look how many events are in this bin:
-      Int_t mySize = diMap[etaBin][qtBin].size(); 
-      //cout<<"There are --"<<mySize<<"--  events in bin[eta,pt] = ["<<etaBin<<", "<<qtBin<<"]"<<endl;
-      if (mySize==0) {cout<<"No events found in the library for that bin - ["<<etaBin<<", "<<qtBin<<"]  -! return kTRUE"<<endl; return kTRUE;}      
-      TLorentzVector diLepton = Lepton1 + Lepton2;
-
-      //Try 10 times (need both leptonswith eta<2.4 and pt>20 after the boosting):
-      for(Int_t l=0; l<20; l++){
-	//Throw a random number 
-	Double_t rndm = myRandom->Integer(mySize); 
-	//cout<<l<<"  Random number out of --"<<mySize<<"--   is going to be: *"<<rndm<<endl;
-	pair<TLorentzVector, TLorentzVector> myPair = diMap[etaBin][qtBin].at(rndm);
-	Lepton1  = myPair.first;
-	Lepton2  = myPair.second;
-	diLepton = Lepton1 + Lepton2;
-	//cout<<bin<<"\n  ---- Original Gamma/Z ----"<<endl;
-	//cout<<"n\t qt= "<<ZP4.Pt()<<"\t eta= "<<ZP4.Eta()<<"\t phi= "<<ZP4.Phi()<<"\t M= "<<ZP4.M()<<endl;
-	//ZP4.Print();
-	
-	//----Boosting the leptons--------//	
-	//cout<<"\n------From di-lepton library----\nNot boosted:"<<endl;
-	//cout<<"\t qt= "<<diLepton.Pt()<<"\t eta= "<<diLepton.Eta()<<"\t phi= "<<diLepton.Phi()<<"\t M= "<<diLepton.M()<<endl;
-	//diLepton.Print();
-	
-	//First, boost them to rest-frame:
-	TVector3 b1 = diLepton.BoostVector();       
-	Lepton1.Boost(-b1);
-	Lepton2.Boost(-b1);
-	//diLepton = Lepton1+Lepton2;
-	//cout<<"\nAfter boost to rest-frame:\n"<<endl;
-	//diLepton.Print();
-	
-	//Make a vector with Z/Gamma direction and diLepton mass
-	TLorentzVector ZP4_Mass(0,0,0,0);
-	ZP4_Mass.SetPtEtaPhiM(ZP4.Pt(), ZP4.Eta(), ZP4.Phi(), diLepton.M());
-	//Now, boost the leptons in Gamma/Z direction:
-	TVector3 b2 = ZP4_Mass.BoostVector();       
-	Lepton1.Boost(b2);
-	Lepton2.Boost(b2);
-	if(Lepton1.Pt()>20 && Lepton2.Pt()>20 && fabs(Lepton1.Eta())<2.4 && fabs(Lepton2.Eta())<2.4)
-	  break; //found a good pair of leptons
-      }
-
-      //Swap the order of leptons if pt's changed 
-      if (Lepton2.Pt()>Lepton1.Pt()) {
-	//cout<<"swaping leptons pt1: "<<Lepton1.Pt()<<"    pt2: "<<Lepton2.Pt()<<endl;
-	TLorentzVector tempLep = Lepton2;
-	Lepton2 = Lepton1;
-	Lepton1 = tempLep;
-      }
-      diLepton = Lepton1+Lepton2;
-      //cout<<"\n After final boost:"<<endl;
-      //cout<<"\t qt= "<<diLepton.Pt()<<"\t eta= "<<diLepton.Eta()<<"\t phi= "<<diLepton.Phi()<<"\t M= "<<diLepton.M()<<endl;
-      //diLepton.Print();
+      TLorentzVector diLepton = Lepton1+Lepton2;
+      //cout<<"lep1 pt= "<<Lepton1.Pt()<<"     lep2 pt= "<<Lepton2.Pt()<<endl;
       
       //replace the Gamma/Z variables with the di-lepton from the library
       qT    = diLepton.Pt(); 
       Mll   = diLepton.M();
       diEta = diLepton.Eta();
       diPhi = diLepton.Phi();
+
     }
     //----end of library -------//
     //////////////////////////////

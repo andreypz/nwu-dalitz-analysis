@@ -1,4 +1,4 @@
-// $Id: higgsAnalyzer.h,v 1.14 2011/12/05 22:06:54 andrey Exp $
+// $Id: higgsAnalyzer.h,v 1.15 2011/12/09 11:29:34 andrey Exp $
 
 #ifndef higgsAnalyzer_h
 #define higgsAnalyzer_h
@@ -40,6 +40,7 @@
 
 #include "../plugins/WeightUtils.h"
 #include "../plugins/TriggerSelector.h"
+#include "../plugins/ZedEventsLibrary.h"
 
 #define nC 20  //nCuts in the analysis. make plots after each cut
 
@@ -71,6 +72,7 @@ class higgsAnalyzer : public TSelector {
   TTree * _kinTree;
 
 
+  ZedEventsLibrary *zLib;
   TriggerSelector *triggerSelector;
   WeightUtils *weighter;
 
@@ -157,15 +159,6 @@ class higgsAnalyzer : public TSelector {
   UInt_t nEvents[nC];
   UInt_t nEventsPassNoiseFilter[6][nC]; //1-Hcal, 2-Ecal, 3- Scraping, 4-CSCTight, 5-CSCLoose,   0-passed all
   
-  /*
-  //MET corrections
-  struct metCorrs {
-  float Sigma0;
-  float SigmaPU;
-  float Shift;
-  } metCorr;
-    */
-  
   higgsAnalyzer(TTree * /*tree*/ =0) { }
   virtual ~higgsAnalyzer() { }
   virtual int     Version() const { return 2; }
@@ -186,7 +179,6 @@ class higgsAnalyzer : public TSelector {
   virtual float   CalculateTransMass(TLorentzVector p1, TLorentzVector p2);
   virtual float   CalculateTransMassAlt(TLorentzVector p1, TLorentzVector p2);
   virtual float   DeltaPhiJetMET(TLorentzVector , std::vector<TLorentzVector> ); 
-  //virtual float   GetPhotonMass();
 
   void scaleAndColor(TString , Float_t , Float_t , Float_t , Int_t , Int_t );
   
@@ -196,7 +188,7 @@ class higgsAnalyzer : public TSelector {
   void CountEvents(Int_t);
   void PrintOut(Int_t);
   void PrintOutNoisy(Int_t);
-  pair<int, int> GetQtBin(Float_t, Float_t);
+ // pair<int, int> GetQtBin(Float_t, Float_t);
   
   ClassDef(higgsAnalyzer,0);
 };

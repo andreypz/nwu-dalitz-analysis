@@ -14,7 +14,7 @@ if($6 == "b") then
     echo "Do batch, source files: \n ${sourceFiles}"
 else
     set sourceFiles = "./sourceFiles/$3.txt"
-    echo "Do batch, source files: \n ${sourceFiles}"
+    echo "Run locally, source files: \n ${sourceFiles}"
 endif
 
 cat > run.C << +EOF
@@ -36,6 +36,7 @@ gROOT->LoadMacro("../src/TCTrigger.cc+");
 gROOT->LoadMacro("../src/TCTriggerObject.cc+");
 gROOT->LoadMacro("../plugins/WeightUtils.cc+");
 gROOT->LoadMacro("../plugins/TriggerSelector.cc+");
+gROOT->LoadMacro("../plugins/ZedEventsLibrary.cc+");
      
 TChain* fChain = new TChain("ntupleProducer/eventTree");
 
