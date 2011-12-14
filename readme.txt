@@ -5,7 +5,11 @@ https://twiki.cern.ch/twiki/bin/view/CMS/UserCodeNWUHiggs
 
 The log of changes:
 
+2011-Dec-14
+  * simplified drowing macro (no need to make all stacks - they are produced in drawMulti function)
+  
 2011-Dec-13
+  V01-04 tag
   * Z library class is working
 
 2011-Dec-09

@@ -1,4 +1,4 @@
-// $Id: andrey Exp $
+// $Id: ZedEventsLibrary.cc,v 1.3 2011/12/13 20:48:22 andrey Exp $
 
 #include "ZedEventsLibrary.h"
 
@@ -150,7 +150,7 @@ pair<TLorentzVector, TLorentzVector> ZedEventsLibrary::GetLeptonsFromLibrary(TLo
   //Try 20 times (need both leptons within eta<2.4 and pt>20 after the boosting):
   for(Int_t l=0; l<20; l++){                                                                                                                             
     //Throw a random number 
-    Double_t rndm = _myRandom->Integer(mySize);                                                                                                           
+    Int_t rndm = _myRandom->Integer(mySize);                                                                                                           
     //cout<<l<<"  Random number out of --"<<mySize<<"--   is going to be: *"<<rndm<<"*"<<endl;
     pair<TLorentzVector, TLorentzVector> myPair = _diMap[etaBin][qtBin].at(rndm);                                                                         
 
@@ -164,7 +164,7 @@ pair<TLorentzVector, TLorentzVector> ZedEventsLibrary::GetLeptonsFromLibrary(TLo
     lep2.Boost(-b1);                                                                                                                                  
     //cout<<"\nAfter boost to rest-frame:\n"<<endl;                                                                                                      
 
-    //Make a vector with Z/Gamma direction and diLepton mass                                                                                             
+    //Make a vector with Z/Gamma direction but the mass of  diLepton
     TLorentzVector origZP4_Mass(0,0,0,0);
     origZP4_Mass.SetPtEtaPhiM(origZP4.Pt(), origZP4.Eta(), origZP4.Phi(), diLepton.M());
 
@@ -172,9 +172,11 @@ pair<TLorentzVector, TLorentzVector> ZedEventsLibrary::GetLeptonsFromLibrary(TLo
     TVector3 b2 = origZP4_Mass.BoostVector();
 
     lep1.Boost(b2);                                                                                                                                   
-    lep2.Boost(b2);                                                                                                                                   
+    lep2.Boost(b2);
+    //Check if it satisfy our main selection cuts                                                                                  
     if(lep1.Pt()>20 && lep2.Pt()>20 && fabs(lep1.Eta())<2.4 && fabs(lep2.Eta())<2.4)                                                         
       break; //found a good pair of leptons
+    //if not found in 20 attempts - it will use the latest tried
   }
 
   //diLepton = lep1 + lep2;

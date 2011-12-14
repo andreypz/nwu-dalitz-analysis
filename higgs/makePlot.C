@@ -18,8 +18,7 @@ void makePlot(Int_t sel=1, TString hPath="00")
   Float_t intLumi = 1;
   if(sel==1)  intLumi = 215.1 + 927.6 + 370.9 + 663.0 + 2511; //double mu	
   if(sel==2)  intLumi = 215.1 + 789.2 + 313.2 + 662.2 + 2511; //double ele	
-  TString dir("2011_Dec_13");
-//  TString dir("test");
+  TString dir("test");
 
   Bool_t doTest    = 0;
   Bool_t doPhotons = 0;
@@ -103,106 +102,6 @@ void makePlot(Int_t sel=1, TString hPath="00")
   PrintYields(list_bg, list_ggH, list_vbfH, fData, intLumi, histoPath, "twiki");
   PrintYields(list_bg, list_ggH, list_vbfH, fData, intLumi, histoPath, "tex");
   
-
-  THStack *hs_met0_et[nC], *hs_met1_et[nC], *hs_met2_et[nC], *hs_met3_et[nC], *hs_met4_et[nC], *hs_met5_et[nC], *hs_met6_et[nC], *hs_met7_et[nC], *hs_met8_et[nC], *hs_met9_et[nC], *hs_met10_et[nC];
-  THStack *hs_met1_phi[nC];
-  THStack *hs_met1_over_qt[nC], *hs_met1_et_ovQt[nC], *hs_mt[nC], *hs_mtZ[nC];
-  THStack *hs_jet_N[nC], *hs_jet_pt[nC], *hs_jet_eta[nC], *hs_jet_phi[nC], *hs_jet_dRlep1[nC], *hs_jet_dRlep2[nC];
-  THStack *hs_jet_b_N[nC], *hs_jet_b_Nssv[nC], *hs_jet_b_N25[nC], *hs_jet_b_N30[nC], hs_jet_b_pt[nC];
-  THStack *hs_di_eta[nC], *hs_di_qt[nC], *hs_di_mass[nC], *hs_di_mass_EB[nC], *hs_di_mass_EE[nC], *hs_di_mass_EX[nC];
-  THStack *hs_met_dPhiLeadJet1[nC], *hs_met_dPhiLeadJet2[nC], *hs_met_dPhiClosJet1[nC], *hs_met_dPhiClosJet2[nC];
-  THStack *hs_vtx_nPV_raw[nC], *hs_vtx_nPV_weight[nC], *hs_vtx_nPV_tot[nC];
-  THStack *hs_vtx_ndof_1[nC], *hs_vtx_ndof_2[nC];
-  THStack *hs_l1_eta[nC], *hs_l1_phi[nC], *hs_l1_pt[nC];
-  THStack *hs_l2_eta[nC], *hs_l2_phi[nC], *hs_l2_pt[nC];
-  THStack *hs_evt_byCut, *hs_evt_libQt;
-  THStack *hs_l0_dPhi[nC], *hs_l0_dEta[nC], *hs_l0_dR[nC], *hs_l0_ptRatio[nC];
-  THStack *hs_di_dPhiMet[nC];
-  THStack *hs_met1_lg[nC], *hs_met1_recoil_lg[nC];
-  THStack *hs_ph_nGamma[nC];
-
-  hs_evt_byCut         = makeStack(list_bg, "evt_byCut", intLumi);
-  hs_evt_libQt         = makeStack(list_bg, "evt_libQt", intLumi);
-  for(Int_t n = 0; n<nC; n++)
-    hs_met0_et[n]      = makeStack(list_bg, Form("met0_et_%i", n), intLumi); //pfMet, no noise filters
-  for(Int_t n = 4; n<nC; n++)
-    {
-      hs_mt[n]           = makeStack(list_bg, Form("%s_%i", "mt2", n), intLumi);
-
-      hs_met1_et[n]      = makeStack(list_bg, Form("met1_et_%i", n), intLumi); // pfMet 
-      hs_met2_et[n]      = makeStack(list_bg, Form("met2_et_%i", n), intLumi); //pfMet type 1
-      hs_met3_et[n]      = makeStack(list_bg, Form("met3_et_%i", n), intLumi); //puCorr
-      hs_met4_et[n]      = makeStack(list_bg, Form("met4_et_%i", n), intLumi); //proj
-      hs_met5_et[n]      = makeStack(list_bg, Form("met5_et_%i", n), intLumi); //Zproj
-      hs_met6_et[n]      = makeStack(list_bg, Form("met6_et_%i", n), intLumi); //red1
-      hs_met7_et[n]      = makeStack(list_bg, Form("met7_et_%i", n), intLumi); //red2
-      hs_met8_et[n]      = makeStack(list_bg, Form("met8_et_%i", n), intLumi); //comp (track, vtx asso)
-      hs_met9_et[n]      = makeStack(list_bg, Form("met9_et_%i", n), intLumi); //comp (track, vtx asso)
-      hs_met10_et[n]     = makeStack(list_bg, Form("met10_et_%i", n), intLumi); //comp (track, vtx asso)
-      
-      hs_met1_phi[n]     = makeStack(list_bg, Form("met1_phi_%i", n), intLumi); // pfMet 
-
-      hs_met1_lg[n]        = makeStack(list_bg, Form("met1_lg_%i", n), intLumi); 
-      hs_met1_recoil_lg[n] = makeStack(list_bg, Form("met1_recoil_lg_%i", n), intLumi); 
-
-      hs_l1_phi[n]     = makeStack(list_bg, Form("l1_phi_%i", n), intLumi); 
-      hs_l1_eta[n]     = makeStack(list_bg, Form("l1_eta_%i", n), intLumi); 
-      hs_l1_pt[n]      = makeStack(list_bg, Form("l1_pt_%i", n), intLumi); 
-
-      hs_l2_phi[n]     = makeStack(list_bg, Form("l2_phi_%i", n), intLumi); 
-      hs_l2_eta[n]     = makeStack(list_bg, Form("l2_eta_%i", n), intLumi); 
-      hs_l2_pt[n]      = makeStack(list_bg, Form("l2_pt_%i", n), intLumi); 
-
-      hs_l0_ptRatio[n] = makeStack(list_bg, Form("l0_ptRatio_%i", n), intLumi); 
-      hs_l0_dPhi[n]    = makeStack(list_bg, Form("l0_dPhi_%i", n), intLumi); 
-      hs_l0_dEta[n]    = makeStack(list_bg, Form("l0_dEta_%i", n), intLumi); 
-      hs_l0_dR[n]      = makeStack(list_bg, Form("l0_dR_%i", n), intLumi); 
-
-      hs_di_eta[n]     = makeStack(list_bg, Form("di_eta_%i",n), intLumi);
-      hs_di_qt[n]      = makeStack(list_bg, Form("di_qt_%i",n), intLumi);
-      hs_di_mass[n]    = makeStack(list_bg, Form("di_mass_%i",n), intLumi);
-      hs_di_mass_EB[n] = makeStack(list_bg, Form("di_mass_EB_%i",n), intLumi);
-      hs_di_mass_EE[n] = makeStack(list_bg, Form("di_mass_EE_%i",n), intLumi);
-      hs_di_mass_EX[n] = makeStack(list_bg, Form("di_mass_EX_%i",n), intLumi);
-      hs_di_dPhiMet[n] = makeStack(list_bg, Form("di_dPhiMet_%i",n), intLumi);
-
-      hs_jet_N[n]      = makeStack(list_bg, Form("jet_N_%i",n), intLumi);
-      hs_jet_pt[n]     = makeStack(list_bg, Form("jet_pt_%i",n), intLumi);
-      hs_jet_eta[n]    = makeStack(list_bg, Form("jet_eta_%i",n), intLumi);
-      hs_jet_phi[n]    = makeStack(list_bg, Form("jet_phi_%i",n), intLumi);
-      hs_jet_b_N[n]    = makeStack(list_bg, Form("jet_b_N_%i",n), intLumi); 
-      hs_jet_b_Nssv[n] = makeStack(list_bg, Form("jet_b_Nssv_%i",n), intLumi); 
-      hs_jet_b_N25[n]  = makeStack(list_bg, Form("jet_b_N25_%i",n), intLumi); 
-      hs_jet_b_N30[n]  = makeStack(list_bg, Form("jet_b_N30_%i",n), intLumi); 
-
-      hs_jet_dRlep1[n]  = makeStack(list_bg, Form("jet_dRlep1_%i",n), intLumi); 
-      hs_jet_dRlep2[n]  = makeStack(list_bg, Form("jet_dRlep2_%i",n), intLumi); 
-
-      //hs_ph_nGamma[n]      = makeStack(list_bg, Form("ph_nGamma_%i",n), intLumi);
-
-      hs_vtx_nPV_tot[n]    = makeStack(list_bg, Form("vtx_nPV_tot_%i",n), intLumi); 
-      hs_vtx_nPV_raw[n]    = makeStack(list_bg, Form("vtx_nPV_raw_%i",n), intLumi); 
-      hs_vtx_nPV_weight[n] = makeStack(list_bg, Form("vtx_nPV_weight_%i",n), intLumi); 
-      hs_vtx_ndof_1[n]     = makeStack(list_bg, Form("vtx_ndof_1_%i",n), intLumi);
-      hs_vtx_ndof_2[n]     = makeStack(list_bg, Form("vtx_ndof_2_%i",n), intLumi);
-
-      hs_met_dPhiClosJet1[n] = makeStack(list_bg, Form("met1_dPhiClosJet1_%i",n), intLumi);
-      hs_met_dPhiClosJet2[n] = makeStack(list_bg, Form("met1_dPhiClosJet2_%i",n), intLumi);
-
-      /*hs_mtZ[n]          = makeStack(list_bg, Form("mtZ_%i", n), intLumi);
-
-      hs_met_over_qt[n]  = makeStack(list_bg, Form("%s_over_qt_%i", metType.Data(), n), intLumi);
-      hs_met2_over_qt[n] = makeStack(list_bg, Form("met2_over_qt_%i", n), intLumi);
-      hs_met_et_ovQt[n]  = makeStack(list_bg, Form("%s_et_ovQt_%i", metType.Data(), n), intLumi);
-
-      hs_jet_dRlep1[n]   = makeStack(list_bg, Form("jet_dRlep1_%i",n), intLumi);
-      hs_jet_dRlep2[n]   = makeStack(list_bg, Form("jet_dRlep2_%i",n), intLumi);
-
-      hs_met_dPhiLeadJet1[n] = makeStack(list_bg, Form("met2_dPhiLeadJet1_%i",n), intLumi);
-      hs_met_dPhiLeadJet2[n] = makeStack(list_bg, Form("met2_dPhiLeadJet2_%i",n), intLumi);
-      */
-    }
-    
   
   TH1 * forLegend[21];
   list_legend = new TList();
@@ -239,7 +138,7 @@ void makePlot(Int_t sel=1, TString hPath="00")
   
   leg01->SetFillColor(kWhite);
   
-  hs_vtx_nPV_raw[F0] -> Draw("hist");
+  hh[0] -> Draw("hist");
   c1 -> SaveAs(imgpath+"ov01.png");
   TCanvas *c2 = new TCanvas("c2","example",600,700);
   
@@ -247,7 +146,7 @@ void makePlot(Int_t sel=1, TString hPath="00")
   if(doTest){
     TString testpath("~/afs/public_html/test/");  
     
-    drawMuliPlot("","di qT", 1, 0.001, 1000000, 0,3, hs_di_qt[6], c2, leg01, list_overlay, intLumi, sel); 
+    drawMuliPlot("","di qT", Form("di_qt_%i", F0), 1, 0.001, 1e6, 0,3, c2, leg01, list_overlay, list_bg, intLumi, sel); 
     c2 -> SaveAs(testpath+"p01.png");
 
     /*
@@ -291,134 +190,134 @@ void makePlot(Int_t sel=1, TString hPath="00")
       //-------------------------//
       //------- Met plots--------//
       //-------------------------//  
-      drawMuliPlot("","pfMET", 1, 0.1, 1000000, 0,2.9, hs_met1_et[F0], c2, leg01, list_overlay, intLumi, sel);
+      drawMuliPlot("","pfMET", Form("met1_et_%i", F0), 1, 0.1, 1e6, 0,2.9, c2, leg01, list_overlay, list_bg, intLumi, sel);
       c2 -> SaveAs(imgpath+"Met/m01.png");
 
-      drawMuliPlot("","pfMET Phi", 1, 0.1, 1000000, 0,2.9, hs_met1_phi[F0], c2, leg01, list_overlay, intLumi, sel);
+      drawMuliPlot("","pfMET Phi", Form("met1_phi_%i", F0), 1, 0.1, 1e6, 0,2.9, c2, leg01, list_overlay, list_bg, intLumi, sel);
       c2 -> SaveAs(imgpath+"Met/m02.png");
 
-      drawMuliPlot("","MT", 1, 0.1, 1000000, 0,1.9, hs_mt[F0], c2, leg01, list_overlay, intLumi, sel);
+      drawMuliPlot("","MT", Form("mt2_%i", F0), 1, 0.1, 1e6, 0,1.9, c2, leg01, list_overlay, list_bg, intLumi, sel);
       c2 -> SaveAs(imgpath+"Met/m03.png");
 
-      drawMuliPlot("","type 1 pfMET", 1, 0.1, 1e6, 0,2.9, hs_met2_et[F0], c2, leg01, list_overlay, intLumi, sel);
+      drawMuliPlot("","type 1 pfMET", Form("met2_et_%i", F0), 1, 0.1, 1e6, 0,2.9, c2, leg01, list_overlay, list_bg, intLumi, sel);
       c2 -> SaveAs(imgpath+"Met/m04.png");
 
-      drawMuliPlot("","pfMET long to di-lepton", 1, 0.1, 1e7, 0,2.9, hs_met1_lg[F0], c2, leg01, list_overlay, intLumi, sel);
+      drawMuliPlot("","pfMET long to di-lepton", Form("met1_lg_%i", F0), 1, 0.1, 1e7, 0,2.9, c2, leg01, list_overlay, list_bg, intLumi, sel);
       c2 -> SaveAs(imgpath+"Met/m05.png");
 
-      drawMuliPlot("","Long Recoil = -(pfMet+Z/G)", 1, 0.1, 1e7, 0,2.9, hs_met1_recoil_lg[F0], c2, leg01, list_overlay, intLumi, sel);
+      drawMuliPlot("","Long Recoil = -(pfMet+Z/G)", Form("met1_recoil_lg_%i", F0), 1, 0.1, 1e7, 0,2.9, c2, leg01, list_overlay, list_bg, intLumi, sel);
       c2 -> SaveAs(imgpath+"Met/m06.png");
 
 
-      drawMuliPlot("","puCorrMET", 1, 0.1, 1000000, 0,2.9, hs_met3_et[F0], c2, leg01, list_overlay, intLumi, sel);
+      drawMuliPlot("","puCorrMET", Form("met3_et_%i", F0), 1, 0.1, 1e6, 0,2.9, c2, leg01, list_overlay, list_bg, intLumi, sel);
       c2 -> SaveAs(imgpath+"Met/m07.png");
 
-      drawMuliPlot("","projMET", 1, 0.1, 1000000, 0,2.9, hs_met4_et[F0], c2, leg01, list_overlay, intLumi, sel);
+      drawMuliPlot("","projMET", Form("met4_et_%i", F0), 1, 0.1, 1e6, 0,2.9, c2, leg01, list_overlay, list_bg, intLumi, sel);
       c2 -> SaveAs(imgpath+"Met/m08.png");
-      drawMuliPlot("","ZprojMET", 1, 0.1, 1000000, 0,2.9, hs_met5_et[F0], c2, leg01, list_overlay, intLumi, sel);
+      drawMuliPlot("","ZprojMET", Form("met5_et_%i", F0), 1, 0.1, 1e6, 0,2.9, c2, leg01, list_overlay, list_bg, intLumi, sel);
       c2 -> SaveAs(imgpath+"Met/m09.png");
 
-      drawMuliPlot("","redMET1", 1, 0.1, 1000000, 0,2.9, hs_met6_et[F0], c2, leg01, list_overlay, intLumi, sel);
+      drawMuliPlot("","redMET1", Form("met6_et_%i", F0), 1, 0.1, 1e6, 0,2.9, c2, leg01, list_overlay, list_bg, intLumi, sel);
       c2 -> SaveAs(imgpath+"Met/m10.png");
-      drawMuliPlot("","redMET2", 1, 0.1, 1000000, 0,2.9, hs_met7_et[F0], c2, leg01, list_overlay, intLumi, sel);
+      drawMuliPlot("","redMET2", Form("met7_et_%i", F0), 1, 0.1, 1e6, 0,2.9, c2, leg01, list_overlay, list_bg, intLumi, sel);
       c2 -> SaveAs(imgpath+"Met/m11.png");
 
       //-------------------------//
       //------- Jet plots--------//
       //-------------------------//  
 
-      drawMuliPlot("","N jets", 1, 0.1, 1e6, 0,2.9, hs_jet_N[F0], c2, leg01, list_overlay, intLumi, sel);
+      drawMuliPlot("","N jets", Form("jet_N_%i", F0), 1, 0.1, 1e6, 0,2.9, c2, leg01, list_overlay, list_bg, intLumi, sel);
       c2 -> SaveAs(imgpath+"Jet/j01.png");
-      drawMuliPlot("","#Delta#phi(MET, clos jet), p_{T}>30, |#eta|<4.8", 1, 0.1, 10000000, 0,2, hs_met_dPhiClosJet1[F0], c2, leg01, list_overlay, intLumi, sel);
+      drawMuliPlot("","#Delta#phi(MET, clos jet), p_{T}>30, |#eta|<4.8", Form("met1_dPhiClosJet1_%i", F0), 1, 0.1, 1e7, 0,2, c2, leg01, list_overlay, list_bg, intLumi, sel);
       c2 -> SaveAs(imgpath+"Jet/j02.png");
 
-      drawMuliPlot("Post b-veto","N b-jets", 1, 0.1, 1000000, 0,1.9, hs_jet_b_N[F0], c2, leg01, list_overlay, intLumi, sel);
+      drawMuliPlot("Post b-veto","N b-jets", Form("jet_b_N_%i", F0), 1, 0.1, 1e6, 0,1.9, c2, leg01, list_overlay, list_bg, intLumi, sel);
       c2 -> SaveAs(imgpath+"Jet/j03.png");
-      drawMuliPlot("No b-veto, MET>70","N b-jets", 0, 0.1, 350, 0,1.9, hs_jet_b_N[F1], c2, leg01, list_overlay, intLumi, sel);
+      drawMuliPlot("No b-veto, MET>70","N b-jets", Form("jet_b_N_%i", F1), 0, 0.1, 350, 0,1.9, c2, leg01, list_overlay, list_bg, intLumi, sel);
       c2 -> SaveAs(imgpath+"Jet/j04.png");
 
-      drawMuliPlot("","pt of leading jet", 1, 0.1, 1e6, 0,2.9, hs_jet_pt[F0], c2, leg01, list_overlay, intLumi, sel);
+      drawMuliPlot("","pt of leading jet", Form("jet_pt_%i", F0), 1, 0.1, 1e6, 0,2.9, c2, leg01, list_overlay, list_bg, intLumi, sel);
       c2 -> SaveAs(imgpath+"Jet/j05.png");
 
-      drawMuliPlot("","eta of leading jet", 1, 0.1, 1e6, 0,2.9, hs_jet_eta[F0], c2, leg01, list_overlay, intLumi, sel);
+      drawMuliPlot("","eta of leading jet", Form("jet_eta_%i", F0), 1, 0.1, 1e6, 0,2.9, c2, leg01, list_overlay, list_bg, intLumi, sel);
       c2 -> SaveAs(imgpath+"Jet/j06.png");
 
-      drawMuliPlot("","dR(jet,lep1)", 1, 0.1, 1e6, 0,4.9, hs_jet_dRlep1[F0], c2, leg01, list_overlay, intLumi, sel);
+      drawMuliPlot("","dR(jet,lep1)", Form("jet_dRlep1_%i", F0), 1, 0.1, 1e6, 0,4.9, c2, leg01, list_overlay, list_bg, intLumi, sel);
       c2 -> SaveAs(imgpath+"Jet/j07.png");
 
-      drawMuliPlot("","dR(jet,lep2)", 1, 0.1, 1e6, 0,4.9, hs_jet_dRlep2[F0], c2, leg01, list_overlay, intLumi, sel);
+      drawMuliPlot("","dR(jet,lep2)", Form("jet_dRlep2_%i", F0), 1, 0.1, 1e6, 0,4.9, c2, leg01, list_overlay, list_bg, intLumi, sel);
       c2 -> SaveAs(imgpath+"Jet/j08.png");
      
 
       //-------------------------------//
       //------- Di-Lepton plots--------//
       //-------------------------------//  
-      drawMuliPlot("","M(ll)", 1, 0.1, 1000000, 0,1.9, hs_di_mass[F0], c2, leg01, list_overlay, intLumi, sel);
+      drawMuliPlot("","M(ll)", Form("di_mass_%i", F0), 1, 0.1, 1e6, 0,1.9, c2, leg01, list_overlay, list_bg, intLumi, sel);
       c2 -> SaveAs(imgpath+"diLepton/di01.png");
-      drawMuliPlot("","Leptons in Barrel, |#eta|<1.444,  M(ll)", 1, 0.1, 1000000, 0,1.9, hs_di_mass_EB[F0], c2, leg01, list_overlay, intLumi, sel);
+      drawMuliPlot("","Leptons in Barrel, |#eta|<1.444,  M(ll)", Form("di_mass_EB_%i", F0), 1, 0.1, 1e6, 0,1.9, c2, leg01, list_overlay, list_bg, intLumi, sel);
       c2 -> SaveAs(imgpath+"diLepton/di02.png");
-      drawMuliPlot("","Leptons in Endcap, |#eta|>1.566, M(ll)", 1, 0.1, 1000000, 0,1.9, hs_di_mass_EE[F0], c2, leg01, list_overlay, intLumi, sel);
+      drawMuliPlot("","Leptons in Endcap, |#eta|>1.566, M(ll)", Form("di_mass_EE_%i", F0), 1, 0.1, 1e6, 0,1.9, c2, leg01, list_overlay, list_bg, intLumi, sel);
       c2 -> SaveAs(imgpath+"diLepton/di03.png");
-      drawMuliPlot("","Leptons in EB/EE, mixed, M(ll)", 1, 0.1, 1000000, 0,1.9, hs_di_mass_EX[F0], c2, leg01, list_overlay, intLumi, sel);
+      drawMuliPlot("","Leptons in EB/EE, mixed, M(ll)", Form("di_mass_EX_%i", F0), 1, 0.1, 1e6, 0,1.9, c2, leg01, list_overlay, list_bg, intLumi, sel);
       c2 -> SaveAs(imgpath+"diLepton/di04.png");
 
-      drawMuliPlot("","q_{T} (di-lepton p_{T})", 1, 0.1, 1000000, 0,2.9, hs_di_qt[F0], c2, leg01, list_overlay, intLumi, sel);
+      drawMuliPlot("","q_{T} (di-lepton p_{T})", Form("di_qt_%i", F0), 1, 0.1, 1e6, 0,2.9, c2, leg01, list_overlay, list_bg, intLumi, sel);
       c2 -> SaveAs(imgpath+"diLepton/di05.png");
 
-      drawMuliPlot("","Di-lepton Eta", 1, 0.1, 1000000, 0.5,1.9, hs_di_eta[F0], c2, leg01, list_overlay, intLumi, sel);
+      drawMuliPlot("","Di-lepton Eta", Form("di_eta_%i", F0), 1, 0.1, 1e6, 0.5,1.9, c2, leg01, list_overlay, list_bg, intLumi, sel);
       c2 -> SaveAs(imgpath+"diLepton/di06.png");
 
-      drawMuliPlot("","dPhi(Di-lep, Met)", 1, 0.1, 1000000, 0.5,1.9, hs_di_dPhiMet[F0], c2, leg01, list_overlay, intLumi, sel);
+      drawMuliPlot("","dPhi(Di-lep, Met)", Form("di_dPhiMet_%i", F0), 1, 0.1, 1e6, 0.5,1.9, c2, leg01, list_overlay, list_bg, intLumi, sel);
       c2 -> SaveAs(imgpath+"diLepton/di07.png");
 
       //----------------------------//
       //------- Lepton plots--------//
       //----------------------------//  
-      drawMuliPlot("","Leading Lepton eta", 1, 0.1, 1000000, 0.5,1.4, hs_l1_eta[F0], c2, leg01, list_overlay, intLumi, sel); 
+      drawMuliPlot("","Leading Lepton eta", Form("l1_eta_%i", F0), 1, 0.1, 1e6, 0.5,1.4, c2, leg01, list_overlay, list_bg, intLumi, sel); 
       c2 -> SaveAs(imgpath+"Lepton/l01.png");
-      drawMuliPlot("","Trailing Lepton eta", 1, 0.1, 1000000, 0.5,1.4, hs_l2_eta[F0], c2, leg01, list_overlay, intLumi, sel); 
+      drawMuliPlot("","Trailing Lepton eta", Form("l2_eta_%i", F0), 1, 0.1, 1e6, 0.5,1.4, c2, leg01, list_overlay, list_bg, intLumi, sel); 
       c2 -> SaveAs(imgpath+"Lepton/l02.png");
 
-      drawMuliPlot("","Leading Lepton phi", 1, 0.1, 1000000, 0.5,1.4, hs_l1_phi[F0], c2, leg01, list_overlay, intLumi, sel); 
+      drawMuliPlot("","Leading Lepton phi", Form("l1_phi_%i", F0), 1, 0.1, 1e6, 0.5,1.4, c2, leg01, list_overlay, list_bg, intLumi, sel); 
       c2 -> SaveAs(imgpath+"Lepton/l03.png");
-      drawMuliPlot("","Trailing Lepton phi", 1, 0.1, 1000000, 0.5,1.4, hs_l2_phi[F0], c2, leg01, list_overlay, intLumi, sel); 
+      drawMuliPlot("","Trailing Lepton phi", Form("l2_phi_%i", F0), 1, 0.1, 1e6, 0.5,1.4, c2, leg01, list_overlay, list_bg, intLumi, sel); 
       c2 -> SaveAs(imgpath+"Lepton/l04.png");
 
-      drawMuliPlot("","Leading Lepton pt", 1, 0.1, 1000000, 0.5,1.4, hs_l1_pt[F0], c2, leg01, list_overlay, intLumi, sel); 
+      drawMuliPlot("","Leading Lepton pt", Form("l1_pt_%i", F0), 1, 0.1, 1e6, 0.5,1.4, c2, leg01, list_overlay, list_bg, intLumi, sel); 
       c2 -> SaveAs(imgpath+"Lepton/l05.png");
-      drawMuliPlot("","Trailing Lepton pt", 1, 0.1, 1000000, 0.5,1.4, hs_l2_pt[F0], c2, leg01, list_overlay, intLumi, sel); 
+      drawMuliPlot("","Trailing Lepton pt", Form("l2_pt_%i", F0), 1, 0.1, 1e6, 0.5,1.4, c2, leg01, list_overlay, list_bg, intLumi, sel); 
       c2 -> SaveAs(imgpath+"Lepton/l06.png");
 
-      drawMuliPlot("","dR(lep1,lep2)", 1, 0.1, 1000000, 0.5,1.4, hs_l0_dR[F0], c2, leg01, list_overlay, intLumi, sel); 
+      drawMuliPlot("","dR(lep1,lep2)", Form("l0_dR_%i", F0), 1, 0.1, 1e6, 0.5,1.4, c2, leg01, list_overlay, list_bg, intLumi, sel); 
       c2 -> SaveAs(imgpath+"Lepton/l07.png");
-      drawMuliPlot("","dPhi(lep1,lep2)", 1, 0.1, 1000000, 0.5,1.4, hs_l0_dPhi[F0], c2, leg01, list_overlay, intLumi, sel); 
+      drawMuliPlot("","dPhi(lep1,lep2)", Form("l0_dPhi_%i", F0), 1, 0.1, 1e6, 0.5,1.4, c2, leg01, list_overlay, list_bg, intLumi, sel); 
       c2 -> SaveAs(imgpath+"Lepton/l08.png");
-      drawMuliPlot("","dEta(lep1,lep2)", 1, 0.1, 1000000, 0.5,1.4, hs_l0_dEta[F0], c2, leg01, list_overlay, intLumi, sel); 
+      drawMuliPlot("","dEta(lep1,lep2)", Form("l0_dEta_%i", F0), 1, 0.1, 1e6, 0.5,1.4, c2, leg01, list_overlay, list_bg, intLumi, sel); 
       c2 -> SaveAs(imgpath+"Lepton/l09.png");
-      drawMuliPlot("","pt_{lep2}/pt_{lep1}", 1, 0.1, 1000000, 0.5,1.4, hs_l0_ptRatio[F0], c2, leg01, list_overlay, intLumi, sel); 
+      drawMuliPlot("","pt_{lep2}/pt_{lep1}", Form("l0_ptRatio_%i", F0), 1, 0.1, 1e6, 0.5,1.4, c2, leg01, list_overlay, list_bg, intLumi, sel); 
       c2 -> SaveAs(imgpath+"Lepton/l10.png");
 
       //----------------------------//
       //---Misc plots: vtx etc -----//
       //----------------------------//  
-      drawMuliPlot("","evts cut by cut", 1, 0.1, 1000000, 0,2.9, hs_evt_byCut, c2, leg01, list_overlay, intLumi, sel); 
+      drawMuliPlot("","evts cut by cut", "evt_byCut", 1, 0.1, 1e6, 0,2.9, c2, leg01, list_overlay, list_bg, intLumi, sel); 
       c2 -> SaveAs(imgpath+"Misc/mis01.png");
-      drawMuliPlot("","nVtx total", 1, 0.1, 1e6, 0,1.9, hs_vtx_nPV_tot[F0], c2, leg01, list_overlay, intLumi, sel); 
+      drawMuliPlot("","nVtx total", Form("vtx_nPV_tot_%i", F0), 1, 0.1, 1e6, 0,1.9, c2, leg01, list_overlay, list_bg, intLumi, sel); 
       c2 -> SaveAs(imgpath+"Misc/mis02.png");
 
-      drawMuliPlot("","nVtx raw", 1, 0.1, 1e6, 0,1.9, hs_vtx_nPV_raw[F0], c2, leg01, list_overlay, intLumi, sel); 
+      drawMuliPlot("","nVtx raw", Form("vtx_nPV_raw_%i", F0), 1, 0.1, 1e6, 0,1.9, c2, leg01, list_overlay, list_bg, intLumi, sel); 
       c2 -> SaveAs(imgpath+"Misc/mis03.png");
-      drawMuliPlot("","nVtx reweighted", 1, 0.1, 1e6, 0,1.9, hs_vtx_nPV_weight[F0], c2, leg01, list_overlay, intLumi, sel); 
+      drawMuliPlot("","nVtx reweighted", Form("vtx_nPV_weight_%i", F0), 1, 0.1, 1e6, 0,1.9, c2, leg01, list_overlay, list_bg, intLumi, sel); 
       c2 -> SaveAs(imgpath+"Misc/mis04.png");
 
 
-      drawMuliPlot("","vtx 1 nDof", 1, 0.1, 1e6, 0.5,2.9, hs_vtx_ndof_1[F0], c2, leg01, list_overlay, intLumi, sel); 
+      drawMuliPlot("","vtx 1 nDof", Form("vtx_ndof_1_%i", F0), 1, 0.1, 1e6, 0.5,2.9, c2, leg01, list_overlay, list_bg, intLumi, sel); 
       c2 -> SaveAs(imgpath+"Misc/mis05.png");
 
-      drawMuliPlot("","vtx 2 nDof", 1, 0.1, 1e6, 0.5,2.9, hs_vtx_ndof_2[F0], c2, leg01, list_overlay, intLumi, sel); 
+      drawMuliPlot("","vtx 2 nDof", Form("vtx_ndof_2_%i", F0), 1, 0.1, 1e6, 0.5,2.9, c2, leg01, list_overlay, list_bg, intLumi, sel); 
       c2 -> SaveAs(imgpath+"Misc/mis06.png");
 
-      //drawMuliPlot("","N photons", 1, 0.1, 1e6, 0.5,2.9, hs_ph_nGamma[F0], c2, leg01, list_overlay, intLumi, sel); 
+      //drawMuliPlot("","N photons", Form("ph_nGamma_%i", F0), 1, 0.1, 1e6, 0.5,2.9, c2, leg01, list_overlay, list_bg, intLumi, sel); 
       //c2 -> SaveAs(imgpath+"Misc/mis07.png");
 
 
@@ -431,34 +330,34 @@ void makePlot(Int_t sel=1, TString hPath="00")
       system (Form("cp -r %s/printout_Double* %s/printouts/", histoPath.Data(), imgpath.Data()));
 
     /*
-    drawMuliPlot("","projMET/q_{T}", 1, 0.1, 1000000, 0,3, hs_met_over_qt[F0], c2, leg01, list_overlay, intLumi, sel);
+    drawMuliPlot("","projMET/q_{T}", Form("_%i", F0), 1, 0.1, 1e6, 0,3, ____qt[F0], c2, leg01, list_overlay, list_bg, intLumi, sel);
     c2 -> SaveAs(imgpath+"ov02.png");
     
-    drawMuliPlot("","projMET", 1, 0.1, 1000000, 0,5, hs_met_et[F1], c2, leg01, list_overlay, intLumi, sel);
+    drawMuliPlot("","projMET", Form("_%i", F0), 1, 0.1, 1e6, 0,5, ___[F1], c2, leg01, list_overlay, list_bg, intLumi, sel);
     c2 -> SaveAs(imgpath+"ov03.png");
-    drawMuliPlot("","projMET/q_{T}", 1, 0.1, 1000000, 0,5, hs_met_over_qt[F1], c2, leg01, list_overlay, intLumi, sel);
+    drawMuliPlot("","projMET/q_{T}", Form("_%i", F0), 1, 0.1, 1e6, 0,5, ____qt[F1], c2, leg01, list_overlay, list_bg, intLumi, sel);
     c2 -> SaveAs(imgpath+"ov04.png");
   
 
-    drawMuliPlot("","projMET", 1, 0.1, 1000000, 0,3, hs_met_et[F2], c2, leg01, list_overlay, intLumi, sel);
+    drawMuliPlot("","projMET", Form("_%i", F0), 1, 0.1, 1e6, 0,3, ___[F2], c2, leg01, list_overlay, list_bg, intLumi, sel);
     c2 -> SaveAs(imgpath+"ov05.png");
-    drawMuliPlot("","projMET/q_{T}", 1, 0.1, 1000000, 0,3, hs_met_over_qt[F2], c2, leg01, list_overlay, intLumi, sel);
+    drawMuliPlot("","projMET/q_{T}", Form("_%i", F0), 1, 0.1, 1e6, 0,3, ____qt[F2], c2, leg01, list_overlay, list_bg, intLumi, sel);
     c2 -> SaveAs(imgpath+"ov06.png");
     */
     
       /*    
       
-      drawMuliPlot("","#Delta#phi(MET, lead jet), p_{T}>20, |#eta|<2.4", 1, 0.1, 10000000, 0,2, hs_met_dPhiLeadJet1[F0], c2, leg01, list_overlay, intLumi, sel);
+      drawMuliPlot("","#Delta#phi(MET, lead jet), p_{T}>20, |#eta|<2.4", Form("_%i", F0), 1, 0.1, 1e60, 0,2, c2, leg01, list_overlay, list_bg, intLumi, sel);
       c2 -> SaveAs(imgpath+"ov21.png");
       
-      drawMuliPlot("","#Delta#phi(MET, lead jet), p_{T}>20, |#eta|<2.4", 1, 0.1, 1000000, 0,5, hs_met_dPhiLeadJet1[F1], c2, leg01, list_overlay, intLumi, sel);
+      drawMuliPlot("","#Delta#phi(MET, lead jet), p_{T}>20, |#eta|<2.4", Form("_%i", F0), 1, 0.1, 1e6, 0,5, ___[F1], c2, leg01, list_overlay, list_bg, intLumi, sel);
       c2 -> SaveAs(imgpath+"ov23.png");
-      drawMuliPlot("","#Delta#phi(MET, closest jet), p_{T}>20, |#eta|<2.4", 1, 0.1, 1000000, 0,5, hs_met_dPhiClosJet1[F1], c2, leg01, list_overlay, intLumi, sel);
+      drawMuliPlot("","#Delta#phi(MET, closest jet), p_{T}>20, |#eta|<2.4", Form("_%i", F0), 1, 0.1, 1e6, 0,5, ___[F1], c2, leg01, list_overlay, list_bg, intLumi, sel);
       c2 -> SaveAs(imgpath+"ov24.png");
       
-      drawMuliPlot("","#Delta#phi(MET, lead jet), p_{T}>20, |#eta|<2.4", 1, 0.1, 10000000, 0,2, hs_met_dPhiLeadJet1[F2], c2, leg01, list_overlay, intLumi, sel);
+      drawMuliPlot("","#Delta#phi(MET, lead jet), p_{T}>20, |#eta|<2.4", Form("_%i", F0), 1, 0.1, 1e60, 0,2, ___[F2], c2, leg01, list_overlay, list_bg, intLumi, sel);
       c2 -> SaveAs(imgpath+"ov25.png");
-      drawMuliPlot("","#Delta#phi(MET, closest jet), p_{T}>20, |#eta|<2.4", 1, 0.1, 10000000, 0,2, hs_met_dPhiClosJet1[F2], c2, leg01, list_overlay, intLumi, sel);       
+      drawMuliPlot("","#Delta#phi(MET, closest jet), p_{T}>20, |#eta|<2.4", Form("_%i", F0), 1, 0.1, 1e60, 0,2, ___[F2], c2, leg01, list_overlay, list_bg, intLumi, sel);       
       c2 -> SaveAs(imgpath+"ov26.png");
       
   */

@@ -66,7 +66,7 @@ void PrintYields(TList *bgList, TList *ggHList, TList *vbfList, TFile *dataFile,
     "2. Vtx,cosmic,3d lept veto",
     "3. Z mass",
     "4. soft 3d muon  veto",
-    "5. qT > 25",
+    "5. qT > 55",
     "6. b-veto",
     "7.  H200",
     "8.  H250",
@@ -77,13 +77,13 @@ void PrintYields(TList *bgList, TList *ggHList, TList *vbfList, TFile *dataFile,
     "13. H500",
     "14. H550",
     "15. H600",
-    "16.",
-    "17.",};
+    "16. Met>70",
+    "17. Met>40, b-veto",};
 
   if(option=="tex")  oo<<tabBegin1<<endl;
   oo<<title1<<endl;
 
-  for(Int_t j = 0; j<=15; j++)
+  for(Int_t j = 0; j<=17; j++)
     {
       if(j<=6)  oo.precision(0);
       else  oo.precision(2);
@@ -118,7 +118,7 @@ void PrintYields(TList *bgList, TList *ggHList, TList *vbfList, TFile *dataFile,
 	}      
 
 
-      if(j<=7){
+      if(j<=7||j>15){
 	TH1* data = (TH1*)dataFile->Get(  Form("Andrey/met0_et_%i",j) )->Clone();
 	Int_t nBins = data->GetNbinsX();
 	Float_t iBkg = total_bg;
@@ -179,7 +179,7 @@ void PrintYields(TList *bgList, TList *ggHList, TList *vbfList, TFile *dataFile,
 THStack* makeStack(TList *sourcelist, TString name, Float_t lumi)
 {
   //cout<<"making stack!"<<endl;
-  THStack * hs = new THStack(Form("hs_11_%i",1),"Stacked hist");
+  THStack * hs = new THStack("temp","Stacked hist");
   //sourcelist ->Print();
 
   TFile *first_source = (TFile*)sourcelist->First();
@@ -238,6 +238,7 @@ THStack* makeStack(TList *sourcelist, TString name, Float_t lumi)
   return hs;
 }
 
+/*
 void drawMuliPlot(TString maintitle, TString xtitle, Int_t isLog, Float_t y1min, Float_t y1max, Float_t y2min, Float_t y2max, THStack *hs, TCanvas *cc, TLegend *leg, TList *list, Float_t lumi, Int_t sel)
 {
   //Find the samm objects as in hs stack
@@ -322,6 +323,95 @@ void drawMuliPlot(TString maintitle, TString xtitle, Int_t isLog, Float_t y1min,
   selection -> Draw();
 
 }
+*/
+
+void drawMuliPlot(TString maintitle, TString xtitle, TString  h_name, Int_t isLog, Float_t y1min, Float_t y1max, Float_t y2min, Float_t y2max, TCanvas *cc, TLegend *leg, TList *list, TList *bgList, Float_t lumi, Int_t sel)
+{
+  TString name = Form("Andrey/%s", h_name.Data());
+  cout<<"drawMultiPlot:: " <<h_name<<endl;
+
+  THStack *hs = makeStack(bgList, h_name.Data(), lumi);
+
+  TFile *ff[5];   Int_t size = list->GetSize();
+  TH1 *hh[5]; 
+  if(size>5) {cout<<"To many plots to overlay"<<endl; return 0;}
+  for(Int_t n=0; n<size; n++)
+    {
+      ff[n] = (TFile*)list->At(n);
+      hh[n] = (TH1*)ff[n]->Get( name.Data() )->Clone();
+      //cout<<n<<" file  "<<ff[n] -> GetName()<<"   histoname: "<<hh[n]->GetName()<<endl;
+    }
+
+
+  for(Int_t n=1; n<size; n++)
+    hh[n] ->Scale(lumi/1000./10);
+
+  TH1 *h_data = hh[0]->Clone();
+
+  //h_data -> Print();
+
+  cc ->cd();
+  TPad *pad1 = new TPad("pad1","pad1",0,0.3,1,1);
+  cc -> cd();
+  pad1->SetBottomMargin(0);
+  pad1->Draw();
+  pad1 -> cd();
+  pad1 -> SetLogy(isLog);
+
+  hs -> Draw("hist");
+  hs -> SetTitle(Form("%s;; Events", maintitle.Data()));
+  hs -> SetMinimum(y1min);
+  hs -> SetMaximum(y1max);
+  h_data  -> Draw("same e1pl"); //DATA
+  for(Int_t n=1; n<size; n++)
+    hh[n] -> Draw("same hist");
+  leg -> Draw();
+
+  cc ->cd();
+  TPad *pad2 = new TPad("pad2","pad2",0,0,1,0.3);
+  pad2->SetBottomMargin(0.25);
+  pad2->SetTopMargin(0);
+  pad2->Draw();
+  pad2 -> cd();
+  
+  TH1F* h1 = (TH1F*) h_data->Clone("");
+  TH1F* h2 = (TH1F*) hs->Sum();
+  h1 -> Divide(h2);
+  h1 -> SetTitle(Form(";%s; Data/MC",xtitle.Data()));
+  h1 -> SetMaximum(y2max);
+  h1 -> SetMinimum(y2min);
+  h1 -> GetYaxis()->SetNdivisions(206);
+  h1 -> GetYaxis()->SetTitleOffset(0.4);
+  h1 -> SetTitleSize(0.1,"XYZ");
+  h1 -> SetLabelSize(0.1,"XY");
+  //h1 -> SetFillStyle(3024);
+ // h1 -> SetFillColor(kGray+2);
+  //h1 -> SetMarkerStyle(20);
+  h1 -> Draw("e1p");
+
+  pad1->cd();
+  TLatex *prelim;
+  prelim = new TLatex(0.25,0.95, Form("CMS Preliminary       #it{L_{int}} = %5.f pb^{-1}",lumi));
+  prelim -> SetNDC(); prelim->SetTextSize(0.03); 
+  prelim -> Draw();
+
+
+  TLatex *selection;
+  if(sel==1){
+    selection = new TLatex(0.70,0.95, "#mu#mu selection");
+    selection -> SetTextColor(kBlue-3);
+  }
+  if(sel==2){
+    selection  = new TLatex(0.70,0.95, "#font[32]{ee} selection");
+    selection -> SetTextColor(kGreen-3);
+  }
+  selection -> SetNDC(); prelim->SetTextSize(0.03); 
+  selection -> Draw();
+
+  // cc->SaveAs(h_name+".png");
+  //delete hs;
+}
+
 
 TH1 *THStack::Sum()
 {
