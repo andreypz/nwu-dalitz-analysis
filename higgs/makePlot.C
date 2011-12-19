@@ -1,7 +1,7 @@
 #define nC 20
 #define F0 6
 #define F1 16
-#define F2 7
+#define F2 17
 #define F3 4
 
 void makePlot(Int_t sel=1, TString hPath="00")
@@ -21,7 +21,7 @@ void makePlot(Int_t sel=1, TString hPath="00")
   TString dir("test");
 
   Bool_t doTest    = 0;
-  Bool_t doPhotons = 0;
+  Bool_t doPhotons = 1;
   Bool_t doOverview= 1;
 
   TString ssel("none"), gsel("none");
@@ -44,15 +44,15 @@ void makePlot(Int_t sel=1, TString hPath="00")
   
   // TFile* fmc_Wjets     = new TFile(Form("./%s/hhhh_Wjets.root",histoPath.Data() ));
 
-  TFile* fmc_ZZ        = new TFile(Form("./%s/hhhh_ZZ.root",histoPath.Data() ));
-  TFile* fmc_WW        = new TFile(Form("./%s/hhhh_WW.root",histoPath.Data() ));
-  TFile* fmc_WZ        = new TFile(Form("./%s/hhhh_WZ.root",histoPath.Data() ));
+  TFile* fmc_ZZ        = new TFile(Form("./%s/hhhh_ZZ_1.root",histoPath.Data() ));
+  TFile* fmc_WW        = new TFile(Form("./%s/hhhh_WW_1.root",histoPath.Data() ));
+  TFile* fmc_WZ        = new TFile(Form("./%s/hhhh_WZ_1.root",histoPath.Data() ));
 
   TFile *fmc_ggH[10], *fmc_vbfH[10];
-  for(Int_t i=0; i<9; i++){
+  for(Int_t i=1; i<9; i++){
     Int_t  m = 200+i*50;
-    fmc_ggH[i]   = new TFile(Form("./%s/hhhh_ggHZZ%i.root",histoPath.Data(),m ));
-    fmc_vbfH[i]  = new TFile(Form("./%s/hhhh_VBFHZZ%i.root",histoPath.Data(),m ));
+    fmc_ggH[i]   = new TFile(Form("./%s/hhhh_ggHZZ%i_1.root",histoPath.Data(),m ));
+    fmc_vbfH[i]  = new TFile(Form("./%s/hhhh_VBFHZZ%i_1.root",histoPath.Data(),m ));
   }
 
   TFile* fmc_tt     = new TFile(Form("./%s/m_ttbar_%i.root", hPath.Data(), sel ));
@@ -132,9 +132,9 @@ void makePlot(Int_t sel=1, TString hPath="00")
   leg01->AddEntry(forLegend[0],  "tW","f");
   leg01->AddEntry(forLegend[2],  "WW","f");
   leg01->AddEntry(forLegend[1], "ttbar","f");  
-  leg01->AddEntry(forLegend[7], "10xH250","l");
-  //leg01->AddEntry(forLegend[8], "10xH400","f");
-  //leg01->AddEntry(forLegend[9], "10xH400","f");
+  leg01->AddEntry(forLegend[7], "H250","l");
+  //leg01->AddEntry(forLegend[8], "H400","f");
+  //leg01->AddEntry(forLegend[9], "H400","f");
   
   leg01->SetFillColor(kWhite);
   
@@ -146,47 +146,32 @@ void makePlot(Int_t sel=1, TString hPath="00")
   if(doTest){
     TString testpath("~/afs/public_html/test/");  
     
+
     drawMuliPlot("","di qT", Form("di_qt_%i", F0), 1, 0.001, 1e6, 0,3, c2, leg01, list_overlay, list_bg, intLumi, sel); 
-    c2 -> SaveAs(testpath+"p01.png");
+    c2 -> SaveAs(testpath+"p01.png");    
 
-    /*
-    hs_di_qt[6] -> GetHists() -> Print();
-    c1 -> Clear();
-    TH1F * qt1 =   hs_di_qt[6] -> Sum() -> Clone();
-    TH1F * qt2  = (TH1F*) hs_di_qt[6] -> GetHists()->At(5)->Clone(); 
-    qt2->Divide(qt1);
-    qt2 -> Draw("hist");
-    qt2->SetMaximum(1.01);
-    qt2->SetMinimum(0.98);
-    qt2 -> SetFillColor(kWhite);
-    qt2 -> SetTitle("; qT; Fraction of DY events");
-    //qt3 -> Draw("same");
-    //c1 -> SetLogy();
-    c1->SaveAs(testpath+"p03.png");
-    fmc_Zjets -> cd("Andrey");
-    TH2F * evt_libQt = (TH2F*)fmc_Zjets->Get("Andrey/evt_libQt")->Clone();
-    evt_libQt - > Draw();
-    c1->SaveAs(testpath+"p04.png");
-    */
+    c1->cd();
 
-    /*
+    TH1F * test1 = fmc_ggH[1]->Get("Andrey/jet_N_17")->Clone();
+    TH1F * test2 = fmc_ggH[2]->Get("Andrey/jet_N_17")->Clone();
 
-    TF1 * f1 = new TF1 ("f1","[0] + [1]*x +[2]*x*x",0,400);
-    f1->SetParameter(0, 1.108);
-    f1->SetParameter(1, 0.002429);
-    f1->SetParameter(2, -1.655e-06);
-    f1 -> Draw();
-    f1 -> SetMinimum(0);
-    f1 -> SetMaximum(2.8);
-    
-    c1 -> SaveAs(testpath+"p06.png");
-    */
-    
-   
+    test1->Scale(intLumi/1000./10);
+    test2->Scale(intLumi/1000./10);
+    test1->SetMaximum(25);
+    test1->Draw("hist");
+    test2->Draw("same hist");   
+    c1 -> SaveAs(testpath+"p03.png");
+
+    //TH1F * test1 = fmc_ggH[1]->Get("Andrey/mt2_17")->Clone();
+    //TH1F * test2 = fmc_ggH[3]->Get("Andrey/mt2_17")->Clone();
+
+    //test1->Draw();   
+    //test2->Draw("same");   
+    //c1 -> SaveAs(testpath+"p04.png");
+
   }
   
   if(doOverview){
-
       //-------------------------//
       //------- Met plots--------//
       //-------------------------//  
@@ -247,8 +232,10 @@ void makePlot(Int_t sel=1, TString hPath="00")
 
       drawMuliPlot("","dR(jet,lep2)", Form("jet_dRlep2_%i", F0), 1, 0.1, 1e6, 0,4.9, c2, leg01, list_overlay, list_bg, intLumi, sel);
       c2 -> SaveAs(imgpath+"Jet/j08.png");
-     
 
+      drawMuliPlot("MET>40, b-veto", "N  jets", Form("jet_N_%i", F2), 0, 0.1, 3000, 0,1.9, c2, leg01, list_overlay, list_bg, intLumi, sel);
+      c2 -> SaveAs(imgpath+"Jet/j09.png");
+     
       //-------------------------------//
       //------- Di-Lepton plots--------//
       //-------------------------------//  
@@ -321,13 +308,17 @@ void makePlot(Int_t sel=1, TString hPath="00")
       //c2 -> SaveAs(imgpath+"Misc/mis07.png");
 
 
+      //--- Create hml page ---//
+      //TString afs = "~/afs/public_html/higgs";
+      //system (Form("python %s/writeIntexHTML.py %s/%s  > stdout.txt", afs.Data(), afs.Data(), dir.Data() ));
+      
 
       //--------------------//
       //---Copy printouts---//
       //--------------------//
 
       //      system (Form("cp %s/events_printout_* %s/printouts/", histoPath.Data(), imgpath.Data()));
-      system (Form("cp -r %s/printout_Double* %s/printouts/", histoPath.Data(), imgpath.Data()));
+      //system (Form("cp -r %s/printout_Double* %s/printouts/", histoPath.Data(), imgpath.Data()));
 
     /*
     drawMuliPlot("","projMET/q_{T}", Form("_%i", F0), 1, 0.1, 1e6, 0,3, ____qt[F0], c2, leg01, list_overlay, list_bg, intLumi, sel);

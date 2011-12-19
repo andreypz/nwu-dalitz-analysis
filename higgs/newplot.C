@@ -33,8 +33,8 @@ void newplot(Int_t sel = 1, TString hPath ="v00", Int_t doMerge=0) {
   system (Form("hadd ./%s/m_DataPh_%i.root ./%s/hhhh_Photon*.root", hPath.Data(), sel, gammaPath.Data()));
   
   system (Form("hadd ./%s/m_Data_%i.root  ./%s/hhhh_Doub*.root ", hPath.Data(), sel, histoPath.Data()));
-  system (Form("hadd ./%s/m_Top_%i.root   ./%s/hhhh_t*W.root ",   hPath.Data(), sel,  histoPath.Data()));
-  system (Form("hadd ./%s/m_ttbar_%i.root ./%s/hhhh_tt*",         hPath.Data(), sel, histoPath.Data()));
+  system (Form("hadd ./%s/m_Top_%i.root   ./%s/hhhh_t*W*.root ",   hPath.Data(), sel,  histoPath.Data()));
+  system (Form("hadd ./%s/m_ttbar_%i.root ./%s/hhhh_tt*.root",         hPath.Data(), sel, histoPath.Data()));
 
   //system (Form("hadd ./%s/m_libZjets_%i.root ./%s/lib5EtaBoost/hhhh_DYjets*",       hPath.Data(), sel, histoPath.Data()));
  // system (Form("hadd ./%s/m_libZjets_%i.root ./%s/lib3Zjets/hhhh_DYjets*",       hPath.Data(), sel, histoPath.Data()));

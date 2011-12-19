@@ -4,9 +4,13 @@ https://twiki.cern.ch/twiki/bin/view/CMS/UserCodeNWUHiggs
 
 
 The log of changes:
-
+2011-Dec-17
+  * New version of Weight Utils and reweight files.
+      * Fixed k-nlo for ggH samples 
+  * Third muon veto updated (closer to Nate/ Pas-like)
+  
 2011-Dec-14
-  * simplified drowing macro (no need to make all stacks - they are produced in drawMulti function)
+  * simplified drawing macro (no need to make all stacks - they are produced in drawMulti function)
   
 2011-Dec-13
   V01-04 tag

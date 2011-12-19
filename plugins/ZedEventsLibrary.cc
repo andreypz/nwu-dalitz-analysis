@@ -1,4 +1,4 @@
-// $Id: ZedEventsLibrary.cc,v 1.3 2011/12/13 20:48:22 andrey Exp $
+// $Id: ZedEventsLibrary.cc,v 1.4 2011/12/14 17:30:41 andrey Exp $
 
 #include "ZedEventsLibrary.h"
 
@@ -93,6 +93,9 @@ pair <int, int> ZedEventsLibrary::GetEtaQtBin(Float_t myEta, Float_t myQT){
 void ZedEventsLibrary::CreateLibrary(){
 
   cout<<"\n    Doing the library thing now"<<endl;
+  cout<<"input file:  "<<endl;
+  _inFile->Print();
+
   TTree *libTree = (TTree*)_inFile->Get("Anton/kinTree");
 
   TLorentzVector  *lep1=0, *lep2=0;
@@ -126,8 +129,10 @@ void ZedEventsLibrary::CreateLibrary(){
   //  for(Int_t e=0; e<4; e++)
   //    evt_libQt -> SetBinContent(q+1, e+1,diMap[e][q].size());
   // }
-  //libFile->Close();
-  cout<<"Done with the library. Moving on. \n"<<endl;
+  cout<<"\n  Total events in the library: "<<nentries<<endl;
+  //cout<<"in bins:  "<<endl;
+  _inFile->Close();
+  cout<<"\nDone with the library. Moving on. \n"<<endl;
 }
 
 pair<TLorentzVector, TLorentzVector> ZedEventsLibrary::GetLeptonsFromLibrary(TLorentzVector origZP4){

@@ -1,4 +1,4 @@
-// $Id: higgsAnalyzer.h,v 1.15 2011/12/09 11:29:34 andrey Exp $
+// $Id: higgsAnalyzer.h,v 1.16 2011/12/13 16:48:05 andrey Exp $
 
 #ifndef higgsAnalyzer_h
 #define higgsAnalyzer_h
@@ -105,6 +105,7 @@ class higgsAnalyzer : public TSelector {
   TH1F *vtx_nPV_tot[nC], *vtx_nPV_raw[nC], *vtx_nPV_weight[nC], *vtx_ndof_1[nC], *vtx_ndof_2[nC];
 
   TH1F *run_events[nC];
+  TH1F *evt_weight[nC];
   
  public :
   TTree          *fChain;   //!pointer to the analyzed TTree or TChain

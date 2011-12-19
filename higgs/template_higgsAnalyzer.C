@@ -1,4 +1,4 @@
-// $Id: template_higgsAnalyzer.C,v 1.27 2011/12/13 16:48:06 andrey Exp $
+// $Id: template_higgsAnalyzer.C,v 1.28 2011/12/13 20:48:22 andrey Exp $
 
 #define higgsAnalyzer_cxx
 
@@ -20,7 +20,7 @@ string  suffix         = "SUFFIX";
 vector<int> triggers (trigger, trigger + sizeof(trigger)/sizeof(int));
 
 UInt_t verboseLvl  = 0;
-Bool_t doZlibrary  = 1;
+Bool_t doZlibrary  = 1, isFromData=1;
 Bool_t makeKinTree = 1;
 
 /////////////////
@@ -68,7 +68,7 @@ void higgsAnalyzer::Begin(TTree * /*tree*/)
     myRandom = new TRandom3();
 
     // Initialize utilities and selectors here //
-    zLib            = new ZedEventsLibrary(selection, true);
+    zLib            = new ZedEventsLibrary(selection, isFromData);
     weighter        = new WeightUtils(suffix, period, selection, isRealData);
     triggerSelector = new TriggerSelector(selection, period, triggers);
     
@@ -196,6 +196,8 @@ void higgsAnalyzer::Begin(TTree * /*tree*/)
 
 	ph_nGamma[n]      = new  TH1F(Form("ph_nGamma_%i",n), "photon multiplicity (pt>25)", 10,0,10);
 
+	evt_weight[n]      = new  TH1F(Form("evt_weight_%i",n), "Weights", 50,0,10);
+
 	run_events[n]     =  new  TH1F(Form("run_events_%i",n), "Events per run", 18000, 160000., 178000.);
        }
     if (verboseLvl>0){
@@ -250,14 +252,6 @@ bool higgsAnalyzer::Process(Long64_t entry)
     ++nEventsWeighted[0];
     MET = 0;
     FillHistosNoise(0, 1);
-  
-    if (period == "Combined") {
-      if (myRandom->Rndm() < 0.46) {
-	weighter->SetDataPeriod("2011A");
-      } else {
-	weighter->SetDataPeriod("2011B");
-      }
-    }
     
     if (nEvents[0] == 1) weighter->SetDataBit(isRealData);
     //if(nEvents[0]>1500) return kTRUE;
@@ -418,18 +412,25 @@ bool higgsAnalyzer::Process(Long64_t entry)
 	
         if (
 	    thisMuon->Pt() > 3
-	    && thisMuon->NumberOfValidMuonHits()    > 0
 	    && thisMuon->NumberOfValidTrackerHits() > 10
-	    && thisMuon->NumberOfValidPixelHits()   > 0
-	    && thisMuon->NumberOfMatches() > 1
-	    && thisMuon->NormalizedChi2()  < 10
-	    && fabs(thisMuon->Dxy(pvPosition)) < 0.02
-	    && fabs(thisMuon->Dz(pvPosition))  < 0.1 
+	    && fabs(thisMuon->Dxy(pvPosition)) < 0.2
+	    && fabs(thisMuon->Dz(pvPosition))  < 0.2 
 	    && (thisMuon->TrkIso() + thisMuon->HadIso() + thisMuon->EmIso() - rhoFactor*TMath::Pi()*0.09)/thisMuon->Pt() < 0.15
 	    ) {
 	  softMuons++;
-	  if(thisMuon->Pt()>10)	  muons.push_back(*thisMuon);
-        } else if (
+
+	  if(thisMuon->Pt()>10
+	     && thisMuon->NumberOfValidMuonHits()    > 0
+	     && thisMuon->NumberOfValidTrackerHits() > 10
+	     && thisMuon->NumberOfValidPixelHits()   > 0
+	     && thisMuon->NumberOfMatches() > 1
+	     && thisMuon->NormalizedChi2()  < 10
+	     && fabs(thisMuon->Dxy(pvPosition)) < 0.02
+	     && fabs(thisMuon->Dz(pvPosition))  < 0.1 
+	     && (thisMuon->TrkIso() + thisMuon->HadIso() + thisMuon->EmIso() - rhoFactor*TMath::Pi()*0.09)/thisMuon->Pt() < 0.15
+	     )	  muons.push_back(*thisMuon);
+     
+	} else if (
 		   thisMuon->Pt() > 10 
 		   //&& thisMuon->Pt() <= muPtCut[0] 
 		   && thisMuon->NumberOfValidMuonHits()    > 0
@@ -468,7 +469,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
 	      && thisPhoton->SigmaIEtaIEta() > 0.001
 	      && thisPhoton->SigmaIEtaIEta() < 0.013
 	      && thisPhoton->TrackVeto() == 0
-	      && thisPhoton->EtaSupercluster() < 1.442
+	      && fabs(thisPhoton->EtaSupercluster()) < 1.442
 	       )  
 	    {
 	      photons.push_back(*thisPhoton);
@@ -643,7 +644,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
     float evtWeight = 1;
     evtWeight   = weighter->GetTotalWeight(primaryVtx->GetSize(), jetP4.size(), Lepton1, Lepton2);
 
-    if (selection == "gamma" || selection == "muGamma" || selection == "eGamma") {
+    if ((selection == "gamma" || selection == "muGamma" || selection == "eGamma") && isRealData) {
       //cout<<"Weight, before/after prescale   "<<evtWeight;
       evtWeight  *= eventPrescale;
       //cout<<"\t\t"<<evtWeight<<endl;
@@ -687,9 +688,10 @@ bool higgsAnalyzer::Process(Long64_t entry)
 	//float genMass = (genLeptons[0]+genLeptons[1]+genNeutrinos[0]+genNeutrinos[1]).M();
 	//h1_HiggsPt->Fill(higgsPt);
 	//h1_HiggsMass->Fill(genMass);
-	if (suffix.compare(2, 3, "HZZ") == 0 || suffix.compare(2, 3, "HWW") == 0) {
-	  evtWeight *= weighter->GluGluHiggsWeight(higgsPt, atoi(suffix.substr(3,3).c_str()));
-	  
+	if (suffix.compare(0, 5, "ggHZZ") == 0 || suffix.compare(0, 5, "ggHWW") == 0) {
+	  Int_t i_mass = atoi(suffix.substr(5,3).c_str());
+	  evtWeight *= weighter->GluGluHiggsWeight(higgsPt, i_mass);
+	  cout<<"imass: "<<i_mass<<"   evtWeight= "<<evtWeight<<endl;	  
 	  //if (suffix.compare(0, 3, "VBF") == 0 ) evtWeight *= weighter->VBFHiggsWeight(genMass, atoi(suffix.substr(3,3).c_str()));
 	}
       }
@@ -1208,6 +1210,8 @@ void higgsAnalyzer::FillHistos(Int_t num, Double_t weight){
   if(isRealData)  run_events[num] -> Fill(runNumber);
 
   evt_byCut -> Fill(num, weight);  
+
+  evt_weight[num] -> Fill(weight);
 
   if(nJets>0)
     {

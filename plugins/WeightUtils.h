@@ -14,14 +14,15 @@
 #include "TH1D.h"
 #include "TH2D.h"
 #include "TFile.h"
+#include "TRandom3.h"
 #include "../src/TCJet.h"
 
 using namespace std;
 
 class WeightUtils: public TObject {
     public:
-        WeightUtils();
-        virtual ~WeightUtils();
+        WeightUtils() {};
+        virtual ~WeightUtils() {};
         WeightUtils(string sampleName, string dataPeriod, string selection, bool isRealData);
         void  Initialize();
         void  SetDataBit(bool isRealData);
@@ -35,6 +36,7 @@ class WeightUtils: public TObject {
         float ZZWeight(TLorentzVector l1, TLorentzVector l2);
         float GluGluHiggsWeight(float higgsPt, int higgsMass);
         float VBFHiggsWeight(float genMass, int higgsMass);
+        float RecoilWeight(TLorentzVector recoilP4, TLorentzVector ZP4);
         float GetTotalWeight(int nPV, int nJets, TLorentzVector l1, TLorentzVector l2);
 
         float GetElectronEff(TLorentzVector l1) const;
@@ -75,7 +77,11 @@ class WeightUtils: public TObject {
         float _gammaPtWeight;
         float _gammaPVWeight;
         float _gammaJetWeight;
+        float _recoilLongWeight;
+        float _recoilTransWeight;
 
+        //Misc
+        TRandom3* rnGen;
 };
 
 #endif

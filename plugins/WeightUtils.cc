@@ -1,9 +1,5 @@
 #include "WeightUtils.h"
 
-WeightUtils::WeightUtils() {}
-
-WeightUtils::~WeightUtils() {}
-
 WeightUtils::WeightUtils(string sampleName, string dataPeriod, string selection, bool isRealData)
 {
     _sampleName = sampleName;
@@ -11,19 +7,17 @@ WeightUtils::WeightUtils(string sampleName, string dataPeriod, string selection,
     _selection  = selection;
     _isRealData = isRealData;
 
-    _puWeight = 1.;
-    _zzWeight = 1.;
-    _glugluWeight = 1.;
-    _vbfWeight = 1.;
-    _recoWeight = 1.;
-    _triggerWeight = 1.;
-    _gammaPtWeight = 1.;
-    _gammaPVWeight = 1.;
-    _gammaJetWeight = 1.;
-
+    Initialize();
+    rnGen   = new TRandom3();
     _inFile = new TFile("../data/Reweight.root", "OPEN");
 
     // Photon weights
+    //h1_eGammaPt     = (TH1D*)_inFile->Get(("h1_eGammaPtWeight"+_dataPeriod).c_str());
+    //h1_muGammaPt    = (TH1D*)_inFile->Get(("h1_muGammaPtWeight"+_dataPeriod).c_str());
+    //h1_eGammaPV     = (TH1D*)_inFile->Get(("h1_eGammaPVWeight"+_dataPeriod).c_str());
+    //h1_muGammaPV    = (TH1D*)_inFile->Get(("h1_muGammaPVWeight"+_dataPeriod).c_str());
+    //h1_eGammaMass   = (TH1D*)_inFile->Get(("h1_diElectronMass"+_dataPeriod).c_str());
+    //h1_muGammaMass  = (TH1D*)_inFile->Get(("h1_diMuonMass"+_dataPeriod).c_str());
     h1_eGammaPt     = (TH1D*)_inFile->Get("h1_eGammaPtWeightCombined");
     h1_muGammaPt    = (TH1D*)_inFile->Get("h1_muGammaPtWeightCombined");
     h1_eGammaPV     = (TH1D*)_inFile->Get("h1_eGammaPVWeightCombined");
@@ -35,7 +29,13 @@ WeightUtils::WeightUtils(string sampleName, string dataPeriod, string selection,
     h1_puReweight2011A  = (TH1D*)_inFile->Get("h1_PU2011A");
     h1_puReweight2011B  = (TH1D*)_inFile->Get("h1_PU2011B");
 
-    // Higgs pt weights
+    // Recoil weights
+    //h1_recoilLongMuon       = (TH1D*)_inFile->Get("h1_muonRecoilTransWeight");
+    //h1_recoilTransMuon      = (TH1D*)_inFile->Get("h1_muonRecoilTransWeight");
+    //h1_recoilLongElectron   = (TH1D*)_inFile->Get("h1_electronRecoilTransWeight");
+    //h1_recoilTransElectron  = (TH1D*)_inFile->Get("h1_electronRecoilTransWeight");
+
+    // higgs pt weights
     for (int i = 0; i < 8; ++i) {
         int higgsMass = 250+50*i;
         TFile *higgsFile = new TFile(Form("../data/Kfactors_%i_AllScales.root", higgsMass), "OPEN");
@@ -49,11 +49,15 @@ void WeightUtils::Initialize()
 {
     _puWeight = 1.;
     _zzWeight = 1.;
+    _glugluWeight = 1.;
+    _vbfWeight = 1.;
     _recoWeight = 1.;
     _triggerWeight = 1.;
     _gammaPtWeight = 1.;
     _gammaPVWeight = 1.;
     _gammaJetWeight = 1.;
+    _recoilLongWeight = 1.;
+    _recoilTransWeight = 1.;
 }
 
 void WeightUtils::SetDataBit(bool isRealData)
@@ -93,11 +97,27 @@ float WeightUtils::GetTotalWeight(int nPV, int nJets, TLorentzVector l1, TLorent
 
 float WeightUtils::PUWeight(int nPU)
 {
-    if (nPU < 24 && _dataPeriod == "2011A"){
+    float fraction2011A = 1.;
+    if (_selection == "muon")
+        fraction2011A = 0.46;
+    else if (_selection == "electron")
+        fraction2011A = 0.44;
+    else if (_selection == "gamma")
+        fraction2011A = 0.45;
+    else if (_selection == "muEG")
+        fraction2011A = 0.45;
+
+    if (_dataPeriod == "Combined") {
+        if (rnGen->Rndm() < fraction2011A) 
+            _puWeight = h1_puReweight2011A->GetBinContent(nPU+1); 
+        else 
+            _puWeight = h1_puReweight2011B->GetBinContent(nPU+1); 
+    } else if (nPU < 24 && _dataPeriod == "2011A")
         _puWeight = h1_puReweight2011A->GetBinContent(nPU+1); 
-    } else if (nPU < 35 && _dataPeriod == "2011B") {
+    else if (nPU < 35 && _dataPeriod == "2011B") 
         _puWeight = h1_puReweight2011B->GetBinContent(nPU+1); 
-    } else _puWeight = 0;
+    else 
+        _puWeight = 0;
 
     return _puWeight;
 }
@@ -138,111 +158,131 @@ float WeightUtils::VBFHiggsWeight(float genMass, int higgsMass)
 float WeightUtils::GammaWeight(int nPV, int nJets, TLorentzVector p1)
 {
     if (_selection == "eGamma") {
-      _gammaPtWeight = h1_eGammaPt->GetBinContent(h1_eGammaPt->FindBin(p1.Pt()));
-      
-      if (h1_eGammaPV->GetBinContent(1) != 1) {
-	_gammaPVWeight = h1_eGammaPV->GetBinContent(nPV);
-	if (_dataPeriod == "2011B") {
-	  if (nJets == 0) _gammaJetWeight = 1.063;
-	  if (nJets == 1) _gammaJetWeight = 1.0;
-	} else if (_dataPeriod == "2011A") {
-	  if (nJets == 0) _gammaJetWeight = 1.099;
-	  if (nJets == 1) _gammaJetWeight = 0.99;
-	}
-      }
+        //if (p1.Pt() < 250) {
+        //    _gammaPtWeight = h1_eGammaPt->GetBinContent(h1_eGammaPt->FindBin(p1.Pt()));
+        //} else { 
+        //    if (_dataPeriod == "2011A") _gammaPtWeight = -1.842 + 1.804*pow(p1.Pt(), 0.00757);
+        //    if (_dataPeriod == "2011B") _gammaPtWeight = -1.842 + 1.804*pow(p1.Pt(), 0.00562);
+        //}
+        _gammaPtWeight = h1_eGammaPt->GetBinContent(h1_eGammaPt->FindBin(p1.Pt()));
+
+        if (h1_eGammaPV->GetBinContent(1) != 1) {
+            _gammaPVWeight = h1_eGammaPV->GetBinContent(nPV);
+            if (_dataPeriod == "2011B") {
+                if (nJets == 0) _gammaJetWeight = 1.0;
+                if (nJets == 1) _gammaJetWeight = 1.0;
+            } else if (_dataPeriod == "2011A") {
+                if (nJets == 0) _gammaJetWeight = 1.0;
+                if (nJets == 1) _gammaJetWeight = 1.0;
+            }
+        }
     }
-    
+
     if (_selection == "muGamma") {
-      _gammaPtWeight = h1_muGammaPt->GetBinContent(h1_muGammaPt->FindBin(p1.Pt()));
-      
-      if (h1_muGammaPV->GetBinContent(1) != 1) {
-	_gammaPVWeight = h1_muGammaPV->GetBinContent(nPV);
-	if (_dataPeriod == "2011B") {
-	  if (nJets == 0) _gammaJetWeight = 1.149;
-	  if (nJets == 1) _gammaJetWeight = 1.025;
-	} else if (_dataPeriod == "2011A") {
-	  if (nJets == 0) _gammaJetWeight = 1.072;
-	  if (nJets == 1) _gammaJetWeight = 1.016;
-	}
-      }
+        //if (p1.Pt() < 250) {
+        //    _gammaPtWeight = h1_muGammaPt->GetBinContent(h1_muGammaPt->FindBin(p1.Pt()));
+        //} else { 
+        //    if (_dataPeriod == "2011A") _gammaPtWeight = -1.804 + 1.816*pow(p1.Pt(), 0.0037);
+        //    if (_dataPeriod == "2011B") _gammaPtWeight = -1.815 + 1.813*pow(p1.Pt(), 0.004);
+        //}
+        _gammaPtWeight = h1_muGammaPt->GetBinContent(h1_muGammaPt->FindBin(p1.Pt()));
+
+        if (h1_muGammaPV->GetBinContent(1) != 1) {
+            _gammaPVWeight = h1_muGammaPV->GetBinContent(nPV);
+            if (_dataPeriod == "2011B") {
+                if (nJets == 0) _gammaJetWeight = 1.0;
+                if (nJets == 1) _gammaJetWeight = 1.0;
+            } else if (_dataPeriod == "2011A") {
+                if (nJets == 0) _gammaJetWeight = 1.0;
+                if (nJets == 1) _gammaJetWeight = 1.0;
+            }
+        }
     }
     return _gammaPtWeight*_gammaPVWeight*_gammaJetWeight;
 }
 
 float WeightUtils::GetMuTriggerEff(TLorentzVector l1) const
 {
-  //float doubleMu7Scale[4][4] = {
-  //    {0.98, 0.974, 0.978, 0.978},
-  //    {0.947, 0.947, 0.948, 0.947},
-  //    {0.959, 0.958, 0.958, 0.956},
-  //    {0.926, 0.925, 0.913, 0.921}
-  //};
-  
-  float mu13_mu8Scale[4][4] = {
-    {0.9753, 0.9751, 0.9746, 0.9745},
-    {0.9627, 0.9568, 0.9563, 0.9575},
-    {0.9490, 0.9482, 0.9503, 0.9462},
-    {0.8594, 0.8614, 0.867, 0.8529}
-  };
-  
-  int ptBin = 0;
-  int etaBin = 0;
-  float binningPt[]  = {20., 30., 40., 50., 99999.};
-  float binningEta[] = {0., 0.8, 1.2, 2.1, 2.4};
-  float weight = 1.;
-  
-  for (int i = 0; i < 4; ++i) {
-    if (fabs(l1.Eta()) > binningEta[i] && fabs(l1.Eta()) <= binningEta[i+1]) {
-      etaBin = i;
-      break;
+    //float doubleMu7Scale[4][4] = {
+    //    {0.98, 0.974, 0.978, 0.978},
+    //    {0.947, 0.947, 0.948, 0.947},
+    //    {0.959, 0.958, 0.958, 0.956},
+    //    {0.926, 0.925, 0.913, 0.921}
+    //};
+
+    float mu13_mu8Scale[4][4] = {
+        {0.9753, 0.9751, 0.9746, 0.9745},
+        {0.9627, 0.9568, 0.9563, 0.9575},
+        {0.9490, 0.9482, 0.9503, 0.9462},
+        {0.8594, 0.8614, 0.867, 0.8529}
+    };
+
+    int ptBin = 0;
+    int etaBin = 0;
+    float binningPt[]  = {20., 30., 40., 50., 99999.};
+    float binningEta[] = {0., 0.8, 1.2, 2.1, 2.4};
+    float weight = 1.;
+
+    for (int i = 0; i < 4; ++i) {
+        if (fabs(l1.Eta()) > binningEta[i] && fabs(l1.Eta()) <= binningEta[i+1]) {
+            etaBin = i;
+            break;
+        }
     }
-  }
-  for (int i = 0; i < 4; ++i) {
-    if (l1.Pt() > binningPt[i] && l1.Pt() <= binningPt[i+1]) {
-      ptBin = i;
-      break;
+    for (int i = 0; i < 4; ++i) {
+        if (l1.Pt() > binningPt[i] && l1.Pt() <= binningPt[i+1]) {
+            ptBin = i;
+            break;
+        }
     }
-  }
-  weight = mu13_mu8Scale[etaBin][ptBin];
-  return weight;
+    weight = mu13_mu8Scale[etaBin][ptBin];
+    return weight;
 }
 
 float WeightUtils::GetElectronEff(TLorentzVector l1) const
 {
-  float eleScale[2][5] = {
-    {1.0, 0.938, 0.971, 0.980, 0.987},
-    {1.0, 0.967, 0.97, 0.989, 0.989}
-  };
-  
-  int ptBin = 0;
-  int etaBin = 0;
-  float binning[] = {10., 20., 30., 40., 50., 9999.};
-  float weight = 1.;
-  
-  if (fabs(l1.Eta()) < 1.479) {
-    etaBin = 0;
-  } else {
-    etaBin = 1;
-  }
-  
-  for (int i = 0; i < 5; ++i) {
-    if (l1.Pt() > binning[i] && l1.Pt() <= binning [i+1]) {
-      ptBin = i;
-      break;
+    float eleScale[2][5] = {
+        {1.0, 0.938, 0.971, 0.980, 0.987},
+        {1.0, 0.967, 0.97, 0.989, 0.989}
+    };
+
+    int ptBin = 0;
+    int etaBin = 0;
+    float binning[] = {10., 20., 30., 40., 50., 9999.};
+    float weight = 1.;
+
+    if (fabs(l1.Eta()) < 1.479) {
+        etaBin = 0;
+    } else {
+        etaBin = 1;
     }
-  }
-  weight = eleScale[etaBin][ptBin];
-  return weight;
+
+    for (int i = 0; i < 5; ++i) {
+        if (l1.Pt() > binning[i] && l1.Pt() <= binning [i+1]) {
+            ptBin = i;
+            break;
+        }
+    }
+    weight = eleScale[etaBin][ptBin];
+    return weight;
 }
 
 float WeightUtils::GetPhotonMass() const
 {
-  float photonMass = 91.2;
-  if (_selection == "eGamma") {
-    photonMass = h1_eGammaMass->GetRandom();
-  }
-  if (_selection == "muGamma") {
-    photonMass = h1_muGammaMass->GetRandom();
-  }
-  return photonMass;
+    float photonMass = 91.2;
+    if (_selection == "eGamma") {
+        photonMass = h1_eGammaMass->GetRandom();
+    }
+    if (_selection == "muGamma") {
+        photonMass = h1_muGammaMass->GetRandom();
+    }
+    return photonMass;
+}
+
+float WeightUtils::RecoilWeight(TLorentzVector recoilP4, TLorentzVector ZP4)
+{
+    //if (_selection == "muon") {
+    //    _recoilLongWeight = h1_recoilLongMuon->GetBinContent()
+    //}
+    return -1; //_recoilWeight;
 }
