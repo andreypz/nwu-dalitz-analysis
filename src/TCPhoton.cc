@@ -1,5 +1,5 @@
-#include "TCPhoton.h"
-#include<iostream>
+#include "../interface/TCPhoton.h"
+#include <iostream>
 
 TCPhoton::TCPhoton() {
 }
@@ -37,19 +37,50 @@ int TCPhoton::Charge() const {
 float TCPhoton::NormChi2() const {
    return _normChi2;
 }
-
-float TCPhoton::EmIso() const {
-   return _emIso;
+  //////// pfPhoton custom Iso ///////
+float TCPhoton::CustomEm() const {  //
+  return _customEm;                 //
+}                                   //
+                                    //
+float TCPhoton::CustomCh() const {  //
+  return _customCh;                 //
+}                                   //
+                                    //
+float TCPhoton::CustomNh() const {  //
+  return _customNh;                 //
+}                                   //
+  //////// pfPhoton custom Iso ///////
+float TCPhoton::EmIsoDR03() const {
+   return _emIsoDR03;
 }
 
-float TCPhoton::HadIso() const {
-   return _hadIso;
+float TCPhoton::HadIsoDR03() const {
+   return _hadIsoDR03;
 }
 
-float TCPhoton::TrkIso() const {
-   return _trkIso;
+float TCPhoton::TrkIsoDR03() const {
+   return _trkIsoDR03;
 }
 
+vector<float> TCPhoton::TrkIsoVtxDR03() const {
+   return _trkIsoVtxDR03;
+}
+
+float TCPhoton::EmIsoDR04() const {
+   return _emIsoDR04;
+}
+
+float TCPhoton::HadIsoDR04() const {
+   return _hadIsoDR04;
+}
+
+float TCPhoton::TrkIsoDR04() const {
+   return _trkIsoDR04;
+}
+
+vector<float> TCPhoton::TrkIsoVtxDR04() const {
+   return _trkIsoVtxDR04;
+}
 float TCPhoton::PFIsoNeutral() const {
    return _pfIsoNeutral;
 }
@@ -102,9 +133,9 @@ float  TCPhoton::ConversionDxy() const {
 	return _conversionDxy;
 }
 
-std::pair<TLorentzVector, TLorentzVector> TCPhoton::ConversionPairP4() const {
-    return _convP4;
-}
+//std::pair<TLorentzVector, TLorentzVector> TCPhoton::ConversionPairP4() const {
+//    return _convP4;
+//}
 
 // "set" methods ---------------------------------------------
 
@@ -126,19 +157,39 @@ void TCPhoton::SetCharge(int c){
   _charge = c;
 }
 
+void TCPhoton::SetCustomIso(float em, float nh, float ch){
+  _customEm = em;
+  _customCh = ch;
+  _customNh = nh;
+}
+
 void TCPhoton::SetNormChi2(float c){
   _normChi2 = c;
 }
-void TCPhoton::SetEMIso(float e){
-  _emIso = e;
+void TCPhoton::SetEMIsoDR03(float e){
+  _emIsoDR03 = e;
 }
-void TCPhoton::SetHADIso(float h){
-  _hadIso = h;
+void TCPhoton::SetHADIsoDR03(float h){
+  _hadIsoDR03 = h;
 }
-void TCPhoton::SetTRKIso(float t){
-    _trkIso = t;
+void TCPhoton::SetTRKIsoDR03(float t){
+    _trkIsoDR03 = t;
 }
-
+void TCPhoton::SetTRKIsoVtxDR03(float t){
+    _trkIsoVtxDR03.push_back(t);
+}
+void TCPhoton::SetEMIsoDR04(float e){
+  _emIsoDR04 = e;
+}
+void TCPhoton::SetHADIsoDR04(float h){
+  _hadIsoDR04 = h;
+}
+void TCPhoton::SetTRKIsoDR04(float t){
+    _trkIsoDR04 = t;
+}
+void TCPhoton::SetTRKIsoVtxDR04(float t){
+    _trkIsoVtxDR04.push_back(t);
+}
 void TCPhoton::SetPFIsoNeutral(float n){
     _pfIsoNeutral = n;
 }
@@ -148,7 +199,6 @@ void TCPhoton::SetPFIsoCharged(float c){
 void TCPhoton::SetPFIsoPhoton(float p){
     _pfIsoPhoton = p;
 }
-
 void TCPhoton::SetHadOverEm(float h){
   _hadOverEm = h;
 }
@@ -190,7 +240,7 @@ void TCPhoton::SetConversionDxy(float d) {
 	_conversionDxy = d;
 }
 
-void TCPhoton::SetConversionPairP4(TLorentzVector p1, TLorentzVector p2) {
-    _convP4.first = p1;
-    _convP4.second = p2;
-}
+//void TCPhoton::SetConversionPairP4(TLorentzVector p1, TLorentzVector p2) {
+//    _convP4.first = p1;
+//    _convP4.second = p2;
+//}

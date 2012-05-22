@@ -5,8 +5,8 @@
  * Created on April 30, 2010, 2:49 PM
  */
 
-#include "TCJet.h"
-#include<iostream>
+#include "../interface/TCJet.h"
+#include <iostream>
 
 TCJet::TCJet() {
    for (int i = 0; i < 8; ++i) {
@@ -22,20 +22,20 @@ TCJet::~TCJet() {
 // "get" methods -------------------------------------
 
 TLorentzVector TCJet::P4() const {
-   return _p4;
+    return _p4;
 }
 
 TVector2 TCJet::P2() const {
-   TVector2 v2(_p4.Px(), _p4.Py());
-   return v2;
+    TVector2 v2(_p4.Px(), _p4.Py());
+    return v2;
 }
 
 float TCJet::Et() const {
-   return _p4.Et();
+    return _p4.Et();
 }
 
 float TCJet::Pt() const {
-   return _p4.Pt();
+    return _p4.Pt();
 }
 
 // accessors for corrected jets (argument is level of correction)
@@ -196,12 +196,12 @@ int TCJet::JetFlavor() const {
 // "set" methods ---------------------------------------------
 
 void TCJet::SetP4(TLorentzVector p4) {
-   _p4 = p4;
+       _p4 = p4;
 }
 
 void TCJet::SetP4(float px, float py, float pz, float e) {
-   TLorentzVector p4(px, py, pz, e);
-   _p4 = p4;
+       TLorentzVector p4(px, py, pz, e);
+          _p4 = p4;
 }
 
 void TCJet::SetVtx(float vx, float vy, float vz) {
