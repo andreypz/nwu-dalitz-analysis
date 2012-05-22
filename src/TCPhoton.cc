@@ -1,4 +1,4 @@
-#include "../interface/TCPhoton.h"
+#include "TCPhoton.h"
 #include <iostream>
 
 TCPhoton::TCPhoton() {

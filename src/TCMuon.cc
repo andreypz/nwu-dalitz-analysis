@@ -1,4 +1,4 @@
-#include "../interface/TCMuon.h"
+#include "TCMuon.h"
 #include <iostream>
 
 TCMuon::TCMuon() {

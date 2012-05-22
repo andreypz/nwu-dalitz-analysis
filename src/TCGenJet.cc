@@ -5,7 +5,7 @@
  * Created on Nov 29, 2010, 1:08 PM
  */
 
-#include "../interface/TCGenJet.h"
+#include "TCGenJet.h"
 #include <iostream>
 
 TCGenJet::TCGenJet() {}

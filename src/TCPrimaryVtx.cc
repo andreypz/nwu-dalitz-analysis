@@ -5,7 +5,7 @@
  * Created on May 21, 2010, 11:16 AM
  */
 
-#include "../interface/TCPrimaryVtx.h"
+#include "TCPrimaryVtx.h"
 
 TCPrimaryVtx::TCPrimaryVtx() {
 }

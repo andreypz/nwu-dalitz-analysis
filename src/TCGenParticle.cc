@@ -1,4 +1,4 @@
-#include "../interface/TCGenParticle.h"
+#include "TCGenParticle.h"
 #include <iostream>
 
 TCGenParticle::TCGenParticle() {

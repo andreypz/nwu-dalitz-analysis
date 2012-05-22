@@ -1,4 +1,4 @@
-#include "../interface/TCTriggerObject.h"
+#include "TCTriggerObject.h"
 
 TCTriggerObject::TCTriggerObject() {
 }

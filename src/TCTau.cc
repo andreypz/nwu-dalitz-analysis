@@ -1,4 +1,4 @@
-#include "../interface/TCTau.h"
+#include "TCTau.h"
 #include <iostream>
 
 TCTau::TCTau() {

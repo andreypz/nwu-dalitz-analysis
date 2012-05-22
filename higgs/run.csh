@@ -32,7 +32,7 @@ gROOT->LoadMacro("../src/TCPhoton.cc+");
 gROOT->LoadMacro("../src/TCGenJet.cc+");
 gROOT->LoadMacro("../src/TCGenParticle.cc+");
 gROOT->LoadMacro("../src/TCPrimaryVtx.cc+");
-gROOT->LoadMacro("../src/TCTrigger.cc+");
+//#gROOT->LoadMacro("../src/TCTrigger.cc+");
 gROOT->LoadMacro("../src/TCTriggerObject.cc+");
 gROOT->LoadMacro("../plugins/WeightUtils.cc+");
 gROOT->LoadMacro("../plugins/TriggerSelector.cc+");
@@ -78,7 +78,7 @@ params.close();
   TStopwatch timer;
   timer.Start();
 
-  fChain->Process("higgsAnalyzer.C+");
+  //fChain->Process("higgsAnalyzer.C+");
 
   cout << "\n\nDone!" << endl;
   cout << "CPU Time : " << timer.CpuTime() << endl;
