@@ -162,7 +162,7 @@ void PrintYields(TList *bgList, TList *ggHList, TList *vbfList, TFile *dataFile,
 	oo<<iBkg<<pmSign<<iBkg_err<<separator;
 	oo.precision(0);
 	oo<<iData<<separator;
-	oo.precision(2);
+	oo.precision(3);
 	oo<<0.1*iggH<<separator<<0.1*ivbf<<separator;
 	oo.precision(3);
 	oo<<SrootSB<<separator<<SB<<endLine<<endl;  

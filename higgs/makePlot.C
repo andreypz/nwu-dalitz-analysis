@@ -20,9 +20,9 @@ void makePlot(Int_t sel=1, TString hPath="00")
   if(sel==2)  intLumi = 215.1 + 789.2 + 313.2 + 662.2 + 2511; //double ele	
   TString dir("test");
 
-  Bool_t doTest    = 0;
-  Bool_t doPhotons = 1;
-  Bool_t doOverview= 1;
+  Bool_t doTest    = 1;
+  Bool_t doPhotons = 0;
+  Bool_t doOverview= 0;
 
   TString ssel("none"), gsel("none");
   if (sel==1)  {
@@ -44,9 +44,9 @@ void makePlot(Int_t sel=1, TString hPath="00")
   
   // TFile* fmc_Wjets     = new TFile(Form("./%s/hhhh_Wjets.root",histoPath.Data() ));
 
-  TFile* fmc_ZZ        = new TFile(Form("./%s/hhhh_ZZ_1.root",histoPath.Data() ));
-  TFile* fmc_WW        = new TFile(Form("./%s/hhhh_WW_1.root",histoPath.Data() ));
-  TFile* fmc_WZ        = new TFile(Form("./%s/hhhh_WZ_1.root",histoPath.Data() ));
+  TFile* fmc_ZZ        = new TFile(Form("./%s/hhhh_ZZ.root",histoPath.Data() ));
+  TFile* fmc_WW        = new TFile(Form("./%s/hhhh_WW.root",histoPath.Data() ));
+  TFile* fmc_WZ        = new TFile(Form("./%s/hhhh_WZ.root",histoPath.Data() ));
 
   TFile *fmc_ggH[10], *fmc_vbfH[10];
   for(Int_t i=1; i<9; i++){
@@ -152,6 +152,7 @@ void makePlot(Int_t sel=1, TString hPath="00")
 
     c1->cd();
 
+    /*
     TH1F * test1 = fmc_ggH[1]->Get("Andrey/jet_N_17")->Clone();
     TH1F * test2 = fmc_ggH[2]->Get("Andrey/jet_N_17")->Clone();
 
@@ -161,6 +162,76 @@ void makePlot(Int_t sel=1, TString hPath="00")
     test1->Draw("hist");
     test2->Draw("same hist");   
     c1 -> SaveAs(testpath+"p03.png");
+    */
+
+
+    //gStyle->SetOptStat(11111);
+   
+    for(Int_t i = 0; i<3; i++)
+      {
+	Int_t mm = 8-2*i;
+	//cout<<i<<"  "<<mm<<endl;
+	TH1F * test3  = fmc_ggH[mm]->Get("Andrey/higgs_w_mass_4")->Clone();
+	TH1F * test4  = fmc_ggH[mm]->Get("Andrey/higgs_mass_4")->Clone();
+	test3->Scale(intLumi/1000./10);
+	test4->Scale(intLumi/1000./10);
+	test3->SetLineColor(kBlue+1);
+	test4->SetLineColor(kRed+1);
+	test3->Draw("hist");
+	test4->Draw("same hist");   
+	test3->SetTitle(";M_{H}; normalized");
+
+	leg05 = new TLegend(0.65,0.73,0.85,0.89);
+	leg05 -> SetTextSize(0.04);
+	leg05->AddEntry(test3, "weighted", "f");
+	leg05->AddEntry(test4, "no weight", "f");
+	leg05->SetFillColor(kWhite);
+	leg05 -> Draw();
+
+	c1 -> SaveAs(Form("%sp0%i.png",testpath.Data(),i+1));
+	test3->Delete();
+	test4->Delete();
+      }
+    
+
+    /*
+    for(Int_t i = 0; i<3; i++)
+      {
+	Int_t mm = 8-2*i;
+	//cout<<i<<"  "<<mm<<endl;
+	TH1F * test3  = fmc_vbfH[mm]->Get("Andrey/higgs_w_mass_4")->Clone();
+	TH1F * test4  = fmc_vbfH[mm]->Get("Andrey/higgs_mass_4")->Clone();
+	test3->Scale(intLumi/1000./10);
+	test4->Scale(intLumi/1000./10);
+	test3->SetLineColor(kBlue+1);
+	test4->SetLineColor(kRed+1);
+	test3->Draw("hist");
+	test4->Draw("same hist");   
+	test3->SetTitle(";M_{H}; normalized");
+
+	leg05 = new TLegend(0.65,0.73,0.85,0.89);
+	leg05 -> SetTextSize(0.04);
+	leg05->AddEntry(test3, "weighted", "f");
+	leg05->AddEntry(test4, "no weight", "f");
+	leg05->SetFillColor(kWhite);
+	leg05 -> Draw();
+
+	c1 -> SaveAs(Form("%sp0%i.png",testpath.Data(),i+5));
+	test3->Delete();
+	test4->Delete();
+      }
+    */
+
+    TH1F * test5  = fmc_ggH[8]->Get("Andrey/higgs_w_pt_4")->Clone();
+    TH1F * test6  = fmc_ggH[8]->Get("Andrey/higgs_pt_4")->Clone();
+    test5->Scale(intLumi/1000./10);
+    test6->Scale(intLumi/1000./10);
+    test5->SetLineColor(kBlue+1);
+    test6->SetLineColor(kRed+1);
+    test5->Draw("hist");
+    test6->Draw("same hist");   
+    test5->SetTitle(";Pt_{H}; normalized");
+    c1 -> SaveAs(testpath+"p04.png");
 
     //TH1F * test1 = fmc_ggH[1]->Get("Andrey/mt2_17")->Clone();
     //TH1F * test2 = fmc_ggH[3]->Get("Andrey/mt2_17")->Clone();

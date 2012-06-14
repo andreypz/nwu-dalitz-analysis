@@ -1,4 +1,4 @@
-// $Id: higgsAnalyzer.h,v 1.17 2011/12/19 19:28:38 andrey Exp $
+// $Id: higgsAnalyzer.h,v 1.18 2012/05/22 23:30:19 andrey Exp $
 
 #ifndef higgsAnalyzer_h
 #define higgsAnalyzer_h
@@ -26,17 +26,17 @@
 #include <TRandom3.h>
 
 #include "TClonesArray.h"
-#include "../interface/TCJet.h"
-#include "../interface/TCMET.h"
-#include "../interface/TCElectron.h"
-#include "../interface/TCMuon.h"
-#include "../interface/TCTau.h"
-#include "../interface/TCPhoton.h"
-#include "../interface/TCGenParticle.h"
-#include "../interface/TCGenJet.h"
-#include "../interface/TCPrimaryVtx.h"
-//#include "../interface/TCTrigger.h"
-#include "../interface/TCTriggerObject.h"
+#include "../src/TCJet.h"
+#include "../src/TCMET.h"
+#include "../src/TCElectron.h"
+#include "../src/TCMuon.h"
+#include "../src/TCTau.h"
+#include "../src/TCPhoton.h"
+#include "../src/TCGenParticle.h"
+#include "../src/TCGenJet.h"
+#include "../src/TCPrimaryVtx.h"
+//#include "../src/TCTrigger.h"
+#include "../src/TCTriggerObject.h"
 
 #include "../plugins/WeightUtils.h"
 #include "../plugins/TriggerSelector.h"
@@ -67,6 +67,7 @@ class higgsAnalyzer : public TSelector {
   Float_t lep1_eta, lep1_phi, lep1_pt;
   Float_t lep2_eta, lep2_phi, lep2_pt;
   Float_t dRjetlep1, dRjetlep2, ptLeadJet, etaLeadJet, phiLeadJet, ptLeadBJet;
+  Float_t hig_M, hig_Pt;
 
   ofstream nout[nC], fout[nC], ffout, ncout;
   TTree * _kinTree;
@@ -106,7 +107,9 @@ class higgsAnalyzer : public TSelector {
 
   TH1F *run_events[nC];
   TH1F *evt_weight[nC];
-  
+
+  TH1F *higgs_pt[nC], *higgs_mass[nC], *higgs_w_pt[nC], *higgs_w_mass[nC];
+   
  public :
   TTree          *fChain;   //!pointer to the analyzed TTree or TChain
   

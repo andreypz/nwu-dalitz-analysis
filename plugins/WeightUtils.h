@@ -19,6 +19,11 @@
 
 using namespace std;
 
+extern"C" {
+  void pwhg_cphto_reweight_(double *mh, double *gh, double *mt, int *BWflag, double *m, double *w);
+}
+
+
 class WeightUtils: public TObject {
     public:
         WeightUtils() {};
@@ -35,10 +40,11 @@ class WeightUtils: public TObject {
         float GammaWeight(int nPV, int nJets, TLorentzVector p1);
         float ZZWeight(TLorentzVector l1, TLorentzVector l2);
         float GluGluHiggsWeight(float higgsPt, int higgsMass);
-        float VBFHiggsWeight(float genMass, int higgsMass);
-        float RecoilWeight(TLorentzVector recoilP4, TLorentzVector ZP4);
+        //float VBFHiggsWeight(float genMass, int higgsMass);
+        //float RecoilWeight(TLorentzVector recoilP4, TLorentzVector ZP4);
         float GetTotalWeight(int nPV, int nJets, TLorentzVector l1, TLorentzVector l2);
 
+	float HiggsMassLineShapeWeight(float, float);
         float GetElectronEff(TLorentzVector l1) const;
         float GetMuTriggerEff(TLorentzVector l1) const;
         float GetPhotonMass() const;
@@ -62,8 +68,7 @@ class WeightUtils: public TObject {
         TH1D  *h1_muGammaPV;  
         TH1D  *h1_eGammaMass; 
         TH1D  *h1_muGammaMass;
-        TH1D  *h1_puReweight2011A;
-        TH1D  *h1_puReweight2011B;
+        TH1D  *h1_puReweight2011;
 
         TH1D  *h1_Higgs[8];
 

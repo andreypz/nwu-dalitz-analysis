@@ -12,12 +12,6 @@ WeightUtils::WeightUtils(string sampleName, string dataPeriod, string selection,
     _inFile = new TFile("../data/Reweight.root", "OPEN");
 
     // Photon weights
-    //h1_eGammaPt     = (TH1D*)_inFile->Get(("h1_eGammaPtWeight"+_dataPeriod).c_str());
-    //h1_muGammaPt    = (TH1D*)_inFile->Get(("h1_muGammaPtWeight"+_dataPeriod).c_str());
-    //h1_eGammaPV     = (TH1D*)_inFile->Get(("h1_eGammaPVWeight"+_dataPeriod).c_str());
-    //h1_muGammaPV    = (TH1D*)_inFile->Get(("h1_muGammaPVWeight"+_dataPeriod).c_str());
-    //h1_eGammaMass   = (TH1D*)_inFile->Get(("h1_diElectronMass"+_dataPeriod).c_str());
-    //h1_muGammaMass  = (TH1D*)_inFile->Get(("h1_diMuonMass"+_dataPeriod).c_str());
     h1_eGammaPt     = (TH1D*)_inFile->Get("h1_eGammaPtWeightCombined");
     h1_muGammaPt    = (TH1D*)_inFile->Get("h1_muGammaPtWeightCombined");
     h1_eGammaPV     = (TH1D*)_inFile->Get("h1_eGammaPVWeightCombined");
@@ -26,9 +20,8 @@ WeightUtils::WeightUtils(string sampleName, string dataPeriod, string selection,
     h1_muGammaMass  = (TH1D*)_inFile->Get("h1_diMuonMassCombined");
 
     // PU weights
-    h1_puReweight2011A  = (TH1D*)_inFile->Get("h1_PU2011A");
-    h1_puReweight2011B  = (TH1D*)_inFile->Get("h1_PU2011B");
-
+    h1_puReweight2011  = (TH1D*)_inFile->Get("h1_PU2011");
+  
     // Recoil weights
     //h1_recoilLongMuon       = (TH1D*)_inFile->Get("h1_muonRecoilTransWeight");
     //h1_recoilTransMuon      = (TH1D*)_inFile->Get("h1_muonRecoilTransWeight");
@@ -39,7 +32,7 @@ WeightUtils::WeightUtils(string sampleName, string dataPeriod, string selection,
     for (int i = 0; i < 8; ++i) {
         int higgsMass = 250+50*i;
         TFile *higgsFile = new TFile(Form("../data/Kfactors_%i_AllScales.root", higgsMass), "OPEN");
-        TH1D *h1_tmp = (TH1D*)higgsFile->GetDirectory("kfactors")->Get(Form("kfact_mh%i_ren%i_fac%i", higgsMass, higgsMass, higgsMass));
+	TH1D *h1_tmp = (TH1D*)higgsFile->GetDirectory("kfactors")->Get(Form("kfact_mh%i_ren%i_fac%i", higgsMass, higgsMass, higgsMass));
         h1_Higgs[i] = (TH1D*)h1_tmp->Clone();
         //higgsFile->Close();
     }
@@ -97,29 +90,12 @@ float WeightUtils::GetTotalWeight(int nPV, int nJets, TLorentzVector l1, TLorent
 
 float WeightUtils::PUWeight(int nPU)
 {
-    float fraction2011A = 1.;
-    if (_selection == "muon")
-        fraction2011A = 0.46;
-    else if (_selection == "electron")
-        fraction2011A = 0.44;
-    else if (_selection == "gamma")
-        fraction2011A = 0.45;
-    else if (_selection == "muEG")
-        fraction2011A = 0.45;
-
-    if (_dataPeriod == "Combined") {
-        if (rnGen->Rndm() < fraction2011A) 
-            _puWeight = h1_puReweight2011A->GetBinContent(nPU+1); 
-        else 
-            _puWeight = h1_puReweight2011B->GetBinContent(nPU+1); 
-    } else if (nPU < 24 && _dataPeriod == "2011A")
-        _puWeight = h1_puReweight2011A->GetBinContent(nPU+1); 
-    else if (nPU < 35 && _dataPeriod == "2011B") 
-        _puWeight = h1_puReweight2011B->GetBinContent(nPU+1); 
-    else 
-        _puWeight = 0;
-
-    return _puWeight;
+  if (_dataPeriod == "2011")
+    _puWeight = h1_puReweight2011->GetBinContent(nPU+1);
+  else 
+    _puWeight = 0;
+  
+  return _puWeight;
 }
 
 float WeightUtils::RecoWeight(TLorentzVector l1, TLorentzVector l2)
@@ -142,6 +118,58 @@ float WeightUtils::ZZWeight(TLorentzVector l1, TLorentzVector l2)
     return _zzWeight;
 }
 
+float WeightUtils::HiggsMassLineShapeWeight(float mass, float m_gen) 
+{
+  double mh, gh, mt, m, _w;
+  double decay_width;
+  int BWflag;
+
+  if(m_gen == 130){    decay_width =   0.00487; 
+  }else if(m_gen == 140){    decay_width =   0.00812; 
+  }else if(m_gen == 150){    decay_width =   0.01730; 
+  }else if(m_gen == 160){    decay_width =   0.08290; 
+  }else if(m_gen == 170){    decay_width =   0.38000; 
+  }else if(m_gen == 180){    decay_width =   0.63000; 
+  }else if(m_gen == 190){    decay_width =   1.04000; 
+  }else if(m_gen == 200){    decay_width =   1.43000; 
+  }else if(m_gen == 250){    decay_width =   4.04000; 
+  }else if(m_gen == 300){    decay_width =   8.43000; 
+  }else if(m_gen == 350){    decay_width =  15.20000; 
+  }else if(m_gen == 400){    decay_width =  29.20000; 
+  }else if(m_gen == 450){    decay_width =  46.95000; 
+  }else if(m_gen == 500){    decay_width =  68.00000;
+  }else if(m_gen == 550){    decay_width =  93.15000;
+  }else if(m_gen == 600){    decay_width = 123.00000;
+  }
+
+  mh = m_gen;
+  gh = decay_width; 
+  mt = 172.5;
+  m  = mass;
+  BWflag = 0;
+  _w  =  -1;  // invalid initial value                                                                                        
+
+
+  pwhg_cphto_reweight_(&mh, &gh, &mt, &BWflag, &m, &_w);
+
+/* Usage of  pwhg_cphto_reweight_() function:
+c     INPUT
+c     mh : Higgs boson mass (used in the POWHEG BOX generation)
+c     gh : Higgs boson width (used in the POWHEG BOX generation)
+c     mt : top quark mass
+c     BWflag : 0    if the sample to reweight was produced with fixed Higgs width
+c              1    if the sample to reweight was produced with running Higgs 
+c                   width (this is the default in the POWHEG BOX)
+c     m : virtuality of the produced Higgs boson resonance
+c     OUTPUT
+c     w : the reweighting factor 
+*/
+
+//  cout <<"mass= "<<mh<< "  w = " << _w << endl;
+
+  return _w;
+}
+
 float WeightUtils::GluGluHiggsWeight(float higgsPt, int higgsMass) 
 {
     int iMass = (higgsMass - 250)/50;
@@ -149,54 +177,35 @@ float WeightUtils::GluGluHiggsWeight(float higgsPt, int higgsMass)
     return _glugluWeight;
 }
 
-float WeightUtils::VBFHiggsWeight(float genMass, int higgsMass)
-{
-    _vbfWeight = float(higgsMass)/genMass;
-    return _vbfWeight;
-}
+
+//This looks wrong - we dont reweight like that
+//float WeightUtils::VBFHiggsWeight(float genMass, int higgsMass)
+//{
+//    _vbfWeight = float(higgsMass)/genMass;
+//    return _vbfWeight;
+//}
 
 float WeightUtils::GammaWeight(int nPV, int nJets, TLorentzVector p1)
 {
     if (_selection == "eGamma") {
-        //if (p1.Pt() < 250) {
-        //    _gammaPtWeight = h1_eGammaPt->GetBinContent(h1_eGammaPt->FindBin(p1.Pt()));
-        //} else { 
-        //    if (_dataPeriod == "2011A") _gammaPtWeight = -1.842 + 1.804*pow(p1.Pt(), 0.00757);
-        //    if (_dataPeriod == "2011B") _gammaPtWeight = -1.842 + 1.804*pow(p1.Pt(), 0.00562);
-        //}
         _gammaPtWeight = h1_eGammaPt->GetBinContent(h1_eGammaPt->FindBin(p1.Pt()));
 
         if (h1_eGammaPV->GetBinContent(1) != 1) {
-            _gammaPVWeight = h1_eGammaPV->GetBinContent(nPV);
-            if (_dataPeriod == "2011B") {
-                if (nJets == 0) _gammaJetWeight = 1.0;
-                if (nJets == 1) _gammaJetWeight = 1.0;
-            } else if (_dataPeriod == "2011A") {
-                if (nJets == 0) _gammaJetWeight = 1.0;
-                if (nJets == 1) _gammaJetWeight = 1.0;
-            }
-        }
+	  _gammaPVWeight = h1_eGammaPV->GetBinContent(nPV);
+	  if (nJets == 0) _gammaJetWeight = 1.0;
+	  if (nJets == 1) _gammaJetWeight = 1.0;
+	}
     }
-
+    
     if (_selection == "muGamma") {
-        //if (p1.Pt() < 250) {
-        //    _gammaPtWeight = h1_muGammaPt->GetBinContent(h1_muGammaPt->FindBin(p1.Pt()));
-        //} else { 
-        //    if (_dataPeriod == "2011A") _gammaPtWeight = -1.804 + 1.816*pow(p1.Pt(), 0.0037);
-        //    if (_dataPeriod == "2011B") _gammaPtWeight = -1.815 + 1.813*pow(p1.Pt(), 0.004);
-        //}
-        _gammaPtWeight = h1_muGammaPt->GetBinContent(h1_muGammaPt->FindBin(p1.Pt()));
-
-        if (h1_muGammaPV->GetBinContent(1) != 1) {
-            _gammaPVWeight = h1_muGammaPV->GetBinContent(nPV);
-            if (_dataPeriod == "2011B") {
-                if (nJets == 0) _gammaJetWeight = 1.0;
-                if (nJets == 1) _gammaJetWeight = 1.0;
-            } else if (_dataPeriod == "2011A") {
-                if (nJets == 0) _gammaJetWeight = 1.0;
-                if (nJets == 1) _gammaJetWeight = 1.0;
-            }
-        }
+      _gammaPtWeight = h1_muGammaPt->GetBinContent(h1_muGammaPt->FindBin(p1.Pt()));
+      
+      if (h1_muGammaPV->GetBinContent(1) != 1) {
+	_gammaPVWeight = h1_muGammaPV->GetBinContent(nPV);
+	if (nJets == 0) _gammaJetWeight = 1.0;
+	if (nJets == 1) _gammaJetWeight = 1.0;
+      }
+    
     }
     return _gammaPtWeight*_gammaPVWeight*_gammaJetWeight;
 }
@@ -279,10 +288,12 @@ float WeightUtils::GetPhotonMass() const
     return photonMass;
 }
 
-float WeightUtils::RecoilWeight(TLorentzVector recoilP4, TLorentzVector ZP4)
-{
+
+// Not used
+//float WeightUtils::RecoilWeight(TLorentzVector recoilP4, TLorentzVector ZP4)/
+//{
     //if (_selection == "muon") {
     //    _recoilLongWeight = h1_recoilLongMuon->GetBinContent()
     //}
-    return -1; //_recoilWeight;
-}
+//    return -1; //_recoilWeight;
+//}

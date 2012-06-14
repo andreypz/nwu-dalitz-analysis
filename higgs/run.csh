@@ -3,10 +3,19 @@ echo "Start runninng"
 
 cp template_higgsAnalyzer.C higgsAnalyzer.C
 
+if($5 == "") then
+    set period = "2011"
+else
+    set period = $5 
+endif
+
+echo $period
+
+
 sed -i "s/SUFFIX/$1/g" higgsAnalyzer.C
 sed -i "s/TRIGGER/$2/g" higgsAnalyzer.C
 sed -i "s/SELECTION/$4/g" higgsAnalyzer.C
-sed -i "s/PERIOD/$5/g" higgsAnalyzer.C
+sed -i "s/PERIOD/${period}/g" higgsAnalyzer.C
 
 
 if($6 == "b") then
@@ -23,6 +32,8 @@ using namespace std;
 
 void run() {
 
+gSystem->Load("../plugins/libShapeLine.so");
+
 gROOT->LoadMacro("../src/TCJet.cc+");
 gROOT->LoadMacro("../src/TCMET.cc+");
 gROOT->LoadMacro("../src/TCElectron.cc+");
@@ -37,6 +48,7 @@ gROOT->LoadMacro("../src/TCTriggerObject.cc+");
 gROOT->LoadMacro("../plugins/WeightUtils.cc+");
 gROOT->LoadMacro("../plugins/TriggerSelector.cc+");
 gROOT->LoadMacro("../plugins/ZedEventsLibrary.cc+");
+
      
 TChain* fChain = new TChain("ntupleProducer/eventTree");
 
@@ -78,7 +90,7 @@ params.close();
   TStopwatch timer;
   timer.Start();
 
-  //fChain->Process("higgsAnalyzer.C+");
+  fChain->Process("higgsAnalyzer.C+");
 
   cout << "\n\nDone!" << endl;
   cout << "CPU Time : " << timer.CpuTime() << endl;

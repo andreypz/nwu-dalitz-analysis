@@ -1,7 +1,7 @@
 #!/bin/csh
 source /uscmst1/prod/sw/cms/cshrc prod
-scram pro CMSSW CMSSW_4_2_8
-cd CMSSW_4_2_8/src
+scram pro CMSSW CMSSW_4_4_4
+cd CMSSW_4_4_4/src
 cmsenv 
 
 #### Leave this blank #######
@@ -32,6 +32,7 @@ cp $dir/../src/*.h .
 mkdir ../plugins
 cp $dir/../plugins/*.h  ../plugins
 cp $dir/../plugins/*.cc ../plugins
+cp $dir/../plugins/libShapeLine.so ../plugins
 
 
 mkdir ../data

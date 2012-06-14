@@ -1,4 +1,4 @@
-// $Id: template_higgsAnalyzer.C,v 1.28 2011/12/13 20:48:22 andrey Exp $
+// $Id: template_higgsAnalyzer.C,v 1.29 2011/12/19 19:28:38 andrey Exp $
 
 #define higgsAnalyzer_cxx
 
@@ -20,8 +20,8 @@ string  suffix         = "SUFFIX";
 vector<int> triggers (trigger, trigger + sizeof(trigger)/sizeof(int));
 
 UInt_t verboseLvl  = 0;
-Bool_t doZlibrary  = 1, isFromData=1;
-Bool_t makeKinTree = 1;
+Bool_t doZlibrary  = 0, isFromData=1;
+Bool_t makeKinTree = 0;
 
 /////////////////
 //Analysis cuts//
@@ -66,6 +66,7 @@ void higgsAnalyzer::Begin(TTree * /*tree*/)
     
     cout<<"Begin"<<endl;
     myRandom = new TRandom3();
+
 
     // Initialize utilities and selectors here //
     zLib            = new ZedEventsLibrary(selection, isFromData);
@@ -199,6 +200,18 @@ void higgsAnalyzer::Begin(TTree * /*tree*/)
 	evt_weight[n]      = new  TH1F(Form("evt_weight_%i",n), "Weights", 50,0,10);
 
 	run_events[n]     =  new  TH1F(Form("run_events_%i",n), "Events per run", 18000, 160000., 178000.);
+
+
+	if (suffix.compare(0, 5, "ggHZZ") == 0 || suffix.compare(0, 5, "ggHWW") == 0) {
+	  higgs_pt[n]     = new  TH1F(Form("higgs_pt_%i",n), "Higgs pt", 50,0,500);
+	  higgs_w_pt[n]   = new  TH1F(Form("higgs_w_pt_%i",n), "Higgs pt, wighted", 50,0,500);
+
+	  higgs_mass[n]   = new  TH1F(Form("higgs_mass_%i",n), "Higgs mass", 150, 0,1500);
+	  higgs_w_mass[n] = new  TH1F(Form("higgs_w_mass_%i",n), "Higgs mass, weighted", 150, 0,1500);
+	  //higgs_mass[n] = new  TH1F(Form("higgs_mass_%i",n), "Higgs mass", 70,100,800);
+	}
+
+
        }
     if (verboseLvl>0){
       ffout.open("./events_printout_SUFFIX_final.txt",ofstream::out);
@@ -462,9 +475,9 @@ bool higgsAnalyzer::Process(Long64_t entry)
 	  if (thisPhoton->Pt() < photonPtCut[0] || thisPhoton->Pt() > photonPtCut[1]) continue;	  
 	  if ( 
 	      thisPhoton->Pt() >10
-	      && thisPhoton->EmIso()         < (4.2 + 0.006 *thisPhoton->Pt())
-	      && thisPhoton->HadIso()        < (2.2 + 0.0025*thisPhoton->Pt())
-	      && thisPhoton->TrkIso()        < (2.0 + 0.001 *thisPhoton->Pt())
+	      //&& thisPhoton->EmIso()         < (4.2 + 0.006 *thisPhoton->Pt())
+	      //&& thisPhoton->HadIso()        < (2.2 + 0.0025*thisPhoton->Pt())
+	      //&& thisPhoton->TrkIso()        < (2.0 + 0.001 *thisPhoton->Pt())
 	      && thisPhoton->HadOverEm()     < 0.05 
 	      && thisPhoton->SigmaIEtaIEta() > 0.001
 	      && thisPhoton->SigmaIEtaIEta() < 0.013
@@ -641,8 +654,9 @@ bool higgsAnalyzer::Process(Long64_t entry)
         return kTRUE;
     }
     //Event Weight
-    float evtWeight = 1;
-    evtWeight   = weighter->GetTotalWeight(primaryVtx->GetSize(), jetP4.size(), Lepton1, Lepton2);
+    float evtWeight = 1.0;\
+    // Doesn't work for now. Need to check with Brian/Nate
+    evtWeight   = weighter->GetTotalWeight(nPUVertices, jetP4.size(), Lepton1, Lepton2);
 
     if ((selection == "gamma" || selection == "muGamma" || selection == "eGamma") && isRealData) {
       //cout<<"Weight, before/after prescale   "<<evtWeight;
@@ -662,10 +676,11 @@ bool higgsAnalyzer::Process(Long64_t entry)
     // Gen particles //
     ///////////////////
     
-    if (!isRealData && (suffix.compare(2, 3, "HZZ") == 0 || suffix.compare(2, 3, "HWW") == 0)) {
+    if (!isRealData && (suffix.compare(2, 3, "HZZ") == 0 || suffix.compare(2, 3, "HWW") == 0 || suffix.compare(3, 3, "HZZ") == 0)) {
       vector<TLorentzVector> genLeptons;
       vector<TLorentzVector> genNeutrinos;
     
+      // NLO k-faktors weights
       for (int i = 0; i < genParticles->GetSize(); ++i) {
 	TCGenParticle* thisParticle = (TCGenParticle*) genParticles->At(i);    
 	
@@ -682,19 +697,37 @@ bool higgsAnalyzer::Process(Long64_t entry)
 	     || fabs(thisParticle->GetPDGId()) == 16) 
 	    && thisParticle->Mother() ==23
 	    ) genNeutrinos.push_back(thisParticle->P4());
+
+
+	//if (thisParticle->GetPDGId() == 25)
+	// {
+	//
+	// }
       }
+
       if (genLeptons.size() > 1 && genNeutrinos.size() > 1) {
-	float higgsPt   = (genLeptons[0]+genLeptons[1]+genNeutrinos[0]+genNeutrinos[1]).Pt();
-	//float genMass = (genLeptons[0]+genLeptons[1]+genNeutrinos[0]+genNeutrinos[1]).M();
-	//h1_HiggsPt->Fill(higgsPt);
-	//h1_HiggsMass->Fill(genMass);
+	hig_Pt   = (genLeptons[0]+genLeptons[1]+genNeutrinos[0]+genNeutrinos[1]).Pt();
+	hig_M    = (genLeptons[0]+genLeptons[1]+genNeutrinos[0]+genNeutrinos[1]).M();
+
+	Int_t i_mass = 0;
 	if (suffix.compare(0, 5, "ggHZZ") == 0 || suffix.compare(0, 5, "ggHWW") == 0) {
-	  Int_t i_mass = atoi(suffix.substr(5,3).c_str());
-	  evtWeight *= weighter->GluGluHiggsWeight(higgsPt, i_mass);
-	  cout<<"imass: "<<i_mass<<"   evtWeight= "<<evtWeight<<endl;	  
-	  //if (suffix.compare(0, 3, "VBF") == 0 ) evtWeight *= weighter->VBFHiggsWeight(genMass, atoi(suffix.substr(3,3).c_str()));
+	  i_mass = atoi(suffix.substr(5,3).c_str());
+	  evtWeight *= weighter->GluGluHiggsWeight(hig_Pt, i_mass);
+	} 
+	else if (suffix.compare(0, 6, "VBFHZZ") == 0){
+	  i_mass = atoi(suffix.substr(6,3).c_str()); //for vbf name
 	}
+	
+	//cout<<"nPU vertic = "<<nPUVertices<<"  evtWeight before reweighting  "<<evtWeight<<endl;
+	
+	// Higgs mass lineshapes weights
+	evtWeight *= weighter->HiggsMassLineShapeWeight(hig_M, i_mass);
+	//cout<<"imass: "<<i_mass<<"   genMass from gen Z's: "<<hig_M<<"   evtWeight= "<<evtWeight<<endl;	  
+
       }
+      
+      //cout<<"Higgs Pt and Mass form ZZ: "<<hig_Pt<<"  "<<hig_M<<endl;
+      
     }
    
 
@@ -997,6 +1030,8 @@ void higgsAnalyzer::Terminate()
   cout<<"| H400                        |\t"<< nEvents[11] <<"\t|"<<nEventsWeighted[11] <<"\t|"<<endl;
   cout<<"|                           |\t"<< nEvents[12] <<"\t|"<<nEventsWeighted[12] <<"\t|"<<endl;
   cout<<"| H500                       |\t"<< nEvents[13] <<"\t|"<<nEventsWeighted[13] <<"\t|"<<endl;
+  cout<<"| H550                       |\t"<< nEvents[14] <<"\t|"<<nEventsWeighted[14] <<"\t|"<<endl;
+  cout<<"| H600                       |\t"<< nEvents[15] <<"\t|"<<nEventsWeighted[15] <<"\t|"<<endl;
   
       
     //Normalization to 1fb and coloring the histograms
@@ -1224,6 +1259,15 @@ void higgsAnalyzer::FillHistos(Int_t num, Double_t weight){
   // if(selection =="muGamma" || selection =="eGamma" || selection =="gamma"){
   
   ph_nGamma[num] -> Fill(nGamma);
+
+
+  if (suffix.compare(0, 5, "ggHZZ") == 0 || suffix.compare(0, 5, "ggHWW") == 0) {
+    higgs_pt[num]   -> Fill(hig_Pt);
+    higgs_mass[num] -> Fill(hig_M);
+    higgs_w_pt[num]   -> Fill(hig_Pt, weight);
+    higgs_w_mass[num] -> Fill(hig_M, weight);
+ 
+  }
 }
 
 
