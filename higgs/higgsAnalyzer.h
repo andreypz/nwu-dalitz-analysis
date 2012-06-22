@@ -1,4 +1,4 @@
-// $Id: higgsAnalyzer.h,v 1.18 2012/05/22 23:30:19 andrey Exp $
+// $Id: higgsAnalyzer.h,v 1.19 2012/06/14 20:56:22 andrey Exp $
 
 #ifndef higgsAnalyzer_h
 #define higgsAnalyzer_h
@@ -158,7 +158,7 @@ class higgsAnalyzer : public TSelector {
   //For counting events
   //        int          nEvents[16];
   //For counting weighted events
-  float        nEventsWeighted[nC];
+  float nEventsWeighted[nC];
   
   UInt_t nEvents[nC];
   UInt_t nEventsPassNoiseFilter[6][nC]; //1-Hcal, 2-Ecal, 3- Scraping, 4-CSCTight, 5-CSCLoose,   0-passed all

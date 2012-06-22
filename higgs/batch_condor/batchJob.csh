@@ -38,9 +38,9 @@ cp $dir/../plugins/libShapeLine.so ../plugins
 mkdir ../data
 cp -r $dir/../data/*.root ../data/
 
-cp $dir/run.csh .
-chmod 755 run.csh
-./run.csh ${suffix} ${trigger} ${dataName} ${selection} ${period} b
+cp $dir/run.py .
+chmod 755 run.py
+./run.py ${suffix} ${selection}  ${dataName} ${trigger}  ${period} b
 
 
 #set printDir =  printout_${dataName}

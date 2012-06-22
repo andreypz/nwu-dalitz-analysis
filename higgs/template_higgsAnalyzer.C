@@ -1,4 +1,4 @@
-// $Id: template_higgsAnalyzer.C,v 1.29 2011/12/19 19:28:38 andrey Exp $
+// $Id: template_higgsAnalyzer.C,v 1.30 2012/06/14 20:56:22 andrey Exp $
 
 #define higgsAnalyzer_cxx
 
@@ -64,7 +64,7 @@ void higgsAnalyzer::Begin(TTree * /*tree*/)
     TString option = GetOption();
     TH1::SetDefaultSumw2(kTRUE);
     
-    cout<<"Begin"<<endl;
+    cout<<"\n***      Begin the Analyzer      ****"<<endl;
     myRandom = new TRandom3();
 
 
@@ -84,7 +84,12 @@ void higgsAnalyzer::Begin(TTree * /*tree*/)
 
     if (doZlibrary)  zLib->CreateLibrary();
     
-
+    for (Int_t n=0; n<nC; n++)
+      {
+      //cout<<"zeroing the array: "<<n<<endl;
+      nEvents[n]=0;
+      nEventsWeighted[n]=0;
+    }
 
     for(Int_t n=0; n<nC; n++)
       met0_et[n]       = new TH1F(Form("met0_et_%i",n), "met0_et", 40, 0,400);
@@ -265,11 +270,12 @@ bool higgsAnalyzer::Process(Long64_t entry)
     ++nEventsWeighted[0];
     MET = 0;
     FillHistosNoise(0, 1);
-    
+
+    //cout<<nEvents[0]<<endl;
     if (nEvents[0] == 1) weighter->SetDataBit(isRealData);
-    //if(nEvents[0]>1500) return kTRUE;
+    if(nEvents[0]>200) return kTRUE;
     
-    
+    //cout<<"dbg"<<endl;    
     if (nEvents[0] % (int)5e4 == 0) cout<<nEvents[3]<<" events passed of "<<nEvents[0]<<" checked! (at Z-peak cut)"<<endl;
 
     //if (selection == "gamma"   && (eventNumber % 3) != 0) return kTRUE;
@@ -298,6 +304,8 @@ bool higgsAnalyzer::Process(Long64_t entry)
     CountEvents(1);
     ++nEventsWeighted[1];
     FillHistosNoise(1, 1);
+
+    //cout<<"dbg"<<endl;    
 
     ////////////////////////////
     //Check the event vertices//
@@ -730,6 +738,8 @@ bool higgsAnalyzer::Process(Long64_t entry)
       
     }
    
+    //cout<<"dbg"<<endl;    
+
 
 
     /////////////////////
@@ -1006,6 +1016,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
     nEventsWeighted[13] += evtWeight;
     */
 
+    //cout<<"dbg END"<<endl;    
 
     return kTRUE;
 }
