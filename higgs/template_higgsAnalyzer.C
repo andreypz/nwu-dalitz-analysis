@@ -1,4 +1,4 @@
-// $Id: template_higgsAnalyzer.C,v 1.30 2012/06/14 20:56:22 andrey Exp $
+// $Id: template_higgsAnalyzer.C,v 1.31 2012/06/22 22:11:44 andrey Exp $
 
 #define higgsAnalyzer_cxx
 
@@ -374,14 +374,14 @@ bool higgsAnalyzer::Process(Long64_t entry)
                  && thisElec->SigmaIetaIeta()           < 0.01  
                  && fabs(thisElec->DphiSuperCluster())  < 0.06  
                  && fabs(thisElec->DetaSuperCluster())  < 0.004 
-                 && thisElec->HadOverEm()               < 0.04      
+                 && thisElec->HadOverEm()               < 0.12      
                 ) ||
                 (fabs(thisElec->Eta()) >  1.556  
                  && eleISOendcap                        < 0.1 
                  && thisElec->SigmaIetaIeta()           < 0.03  
                  && fabs(thisElec->DphiSuperCluster())  < 0.03  
                  && fabs(thisElec->DetaSuperCluster())  < 0.007 
-                 && thisElec->HadOverEm()               < 0.15
+                 && thisElec->HadOverEm()               < 0.1
                 )) elecPass = true; 
 
         if (elecPass) { 
@@ -403,13 +403,13 @@ bool higgsAnalyzer::Process(Long64_t entry)
 		     && thisElec->SigmaIetaIeta()           < 0.03
 		     && fabs(thisElec->DphiSuperCluster())  < 0.7
 		     && fabs(thisElec->DetaSuperCluster())  < 0.01
-		     && thisElec->HadOverEm()               < 0.15
+		     && thisElec->HadOverEm()               < 0.99 //noc cut!
 		     )
 		    )
 		   && thisElec->Pt() > 10
 		   && thisElec->PassConversion(95)
-		   && fabs(thisElec->Dxy(pvPosition)) < 0.02
-		   && fabs(thisElec->Dz(pvPosition)) < 0.1
+		   && fabs(thisElec->Dxy(pvPosition)) < 0.04
+		   && fabs(thisElec->Dz(pvPosition)) < 0.2
 		   ) looseLeptons.push_back(thisElec->P4());
 	
     } 
@@ -434,8 +434,8 @@ bool higgsAnalyzer::Process(Long64_t entry)
         if (
 	    thisMuon->Pt() > 3
 	    && thisMuon->NumberOfValidTrackerHits() > 10
-	    && fabs(thisMuon->Dxy(pvPosition)) < 0.2
-	    && fabs(thisMuon->Dz(pvPosition))  < 0.2 
+	    && fabs(thisMuon->Dxy(pvPosition)) < 0.3
+	    && fabs(thisMuon->Dz(pvPosition))  < 0.30 
 	    && (thisMuon->TrkIso() + thisMuon->HadIso() + thisMuon->EmIso() - rhoFactor*TMath::Pi()*0.09)/thisMuon->Pt() < 0.15
 	    ) {
 	  softMuons++;
@@ -446,8 +446,8 @@ bool higgsAnalyzer::Process(Long64_t entry)
 	     && thisMuon->NumberOfValidPixelHits()   > 0
 	     && thisMuon->NumberOfMatches() > 1
 	     && thisMuon->NormalizedChi2()  < 10
-	     && fabs(thisMuon->Dxy(pvPosition)) < 0.02
-	     && fabs(thisMuon->Dz(pvPosition))  < 0.1 
+	     && fabs(thisMuon->Dxy(pvPosition)) < 0.2
+	     && fabs(thisMuon->Dz(pvPosition))  < 0.5 
 	     && (thisMuon->TrkIso() + thisMuon->HadIso() + thisMuon->EmIso() - rhoFactor*TMath::Pi()*0.09)/thisMuon->Pt() < 0.15
 	     )	  muons.push_back(*thisMuon);
      
@@ -617,7 +617,8 @@ bool higgsAnalyzer::Process(Long64_t entry)
         /////////////////////
 
         if (electrons.size() < 2) return kTRUE;
-        if (electrons[0].Charge() == electrons[1].Charge()) return kTRUE;
+	//no opposite charge requirement
+	//if (electrons[0].Charge() == electrons[1].Charge()) return kTRUE;
 
         ZP4           = electrons[0].P4() + electrons[1].P4();
         reducedMet1P4 = GetReducedMET(sumJetP4,  electrons[0].P4(), electrons[1].P4(), metP4, 1);
@@ -629,11 +630,12 @@ bool higgsAnalyzer::Process(Long64_t entry)
     } else if (selection == "muon") {
 
         //////////////////////////////////////////
-        // 2 oppositely charged muons  w/ pt>20 //
+        // 2 (oppositely charged) muons  w/ pt>20 //
         //////////////////////////////////////////
 
         if (muons.size() < 2) return kTRUE;
-        if (muons[0].Charge() == muons[1].Charge()) return kTRUE;
+	//no opposite charge requirement
+        //if (muons[0].Charge() == muons[1].Charge()) return kTRUE;
 
         ZP4           = muons[0].P4() + muons[1].P4();
         reducedMet1P4 = GetReducedMET(sumJetP4,  muons[0].P4(), muons[1].P4(), metP4, 1);

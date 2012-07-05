@@ -26,6 +26,7 @@ echo "Copy files"
 
 cp $dir/higgsAnalyzer.h .
 cp $dir/*.C .
+cp $dir/config.py .
 cp $dir/../src/*.cc .
 cp $dir/../src/*.h .
 

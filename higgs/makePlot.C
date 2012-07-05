@@ -18,8 +18,9 @@ void makePlot(Int_t sel=1, TString hPath="00")
   Float_t intLumi = 1;
   if(sel==1)  intLumi = 215.1 + 927.6 + 370.9 + 663.0 + 2511; //double mu	
   if(sel==2)  intLumi = 215.1 + 789.2 + 313.2 + 662.2 + 2511; //double ele	
-  TString dir("test");
+  TString dir = hPath.Data();
 
+  Bool_t plotdiLepton=1, plotLepton=1, plotJet=0, plotMet=0, plotSpecial=0, plotMisc=0;
   Bool_t doTest    = 1;
   Bool_t doPhotons = 0;
   Bool_t doOverview= 0;
@@ -242,7 +243,7 @@ void makePlot(Int_t sel=1, TString hPath="00")
 
   }
   
-  if(doOverview){
+  if(plotMet){
       //-------------------------//
       //------- Met plots--------//
       //-------------------------//  
@@ -277,11 +278,14 @@ void makePlot(Int_t sel=1, TString hPath="00")
       c2 -> SaveAs(imgpath+"Met/m10.png");
       drawMuliPlot("","redMET2", Form("met7_et_%i", F0), 1, 0.1, 1e6, 0,2.9, c2, leg01, list_overlay, list_bg, intLumi, sel);
       c2 -> SaveAs(imgpath+"Met/m11.png");
+  }
 
-      //-------------------------//
-      //------- Jet plots--------//
-      //-------------------------//  
-
+  //-------------------------//
+  //------- Jet plots--------//
+  //-------------------------//  
+  
+  if(plotJet)
+    {
       drawMuliPlot("","N jets", Form("jet_N_%i", F0), 1, 0.1, 1e6, 0,2.9, c2, leg01, list_overlay, list_bg, intLumi, sel);
       c2 -> SaveAs(imgpath+"Jet/j01.png");
       drawMuliPlot("","#Delta#phi(MET, clos jet), p_{T}>30, |#eta|<4.8", Form("met1_dPhiClosJet1_%i", F0), 1, 0.1, 1e7, 0,2, c2, leg01, list_overlay, list_bg, intLumi, sel);
@@ -306,6 +310,10 @@ void makePlot(Int_t sel=1, TString hPath="00")
 
       drawMuliPlot("MET>40, b-veto", "N  jets", Form("jet_N_%i", F2), 0, 0.1, 3000, 0,1.9, c2, leg01, list_overlay, list_bg, intLumi, sel);
       c2 -> SaveAs(imgpath+"Jet/j09.png");
+    }
+
+  if(plotdiLepton)
+    {
      
       //-------------------------------//
       //------- Di-Lepton plots--------//
@@ -327,7 +335,10 @@ void makePlot(Int_t sel=1, TString hPath="00")
 
       drawMuliPlot("","dPhi(Di-lep, Met)", Form("di_dPhiMet_%i", F0), 1, 0.1, 1e6, 0.5,1.9, c2, leg01, list_overlay, list_bg, intLumi, sel);
       c2 -> SaveAs(imgpath+"diLepton/di07.png");
+    }
 
+  if(plotLepton)
+    {
       //----------------------------//
       //------- Lepton plots--------//
       //----------------------------//  
@@ -354,7 +365,10 @@ void makePlot(Int_t sel=1, TString hPath="00")
       c2 -> SaveAs(imgpath+"Lepton/l09.png");
       drawMuliPlot("","pt_{lep2}/pt_{lep1}", Form("l0_ptRatio_%i", F0), 1, 0.1, 1e6, 0.5,1.4, c2, leg01, list_overlay, list_bg, intLumi, sel); 
       c2 -> SaveAs(imgpath+"Lepton/l10.png");
+    }
 
+  if(plotMisc)
+    {
       //----------------------------//
       //---Misc plots: vtx etc -----//
       //----------------------------//  
@@ -378,19 +392,15 @@ void makePlot(Int_t sel=1, TString hPath="00")
       //drawMuliPlot("","N photons", Form("ph_nGamma_%i", F0), 1, 0.1, 1e6, 0.5,2.9, c2, leg01, list_overlay, list_bg, intLumi, sel); 
       //c2 -> SaveAs(imgpath+"Misc/mis07.png");
 
+    }
 
-      //--- Create hml page ---//
-      //TString afs = "~/afs/public_html/higgs";
-      //system (Form("python %s/writeIntexHTML.py %s/%s  > stdout.txt", afs.Data(), afs.Data(), dir.Data() ));
-      
-
-      //--------------------//
-      //---Copy printouts---//
-      //--------------------//
-
-      //      system (Form("cp %s/events_printout_* %s/printouts/", histoPath.Data(), imgpath.Data()));
-      //system (Form("cp -r %s/printout_Double* %s/printouts/", histoPath.Data(), imgpath.Data()));
-
+  //--------------------//
+  //---Copy printouts---//
+  //--------------------//
+  
+  //      system (Form("cp %s/events_printout_* %s/printouts/", histoPath.Data(), imgpath.Data()));
+  //system (Form("cp -r %s/printout_Double* %s/printouts/", histoPath.Data(), imgpath.Data()));
+  
     /*
     drawMuliPlot("","projMET/q_{T}", Form("_%i", F0), 1, 0.1, 1e6, 0,3, ____qt[F0], c2, leg01, list_overlay, list_bg, intLumi, sel);
     c2 -> SaveAs(imgpath+"ov02.png");
@@ -424,7 +434,7 @@ void makePlot(Int_t sel=1, TString hPath="00")
       
   */
   
-  }
+  
 
   cout<<"\n\n   -- end of job  --"<<endl;
   

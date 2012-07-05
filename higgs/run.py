@@ -157,6 +157,6 @@ ff.close()
 os.system('root -b -q run.C')
 """
 
-os.system('mv a_higgsHistograms.root hhhh_$3.root')
+os.system('mv a_higgsHistograms.root hhhh_'+sample+'.root')
 
 print "End runninng"
