@@ -1,0 +1,115 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+  <style>
+    body {position:absolute; top:0px; bottom:0px; left:0px; right:0px; margin: 0 auto; width: 99%; height: 85%; background-color: #6F5C8F;
+      color: #EAF1FB;}
+    section { display: block; }
+    section#plots { width: 80%; height: 90%; float: left; padding: 0.5%; background-color: #FFFFFF; }
+    article > header { text-decoration: underline; margin-bottom: 0.5%; }
+    aside { float: left; width: 15%; padding: 0.5%; font-size: 100%; }
+    footer { overflow: hidden; clear: both; text-align: center; padding: 1.5%; }
+    nav  {
+        display: block;
+        width: 100%;
+        overflow: hidden;
+    }
+
+    nav ul {
+            margin: 1% auto;
+            padding: 1%;
+            float: left;
+            list-style: none;
+            background: #444;
+            background: rgba(0,0,0,.2);
+            -moz-border-radius: .5em;
+            -webkit-border-radius: .5em;
+            border-radius: .5em;
+            -moz-box-shadow: 0 1px 0 rgba(255,255,255,.2), 0 2px 1px rgba(0,0,0,.8) inset;
+            -webkit-box-shadow: 0 1px 0 rgba(255,255,255,.2), 0 2px 1px rgba(0,0,0,.8) inset;
+            box-shadow: 0 1px 0 rgba(255,255,255,.2), 0 2px 1px rgba(0,0,0,.8) inset;
+    }
+
+    nav li {
+            float: left;
+
+    }
+
+    nav a {
+            float:left;
+            padding: .8em 1.5em;
+            text-decoration: none;
+            color: #555;
+            text-shadow: 0 1px 0 rgba(255,255,255,.5);
+            font: bold 1.1em/1 'trebuchet MS', Arial, Helvetica;
+            letter-spacing: 1px;
+            text-transform: none;
+            border-width: 1px;
+            border-style: solid;
+            border-color: #fff #ccc #999 #eee;
+            background: #c1c1c1;
+            background: -moz-linear-gradient(#f5f5f5, #c1c1c1);
+            background: -webkit-gradient(linear, left top, left bottom, from(#f5f5f5), to(#c1c1c1));
+            background: -webkit-linear-gradient(#f5f5f5, #c1c1c1);
+            background: -o-linear-gradient(#f5f5f5, #c1c1c1);
+            background: -ms-linear-gradient(#f5f5f5, #c1c1c1);
+            background: linear-gradient(#f5f5f5, #c1c1c1);
+     }
+
+    nav a:hover, nav a:focus {
+            outline: 0;
+            color: #fff;
+            text-shadow: 0 1px 0 rgba(0,0,0,.2);
+            background: #fac754;
+            background: -moz-linear-gradient(#fac754, #f8ac00);
+            background: -webkit-gradient(linear, left top, left bottom, from(#fac754), to(#f8ac00));
+            background: -webkit-linear-gradient(#fac754, #f8ac00);
+            background: -o-linear-gradient(#fac754, #f8ac00);
+            background: -ms-linear-gradient(#fac754, #f8ac00);
+            background: linear-gradient(#fac754, #f8ac00);
+    }
+
+    nav a:active {
+            -moz-box-shadow: 0 0 2px 2px rgba(0,0,0,.3) inset;
+            -webkit-box-shadow: 0 0 2px 2px rgba(0,0,0,.3) inset;
+            box-shadow: 0 0 2px 2px rgba(0,0,0,.3) inset;
+    }
+
+    nav li:first-child a {
+            border-left: 0;
+            -moz-border-radius: 4px 0 0 4px;
+            -webkit-border-radius: 4px 0 0 4px;
+            border-radius: 4px 0 0 4px;
+    }
+
+    nav li:last-child a {
+            border-right: 0;
+            -moz-border-radius: 0 4px 4px 0;
+            -webkit-border-radius: 0 4px 4px 0;
+            border-radius: 0 4px 4px 0;
+    }
+  </style>
+  </head>
+  <body style="font: 65% Lucida Grande, Trebuchet MS">
+    <header>
+      <hgroup>
+      
+        <h2>H &rarr; ZZ &rarr; 2l2nu plots.   Page created on {DATE}</h2>
+        
+      </hgroup>
+    </header>
+    <nav>
+      <ul>
+{MENU}
+      </ul>
+    </nav>
+    <section id="plots">
+    <iframe src="diLepton.html" name="iframe_a" frameborder="0" width = "100%" height = "100%"></iframe>
+    </section>
+    <aside>
+{ASIDEMESSAGE}
+    </aside>
+<footer>nwu</footer>
+  </body>
+</html>

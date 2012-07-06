@@ -80,15 +80,15 @@ b.JobConfig('DYjets', dCache+'/bpollack/Apr17/MC/ZJetsV2/', 10, 'DYjets 0 '+sele
 signal = []
 
 signal.extend([
-#b.JobConfig('ggHZZ200', dCache+'/andreypz/nuTuples_v1_7TeV/ggHZZ200', 1, 'ggHZZ200 0 '+selection+' '+period, selection),
+b.JobConfig('ggHZZ200', dCache+'/andreypz/nuTuples_v1_7TeV/ggHZZ200', 1, 'ggHZZ200 0 '+selection+' '+period, selection),
 b.JobConfig('ggHZZ250', dCache+'/andreypz/nuTuples_v1_7TeV/ggHZZ250', 1, 'ggHZZ250 0 '+selection+' '+period, selection),
 b.JobConfig('ggHZZ300', dCache+'/andreypz/nuTuples_v1_7TeV/ggHZZ300', 1, 'ggHZZ300 0 '+selection+' '+period, selection),
 b.JobConfig('ggHZZ350', dCache+'/andreypz/nuTuples_v1_7TeV/ggHZZ350', 1, 'ggHZZ350 0 '+selection+' '+period, selection),
 b.JobConfig('ggHZZ400', dCache+'/andreypz/nuTuples_v1_7TeV/ggHZZ400', 1, 'ggHZZ400 0 '+selection+' '+period, selection),
-#b.JobConfig('ggHZZ450', dCache+'/andreypz/nuTuples_v1_7TeV/ggHZZ450', 1, 'ggHZZ450 0 '+selection+' '+period, selection),
-#b.JobConfig('ggHZZ500', dCache+'/andreypz/nuTuples_v1_7TeV/ggHZZ500', 1, 'ggHZZ500 0 '+selection+' '+period, selection),
-#b.JobConfig('ggHZZ550', dCache+'/andreypz/nuTuples_v1_7TeV/ggHZZ550', 1, 'ggHZZ550 0 '+selection+' '+period, selection),
-#b.JobConfig('ggHZZ600', dCache+'/andreypz/nuTuples_v1_7TeV/ggHZZ600', 1, 'ggHZZ600 0 '+selection+' '+period, selection)
+b.JobConfig('ggHZZ450', dCache+'/andreypz/nuTuples_v1_7TeV/ggHZZ450', 1, 'ggHZZ450 0 '+selection+' '+period, selection),
+b.JobConfig('ggHZZ500', dCache+'/andreypz/nuTuples_v1_7TeV/ggHZZ500', 1, 'ggHZZ500 0 '+selection+' '+period, selection),
+b.JobConfig('ggHZZ550', dCache+'/andreypz/nuTuples_v1_7TeV/ggHZZ550', 1, 'ggHZZ550 0 '+selection+' '+period, selection),
+b.JobConfig('ggHZZ600', dCache+'/andreypz/nuTuples_v1_7TeV/ggHZZ600', 1, 'ggHZZ600 0 '+selection+' '+period, selection)
 #b.JobConfig('ggHWW250', dCache+'/andreypz/nuTuples_v1_7TeV/ggHWW_M250', 1, 'ggHWW250 0 '+selection+' '+period, selection),
 #b.JobConfig('ggHWW300', dCache+'/andreypz/nuTuples_v1_7TeV/ggHWW_M300', 1, 'ggHWW300 0 '+selection+' '+period, selection),
 #b.JobConfig('ggHWW350', dCache+'/andreypz/nuTuples_v1_7TeV/ggHWW_M350', 1, 'ggHWW350 0 '+selection+' '+period, selection),

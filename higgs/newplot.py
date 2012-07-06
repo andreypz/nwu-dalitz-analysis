@@ -3,6 +3,8 @@ import sys,os
 
 from ROOT import *
 import shutil
+import datetime
+
 import config as c
 
 nargs = len(sys.argv)
@@ -110,9 +112,14 @@ for x in plot_types:
     menu = menu+"<li><a href=\""+x+".html\" target=\"iframe_a\">"+x+"</a></li>"
 
 #print menu
+
+today = datetime.date.today()
+print today
+
 tempfile = open("indextemplate.html","r")
 whole_thing = tempfile.read()
 whole_thing = whole_thing.replace("{MENU}", menu)
+whole_thing = whole_thing.replace("{DATE}", str(today))
 tempfile.close()
 
 ifile = open("index.html","w")

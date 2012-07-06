@@ -21,7 +21,7 @@ void makePlot(Int_t sel=1, TString hPath="00")
   TString dir = hPath.Data();
 
   Bool_t plotdiLepton=1, plotLepton=1, plotJet=0, plotMet=0, plotSpecial=0, plotMisc=0;
-  Bool_t doTest    = 1;
+  Bool_t doTest    = 0;
   Bool_t doPhotons = 0;
   Bool_t doOverview= 0;
 
