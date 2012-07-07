@@ -8,8 +8,8 @@ outputPath  = '/uscms_data/d2/andreypz/cmssw/higgs2/CMSSW_4_4_4/src/NWU/Higgs/hi
 selection = 'muon'
 period    = '2011'
 doData    = False
-doBG      = False
-doSignal  = True
+doBG      = True
+doSignal  = False
 
 ''' 
     Set job configurations.  The order of arguments is:
@@ -18,62 +18,43 @@ doSignal  = True
 
 if selection == 'muon':
     data = []
-    if period in ['2011A', 'Combined']:
-        data.append(b.JobConfig('Run2011A', dCache+'/naodell/April15/DoubleMu_Run2011A', 40, 'DATA 4,5,8  muon 2011A', selection))
-
-    if period in ['2011B', 'Combined']:
-        data.append(b.JobConfig('Run2011B', dCache+'/naodell/April15/DoubleMu_Run2011B', 40, 'DATA 4,5,8 muon 2011B', selection))
+    data.append(b.JobConfig('DoubleMu_Run2011A', dCache+'/andreypz/nuTuples_v1_7TeV/DoubleMu_HZZ_Run2011A', 40, 'DATA 4,5,8 muon 2011', selection))
+    data.append(b.JobConfig('DoubleMu_Run2011B', dCache+'/andreypz/nuTuples_v1_7TeV/DoubleMu_HZZ_Run2011B', 40, 'DATA 4,5,8 muon 2011', selection))
 
                             
 
 
 if selection == 'electron':
     data = []
-    if period in ['2011A', 'Combined']:
-        data.append(b.JobConfig('DoubleEle_Run2011A', dCache+'/naodell/April15/DoubleElectron_Run2011A', 30, 'DATA 16,17,18 electron 2011B', selection))
-
-    if period in ['2011B', 'Combined']:
-        data.append(b.JobConfig('DoubleEle_Run2011B', dCache+'/naodell/April15/DoubleElectron_Run2011B', 30, 'DATA 16,17,18 electron 2011B', selection))
+    data.append(b.JobConfig('DoubleEle_Run2011A', dCache+'/andreypz/nuTuples_v1_7TeV/DoubleElectron_HZZ_Run2011A', 30, 'DATA 16,17,18 electron 2011', selection))
+    data.append(b.JobConfig('DoubleEle_Run2011B', dCache+'/andreypz/nuTuples_v1_7TeV/DoubleElectron_HZZ_Run2011B', 30, 'DATA 16,17,18 electron 2011', selection))
 
 
 
 if selection == 'gamma' or selection == 'muGamma' or selection == 'eGamma':
     data = []
-    if period in ['2011A', 'Combined']:
+    if period in ['2011']:
         data.extend([
-        b.JobConfig('Photon_Aug05', dCache+'/radek/Data3/Photon_Run2011A_05Aug2011-v1', 20, 'DATA  14,15,16,17,18,19,20,21,22,23 '+selection+' 2011A', selection),
-        b.JobConfig('Photon_May10', dCache+'/radek/Data3/Photon_Run2011A_May10ReReco-v1', 10, 'DATA  14,15,16,17,18,19,20,21,22,23 '+selection+' 2011A', selection),
-        b.JobConfig('Photon_PromptV4', dCache+'/radek/Data3/Photon_Run2011A_PromptReco-v4-r2', 20, 'DATA  14,15,16,17,18,19,20,21,22,23 '+selection+' 2011A', selection),
-        b.JobConfig('Photon_PromptV6', dCache+'/radek/Data3/Photon_Run2011A_PromptReco-v6-r2', 10, 'DATA  14,15,16,17,18,19,20,21,22,23 '+selection+' 2011A', selection),
+        b.JobConfig('Photon_Aug05', dCache+'/radek/Data3/Photon_Run2011A_05Aug2011-v1', 20, 'DATA  14,15,16,17,18,19,20,21,22,23 '+selection+' 2011', selection)
         ])
-    if period in ['2011B', 'Combined']:
-        data.append(b.JobConfig('Photon_Run2011B', dCache+'/naodell/Nov09/Photon_Run2011B', 30, 'DATA 15,16,17,18,19,20,21,22,23,24,25 '+selection+' 2011B', selection))
 
 if selection == 'muEG':
     data = []
-    if period in ['2011A', 'Combined']:
+    if period in ['2011',]:
         data.extend([
-        b.JobConfig('Aug05', dCache+'/andreypz/Oct21/MuEG_Aug05', 10, 'DATA  24,25,27,28 muEG 2011A', selection),
-        b.JobConfig('May10', dCache+'/andreypz/Oct21/MuEG_May10', 10, 'DATA  24,25,27,28 muEG 2011A', selection),
-        b.JobConfig('PromptV4', dCache+'/andreypz/Oct21/MuEG_PromptV4', 20, 'DATA  24,25,27,28 muEG 2011A', selection),
-        b.JobConfig('PromptV6', dCache+'/andreypz/Oct21/MuEG_PromptV6', 20, 'DATA  24,25,27,28 muEG 2011A', selection)
-        ])
-    if period in ['2011B', 'Combined']:
-        data.append(b.JobConfig('PromptV6', dCache+'/naodell/Nov09/MuEG_Run2011B', 20, 'DATA  24,25,27,28 muEG 2011B', selection))
-
+        b.JobConfig('Aug05', dCache+'/andreypz/Oct21/MuEG_Aug05', 10, 'DATA  24,25,27,28 muEG 2011', selection),
+         ])
+ 
 bg = []
 bg.extend([
-#b.JobConfig('ZZ', dCache+'/bpollack/Oct09/MC/ZZJetsTo2L2Nu', 1, 'ZZ 0 '+selection+' '+period, selection),
-#b.JobConfig('ggWW', dCache+'/bpollack/Oct09/MC/GluGluToWWTo4L', 1, 'ggWW 0 '+selection+' '+period, selection),
-#b.JobConfig('WW', dCache+'/bpollack/Oct09/MC/WWJetsTo2L2Nu', 1, 'WW 0 '+selection+' '+period, selection),
-#b.JobConfig('WZ', dCache+'/bpollack/Oct09/MC/WZJetsTo3LNu', 1, 'WZ 0 '+selection+' '+period, selection),
-#b.JobConfig('ttbar', dCache+'/radek/MC3b/TTTo2L2Nu2B_7TeV-powheg-pythia6', 20, 'ttbar 0 '+selection+' '+period, selection),
-#b.JobConfig('tW', dCache+'/radek/MC3b/T_tW-channel-DR-r2', 1, 'tW 0 '+selection+' '+period, selection),
-#b.JobConfig('tbarW', dCache+'/radek/MC3b/Tbar_tW-channel-DR-r2', 1, 'tW 0 '+selection+' '+period, selection),
-b.JobConfig('DYjets', dCache+'/bpollack/Apr17/MC/ZJetsV2/', 10, 'DYjets 0 '+selection+' '+period, selection)
-#b.JobConfig('ZZ', dCache+'/bpollack/MC/ZZTo2L2Nu', 5, 'ZZ 0 '+selection+' '+period, selection)
-#b.JobConfig('WW', dCache+'/bpollack/MC/WWTo2L2Nu', 4, 'WW 0 '+selection+' '+period, selection),
-#b.JobConfig('WZ', dCache+'/bpollack/MC/WZTo3LNu', 4, 'WZ 0 '+selection+' '+period, selection),
+b.JobConfig('ZZ', dCache+'/andreypz/nuTuples_v1_7TeV/ZZJetsTo2L2Nu', 1, 'ZZ 0 '+selection+' '+period, selection),
+#b.JobConfig('WW', dCache+'/andreypz/nuTuples_v1_7TeV/WWTo2L2Nu', 1, 'WW 0 '+selection+' '+period, selection),
+#b.JobConfig('WZ', dCache+'/andreypz/nuTuples_v1_7TeV/WZTo3LNu', 1, 'WZ 0 '+selection+' '+period, selection),
+#b.JobConfig('ttbar', dCache+'/andreypz/nuTuples_v1_7TeV/TTJets', 20, 'ttbar 0 '+selection+' '+period, selection),
+#b.JobConfig('tW', dCache+'/andreypz/nuTuples_v1_7TeV/T_tW-channel-DR-r2', 1, 'tW 0 '+selection+' '+period, selection),
+#b.JobConfig('tbarW', dCache+'/andreypz/nuTuples_v1_7TeV/Tbar_tW-channel-DR-r2', 1, 'tW 0 '+selection+' '+period, selection),
+#b.JobConfig('DYjets', dCache+'/andreypz/nuTuples_v1_7TeV/MC/DYJetsToLL', 10, 'DYjets 0 '+selection+' '+period, selection)
+#b.JobConfig('ggWW', dCache+'/andreypz/nuTuples_v1_7TeV/GluGluToWWTo4L', 1, 'ggWW 0 '+selection+' '+period, selection),
 ])
 
 

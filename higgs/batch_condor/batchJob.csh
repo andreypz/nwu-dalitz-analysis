@@ -41,7 +41,7 @@ cp -r $dir/../data/*.root ../data/
 
 cp $dir/run.py .
 chmod 755 run.py
-./run.py ${suffix} ${selection}  ${dataName} ${trigger}  ${period} b
+./run.py ${suffix} ${selection} ${dataName} ${trigger} ${period} b
 
 
 #set printDir =  printout_${dataName}

@@ -4,6 +4,12 @@ https://twiki.cern.ch/twiki/bin/view/CMS/UserCodeNWUHiggs
 
 
 The log of changes:
+
+2012-Jun-14
+  * V02-01 tag
+  * Lineshape reweighting plugins
+  * Updating to the recent TC object classes
+
 2011-Dec-17
   * New version of Weight Utils and reweight files.
       * Fixed k-nlo for ggH samples 

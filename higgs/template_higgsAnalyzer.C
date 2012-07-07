@@ -1,4 +1,4 @@
-// $Id: template_higgsAnalyzer.C,v 1.31 2012/06/22 22:11:44 andrey Exp $
+// $Id: template_higgsAnalyzer.C,v 1.32 2012/07/05 00:01:09 andrey Exp $
 
 #define higgsAnalyzer_cxx
 
@@ -207,15 +207,15 @@ void higgsAnalyzer::Begin(TTree * /*tree*/)
 	run_events[n]     =  new  TH1F(Form("run_events_%i",n), "Events per run", 18000, 160000., 178000.);
 
 
-	if (suffix.compare(0, 5, "ggHZZ") == 0 || suffix.compare(0, 5, "ggHWW") == 0) {
+	/*if (suffix.compare(0, 5, "ggHZZ") == 0 || suffix.compare(0, 5, "ggHWW") == 0) {
 	  higgs_pt[n]     = new  TH1F(Form("higgs_pt_%i",n), "Higgs pt", 50,0,500);
 	  higgs_w_pt[n]   = new  TH1F(Form("higgs_w_pt_%i",n), "Higgs pt, wighted", 50,0,500);
 
 	  higgs_mass[n]   = new  TH1F(Form("higgs_mass_%i",n), "Higgs mass", 150, 0,1500);
 	  higgs_w_mass[n] = new  TH1F(Form("higgs_w_mass_%i",n), "Higgs mass, weighted", 150, 0,1500);
 	  //higgs_mass[n] = new  TH1F(Form("higgs_mass_%i",n), "Higgs mass", 70,100,800);
-	}
-
+	 	}
+	*/
 
        }
     if (verboseLvl>0){
@@ -328,7 +328,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
 	//if(pVtx->isFake()) cout<<"PV is fake"<<endl;
 
 	if( 
-	   !pVtx->IsFake() && 
+	   //   !pVtx->IsFake() && 
 	    pVtx->NDof() > cut_vndof                      //4
 	    && fabs(pVtx->Position().z()) <= cut_vz      //15
 	    && fabs(pVtx->Position().Perp()) <= cut_vd0   //Not Mag()!; 2
@@ -686,7 +686,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
     // Gen particles //
     ///////////////////
     
-    if (!isRealData && (suffix.compare(2, 3, "HZZ") == 0 || suffix.compare(2, 3, "HWW") == 0 || suffix.compare(3, 3, "HZZ") == 0)) {
+    if (!isRealData /*&& (suffix.compare(2, 3, "HZZ") == 0 || suffix.compare(2, 3, "HWW") == 0 || suffix.compare(3, 3, "HZZ") == 0)*/) {
       vector<TLorentzVector> genLeptons;
       vector<TLorentzVector> genNeutrinos;
     
