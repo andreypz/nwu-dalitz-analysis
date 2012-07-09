@@ -1,4 +1,4 @@
-// $Id: template_higgsAnalyzer.C,v 1.32 2012/07/05 00:01:09 andrey Exp $
+// $Id: template_higgsAnalyzer.C,v 1.33 2012/07/07 21:24:41 andrey Exp $
 
 #define higgsAnalyzer_cxx
 
@@ -15,7 +15,7 @@ string  selection      = "SELECTION";
 string  period         = "PERIOD";
 int     JC_LVL         = 4;
 int     trigger[]      = {TRIGGER};
-string  suffix         = "SUFFIX";
+TString suffix("SUFFIX");
 
 vector<int> triggers (trigger, trigger + sizeof(trigger)/sizeof(int));
 
@@ -70,7 +70,7 @@ void higgsAnalyzer::Begin(TTree * /*tree*/)
 
     // Initialize utilities and selectors here //
     zLib            = new ZedEventsLibrary(selection, isFromData);
-    weighter        = new WeightUtils(suffix, period, selection, isRealData);
+    weighter        = new WeightUtils(suffix.Data(), period, selection, isRealData);
     triggerSelector = new TriggerSelector(selection, period, triggers);
     
     histoFile = new TFile("a_higgsHistograms.root", "RECREATE");
@@ -207,15 +207,15 @@ void higgsAnalyzer::Begin(TTree * /*tree*/)
 	run_events[n]     =  new  TH1F(Form("run_events_%i",n), "Events per run", 18000, 160000., 178000.);
 
 
-	/*if (suffix.compare(0, 5, "ggHZZ") == 0 || suffix.compare(0, 5, "ggHWW") == 0) {
+	if (suffix.Contains("ggHZZ") || suffix.Contains("ggHWW")) {
 	  higgs_pt[n]     = new  TH1F(Form("higgs_pt_%i",n), "Higgs pt", 50,0,500);
 	  higgs_w_pt[n]   = new  TH1F(Form("higgs_w_pt_%i",n), "Higgs pt, wighted", 50,0,500);
-
+	  
 	  higgs_mass[n]   = new  TH1F(Form("higgs_mass_%i",n), "Higgs mass", 150, 0,1500);
 	  higgs_w_mass[n] = new  TH1F(Form("higgs_w_mass_%i",n), "Higgs mass, weighted", 150, 0,1500);
 	  //higgs_mass[n] = new  TH1F(Form("higgs_mass_%i",n), "Higgs mass", 70,100,800);
-	 	}
-	*/
+	}
+       
 
        }
     if (verboseLvl>0){
@@ -273,7 +273,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
 
     //cout<<nEvents[0]<<endl;
     if (nEvents[0] == 1) weighter->SetDataBit(isRealData);
-    if(nEvents[0]>200) return kTRUE;
+    //if(nEvents[0]>200) return kTRUE;
     
     //cout<<"dbg"<<endl;    
     if (nEvents[0] % (int)5e4 == 0) cout<<nEvents[3]<<" events passed of "<<nEvents[0]<<" checked! (at Z-peak cut)"<<endl;
@@ -686,7 +686,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
     // Gen particles //
     ///////////////////
     
-    if (!isRealData /*&& (suffix.compare(2, 3, "HZZ") == 0 || suffix.compare(2, 3, "HWW") == 0 || suffix.compare(3, 3, "HZZ") == 0)*/) {
+    if (!isRealData && (suffix.Contains("HZZ") || suffix.Contains("HWW") )) {
       vector<TLorentzVector> genLeptons;
       vector<TLorentzVector> genNeutrinos;
     
@@ -720,19 +720,19 @@ bool higgsAnalyzer::Process(Long64_t entry)
 	hig_M    = (genLeptons[0]+genLeptons[1]+genNeutrinos[0]+genNeutrinos[1]).M();
 
 	Int_t i_mass = 0;
-	if (suffix.compare(0, 5, "ggHZZ") == 0 || suffix.compare(0, 5, "ggHWW") == 0) {
-	  i_mass = atoi(suffix.substr(5,3).c_str());
+	if (suffix.Contains("ggHZZ") || suffix.Contains("ggHWW")) {
+	  i_mass = TString(suffix(5,3)).Atoi();
 	  evtWeight *= weighter->GluGluHiggsWeight(hig_Pt, i_mass);
 	} 
-	else if (suffix.compare(0, 6, "VBFHZZ") == 0){
-	  i_mass = atoi(suffix.substr(6,3).c_str()); //for vbf name
+	else if (suffix.Contains("VBFHZZ")){
+	  i_mass = TString(suffix(6,3)).Atoi(); //for vbf name
 	}
 	
 	//cout<<"nPU vertic = "<<nPUVertices<<"  evtWeight before reweighting  "<<evtWeight<<endl;
 	
 	// Higgs mass lineshapes weights
 	evtWeight *= weighter->HiggsMassLineShapeWeight(hig_M, i_mass);
-	//cout<<"imass: "<<i_mass<<"   genMass from gen Z's: "<<hig_M<<"   evtWeight= "<<evtWeight<<endl;	  
+	cout<<"imass: "<<i_mass<<"   genMass from gen Z's: "<<hig_M<<"   evtWeight= "<<evtWeight<<endl;	  
 
       }
       
@@ -1274,7 +1274,7 @@ void higgsAnalyzer::FillHistos(Int_t num, Double_t weight){
   ph_nGamma[num] -> Fill(nGamma);
 
 
-  if (suffix.compare(0, 5, "ggHZZ") == 0 || suffix.compare(0, 5, "ggHWW") == 0) {
+  if (suffix.Contains("ggHZZ") || suffix.Contains("ggHWW")) {
     higgs_pt[num]   -> Fill(hig_Pt);
     higgs_mass[num] -> Fill(hig_M);
     higgs_w_pt[num]   -> Fill(hig_Pt, weight);

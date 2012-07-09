@@ -43,11 +43,5 @@ cp $dir/run.py .
 chmod 755 run.py
 ./run.py ${suffix} ${selection} ${dataName} ${trigger} ${period} b
 
-
-#set printDir =  printout_${dataName}
-#mkdir $printDir
-#cp events_* $printDir
-#cp -r $printDir $outDir
 cp hhhh_${dataName}.root $outDir/hhhh_${dataName}_${count}.root
 
-#cp counts* $newDir

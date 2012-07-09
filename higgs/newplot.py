@@ -11,17 +11,18 @@ nargs = len(sys.argv)
 print sys.argv[0], nargs
 
 sel = 1
-doMerge = 0
+doMerge = False
 
 if (nargs<2):
     print "you have to specify the path where to llok for the files!\nLike v62, or something"
     sys.exit()
-if (nargs==3):
-    sel = sys.argv[2]
+if (nargs>=3):
+    sel = int(sys.argv[2])
+if (nargs==4):
+    doMerge = bool(int(sys.argv[3]))
 
 hPath = sys.argv[1]
-print hPath, sel
-
+print hPath, sel, doMerge
 
 def createDir(dir):
     try:
@@ -36,6 +37,8 @@ dirnameOut = "/afs/fnal.gov/files/home/room1/andreypz/public_html/higgs/"+hPath
 selection  = ['muon', 'electron']
 plot_types = ['diLepton', 'Lepton', 'Jet', 'Met', 'Special', 'Misc']
 
+thissel = selection[sel-1]
+
 for x in selection:
     for y in plot_types:
         createDir(dirnameOut+'/'+x+'/'+y)
@@ -46,33 +49,37 @@ gROOT.LoadMacro("./utils.C");
 timer = TStopwatch()	
 timer.Start()
 
-#TString ssel("none"), gsel("none");
-#if (sel==1)  {ssel = "muon";     gsel ="muGamma";}
-#    if (sel==2)  {ssel = "electron"; gsel ="eGamma";}
-
-#TString histoPath = Form("%s/%s", hPath.Data(), ssel.Data());
-#TString gammaPath = Form("%s/%s", hPath.Data(), gsel.Data());
-#cout<<histoPath.Data()<<endl;
-
- 
 gROOT.SetBatch()
-if (doMerge==0):    
+print doMerge
+if doMerge:
+    os.system("rm "+hPath+"/m_*_"+thissel+".root") #removing the old merged files
+    
+    os.system("hadd ./"+hPath+"/m_Data_"+thissel+".root  ./"+hPath+"/"+thissel+"/hhhh_Double*.root")
+    os.system("hadd ./"+hPath+"/m_ttbar_"+thissel+".root ./"+hPath+"/"+thissel+"/hhhh_ttbar_*.root")
+    os.system("hadd ./"+hPath+"/m_Zjets_"+thissel+".root ./"+hPath+"/"+thissel+"/hhhh_DYjets_*.root")
+
+
+    m_ttbar = TFile(hPath+"/m_ttbar_"+thissel+".root", "UPDATE")
+    m_Zjets = TFile(hPath+"/m_Zjets_"+thissel+".root", "UPDATE")
+
+    RescaleToLumiAndColors(m_ttbar,1, 1000,1000, kMagenta+1, kBlue-3, 1001);
+    m_ttbar.Close()
+    RescaleToLumiAndColors(m_Zjets,1, 1000,1000, kRed+2, kRed+1,3004);
+    m_Zjets.Close()
+
+
+    gROOT.ProcessLine(".x makePlot.C("+str(sel)+", \""+hPath+"\")");
+
+    print "\n\nDone!"
+    print "CPU Time : ", timer.CpuTime()
+    print "RealTime : ", timer.RealTime()
+else:    
     gROOT.ProcessLine(".x makePlot.C("+str(sel)+", \""+hPath+"\")");
     
     print "\n\nDone!"
     print "CPU Time : ", timer.CpuTime()
-    print "RealTime : ", timer.RealTime()
-  
-else:
-    #Same for now, but later do the merging here (t+tW+tt, Data etc)
-    gROOT.ProcessLine(".x makePlot.C("+str(sel)+", \""+hPath+"\")");
-    
-    print "\n\nDone!"
-    print "CPU Time : ", timer.CpuTime()
-    print "RealTime : ", timer.RealTime()
+    print "RealTime : ", timer.RealTime()  
 
-
-#os.system("rm ./%s/m_*%i.root "% (hPath.Data(), sel))
 
 print "\n\n ******** Now making HTML pages ******** \n"
 menu=""

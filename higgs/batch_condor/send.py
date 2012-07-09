@@ -47,13 +47,13 @@ if selection == 'muEG':
  
 bg = []
 bg.extend([
-b.JobConfig('ZZ', dCache+'/andreypz/nuTuples_v1_7TeV/ZZJetsTo2L2Nu', 1, 'ZZ 0 '+selection+' '+period, selection),
-#b.JobConfig('WW', dCache+'/andreypz/nuTuples_v1_7TeV/WWTo2L2Nu', 1, 'WW 0 '+selection+' '+period, selection),
-#b.JobConfig('WZ', dCache+'/andreypz/nuTuples_v1_7TeV/WZTo3LNu', 1, 'WZ 0 '+selection+' '+period, selection),
+#b.JobConfig('DYjets', dCache+'/andreypz/nuTuples_v1_7TeV/DYJetsToLL', 10, 'DYjets 0 '+selection+' '+period, selection),
+#b.JobConfig('ZZ', dCache+'/andreypz/nuTuples_v1_7TeV/ZZJetsTo2L2Nu', 1, 'ZZ 0 '+selection+' '+period, selection),
+#b.JobConfig('WW', '/eos/uscms/store/user/bpollack/May15/MC/WWJets/', 1, 'WW 0 '+selection+' '+period, selection),
+b.JobConfig('WZ', '/eos/uscms/store/user/bpollack/Apr17/MC/WZJets', 1, 'WZ 0 '+selection+' '+period, selection),
 #b.JobConfig('ttbar', dCache+'/andreypz/nuTuples_v1_7TeV/TTJets', 20, 'ttbar 0 '+selection+' '+period, selection),
 #b.JobConfig('tW', dCache+'/andreypz/nuTuples_v1_7TeV/T_tW-channel-DR-r2', 1, 'tW 0 '+selection+' '+period, selection),
 #b.JobConfig('tbarW', dCache+'/andreypz/nuTuples_v1_7TeV/Tbar_tW-channel-DR-r2', 1, 'tW 0 '+selection+' '+period, selection),
-#b.JobConfig('DYjets', dCache+'/andreypz/nuTuples_v1_7TeV/MC/DYJetsToLL', 10, 'DYjets 0 '+selection+' '+period, selection)
 #b.JobConfig('ggWW', dCache+'/andreypz/nuTuples_v1_7TeV/GluGluToWWTo4L', 1, 'ggWW 0 '+selection+' '+period, selection),
 ])
 

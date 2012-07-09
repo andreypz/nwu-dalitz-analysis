@@ -5,15 +5,18 @@ class SampleParams():
     def __init__(self):
         
         self._xsec_and_colors = {
+            "DATA": [-1,-1,-1,-1],
             "ZZ":   [kBlue,     kMagenta, 0.1787, 1103.468e3],
             "WZ":   [kRed+2,    kBlue-1,  0.856, 1221.134e3],
             "WW":   [kOrange+1, kSpring,  4.783, 1197.558e3],
-            "Wjets":[kGreen-2,  kCyan+1,  31314.0, 81.251e6],
+
+            "DYjets":[kRed,  kWhite,  3048.0, 36.278e6],
+            "Wjets": [kGreen-2,  kCyan+1,  31314.0, 81.251e6],
             
             #"ttbar":[kOrange+1, kGreen+2, 16.71, 10.34e6],
-            "ttbar":[kOrange+1, kGreen+2, 16.71, 10.34e6], #madgraph
-            "tW":   [kRed,      kWhite,   7.87, 814.390e3],
-            "tbarW":[kRed,      kWhite,   7.87, 809.984e3],
+            "ttbar": [kOrange+1, kGreen+2, 16.71, 10.34e6], #madgraph
+            "tW":    [kRed,      kWhite,   7.87, 814.390e3],
+            "tbarW": [kRed,      kWhite,   7.87, 809.984e3],
 
             "ggHZZ200":[kPink, -1, 0.05406, 96.215e3],
             "ggHZZ250":[kPink, -1, 0.0398,  99.993e3],

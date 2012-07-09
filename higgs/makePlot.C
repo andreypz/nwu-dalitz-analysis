@@ -40,14 +40,14 @@ void makePlot(Int_t sel=1, TString hPath="00")
   TString histoPath = Form("%s/%s", hPath.Data(), ssel.Data());
   cout<<"histoPath:  "<<histoPath.Data()<<"  int Lumi: "<<intLumi<<endl;
 
-  TFile  *fda_Data  = new TFile(Form("./%s/m_Data_%i.root", hPath.Data(),  sel));  //Merged Data
+  TFile  *fda_Data  = new TFile(Form("./%s/m_Data_%s.root", hPath.Data(),  ssel.Data()));  //Merged Data
   TFile  *fData = (TFile*)fda_Data;
   
   // TFile* fmc_Wjets     = new TFile(Form("./%s/hhhh_Wjets.root",histoPath.Data() ));
 
-  TFile* fmc_ZZ        = new TFile(Form("./%s/hhhh_ZZ.root",histoPath.Data() ));
-  TFile* fmc_WW        = new TFile(Form("./%s/hhhh_WW.root",histoPath.Data() ));
-  TFile* fmc_WZ        = new TFile(Form("./%s/hhhh_WZ.root",histoPath.Data() ));
+  TFile* fmc_ZZ        = new TFile(Form("./%s/hhhh_ZZ_1.root",histoPath.Data() ));
+  TFile* fmc_WW        = new TFile(Form("./%s/hhhh_WW_1.root",histoPath.Data() ));
+  TFile* fmc_WZ        = new TFile(Form("./%s/hhhh_WZ_1.root",histoPath.Data() ));
 
   TFile *fmc_ggH[10], *fmc_vbfH[10];
   for(Int_t i=1; i<9; i++){
@@ -56,12 +56,13 @@ void makePlot(Int_t sel=1, TString hPath="00")
     fmc_vbfH[i]  = new TFile(Form("./%s/hhhh_VBFHZZ%i_1.root",histoPath.Data(),m ));
   }
 
-  TFile* fmc_tt     = new TFile(Form("./%s/m_ttbar_%i.root", hPath.Data(), sel ));
-  TFile* fmc_Top    = new TFile(Form("./%s/m_Top_%i.root", hPath.Data(), sel ));
+  TFile* fmc_tt     = new TFile(Form("./%s/m_ttbar_%s.root", hPath.Data(), ssel.Data() ));
+  TFile* fmc_Top    = new TFile(Form("./%s/m_ttbar_%s.root", hPath.Data(), ssel.Data() ));
+  //TFile* fmc_Top    = new TFile(Form("./%s/m_Top_%s.root", hPath.Data(), ssel.Data() ));
 
-  TFile* fmc_Zjets  = new TFile(Form("./%s/m_Zjets_%i.root", hPath.Data(), sel ));
-  //TFile* fmc_Zjets  = new TFile(Form("./%s/m_libZjets_%i.root", hPath.Data(), sel ));
-  if(doPhotons)  fmc_Zjets  = new TFile(Form("./%s/m_DataPh_%i.root", hPath.Data(), sel ));
+  TFile* fmc_Zjets  = new TFile(Form("./%s/m_Zjets_%s.root", hPath.Data(), ssel.Data() ));
+  //TFile* fmc_Zjets  = new TFile(Form("./%s/m_libZjets_%i.root", hPath.Data(), ssel ));
+  if(doPhotons)  fmc_Zjets  = new TFile(Form("./%s/m_DataPh_%s.root", hPath.Data(), ssel.Data() ));
 
   /*
   RescaleToLumiAndColors(fmc_tt, 1000,1000, kMagenta+1, kBlue-3, 1001, 0);

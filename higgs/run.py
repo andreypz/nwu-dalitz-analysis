@@ -87,14 +87,13 @@ for l in f.readlines():
         fChain.Add(line)      
         nfiles+=1
 print nfiles, " files added!"
-#fChain.Add("/eos/uscms/store/user/bpollack/May15/MC/ZZJets/nuTuple_100_1_RGT.root")
-#fChain.Add("/eos/uscms/store/user/bpollack/Apr17/MC/WZJets/nuTuple_9_1_IRt.root")
+
 
 para = c.SampleParams()
 xsec_and_colors = para.xsec_and_colors()
 
-lineColor = xsec_and_colors[sample][0]
-fillColor = xsec_and_colors[sample][1]
+fillColor = xsec_and_colors[sample][0]
+lineColor = xsec_and_colors[sample][1]
 cs = xsec_and_colors[sample][2]
 Ne = xsec_and_colors[sample][3]
 
@@ -110,53 +109,6 @@ fChain.Process("higgsAnalyzer.C+")
 
 print "Done!", "CPU Time: ", timer.CpuTime(), "RealTime : ", timer.RealTime() 
 
-"""
-
-run = '''
-using namespace std;
-
-void run() {
-
-gSystem->Load("../plugins/libShapeLine.so");
-
-gROOT->LoadMacro("../src/TCJet.cc+");
-gROOT->LoadMacro("../src/TCMET.cc+");
-gROOT->LoadMacro("../src/TCElectron.cc+");
-gROOT->LoadMacro("../src/TCMuon.cc+");
-gROOT->LoadMacro("../src/TCTau.cc+");
-gROOT->LoadMacro("../src/TCPhoton.cc+");
-gROOT->LoadMacro("../src/TCGenJet.cc+");
-gROOT->LoadMacro("../src/TCGenParticle.cc+");
-gROOT->LoadMacro("../src/TCPrimaryVtx.cc+");
-//#gROOT->LoadMacro("../src/TCTrigger.cc+");
-gROOT->LoadMacro("../src/TCTriggerObject.cc+");
-gROOT->LoadMacro("../plugins/WeightUtils.cc+");
-gROOT->LoadMacro("../plugins/TriggerSelector.cc+");
-gROOT->LoadMacro("../plugins/ZedEventsLibrary.cc+");
-
-TChain* fChain = new TChain("ntupleProducer/eventTree");
-
-ifstream sourceFiles("SOURCEFILES");
-string line;
-int  count = 0;
-while (sourceFiles >> line) {
-  fChain->Add(line.c_str());
-  ++count;
-}
-
-fChain->Process("higgsAnalyzer.C+");  
-}
-'''
-
-run = run.replace("SOURCEFILES",sourceFiles)
-
-ff = open("run.C","w")
-ff.write(run)
-ff.close()
-
-os.system('root -b -q run.C')
-"""
-
-os.system('mv a_higgsHistograms.root hhhh_'+sample+'.root')
+os.system('mv a_higgsHistograms.root hhhh_'+sourcefilename+'.root')
 
 print "End runninng"
