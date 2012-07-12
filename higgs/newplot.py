@@ -33,7 +33,8 @@ def createDir(dir):
         else:
             raise
 
-dirnameOut = "/afs/fnal.gov/files/home/room1/andreypz/public_html/higgs/"+hPath
+baseDir = "/uscms_data/d2/andreypz/hzz2l2nu_html/"
+dirnameOut = baseDir+hPath
 selection  = ['muon', 'electron']
 plot_types = ['diLepton', 'Lepton', 'Jet', 'Met', 'Special', 'Misc']
 
@@ -56,25 +57,29 @@ if doMerge:
     
     os.system("hadd ./"+hPath+"/m_Data_"+thissel+".root  ./"+hPath+"/"+thissel+"/hhhh_Double*.root")
     os.system("hadd ./"+hPath+"/m_ttbar_"+thissel+".root ./"+hPath+"/"+thissel+"/hhhh_ttbar_*.root")
+    os.system("hadd ./"+hPath+"/m_Top_"+thissel+".root ./"+hPath+"/"+thissel+"/hhhh_t*W_*.root")
     os.system("hadd ./"+hPath+"/m_Zjets_"+thissel+".root ./"+hPath+"/"+thissel+"/hhhh_DYjets_*.root")
 
 
     m_ttbar = TFile(hPath+"/m_ttbar_"+thissel+".root", "UPDATE")
+    m_Top   = TFile(hPath+"/m_Top_"+thissel+".root", "UPDATE")
     m_Zjets = TFile(hPath+"/m_Zjets_"+thissel+".root", "UPDATE")
 
     RescaleToLumiAndColors(m_ttbar,1, 1000,1000, kMagenta+1, kBlue-3, 1001);
     m_ttbar.Close()
+    RescaleToLumiAndColors(m_Top,1, 1000,1000, kOrange+9, kOrange+6, 1001);
+    m_Top.Close()
     RescaleToLumiAndColors(m_Zjets,1, 1000,1000, kRed+2, kRed+1,3004);
     m_Zjets.Close()
 
 
-    gROOT.ProcessLine(".x makePlot.C("+str(sel)+", \""+hPath+"\")");
+    gROOT.ProcessLine(".x makePlot.C("+str(sel)+", \""+baseDir+"\", \""+hPath+"\")")
 
     print "\n\nDone!"
     print "CPU Time : ", timer.CpuTime()
     print "RealTime : ", timer.RealTime()
 else:    
-    gROOT.ProcessLine(".x makePlot.C("+str(sel)+", \""+hPath+"\")");
+    gROOT.ProcessLine(".x makePlot.C("+str(sel)+", \""+baseDir+"\", \""+hPath+"\")")
     
     print "\n\nDone!"
     print "CPU Time : ", timer.CpuTime()

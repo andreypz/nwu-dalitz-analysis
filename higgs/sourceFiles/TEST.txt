@@ -1,1 +1,2 @@
-/eos/uscms/store/user/bpollack/Apr17/MC/WZJets/nuTuple_1_1_s0f.root
+dcap://cmsdca1.fnal.gov:24140/pnfs/fnal.gov/usr/cms/WAX/11/store/user/radek/MC3b/T_tW-channel-DR-r2/nuTuple_100_1_jWI.root
+dcap://cmsdca1.fnal.gov:24140/pnfs/fnal.gov/usr/cms/WAX/11/store/user/radek/MC3b/T_tW-channel-DR-r2/nuTuple_101_1_QfM.root

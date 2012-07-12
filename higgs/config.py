@@ -14,11 +14,12 @@ class SampleParams():
             "Wjets": [kGreen-2,  kCyan+1,  31314.0, 81.251e6],
             
             #"ttbar":[kOrange+1, kGreen+2, 16.71, 10.34e6],
-            "ttbar": [kOrange+1, kGreen+2, 16.71, 10.34e6], #madgraph
+            "ttbar": [kOrange+1, kGreen+2, 165, 3701.947e3], #madgraph
             "tW":    [kRed,      kWhite,   7.87, 814.390e3],
             "tbarW": [kRed,      kWhite,   7.87, 809.984e3],
 
-            "ggHZZ200":[kPink, -1, 0.05406, 96.215e3],
+            "ggHZZ125":[kPink, -1, 0.01651, 292.174e3],
+            "ggHZZ200":[kPink, -1, 0.05425, 96.215e3],
             "ggHZZ250":[kPink, -1, 0.0398,  99.993e3],
             "ggHZZ300":[kPink, -1, 0.0301,  99.990e3],
             "ggHZZ350":[kPink, -1, 0.0286,  99.998e3],
@@ -28,6 +29,7 @@ class SampleParams():
             "ggHZZ550":[kPink, -1, 0.00568, 97.824e3],
             "ggHZZ600":[kPink, -1, 0.00359, 99.972e3],
 
+            "ggHWW125":[kCyan, -1, 0.34723, 0e3],
             "ggHWW200":[kCyan, -1, 0.40840, 109.993e3],
             "ggHWW250":[kCyan, -1, 0.24378, 106.038e3],
             "ggHWW300":[kCyan, -1, 0.17598, 109.989e3],
@@ -38,6 +40,7 @@ class SampleParams():
             "ggHWW550":[kCyan, -1, 0.03053, 109.973e3],
             "ggHWW600":[kCyan, -1, 0.01914, 109.972e3],
 
+            "VBFHZZ125":[kCyan+1, -1, 1.310e-3, 49.347e3],
             "VBFHZZ200":[kCyan+1, -1, 6.562e-3, 49.943e3],
             "VBFHZZ250":[kCyan+1, -1, 5.163e-3, 49.957e3],
             "VBFHZZ300":[kCyan+1, -1, 3.734e-3, 49.935e3],

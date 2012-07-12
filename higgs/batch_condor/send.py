@@ -7,27 +7,35 @@ outputPath  = '/uscms_data/d2/andreypz/cmssw/higgs2/CMSSW_4_4_4/src/NWU/Higgs/hi
 
 selection = 'muon'
 period    = '2011'
-doData    = False
+doData    = True
 doBG      = True
 doSignal  = False
+doTest    = False
 
 ''' 
     Set job configurations.  The order of arguments is:
     (Dataset, path to data, number of jobs, arguments to pass to executable, output directory name)
 '''
 
+test = []
+test.extend([
+b.JobConfig('ggHZZ200', dCache+'/andreypz/nuTuples_v1_7TeV/ggHZZ200', 1, 'ggHZZ200 0 '+selection+' '+period, selection),
+])
+
+
+
 if selection == 'muon':
     data = []
-    data.append(b.JobConfig('DoubleMu_Run2011A', dCache+'/andreypz/nuTuples_v1_7TeV/DoubleMu_HZZ_Run2011A', 40, 'DATA 4,5,8 muon 2011', selection))
-    data.append(b.JobConfig('DoubleMu_Run2011B', dCache+'/andreypz/nuTuples_v1_7TeV/DoubleMu_HZZ_Run2011B', 40, 'DATA 4,5,8 muon 2011', selection))
+    data.append(b.JobConfig('DoubleMu_Run2011A', dCache+'/andreypz/nuTuples_v1_7TeV/DoubleMu_HZZ_Run2011A', 20, 'DATA 0 muon 2011', selection))
+    data.append(b.JobConfig('DoubleMu_Run2011B', dCache+'/andreypz/nuTuples_v1_7TeV/DoubleMu_HZZ_Run2011B', 20, 'DATA 0 muon 2011', selection))
 
                             
 
 
 if selection == 'electron':
     data = []
-    data.append(b.JobConfig('DoubleEle_Run2011A', dCache+'/andreypz/nuTuples_v1_7TeV/DoubleElectron_HZZ_Run2011A', 30, 'DATA 16,17,18 electron 2011', selection))
-    data.append(b.JobConfig('DoubleEle_Run2011B', dCache+'/andreypz/nuTuples_v1_7TeV/DoubleElectron_HZZ_Run2011B', 30, 'DATA 16,17,18 electron 2011', selection))
+    data.append(b.JobConfig('DoubleEle_Run2011A', dCache+'/andreypz/nuTuples_v1_7TeV/DoubleElectron_HZZ_Run2011A', 20, 'DATA 0 electron 2011', selection))
+    data.append(b.JobConfig('DoubleEle_Run2011B', dCache+'/andreypz/nuTuples_v1_7TeV/DoubleElectron_HZZ_Run2011B', 20, 'DATA 0 electron 2011', selection))
 
 
 
@@ -47,13 +55,13 @@ if selection == 'muEG':
  
 bg = []
 bg.extend([
-#b.JobConfig('DYjets', dCache+'/andreypz/nuTuples_v1_7TeV/DYJetsToLL', 10, 'DYjets 0 '+selection+' '+period, selection),
-#b.JobConfig('ZZ', dCache+'/andreypz/nuTuples_v1_7TeV/ZZJetsTo2L2Nu', 1, 'ZZ 0 '+selection+' '+period, selection),
-#b.JobConfig('WW', '/eos/uscms/store/user/bpollack/May15/MC/WWJets/', 1, 'WW 0 '+selection+' '+period, selection),
+b.JobConfig('DYjets', dCache+'/andreypz/nuTuples_v1_7TeV/DYJetsToLL', 20, 'DYjets 0 '+selection+' '+period, selection),
+b.JobConfig('ZZ', dCache+'/andreypz/nuTuples_v1_7TeV/ZZJetsTo2L2Nu', 1, 'ZZ 0 '+selection+' '+period, selection),
+b.JobConfig('WW', '/eos/uscms/store/user/bpollack/May15/MC/WWJets/', 1, 'WW 0 '+selection+' '+period, selection),
 b.JobConfig('WZ', '/eos/uscms/store/user/bpollack/Apr17/MC/WZJets', 1, 'WZ 0 '+selection+' '+period, selection),
-#b.JobConfig('ttbar', dCache+'/andreypz/nuTuples_v1_7TeV/TTJets', 20, 'ttbar 0 '+selection+' '+period, selection),
-#b.JobConfig('tW', dCache+'/andreypz/nuTuples_v1_7TeV/T_tW-channel-DR-r2', 1, 'tW 0 '+selection+' '+period, selection),
-#b.JobConfig('tbarW', dCache+'/andreypz/nuTuples_v1_7TeV/Tbar_tW-channel-DR-r2', 1, 'tW 0 '+selection+' '+period, selection),
+b.JobConfig('ttbar', dCache+'/andreypz/nuTuples_v1_7TeV/TTJets', 10, 'ttbar 0 '+selection+' '+period, selection),
+b.JobConfig('tW', dCache+'/radek/MC3b/T_tW-channel-DR-r2', 1, 'tW 0 '+selection+' '+period, selection),
+b.JobConfig('tbarW', dCache+'/radek/MC3b/Tbar_tW-channel-DR-r2', 1, 'tbarW 0 '+selection+' '+period, selection),
 #b.JobConfig('ggWW', dCache+'/andreypz/nuTuples_v1_7TeV/GluGluToWWTo4L', 1, 'ggWW 0 '+selection+' '+period, selection),
 ])
 
@@ -61,6 +69,7 @@ b.JobConfig('WZ', '/eos/uscms/store/user/bpollack/Apr17/MC/WZJets', 1, 'WZ 0 '+s
 signal = []
 
 signal.extend([
+b.JobConfig('ggHZZ125', dCache+'/andreypz/nuTuples_v1_7TeV/ggHZZ125', 1, 'ggHZZ125 0 '+selection+' '+period, selection),
 b.JobConfig('ggHZZ200', dCache+'/andreypz/nuTuples_v1_7TeV/ggHZZ200', 1, 'ggHZZ200 0 '+selection+' '+period, selection),
 b.JobConfig('ggHZZ250', dCache+'/andreypz/nuTuples_v1_7TeV/ggHZZ250', 1, 'ggHZZ250 0 '+selection+' '+period, selection),
 b.JobConfig('ggHZZ300', dCache+'/andreypz/nuTuples_v1_7TeV/ggHZZ300', 1, 'ggHZZ300 0 '+selection+' '+period, selection),
@@ -69,8 +78,10 @@ b.JobConfig('ggHZZ400', dCache+'/andreypz/nuTuples_v1_7TeV/ggHZZ400', 1, 'ggHZZ4
 b.JobConfig('ggHZZ450', dCache+'/andreypz/nuTuples_v1_7TeV/ggHZZ450', 1, 'ggHZZ450 0 '+selection+' '+period, selection),
 b.JobConfig('ggHZZ500', dCache+'/andreypz/nuTuples_v1_7TeV/ggHZZ500', 1, 'ggHZZ500 0 '+selection+' '+period, selection),
 b.JobConfig('ggHZZ550', dCache+'/andreypz/nuTuples_v1_7TeV/ggHZZ550', 1, 'ggHZZ550 0 '+selection+' '+period, selection),
-b.JobConfig('ggHZZ600', dCache+'/andreypz/nuTuples_v1_7TeV/ggHZZ600', 1, 'ggHZZ600 0 '+selection+' '+period, selection)
-#b.JobConfig('ggHWW250', dCache+'/andreypz/nuTuples_v1_7TeV/ggHWW_M250', 1, 'ggHWW250 0 '+selection+' '+period, selection),
+b.JobConfig('ggHZZ600', dCache+'/andreypz/nuTuples_v1_7TeV/ggHZZ600', 1, 'ggHZZ600 0 '+selection+' '+period, selection),
+
+b.JobConfig('ggHWW125', dCache+'/andreypz/nuTuples_v1_7TeV/ggHWW_M125', 1, 'ggHWW125 0 '+selection+' '+period, selection),
+b.JobConfig('ggHWW200', dCache+'/andreypz/nuTuples_v1_7TeV/ggHWW_M200', 1, 'ggHWW200 0 '+selection+' '+period, selection),
 #b.JobConfig('ggHWW300', dCache+'/andreypz/nuTuples_v1_7TeV/ggHWW_M300', 1, 'ggHWW300 0 '+selection+' '+period, selection),
 #b.JobConfig('ggHWW350', dCache+'/andreypz/nuTuples_v1_7TeV/ggHWW_M350', 1, 'ggHWW350 0 '+selection+' '+period, selection),
 #b.JobConfig('ggHWW400', dCache+'/andreypz/nuTuples_v1_7TeV/ggHWW_M400', 1, 'ggHWW400 0 '+selection+' '+period, selection),
@@ -96,4 +107,7 @@ if doBG:
     batcher.SubmitToLPC()
 if doSignal:
     batcher = b.BatchMaster(signal, outputPath)
+    batcher.SubmitToLPC()
+if doTest:
+    batcher = b.BatchMaster(test, outputPath)
     batcher.SubmitToLPC()

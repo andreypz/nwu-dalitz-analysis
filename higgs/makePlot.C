@@ -4,7 +4,7 @@
 #define F2 17
 #define F3 4
 
-void makePlot(Int_t sel=1, TString hPath="00")
+void makePlot(Int_t sel=1, TString dir ="./", TString hPath="v00")
 {
   gROOT->ProcessLine(".L ./utils.C");
   gROOT->ProcessLine(".L ../data/tdrstyle.C");
@@ -16,9 +16,8 @@ void makePlot(Int_t sel=1, TString hPath="00")
   TH1::SetDefaultSumw2(kTRUE);
 
   Float_t intLumi = 1;
-  if(sel==1)  intLumi = 215.1 + 927.6 + 370.9 + 663.0 + 2511; //double mu	
-  if(sel==2)  intLumi = 215.1 + 789.2 + 313.2 + 662.2 + 2511; //double ele	
-  TString dir = hPath.Data();
+  if(sel==1)  intLumi = 2312 + 2739; //double mu	
+  if(sel==2)  intLumi = 2312 + 2739; //double ele	
 
   Bool_t plotdiLepton=1, plotLepton=1, plotJet=0, plotMet=0, plotSpecial=0, plotMisc=0;
   Bool_t doTest    = 0;
@@ -28,13 +27,13 @@ void makePlot(Int_t sel=1, TString hPath="00")
   TString ssel("none"), gsel("none");
   if (sel==1)  {
     ssel = "muon";  gsel ="muGamma";
-    if(doPhotons)  TString imgpath(Form("~/afs/public_html/higgs/%s/%s/", dir.Data(), gsel.Data() ) ); 
-    else           TString imgpath(Form("~/afs/public_html/higgs/%s/%s/", dir.Data(), ssel.Data() ) ); 
+    if(doPhotons)  TString imgpath(Form("%s/%s/%s/", dir.Data(), hPath.Data(), gsel.Data() ) ); 
+    else           TString imgpath(Form("%s/%s/%s/", dir.Data(), hPath.Data(), ssel.Data() ) ); 
   }
   if (sel==2)  {
     ssel = "electron";  gsel ="eGamma";
-    if(doPhotons)  TString imgpath(Form("~/afs/public_html/higgs/%s/%s/", dir.Data(), gsel.Data() ) ); 
-    else           TString imgpath(Form("~/afs/public_html/higgs/%s/%s/", dir.Data(), ssel.Data() ) ); 
+    if(doPhotons)  TString imgpath(Form("%s/%s/%s/", dir.Data(), hPath.Data(), gsel.Data() ) ); 
+    else           TString imgpath(Form("%s/%s/%s/", dir.Data(), hPath.Data(), ssel.Data() ) ); 
   }
 
   TString histoPath = Form("%s/%s", hPath.Data(), ssel.Data());
@@ -57,8 +56,7 @@ void makePlot(Int_t sel=1, TString hPath="00")
   }
 
   TFile* fmc_tt     = new TFile(Form("./%s/m_ttbar_%s.root", hPath.Data(), ssel.Data() ));
-  TFile* fmc_Top    = new TFile(Form("./%s/m_ttbar_%s.root", hPath.Data(), ssel.Data() ));
-  //TFile* fmc_Top    = new TFile(Form("./%s/m_Top_%s.root", hPath.Data(), ssel.Data() ));
+  TFile* fmc_Top    = new TFile(Form("./%s/m_Top_%s.root", hPath.Data(), ssel.Data() ));
 
   TFile* fmc_Zjets  = new TFile(Form("./%s/m_Zjets_%s.root", hPath.Data(), ssel.Data() ));
   //TFile* fmc_Zjets  = new TFile(Form("./%s/m_libZjets_%i.root", hPath.Data(), ssel ));

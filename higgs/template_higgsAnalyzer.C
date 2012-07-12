@@ -1,4 +1,4 @@
-// $Id: template_higgsAnalyzer.C,v 1.33 2012/07/07 21:24:41 andrey Exp $
+// $Id: template_higgsAnalyzer.C,v 1.34 2012/07/09 21:40:00 andrey Exp $
 
 #define higgsAnalyzer_cxx
 
@@ -32,17 +32,17 @@ Float_t bJetPtCut      = 30.;
 Float_t muPtCut[]      = {20., 10.};
 Float_t elePtCut[]     = {20., 10.};
 float   photonPtCut[]  = {25., 1e9};
-Float_t zMassCut[]     = {76.2, 106.2};
+Float_t zMassCut[]     = {76, 106};
 Float_t qtCut          = 55.;
 Int_t   nJetsCut[]     = {0, 99};
 Float_t cut_vz = 24, cut_vd0 = 2, cut_vndof = 4;  //PV filter cuts
 
-// Cuts for mass points in the PAS. 250,300,350 etc
-Float_t dPhiMinCut[] = {0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5};
+// Cuts for mass points in the PAS. 200, 250,300,350 etc
+Float_t dPhiMinCut = 0.5; //[] = {0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5};
 //Float_t dPhiMinCut[] = {0.47, 0.33, 0.21, 0.12, 0.06, 0.01, 0.00, 0.00};
-Float_t metMinCut[]  = {70,     79,   95,  115,  134,  150, 159, 160};
-Float_t mtMinCut[]   = {222,   264,  298,  327,  354,  382, 413, 452};
-Float_t mtMaxCut[]   = {272,   331,  393,  460,  531,  605, 684, 767};
+Float_t metMinCut[]  = {75,     75,   85,  85,  90, 110,  110, 120, 120};
+Float_t mtMinCut[]   = {175, 225,   250,  300,  325,  350,  400, 450, 450};
+Float_t mtMaxCut[]   = {275, 325,   350,  400,  425,  500,  650, 700, 9999};
 
 //For Anton's tree:
 TLorentzVector  kt_lep1, kt_lep2, kt_met, kt_corrMet, kt_allJets, kt_V;
@@ -265,7 +265,7 @@ void higgsAnalyzer::Begin(TTree * /*tree*/)
 }
 bool higgsAnalyzer::Process(Long64_t entry)
 {  
-    GetEntry(entry);
+  GetEntry(entry);
     CountEvents(0);
     ++nEventsWeighted[0];
     MET = 0;
@@ -328,7 +328,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
 	//if(pVtx->isFake()) cout<<"PV is fake"<<endl;
 
 	if( 
-	   //   !pVtx->IsFake() && 
+	   //!pVtx->IsFake() && 
 	    pVtx->NDof() > cut_vndof                      //4
 	    && fabs(pVtx->Position().z()) <= cut_vz      //15
 	    && fabs(pVtx->Position().Perp()) <= cut_vd0   //Not Mag()!; 2
@@ -509,7 +509,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
 
 
     //////////
-    // jets //
+    // Jets //
     //////////
 
     vector<TLorentzVector> jetP4, bJetP4, softJetP4, bSSVJetP4, testJetP4;
@@ -534,47 +534,50 @@ bool higgsAnalyzer::Process(Long64_t entry)
       
       if (fabs(thisJet->P4().Eta()) < 2.4) {
 	if (
-	    thisJet->NumConstit()   > 1
-	    && thisJet->ChHadFrac() > 0
-	    && thisJet->ChEmFrac()  < 1
-	    && (thisJet->NeuHadFrac() + thisJet->NeuEmFrac()) < 0.9
+	    // Loose ID jets. Those are used fo deltaPhi(Jet, Met) cut
+	    thisJet->NumConstit()    > 1
+	    && thisJet->NeuHadFrac() < 0.99
+	    && thisJet->NeuEmFrac()  < 0.99
+	    && thisJet->ChEmFrac()   < 0.99
+	    && thisJet->ChHadFrac()  > 0
+	    && thisJet->NumChPart()  > 0
+
 	    //&& thisJet->P4(JC_LVL).Pt() > jetPtCut[0]
 	    ) {
-	  if (
-	      kTRUE  //Removing jet-vertex assosiation
-	      //thisJet->VtxNTracks() > 0
-	      //&& thisJet->VtxSumPtFrac() > 0. 
-	      //&& thisJet->VtxSumPtIndex() == (UInt_t)(PVind[0]+1) //index in pv collection (passed vtx selection)
-	      ) {
-
-	    if (thisJet->P4(JC_LVL).Pt() > jetPtCut[0]) {
-	      if (thisJet->BDiscrTCHE() > 2. && thisJet->P4(JC_LVL).Pt() > bJetPtCut) 
-		bJetP4.push_back(thisJet->P4(JC_LVL));
-	      if (( thisJet->BDiscrTCHE() > 2 || thisJet->BDiscrSSVHE()> 1.74 )&& thisJet->P4(JC_LVL).Pt() > bJetPtCut) 
-		bSSVJetP4.push_back(thisJet->P4(JC_LVL));
-	      
-	      jetP4.push_back(thisJet->P4(JC_LVL));
-	      sumJetP4 += thisJet->P4();
-	      ++jetCount;
-	    }
-	    else if (thisJet->P4(JC_LVL).Pt() > jetPtCut[1]) softJetP4.push_back(thisJet->P4(JC_LVL));
+	  
+	  if (thisJet->P4(JC_LVL).Pt() > jetPtCut[0]) {
+	    if (thisJet->BDiscrJBP() > 0.275 && thisJet->P4(JC_LVL).Pt() > bJetPtCut) 
+	      //if (thisJet->BDiscrTCHE() > 2. && thisJet->P4(JC_LVL).Pt() > bJetPtCut) 
+	      bJetP4.push_back(thisJet->P4(JC_LVL));
+	    if (( thisJet->BDiscrTCHE() > 2 || thisJet->BDiscrSSVHE()> 1.74 )&& thisJet->P4(JC_LVL).Pt() > bJetPtCut) 
+	      bSSVJetP4.push_back(thisJet->P4(JC_LVL));
+	    
+	    jetP4.push_back(thisJet->P4(JC_LVL));
+	    sumJetP4 += thisJet->P4();
+	    ++jetCount;
 	  }
+    	    else if (thisJet->P4(JC_LVL).Pt() > jetPtCut[1]) softJetP4.push_back(thisJet->P4(JC_LVL));
 	}
-      } else if (fabs(thisJet->P4().Eta()) < 4.8) {
-	if (thisJet->P4(JC_LVL).Pt() > jetPtCut[0]) {
+    	
+      } else if (fabs(thisJet->P4().Eta()) < 4.9) {
+    	if (thisJet->P4(JC_LVL).Pt() > jetPtCut[0]
+    	    && thisJet->NumConstit()    > 1
+    	    && thisJet->NeuHadFrac() < 0.99
+    	    && thisJet->NeuEmFrac()  < 0.99
+    	    ) {
      	  jetP4.push_back(thisJet->P4(JC_LVL)); 
-	  sumJetP4 += thisJet->P4();
-	  fwdJetSumPt += thisJet->Pt(JC_LVL);
-	  ++fwdJetCount;
-	  ++jetCount;
-	} else if (thisJet->P4(JC_LVL).Pt() > jetPtCut[1]) softJetP4.push_back(thisJet->P4(JC_LVL));
+    	  sumJetP4 += thisJet->P4();
+    	  fwdJetSumPt += thisJet->Pt(JC_LVL);
+    	  ++fwdJetCount;
+    	  ++jetCount;
+    	} else if (thisJet->P4(JC_LVL).Pt() > jetPtCut[1]) softJetP4.push_back(thisJet->P4(JC_LVL));
       }
     }
-
+    
     sort(jetP4.begin(), jetP4.end(), P4SortCondition);
     sort(bJetP4.begin(), bJetP4.end(), P4SortCondition);
     sort(bSSVJetP4.begin(), bSSVJetP4.end(), P4SortCondition);
-
+    
     nJets     = jetP4.size();
     nJetsB    = bJetP4.size();
     nJetsBssv = bSSVJetP4.size();
@@ -608,7 +611,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
 
     if (selection=="muon" && muons.size() > 1) if (CosmicMuonFilter(muons[0], muons[1])) return kTRUE;
     //Data quality
-    if (isRealData && (isNoiseHcal || isScraping || isCSCTightHalo)) return kTRUE;
+    //if (isRealData && (isNoiseHcal || isScraping || isCSCTightHalo)) return kTRUE;
 
     TLorentzVector Lepton1(0.,0.,0.,0.), Lepton2(0.,0.,0.,0.);
     if (selection == "electron") {
@@ -617,15 +620,15 @@ bool higgsAnalyzer::Process(Long64_t entry)
         /////////////////////
 
         if (electrons.size() < 2) return kTRUE;
-	//no opposite charge requirement
-	//if (electrons[0].Charge() == electrons[1].Charge()) return kTRUE;
+    	//no opposite charge requirement
+    	//if (electrons[0].Charge() == electrons[1].Charge()) return kTRUE;
 
         ZP4           = electrons[0].P4() + electrons[1].P4();
         reducedMet1P4 = GetReducedMET(sumJetP4,  electrons[0].P4(), electrons[1].P4(), metP4, 1);
         reducedMet2P4 = GetReducedMET(sumJetP4,  electrons[0].P4(), electrons[1].P4(), metP4, 2);
 
-	Lepton1 = electrons[0].P4();
-	Lepton2 = electrons[1].P4();
+    	Lepton1 = electrons[0].P4();
+    	Lepton2 = electrons[1].P4();
 
     } else if (selection == "muon") {
 
@@ -634,15 +637,15 @@ bool higgsAnalyzer::Process(Long64_t entry)
         //////////////////////////////////////////
 
         if (muons.size() < 2) return kTRUE;
-	//no opposite charge requirement
+    	//no opposite charge requirement
         //if (muons[0].Charge() == muons[1].Charge()) return kTRUE;
 
         ZP4           = muons[0].P4() + muons[1].P4();
         reducedMet1P4 = GetReducedMET(sumJetP4,  muons[0].P4(), muons[1].P4(), metP4, 1);
         reducedMet2P4 = GetReducedMET(sumJetP4,  muons[0].P4(), muons[1].P4(), metP4, 2);
 
-	Lepton1 = muons[0].P4();
-	Lepton2 = muons[1].P4();
+    	Lepton1 = muons[0].P4();
+    	Lepton2 = muons[1].P4();
 
     } else if (selection == "eGamma" || selection == "muGamma" || selection == "gamma") {
 
@@ -651,14 +654,14 @@ bool higgsAnalyzer::Process(Long64_t entry)
         /////////////////////////////////////
 
         if (photons.size() < 1) return kTRUE;
-	float photonMass = weighter->GetPhotonMass(); 
-	ZP4.SetPtEtaPhiM(photons[0].Pt(), photons[0].Eta(), photons[0].Phi(), photonMass);
+    	float photonMass = weighter->GetPhotonMass(); 
+    	ZP4.SetPtEtaPhiM(photons[0].Pt(), photons[0].Eta(), photons[0].Phi(), photonMass);
         reducedMet1P4 = GetReducedMET(sumJetP4,  photons[0].P4(), TLorentzVector(0, 0, 0, 0), metP4, 1);
-	reducedMet2P4 = GetReducedMET(sumJetP4,  photons[0].P4(), TLorentzVector(0, 0, 0, 0), metP4, 2);
+    	reducedMet2P4 = GetReducedMET(sumJetP4,  photons[0].P4(), TLorentzVector(0, 0, 0, 0), metP4, 2);
 
-	//needed for weights
-	Lepton1 = ZP4;  
-	Lepton2.SetXYZT(0,0,0,0);
+    	//needed for weights
+    	Lepton1 = ZP4;  
+    	Lepton2.SetXYZT(0,0,0,0);
 
     } else {
         return kTRUE;
@@ -692,47 +695,47 @@ bool higgsAnalyzer::Process(Long64_t entry)
     
       // NLO k-faktors weights
       for (int i = 0; i < genParticles->GetSize(); ++i) {
-	TCGenParticle* thisParticle = (TCGenParticle*) genParticles->At(i);    
+    	TCGenParticle* thisParticle = (TCGenParticle*) genParticles->At(i);    
 	
-	if (
-	    (fabs(thisParticle->GetPDGId()) == 11 
-	     || fabs(thisParticle->GetPDGId()) == 13 
-	     || fabs(thisParticle->GetPDGId()) == 15) 
-	    && thisParticle->Mother() ==23
-	    ) genLeptons.push_back(thisParticle->P4());
+    	if (
+    	    (fabs(thisParticle->GetPDGId()) == 11 
+    	     || fabs(thisParticle->GetPDGId()) == 13 
+    	     || fabs(thisParticle->GetPDGId()) == 15) 
+    	    && thisParticle->Mother() ==23
+    	    ) genLeptons.push_back(thisParticle->P4());
 	
-	if (
-	    (fabs(thisParticle->GetPDGId()) == 12 
-	     || fabs(thisParticle->GetPDGId()) == 14 
-	     || fabs(thisParticle->GetPDGId()) == 16) 
-	    && thisParticle->Mother() ==23
-	    ) genNeutrinos.push_back(thisParticle->P4());
+    	if (
+    	    (fabs(thisParticle->GetPDGId()) == 12 
+    	     || fabs(thisParticle->GetPDGId()) == 14 
+    	     || fabs(thisParticle->GetPDGId()) == 16) 
+    	    && thisParticle->Mother() ==23
+    	    ) genNeutrinos.push_back(thisParticle->P4());
 
 
-	//if (thisParticle->GetPDGId() == 25)
-	// {
-	//
-	// }
+    	//if (thisParticle->GetPDGId() == 25)
+    	// {
+    	//
+    	// }
       }
 
       if (genLeptons.size() > 1 && genNeutrinos.size() > 1) {
-	hig_Pt   = (genLeptons[0]+genLeptons[1]+genNeutrinos[0]+genNeutrinos[1]).Pt();
-	hig_M    = (genLeptons[0]+genLeptons[1]+genNeutrinos[0]+genNeutrinos[1]).M();
+    	hig_Pt   = (genLeptons[0]+genLeptons[1]+genNeutrinos[0]+genNeutrinos[1]).Pt();
+    	hig_M    = (genLeptons[0]+genLeptons[1]+genNeutrinos[0]+genNeutrinos[1]).M();
 
-	Int_t i_mass = 0;
-	if (suffix.Contains("ggHZZ") || suffix.Contains("ggHWW")) {
-	  i_mass = TString(suffix(5,3)).Atoi();
-	  evtWeight *= weighter->GluGluHiggsWeight(hig_Pt, i_mass);
-	} 
-	else if (suffix.Contains("VBFHZZ")){
-	  i_mass = TString(suffix(6,3)).Atoi(); //for vbf name
-	}
+    	Int_t i_mass = 0;
+    	if (suffix.Contains("ggHZZ") || suffix.Contains("ggHWW")) {
+    	  i_mass = TString(suffix(5,3)).Atoi();
+    	  evtWeight *= weighter->GluGluHiggsWeight(hig_Pt, i_mass);
+    	} 
+    	else if (suffix.Contains("VBFHZZ")){
+    	  i_mass = TString(suffix(6,3)).Atoi(); //for vbf name
+    	}
 	
-	//cout<<"nPU vertic = "<<nPUVertices<<"  evtWeight before reweighting  "<<evtWeight<<endl;
+    	//cout<<"nPU vertic = "<<nPUVertices<<"  evtWeight before reweighting  "<<evtWeight<<endl;
 	
-	// Higgs mass lineshapes weights
-	evtWeight *= weighter->HiggsMassLineShapeWeight(hig_M, i_mass);
-	cout<<"imass: "<<i_mass<<"   genMass from gen Z's: "<<hig_M<<"   evtWeight= "<<evtWeight<<endl;	  
+    	// Higgs mass lineshapes weights
+    	evtWeight *= weighter->HiggsMassLineShapeWeight(hig_M, i_mass);
+    	//cout<<"imass: "<<i_mass<<"   genMass from gen Z's: "<<hig_M<<"   evtWeight= "<<evtWeight<<endl;	  
 
       }
       
@@ -743,7 +746,6 @@ bool higgsAnalyzer::Process(Long64_t entry)
     //cout<<"dbg"<<endl;    
 
 
-
     /////////////////////
     // 3rd lepton veto //
     /////////////////////
@@ -751,34 +753,37 @@ bool higgsAnalyzer::Process(Long64_t entry)
    if(selection  == "muon" ||  selection  == "electron")
      if (Lepton1.Pt() < 20 || Lepton2.Pt() < 20) return kTRUE;
 
+    CountEvents(2);
+    nEventsWeighted[2] += evtWeight;
+    FillHistosNoise(2, evtWeight);
+
     if ((electrons.size() > 0 || muons.size() > 2) && selection  == "muon") return kTRUE;
     if ((muons.size() > 0 || electrons.size() > 2) && selection  == "electron") return kTRUE;
     if ((muons.size() > 0 || electrons.size() > 0) && (selection == "eGamma" || selection == "muGamma" || selection == "gamma")) return kTRUE;
 
-    //Loose third lepton Veto:
-    //if( (selection == "muon" || selection == "electron") && looseLeptons.size()>0) return kTRUE;
 
-    CountEvents(2);
-    nEventsWeighted[2] += evtWeight;
-    FillHistosNoise(2, evtWeight);
+    //Loose third lepton Veto:
+    if( (selection == "muon" || selection == "electron") && looseLeptons.size()>0) return kTRUE;
+    //Soft third muon veto:
+    if (softMuons > 2) return kTRUE;
+
+
+    CountEvents(3);
+    nEventsWeighted[3] += evtWeight;
+    FillHistosNoise(3, evtWeight);
 
     ////////////
     // Z mass //
     ////////////
 
     if (ZP4.M() < zMassCut[0] || ZP4.M() > zMassCut[1]) return kTRUE;  
-    CountEvents(3);
-    nEventsWeighted[3] += evtWeight;
-    FillHistosNoise(3, evtWeight);
-
-
-    //Soft third muon veto:
-    if (softMuons > 2) return kTRUE;
-
     CountEvents(4);
     nEventsWeighted[4] += evtWeight;
-
+    FillHistosNoise(4, evtWeight);
+    FillHistos(4, evtWeight);
     
+
+
     /////////////////////////////////////////////////
     // Variables for FillHistos() function (Andrey)//
     /////////////////////////////////////////////////
@@ -859,9 +864,6 @@ bool higgsAnalyzer::Process(Long64_t entry)
     ///-------------------/////
 
 
-    FillHistosNoise(4, evtWeight);
-    FillHistos(4, evtWeight);
-    
     ////////////////
     // b-jet veto //
     ////////////////
@@ -889,16 +891,28 @@ bool higgsAnalyzer::Process(Long64_t entry)
     }
 
     if (ZP4.Pt() < qtCut) return kTRUE;  
+
     CountEvents(5);
     nEventsWeighted[5] += evtWeight;
     FillHistosNoise(5, evtWeight);
     
-
-    if(passBveto){
+    if (deltaPhiJetMET > dPhiMinCut) return kTRUE;
       CountEvents(6);
       nEventsWeighted[6] += evtWeight;
       FillHistos(6, evtWeight);
       FillHistosNoise(6, evtWeight);
+
+    if (MET > 70) return kTRUE;
+      CountEvents(7);
+      nEventsWeighted[7] += evtWeight;
+      FillHistos(7, evtWeight);
+      FillHistosNoise(7, evtWeight);
+
+    if(passBveto){
+      CountEvents(8);
+      nEventsWeighted[8] += evtWeight;
+      FillHistos(8, evtWeight);
+      FillHistosNoise(8, evtWeight);
     }    
         
     Bool_t passBasic = kTRUE;
@@ -907,99 +921,91 @@ bool higgsAnalyzer::Process(Long64_t entry)
     // DeltaPhi(MET, jet); MET and MT cuts //
     /////////////////////////////////////////
 
-    if (passBveto && deltaPhiJetMET > dPhiMinCut[0] &&  MET>metMinCut[0]  && (MT > mtMinCut[0] && MT < mtMaxCut[0]))
+    if (passBveto &&  MET>metMinCut[0]  && (MT > mtMinCut[0] && MT < mtMaxCut[0]))
       {
 	//For Higgs  200 . The cuts need to be defined
-	CountEvents(7);
-	nEventsWeighted[7] += evtWeight;
-	//FillHistos(7, evtWeight);
-	FillHistosNoise(7, evtWeight);
-      }
-
-    if (passBveto && deltaPhiJetMET > dPhiMinCut[0] &&  MET>metMinCut[0]  && (MT > mtMinCut[0] && MT < mtMaxCut[0]))
-      {
-	//For Higgs  250
-	CountEvents(8);
-	nEventsWeighted[8] += evtWeight;
-	FillHistos(8, evtWeight);
-	FillHistosNoise(8, evtWeight);
-	PrintOut(8);
-      }
-
-    if (passBveto && deltaPhiJetMET > dPhiMinCut[1] &&  MET>metMinCut[1]  && (MT > mtMinCut[1] && MT < mtMaxCut[1]))
-      {
-	//For Higgs  300
 	CountEvents(9);
 	nEventsWeighted[9] += evtWeight;
-       	//FillHistos(9, evtWeight);
+	FillHistos(9, evtWeight);
 	FillHistosNoise(9, evtWeight);
-	PrintOut(9);
       }
 
-    if (passBveto && deltaPhiJetMET > dPhiMinCut[2] &&  MET>metMinCut[2]  && (MT > mtMinCut[2] && MT < mtMaxCut[2]))
+    if (passBveto &&  MET>metMinCut[1]  && (MT > mtMinCut[1] && MT < mtMaxCut[1]))
       {
-	//For Higgs  350
+	//For Higgs  250
 	CountEvents(10);
 	nEventsWeighted[10] += evtWeight;
-       	//FillHistos(10, evtWeight);
+	FillHistos(10, evtWeight);
 	FillHistosNoise(10, evtWeight);
 	PrintOut(10);
       }
-    if (passBveto && deltaPhiJetMET > dPhiMinCut[3] &&  MET>metMinCut[3]  && (MT > mtMinCut[3] && MT < mtMaxCut[3]))
+
+    if (passBveto &&  MET>metMinCut[2]  && (MT > mtMinCut[2] && MT < mtMaxCut[2]))
       {
-	//For Higgs  400
+	//For Higgs  300
 	CountEvents(11);
 	nEventsWeighted[11] += evtWeight;
-       	FillHistos(11, evtWeight);
+       	//FillHistos(11, evtWeight);
 	FillHistosNoise(11, evtWeight);
 	PrintOut(11);
-
       }
-    if (passBveto && deltaPhiJetMET > dPhiMinCut[4] &&  MET>metMinCut[4]  && (MT > mtMinCut[4] && MT < mtMaxCut[4]))
+
+    if (passBveto &&  MET>metMinCut[3]  && (MT > mtMinCut[3] && MT < mtMaxCut[3]))
       {
-	//For Higgs  450
+	//For Higgs  350
 	CountEvents(12);
 	nEventsWeighted[12] += evtWeight;
        	//FillHistos(12, evtWeight);
-    	FillHistosNoise(12, evtWeight);
+	FillHistosNoise(12, evtWeight);
+	PrintOut(12);
       }
-
-    if (passBveto && deltaPhiJetMET > dPhiMinCut[5] &&  MET>metMinCut[5]  && (MT > mtMinCut[5] && MT < mtMaxCut[5]))
+    if (passBveto &&  MET>metMinCut[4]  && (MT > mtMinCut[4] && MT < mtMaxCut[4]))
       {
-	//For Higgs  500
+	//For Higgs  400
 	CountEvents(13);
 	nEventsWeighted[13] += evtWeight;
        	//FillHistos(13, evtWeight);
-    	FillHistosNoise(13, evtWeight);
-      }
+	FillHistosNoise(13, evtWeight);
+	PrintOut(13);
 
-    if (passBveto && deltaPhiJetMET > dPhiMinCut[6] &&  MET>metMinCut[6]  && (MT > mtMinCut[6] && MT < mtMaxCut[6]))
+      }
+    if (passBveto &&  MET>metMinCut[5]  && (MT > mtMinCut[5] && MT < mtMaxCut[5]))
       {
-	//For Higgs  550
+	//For Higgs  450
 	CountEvents(14);
 	nEventsWeighted[14] += evtWeight;
        	//FillHistos(14, evtWeight);
     	FillHistosNoise(14, evtWeight);
       }
 
-    if (passBveto && deltaPhiJetMET > dPhiMinCut[7] &&  MET>metMinCut[7]  && (MT > mtMinCut[7] && MT < mtMaxCut[7]))
+    if (passBveto &&  MET>metMinCut[6]  && (MT > mtMinCut[6] && MT < mtMaxCut[6]))
       {
-	//For Higgs  600
+	//For Higgs  500
 	CountEvents(15);
 	nEventsWeighted[15] += evtWeight;
        	//FillHistos(15, evtWeight);
     	FillHistosNoise(15, evtWeight);
       }
-    
-    if (passBasic && MET> 70)
+
+    if (passBveto &&  MET>metMinCut[7]  && (MT > mtMinCut[7] && MT < mtMaxCut[7]))
       {
-	//NO b-veto, only basics cuts. For N-b jets distribution.
+	//For Higgs  550
 	CountEvents(16);
 	nEventsWeighted[16] += evtWeight;
-       	FillHistos(16, evtWeight);
-	FillHistosNoise(16, evtWeight);
+       	//FillHistos(16, evtWeight);
+    	FillHistosNoise(16, evtWeight);
       }
 
+    if (passBveto &&  MET>metMinCut[8]  && (MT > mtMinCut[8] && MT < mtMaxCut[8]))
+      {
+	//For Higgs  600
+	CountEvents(17);
+	nEventsWeighted[17] += evtWeight;
+       	//FillHistos(17, evtWeight);
+    	FillHistosNoise(15, evtWeight);
+      }
+    
+    /*
     if (passBasic && passBveto && MET> 40)
       {
 	CountEvents(17);
@@ -1007,7 +1013,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
 	FillHistos(17, evtWeight);
 	FillHistosNoise(17, evtWeight);
       }
-   
+    */   
 
     //////////////////////
     // Jet Multiplicity //
@@ -1028,26 +1034,30 @@ void higgsAnalyzer::Terminate()
   for (int i = 6; i < nC; ++i) fout[i].close();
 
   cout<<"\nRunning over "<<suffix<<" dataset with "<<selection<<" selection."<<"\n"<<endl;
-  cout<<"| CUT DESCRIPTION                    |\t"<< "\t|"<<endl;
-  cout<<"| Initial number of events:          |\t"<< nEvents[0]  <<"\t|"<<nEventsWeighted[0]  <<"\t|"<<endl;
-  cout<<"| Pass HLT selection:                |\t"<< nEvents[1]  <<"\t|"<<nEventsWeighted[1]  <<"\t|"<<endl;
-  cout<<"| Two oppositely charged leptons:    |\t"<< nEvents[2]  <<"\t|"<<nEventsWeighted[2]  <<"\t|"<<endl;
-  cout<<"| Z mass window:                     |\t"<< nEvents[3]  <<"\t|"<<nEventsWeighted[3]  <<"\t|"<<endl;
-  cout<<"| Third lepton veto:                 |\t"<< nEvents[4]  <<"\t|"<<nEventsWeighted[4]  <<"\t|"<<endl;
-  cout<<"| Z Qt :                             |\t"<< nEvents[5]  <<"\t|"<<nEventsWeighted[5]  <<"\t|"<<endl;
-  cout<<"| b-jet veto:                        |\t"<< nEvents[6]  <<"\t|"<<nEventsWeighted[6]  <<"\t|"<<endl;
-  cout<<"|                            |\t"<< nEvents[7]  <<"\t|"<<nEventsWeighted[7]  <<"\t|"<<endl;
-  cout<<"| H250                         |\t"<< nEvents[8]  <<"\t|"<<nEventsWeighted[8]  <<"\t|"<<endl;
-  cout<<"| H300                       |\t"<< nEvents[9] <<"\t|"<<nEventsWeighted[9] <<"\t|"<<endl;
-  cout<<"|                        |\t"<< nEvents[10]  <<"\t|"<<nEventsWeighted[10]  <<"\t|"<<endl;
-  cout<<"| H400                        |\t"<< nEvents[11] <<"\t|"<<nEventsWeighted[11] <<"\t|"<<endl;
-  cout<<"|                           |\t"<< nEvents[12] <<"\t|"<<nEventsWeighted[12] <<"\t|"<<endl;
-  cout<<"| H500                       |\t"<< nEvents[13] <<"\t|"<<nEventsWeighted[13] <<"\t|"<<endl;
-  cout<<"| H550                       |\t"<< nEvents[14] <<"\t|"<<nEventsWeighted[14] <<"\t|"<<endl;
-  cout<<"| H600                       |\t"<< nEvents[15] <<"\t|"<<nEventsWeighted[15] <<"\t|"<<endl;
+  cout<<"| CUT DESCRIPTION                  |\t"<< "\t|"<<endl;
+  cout<<"| Initial number of events:        |\t"<< nEvents[0]  <<"\t|"<<nEventsWeighted[0]  <<"\t|"<<endl;
+  cout<<"| Pass HLT selection:              |\t"<< nEvents[1]  <<"\t|"<<nEventsWeighted[1]  <<"\t|"<<endl;
+  cout<<"| Two leptons (id and iso):        |\t"<< nEvents[2]  <<"\t|"<<nEventsWeighted[2]  <<"\t|"<<endl;
+  cout<<"| Third lepton veto:Z mass window  |\t"<< nEvents[3]  <<"\t|"<<nEventsWeighted[3]  <<"\t|"<<endl;
+  cout<<"| Z mass window                    |\t"<< nEvents[4]  <<"\t|"<<nEventsWeighted[4]  <<"\t|"<<endl;
+  cout<<"| Z Qt > 55 :                      |\t"<< nEvents[5]  <<"\t|"<<nEventsWeighted[5]  <<"\t|"<<endl;
+  cout<<"| dPi(Jet, Met) > 0.5              |\t"<< nEvents[6]  <<"\t|"<<nEventsWeighted[6]  <<"\t|"<<endl;
+  cout<<"| Met > 70                         |\t"<< nEvents[7]  <<"\t|"<<nEventsWeighted[7]  <<"\t|"<<endl;
+  cout<<"| b-jet veto                       |\t"<< nEvents[8]  <<"\t|"<<nEventsWeighted[8]  <<"\t|"<<endl;
+  cout<<"| H200                       |\t"<< nEvents[9]  <<"\t|"<<nEventsWeighted[9] <<"\t|"<<endl;
+  cout<<"|                            |\t"<< nEvents[10] <<"\t|"<<nEventsWeighted[10]  <<"\t|"<<endl;
+  cout<<"| H300                       |\t"<< nEvents[11] <<"\t|"<<nEventsWeighted[11] <<"\t|"<<endl;
+  cout<<"|                            |\t"<< nEvents[12] <<"\t|"<<nEventsWeighted[12] <<"\t|"<<endl;
+  cout<<"| H400                       |\t"<< nEvents[13] <<"\t|"<<nEventsWeighted[13] <<"\t|"<<endl;
+  cout<<"| H450                       |\t"<< nEvents[14] <<"\t|"<<nEventsWeighted[14] <<"\t|"<<endl;
+  cout<<"| H500                       |\t"<< nEvents[15] <<"\t|"<<nEventsWeighted[15] <<"\t|"<<endl;
+  cout<<"|                            |\t"<< nEvents[16] <<"\t|"<<nEventsWeighted[16] <<"\t|"<<endl;
+  cout<<"| H600                       |\t"<< nEvents[17] <<"\t|"<<nEventsWeighted[17] <<"\t|"<<endl;
+
   
       
     //Normalization to 1fb and coloring the histograms
+  /*
     string sel, sample;
     Float_t CS, nEv;  Int_t lColor, fColor;
 
@@ -1069,7 +1079,7 @@ void higgsAnalyzer::Terminate()
     scaleAndColor(sample.c_str(), CS, nEv, 1000.0, lColor, fColor); //normalize to 1fb
 
     histoFile->Close();  
-
+  */
     //reweightFile->Close();  
 }
 
