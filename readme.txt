@@ -5,6 +5,16 @@ https://twiki.cern.ch/twiki/bin/view/CMS/UserCodeNWUHiggs
 
 The log of changes:
 
+2012-Jul-18
+  * V02-02 tag
+  * Converted scripts and plotting macros to python
+  * Updates in analyzer in order to synchronize with Common analysis:
+    * b-tagging
+    * jet cuts
+    * lepton iso and third lepton veto
+    * Met and MT cuts reoptimised
+    * etc
+    
 2012-Jun-14
   * V02-01 tag
   * Lineshape reweighting plugins
