@@ -52,7 +52,7 @@ timer = TStopwatch()
 timer.Start()
 
 gROOT.SetBatch()
-print doMerge
+print "Merging?", doMerge
 if doMerge:
     os.system("rm "+hPath+"/m_*_"+thissel+".root") #removing the old merged files
     os.system("hadd ./"+hPath+"/m_Data_"+thissel+".root  ./"+hPath+"/"+thissel+"/hhhh_Double*.root")

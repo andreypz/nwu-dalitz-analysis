@@ -58,25 +58,25 @@ def makePlots(sel=1, dir="./", hPath="v00"):
     li_ov = TList()
 
     for a in topbg:
-        print "Creating TList", a
+        #print "Creating TList", a
         f = TFile(hPath+"/"+thissel+"/hhhh_"+a+"_1.root", "OPEN")
         li_topbg.Add(f)        
     for a in bg:
-        print a
+        #print a
         if a=='ttbar':
             f = TFile(hPath+"/m_ttbar_"+thissel+".root", "OPEN")
         elif a=='DYjets':
             f = TFile(hPath+"/m_DYjets_"+thissel+".root", "OPEN")
         else:
             f = TFile(hPath+"/"+thissel+"/hhhh_"+a+"_1.root", "OPEN")
-        f.Print()
-        print "Creating TList", a
+        #f.Print()
+        #print "Creating TList", a
         li_bg.Add(f)
             
     for a in sig1:
-        print a
+        #print a
         f = TFile(hPath+"/"+thissel+"/hhhh_"+a+"_1.root", "OPEN")
-        f.Print()
+        #f.Print()
         li_sig1.Add(f)
 
     f_Data =  TFile(hPath+"/m_Data_"+thissel+".root", "OPEN")
@@ -93,14 +93,14 @@ def makePlots(sel=1, dir="./", hPath="v00"):
         c1.cd()
         for a in ["ggHZZ400","ggHZZ450","ggHZZ500","ggHZZ550","ggHZZ600"]:
             ind = sig1.index(a)
-            print a, ind
+            #print a, ind
             test1 = li_sig1.At(ind).Get("Andrey/higgs_w_mass_"+str(F0)).Clone()
             u.handleOverflowBinsScaleAndColors(test1,a, 0)
             test2 = li_sig1.At(ind).Get("Andrey/higgs_mass_"+str(F0)).Clone()
             u.handleOverflowBinsScaleAndColors(test1,a, 0)
 
-            test1.Print()
-            test2.Print()
+            #test1.Print()
+            #test2.Print()
             test1.SetLineColor(kBlue+1);
             test2.SetLineColor(kRed+1);
             test1.Draw("hist");
