@@ -1,4 +1,4 @@
-// $Id: template_higgsAnalyzer.C,v 1.34 2012/07/09 21:40:00 andrey Exp $
+// $Id: template_higgsAnalyzer.C,v 1.35 2012/07/12 18:17:57 andrey Exp $
 
 #define higgsAnalyzer_cxx
 
@@ -19,8 +19,8 @@ TString suffix("SUFFIX");
 
 vector<int> triggers (trigger, trigger + sizeof(trigger)/sizeof(int));
 
-UInt_t verboseLvl  = 0;
-Bool_t doZlibrary  = 0, isFromData=1;
+UInt_t verboseLvl  = 1;
+Bool_t doZlibrary  = 0, isFromData=0;
 Bool_t makeKinTree = 0;
 
 /////////////////
@@ -40,7 +40,7 @@ Float_t cut_vz = 24, cut_vd0 = 2, cut_vndof = 4;  //PV filter cuts
 // Cuts for mass points in the PAS. 200, 250,300,350 etc
 Float_t dPhiMinCut = 0.5; //[] = {0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5};
 //Float_t dPhiMinCut[] = {0.47, 0.33, 0.21, 0.12, 0.06, 0.01, 0.00, 0.00};
-Float_t metMinCut[]  = {75,     75,   85,  85,  90, 110,  110, 120, 120};
+Float_t metMinCut[]  = {75,     75,   85,  85,  90, 110,  110, 120, 120}; 
 Float_t mtMinCut[]   = {175, 225,   250,  300,  325,  350,  400, 450, 450};
 Float_t mtMaxCut[]   = {275, 325,   350,  400,  425,  500,  650, 700, 9999};
 
@@ -92,7 +92,10 @@ void higgsAnalyzer::Begin(TTree * /*tree*/)
     }
 
     for(Int_t n=0; n<nC; n++)
-      met0_et[n]       = new TH1F(Form("met0_et_%i",n), "met0_et", 40, 0,400);
+      {
+	met0_et[n]       = new TH1F(Form("met0_et_%i",n), "met0_et", 40, 0,400);
+	evt_weight[n]      = new  TH1F(Form("evt_weight_%i",n), "Weights", 50,0,10);
+      }
 
     for(Int_t n=4; n<nC; n++)
       {
@@ -202,8 +205,6 @@ void higgsAnalyzer::Begin(TTree * /*tree*/)
 
 	ph_nGamma[n]      = new  TH1F(Form("ph_nGamma_%i",n), "photon multiplicity (pt>25)", 10,0,10);
 
-	evt_weight[n]      = new  TH1F(Form("evt_weight_%i",n), "Weights", 50,0,10);
-
 	run_events[n]     =  new  TH1F(Form("run_events_%i",n), "Events per run", 18000, 160000., 178000.);
 
 
@@ -262,18 +263,20 @@ void higgsAnalyzer::Begin(TTree * /*tree*/)
       _kinTree->Branch("evNumber", &kt_evNumber, "evNumber/l");
       _kinTree->Branch("weight", &kt_weight, "weight/F");
     }
+
+    //cout<<"dbg   End of Begin job"<<endl;
 }
 bool higgsAnalyzer::Process(Long64_t entry)
 {  
-  GetEntry(entry);
+    GetEntry(entry);
     CountEvents(0);
     ++nEventsWeighted[0];
     MET = 0;
-    FillHistosNoise(0, 1);
+    FillHistosBasic(0, 1);
 
-    //cout<<nEvents[0]<<endl;
+    //cout<<"event #"<<nEvents[0]<<endl;
     if (nEvents[0] == 1) weighter->SetDataBit(isRealData);
-    //if(nEvents[0]>200) return kTRUE;
+    if(nEvents[0]>200) Abort("\t\t  ** 200 EVENTS PASSED, FINISH   ** ");
     
     //cout<<"dbg"<<endl;    
     if (nEvents[0] % (int)5e4 == 0) cout<<nEvents[3]<<" events passed of "<<nEvents[0]<<" checked! (at Z-peak cut)"<<endl;
@@ -303,7 +306,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
 
     CountEvents(1);
     ++nEventsWeighted[1];
-    FillHistosNoise(1, 1);
+    FillHistosBasic(1, 1);
 
     //cout<<"dbg"<<endl;    
 
@@ -734,7 +737,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
     	//cout<<"nPU vertic = "<<nPUVertices<<"  evtWeight before reweighting  "<<evtWeight<<endl;
 	
     	// Higgs mass lineshapes weights
-    	evtWeight *= weighter->HiggsMassLineShapeWeight(hig_M, i_mass);
+    	//evtWeight *= weighter->HiggsMassLineShapeWeight(hig_M, i_mass);
     	//cout<<"imass: "<<i_mass<<"   genMass from gen Z's: "<<hig_M<<"   evtWeight= "<<evtWeight<<endl;	  
 
       }
@@ -755,7 +758,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
 
     CountEvents(2);
     nEventsWeighted[2] += evtWeight;
-    FillHistosNoise(2, evtWeight);
+    FillHistosBasic(2, evtWeight);
 
     if ((electrons.size() > 0 || muons.size() > 2) && selection  == "muon") return kTRUE;
     if ((muons.size() > 0 || electrons.size() > 2) && selection  == "electron") return kTRUE;
@@ -770,7 +773,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
 
     CountEvents(3);
     nEventsWeighted[3] += evtWeight;
-    FillHistosNoise(3, evtWeight);
+    FillHistosBasic(3, evtWeight);
 
     ////////////
     // Z mass //
@@ -779,8 +782,8 @@ bool higgsAnalyzer::Process(Long64_t entry)
     if (ZP4.M() < zMassCut[0] || ZP4.M() > zMassCut[1]) return kTRUE;  
     CountEvents(4);
     nEventsWeighted[4] += evtWeight;
-    FillHistosNoise(4, evtWeight);
-    FillHistos(4, evtWeight);
+    FillHistosBasic(4, evtWeight);
+    FillHistosFull(4, evtWeight);
     
 
 
@@ -894,28 +897,32 @@ bool higgsAnalyzer::Process(Long64_t entry)
 
     CountEvents(5);
     nEventsWeighted[5] += evtWeight;
-    FillHistosNoise(5, evtWeight);
+    FillHistosFull(5, evtWeight);
+    FillHistosBasic(5, evtWeight);
     
-    if (deltaPhiJetMET > dPhiMinCut) return kTRUE;
+    if (deltaPhiJetMET < dPhiMinCut) return kTRUE;
       CountEvents(6);
       nEventsWeighted[6] += evtWeight;
-      FillHistos(6, evtWeight);
-      FillHistosNoise(6, evtWeight);
+      FillHistosFull(6, evtWeight);
+      FillHistosBasic(6, evtWeight);
 
-    if (MET > 70) return kTRUE;
+    if (MET < 70) return kTRUE;
       CountEvents(7);
       nEventsWeighted[7] += evtWeight;
-      FillHistos(7, evtWeight);
-      FillHistosNoise(7, evtWeight);
+      FillHistosFull(7, evtWeight);
+      FillHistosBasic(7, evtWeight);
 
     if(passBveto){
       CountEvents(8);
       nEventsWeighted[8] += evtWeight;
-      FillHistos(8, evtWeight);
-      FillHistosNoise(8, evtWeight);
+      FillHistosFull(8, evtWeight);
+      FillHistosBasic(8, evtWeight);
+      
+      PrintOut(8);
+
     }    
         
-    Bool_t passBasic = kTRUE;
+    //    Bool_t passBasic = kTRUE;
 
     /////////////////////////////////////////
     // DeltaPhi(MET, jet); MET and MT cuts //
@@ -926,8 +933,9 @@ bool higgsAnalyzer::Process(Long64_t entry)
 	//For Higgs  200 . The cuts need to be defined
 	CountEvents(9);
 	nEventsWeighted[9] += evtWeight;
-	FillHistos(9, evtWeight);
-	FillHistosNoise(9, evtWeight);
+	FillHistosFull(9, evtWeight);
+	FillHistosBasic(9, evtWeight);
+	PrintOut(9);
       }
 
     if (passBveto &&  MET>metMinCut[1]  && (MT > mtMinCut[1] && MT < mtMaxCut[1]))
@@ -935,9 +943,8 @@ bool higgsAnalyzer::Process(Long64_t entry)
 	//For Higgs  250
 	CountEvents(10);
 	nEventsWeighted[10] += evtWeight;
-	FillHistos(10, evtWeight);
-	FillHistosNoise(10, evtWeight);
-	PrintOut(10);
+	FillHistosFull(10, evtWeight);
+	FillHistosBasic(10, evtWeight);
       }
 
     if (passBveto &&  MET>metMinCut[2]  && (MT > mtMinCut[2] && MT < mtMaxCut[2]))
@@ -945,9 +952,8 @@ bool higgsAnalyzer::Process(Long64_t entry)
 	//For Higgs  300
 	CountEvents(11);
 	nEventsWeighted[11] += evtWeight;
-       	//FillHistos(11, evtWeight);
-	FillHistosNoise(11, evtWeight);
-	PrintOut(11);
+       	//FillHistosFull(11, evtWeight);
+	FillHistosBasic(11, evtWeight);
       }
 
     if (passBveto &&  MET>metMinCut[3]  && (MT > mtMinCut[3] && MT < mtMaxCut[3]))
@@ -955,18 +961,16 @@ bool higgsAnalyzer::Process(Long64_t entry)
 	//For Higgs  350
 	CountEvents(12);
 	nEventsWeighted[12] += evtWeight;
-       	//FillHistos(12, evtWeight);
-	FillHistosNoise(12, evtWeight);
-	PrintOut(12);
+       	//FillHistosFull(12, evtWeight);
+	FillHistosBasic(12, evtWeight);
       }
     if (passBveto &&  MET>metMinCut[4]  && (MT > mtMinCut[4] && MT < mtMaxCut[4]))
       {
 	//For Higgs  400
 	CountEvents(13);
 	nEventsWeighted[13] += evtWeight;
-       	//FillHistos(13, evtWeight);
-	FillHistosNoise(13, evtWeight);
-	PrintOut(13);
+       	//FillHistosFull(13, evtWeight);
+	FillHistosBasic(13, evtWeight);
 
       }
     if (passBveto &&  MET>metMinCut[5]  && (MT > mtMinCut[5] && MT < mtMaxCut[5]))
@@ -974,8 +978,8 @@ bool higgsAnalyzer::Process(Long64_t entry)
 	//For Higgs  450
 	CountEvents(14);
 	nEventsWeighted[14] += evtWeight;
-       	//FillHistos(14, evtWeight);
-    	FillHistosNoise(14, evtWeight);
+       	//FillHistosFull(14, evtWeight);
+    	FillHistosBasic(14, evtWeight);
       }
 
     if (passBveto &&  MET>metMinCut[6]  && (MT > mtMinCut[6] && MT < mtMaxCut[6]))
@@ -983,8 +987,8 @@ bool higgsAnalyzer::Process(Long64_t entry)
 	//For Higgs  500
 	CountEvents(15);
 	nEventsWeighted[15] += evtWeight;
-       	//FillHistos(15, evtWeight);
-    	FillHistosNoise(15, evtWeight);
+       	//FillHistosFull(15, evtWeight);
+    	FillHistosBasic(15, evtWeight);
       }
 
     if (passBveto &&  MET>metMinCut[7]  && (MT > mtMinCut[7] && MT < mtMaxCut[7]))
@@ -992,8 +996,8 @@ bool higgsAnalyzer::Process(Long64_t entry)
 	//For Higgs  550
 	CountEvents(16);
 	nEventsWeighted[16] += evtWeight;
-       	//FillHistos(16, evtWeight);
-    	FillHistosNoise(16, evtWeight);
+       	//FillHistosFull(16, evtWeight);
+    	FillHistosBasic(16, evtWeight);
       }
 
     if (passBveto &&  MET>metMinCut[8]  && (MT > mtMinCut[8] && MT < mtMaxCut[8]))
@@ -1001,29 +1005,10 @@ bool higgsAnalyzer::Process(Long64_t entry)
 	//For Higgs  600
 	CountEvents(17);
 	nEventsWeighted[17] += evtWeight;
-       	//FillHistos(17, evtWeight);
-    	FillHistosNoise(15, evtWeight);
+       	//FillHistosFull(17, evtWeight);
+    	FillHistosBasic(17, evtWeight);
       }
     
-    /*
-    if (passBasic && passBveto && MET> 40)
-      {
-	CountEvents(17);
-	nEventsWeighted[17] += evtWeight;
-	FillHistos(17, evtWeight);
-	FillHistosNoise(17, evtWeight);
-      }
-    */   
-
-    //////////////////////
-    // Jet Multiplicity //
-    //////////////////////
-    /*
-    if ((int)jetP4.size() < nJetsCut[0] || (int)jetP4.size() > nJetsCut[1]) return kTRUE;
-    CountEvents(13);
-    nEventsWeighted[13] += evtWeight;
-    */
-
     //cout<<"dbg END"<<endl;    
 
     return kTRUE;
@@ -1055,33 +1040,10 @@ void higgsAnalyzer::Terminate()
   cout<<"| H600                       |\t"<< nEvents[17] <<"\t|"<<nEventsWeighted[17] <<"\t|"<<endl;
 
   
-      
-    //Normalization to 1fb and coloring the histograms
-  /*
-    string sel, sample;
-    Float_t CS, nEv;  Int_t lColor, fColor;
-
-    ifstream params;
-    params.open("./params.txt");  //This is the file where parameters are stored
-    params>>sel;
-    params>>sample;  params>>nEv;  params>>CS;  params>>lColor;  params>>fColor;
-    cout<<"sample: "<<sample<<"  cs: "<<CS<<"  events: "<<nEv<<" colors: "<<lColor<<"  "<<fColor<<endl;
-    
-    //histoFile->cd("");
-    //samp = "none";
-    //samp = sample;
-    //cout<<samp<<endl;
-    //TObject *obbb = new TObject(samp);
-    //histoFile->WriteObjectAny(samp, TClass::TString);
-
-    histoFile->Write();
-    histoFile->cd("Andrey");
-    scaleAndColor(sample.c_str(), CS, nEv, 1000.0, lColor, fColor); //normalize to 1fb
-
-    histoFile->Close();  
-  */
-    //reweightFile->Close();  
-}
+  histoFile->Write();
+  histoFile->Close();  
+  
+ }
 
 
 float higgsAnalyzer::CalculateTransMass(TLorentzVector p1, TLorentzVector p2)
@@ -1124,7 +1086,7 @@ float higgsAnalyzer::DeltaPhiJetMET(TLorentzVector metP4, vector<TLorentzVector>
 }
 
 void higgsAnalyzer::PrintOutNoisy(Int_t num){
-  nout[num]<<"* "<<runNumber<<"\t* "<<eventNumber<<"  \t* "<<lumiSection<<"\t* "<<MET<<"\t* "
+  nout[num]<<"* "<<runNumber<<"\t\t* "<<eventNumber<<"  \t* "<<lumiSection<<"\t* "<<MET<<"\t* "
 	   <<endl;//       <<isNoiseHcal<<"\t* "<<isDeadEcalCluster<<"\t* "<<isScraping<<"\t* "<<isCSCTightHalo<<"\t* "<<endl;
 }
 
@@ -1134,66 +1096,18 @@ void higgsAnalyzer::PrintOut(Int_t num){
 	   <<qT<<"\t* "<<rhoFactor<<"\t* "<<endl;//<<muCountLoose<<"\t* "<<eleCountLoose<<endl;
 }
 
-void higgsAnalyzer::scaleAndColor(TString sample1, Float_t cs, Float_t nTotEv, Float_t lumi, Int_t line, Int_t fill)
-{
-  Float_t scaleFactor      = lumi*cs/nTotEv;
-  Bool_t isData = kFALSE;
-  if(sample1.Contains("DATA")) {scaleFactor = 1.0; isData = kTRUE;}
-  if(sample1.Contains("HZZ")) scaleFactor*=10;
+void higgsAnalyzer::FillHistosBasic(Int_t num, Double_t weight){
+  met0_et[num] -> Fill(MET, weight);
+  if(num!=0) 
+    evt_byCut -> Fill(num, weight);  
 
-  //  cout<<sample1<<"   Rescaling all the histograms by: "<<scaleFactor<<endl;                                                                              
-  //  file -> cd();                                                                                                                                          
-  TIter nextkey( gDirectory->GetListOfKeys() );
-  //TIter nextkey( file->GetListOfKeys() );                                                                                                                  
-  TKey *key, *oldkey=0;
-
-  while ( (key = (TKey*)nextkey()))
-    {
-      if (oldkey && !strcmp(oldkey->GetName(),key->GetName())) continue;
-      TObject *obj = key->ReadObj();
-      if ( ! (obj->IsA()->InheritsFrom( TH1::Class() )) ) continue;
-      TH1 *hist = (TH1*)key->ReadObj();
-
-      //Adding overflow and underflow bins inside the histogram:
-      Int_t nBins    = hist->GetNbinsX();
-      Double_t lastBin    = hist->GetBinContent(nBins);
-      Double_t ovflBin    = hist->GetBinContent(nBins+1);
-      Double_t lastBinErr = hist->GetBinError(nBins);
-      Double_t ovflBinErr = hist->GetBinError(nBins+1);
-     
-      Double_t firstBin    = hist->GetBinContent(1);
-      Double_t undflBin    = hist->GetBinContent(0);
-      Double_t firstBinErr = hist->GetBinError(1);
-      Double_t undflBinErr = hist->GetBinError(0);
-  
-      hist -> SetBinContent(nBins, lastBin+ovflBin);
-      hist -> SetBinError(nBins, sqrt(pow(lastBinErr,2) + pow(ovflBinErr,2)) );
-      hist -> SetBinContent(1, firstBin+undflBin);
-      hist -> SetBinError(1, sqrt(pow(firstBinErr,2) + pow(undflBinErr,2)) );
-      hist -> SetBinContent(0,0);
-      hist -> SetBinContent(nBins+1,0);
-
-      hist -> Scale(scaleFactor);
-      if(line!=-1)      hist -> SetLineColor(line);
-      if(fill!=-1)      hist -> SetFillColor(fill);
-      if(isData)        hist -> SetMarkerStyle(20);
-      hist->SetLineWidth(2);
-
-
-      hist->Write("",kWriteDelete); //overwrite the object in the file                                                                                       
-      delete obj;
-      //cout<<sample1<<"  nEv: "<<nTotEv<<"   cs: "<<cs<<"   Rescaling all the histogram "<<hist->GetName()<<" by: "<<scaleFactor<<endl;                     
-    }
-
+  evt_weight[num] -> Fill(weight);
 }
 
-void higgsAnalyzer::FillHistosNoise(Int_t num, Double_t weight){
-  met0_et[num]      -> Fill(MET, weight);
-}
 
-void higgsAnalyzer::FillHistos(Int_t num, Double_t weight){
+void higgsAnalyzer::FillHistosFull(Int_t num, Double_t weight){
   
-  met1_et[num]      -> Fill(pfMET, weight);
+  met1_et[num]      -> Fill(MET, weight);
   met2_et[num]      -> Fill(pfMET1, weight);
   met3_et[num]      -> Fill(puCorrMET, weight);
   met4_et[num]      -> Fill(projMET, weight);
@@ -1214,7 +1128,7 @@ void higgsAnalyzer::FillHistos(Int_t num, Double_t weight){
   l2_phi[num]  -> Fill(lep2_phi, weight);
   l2_pt[num]   -> Fill(lep2_pt, weight);
 
-  Float_t lep_dPhi =  fabs(TVector2::Phi_mpi_pi(lep1_phi - lep2_phi));
+  Float_t lep_dPhi = fabs(TVector2::Phi_mpi_pi(lep1_phi - lep2_phi));
   Float_t lep_dEta = fabs(lep1_eta - lep2_eta);
   Float_t lep_dR   = sqrt(pow(lep_dPhi,2) + pow(lep_dEta,2));
   l0_dPhi[num]        -> Fill(lep_dPhi,weight);
@@ -1267,9 +1181,6 @@ void higgsAnalyzer::FillHistos(Int_t num, Double_t weight){
 
   if(isRealData)  run_events[num] -> Fill(runNumber);
 
-  evt_byCut -> Fill(num, weight);  
-
-  evt_weight[num] -> Fill(weight);
 
   if(nJets>0)
     {

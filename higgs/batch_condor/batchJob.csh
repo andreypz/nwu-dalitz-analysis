@@ -44,4 +44,4 @@ chmod 755 run.py
 ./run.py ${suffix} ${selection} ${dataName} ${trigger} ${period} b
 
 cp hhhh_${dataName}.root $outDir/hhhh_${dataName}_${count}.root
-
+cp  events_printout_* $outDir/printouts/

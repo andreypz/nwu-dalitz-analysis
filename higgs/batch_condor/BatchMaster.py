@@ -98,6 +98,7 @@ class BatchMaster():
         self.MakeDirectory(self._outDir, clear=False)
         for cfg in self._configList:
             self.MakeDirectory(self._outDir+'/'+cfg._selection, clear=False)
+            self.MakeDirectory(self._outDir+'/'+cfg._selection+'/printouts', clear=False)
             sourceFiles = self.SplitJobs(cfg._inDir, cfg._nJobs)
             for i, source in enumerate(sourceFiles):
                 exec_tmp  = self.MakeExecutable(cfg, source, i)

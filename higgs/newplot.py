@@ -6,6 +6,7 @@ import shutil
 import datetime
 
 import config as c
+import makePlots as mp
 
 nargs = len(sys.argv)
 print sys.argv[0], nargs
@@ -33,6 +34,7 @@ def createDir(dir):
         else:
             raise
 
+#baseDir = "/afs/fnal.gov/files/home/room1/andreypz/public_html/test2/"
 baseDir = "/uscms_data/d2/andreypz/hzz2l2nu_html/"
 dirnameOut = baseDir+hPath
 selection  = ['muon', 'electron']
@@ -44,8 +46,7 @@ for x in selection:
     for y in plot_types:
         createDir(dirnameOut+'/'+x+'/'+y)
         
-gROOT.LoadMacro("./makePlot.C");
-gROOT.LoadMacro("./utils.C");
+#gROOT.LoadMacro("./makePlot.C");
   
 timer = TStopwatch()	
 timer.Start()
@@ -54,36 +55,17 @@ gROOT.SetBatch()
 print doMerge
 if doMerge:
     os.system("rm "+hPath+"/m_*_"+thissel+".root") #removing the old merged files
-    
     os.system("hadd ./"+hPath+"/m_Data_"+thissel+".root  ./"+hPath+"/"+thissel+"/hhhh_Double*.root")
     os.system("hadd ./"+hPath+"/m_ttbar_"+thissel+".root ./"+hPath+"/"+thissel+"/hhhh_ttbar_*.root")
-    os.system("hadd ./"+hPath+"/m_Top_"+thissel+".root ./"+hPath+"/"+thissel+"/hhhh_t*W_*.root")
-    os.system("hadd ./"+hPath+"/m_Zjets_"+thissel+".root ./"+hPath+"/"+thissel+"/hhhh_DYjets_*.root")
+    os.system("hadd ./"+hPath+"/m_DYjets_"+thissel+".root ./"+hPath+"/"+thissel+"/hhhh_DYjets_*.root")
+                
 
+mp.makePlots(sel, baseDir, hPath)
 
-    m_ttbar = TFile(hPath+"/m_ttbar_"+thissel+".root", "UPDATE")
-    m_Top   = TFile(hPath+"/m_Top_"+thissel+".root", "UPDATE")
-    m_Zjets = TFile(hPath+"/m_Zjets_"+thissel+".root", "UPDATE")
+print "\n\nDone!"
+print "CPU Time : ", timer.CpuTime()
+print "RealTime : ", timer.RealTime()  
 
-    RescaleToLumiAndColors(m_ttbar,1, 1000,1000, kMagenta+1, kBlue-3, 1001);
-    m_ttbar.Close()
-    RescaleToLumiAndColors(m_Top,1, 1000,1000, kOrange+9, kOrange+6, 1001);
-    m_Top.Close()
-    RescaleToLumiAndColors(m_Zjets,1, 1000,1000, kRed+2, kRed+1,3004);
-    m_Zjets.Close()
-
-
-    gROOT.ProcessLine(".x makePlot.C("+str(sel)+", \""+baseDir+"\", \""+hPath+"\")")
-
-    print "\n\nDone!"
-    print "CPU Time : ", timer.CpuTime()
-    print "RealTime : ", timer.RealTime()
-else:    
-    gROOT.ProcessLine(".x makePlot.C("+str(sel)+", \""+baseDir+"\", \""+hPath+"\")")
-    
-    print "\n\nDone!"
-    print "CPU Time : ", timer.CpuTime()
-    print "RealTime : ", timer.RealTime()  
 
 
 print "\n\n ******** Now making HTML pages ******** \n"

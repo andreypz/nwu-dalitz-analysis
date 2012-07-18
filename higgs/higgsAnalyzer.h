@@ -1,4 +1,4 @@
-// $Id: higgsAnalyzer.h,v 1.19 2012/06/14 20:56:22 andrey Exp $
+// $Id: higgsAnalyzer.h,v 1.20 2012/06/22 22:11:44 andrey Exp $
 
 #ifndef higgsAnalyzer_h
 #define higgsAnalyzer_h
@@ -184,11 +184,9 @@ class higgsAnalyzer : public TSelector {
   virtual float   CalculateTransMassAlt(TLorentzVector p1, TLorentzVector p2);
   virtual float   DeltaPhiJetMET(TLorentzVector , std::vector<TLorentzVector> ); 
 
-  void scaleAndColor(TString , Float_t , Float_t , Float_t , Int_t , Int_t );
   
-  
-  void FillHistos(Int_t, Double_t);
-  void FillHistosNoise(Int_t, Double_t);
+  void FillHistosBasic(Int_t, Double_t);
+  void FillHistosFull(Int_t, Double_t);
   void CountEvents(Int_t);
   void PrintOut(Int_t);
   void PrintOutNoisy(Int_t);
