@@ -60,6 +60,7 @@ else:
 
 gSystem.Load("../plugins/libShapeLine.so");
 
+gROOT.LoadMacro("../plugins/rochcor.C+");
 gROOT.LoadMacro("../src/TCJet.cc+");
 gROOT.LoadMacro("../src/TCMET.cc+");
 gROOT.LoadMacro("../src/TCElectron.cc+");

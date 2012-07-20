@@ -1,4 +1,4 @@
-// $Id: higgsAnalyzer.h,v 1.21 2012/07/18 21:43:43 andrey Exp $
+// $Id: higgsAnalyzer.h,v 1.22 2012/07/20 22:38:37 andrey Exp $
 
 #ifndef higgsAnalyzer_h
 #define higgsAnalyzer_h
@@ -41,6 +41,7 @@
 #include "../plugins/WeightUtils.h"
 #include "../plugins/TriggerSelector.h"
 #include "../plugins/ZedEventsLibrary.h"
+#include "../plugins/rochcor.h"
 
 #define nC 20  //nCuts in the analysis. make plots after each cut
 
@@ -71,11 +72,6 @@ class higgsAnalyzer : public TSelector {
 
   ofstream nout[nC], fout[nC], ffout, ncout;
   TTree * _kinTree;
-
-
-  ZedEventsLibrary *zLib;
-  TriggerSelector *triggerSelector;
-  WeightUtils *weighter;
 
   TH1F *evt_byCut;
   TH2F *evt_libQt;
@@ -109,7 +105,13 @@ class higgsAnalyzer : public TSelector {
   TH1F *evt_weight[nC];
 
   TH1F *higgs_pt[nC], *higgs_mass[nC], *higgs_w_pt[nC], *higgs_w_mass[nC];
-   
+
+  rochcor *roch;
+  ZedEventsLibrary *zLib;
+  WeightUtils *weighter;
+  TriggerSelector *triggerSelector;
+
+
  public :
   TTree          *fChain;   //!pointer to the analyzed TTree or TChain
   

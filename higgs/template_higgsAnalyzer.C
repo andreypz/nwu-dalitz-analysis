@@ -1,10 +1,11 @@
-// $Id: template_higgsAnalyzer.C,v 1.36 2012/07/18 21:43:44 andrey Exp $
+// $Id: template_higgsAnalyzer.C,v 1.37 2012/07/20 22:38:37 andrey Exp $
 
 #define higgsAnalyzer_cxx
 
 #include "higgsAnalyzer.h"
 #include <string>
 #include "../plugins/MetDefinitions.h"
+//#include "../plugins/rochcor.h"
 using namespace std;
 
 /////////////////////////////
@@ -63,10 +64,14 @@ void higgsAnalyzer::Begin(TTree * /*tree*/)
 {
     TString option = GetOption();
     TH1::SetDefaultSumw2(kTRUE);
-    
+
     cout<<"\n***      Begin the Analyzer      ****"<<endl;
     myRandom = new TRandom3();
 
+    //Rochester Corrections for muons:
+
+    if (selection=="muon")
+      roch = new rochcor();    
 
     // Initialize utilities and selectors here //
     zLib            = new ZedEventsLibrary(selection, isFromData);
@@ -277,7 +282,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
 
     //cout<<"event #"<<nEvents[0]<<endl;
     if (nEvents[0] == 1) weighter->SetDataBit(isRealData);
-    //if(nEvents[0]>200) Abort("\t\t  ** 200 EVENTS PASSED, FINISH   ** ");
+    if(nEvents[0]>200) Abort("\t\t  ** 200 EVENTS PASSED, FINISH   ** ");
     
     //cout<<"dbg"<<endl;    
     if (nEvents[0] % (int)5e4 == 0) cout<<nEvents[3]<<" events passed of "<<nEvents[0]<<" checked! (at Z-peak cut)"<<endl;
@@ -617,6 +622,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
     //Data quality
     //if (isRealData && (isNoiseHcal || isScraping || isCSCTightHalo)) return kTRUE;
 
+    Int_t ch1=0, ch2=0;
     TLorentzVector Lepton1(0.,0.,0.,0.), Lepton2(0.,0.,0.,0.);
     if (selection == "electron") {
         /////////////////////
@@ -624,12 +630,15 @@ bool higgsAnalyzer::Process(Long64_t entry)
         /////////////////////
 
         if (electrons.size() < 2) return kTRUE;
-    	//no opposite charge requirement
+    	//opposite charge requirement
     	//if (electrons[0].Charge() == electrons[1].Charge()) return kTRUE;
 
         ZP4           = electrons[0].P4() + electrons[1].P4();
         reducedMet1P4 = GetReducedMET(sumJetP4,  electrons[0].P4(), electrons[1].P4(), metP4, 1);
         reducedMet2P4 = GetReducedMET(sumJetP4,  electrons[0].P4(), electrons[1].P4(), metP4, 2);
+
+	ch1=electrons[0].Charge();
+	ch2=electrons[1].Charge();
 
     	Lepton1 = electrons[0].P4();
     	Lepton2 = electrons[1].P4();
@@ -641,12 +650,15 @@ bool higgsAnalyzer::Process(Long64_t entry)
         //////////////////////////////////////////
 
         if (muons.size() < 2) return kTRUE;
-    	//no opposite charge requirement
-        //if (muons[0].Charge() == muons[1].Charge()) return kTRUE;
+    	//opposite charge requirement
+        if (muons[0].Charge() == muons[1].Charge()) return kTRUE;
 
         ZP4           = muons[0].P4() + muons[1].P4();
         reducedMet1P4 = GetReducedMET(sumJetP4,  muons[0].P4(), muons[1].P4(), metP4, 1);
         reducedMet2P4 = GetReducedMET(sumJetP4,  muons[0].P4(), muons[1].P4(), metP4, 2);
+
+	ch1 = muons[0].Charge();
+	ch2 = muons[1].Charge();
 
     	Lepton1 = muons[0].P4();
     	Lepton2 = muons[1].P4();
@@ -688,6 +700,30 @@ bool higgsAnalyzer::Process(Long64_t entry)
     else if (softJetP4.size() > 0)   deltaPhiJetMET = DeltaPhiJetMET(metP4, softJetP4);
 
 
+
+    cout<<"before: "<<Lepton1.Pt()<<endl;
+    if(selection=="muon"){
+
+      Int_t runopt = 0;
+      if(isRealData){
+	if(period=="2011A") runopt=0;
+	else if(period=="2011B") runopt=1;
+	else Abort("   * The Run period is not found! (2011A or 2011B)");
+	
+	if (ch1==-1)	
+	  roch->momcor_data(Lepton1,Lepton2, 1,0,runopt);
+	else
+	  roch->momcor_data(Lepton2,Lepton1, 1,0,runopt);
+      }
+      else {
+	if (ch1==-1)	
+	  roch->momcor_mc(Lepton1,Lepton2, 1,0,0);
+	else
+	  roch->momcor_mc(Lepton2,Lepton1, 1,0,0);
+      }
+
+    }
+    cout<<"after:  "<<Lepton1.Pt()<<endl;
 
     /////////////////// 
     // Gen particles //
