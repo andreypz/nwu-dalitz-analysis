@@ -20,26 +20,19 @@ set selection = $7
 set period    = $8
 
 
-set dir = ${srcDir}/..
+set dir = ${srcDir}/code_dir
 
-echo "Copy files"
-
-cp $dir/higgsAnalyzer.h .
-cp $dir/*.C .
-cp $dir/config.py .
-cp $dir/../src/*.cc .
-cp $dir/../src/*.h .
-
-mkdir ../plugins
-cp $dir/../plugins/*.h  ../plugins
-cp $dir/../plugins/*.cc ../plugins
-cp $dir/../plugins/libShapeLine.so ../plugins
+echo "Copy all files needed from a working directory"
+cd ../
+cp -r $dir/* .
 
 
-mkdir ../data
-cp -r $dir/../data/*.root ../data/
+cd higgs
+mv ../src/input.txt .
 
-cp $dir/run.py .
+#echo 'ls in higgs'
+#ls
+
 chmod 755 run.py
 ./run.py ${suffix} ${selection} ${dataName} ${trigger} ${period} b
 

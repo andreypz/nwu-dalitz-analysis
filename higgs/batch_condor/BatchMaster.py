@@ -1,4 +1,4 @@
-import sys, os, subprocess, fileinput, pickle, math, tempfile
+import os, subprocess, fileinput, pickle, math, tempfile
 
 class JobConfig():
     '''Class for storing configuration for each dataset'''
@@ -8,7 +8,7 @@ class JobConfig():
         self._nJobs     = nJobs
         self._args      = arguments
         self._selection = selection 
-
+        
     def GetMembers(self, verbose = False):
         '''Returns data members of class instance'''
         if verbose:
@@ -29,7 +29,7 @@ class BatchMaster():
         if not os.path.exists(filePath):
             os.system('mkdir -p '+filePath)
         elif clear:
-            os.system('rm '+filePath+'/*')
+            os.system('rm -rf '+filePath+'/*')
 
     def SplitJobs(self, directory, nJobs):
         '''Split jobs by dataset'''
@@ -41,6 +41,7 @@ class BatchMaster():
         nFilesPerJob = int(math.ceil(float(nFiles)/nJobs))
         fileSplit = [fileList[i:i+nFilesPerJob] for i in range(0, len(fileList), nFilesPerJob)]
 
+        #print fileList
         return fileSplit
 
     def MakeExecutable(self, config, sourceFiles, count):
@@ -60,27 +61,21 @@ class BatchMaster():
 
                 for file in sourceFiles:
                     exec_tmp.write('echo '+repr(path+'/'+file)+' >> input.txt\n')
-
+                    
         exec_tmp.seek(0)
         infile.close()
+                
         return exec_tmp
 
     def MakeBatchConfig(self, config, count, exec_tmp, sourceFiles):
         '''Write batch configuration file'''
         batch_tmp = tempfile.NamedTemporaryFile(prefix = 'TEST', delete=False)
 
-        input = ''
-        for i,source in enumerate(sourceFiles):
-            if i < len(sourceFiles)-1:
-                input += config._inDir+'/'+source+', '
-            else:
-                input += config._inDir+'/'+source
-
         batch_tmp.write('Arguments  = %s %s %s %s %s\n' % (self._current, self._outDir+'/'+config._selection, str(count+1), config._dataName, config._args))
         batch_tmp.write('Executable            = %s\n' % exec_tmp.name)
         batch_tmp.write('Should_Transfer_Files = YES\n')
         batch_tmp.write('WhenToTransferOutput  = ON_EXIT\n')
-        batch_tmp.write('Transfer_Input_Files  = \n') #, %s\n' % input)
+        batch_tmp.write('Transfer_Input_Files  = \n')
         batch_tmp.write('Universe              = vanilla\n')
         batch_tmp.write('Requirements = Memory >= 199 &&OpSys == "LINUX"&& (Arch != "DUMMY" )&& Disk > 1000000\n')
         if self._shortQueue:
@@ -93,9 +88,32 @@ class BatchMaster():
         batch_tmp.seek(0)
         return batch_tmp
 
+
+    def CreateWorkingDir(self, codedir):
+        '''Creating local working directory which will be used for copying all the files'''
+        self.MakeDirectory(self._outDir, clear=False)
+        code_copy_dir = self._outDir+'/'+codedir
+        self.MakeDirectory(code_copy_dir, clear=True)
+
+        for d in ["src", "plugins", "data", "higgs"]:
+            self.MakeDirectory(code_copy_dir+'/'+d, clear=True)
+            if   d == "data":
+                os.system("cp "+self._outDir+"/../../"+d+"/*.root "+code_copy_dir+"/"+d)
+            elif d =="plugins":
+                os.system("cp "+self._outDir+"/../../"+d+"/*.so "+code_copy_dir+"/"+d)
+                os.system("cp "+self._outDir+"/../../"+d+"/*.cc "+code_copy_dir+"/"+d)
+                os.system("cp "+self._outDir+"/../../"+d+"/*.h "+code_copy_dir+"/"+d)
+            elif d == "src":
+                os.system("cp "+self._outDir+"/../../"+d+"/*.cc "+code_copy_dir+"/"+d)
+                os.system("cp "+self._outDir+"/../../"+d+"/*.h "+code_copy_dir+"/"+d)
+            else:
+                os.system("cp "+self._outDir+"/../../"+d+"/*.C "+code_copy_dir+"/"+d)
+                os.system("cp "+self._outDir+"/../../"+d+"/*.h "+code_copy_dir+"/"+d)
+                os.system("cp "+self._outDir+"/../../"+d+"/*.py "+code_copy_dir+"/"+d)
+
+        
     def SubmitToLPC(self):
         '''Submits batch jobs to lpc batch'''
-        self.MakeDirectory(self._outDir, clear=False)
         for cfg in self._configList:
             self.MakeDirectory(self._outDir+'/'+cfg._selection, clear=False)
             self.MakeDirectory(self._outDir+'/'+cfg._selection+'/printouts', clear=False)

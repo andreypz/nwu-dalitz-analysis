@@ -9,8 +9,9 @@ class Params():
         
         self._xsec_and_colors = {
             "DATA": [-1,-1,-1,-1],
-            "ZZ":   [kBlue,     kMagenta, 0.1787, 1103.468e3],
-            "WZ":   [kYellow-1,    kBlue-1,  0.856, 1221.134e3],
+            #"ZZ":   [kBlue,     kMagenta, 6.46, 4191.045e3],  #pythia
+            "ZZ":   [kBlue,     kMagenta, 0.1787, 1103.468e3],  #madgraph
+            "WZ":   [kYellow-1,    kBlue-1,  0.856, 1221.134e3], #or 0.879?
             "WW":   [kOrange+1, kGreen+2,  4.783, 1197.558e3],
 
             "DYjets":[kRed,  kWhite,  3048.0, 36.278e6],

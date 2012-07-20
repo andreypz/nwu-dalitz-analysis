@@ -3,7 +3,7 @@ import BatchMaster as b
 import sys
 
 nargs = len(sys.argv)
-print "Runnoing", sys.argv[0], nargs
+print "Running", sys.argv[0], nargs
 
 
 
@@ -16,10 +16,10 @@ if nargs>1 and sys.argv[1]=="ele":
     selection="electron"
     
 period    = '2011'
-doTest    = False
-doData    = True
-doBG      = True
-doSignal  = True
+doTest    = 1
+doData    = 0
+doBG      = 0
+doSignal  = 0
 
 ''' 
     Set job configurations.  The order of arguments is:
@@ -28,23 +28,30 @@ doSignal  = True
 
 test = []
 test.extend([
-b.JobConfig('ggHZZ200', dCache+'/andreypz/nuTuples_v1_7TeV/ggHZZ200', 1, 'ggHZZ200 0 '+selection+' '+period, selection),
+#b.JobConfig('ZZ', dCache+'/andreypz/nuTuples_v1_7TeV/ZZ_v3', 1, 'ZZ 0 '+selection+' '+period, selection),
+#b.JobConfig('ggHZZ250', dCache+'/andreypz/nuTuples_v1_7TeV/ggHZZ250', 1, 'ggHZZ250 0 '+selection+' '+period, selection),
+#b.JobConfig('DoubleEle_Run2011A', dCache+'/andreypz/nuTuples_v1_7TeV/DoubleElectron_HZZ_Run2011A', 25, 'DATA 16,17,18 electron 2011', selection),
+b.JobConfig('DYjets', dCache+'/andreypz/nuTuples_v1_7TeV/DYJetsToLL', 30, 'DYjets 0 '+selection+' '+period, selection),
 ])
 
 
 
 if selection == 'muon':
     data = []
-    data.append(b.JobConfig('DoubleMu_Run2011A', dCache+'/andreypz/nuTuples_v1_7TeV/DoubleMu_HZZ_Run2011A', 25, 'DATA 4,5,8 muon 2011', selection))
-    data.append(b.JobConfig('DoubleMu_Run2011B', dCache+'/andreypz/nuTuples_v1_7TeV/DoubleMu_HZZ_Run2011B', 25, 'DATA 4,5,8 muon 2011', selection))
+    data.extend([
+        b.JobConfig('DoubleMu_Run2011A', dCache+'/andreypz/nuTuples_v1_7TeV/DoubleMu_HZZ_Run2011A', 25, 'DATA 4,5,8 muon 2011', selection),
+        b.JobConfig('DoubleMu_Run2011B', dCache+'/andreypz/nuTuples_v1_7TeV/DoubleMu_HZZ_Run2011B', 25, 'DATA 4,5,8 muon 2011', selection),
+        ])
 
                             
 
 
 if selection == 'electron':
     data = []
-    data.append(b.JobConfig('DoubleEle_Run2011A', dCache+'/andreypz/nuTuples_v1_7TeV/DoubleElectron_HZZ_Run2011A', 25, 'DATA 16,17,18 electron 2011', selection))
-    data.append(b.JobConfig('DoubleEle_Run2011B', dCache+'/andreypz/nuTuples_v1_7TeV/DoubleElectron_HZZ_Run2011B', 25, 'DATA 16,17,18 electron 2011', selection))
+    data.extend([
+        b.JobConfig('DoubleEle_Run2011A', dCache+'/andreypz/nuTuples_v1_7TeV/DoubleElectron_HZZ_Run2011A', 25, 'DATA 16,17,18 electron 2011', selection),
+        b.JobConfig('DoubleEle_Run2011B', dCache+'/andreypz/nuTuples_v1_7TeV/DoubleElectron_HZZ_Run2011B', 25, 'DATA 16,17,18 electron 2011', selection),
+        ])
 
 
 
@@ -65,7 +72,8 @@ if selection == 'muEG':
 bg = []
 bg.extend([
 b.JobConfig('DYjets', dCache+'/andreypz/nuTuples_v1_7TeV/DYJetsToLL', 20, 'DYjets 0 '+selection+' '+period, selection),
-b.JobConfig('ZZ', dCache+'/andreypz/nuTuples_v1_7TeV/ZZJetsTo2L2Nu', 1, 'ZZ 0 '+selection+' '+period, selection),
+#b.JobConfig('ZZ', dCache+'/andreypz/nuTuples_v1_7TeV/ZZJetsTo2L2Nu', 1, 'ZZ 0 '+selection+' '+period, selection),
+b.JobConfig('ZZ', dCache+'/andreypz/nuTuples_v1_7TeV/ZZ_v3', 1, 'ZZ 0 '+selection+' '+period, selection),
 b.JobConfig('WW', '/eos/uscms/store/user/bpollack/May15/MC/WWJets/', 1, 'WW 0 '+selection+' '+period, selection),
 b.JobConfig('WZ', '/eos/uscms/store/user/bpollack/Apr17/MC/WZJets', 1, 'WZ 0 '+selection+' '+period, selection),
 b.JobConfig('ttbar', dCache+'/andreypz/nuTuples_v1_7TeV/TTJets', 10, 'ttbar 0 '+selection+' '+period, selection),
@@ -96,6 +104,9 @@ b.JobConfig('VBFHZZ125', dCache+'/andreypz/nuTuples_v1_7TeV/VBFHZZ125', 1, 'VBFH
 b.JobConfig('VBFHZZ200', dCache+'/andreypz/nuTuples_v1_7TeV/VBFHZZ200', 1, 'VBFHZZ200 0 '+selection+' '+period, selection),
 
 ])
+
+btemp = b.BatchMaster([],outputPath)
+btemp.CreateWorkingDir("code_dir")
 
 if doData:
     batcher = b.BatchMaster(data, outputPath)

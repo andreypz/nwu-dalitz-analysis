@@ -8,19 +8,16 @@ import datetime
 import config as c
 import utils as u
 
-nargs = len(sys.argv)
-print sys.argv[0], nargs
-
 F0 = 6
 FNOB = 7
 FB = 8
 
 plotSpecial = 1
-plotMet = 0
-plotJet = 0
-plotLepton = 0
-plotDiLepton = 0
-plotMisc = 0
+plotMet = 1
+plotJet = 1
+plotLepton = 1
+plotDiLepton = 1
+plotMisc = 1
 
 
 
@@ -118,50 +115,51 @@ def makePlots(sel=1, dir="./", hPath="v00"):
             test2.Delete()
         
 
+    if plotDiLepton:
+        u.drawMultiPlot(imgpath+"diLepton/di01", "","M(ll)", "di_mass_"+str(F0), 1, 0.1, 1e6, 0.5,1.49, c2, li_ov, li_topbg, li_bg, sel)
+        u.drawMultiPlot(imgpath+"diLepton/di02", "","Leptons in Barrel, |#eta|<1.444, M(ll)", "di_mass_EB_"+str(F0), 1, 0.1, 1e6, 0.5,1.49, c2, li_ov, li_topbg, li_bg, sel)
+        u.drawMultiPlot(imgpath+"diLepton/di03", "","Leptons in Barrel, |#eta|>1.566, M(ll)", "di_mass_EE_"+str(F0), 1, 0.1, 1e6, 0.5,1.49, c2, li_ov, li_topbg, li_bg, sel)
+        u.drawMultiPlot(imgpath+"diLepton/di04", "","Leptons in EB/EE, mixed, M(ll)", "di_mass_EX_"+str(F0), 1, 0.1, 1e6, 0.5,1.49, c2, li_ov, li_topbg, li_bg, sel)
+        u.drawMultiPlot(imgpath+"diLepton/di05", "","q_{T} (di-lepton p_{T})", "di_qt_"+str(F0), 1, 0.1, 1e6, 0.5,1.49, c2, li_ov, li_topbg, li_bg, sel)
+        u.drawMultiPlot(imgpath+"diLepton/di06", "","Di-lepton Eta", "di_eta_"+str(F0), 1, 0.1, 1e6, 0.5,1.49, c2, li_ov, li_topbg, li_bg, sel)
+        u.drawMultiPlot(imgpath+"diLepton/di07", "","dPhi(Di-lep, Met)", "di_dPhiMet_"+str(F0), 1, 0.1, 1e6, 0.5,1.49, c2, li_ov, li_topbg, li_bg, sel)
+
+    if plotLepton:
+        u.drawMultiPlot(imgpath+"Lepton/l01", "","Leading Lepton eta", "l1_eta_"+str(F0), 1, 0.1, 1e6, 0.5,1.49, c2, li_ov, li_topbg, li_bg, sel)
+        u.drawMultiPlot(imgpath+"Lepton/l02", "","Trailing Lepton eta", "l2_eta_"+str(F0), 1, 0.1, 1e6, 0.5,1.49, c2, li_ov, li_topbg, li_bg, sel)
+        u.drawMultiPlot(imgpath+"Lepton/l03", "","Leading Lepton phi", "l1_phi_"+str(F0), 1, 0.1, 1e6, 0.5,1.49, c2, li_ov, li_topbg, li_bg, sel)
+        u.drawMultiPlot(imgpath+"Lepton/l04", "","Trailing Lepton phi", "l2_phi_"+str(F0), 1, 0.1, 1e6, 0.5,1.49, c2, li_ov, li_topbg, li_bg, sel)
+        u.drawMultiPlot(imgpath+"Lepton/l05", "","Leading Lepton pt", "l1_pt_"+str(F0), 1, 0.1, 1e6, 0.5,1.49, c2, li_ov, li_topbg, li_bg, sel)
+        u.drawMultiPlot(imgpath+"Lepton/l06", "","Trailing Lepton pt", "l2_pt_"+str(F0), 1, 0.1, 1e6, 0.5,1.49, c2, li_ov, li_topbg, li_bg, sel)
+
+        u.drawMultiPlot(imgpath+"Lepton/l07", "","dPhi(lep1, lep2)", "l0_dPhi_"+str(F0), 1, 0.1, 1e6, 0.5,1.49, c2, li_ov, li_topbg, li_bg, sel)
+        u.drawMultiPlot(imgpath+"Lepton/l08", "","dEta(lep1, lep2)", "l0_dEta_"+str(F0), 1, 0.1, 1e6, 0.5,1.49, c2, li_ov, li_topbg, li_bg, sel)
+        u.drawMultiPlot(imgpath+"Lepton/l09", "","dR(lep1, lep2)", "l0_dR_"+str(F0), 1, 0.1, 1e6, 0.5,1.49, c2, li_ov, li_topbg, li_bg, sel)
+        u.drawMultiPlot(imgpath+"Lepton/l10", "","ratio p_{T2}/p_{T1}", "l0_ptRatio_"+str(F0), 1, 0.1, 1e6, 0.5,1.49, c2, li_ov, li_topbg, li_bg, sel)
+        u.drawMultiPlot(imgpath+"Lepton/l11", "","ratio p_{T2}/p_{T1}", "l0_dR_"+str(F0), 1, 0.1, 1e6, 0.5,1.49, c2, li_ov, li_topbg, li_bg, sel)
+        
+
+    if plotJet:
+        u.drawMultiPlot(imgpath+"Jet/j01", "","N jets", "jet_N_"+str(F0), 1, 0.1, 1e6, 0,2.49, c2, li_ov, li_topbg, li_bg, sel)
+        u.drawMultiPlot(imgpath+"Jet/j02", "","#Delta#phi(MET, clos jet), p_{T}>30, |#eta|<4.8", "met1_dPhiClosJet1_"+str(F0), 1, 0.1, 1e6, 0.5,1.49, c2, li_ov, li_topbg, li_bg, sel)
+        u.drawMultiPlot(imgpath+"Jet/j03", "No b-veto, MET>70","N b-jets", "jet_b_N_"+str(FNOB), 1, 0.1, 1e6, 0,1.9, c2, li_ov, li_topbg, li_bg, sel)
+        u.drawMultiPlot(imgpath+"Jet/j04", "","pt of leading jet", "jet_pt_"+str(F0), 1, 0.1, 1e6, 0.5,1.49, c2, li_ov, li_topbg, li_bg, sel)
+        u.drawMultiPlot(imgpath+"Jet/j05", "","eta of leading jet", "jet_eta_"+str(F0), 1, 0.1, 1e6, 0.5,1.49, c2, li_ov, li_topbg, li_bg, sel)
+        u.drawMultiPlot(imgpath+"Jet/j06", "","dR(jet,lep 1)", "jet_dRlep1_"+str(F0), 1, 0.1, 1e6, 0.5,1.9, c2, li_ov, li_topbg, li_bg, sel)
+        u.drawMultiPlot(imgpath+"Jet/j07", "","dR(jet,lep 2)", "jet_dRlep2_"+str(F0), 1, 0.1, 1e6, 0.5,1.9, c2, li_ov, li_topbg, li_bg, sel)
+
     if plotMet:
         u.drawMultiPlot(imgpath+"Met/m01", "","pfMet", "met1_et_"+str(F0), 1, 0.1, 1e6, 0,2.9, c2, li_ov, li_topbg, li_bg, sel)
-        u.drawMultiPlot(imgpath+"Met/m02", "","pfMet Phi", "met1_phi_"+str(F0), 1, 0.1, 1e6, 0,2.9, c2, li_ov, li_topbg, li_bg, sel)
-        u.drawMultiPlot(imgpath+"Met/m03", "","MT", "mt2_"+str(F0), 1, 0.1, 1e6, 0,1.9, c2, li_ov, li_topbg, li_bg, sel)
-        u.drawMultiPlot(imgpath+"Met/m04", "","pfMet long to di-lepton", "met1_lg_"+str(F0), 1, 0.1, 1e7, 0,2.9, c2, li_ov, li_topbg, li_bg, sel)
-        u.drawMultiPlot(imgpath+"Met/m05", "","Long Recoil = -(pfMet+Z/G)", "met1_recoil_lg_"+str(F0), 1, 0.1, 1e6, 0,2.9, c2, li_ov, li_topbg, li_bg, sel)
+        u.drawMultiPlot(imgpath+"Met/m02", "","pfMet Phi", "met1_phi_"+str(F0), 1, 0.1, 1e6, 0.5,1.49, c2, li_ov, li_topbg, li_bg, sel)
+        u.drawMultiPlot(imgpath+"Met/m03", "","MT", "mt2_"+str(F0), 1, 0.1, 1e6, 0.5,1.9, c2, li_ov, li_topbg, li_bg, sel)
+        u.drawMultiPlot(imgpath+"Met/m04", "","pfMet long to di-lepton", "met1_lg_"+str(F0), 1, 0.4, 1e7, 0.2,1.4, c2, li_ov, li_topbg, li_bg, sel)
+        u.drawMultiPlot(imgpath+"Met/m05", "","Long Recoil = -(pfMet+Z/G)", "met1_recoil_lg_"+str(F0), 1, 0.1, 1e6, 0.2,1.9, c2, li_ov, li_topbg, li_bg, sel)
         u.drawMultiPlot(imgpath+"Met/m06", "","projMET", "met4_et_"+str(F0), 1, 0.1, 1e6, 0,2.9, c2, li_ov, li_topbg, li_bg, sel)
         u.drawMultiPlot(imgpath+"Met/m07", "","ZprojMET", "met5_et_"+str(F0), 1, 0.1, 1e6, 0,2.9, c2, li_ov, li_topbg, li_bg, sel)
         u.drawMultiPlot(imgpath+"Met/m08", "","redMET1", "met6_et_"+str(F0), 1, 0.1, 1e6, 0,2.9, c2, li_ov, li_topbg, li_bg, sel)
         u.drawMultiPlot(imgpath+"Met/m09", "","redMET2", "met7_et_"+str(F0), 1, 0.1, 1e6, 0,2.9, c2, li_ov, li_topbg, li_bg, sel)
         u.drawMultiPlot(imgpath+"Met/m10", "","pfMet1/q_{T}", "met1_over_qt_"+str(F0), 1, 0.1, 1e6, 0,2.9, c2, li_ov, li_topbg, li_bg, sel)
 
-    if plotJet:
-        u.drawMultiPlot(imgpath+"Jet/j01", "","N jets", "jet_N_"+str(F0), 1, 0.1, 1e6, 0,2.9, c2, li_ov, li_topbg, li_bg, sel)
-        u.drawMultiPlot(imgpath+"Jet/j02", "","#Delta#phi(MET, clos jet), p_{T}>30, |#eta|<4.8", "met1_dPhiClosJet1_"+str(F0), 1, 0.1, 1e6, 0,2.9, c2, li_ov, li_topbg, li_bg, sel)
-        u.drawMultiPlot(imgpath+"Jet/j03", "No b-veto, MET>70","N b-jets", "jet_b_N_"+str(FNOB), 1, 0.1, 1e6, 0,2.9, c2, li_ov, li_topbg, li_bg, sel)
-        u.drawMultiPlot(imgpath+"Jet/j04", "","pt of leading jet", "jet_pt_"+str(F0), 1, 0.1, 1e6, 0,2.9, c2, li_ov, li_topbg, li_bg, sel)
-        u.drawMultiPlot(imgpath+"Jet/j05", "","eta of leading jet", "jet_eta_"+str(F0), 1, 0.1, 1e6, 0,2.9, c2, li_ov, li_topbg, li_bg, sel)
-        u.drawMultiPlot(imgpath+"Jet/j06", "","dR(jet,lep 1)", "jet_dRlep1_"+str(F0), 1, 0.1, 1e6, 0,2.9, c2, li_ov, li_topbg, li_bg, sel)
-        u.drawMultiPlot(imgpath+"Jet/j07", "","dR(jet,lep 2)", "jet_dRlep2_"+str(F0), 1, 0.1, 1e6, 0,2.9, c2, li_ov, li_topbg, li_bg, sel)
-
-    if plotDiLepton:
-        u.drawMultiPlot(imgpath+"diLepton/di01", "","M(ll)", "di_mass_"+str(F0), 1, 0.1, 1e6, 0.5,1.49, c2, li_ov, li_topbg, li_bg, sel)
-        u.drawMultiPlot(imgpath+"diLepton/di02", "","Leptons in Barrel, |#eta|<1.444, M(ll)", "di_mass_EB_"+str(F0), 1, 0.1, 1e6, 0.5,1.49, c2, li_ov, li_topbg, li_bg, sel)
-        u.drawMultiPlot(imgpath+"diLepton/di03", "","Leptons in Barrel, |#eta|>1.566, M(ll)", "di_mass_EE_"+str(F0), 1, 0.1, 1e6, 0.5,1.49, c2, li_ov, li_topbg, li_bg, sel)
-        u.drawMultiPlot(imgpath+"diLepton/di04", "","Leptons in EB/EE, mixed, M(ll)", "di_mass_EX_"+str(F0), 1, 0.1, 1e6, 0.5,1.49, c2, li_ov, li_topbg, li_bg, sel)
-        u.drawMultiPlot(imgpath+"diLepton/di05", "","q_{T} (di-lepton p_{T})", "di_qt_"+str(F0), 1, 0.1, 1e6, 0,1.9, c2, li_ov, li_topbg, li_bg, sel)
-        u.drawMultiPlot(imgpath+"diLepton/di06", "","Di-lepton Eta", "di_eta_"+str(F0), 1, 0.1, 1e6, 0,1.9, c2, li_ov, li_topbg, li_bg, sel)
-        u.drawMultiPlot(imgpath+"diLepton/di07", "","dPhi(Di-lep, Met)", "di_dPhiMet_"+str(F0), 1, 0.1, 1e6, 0,1.9, c2, li_ov, li_topbg, li_bg, sel)
-
-    if plotLepton:
-        u.drawMultiPlot(imgpath+"Lepton/l01", "","Leading Lepton eta", "l1_eta_"+str(F0), 1, 0.1, 1e6, 0,1.9, c2, li_ov, li_topbg, li_bg, sel)
-        u.drawMultiPlot(imgpath+"Lepton/l02", "","Trailing Lepton eta", "l2_eta_"+str(F0), 1, 0.1, 1e6, 0,1.9, c2, li_ov, li_topbg, li_bg, sel)
-        u.drawMultiPlot(imgpath+"Lepton/l03", "","Leading Lepton phi", "l1_phi_"+str(F0), 1, 0.1, 1e6, 0,1.9, c2, li_ov, li_topbg, li_bg, sel)
-        u.drawMultiPlot(imgpath+"Lepton/l04", "","Trailing Lepton phi", "l2_phi_"+str(F0), 1, 0.1, 1e6, 0,1.9, c2, li_ov, li_topbg, li_bg, sel)
-        u.drawMultiPlot(imgpath+"Lepton/l05", "","Leading Lepton pt", "l1_pt_"+str(F0), 1, 0.1, 1e6, 0,1.9, c2, li_ov, li_topbg, li_bg, sel)
-        u.drawMultiPlot(imgpath+"Lepton/l06", "","Trailing Lepton pt", "l2_pt_"+str(F0), 1, 0.1, 1e6, 0,1.9, c2, li_ov, li_topbg, li_bg, sel)
-
-        u.drawMultiPlot(imgpath+"Lepton/l07", "","dPhi(lep1, lep2)", "l0_dPhi_"+str(F0), 1, 0.1, 1e6, 0,1.9, c2, li_ov, li_topbg, li_bg, sel)
-        u.drawMultiPlot(imgpath+"Lepton/l08", "","dEta(lep1, lep2)", "l0_dEta_"+str(F0), 1, 0.1, 1e6, 0,1.9, c2, li_ov, li_topbg, li_bg, sel)
-        u.drawMultiPlot(imgpath+"Lepton/l09", "","dR(lep1, lep2)", "l0_dR_"+str(F0), 1, 0.1, 1e6, 0,1.9, c2, li_ov, li_topbg, li_bg, sel)
-        u.drawMultiPlot(imgpath+"Lepton/l10", "","ratio p_{T2}/p_{T1}", "l0_ptRatio_"+str(F0), 1, 0.1, 1e6, 0,1.9, c2, li_ov, li_topbg, li_bg, sel)
-        u.drawMultiPlot(imgpath+"Lepton/l11", "","ratio p_{T2}/p_{T1}", "l0_dR_"+str(F0), 1, 0.1, 1e6, 0,1.9, c2, li_ov, li_topbg, li_bg, sel)
-        
     if plotMisc:
         u.drawMultiPlot(imgpath+"Misc/mis01", "","evts cut by cut", "evt_byCut", 1, 0.1, 1e6, 0,1.9, c2, li_ov, li_topbg, li_bg, sel)
         u.drawMultiPlot(imgpath+"Misc/mis02", "","nVtx total", "vtx_nPV_tot_"+str(F0), 1, 0.1, 1e6, 0,1.9, c2, li_ov, li_topbg, li_bg, sel)
@@ -169,6 +167,8 @@ def makePlots(sel=1, dir="./", hPath="v00"):
         u.drawMultiPlot(imgpath+"Misc/mis04", "","nVtx reweighted", "vtx_nPV_weight_"+str(F0), 1, 0.1, 1e6, 0,1.9, c2, li_ov, li_topbg, li_bg, sel)
         u.drawMultiPlot(imgpath+"Misc/mis05", "","vtx 1 ndof", "vtx_ndof_1_"+str(F0), 1, 0.1, 1e6, 0,1.9, c2, li_ov, li_topbg, li_bg, sel)
         u.drawMultiPlot(imgpath+"Misc/mis06", "","vtx 2 ndof", "vtx_ndof_2_"+str(F0), 1, 0.1, 1e6, 0,1.9, c2, li_ov, li_topbg, li_bg, sel)
+
+
     
     #c2.cd()
     #hh = f_Data.Get('Andrey/di_qt_8')

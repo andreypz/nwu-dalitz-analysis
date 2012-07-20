@@ -1,4 +1,4 @@
-// $Id: higgsAnalyzer.h,v 1.20 2012/06/22 22:11:44 andrey Exp $
+// $Id: higgsAnalyzer.h,v 1.21 2012/07/18 21:43:43 andrey Exp $
 
 #ifndef higgsAnalyzer_h
 #define higgsAnalyzer_h
@@ -61,7 +61,7 @@ class higgsAnalyzer : public TSelector {
   Float_t METqt, MET1qt, projMETqt;
   Int_t nVtx, nVtxTotal;
   Float_t nDofVtx1, nDofVtx2;
-  Int_t nJets, nJetsB , nJetsBssv, nJetsB25, nJetsB30;
+  Int_t nJets, nJetsEta24, nJetsB , nJetsBssv, nJetsB25, nJetsB30;
   Int_t nGamma;
   Float_t dPhiClos1, dPhiClos2;
   Float_t lep1_eta, lep1_phi, lep1_pt;
@@ -91,7 +91,7 @@ class higgsAnalyzer : public TSelector {
   TH1F *btag_hp[nC];
   TH1F *di_qt[nC], *di_eta[nC], *di_phi[nC], *di_mass[nC], *di_mass_EB[nC], *di_mass_EE[nC], *di_mass_EX[nC];
   TH1F *di_dPhiMet[nC];
-  TH1F *jet_N[nC], *jet_dRlep1[nC], *jet_dRlep2[nC], *jet_pt[nC], *jet_eta[nC], *jet_phi[nC];
+  TH1F *jet_N[nC], *jet_N24[nC], *jet_dRlep1[nC], *jet_dRlep2[nC], *jet_pt[nC], *jet_eta[nC], *jet_phi[nC];
   TH1F *jet_b_N[nC], *jet_b_Nssv[nC], *jet_b_N25[nC],*jet_b_N30[nC], *jet_b_pt[nC];
   TH1F *ph_nGamma[nC];
   TH1F *l0_dPhi[nC], *l0_dEta[nC], *l0_dR[nC], *l0_ptRatio[nC];

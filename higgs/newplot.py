@@ -9,7 +9,7 @@ import config as c
 import makePlots as mp
 
 nargs = len(sys.argv)
-print sys.argv[0], nargs
+print sys.argv[0], "nargs:", nargs
 
 sel = 1
 doMerge = False

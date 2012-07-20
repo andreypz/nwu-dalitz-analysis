@@ -1,4 +1,4 @@
-// $Id: template_higgsAnalyzer.C,v 1.35 2012/07/12 18:17:57 andrey Exp $
+// $Id: template_higgsAnalyzer.C,v 1.36 2012/07/18 21:43:44 andrey Exp $
 
 #define higgsAnalyzer_cxx
 
@@ -184,6 +184,7 @@ void higgsAnalyzer::Begin(TTree * /*tree*/)
 	di_dPhiMet[n] = new TH1F(Form("di_dPhiMet_%i",n), "di_dPhiMet", 50, 0, TMath::Pi());
 
 	jet_N[n]      = new TH1F(Form("jet_N_%i",n), "Number of jets", 20,0,20);
+	jet_N24[n]    = new TH1F(Form("jet_N24_%i",n), "Number of jets in eta 2.4", 20,0,20);
 	jet_dRlep1[n] = new TH1F(Form("jet_dRlep1_%i",n), "dR(jet, lepton1)", 50, 0,5);
 	jet_dRlep2[n] = new TH1F(Form("jet_dRlep2_%i",n), "dR(jet, lepton2)", 50, 0,5);
 	jet_pt[n]     = new TH1F(Form("jet_pt_%i",n),  "Pt of leading jet", 50,0,400);
@@ -276,7 +277,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
 
     //cout<<"event #"<<nEvents[0]<<endl;
     if (nEvents[0] == 1) weighter->SetDataBit(isRealData);
-    if(nEvents[0]>200) Abort("\t\t  ** 200 EVENTS PASSED, FINISH   ** ");
+    //if(nEvents[0]>200) Abort("\t\t  ** 200 EVENTS PASSED, FINISH   ** ");
     
     //cout<<"dbg"<<endl;    
     if (nEvents[0] % (int)5e4 == 0) cout<<nEvents[3]<<" events passed of "<<nEvents[0]<<" checked! (at Z-peak cut)"<<endl;
@@ -521,7 +522,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
     float fwdJetSumPt = 0.;
     int fwdJetCount = 0;
 
-    nJets=0; nJetsB=0, nJetsBssv=0;
+    nJets=0, nJetsEta24=0, nJetsB=0, nJetsBssv=0;
     for (int i = 0; i < recoJets->GetSize(); ++i) {
       TCJet* thisJet = (TCJet*) recoJets->At(i);     
 
@@ -1161,6 +1162,7 @@ void higgsAnalyzer::FillHistosFull(Int_t num, Double_t weight){
   if(Mll_EX!=0) di_mass_EX[num]  -> Fill(Mll_EX, weight);
 
   jet_N[num]     -> Fill(nJets, weight);
+  jet_N24[num]   -> Fill(nJetsEta24, weight);
   jet_b_N[num]   -> Fill(nJetsB, weight);
   jet_b_Nssv[num]-> Fill(nJetsBssv, weight);
   jet_b_N25[num] -> Fill(nJetsB25, weight);
