@@ -90,7 +90,7 @@ float WeightUtils::GetTotalWeight(int nPV, int nJets, TLorentzVector l1, TLorent
 
 float WeightUtils::PUWeight(int nPU)
 {
-  if (_dataPeriod == "2011")
+  if (_dataPeriod == "2011" || _dataPeriod == "2011A" || _dataPeriod == "2011B")
     _puWeight = h1_puReweight2011->GetBinContent(nPU+1);
   else 
     _puWeight = 0;

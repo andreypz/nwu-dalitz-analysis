@@ -11,7 +11,7 @@ import config as c
 #shutil.copy2('template_higgsAnalyzer.C', 'higgsAnalyzer.C')
 
 
-period    = "2011"
+period    = "2011A"
 sample    = "ggHZZ400"
 selection = "muon"
 trigger   = "0"
