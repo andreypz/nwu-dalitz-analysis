@@ -1,4 +1,4 @@
-// $Id: template_higgsAnalyzer.C,v 1.37 2012/07/20 22:38:37 andrey Exp $
+// $Id: template_higgsAnalyzer.C,v 1.38 2012/07/20 23:59:17 andrey Exp $
 
 #define higgsAnalyzer_cxx
 
@@ -77,7 +77,7 @@ void higgsAnalyzer::Begin(TTree * /*tree*/)
     zLib            = new ZedEventsLibrary(selection, isFromData);
     weighter        = new WeightUtils(suffix.Data(), period, selection, isRealData);
     triggerSelector = new TriggerSelector(selection, period, triggers);
-    
+
     histoFile = new TFile("a_higgsHistograms.root", "RECREATE");
     histoFile->mkdir("Andrey", "Andrey");
     histoFile->mkdir("Anton", "Anton");
@@ -282,7 +282,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
 
     //cout<<"event #"<<nEvents[0]<<endl;
     if (nEvents[0] == 1) weighter->SetDataBit(isRealData);
-    if(nEvents[0]>200) Abort("\t\t  ** 200 EVENTS PASSED, FINISH   ** ");
+    //if(nEvents[0]>200) Abort("\t\t  ** 200 EVENTS PASSED, FINISH   ** ");
     
     //cout<<"dbg"<<endl;    
     if (nEvents[0] % (int)5e4 == 0) cout<<nEvents[3]<<" events passed of "<<nEvents[0]<<" checked! (at Z-peak cut)"<<endl;
@@ -701,7 +701,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
 
 
 
-    cout<<"before: "<<Lepton1.Pt()<<endl;
+    //cout<<"before: "<<Lepton1.Pt()<<endl;
     if(selection=="muon"){
 
       Int_t runopt = 0;
@@ -723,7 +723,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
       }
 
     }
-    cout<<"after:  "<<Lepton1.Pt()<<endl;
+    //cout<<"after:  "<<Lepton1.Pt()<<endl;
 
     /////////////////// 
     // Gen particles //
