@@ -1,4 +1,4 @@
-// $Id: template_higgsAnalyzer.C,v 1.38 2012/07/20 23:59:17 andrey Exp $
+// $Id: template_higgsAnalyzer.C,v 1.39 2012/07/23 18:53:47 andrey Exp $
 
 #define higgsAnalyzer_cxx
 
@@ -653,15 +653,37 @@ bool higgsAnalyzer::Process(Long64_t entry)
     	//opposite charge requirement
         if (muons[0].Charge() == muons[1].Charge()) return kTRUE;
 
-        ZP4           = muons[0].P4() + muons[1].P4();
-        reducedMet1P4 = GetReducedMET(sumJetP4,  muons[0].P4(), muons[1].P4(), metP4, 1);
-        reducedMet2P4 = GetReducedMET(sumJetP4,  muons[0].P4(), muons[1].P4(), metP4, 2);
-
 	ch1 = muons[0].Charge();
 	ch2 = muons[1].Charge();
 
     	Lepton1 = muons[0].P4();
     	Lepton2 = muons[1].P4();
+
+	//Rochester Muon corrections to make em peak at Z mass correctly
+	//cout<<"before: "<<Lepton1.Pt()<<endl;
+	Int_t runopt = 0;
+	if(isRealData){
+	  
+	  if(period=="2011A") runopt=0;
+	  else if(period=="2011B") runopt=1;
+	  else Abort("   * The Run period is not found! (2011A or 2011B)");
+	  
+	  if (ch1==-1)	
+	    roch->momcor_data(Lepton1,Lepton2, 1,0,runopt);
+	  else
+	    roch->momcor_data(Lepton2,Lepton1, 1,0,runopt);
+	}
+	else {
+	  if (ch1==-1)	
+	    roch->momcor_mc(Lepton1,Lepton2, 1,0,0);
+	  else
+	    roch->momcor_mc(Lepton2,Lepton1, 1,0,0);
+	}
+	//cout<<"after:  "<<Lepton1.Pt()<<endl;
+
+        ZP4           = Lepton1 + Lepton2;
+        reducedMet1P4 = GetReducedMET(sumJetP4, Lepton1, Lepton2, metP4, 1);
+        reducedMet2P4 = GetReducedMET(sumJetP4, Lepton1, Lepton2, metP4, 2);
 
     } else if (selection == "eGamma" || selection == "muGamma" || selection == "gamma") {
 
@@ -701,29 +723,6 @@ bool higgsAnalyzer::Process(Long64_t entry)
 
 
 
-    //cout<<"before: "<<Lepton1.Pt()<<endl;
-    if(selection=="muon"){
-
-      Int_t runopt = 0;
-      if(isRealData){
-	if(period=="2011A") runopt=0;
-	else if(period=="2011B") runopt=1;
-	else Abort("   * The Run period is not found! (2011A or 2011B)");
-	
-	if (ch1==-1)	
-	  roch->momcor_data(Lepton1,Lepton2, 1,0,runopt);
-	else
-	  roch->momcor_data(Lepton2,Lepton1, 1,0,runopt);
-      }
-      else {
-	if (ch1==-1)	
-	  roch->momcor_mc(Lepton1,Lepton2, 1,0,0);
-	else
-	  roch->momcor_mc(Lepton2,Lepton1, 1,0,0);
-      }
-
-    }
-    //cout<<"after:  "<<Lepton1.Pt()<<endl;
 
     /////////////////// 
     // Gen particles //
@@ -786,16 +785,16 @@ bool higgsAnalyzer::Process(Long64_t entry)
     //cout<<"dbg"<<endl;    
 
 
-    /////////////////////
-    // 3rd lepton veto //
-    /////////////////////
-
    if(selection  == "muon" ||  selection  == "electron")
      if (Lepton1.Pt() < 20 || Lepton2.Pt() < 20) return kTRUE;
 
     CountEvents(2);
     nEventsWeighted[2] += evtWeight;
     FillHistosBasic(2, evtWeight);
+
+    /////////////////////
+    // 3rd lepton veto //
+    /////////////////////
 
     if ((electrons.size() > 0 || muons.size() > 2) && selection  == "muon") return kTRUE;
     if ((muons.size() > 0 || electrons.size() > 2) && selection  == "electron") return kTRUE;
@@ -938,17 +937,17 @@ bool higgsAnalyzer::Process(Long64_t entry)
     FillHistosBasic(5, evtWeight);
     
     if (deltaPhiJetMET < dPhiMinCut) return kTRUE;
-      CountEvents(6);
-      nEventsWeighted[6] += evtWeight;
-      FillHistosFull(6, evtWeight);
-      FillHistosBasic(6, evtWeight);
+    CountEvents(6);
+    nEventsWeighted[6] += evtWeight;
+    FillHistosFull(6, evtWeight);
+    FillHistosBasic(6, evtWeight);
 
     if (MET < 70) return kTRUE;
-      CountEvents(7);
-      nEventsWeighted[7] += evtWeight;
-      FillHistosFull(7, evtWeight);
-      FillHistosBasic(7, evtWeight);
-
+    CountEvents(7);
+    nEventsWeighted[7] += evtWeight;
+    FillHistosFull(7, evtWeight);
+    FillHistosBasic(7, evtWeight);
+    
     if(passBveto){
       CountEvents(8);
       nEventsWeighted[8] += evtWeight;

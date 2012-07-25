@@ -52,6 +52,8 @@ def makePlots(sel=1, dir="./", hPath="v00"):
     li_topbg = TList()
     li_bg    = TList()
     li_sig1  = TList()
+    li_sig2  = TList()
+    li_sig3  = TList()
     li_ov = TList()
 
     for a in topbg:
@@ -83,6 +85,9 @@ def makePlots(sel=1, dir="./", hPath="v00"):
 
     c1 = TCanvas("c1","small canvas",600,500);
     c2 = TCanvas("c2","big canvas",600,700);
+
+    print "\n\n ******** Make the Yield table ******** \n"
+    u.printYields(li_topbg, li_bg, li_sig1, sig2, sig3, f_Data, sel, "yields_"+thissel+".html")
 
     if plotSpecial:
         #u.drawMultiPlot(imgpath+"Special/sp01", "","pfMet1/q_{T}", "met1_over_qt_"+str(F0), 1, 0.1, 1e6, 0,2.9, c2, li_ov, li_topbg, li_bg, sel)
@@ -118,7 +123,7 @@ def makePlots(sel=1, dir="./", hPath="v00"):
     if plotDiLepton:
         u.drawMultiPlot(imgpath+"diLepton/di01", "","M(ll)", "di_mass_"+str(F0), 1, 0.1, 1e6, 0.5,1.49, c2, li_ov, li_topbg, li_bg, sel)
         u.drawMultiPlot(imgpath+"diLepton/di02", "","Leptons in Barrel, |#eta|<1.444, M(ll)", "di_mass_EB_"+str(F0), 1, 0.1, 1e6, 0.5,1.49, c2, li_ov, li_topbg, li_bg, sel)
-        u.drawMultiPlot(imgpath+"diLepton/di03", "","Leptons in Barrel, |#eta|>1.566, M(ll)", "di_mass_EE_"+str(F0), 1, 0.1, 1e6, 0.5,1.49, c2, li_ov, li_topbg, li_bg, sel)
+        u.drawMultiPlot(imgpath+"diLepton/di03", "","Leptons in Endcap, |#eta|>1.566, M(ll)", "di_mass_EE_"+str(F0), 1, 0.1, 1e6, 0.5,1.49, c2, li_ov, li_topbg, li_bg, sel)
         u.drawMultiPlot(imgpath+"diLepton/di04", "","Leptons in EB/EE, mixed, M(ll)", "di_mass_EX_"+str(F0), 1, 0.1, 1e6, 0.5,1.49, c2, li_ov, li_topbg, li_bg, sel)
         u.drawMultiPlot(imgpath+"diLepton/di05", "","q_{T} (di-lepton p_{T})", "di_qt_"+str(F0), 1, 0.1, 1e6, 0.5,1.49, c2, li_ov, li_topbg, li_bg, sel)
         u.drawMultiPlot(imgpath+"diLepton/di06", "","Di-lepton Eta", "di_eta_"+str(F0), 1, 0.1, 1e6, 0.5,1.49, c2, li_ov, li_topbg, li_bg, sel)
@@ -136,23 +141,23 @@ def makePlots(sel=1, dir="./", hPath="v00"):
         u.drawMultiPlot(imgpath+"Lepton/l08", "","dEta(lep1, lep2)", "l0_dEta_"+str(F0), 1, 0.1, 1e6, 0.5,1.49, c2, li_ov, li_topbg, li_bg, sel)
         u.drawMultiPlot(imgpath+"Lepton/l09", "","dR(lep1, lep2)", "l0_dR_"+str(F0), 1, 0.1, 1e6, 0.5,1.49, c2, li_ov, li_topbg, li_bg, sel)
         u.drawMultiPlot(imgpath+"Lepton/l10", "","ratio p_{T2}/p_{T1}", "l0_ptRatio_"+str(F0), 1, 0.1, 1e6, 0.5,1.49, c2, li_ov, li_topbg, li_bg, sel)
-        u.drawMultiPlot(imgpath+"Lepton/l11", "","ratio p_{T2}/p_{T1}", "l0_dR_"+str(F0), 1, 0.1, 1e6, 0.5,1.49, c2, li_ov, li_topbg, li_bg, sel)
         
 
     if plotJet:
-        u.drawMultiPlot(imgpath+"Jet/j01", "","N jets", "jet_N_"+str(F0), 1, 0.1, 1e6, 0,2.49, c2, li_ov, li_topbg, li_bg, sel)
-        u.drawMultiPlot(imgpath+"Jet/j02", "","#Delta#phi(MET, clos jet), p_{T}>30, |#eta|<4.8", "met1_dPhiClosJet1_"+str(F0), 1, 0.1, 1e6, 0.5,1.49, c2, li_ov, li_topbg, li_bg, sel)
-        u.drawMultiPlot(imgpath+"Jet/j03", "No b-veto, MET>70","N b-jets", "jet_b_N_"+str(FNOB), 1, 0.1, 1e6, 0,1.9, c2, li_ov, li_topbg, li_bg, sel)
-        u.drawMultiPlot(imgpath+"Jet/j04", "","pt of leading jet", "jet_pt_"+str(F0), 1, 0.1, 1e6, 0.5,1.49, c2, li_ov, li_topbg, li_bg, sel)
-        u.drawMultiPlot(imgpath+"Jet/j05", "","eta of leading jet", "jet_eta_"+str(F0), 1, 0.1, 1e6, 0.5,1.49, c2, li_ov, li_topbg, li_bg, sel)
-        u.drawMultiPlot(imgpath+"Jet/j06", "","dR(jet,lep 1)", "jet_dRlep1_"+str(F0), 1, 0.1, 1e6, 0.5,1.9, c2, li_ov, li_topbg, li_bg, sel)
-        u.drawMultiPlot(imgpath+"Jet/j07", "","dR(jet,lep 2)", "jet_dRlep2_"+str(F0), 1, 0.1, 1e6, 0.5,1.9, c2, li_ov, li_topbg, li_bg, sel)
+        u.drawMultiPlot(imgpath+"Jet/j01", "","N jets pt>30 | #eta|<4.8", "jet_N_"+str(F0), 1, 0.1, 1e6, 0,2.49, c2, li_ov, li_topbg, li_bg, sel)
+        u.drawMultiPlot(imgpath+"Jet/j02", "","N jets pt>30 | #eta|<2.4", "jet_N24_"+str(F0), 1, 0.1, 1e6, 0,2.49, c2, li_ov, li_topbg, li_bg, sel)
+        u.drawMultiPlot(imgpath+"Jet/j03", "","#Delta#phi(MET, clos jet), p_{T}>30, |#eta|<4.8", "met1_dPhiClosJet1_"+str(F0), 1, 0.1, 1e6, 0.5,1.49, c2, li_ov, li_topbg, li_bg, sel)
+        u.drawMultiPlot(imgpath+"Jet/j04", "No b-veto, MET>70","N b-jets", "jet_b_N_"+str(FNOB), 1, 0.1, 1e6, 0,1.9, c2, li_ov, li_topbg, li_bg, sel)
+        u.drawMultiPlot(imgpath+"Jet/j05", "","pt of leading jet", "jet_pt_"+str(F0), 1, 0.1, 1e6, 0.5,1.49, c2, li_ov, li_topbg, li_bg, sel)
+        u.drawMultiPlot(imgpath+"Jet/j06", "","eta of leading jet", "jet_eta_"+str(F0), 1, 0.1, 1e6, 0.5,1.49, c2, li_ov, li_topbg, li_bg, sel)
+        u.drawMultiPlot(imgpath+"Jet/j07", "","dR(jet,lep 1)", "jet_dRlep1_"+str(F0), 1, 0.1, 1e6, 0.5,1.9, c2, li_ov, li_topbg, li_bg, sel)
+        u.drawMultiPlot(imgpath+"Jet/j08", "","dR(jet,lep 2)", "jet_dRlep2_"+str(F0), 1, 0.1, 1e6, 0.5,1.9, c2, li_ov, li_topbg, li_bg, sel)
 
     if plotMet:
         u.drawMultiPlot(imgpath+"Met/m01", "","pfMet", "met1_et_"+str(F0), 1, 0.1, 1e6, 0,2.9, c2, li_ov, li_topbg, li_bg, sel)
         u.drawMultiPlot(imgpath+"Met/m02", "","pfMet Phi", "met1_phi_"+str(F0), 1, 0.1, 1e6, 0.5,1.49, c2, li_ov, li_topbg, li_bg, sel)
         u.drawMultiPlot(imgpath+"Met/m03", "","MT", "mt2_"+str(F0), 1, 0.1, 1e6, 0.5,1.9, c2, li_ov, li_topbg, li_bg, sel)
-        u.drawMultiPlot(imgpath+"Met/m04", "","pfMet long to di-lepton", "met1_lg_"+str(F0), 1, 0.4, 1e7, 0.2,1.4, c2, li_ov, li_topbg, li_bg, sel)
+        u.drawMultiPlot(imgpath+"Met/m04", "","pfMet long to di-lepton", "met1_lg_"+str(F0), 1, 0.4, 1e7, 0.2,2.9, c2, li_ov, li_topbg, li_bg, sel)
         u.drawMultiPlot(imgpath+"Met/m05", "","Long Recoil = -(pfMet+Z/G)", "met1_recoil_lg_"+str(F0), 1, 0.1, 1e6, 0.2,1.9, c2, li_ov, li_topbg, li_bg, sel)
         u.drawMultiPlot(imgpath+"Met/m06", "","projMET", "met4_et_"+str(F0), 1, 0.1, 1e6, 0,2.9, c2, li_ov, li_topbg, li_bg, sel)
         u.drawMultiPlot(imgpath+"Met/m07", "","ZprojMET", "met5_et_"+str(F0), 1, 0.1, 1e6, 0,2.9, c2, li_ov, li_topbg, li_bg, sel)

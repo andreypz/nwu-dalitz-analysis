@@ -67,7 +67,6 @@ print "CPU Time : ", timer.CpuTime()
 print "RealTime : ", timer.RealTime()  
 
 
-
 print "\n\n ******** Now making HTML pages ******** \n"
 menu=""
 
@@ -105,7 +104,10 @@ for x in plot_types:
     os.system("mv "+fname+" "+dirnameOut)
     menu = menu+"<li><a href=\""+x+".html\" target=\"iframe_a\">"+x+"</a></li>"
 
+menu += '<li><a href="yields_muon.html" target="iframe_a">Yields mu</a></li>'
+menu += '<li><a href="yields_electron.html" target="iframe_a">Yields ele</a></li>'
 #print menu
+
 
 today = datetime.date.today()
 print today
@@ -121,3 +123,4 @@ ifile.write(whole_thing)
 ifile.close()
 
 os.system("mv index.html "+dirnameOut)
+os.system("mv yields* "+dirnameOut)

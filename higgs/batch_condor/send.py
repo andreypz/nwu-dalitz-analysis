@@ -16,10 +16,10 @@ if nargs>1 and sys.argv[1]=="ele":
     selection="electron"
     
 period    = '2011'
-doTest    = 0
-doData    = 1
-doBG      = 1
-doSignal  = 1
+doTest    = 1
+doData    = 0
+doBG      = 0
+doSignal  = 0
 
 ''' 
     Set job configurations.  The order of arguments is:
@@ -29,8 +29,9 @@ doSignal  = 1
 test = []
 test.extend([
 #b.JobConfig('ZZ', dCache+'/andreypz/nuTuples_v1_7TeV/ZZ_v3', 1, 'ZZ 0 '+selection+' '+period, selection),
-b.JobConfig('ggHZZ250', dCache+'/andreypz/nuTuples_v1_7TeV/ggHZZ250', 1, 'ggHZZ250 0 '+selection+' '+period, selection),
-#b.JobConfig('DoubleEle_Run2011A', dCache+'/andreypz/nuTuples_v1_7TeV/DoubleElectron_HZZ_Run2011A', 25, 'DATA 16,17,18 electron 2011A', selection),
+#b.JobConfig('ggHZZ250', dCache+'/andreypz/nuTuples_v1_7TeV/ggHZZ250', 1, 'ggHZZ250 0 '+selection+' '+period, selection),
+b.JobConfig('DoubleEle_Run2011A', dCache+'/andreypz/nuTuples_v1_7TeV/DoubleElectron_HZZ_Run2011A', 40, 'DATA 16,17,18 electron 2011A', selection),
+b.JobConfig('DoubleEle_Run2011B', dCache+'/andreypz/nuTuples_v1_7TeV/DoubleElectron_HZZ_Run2011B', 40, 'DATA 16,17,18 electron 2011B', selection),
 #b.JobConfig('DYjets', dCache+'/andreypz/nuTuples_v1_7TeV/DYJetsToLL', 30, 'DYjets 0 '+selection+' '+period, selection),
 ])
 
@@ -49,8 +50,8 @@ if selection == 'muon':
 if selection == 'electron':
     data = []
     data.extend([
-        b.JobConfig('DoubleEle_Run2011A', dCache+'/andreypz/nuTuples_v1_7TeV/DoubleElectron_HZZ_Run2011A', 25, 'DATA 16,17,18 electron 2011A', selection),
-        b.JobConfig('DoubleEle_Run2011B', dCache+'/andreypz/nuTuples_v1_7TeV/DoubleElectron_HZZ_Run2011B', 25, 'DATA 16,17,18 electron 2011B', selection),
+        b.JobConfig('DoubleEle_Run2011A', dCache+'/andreypz/nuTuples_v1_7TeV/DoubleElectron_HZZ_Run2011A', 40, 'DATA 16,17,18 electron 2011A', selection),
+        b.JobConfig('DoubleEle_Run2011B', dCache+'/andreypz/nuTuples_v1_7TeV/DoubleElectron_HZZ_Run2011B', 40, 'DATA 16,17,18 electron 2011B', selection),
         ])
 
 
@@ -71,7 +72,7 @@ if selection == 'muEG':
  
 bg = []
 bg.extend([
-b.JobConfig('DYjets', dCache+'/andreypz/nuTuples_v1_7TeV/DYJetsToLL', 20, 'DYjets 0 '+selection+' '+period, selection),
+b.JobConfig('DYjets', dCache+'/andreypz/nuTuples_v1_7TeV/DYJetsToLL', 30, 'DYjets 0 '+selection+' '+period, selection),
 b.JobConfig('ZZ', dCache+'/andreypz/nuTuples_v1_7TeV/ZZJetsTo2L2Nu', 1, 'ZZ 0 '+selection+' '+period, selection),
 #b.JobConfig('ZZ', dCache+'/andreypz/nuTuples_v1_7TeV/ZZ_v3', 1, 'ZZ 0 '+selection+' '+period, selection),
 b.JobConfig('WW', '/eos/uscms/store/user/bpollack/May15/MC/WWJets/', 1, 'WW 0 '+selection+' '+period, selection),
