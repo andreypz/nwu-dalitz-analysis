@@ -81,7 +81,7 @@ for x in plot_types:
     nmu = len(fileList["muon"])
     nele = len(fileList["electron"])
     if (nmu!=0 and fileList["muon"]==fileList["electron"]):
-        for pl in  fileList["muon"]:
+        for pl in  sorted(fileList["muon"]):
             imgfile.write('<nobr><img src=muon/'+x+'/'+pl+' width=47%>')
             imgfile.write('    <img src=electron/'+x+'/'+pl+' width=47%></nobr>\n') 
     elif(nmu!=0 and  nele!=0 and fileList["muon"]!=fileList["electron"]):
@@ -89,7 +89,7 @@ for x in plot_types:
     elif(nmu!=0 and nele==0):
         count =1
         mod =1
-        for pl in  fileList["muon"]:
+        for pl in  sorted(fileList["muon"]):
             mod = count % 2
             if mod==1: imgfile.write('<nobr><img src=muon/'+x+'/'+pl+' width=47%>')
             if mod==0: imgfile.write('      <img src=muon/'+x+'/'+pl+' width=47%></nobr>\n')

@@ -145,7 +145,7 @@ def makePlots(sel=1, dir="./", hPath="v00"):
 
     if plotJet:
         u.drawMultiPlot(imgpath+"Jet/j01", "","N jets pt>30 | #eta|<4.8", "jet_N_"+str(F0), 1, 0.1, 1e6, 0,2.49, c2, li_ov, li_topbg, li_bg, sel)
-        u.drawMultiPlot(imgpath+"Jet/j02", "","N jets pt>30 | #eta|<2.4", "jet_N24_"+str(F0), 1, 0.1, 1e6, 0,2.49, c2, li_ov, li_topbg, li_bg, sel)
+        #u.drawMultiPlot(imgpath+"Jet/j02", "","N jets pt>30 | #eta|<2.4", "jet_N24_"+str(F0), 1, 0.1, 1e6, 0,2.49, c2, li_ov, li_topbg, li_bg, sel)
         u.drawMultiPlot(imgpath+"Jet/j03", "","#Delta#phi(MET, clos jet), p_{T}>30, |#eta|<4.8", "met1_dPhiClosJet1_"+str(F0), 1, 0.1, 1e6, 0.5,1.49, c2, li_ov, li_topbg, li_bg, sel)
         u.drawMultiPlot(imgpath+"Jet/j04", "No b-veto, MET>70","N b-jets", "jet_b_N_"+str(FNOB), 1, 0.1, 1e6, 0,1.9, c2, li_ov, li_topbg, li_bg, sel)
         u.drawMultiPlot(imgpath+"Jet/j05", "","pt of leading jet", "jet_pt_"+str(F0), 1, 0.1, 1e6, 0.5,1.49, c2, li_ov, li_topbg, li_bg, sel)
