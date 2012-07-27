@@ -1,4 +1,4 @@
-// $Id: template_higgsAnalyzer.C,v 1.41 2012/07/25 23:57:50 andrey Exp $
+// $Id: template_higgsAnalyzer.C,v 1.42 2012/07/27 22:10:44 andrey Exp $
 
 #define higgsAnalyzer_cxx
 
@@ -76,7 +76,7 @@ TRandom3 *myRandom;
 #include "TMVA/MethodCuts.h"
 
 // TMVA weights directory
-TString weightsDir = "./mvaWeights";
+TString weightsDir = "../data/mvaWeights";
 
 #define N_DISCR_METHODS 3
 // here we will use only BDTG... but will keep the structure 
