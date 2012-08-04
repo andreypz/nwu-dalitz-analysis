@@ -1,4 +1,4 @@
-// $Id: higgsAnalyzer.h,v 1.22 2012/07/20 22:38:37 andrey Exp $
+// $Id: higgsAnalyzer.h,v 1.23 2012/07/20 23:59:15 andrey Exp $
 
 #ifndef higgsAnalyzer_h
 #define higgsAnalyzer_h
@@ -73,7 +73,7 @@ class higgsAnalyzer : public TSelector {
   ofstream nout[nC], fout[nC], ffout, ncout;
   TTree * _kinTree;
 
-  TH1F *evt_byCut;
+  TH1F *evt_byCut, *evt_byCut_raw;
   TH2F *evt_libQt;
   TH1F *mtZ[nC], *mt0[nC], *mt1[nC], *mt2[nC], *mt3[nC], *mt4[nC];
   TH1F *met0_phi[nC], *met0_et[nC], *met0_over_qt[nC];
@@ -115,47 +115,78 @@ class higgsAnalyzer : public TSelector {
  public :
   TTree          *fChain;   //!pointer to the analyzed TTree or TChain
   
-  // Declaration of leaf types
-  TClonesArray  *recoJets;
-  TClonesArray  *recoMET;
-  TClonesArray  *genJets;
-  TClonesArray  *genParticles;
-  TClonesArray  *recoMuons;
-  TClonesArray  *recoElectrons;
-  TClonesArray  *recoPhotons;
-  TClonesArray  *primaryVtx;
-  int           eventNumber;
-  int           runNumber;
-  int           lumiSection;
-  int           nPUVertices;
-  double        ptHat;
-  float         rhoFactor;
-  unsigned int  triggerStatus;
-  int           hltPrescale[64];
-  bool          isRealData, isNoiseHcal, isDeadEcalCluster, isScraping, isCSCTightHalo;
+  // Declaration of leaf types                                                                                                                                 
+  TClonesArray    *recoJets;
+  TClonesArray    *recoJPT;
+  TClonesArray    *recoElectrons;
+  TClonesArray    *recoMuons;
+  TClonesArray    *pfMuons;
+  TClonesArray    *recoTaus;
+  TClonesArray    *recoPhotons;
+  TClonesArray    *pfPhotons;
+  TCMET           *recoMET;
+  TCMET           *recoMETNoPU;
+  TClonesArray    *triggerObjects;
+  TClonesArray    *genJets;
+  TClonesArray    *genParticles;
+  TClonesArray    *primaryVtx;
+
+  TVector3        *beamSpot;
+  Int_t           nPUVertices;
+  Float_t         nPUVerticesTrue;
+  Bool_t          isRealData;
+  UInt_t          runNumber;
+  ULong64_t       eventNumber;
+  UInt_t          lumiSection;
+  UInt_t          bunchCross;
+  Bool_t          isScraping;
+  Bool_t          isNoiseHcal;
+  Bool_t          isDeadEcalCluster;
+  Bool_t          isCSCTightHalo;
+  Bool_t          isCSCLooseHalo;
+  Float_t         ptHat;
+  Float_t         qScale;
+  Float_t         evtWeight;
+  Float_t         rhoFactor;
+  ULong64_t       triggerStatus;
+  int          hltPrescale[64];
   
-  // List of branches
-  TBranch        *b_recoJets;   //!
-  TBranch        *b_recoMET;   //!
-  TBranch        *b_genParticles;   //!
-  TBranch        *b_genJets;   //!
-  TBranch        *b_recoMuons;
-  TBranch        *b_recoElectrons;
-  TBranch        *b_recoPhotons;
-  TBranch        *b_primaryVtx;   //!
-  TBranch        *b_eventNumber;   //!
-  TBranch        *b_runNumber;   //!
-  TBranch        *b_lumiSection;   //!
-  TBranch        *b_rhoFactor;   //!
-  TBranch        *b_ptHat;   //!
-  TBranch        *b_triggerStatus;   //!
-  TBranch        *b_hltPrescale;   //!
-  TBranch        *b_nPUVertices;   //!
-  TBranch        *b_isRealData;   //!
-  TBranch        *b_isNoiseHcal;   //!
-  TBranch        *b_isDeadEcalCluster;   //!
-  TBranch        *b_isScraping;   //!
-  TBranch        *b_isCSCTightHalo;   //!
+  // List of branches                                                                                                                                          
+  TBranch        *b_recoJets;   //! 
+  TBranch        *b_recoJPT;   //!
+  TBranch        *b_recoElectrons;   //!
+  TBranch        *b_recoMuons;   //!                                                                                                                           
+  TBranch        *b_pfMuons;   //!                                                                                                                             
+  TBranch        *b_recoTaus;   //!                                                                                                                            
+  TBranch        *b_recoPhotons;   //!                                                                                                                         
+  TBranch        *b_pfPhotons;   //!                                                                                                                           
+  TBranch        *b_recoMET;   //!                                                                                                                             
+  TBranch        *b_recoMETNoPU;   //!                                                                                                                         
+  TBranch        *b_triggerObjects;   //!                                                                                                                      
+  TBranch        *b_genJets;   //!                                                                                                                             
+  TBranch        *b_genParticles;   //!                                                                                                                        
+  TBranch        *b_primaryVtx;   //!  
+  TBranch        *b_beamSpot;   //!
+
+  TBranch        *b_nPUVertices;   //!                                                                                                                         
+  TBranch        *b_nPUVerticesTrue;   //!                                                                                                                     
+  TBranch        *b_isRealData;   //!                                                                                                                          
+  TBranch        *b_runNumber;   //!                                                                                                                           
+  TBranch        *b_eventNumber;   //!                                                                                                                         
+  TBranch        *b_lumiSection;   //!                                                                                                                         
+  TBranch        *b_bunchCross;   //!                                                                                                                          
+  TBranch        *b_isScraping;   //!                                                                                                                          
+  TBranch        *b_isNoiseHcal;   //!                                                                                                                         
+  TBranch        *b_isDeadEcalCluster;   //!                                                                                                                   
+  TBranch        *b_isCSCTightHalo;   //!                                                                                                                      
+  TBranch        *b_isCSCLooseHalo;   //!                                                                                                                      
+  TBranch        *b_ptHat;   //!                                                                                                                               
+  TBranch        *b_qScale;   //!                                                                                                                              
+  TBranch        *b_evtWeight;   //!                                                                                                                           
+  TBranch        *b_rhoFactor;   //!                                                                                                                           
+  TBranch        *b_triggerStatus;   //!                                                                                                                       
+  TBranch        *b_hltPrescale;   //!                                                                                                                         
+
   
   //For counting events
   //        int          nEvents[16];
@@ -190,7 +221,7 @@ class higgsAnalyzer : public TSelector {
   void FillHistosBasic(Int_t, Double_t);
   void FillHistosFull(Int_t, Double_t);
   void CountEvents(Int_t);
-  void PrintOut(Int_t);
+  void PrintOut(Int_t, Bool_t isShort=kFALSE);
   void PrintOutNoisy(Int_t);
  // pair<int, int> GetQtBin(Float_t, Float_t);
   
@@ -202,59 +233,70 @@ class higgsAnalyzer : public TSelector {
 #ifdef higgsAnalyzer_cxx
 void higgsAnalyzer::Init(TTree *tree)
 {
-	// The Init() function is called when the selector needs to initialize
-	// a new tree or chain. Typically here the branch addresses and branch
-	// pointers of the tree will be set.
-	// It is normally not necessary to make changes to the generated
-	// code, but the routine can be extended by the user if needed.
-	// Init() will be called many times when running on PROOF
-	// (once per file to be processed).
+  // The Init() function is called when the selector needs to initialize
+  // a new tree or chain. Typically here the branch addresses and branch
+  // pointers of the tree will be set.
+  // It is normally not necessary to make changes to the generated
+  // code, but the routine can be extended by the user if needed.
+  // Init() will be called many times when running on PROOF
+  // (once per file to be processed).
+  
+  // Set object pointer                                                                                                                                        
+  recoJets = 0;
+  recoJPT = 0;
+  recoElectrons = 0;
+  recoMuons = 0;
+  pfMuons = 0;
+  recoTaus = 0;
+  recoPhotons = 0;
+  pfPhotons = 0;
+  recoMET = 0;
+  recoMETNoPU = 0;
+  triggerObjects = 0;
+  genJets = 0;
+  genParticles = 0;
+  primaryVtx = 0;
+  beamSpot = 0;
 
-	// Set object pointer
-	recoJets = 0;
-	recoMET = 0;
-	genParticles = 0;
-	genJets = 0;
-	primaryVtx = 0;
-	recoMuons = 0;
-	recoElectrons = 0;
-	recoPhotons = 0;
-	// Set branch addresses and branch pointers
-	if (!tree) return;
-	fChain = tree;
-	fChain->SetMakeClass(1);
 
-	fChain->SetBranchAddress("recoJets", &recoJets, &b_recoJets);
-	fChain->SetBranchAddress("recoElectrons", &recoElectrons, &b_recoElectrons);
-	fChain->SetBranchAddress("recoMuons", &recoMuons, &b_recoMuons);
-	fChain->SetBranchAddress("recoPhotons", &recoPhotons, &b_recoPhotons);
-	fChain->SetBranchAddress("recoMET", &recoMET, &b_recoMET);
-	fChain->SetBranchAddress("genJets", &genJets, &b_genJets);
-	fChain->SetBranchAddress("primaryVtx", &primaryVtx, &b_primaryVtx);
-
-	fChain->SetBranchAddress("isRealData", &isRealData, &b_isRealData);
-	fChain->SetBranchAddress("eventNumber", &eventNumber, &b_eventNumber);
-	fChain->SetBranchAddress("runNumber", &runNumber, &b_runNumber);
-	fChain->SetBranchAddress("lumiSection", &lumiSection, &b_lumiSection);
-	fChain->SetBranchAddress("rhoFactor", &rhoFactor, &b_rhoFactor);
-	fChain->SetBranchAddress("ptHat", &ptHat, &b_ptHat);
-	fChain->SetBranchAddress("nPUVertices", &nPUVertices, &b_nPUVertices);
-	fChain->SetBranchAddress("triggerStatus", &triggerStatus, &b_triggerStatus);
-	fChain->SetBranchAddress("hltPrescale",&hltPrescale, &b_hltPrescale);
-
-	fChain->SetBranchAddress("isNoiseHcal", &isNoiseHcal, &b_isNoiseHcal);
-	fChain->SetBranchAddress("isDeadEcalCluster", &isDeadEcalCluster, &b_isDeadEcalCluster);
-	fChain->SetBranchAddress("isScraping", &isScraping, &b_isScraping);
-	fChain->SetBranchAddress("isCSCTightHalo", &isCSCTightHalo, &b_isCSCTightHalo);
-
-	fChain->SetBranchAddress("genParticles", &genParticles, &b_genParticles);
-
-	// ADD THESE!
-	//eventTree->Branch("recoTaus",&recoTaus, 6400, 0);
-	//eventTree->Branch("beamSpot", &beamSpot, 6400, 0);
-	//eventTree->Branch("bunchCross",&bunchCross, "bunchCross/i");
-	//eventTree->Branch("qScale", &qScale, "qScale/F");
-	//eventTree->Branch("evtWeight", &evtWeight, "evtWeight/F");
+  // Set branch addresses and branch pointers
+  if (!tree) return;
+  fChain = tree;
+  fChain->SetMakeClass(1);
+  
+  fChain->SetBranchAddress("recoJets", &recoJets, &b_recoJets);
+  fChain->SetBranchAddress("recoJPT", &recoJPT, &b_recoJPT);
+  fChain->SetBranchAddress("recoElectrons", &recoElectrons, &b_recoElectrons);
+  fChain->SetBranchAddress("recoMuons", &recoMuons, &b_recoMuons);
+  fChain->SetBranchAddress("pfMuons", &pfMuons, &b_pfMuons);
+  fChain->SetBranchAddress("recoTaus", &recoTaus, &b_recoTaus);
+  fChain->SetBranchAddress("recoPhotons", &recoPhotons, &b_recoPhotons);
+  fChain->SetBranchAddress("pfPhotons", &pfPhotons, &b_pfPhotons);
+  fChain->SetBranchAddress("recoMET", &recoMET, &b_recoMET);
+  fChain->SetBranchAddress("recoMETNoPU", &recoMETNoPU, &b_recoMETNoPU);
+  fChain->SetBranchAddress("triggerObjects", &triggerObjects, &b_triggerObjects);
+  fChain->SetBranchAddress("genJets", &genJets, &b_genJets);
+  fChain->SetBranchAddress("genParticles", &genParticles, &b_genParticles);
+  fChain->SetBranchAddress("primaryVtx", &primaryVtx, &b_primaryVtx);
+  fChain->SetBranchAddress("beamSpot", &beamSpot, &b_beamSpot);
+  fChain->SetBranchAddress("nPUVertices", &nPUVertices, &b_nPUVertices);
+  fChain->SetBranchAddress("nPUVerticesTrue", &nPUVerticesTrue, &b_nPUVerticesTrue);
+  fChain->SetBranchAddress("isRealData", &isRealData, &b_isRealData);
+  fChain->SetBranchAddress("runNumber", &runNumber, &b_runNumber);
+  fChain->SetBranchAddress("eventNumber", &eventNumber, &b_eventNumber);
+  fChain->SetBranchAddress("lumiSection", &lumiSection, &b_lumiSection);
+  fChain->SetBranchAddress("bunchCross", &bunchCross, &b_bunchCross);
+  fChain->SetBranchAddress("isScraping", &isScraping, &b_isScraping);
+  fChain->SetBranchAddress("isNoiseHcal", &isNoiseHcal, &b_isNoiseHcal);
+  fChain->SetBranchAddress("isDeadEcalCluster", &isDeadEcalCluster, &b_isDeadEcalCluster);
+  fChain->SetBranchAddress("isCSCTightHalo", &isCSCTightHalo, &b_isCSCTightHalo);
+  fChain->SetBranchAddress("isCSCLooseHalo", &isCSCLooseHalo, &b_isCSCLooseHalo);
+  fChain->SetBranchAddress("ptHat", &ptHat, &b_ptHat);
+  fChain->SetBranchAddress("qScale", &qScale, &b_qScale);
+  fChain->SetBranchAddress("evtWeight", &evtWeight, &b_evtWeight);
+  fChain->SetBranchAddress("rhoFactor", &rhoFactor, &b_rhoFactor);
+  fChain->SetBranchAddress("triggerStatus", &triggerStatus, &b_triggerStatus);
+  fChain->SetBranchAddress("hltPrescale", hltPrescale, &b_hltPrescale);
 
 }
 

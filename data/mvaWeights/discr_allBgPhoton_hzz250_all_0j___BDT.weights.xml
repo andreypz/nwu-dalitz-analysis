@@ -4,11 +4,11 @@
     <Info name="TMVA Release" value="4.0.7 [262151]"/>
     <Info name="ROOT Release" value="5.27/06 [334598]"/>
     <Info name="Creator" value="andreypz"/>
-    <Info name="Date" value="Fri Jul 27 16:29:49 2012"/>
+    <Info name="Date" value="Tue Jul 31 12:03:00 2012"/>
     <Info name="Host" value="Linux lxbuild168.cern.ch 2.6.18-274.12.1.el5 #1 SMP Wed Nov 30 08:57:58 CET 2011 x86_64 x86_64 x86_64 GNU/Linux"/>
     <Info name="Dir" value="/uscms_data/d2/andreypz/cmssw/higgs2/CMSSW_4_4_4/src/NWU/Higgs/higgs/mvaExamples"/>
     <Info name="Training events" value="34336"/>
-    <Info name="TrainingTime" value="53.7961"/>
+    <Info name="TrainingTime" value="44.3639"/>
     <Info name="AnalysisType" value="Classification"/>
   </GeneralInfo>
   <Options>

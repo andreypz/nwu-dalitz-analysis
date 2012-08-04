@@ -6,7 +6,6 @@ nargs = len(sys.argv)
 print "Running", sys.argv[0], nargs
 
 
-
 ''' Specify parameters '''
 dCache      = '/pnfs/cms/WAX/11/store/user' 
 outputPath  = '/uscms_data/d2/andreypz/cmssw/higgs2/CMSSW_4_4_4/src/NWU/Higgs/higgs/batch_condor'
@@ -28,10 +27,12 @@ doSignal  = 0
 
 test = []
 test.extend([
-#b.JobConfig('ZZ', dCache+'/andreypz/nuTuples_v1_7TeV/ZZ_v3', 1, 'ZZ 0 '+selection+' '+period, selection),
+b.JobConfig('ZZ', dCache+'/andreypz/nuTuples_v1_7TeV/ZZ_v3', 1, 'ZZ 0 '+selection+' '+period, selection),
+#b.JobConfig('ggHZZ200', dCache+'/andreypz/nuTuples_v1_7TeV/ggHZZ200', 1, 'ggHZZ200 0 '+selection+' '+period, selection),
 #b.JobConfig('ggHZZ250', dCache+'/andreypz/nuTuples_v1_7TeV/ggHZZ250', 1, 'ggHZZ250 0 '+selection+' '+period, selection),
-b.JobConfig('DoubleEle_Run2011A', dCache+'/andreypz/nuTuples_v1_7TeV/DoubleElectron_HZZ_Run2011A', 30, 'DATA 16,17,18 electron 2011A', selection),
-b.JobConfig('DoubleEle_Run2011B', dCache+'/andreypz/nuTuples_v1_7TeV/DoubleElectron_HZZ_Run2011B', 30, 'DATA 16,17,18 electron 2011B', selection),
+#b.JobConfig('ggHZZ300', dCache+'/andreypz/nuTuples_v1_7TeV/ggHZZ300', 1, 'ggHZZ300 0 '+selection+' '+period, selection),
+#b.JobConfig('DoubleEle_Run2011A', dCache+'/andreypz/nuTuples_v1_7TeV/DoubleElectron_HZZ_Run2011A', 30, 'DATA 16,17,18 electron 2011A', selection),
+#b.JobConfig('DoubleEle_Run2011B', dCache+'/andreypz/nuTuples_v1_7TeV/DoubleElectron_HZZ_Run2011B', 30, 'DATA 16,17,18 electron 2011B', selection),
 #b.JobConfig('DYjets', dCache+'/andreypz/nuTuples_v1_7TeV/DYJetsToLL', 30, 'DYjets 0 '+selection+' '+period, selection),
 ])
 

@@ -122,5 +122,7 @@ ifile = open("index.html","w")
 ifile.write(whole_thing)
 ifile.close()
 
+print "\n\n *** End of  making HTML pages - all done *** \n"
+
 os.system("mv index.html "+dirnameOut)
 os.system("mv yields* "+dirnameOut)

@@ -2,7 +2,7 @@
 import sys,os
 
 from ROOT import *
-import shutil
+#import shutil
 import datetime
 
 import config as c
@@ -12,12 +12,12 @@ F0 = 6
 FNOB = 7
 FB = 8
 
-plotSpecial = 1
-plotMet = 1
-plotJet = 1
-plotLepton = 1
-plotDiLepton = 1
-plotMisc = 1
+plotSpecial = 0
+plotMet = 0
+plotJet = 0
+plotLepton = 0
+plotDiLepton = 0
+plotMisc = 0
 
 
 
@@ -46,11 +46,12 @@ def makePlots(sel=1, dir="./", hPath="v00"):
     topbg = ["tW","tbarW"]
     bg   = ["WW", "WZ","ZZ", "ttbar","DYjets"]
     sig1 = ["ggHZZ125","ggHZZ200","ggHZZ250","ggHZZ300","ggHZZ350","ggHZZ400","ggHZZ450","ggHZZ500","ggHZZ550","ggHZZ600"]
-    sig2 = ["ggHWW125","ggHWW200","ggHWW250","ggHWW300","ggHWW350","ggHWW400","ggHWW450","ggHWW500","ggHWW550","ggHWW600"]
-    sig3 = ["VBFHZZ125","VBFHZZ200","VBFHZZ250","VBFHZZ300","VBFHZZ350","VBFHZZ400","VBFHZZ450","VBFHZZ500","VBFHZZ550","VBFHZZ600"]
+    sig2 = ["VBFHZZ125","VBFHZZ200","VBFHZZ250","VBFHZZ300","VBFHZZ350","VBFHZZ400","VBFHZZ450","VBFHZZ500","VBFHZZ550","VBFHZZ600"]
+    sig3 = ["ggHWW125","ggHWW200","ggHWW250","ggHWW300","ggHWW350","ggHWW400","ggHWW450","ggHWW500","ggHWW550","ggHWW600"]
 
     li_topbg = TList()
     li_bg    = TList()
+    li_allbg = TList()
     li_sig1  = TList()
     li_sig2  = TList()
     li_sig3  = TList()
@@ -59,7 +60,8 @@ def makePlots(sel=1, dir="./", hPath="v00"):
     for a in topbg:
         #print "Creating TList", a
         f = TFile(hPath+"/"+thissel+"/hhhh_"+a+"_1.root", "OPEN")
-        li_topbg.Add(f)        
+        li_topbg.Add(f)
+        li_allbg.Add(f)
     for a in bg:
         #print a
         if a=='ttbar':
@@ -71,12 +73,18 @@ def makePlots(sel=1, dir="./", hPath="v00"):
         #f.Print()
         #print "Creating TList", a
         li_bg.Add(f)
+        li_allbg.Add(f)
             
     for a in sig1:
         #print a
         f = TFile(hPath+"/"+thissel+"/hhhh_"+a+"_1.root", "OPEN")
         #f.Print()
         li_sig1.Add(f)
+    for a in sig2:
+        #print a
+        f = TFile(hPath+"/"+thissel+"/hhhh_"+a+"_1.root", "OPEN")
+        #f.Print()
+        li_sig2.Add(f)
 
     f_Data =  TFile(hPath+"/m_Data_"+thissel+".root", "OPEN")
 
@@ -87,7 +95,13 @@ def makePlots(sel=1, dir="./", hPath="v00"):
     c2 = TCanvas("c2","big canvas",600,700);
 
     print "\n\n ******** Make the Yield table ******** \n"
-    u.printYields(li_topbg, li_bg, li_sig1, sig2, sig3, f_Data, sel, "yields_"+thissel+".html")
+    u.printYields(li_topbg, li_bg, li_sig1, li_sig2, li_sig3, f_Data, sel, "yields_"+thissel+".html")
+
+    #u.makeWeightBranch(li_topbg, li_bg, li_sig1, sig2)
+    mvaInputsDir = hPath+"/"+thissel+"/mva/"
+    if not os.path.exists(mvaInputsDir):
+        os.makedirs(mvaInputsDir)
+    u.makeMvaTrees(mvaInputsDir,li_allbg, li_sig1, li_sig2,sel)
 
     if plotSpecial:
         #u.drawMultiPlot(imgpath+"Special/sp01", "","pfMet1/q_{T}", "met1_over_qt_"+str(F0), 1, 0.1, 1e6, 0,2.9, c2, li_ov, li_topbg, li_bg, sel)
