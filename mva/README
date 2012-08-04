@@ -1,0 +1,29 @@
+A few words to get started....
+
+run.sh has the commands for training on one mass point and three
+jet multiplicity sub-samples.
+
+After you finish training you can visualize the results using the
+tools provided by TMVA. See the directory "test" that is a direct 
+copy of ${ROOTSYS}/tmva/test for local use.
+It contains a tutorial as well as the tools in question. You do NOT need to
+look/modify most of the files.
+First use the GUI:
+Go in the "test" directory and run
+root -l 'TMVAGui.C("pathToFIle/file.root")'
+where pathToFIle/file.root is the file that was made after the training.
+
+You will need to look at the README file in the "test" directory and the TMVA
+manual.
+Forget about the "toy data" as I included some HZZ training/testing ntuples. 
+No need to run TMVAClassification.C - TrainMva.C does the training for HZZ and is derived from it.
+Note that I have included arguments that provide some convenience 
+when dealing with different configurations, so it is not exactly the same.
+
+
+
+
+
+
+
+
