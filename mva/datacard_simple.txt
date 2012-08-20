@@ -5,7 +5,7 @@ kmax 5  number of nuisance parameters (sources of systematical uncertainties)
 ------------
 # we have just one channel, in which we observe 0 events
 bin 1
-observation 91 #mva 1
+observation 91 #mva
 #observation 93   #cut bused
 ------------
 # now we list the expected events for signal and all backgrounds in that bin
