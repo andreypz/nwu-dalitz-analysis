@@ -5,6 +5,7 @@ from ROOT import *
 import config as c
 
 def  makeMvaTrees(outpath, bg_list, sig1_list, sig2_list, sel):
+    print "** Creating mva trees ***"
     fbg_train = TFile(outpath+"allBg_train.root","RECREATE")
     fbg_test  = TFile(outpath+"allBg_test.root","RECREATE")
 
@@ -18,6 +19,7 @@ Float_t met;\
 Float_t metProjOnQt;\
 Float_t metPerpQt;\
 Float_t diLepMetDeltaPhi;\
+Float_t dPhiJetMet;\
 Float_t mt;\
 Float_t longRecoil;\
 Float_t allJetsEt;\
@@ -27,8 +29,8 @@ Float_t evWeight;\
 Float_t fullWeight;\
 };")
 
-    allVars = 'lep1Pt/F:lep2Pt/F:diLepPt/F:diLepM/F:met/F:metProjOnQt:metPerpQt:\
-diLepMetDeltaPhi:mt:longRecoil/F:allJetsEt/F:hasBJet/I:nJets/I:evWeight/F:\
+    allVars = 'lep1Pt/F:lep2Pt:diLepPt:diLepM:met:metProjOnQt:metPerpQt:\
+diLepMetDeltaPhi:dPhiJetMet:mt:longRecoil:allJetsEt:hasBJet/I:nJets/I:evWeight/F:\
 fullWeight/F'
     stuff  = mva_vars()
     fbg_train.cd()
@@ -48,7 +50,7 @@ fullWeight/F'
         sample = b.Get("Andrey/evt_byCut").GetTitle()
         #if sample!="tW": continue  # for tests
         print sample
-        tree = b.Get("Anton/kinTree")
+        tree = b.Get("mvaTree/kinTree")
 
         for evt in tree:                
             stuff.lep1Pt = evt.lep1.Pt()
@@ -59,6 +61,7 @@ fullWeight/F'
             stuff.metProjOnQt     =  evt.met.Pt()*cos(evt.met.DeltaPhi(evt.V))
             stuff.metPerpQt       =  evt.met.Pt()*sin(evt.met.DeltaPhi(evt.V))
             stuff.diLepMetDeltaPhi=  abs(TVector2.Phi_mpi_pi(evt.met.Phi()-evt.V.Phi()))
+            stuff.dPhiJetMet = evt.dPhiJetMet  
             stuff.mt         = CalculateTransMass(evt.lep1, evt.lep2)
             stuff.longRecoil = 0
             stuff.allJetsEt  = evt.allJets.Et()
@@ -101,21 +104,22 @@ fullWeight/F'
 
         sig_list = TList()
         sig_list.Add(sig1_list.At(mhmap[str(mh)]))
-        #sig_list.Add(sig2_list.At(mhmap[str(mh)] ))
+        sig_list.Add(sig2_list.At(mhmap[str(mh)]))
         
         for s in sig_list:
             sample = s.Get("Andrey/evt_byCut").GetTitle()
             print sample
-            tree = s.Get("Anton/kinTree")
+            tree = s.Get("mvaTree/kinTree")
             for evt in tree:                
-                stuff.lep1Pt = evt.lep1.Pt()
-                stuff.lep2Pt = evt.lep2.Pt()
+                stuff.lep1Pt  = evt.lep1.Pt()
+                stuff.lep2Pt  = evt.lep2.Pt()
                 stuff.diLepPt = evt.V.Pt()
-                stuff.diLepM = evt.V.M()
-                stuff.met    = evt.met.Pt()
+                stuff.diLepM  = evt.V.M()
+                stuff.met     = evt.met.Pt()
                 stuff.metProjOnQt     =  evt.met.Pt()*cos(evt.met.DeltaPhi(evt.V))
                 stuff.metPerpQt       =  evt.met.Pt()*sin(evt.met.DeltaPhi(evt.V))
                 stuff.diLepMetDeltaPhi=  abs(TVector2.Phi_mpi_pi(evt.met.Phi()-evt.V.Phi()))
+                stuff.dPhiJetMet = evt.dPhiJetMet  
                 stuff.mt         = CalculateTransMass(evt.lep1, evt.lep2)
                 stuff.longRecoil = 0
                 stuff.allJetsEt  = evt.allJets.Et()
@@ -139,6 +143,7 @@ fullWeight/F'
         mvaTree_test.Write()
         fsig_test.Close()
 
+    print "** End of creating mva trees ***"
 
 def makeWeightBranch(outpatth,bg_list, sig1_list, sig2_list):
     fbg_train = TFile("allBg_train.root","RECREATE")
@@ -153,8 +158,8 @@ Float_t fullWeight;\
     www = stuff_t()
 
     allList = TList()
-    for b in topbg_list:
-        tree = b.Get("Anton/kinTree")
+    for b in bg_list:
+        tree = b.Get("mvaTree/kinTree")
         newtree = tree.CloneTree(0)
         br = newtree.Branch("fullWeights",www,"fullWeight/F")
         #br.SetFile(fbg_train)
@@ -210,10 +215,20 @@ def printYields(topbg_list, bg_list, sig1_list, sig2_list, sig3_list, data, sel,
                 "14. H450 selection",
                 "15. H500 selection",
                 "16. H550 selection",
-                "17. H250 MVA",
+                "17. H600 selection",
+                "18. H250 MVA",
+                "19. 0j bin",
+                "20. 1j bin",
+                "21. >1j bin",
+                "22.",
+                "23.",
+                "24.",
+                "25. kin Tree, nj=0",
+                "26. kin Tree, nj=1",
+                "27. kin Tree, nj>1",
                 ]
 
-    lTot = 18   # Total number of cuts
+    lTot = 28   # Total number of cuts
     lMax = 9 # Lines to print in the main table
     lMax2 = lTot-lMax # additional table
     beginTable = '<table border = "10"    cellpadding="5">'
@@ -227,6 +242,8 @@ def printYields(topbg_list, bg_list, sig1_list, sig2_list, sig3_list, data, sel,
     beginCellH = '<th>'
     endCellH = '</th>'
     beginLineGrey = '<tr style="background-color:LightGrey">'
+    beginLineGreen = '<tr style="background-color:LightGreen">'
+    beginLineBlue = '<tr style="background-color:LightBlue">'
 
 
     lumi = c.Params().getLumi(sel)
@@ -318,6 +335,24 @@ def printYields(topbg_list, bg_list, sig1_list, sig2_list, sig3_list, data, sel,
 
         Yields_sig1.append(Yields_sig1_per_cut)
 
+        # Yields of the signals:
+        for s in sig2_list:
+            h = s.Get("Andrey/met0_et_"+str(l)).Clone()
+            sample = s.Get("Andrey/evt_byCut").GetTitle()
+            #print l, sample
+            if mode=="scaled":
+                handleOverflowBinsScaleAndColors(h, sample, lumi)
+            err = Double(0)
+            
+            bins = h.GetNbinsX()
+            y = h.IntegralAndError(0, bins+1, err)
+            #y = s.Get("Andrey/evt_byCut").GetBinContent(l+1)
+
+            #print "integral = ", y
+            Yields_sig2_per_cut[sample] = ([y,err])
+
+        Yields_sig2.append(Yields_sig2_per_cut)
+
     #print Yields_bg
     myTable += beginTable
     
@@ -339,7 +374,10 @@ def printYields(topbg_list, bg_list, sig1_list, sig2_list, sig3_list, data, sel,
     myTable += "Data"
     myTable += endCellH
     myTable += beginCellH
-    myTable += "HZZ 250"
+    myTable += "ggHZZ 250"
+    myTable += endCellH
+    myTable += beginCellH
+    myTable += "vbfHZZ 250"
     myTable += endCellH
     
     myTable += endLine
@@ -369,18 +407,28 @@ def printYields(topbg_list, bg_list, sig1_list, sig2_list, sig3_list, data, sel,
         myTable +='%0.1f'% (total_bg)
         myTable += endCell
         myTable += beginCell
-        myTable += '%0.1f'% (yields_data[l])
+        myTable += '%d'% (yields_data[l])
         myTable += endCell
         myTable += beginCell
         myTable += '%0.1f'% (Yields_sig1[l]["ggHZZ250"][0])
+        myTable += endCell
+        myTable += beginCell
+        myTable += '%0.1f'% (Yields_sig2[l]["VBFHZZ250"][0])
         myTable += endCell
 
         myTable += endLine
 
 
-    for l in [10,17]:
-        myTable += beginLine
+    for l in [25,26,27,10,18,19,20,21]:
 
+        if l in [25,26,27]:
+            myTable += beginLineGreen
+        elif l in [10,18]:
+            myTable += beginLineBlue
+        else:
+            myTable += beginLine
+        
+            
         myTable += beginCellH
         myTable += cutNames[l]
         myTable += endCellH
@@ -400,10 +448,13 @@ def printYields(topbg_list, bg_list, sig1_list, sig2_list, sig3_list, data, sel,
         myTable +='%0.1f &pm; %0.1f'% (total_bg, total_err)
         myTable += endCell
         myTable += beginCell
-        myTable += '%0.1f &pm; %0.1f'% (yields_data[l], yields_data_err[l])
+        myTable += '%d'% (yields_data[l])
         myTable += endCell
         myTable += beginCell
         myTable += '%0.1f &pm; %0.1f'% (Yields_sig1[l]["ggHZZ250"][0], Yields_sig1[l]["ggHZZ250"][1])
+        myTable += endCell
+        myTable += beginCell
+        myTable += '%0.1f &pm; %0.1f'% (Yields_sig2[l]["VBFHZZ250"][0], Yields_sig2[l]["VBFHZZ250"][1])
         myTable += endCell
         myTable += endLine
         
@@ -486,12 +537,14 @@ def drawMultiPlot(fname,maintitle, xtitle, h_name, isLog, y1min, y1max, y2min, y
     ff = []
     size = ovlist.GetSize()
     hh = [];
-    if(size>4):
+    if (size>4):
         print "To many plots to overlay"
         sys.exit(0)
 
-  #  print "size of the list", size
+    print "size of the list", size
   
+    #ovlist.At(0).Print()
+    #ovlist.At(1).Print()
     for n in xrange(size):
         ff.append(ovlist.At(n))
         hh.append(ff[n].Get(name).Clone())
@@ -521,7 +574,7 @@ def drawMultiPlot(fname,maintitle, xtitle, h_name, isLog, y1min, y1max, y2min, y
     
     hs.Draw("hist")
     
-    hs.SetTitle(maintitle+"; Events")
+    hs.SetTitle(maintitle+";; Events")
     hs.SetMinimum(y1min);
     hs.SetMaximum(y1max);
     h_data.Draw("same e1pl");
@@ -579,7 +632,7 @@ def drawMultiPlot(fname,maintitle, xtitle, h_name, isLog, y1min, y1max, y2min, y
     leg01.AddEntry(hs.GetStack()[4],"ttbar","f")
     leg01.AddEntry(hs.GetStack()[5],"Z + jets","f")
     leg01.AddEntry(h_data,"Data","epl")
-    leg01.AddEntry(hh[1],"H200","l")
+    leg01.AddEntry(hh[1],"H250","l")
     leg01.SetFillColor(kWhite)
     leg01.Draw()
 

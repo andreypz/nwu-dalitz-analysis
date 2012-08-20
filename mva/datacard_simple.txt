@@ -1,0 +1,25 @@
+# Simple counting experiment, with one signal and a few background processes 
+imax 1  number of channels
+jmax 2  number of backgrounds
+kmax 5  number of nuisance parameters (sources of systematical uncertainties)
+------------
+# we have just one channel, in which we observe 0 events
+bin 1
+observation 91 #mva 1
+#observation 93   #cut bused
+------------
+# now we list the expected events for signal and all backgrounds in that bin
+# the second 'process' line must have a positive number for backgrounds, and 0 for signal
+# then we list the independent sources of uncertainties, and give their effect (syst. error)
+# on each process and bin
+bin              1     1      1
+process         Higgs   DY    others
+process         0     1       2
+rate           12.8  13.7   60.5   #mva 1
+#rate          12.5  7.3    84.8    #cut based
+------------
+lumi    lnN     1.02    1.02   1.02     lumi affects both signal and gg->WW (mc-driven). lnN = lognormal
+xs_H  lnN       1.05    -     -      gg->H cross section + signal efficiency + other minor ones.
+unc_H lnN       1.01    -     -    
+unc_DY  lnN     -    1.15     -     
+unc_other lnN   -       -     1.06    

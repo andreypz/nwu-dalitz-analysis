@@ -15,10 +15,10 @@ if nargs>1 and sys.argv[1]=="ele":
     selection="electron"
     
 period    = '2011'
-doTest    = 1
-doData    = 0
-doBG      = 0
-doSignal  = 0
+doTest    = 0
+doData    = 1
+doBG      = 1
+doSignal  = 1
 
 ''' 
     Set job configurations.  The order of arguments is:
@@ -104,6 +104,7 @@ b.JobConfig('ggHWW200', dCache+'/andreypz/nuTuples_v1_7TeV/ggHWW200', 1, 'ggHWW2
 
 b.JobConfig('VBFHZZ125', dCache+'/andreypz/nuTuples_v1_7TeV/VBFHZZ125', 1, 'VBFHZZ125 0 '+selection+' '+period, selection),
 b.JobConfig('VBFHZZ200', dCache+'/andreypz/nuTuples_v1_7TeV/VBFHZZ200', 1, 'VBFHZZ200 0 '+selection+' '+period, selection),
+b.JobConfig('VBFHZZ250', dCache+'/andreypz/nuTuples_v1_7TeV/VBFHZZ250', 1, 'VBFHZZ250 0 '+selection+' '+period, selection),
 
 ])
 

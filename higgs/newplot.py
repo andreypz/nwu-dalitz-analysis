@@ -38,7 +38,8 @@ def createDir(dir):
 baseDir = "/uscms_data/d2/andreypz/hzz2l2nu_html/"
 dirnameOut = baseDir+hPath
 selection  = ['muon', 'electron']
-plot_types = ['diLepton', 'Lepton', 'Jet', 'Met', 'Special', 'Misc']
+plot_types = ['Jet', 'Met', 'Misc', "mvaPresel"]
+#plot_types = ['diLepton', 'Lepton', 'Jet', 'Met', 'Special', 'Misc', "mvaPresel"]
 
 thissel = selection[sel-1]
 

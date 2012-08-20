@@ -1,4 +1,4 @@
-// $Id: higgsAnalyzer.h,v 1.23 2012/07/20 23:59:15 andrey Exp $
+// $Id: higgsAnalyzer.h,v 1.24 2012/08/04 23:36:49 andrey Exp $
 
 #ifndef higgsAnalyzer_h
 #define higgsAnalyzer_h
@@ -43,7 +43,7 @@
 #include "../plugins/ZedEventsLibrary.h"
 #include "../plugins/rochcor.h"
 
-#define nC 20  //nCuts in the analysis. make plots after each cut
+#define nC 30  //nCuts in the analysis. make plots after each cut
 
 class higgsAnalyzer : public TSelector {
 
@@ -74,6 +74,7 @@ class higgsAnalyzer : public TSelector {
   TTree * _kinTree;
 
   TH1F *evt_byCut, *evt_byCut_raw;
+  TH1F *mva_discr[3];
   TH2F *evt_libQt;
   TH1F *mtZ[nC], *mt0[nC], *mt1[nC], *mt2[nC], *mt3[nC], *mt4[nC];
   TH1F *met0_phi[nC], *met0_et[nC], *met0_over_qt[nC];

@@ -11,13 +11,15 @@ import utils as u
 F0 = 6
 FNOB = 7
 FB = 8
+FMVA = 25
 
 plotSpecial = 0
-plotMet = 0
-plotJet = 0
+plotMVA = 1
+plotMet = 1
+plotJet = 1
 plotLepton = 0
 plotDiLepton = 0
-plotMisc = 0
+plotMisc = 1
 
 
 
@@ -46,7 +48,7 @@ def makePlots(sel=1, dir="./", hPath="v00"):
     topbg = ["tW","tbarW"]
     bg   = ["WW", "WZ","ZZ", "ttbar","DYjets"]
     sig1 = ["ggHZZ125","ggHZZ200","ggHZZ250","ggHZZ300","ggHZZ350","ggHZZ400","ggHZZ450","ggHZZ500","ggHZZ550","ggHZZ600"]
-    sig2 = ["VBFHZZ125","VBFHZZ200","VBFHZZ250","VBFHZZ300","VBFHZZ350","VBFHZZ400","VBFHZZ450","VBFHZZ500","VBFHZZ550","VBFHZZ600"]
+    sig2 = ["VBFHZZ125","VBFHZZ200","VBFHZZ250"]#,"VBFHZZ300","VBFHZZ350","VBFHZZ400","VBFHZZ450","VBFHZZ500","VBFHZZ550","VBFHZZ600"]
     sig3 = ["ggHWW125","ggHWW200","ggHWW250","ggHWW300","ggHWW350","ggHWW400","ggHWW450","ggHWW500","ggHWW550","ggHWW600"]
 
     li_topbg = TList()
@@ -55,7 +57,7 @@ def makePlots(sel=1, dir="./", hPath="v00"):
     li_sig1  = TList()
     li_sig2  = TList()
     li_sig3  = TList()
-    li_ov = TList()
+    li_ov    = TList()
 
     for a in topbg:
         #print "Creating TList", a
@@ -98,11 +100,23 @@ def makePlots(sel=1, dir="./", hPath="v00"):
     u.printYields(li_topbg, li_bg, li_sig1, li_sig2, li_sig3, f_Data, sel, "yields_"+thissel+".html")
 
     #u.makeWeightBranch(li_topbg, li_bg, li_sig1, sig2)
-    mvaInputsDir = hPath+"/"+thissel+"/mva/"
+
+    mvaInputsDir = "../mva/mvaInputs_"+hPath+"/"+thissel+"/"
     if not os.path.exists(mvaInputsDir):
         os.makedirs(mvaInputsDir)
-    u.makeMvaTrees(mvaInputsDir,li_allbg, li_sig1, li_sig2,sel)
+    #u.makeMvaTrees(mvaInputsDir,li_allbg, li_sig1, li_sig2,sel)
 
+    if plotMVA:
+
+        u.drawMultiPlot(imgpath+"mvaPresel/mva01", "nJets=0","BDT discriminator", "mva_discr_0", 0, 0.1, 80, 0.1,3.9, c2, li_ov, li_topbg, li_bg, sel)
+        u.drawMultiPlot(imgpath+"mvaPresel/mva02", "nJets=1","BDT discriminator", "mva_discr_1", 0, 0.1, 500, 0.1,3.9, c2, li_ov, li_topbg, li_bg, sel)
+        u.drawMultiPlot(imgpath+"mvaPresel/mva03", "nJets>1","BDT discriminator", "mva_discr_2", 0, 0.1, 300, 0.1,3.9, c2, li_ov, li_topbg, li_bg, sel)
+        u.drawMultiPlot(imgpath+"mvaPresel/mva04", "nJets=0","M(ll)", "di_mass_"+str(FMVA), 0, 0.1, 80, 0.3,1.9, c2, li_ov, li_topbg, li_bg, sel)
+        u.drawMultiPlot(imgpath+"mvaPresel/mva05", "nJets=1","M(ll)", "di_mass_"+str(FMVA+1), 0, 0.1, 500, 0.3,1.9, c2, li_ov, li_topbg, li_bg, sel)
+        u.drawMultiPlot(imgpath+"mvaPresel/mva06", "nJets=2","M(ll)", "di_mass_"+str(FMVA+2), 0, 0.1, 300, 0.3,1.9, c2, li_ov, li_topbg, li_bg, sel)
+        u.drawMultiPlot(imgpath+"mvaPresel/mva07", "","Leading Lepton pt", "l1_pt_"+str(FMVA), 0, 0.1, 80, 0.3,1.9, c2, li_ov, li_topbg, li_bg, sel)
+        u.drawMultiPlot(imgpath+"mvaPresel/mva08", "","Trailing Lepton pt", "l2_pt_"+str(FMVA), 0, 0.1, 80, 0.3,1.9, c2, li_ov, li_topbg, li_bg, sel)
+    
     if plotSpecial:
         #u.drawMultiPlot(imgpath+"Special/sp01", "","pfMet1/q_{T}", "met1_over_qt_"+str(F0), 1, 0.1, 1e6, 0,2.9, c2, li_ov, li_topbg, li_bg, sel)
 
