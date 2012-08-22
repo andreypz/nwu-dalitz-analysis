@@ -5,8 +5,13 @@ kmax 5  number of nuisance parameters (sources of systematical uncertainties)
 ------------
 # we have just one channel, in which we observe 0 events
 bin 1
-observation 91 #mva
+#observation 76 #mva
+observation 96 #mva
 #observation 93   #cut bused
+
+#electrons:
+#observation 57   #cut bused
+#observation 40   # mva
 ------------
 # now we list the expected events for signal and all backgrounds in that bin
 # the second 'process' line must have a positive number for backgrounds, and 0 for signal
@@ -15,8 +20,13 @@ observation 91 #mva
 bin              1     1      1
 process         Higgs   DY    others
 process         0     1       2
-rate           12.8  13.7   60.5   #mva 1
+#rate           11.9  10.9   52.3   #mva 2
+rate           12.2  20.8   44.5   #mva 1
 #rate          12.5  7.3    84.8    #cut based
+
+#electrons
+#rate          8.0  4.0    50.9    #cut based
+#rate          7.3  6.7    30.9    #mva
 ------------
 lumi    lnN     1.02    1.02   1.02     lumi affects both signal and gg->WW (mc-driven). lnN = lognormal
 xs_H  lnN       1.05    -     -      gg->H cross section + signal efficiency + other minor ones.

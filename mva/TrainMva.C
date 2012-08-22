@@ -127,6 +127,11 @@ void TrainMva(TString myMethodList = "",
     }
 
 
+    if (_signalName == "hzz125") {
+        sigFileName_train = inputFilesDir + "hzz125_train.root";
+        sigFileName_test = inputFilesDir + "hzz125_test.root";
+        sigFileName = inputFilesDir + "hzz125.root";
+    } else
     if (_signalName == "hzz200") {
         sigFileName_train = inputFilesDir + "hzz200_train.root";
         sigFileName_test = inputFilesDir + "hzz200_test.root";
@@ -183,7 +188,14 @@ void TrainMva(TString myMethodList = "",
 
     }// this for the case when the gg+VBF is used in the training
 
-    else
+	else
+
+
+        if (_signalName == "hzz125_all") {
+        sigFileName_train = inputFilesDir + "hzz125_all_train.root";
+        sigFileName_test = inputFilesDir + "hzz125_all_test.root";
+        sigFileName = inputFilesDir + "hzz125_all.root";
+    } else
 
         if (_signalName == "hzz200_all") {
         sigFileName_train = inputFilesDir + "hzz200_all_train.root";
@@ -375,10 +387,10 @@ void TrainMva(TString myMethodList = "",
 
     // Define the input variables that shall be used for the MVA training
 
-    //factory->AddVariable("lep1Pt", "p_{T}(l_{1})", "GeV", 'F');
-    //factory->AddVariable("lep2Pt", "p_{T}(l_{2})", "GeV", 'F');
+    factory->AddVariable("lep1Pt", "p_{T}(l_{1})", "GeV", 'F');
+    factory->AddVariable("lep2Pt", "p_{T}(l_{2})", "GeV", 'F');
     //    factory->AddVariable("diLepDeltaPhi", "#Delta#phi(ll)", "rad", 'F');
-    //    factory->AddVariable("diLepEta", "|#eta(ll)|", "", 'F');
+    factory->AddVariable("diLepEta", "|#eta(ll)|", "", 'F');
     factory->AddVariable("met", "MET", "GeV", 'F');
     factory->AddVariable("diLepPt", "p_{T}(ll)", "GeV", 'F');
     factory->AddVariable("mt", "m_{T}(HZZ hypothesis)", "GeV", 'F');

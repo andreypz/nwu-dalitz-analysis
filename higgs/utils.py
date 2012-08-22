@@ -15,6 +15,7 @@ Float_t lep1Pt;\
 Float_t lep2Pt;\
 Float_t diLepPt;\
 Float_t diLepM;\
+Float_t diLepEta;\
 Float_t met;\
 Float_t metProjOnQt;\
 Float_t metPerpQt;\
@@ -29,7 +30,7 @@ Float_t evWeight;\
 Float_t fullWeight;\
 };")
 
-    allVars = 'lep1Pt/F:lep2Pt:diLepPt:diLepM:met:metProjOnQt:metPerpQt:\
+    allVars = 'lep1Pt/F:lep2Pt:diLepPt:diLepM:diLepEta:met:metProjOnQt:metPerpQt:\
 diLepMetDeltaPhi:dPhiJetMet:mt:longRecoil:allJetsEt:hasBJet/I:nJets/I:evWeight/F:\
 fullWeight/F'
     stuff  = mva_vars()
@@ -57,6 +58,7 @@ fullWeight/F'
             stuff.lep2Pt = evt.lep2.Pt()
             stuff.diLepPt = evt.V.Pt()
             stuff.diLepM = evt.V.M()
+            stuff.diLepEta = evt.V.Eta()
             stuff.met    = evt.met.Pt()
             stuff.metProjOnQt     =  evt.met.Pt()*cos(evt.met.DeltaPhi(evt.V))
             stuff.metPerpQt       =  evt.met.Pt()*sin(evt.met.DeltaPhi(evt.V))
@@ -115,6 +117,7 @@ fullWeight/F'
                 stuff.lep2Pt  = evt.lep2.Pt()
                 stuff.diLepPt = evt.V.Pt()
                 stuff.diLepM  = evt.V.M()
+                stuff.diLepEta = evt.V.Eta()
                 stuff.met     = evt.met.Pt()
                 stuff.metProjOnQt     =  evt.met.Pt()*cos(evt.met.DeltaPhi(evt.V))
                 stuff.metPerpQt       =  evt.met.Pt()*sin(evt.met.DeltaPhi(evt.V))
@@ -207,15 +210,15 @@ def printYields(topbg_list, bg_list, sig1_list, sig2_list, sig3_list, data, sel,
                 "6. dPhi cut",
                 "7. Met >70",
                 "8. bjet veto",
-                "9. H200 selection",
-                "10. H250 selection",
-                "11. H300 selection",
-                "12. H350 selection",
-                "13. H400 selection",
-                "14. H450 selection",
-                "15. H500 selection",
-                "16. H550 selection",
-                "17. H600 selection",
+                "9. H200 cut based",
+                "10. H250 cut based",
+                "11. H300 cut based",
+                "12. H350 cut based",
+                "13. H400 cut based",
+                "14. H450 cut based",
+                "15. H500 cut based",
+                "16. H550 cut based",
+                "17. H600 cut based",
                 "18. H250 MVA",
                 "19. 0j bin",
                 "20. 1j bin",
@@ -223,9 +226,9 @@ def printYields(topbg_list, bg_list, sig1_list, sig2_list, sig3_list, data, sel,
                 "22.",
                 "23.",
                 "24.",
-                "25. kin Tree, nj=0",
-                "26. kin Tree, nj=1",
-                "27. kin Tree, nj>1",
+                "25. mvaTree, nj=0",
+                "26. mvaTree, nj=1",
+                "27. mvaTree, nj>1",
                 ]
 
     lTot = 28   # Total number of cuts
@@ -397,23 +400,23 @@ def printYields(topbg_list, bg_list, sig1_list, sig2_list, sig3_list, data, sel,
         for k, v in Yields_bg[l].iteritems():
             #print k, v
             myTable += beginCell
-            myTable += '%0.1f'% (v[0])
+            myTable += '%d'% (v[0])
             myTable += endCell
             
             total_bg += v[0]
             total_err += v[1]
                 
         myTable += beginCell
-        myTable +='%0.1f'% (total_bg)
+        myTable +='%d'% (total_bg)
         myTable += endCell
         myTable += beginCell
         myTable += '%d'% (yields_data[l])
         myTable += endCell
         myTable += beginCell
-        myTable += '%0.1f'% (Yields_sig1[l]["ggHZZ250"][0])
+        myTable += '%d'% (Yields_sig1[l]["ggHZZ250"][0])
         myTable += endCell
         myTable += beginCell
-        myTable += '%0.1f'% (Yields_sig2[l]["VBFHZZ250"][0])
+        myTable += '%d'% (Yields_sig2[l]["VBFHZZ250"][0])
         myTable += endCell
 
         myTable += endLine
@@ -438,23 +441,26 @@ def printYields(topbg_list, bg_list, sig1_list, sig2_list, sig3_list, data, sel,
         for k, v in Yields_bg[l].iteritems():
             #print k, v
             myTable += beginCell
-            myTable += '%0.1f &pm; %0.1f'% (v[0],v[1])
+            myTable += '%0.1f'% (v[0])
+            #myTable += '%0.1f &pm; %0.1f'% (v[0],v[1])
             myTable += endCell
         
             total_bg += v[0]
             total_err += v[1]
                 
         myTable += beginCell
-        myTable +='%0.1f &pm; %0.1f'% (total_bg, total_err)
+        myTable +='%0.1f'% (total_bg)
+        #myTable +='%0.1f &pm; %0.1f'% (total_bg, total_err)
         myTable += endCell
         myTable += beginCell
         myTable += '%d'% (yields_data[l])
         myTable += endCell
         myTable += beginCell
-        myTable += '%0.1f &pm; %0.1f'% (Yields_sig1[l]["ggHZZ250"][0], Yields_sig1[l]["ggHZZ250"][1])
+        myTable += '%0.1f'% (Yields_sig1[l]["ggHZZ250"][0])
+        #myTable += '%0.1f &pm; %0.1f'% (Yields_sig1[l]["ggHZZ250"][0], Yields_sig1[l]["ggHZZ250"][1])
         myTable += endCell
         myTable += beginCell
-        myTable += '%0.1f &pm; %0.1f'% (Yields_sig2[l]["VBFHZZ250"][0], Yields_sig2[l]["VBFHZZ250"][1])
+        myTable += '%0.1f'% (Yields_sig2[l]["VBFHZZ250"][0])
         myTable += endCell
         myTable += endLine
         

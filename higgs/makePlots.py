@@ -105,17 +105,18 @@ def makePlots(sel=1, dir="./", hPath="v00"):
     if not os.path.exists(mvaInputsDir):
         os.makedirs(mvaInputsDir)
     #u.makeMvaTrees(mvaInputsDir,li_allbg, li_sig1, li_sig2,sel)
-
+    
     if plotMVA:
 
         u.drawMultiPlot(imgpath+"mvaPresel/mva01", "nJets=0","BDT discriminator", "mva_discr_0", 0, 0.1, 80, 0.1,3.9, c2, li_ov, li_topbg, li_bg, sel)
         u.drawMultiPlot(imgpath+"mvaPresel/mva02", "nJets=1","BDT discriminator", "mva_discr_1", 0, 0.1, 500, 0.1,3.9, c2, li_ov, li_topbg, li_bg, sel)
         u.drawMultiPlot(imgpath+"mvaPresel/mva03", "nJets>1","BDT discriminator", "mva_discr_2", 0, 0.1, 300, 0.1,3.9, c2, li_ov, li_topbg, li_bg, sel)
         u.drawMultiPlot(imgpath+"mvaPresel/mva04", "nJets=0","M(ll)", "di_mass_"+str(FMVA), 0, 0.1, 80, 0.3,1.9, c2, li_ov, li_topbg, li_bg, sel)
-        u.drawMultiPlot(imgpath+"mvaPresel/mva05", "nJets=1","M(ll)", "di_mass_"+str(FMVA+1), 0, 0.1, 500, 0.3,1.9, c2, li_ov, li_topbg, li_bg, sel)
-        u.drawMultiPlot(imgpath+"mvaPresel/mva06", "nJets=2","M(ll)", "di_mass_"+str(FMVA+2), 0, 0.1, 300, 0.3,1.9, c2, li_ov, li_topbg, li_bg, sel)
-        u.drawMultiPlot(imgpath+"mvaPresel/mva07", "","Leading Lepton pt", "l1_pt_"+str(FMVA), 0, 0.1, 80, 0.3,1.9, c2, li_ov, li_topbg, li_bg, sel)
-        u.drawMultiPlot(imgpath+"mvaPresel/mva08", "","Trailing Lepton pt", "l2_pt_"+str(FMVA), 0, 0.1, 80, 0.3,1.9, c2, li_ov, li_topbg, li_bg, sel)
+        u.drawMultiPlot(imgpath+"mvaPresel/mva05", "nJets=0","qT(ll)", "di_qt_"+str(FMVA), 0, 0.1, 100, 0.3,1.9, c2, li_ov, li_topbg, li_bg, sel)
+        u.drawMultiPlot(imgpath+"mvaPresel/mva06", "nJets=0","pfMet", "met1_et_"+str(FMVA), 0, 0.1, 100, 0.3,1.9, c2, li_ov, li_topbg, li_bg, sel)
+        u.drawMultiPlot(imgpath+"mvaPresel/mva07", "nJets=0","MT", "mt2_"+str(FMVA), 0, 0.1, 100, 0.3,1.9, c2, li_ov, li_topbg, li_bg, sel)
+        u.drawMultiPlot(imgpath+"mvaPresel/mva08", "","Leading Lepton pt", "l1_pt_"+str(FMVA), 0, 0.1, 80, 0.3,1.9, c2, li_ov, li_topbg, li_bg, sel)
+        u.drawMultiPlot(imgpath+"mvaPresel/mva09", "","Trailing Lepton pt", "l2_pt_"+str(FMVA), 0, 0.1, 80, 0.3,1.9, c2, li_ov, li_topbg, li_bg, sel)
     
     if plotSpecial:
         #u.drawMultiPlot(imgpath+"Special/sp01", "","pfMet1/q_{T}", "met1_over_qt_"+str(F0), 1, 0.1, 1e6, 0,2.9, c2, li_ov, li_topbg, li_bg, sel)
@@ -187,11 +188,11 @@ def makePlots(sel=1, dir="./", hPath="v00"):
         u.drawMultiPlot(imgpath+"Met/m03", "","MT", "mt2_"+str(F0), 1, 0.1, 1e6, 0.5,1.9, c2, li_ov, li_topbg, li_bg, sel)
         u.drawMultiPlot(imgpath+"Met/m04", "","pfMet long to di-lepton", "met1_lg_"+str(F0), 1, 0.4, 1e7, 0.2,2.9, c2, li_ov, li_topbg, li_bg, sel)
         u.drawMultiPlot(imgpath+"Met/m05", "","Long Recoil = -(pfMet+Z/G)", "met1_recoil_lg_"+str(F0), 1, 0.1, 1e6, 0.2,1.9, c2, li_ov, li_topbg, li_bg, sel)
-        u.drawMultiPlot(imgpath+"Met/m06", "","projMET", "met4_et_"+str(F0), 1, 0.1, 1e6, 0,2.9, c2, li_ov, li_topbg, li_bg, sel)
-        u.drawMultiPlot(imgpath+"Met/m07", "","ZprojMET", "met5_et_"+str(F0), 1, 0.1, 1e6, 0,2.9, c2, li_ov, li_topbg, li_bg, sel)
-        u.drawMultiPlot(imgpath+"Met/m08", "","redMET1", "met6_et_"+str(F0), 1, 0.1, 1e6, 0,2.9, c2, li_ov, li_topbg, li_bg, sel)
-        u.drawMultiPlot(imgpath+"Met/m09", "","redMET2", "met7_et_"+str(F0), 1, 0.1, 1e6, 0,2.9, c2, li_ov, li_topbg, li_bg, sel)
         u.drawMultiPlot(imgpath+"Met/m10", "","pfMet1/q_{T}", "met1_over_qt_"+str(F0), 1, 0.1, 1e6, 0,2.9, c2, li_ov, li_topbg, li_bg, sel)
+        #u.drawMultiPlot(imgpath+"Met/m06", "","projMET", "met4_et_"+str(F0), 1, 0.1, 1e6, 0,2.9, c2, li_ov, li_topbg, li_bg, sel)
+        #u.drawMultiPlot(imgpath+"Met/m07", "","ZprojMET", "met5_et_"+str(F0), 1, 0.1, 1e6, 0,2.9, c2, li_ov, li_topbg, li_bg, sel)
+        #u.drawMultiPlot(imgpath+"Met/m08", "","redMET1", "met6_et_"+str(F0), 1, 0.1, 1e6, 0,2.9, c2, li_ov, li_topbg, li_bg, sel)
+        #u.drawMultiPlot(imgpath+"Met/m09", "","redMET2", "met7_et_"+str(F0), 1, 0.1, 1e6, 0,2.9, c2, li_ov, li_topbg, li_bg, sel)
 
     if plotMisc:
         u.drawMultiPlot(imgpath+"Misc/mis01", "","evts cut by cut", "evt_byCut", 1, 0.1, 1e6, 0,1.9, c2, li_ov, li_topbg, li_bg, sel)
