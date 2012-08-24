@@ -1,4 +1,4 @@
-// $Id: higgsAnalyzer.h,v 1.24 2012/08/04 23:36:49 andrey Exp $
+// $Id: higgsAnalyzer.h,v 1.25 2012/08/20 01:59:42 andrey Exp $
 
 #ifndef higgsAnalyzer_h
 #define higgsAnalyzer_h
@@ -53,25 +53,27 @@ class higgsAnalyzer : public TSelector {
   //Variables to Fill into histos. Have to be global
 
   TString samp;  
-  Float_t qT, diEta, diPhi, Mll, Mll_EB, Mll_EE, Mll_EX;
-  
+  Float_t qT, diEta, diPhi, diAngle, Mll, Mll_EB, Mll_EE, Mll_EX;  
   Float_t MET, pfMET, pfMET1, puCorrMET, projMET, ZprojMET, redMET1, redMET2, compMET;
   Float_t pfMET_lg, pfMET_recoil;
+  Float_t dPhiMetDiLep, metProjOnQt, metPerpQt, metOverQt;
+
   Float_t MET_phi, MET1_phi;
   Float_t MT, MT1, MTZ, pTll;
-  Float_t METqt, MET1qt, projMETqt;
   Int_t nVtx, nVtxTotal;
   Float_t nDofVtx1, nDofVtx2;
-  Int_t nJets, nJetsEta24, nJetsB , nJetsBssv, nJetsB25, nJetsB30;
+  Int_t nJets, nJets15, nJetsEta24, nJetsB , nJetsBssv, nJetsB25, nJetsB30;
   Int_t nGamma;
   Float_t dPhiClos1, dPhiClos2;
   Float_t lep1_eta, lep1_phi, lep1_pt;
   Float_t lep2_eta, lep2_phi, lep2_pt;
   Float_t dRjetlep1, dRjetlep2, ptLeadJet, etaLeadJet, phiLeadJet, ptLeadBJet;
+  Float_t ptTrailJet, etaTrailJet, phiTrailJet;
+  Float_t deltaEtaDiJet, massDiJet, zeppDiJetDiLep;
   Float_t hig_M, hig_Pt;
 
   ofstream nout[nC], fout[nC], ffout, ncout;
-  TTree * _kinTree;
+  TTree * _mvaTree;
 
   TH1F *evt_byCut, *evt_byCut_raw;
   TH1F *mva_discr[3];
@@ -82,23 +84,28 @@ class higgsAnalyzer : public TSelector {
   TH1F *met2_phi[nC], *met2_et[nC], *met2_over_qt[nC];
   TH1F *met3_phi[nC], *met3_et[nC], *met3_over_qt[nC];
   TH1F *met4_phi[nC], *met4_et[nC], *met4_over_qt[nC], *met4_puSig[nC];
-  TH1F *met5_et[nC],*met6_et[nC],*met7_et[nC],*met8_et[nC], *met9_et[nC], *met10_et[nC];
+  TH1F *met5_et[nC], *met6_et[nC], *met7_et[nC], *met8_et[nC], *met9_et[nC], *met10_et[nC];
   TH1F *l1_phi[nC], *l1_eta[nC], *l1_pt[nC];
   TH1F *l2_phi[nC], *l2_eta[nC], *l2_pt[nC];
   TH1F *btag_hp[nC];
   TH1F *di_qt[nC], *di_eta[nC], *di_phi[nC], *di_mass[nC], *di_mass_EB[nC], *di_mass_EE[nC], *di_mass_EX[nC];
-  TH1F *di_dPhiMet[nC];
-  TH1F *jet_N[nC], *jet_N24[nC], *jet_dRlep1[nC], *jet_dRlep2[nC], *jet_pt[nC], *jet_eta[nC], *jet_phi[nC];
+  TH1F *di_dPhiMet[nC], *di_angle[nC];
+  TH1F *jet_N[nC], *jet_N15[nC], *jet_N24[nC], *jet_dRlep1[nC], *jet_dRlep2[nC];
+  TH1F *jet_pt1[nC], *jet_eta1[nC], *jet_phi1[nC];
+  TH1F *jet_pt2[nC], *jet_eta2[nC], *jet_phi2[nC];
+  TH1F *jet_diM[nC], *jet_deltaEta[nC], *jet_zeppZ[nC];
   TH1F *jet_b_N[nC], *jet_b_Nssv[nC], *jet_b_N25[nC],*jet_b_N30[nC], *jet_b_pt[nC];
   TH1F *ph_nGamma[nC];
   TH1F *l0_dPhi[nC], *l0_dEta[nC], *l0_dR[nC], *l0_ptRatio[nC];
   TH1F *met1_dPhiLeadJet1[nC], *met1_dPhiLeadJet2[nC], *met1_dPhiClosJet1[nC], *met1_dPhiClosJet2[nC];
-  TH1F *met1_lg[nC], *met1_recoil_lg[nC];
+  
+  TH1F *met1_overQt[nC], *met1_projOnQt[nC], *met1_perpQt[nC];
+  TH1F *met1_recoil_lg[nC];
 //  TH1F *met2_dPhiLeadJet1[nC], *met2_dPhiLeadJet2[nC], *met2_dPhiClosJet1[nC], *met2_dPhiClosJet2[nC];
 
-  TH2F *met0_et_ovQt[nC], *met1_et_ovQt[nC], *met2_et_ovQt[nC], *met3_et_ovQt[nC], *met4_et_ovQt[nC];
-  TH2F *mtZ_met2[nC], *mt2_met2[nC];
-  TH2F *mtZ_met3[nC], *mt2_met3[nC];
+  //TH2F *met0_et_ovQt[nC], *met1_et_ovQt[nC], *met2_et_ovQt[nC], *met3_et_ovQt[nC], *met4_et_ovQt[nC];
+  //TH2F *mtZ_met2[nC], *mt2_met2[nC];
+  //TH2F *mtZ_met3[nC], *mt2_met3[nC];
 
   TH1F *vtx_nPV_tot[nC], *vtx_nPV_raw[nC], *vtx_nPV_weight[nC], *vtx_ndof_1[nC], *vtx_ndof_2[nC];
 

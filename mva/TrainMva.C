@@ -26,7 +26,7 @@
 #endif
 
 
-TString inputFilesDir = "mvaInputs_v66/muon/";
+TString inputFilesDir = "mvaInputs_v69/muon/";
 TString outputWeightsDir = "";
 
 
@@ -46,6 +46,7 @@ void TrainMva(TString myMethodList = "",
         TString _weightsSubDir = "") {
 
 
+    std::cout << "==> Starting TrainMva " << std::endl;
     // subdirectory where output weights for classifiers will go
     outputWeightsDir += _weightsSubDir;
 
@@ -261,17 +262,17 @@ void TrainMva(TString myMethodList = "",
     // cuts should reflect the selections.
 
     TString jetMultiName = "0j"; //used for inclusion in file names   
-    TCut addCutsSig = "nJets==0 && !hasBJet && met > 40 && diLepPt > 55";
-    TCut addCutsBg = "nJets==0 && !hasBJet && met > 40 && diLepPt > 55";
+    TCut addCutsSig = "nJets==0";
+    TCut addCutsBg = "nJets==0";
 
     if (_jetMulti == 1) {
         jetMultiName = "1j";
-        addCutsSig = "nJets==1 && !hasBJet && met > 40 && diLepPt > 55 && dPhiJetMet>0.5";
-        addCutsBg = "nJets==1 && !hasBJet && met > 40 && diLepPt > 55 && dPhiJetMet>0.5";
+        addCutsSig = "nJets==1";
+        addCutsBg = "nJets==1";
     } else if (_jetMulti > 1) {
         jetMultiName = "gt1j";
-        addCutsSig = "nJets>1 && !hasBJet && met > 40 && diLepPt > 55 && dPhiJetMet>0.5";
-        addCutsBg = "nJets>1 && !hasBJet && met > 40 && diLepPt > 55 && dPhiJetMet>0.5";
+        addCutsSig = "nJets>1";
+        addCutsBg = "nJets>1";
     }
 
     //   used for the filenames of the MVA weights xml files, etc.
@@ -389,20 +390,33 @@ void TrainMva(TString myMethodList = "",
 
     factory->AddVariable("lep1Pt", "p_{T}(l_{1})", "GeV", 'F');
     factory->AddVariable("lep2Pt", "p_{T}(l_{2})", "GeV", 'F');
-    //    factory->AddVariable("diLepDeltaPhi", "#Delta#phi(ll)", "rad", 'F');
-    factory->AddVariable("diLepEta", "|#eta(ll)|", "", 'F');
-    factory->AddVariable("met", "MET", "GeV", 'F');
-    factory->AddVariable("diLepPt", "p_{T}(ll)", "GeV", 'F');
-    factory->AddVariable("mt", "m_{T}(HZZ hypothesis)", "GeV", 'F');
 
+    factory->AddVariable("diLepPt", "p_{T}(ll)", "GeV", 'F');
+    factory->AddVariable("diLepEta", "|#eta(ll)|", "", 'F');
+    factory->AddVariable("diLepM", "m_{ll}", "GeV", 'F'); // do not use when using individual bg's that have real Z->ll
+    factory->AddVariable("met", "MET", "GeV", 'F');
+    factory->AddVariable("metOverQt", "MET/p_{T}(ll)", "", 'F');
     factory->AddVariable("metProjOnQt", "MET || p_{T}(ll)", "GeV", 'F');
     factory->AddVariable("metPerpQt", "MET perp  p_{T}(ll)", "GeV", 'F');
-    
-    factory->AddVariable("diLepMetDeltaPhi", "#Delta#phi(p_{ll},MET)", "rad", 'F');
+    factory->AddVariable("dPhiMetDiLep", "#Delta#phi(p_{ll},MET)", "rad", 'F');
+    factory->AddVariable("mt", "m_{T}(HZZ hypothesis)", "GeV", 'F');
 
+//factory->AddVariable("nJets15", "Number of jets with p_{T}>15", "", 'I');
+
+
+//if (_jetMulti > 0) 
+//       factory->AddVariable("dPhiJetMet", "#Delta#phi(Closest jet,MET)", "rad", 'F');
+   if (_jetMulti > 1) 
+     {
+       factory->AddVariable("deltaEtaDiJet", "#Delta#eta(jet1,jet2)", "rad", 'F');
+       factory->AddVariable("massDiJet", "M(jet1,jet2)", "GeV", 'F');
+       factory->AddVariable("zeppDiJetDiLep", "Zeppelfeld variable", "rad", 'F');
+     }
+
+ 
     //    if (_bgName.EqualTo("TTBAR", TString::kIgnoreCase))
-    if (_bgName == "ttbar" || _bgName.Contains("allBg", TString::kIgnoreCase))
-      factory->AddVariable("diLepM", "m_{ll}", "GeV", 'F'); // do not use when using individual bg's that have real Z->ll
+//if (_bgName == "ttbar" || _bgName.Contains("allBg", TString::kIgnoreCase))
+//     factory->AddVariable("diLepM", "m_{ll}", "GeV", 'F'); // do not use when using individual bg's that have real Z->ll
 
     // angle between MET and the jets
     //    if (_jetMulti > 0) //  && _bgName.EqualTo("DYMM", TString::kIgnoreCase)) 
@@ -462,6 +476,7 @@ void TrainMva(TString myMethodList = "",
     }
 
 
+    std::cout << "==> Booking the methods " << std::endl;
     // ---- Book MVA methods
     //
     // Please lookup the various method configuration options in the corresponding cxx files, eg:

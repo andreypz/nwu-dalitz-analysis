@@ -27,7 +27,6 @@ doSignal  = 0
 
 test = []
 test.extend([
-b.JobConfig('ZZ', '/eos/uscms/store/user/andreypz/nuTuples_v1_7TeV/ZZ_v3', 1, 'ZZ 0 '+selection+' '+period, selection),
 #b.JobConfig('WW', '/eos/uscms/store/user/bpollack/May15/MC/WWJets/', 1, 'WW 0 '+selection+' '+period, selection),
 #b.JobConfig('ggHZZ300', dCache+'/andreypz/nuTuples_v1_7TeV/ggHZZ300', 1, 'ggHZZ300 0 '+selection+' '+period, selection),
 #b.JobConfig('DoubleEle_Run2011A', dCache+'/andreypz/nuTuples_v1_7TeV/DoubleElectron_HZZ_Run2011A', 30, 'DATA 16,17,18 electron 2011A', selection),
@@ -81,6 +80,7 @@ b.JobConfig('ttbar', dCache+'/andreypz/nuTuples_v1_7TeV/TTJets', 10, 'ttbar 0 '+
 b.JobConfig('tW', dCache+'/radek/MC3b/T_tW-channel-DR-r2', 1, 'tW 0 '+selection+' '+period, selection),
 b.JobConfig('tbarW', dCache+'/radek/MC3b/Tbar_tW-channel-DR-r2', 1, 'tbarW 0 '+selection+' '+period, selection),
 #b.JobConfig('ggWW', dCache+'/andreypz/nuTuples_v1_7TeV/GluGluToWWTo4L', 1, 'ggWW 0 '+selection+' '+period, selection),
+b.JobConfig('ZZpythia', '/eos/uscms/store/user/andreypz/nuTuples_v1_7TeV/ZZ_v3', 1, 'ZZ 0 '+selection+' '+period, selection),
 ])
 
 

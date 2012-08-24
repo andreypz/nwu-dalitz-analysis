@@ -4,8 +4,9 @@ import sys,os
 from ROOT import *
 import config as c
 
+
 def  makeMvaTrees(outpath, bg_list, sig1_list, sig2_list, sel):
-    print "** Creating mva trees ***"
+    print "\n  ** Creating mva trees ***"
     fbg_train = TFile(outpath+"allBg_train.root","RECREATE")
     fbg_test  = TFile(outpath+"allBg_test.root","RECREATE")
 
@@ -17,21 +18,23 @@ Float_t diLepPt;\
 Float_t diLepM;\
 Float_t diLepEta;\
 Float_t met;\
+Float_t metOverQt;\
 Float_t metProjOnQt;\
 Float_t metPerpQt;\
-Float_t diLepMetDeltaPhi;\
+Float_t dPhiMetDiLep;\
 Float_t dPhiJetMet;\
 Float_t mt;\
-Float_t longRecoil;\
-Float_t allJetsEt;\
-Int_t hasBJet;\
 Int_t nJets;\
+Int_t nJets15;\
+Float_t deltaEtaDiJet;\
+Float_t massDiJet;\
+Float_t zeppDiJetDiLep;\
 Float_t evWeight;\
 Float_t fullWeight;\
 };")
 
-    allVars = 'lep1Pt/F:lep2Pt:diLepPt:diLepM:diLepEta:met:metProjOnQt:metPerpQt:\
-diLepMetDeltaPhi:dPhiJetMet:mt:longRecoil:allJetsEt:hasBJet/I:nJets/I:evWeight/F:\
+    allVars = 'lep1Pt/F:lep2Pt:diLepPt:diLepM:diLepEta:met:metOverQt:metProjOnQt:metPerpQt:\
+dPhiMetDiLep:dPhiJetMet:mt:nJets/I:nJets15/I:deltaEtaDiJet/F:massDiJet:zeppDiJetDiLep:evWeight/F:\
 fullWeight/F'
     stuff  = mva_vars()
     fbg_train.cd()
@@ -42,37 +45,17 @@ fullWeight/F'
     mvaTree_test = TTree("mvaTree","mvaTree")
     br_test = mvaTree_test.Branch("mvaVars", stuff, allVars)
 
-    lumi = c.Params().getLumi(sel)
-    xc = c.Params().xsec_and_colors()
-
-    
     for b in bg_list:
-       
         sample = b.Get("Andrey/evt_byCut").GetTitle()
         #if sample!="tW": continue  # for tests
-        print sample
-        tree = b.Get("mvaTree/kinTree")
+       
+        tree = b.Get("mvaTree/mvaTree")
+        print sample, "Total events in a tree: ", tree.GetEntries()
 
-        for evt in tree:                
-            stuff.lep1Pt = evt.lep1.Pt()
-            stuff.lep2Pt = evt.lep2.Pt()
-            stuff.diLepPt = evt.V.Pt()
-            stuff.diLepM = evt.V.M()
-            stuff.diLepEta = evt.V.Eta()
-            stuff.met    = evt.met.Pt()
-            stuff.metProjOnQt     =  evt.met.Pt()*cos(evt.met.DeltaPhi(evt.V))
-            stuff.metPerpQt       =  evt.met.Pt()*sin(evt.met.DeltaPhi(evt.V))
-            stuff.diLepMetDeltaPhi=  abs(TVector2.Phi_mpi_pi(evt.met.Phi()-evt.V.Phi()))
-            stuff.dPhiJetMet = evt.dPhiJetMet  
-            stuff.mt         = CalculateTransMass(evt.lep1, evt.lep2)
-            stuff.longRecoil = 0
-            stuff.allJetsEt  = evt.allJets.Et()
-            stuff.hasBJet    = evt.hasBJet
-            stuff.nJets      = evt.nJets
-            stuff.evWeight   = evt.weight
-            stuff.fullWeight = evt.weight* float(lumi*xc[sample][2])/xc[sample][3]
-
-            stuff2 = stuff
+        for evt in tree:
+            fillStruct(stuff,evt,sel,sample)
+            #print "evt", evt
+            #stuff2 = stuff
             #print stuff.lep1Pt
             #print stuff2.lep1Pt
             if tree.evNumber % 2 == 0:
@@ -81,8 +64,8 @@ fullWeight/F'
                 mvaTree_test.Fill()
                 #print tree.evNumber
                 #print "lepton's pt:",stuff.lep1Pt,stuff.lep2Pt
-    
-    
+    print "\t Nevts in train=", mvaTree_train.GetEntries(), "Nevts in test=",mvaTree_test.GetEntries()
+        
     fbg_train.cd()      
     mvaTree_train.Write()
     fbg_train.Close()
@@ -110,26 +93,14 @@ fullWeight/F'
         
         for s in sig_list:
             sample = s.Get("Andrey/evt_byCut").GetTitle()
-            print sample
-            tree = s.Get("mvaTree/kinTree")
-            for evt in tree:                
-                stuff.lep1Pt  = evt.lep1.Pt()
-                stuff.lep2Pt  = evt.lep2.Pt()
-                stuff.diLepPt = evt.V.Pt()
-                stuff.diLepM  = evt.V.M()
-                stuff.diLepEta = evt.V.Eta()
-                stuff.met     = evt.met.Pt()
-                stuff.metProjOnQt     =  evt.met.Pt()*cos(evt.met.DeltaPhi(evt.V))
-                stuff.metPerpQt       =  evt.met.Pt()*sin(evt.met.DeltaPhi(evt.V))
-                stuff.diLepMetDeltaPhi=  abs(TVector2.Phi_mpi_pi(evt.met.Phi()-evt.V.Phi()))
-                stuff.dPhiJetMet = evt.dPhiJetMet  
-                stuff.mt         = CalculateTransMass(evt.lep1, evt.lep2)
-                stuff.longRecoil = 0
-                stuff.allJetsEt  = evt.allJets.Et()
-                stuff.hasBJet    = evt.hasBJet
-                stuff.nJets      = evt.nJets
-                stuff.evWeight   = evt.weight
-                stuff.fullWeight = evt.weight* float(lumi*xc[sample][2])/xc[sample][3]
+            tree = s.Get("mvaTree/mvaTree")
+            
+            print sample, "Total events in a tree: ", tree.GetEntries()
+            for evt in tree:
+                fillStruct(stuff,evt,sel,sample)
+                
+                #stuff2 = stuff
+                #print stuff.lep1Pt
                 
                 if tree.evNumber % 2 == 0:
                     mvaTree_train.Fill()
@@ -137,6 +108,7 @@ fullWeight/F'
                     mvaTree_test.Fill()
                     #print tree.evNumber
                     #print "lepton's pt:",stuff.lep1Pt,stuff.lep2Pt
+        print "\t Nevts in train=", mvaTree_train.GetEntries(), "Nevts in test=",mvaTree_test.GetEntries()
                 
         fsig_train.cd()      
         mvaTree_train.Write()
@@ -148,11 +120,48 @@ fullWeight/F'
 
     print "** End of creating mva trees ***"
 
+def fillStruct(stuff, evt, sel, sample):
+    lumi = c.Params().getLumi(sel)
+    xc = c.Params().xsec_and_colors()
+
+    
+    stuff.lep1Pt   = evt.lep1Pt
+    stuff.lep2Pt   = evt.lep2Pt
+    stuff.diLepPt  = evt.diLepPt
+    stuff.diLepM   = evt.diLepM
+    stuff.diLepEta = evt.diLepEta
+    stuff.met      = evt.met
+    stuff.metOverQt    =  evt.metOverQt
+    stuff.metProjOnQt  =  evt.metProjOnQt
+    stuff.metPerpQt    =  evt.metPerpQt
+    stuff.dPhiMetDiLep = evt.dPhiMetDiLep
+    stuff.dPhiJetMet   = evt.dPhiJetMet  
+    stuff.mt      = evt.mt
+    stuff.nJets   = evt.nJets
+    stuff.nJets15 = evt.nJets15
+    #print stuff.nJet15
+    stuff.deltaEtaDiJet  = evt.deltaEtaDiJet
+    stuff.massDiJet      = evt.massDiJet
+    stuff.zeppDiJetDiLep = evt.zeppDiJetDiLep
+    stuff.evWeight   = evt.weight
+    stuff.fullWeight = evt.weight* float(lumi*xc[sample][2])/xc[sample][3]
+
+
+#def CalculateTransMass(p1,p2):
+#    transE    = sqrt(p1.Pt()*p1.Pt() + p2.M()*p2.M()) + sqrt(p2.Pt()*p2.Pt() +p2.M()*p2.M())
+#    transPt   = (p1 + p2).Pt()
+#    transMass = sqrt(transE*transE - transPt*transPt)
+#    return transMass      
+
+"""
 def makeWeightBranch(outpatth,bg_list, sig1_list, sig2_list):
     fbg_train = TFile("allBg_train.root","RECREATE")
     #fbg_test =  TFile("allBg_test.root","RECREATE")
 
-    
+    tree = bg_list[0].Get("mvaTree/mvaTree")
+    fbg_train.cd()
+    tree.Write()
+    '''
     gROOT.ProcessLine(
 "struct stuff_t {\
 Float_t fullWeight;\
@@ -162,7 +171,7 @@ Float_t fullWeight;\
 
     allList = TList()
     for b in bg_list:
-        tree = b.Get("mvaTree/kinTree")
+        tree = b.Get("mvaTree/mvaTree")
         newtree = tree.CloneTree(0)
         br = newtree.Branch("fullWeights",www,"fullWeight/F")
         #br.SetFile(fbg_train)
@@ -183,19 +192,18 @@ Float_t fullWeight;\
 
     
     #print "number of merged events:", a 
+    '''
+    #mvaTree_train = fbg_train.Get("mvaTree")
+    
+    #for evt in mvaTree_train:
+    #    print "weights", evt.weight
 
-    for evt in mvaTree_train:
-        print "weights", evt.weight, evt.fullWeight
     #fbg_train.cd()
     #mvaTree_train.AutoSave()
-    
-        
+   
+"""        
 
-def CalculateTransMass(p1,p2):
-    transE    = sqrt(p1.Pt()*p1.Pt() + p2.M()*p2.M()) + sqrt(p2.Pt()*p2.Pt() +p2.M()*p2.M())
-    transPt   = (p1 + p2).Pt()
-    transMass = sqrt(transE*transE - transPt*transPt)
-    return transMass      
+
     
 
 def printYields(topbg_list, bg_list, sig1_list, sig2_list, sig3_list, data, sel, filename, mode="scaled"):
@@ -263,13 +271,17 @@ def printYields(topbg_list, bg_list, sig1_list, sig2_list, sig3_list, data, sel,
     for l in range(0,lTot):
 
         # Data yields:
-        dd = data.Get("Andrey/met0_et_"+str(l)).Clone()
-        derr = Double(0)
-        bins = dd.GetNbinsX()
-        dy = dd.IntegralAndError(0, bins+1, derr)
-        yields_data.append(dy)
-        yields_data_err.append(derr)
-       
+        if data != None:
+            dd = data.Get("Andrey/met0_et_"+str(l)).Clone()
+            derr = Double(0)
+            bins = dd.GetNbinsX()
+            dy = dd.IntegralAndError(0, bins+1, derr)
+            yields_data.append(dy)
+            yields_data_err.append(derr)
+        else:
+            yields_data.append(0)
+            yields_data_err.append(0)
+            
 
         Yields_bg_per_cut = {}
         Yields_sig1_per_cut = {}
@@ -313,7 +325,7 @@ def printYields(topbg_list, bg_list, sig1_list, sig2_list, sig3_list, data, sel,
             
             bins = h.GetNbinsX()
             y = h.IntegralAndError(0, bins+1, err)
-            print sample, y
+            #print sample, y
 
             Yields_bg_per_cut[sample] = ([y,err])
 
@@ -528,7 +540,8 @@ def makeStack(topbglist, otherbglist, histoname, lumi):
 
     return hs
 
-def drawMultiPlot(fname,maintitle, xtitle, h_name, isLog, y1min, y1max, y2min, y2max, cc, ovlist, topbg, bgList, sel):
+def drawMultiPlot(fname,maintitle, xtitle, h_name, isLog, y1min, y1max, y2min, y2max, ovlist, topbg, bgList, sel):
+
     
     lumi = c.Params().getLumi(sel)
     
@@ -548,67 +561,89 @@ def drawMultiPlot(fname,maintitle, xtitle, h_name, isLog, y1min, y1max, y2min, y
         sys.exit(0)
 
     print "size of the list", size
-  
+
+    h_data = None
+    sig = []
     #ovlist.At(0).Print()
     #ovlist.At(1).Print()
     for n in xrange(size):
-        ff.append(ovlist.At(n))
-        hh.append(ff[n].Get(name).Clone())
-        #print n, "file:", ff[n].GetName(), "   histoname: ", hh[n].GetName()
+        if ovlist.At(n) != None:
+            ff.append(ovlist.At(n))
+            hh.append(ff[n].Get(name).Clone())
+            #print n, "file:", ff[n].GetName(), "   histoname: ", hh[n].GetName()
+            
+            sample = ff[n].Get("Andrey/evt_byCut").GetTitle()
+            #print "Double check the sample:",sample
+            
+            if sample=="DATA":
+                handleOverflowBinsScaleAndColors(hh[n], "Data", lumi)
+                h_data = hh[0]
+                h_data.SetMarkerStyle(20);
+                h_data.SetMarkerSize(0.7)
 
-        sample = ff[n].Get("Andrey/evt_byCut").GetTitle()
-        #print "Double check the sample:",sample
+            else:
+                handleOverflowBinsScaleAndColors(hh[n], sample, lumi)
+                sig.append(hh[n])
 
-        if n==0:
-            handleOverflowBinsScaleAndColors(hh[n], "Data", lumi)
-        else:
-            handleOverflowBinsScaleAndColors(hh[n], sample, lumi)
-               
-    h_data = hh[0]
-    h_data.SetMarkerStyle(20);
-    h_data.SetMarkerSize(0.7)
+    doRatio = True
+    if not isLog or h_data==None:
+        doRatio = False
 
-
+    cc =None
+    if doRatio:
+        cc = TCanvas("c2","big canvas",600,700);
+    else:
+        cc = TCanvas("c1","small canvas",600,600);
+        cc.SetLogy(isLog)
+                
     cc.cd()
-    #print "drawing"
     
-    pad1 = TPad("pad1","pad1",0,0.3,1,1);
-    pad1.SetBottomMargin(0);
-    pad1.Draw();
-    pad1.cd();
-    pad1.SetLogy(isLog)
+    #print "drawing"
+    if doRatio:
+        pad1 = TPad("pad1","pad1",0,0.3,1,1);
+        pad1.SetBottomMargin(0);
+        pad1.Draw();
+        pad1.cd();
+        pad1.SetLogy(isLog)
     
     hs.Draw("hist")
     
-    hs.SetTitle(maintitle+";; Events")
+    if doRatio:
+        hs.SetTitle(maintitle+";; Events")
+    else:
+        hs.SetTitle(maintitle+";"+xtitle+"; Data/MC");
     hs.SetMinimum(y1min);
     hs.SetMaximum(y1max);
-    h_data.Draw("same e1pl");
-    for n in xrange(1, size):
-        hh[n].Draw("same hist");
 
-    cc.cd()
-    pad2 = TPad("pad2","pad2",0,0,1,0.3);
-    pad2.SetBottomMargin(0.25);
-    pad2.SetTopMargin(0);
-    pad2.Draw();
-    pad2.cd();
+    if h_data!=None:
+        h_data.Draw("same e1pl");
+    for s in sig:
+        s.Draw("same hist");
+                
+    if doRatio:
+        cc.cd()
+        pad2 = TPad("pad2","pad2",0,0,1,0.3);
+        pad2.SetBottomMargin(0.25);
+        pad2.SetTopMargin(0);
+        pad2.Draw();
+        pad2.cd();
   
-    h1 = h_data.Clone("")
-    stackSum = hs.GetStack().Last().Clone()
+        h1 = h_data.Clone("")
+        stackSum = hs.GetStack().Last().Clone()
     
-    h1.Divide(stackSum);
-    h1.SetTitle(";"+xtitle+"; Data/MC");
-    h1.SetMaximum(y2max);
-    h1.SetMinimum(y2min);
-    h1.GetYaxis().SetNdivisions(206);
-    h1.GetYaxis().SetTitleOffset(0.4);
-    h1.SetTitleSize(0.1,"XYZ");
-    h1.SetLabelSize(0.1,"XY");
+        h1.Divide(stackSum);
+        h1.SetTitle(";"+xtitle+"; Data/MC");
+        h1.SetMaximum(y2max);
+        h1.SetMinimum(y2min);
+        h1.GetYaxis().SetNdivisions(206);
+        h1.GetYaxis().SetTitleOffset(0.4);
+        h1.SetTitleSize(0.1,"XYZ");
+        h1.SetLabelSize(0.1,"XY");
 
-    h1.Draw("e1p");
+        h1.Draw("e1p");
     
-    pad1.cd();
+        pad1.cd();
+
     prelim = TLatex(0.25,0.95, "CMS Preliminary       #it{L_{int}} = %0.1f fb^{-1}" % (lumi/1000.))
     prelim.SetNDC();
     prelim.SetTextSize(0.03); 
@@ -637,8 +672,11 @@ def drawMultiPlot(fname,maintitle, xtitle, h_name, isLog, y1min, y1max, y2min, y
     leg01.AddEntry(hs.GetStack()[3],"ZZ","f")
     leg01.AddEntry(hs.GetStack()[4],"ttbar","f")
     leg01.AddEntry(hs.GetStack()[5],"Z + jets","f")
-    leg01.AddEntry(h_data,"Data","epl")
-    leg01.AddEntry(hh[1],"H250","l")
+    if h_data != None:
+        leg01.AddEntry(h_data,"Data","epl")
+    for s in sig:
+        leg01.AddEntry(s,"H250","l")
+
     leg01.SetFillColor(kWhite)
     leg01.Draw()
 

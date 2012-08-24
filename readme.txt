@@ -5,6 +5,14 @@ https://twiki.cern.ch/twiki/bin/view/CMS/UserCodeNWUHiggs
 
 The log of changes:
 
+
+2012-Aug-23
+ *Recent tags: 
+   * V02-07 - Updated MVA cuts, tree maker and training  
+   * V02-05 - Workable MVA code 
+   * V02-03 - Added rochcor function for correcting muons, nJets histogram for jets in eta<2.5; 
+         batch maser is modified to copy the files to a local directory before sendingthem over to batch 
+
 2012-Jul-18
   * V02-02 tag
   * Converted scripts and plotting macros to python

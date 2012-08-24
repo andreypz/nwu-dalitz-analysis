@@ -1,2 +1,3 @@
-dcap://cmsdca1.fnal.gov:24140/pnfs/fnal.gov/usr/cms/WAX/11/store/user/andreypz/nuTuples_v1_7TeV/DoubleMu_HZZ_Run2011A/nuTuple_10_2_P7n.root
-dcap://cmsdca1.fnal.gov:24140/pnfs/fnal.gov/usr/cms/WAX/11/store/user/andreypz/nuTuples_v1_7TeV/DoubleMu_HZZ_Run2011A/nuTuple_11_1_uMd.root
+/eos/uscms/store/user/andreypz/nuTuples_v1_7TeV/ZZ_v3/nuTuple_100_1_VIG.root
+/eos/uscms/store/user/andreypz/nuTuples_v1_7TeV/ZZ_v3/nuTuple_101_1_OJH.root
+/eos/uscms/store/user/andreypz/nuTuples_v1_7TeV/ZZ_v3/nuTuple_102_1_IpN.root
