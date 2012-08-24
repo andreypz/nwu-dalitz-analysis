@@ -15,10 +15,10 @@ if nargs>1 and sys.argv[1]=="ele":
     selection="electron"
     
 period    = '2011'
-doTest    = 1
-doData    = 0
-doBG      = 0
-doSignal  = 0
+doTest    = 0
+doData    = 1
+doBG      = 1
+doSignal  = 1
 
 ''' 
     Set job configurations.  The order of arguments is:

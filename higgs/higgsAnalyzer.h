@@ -1,4 +1,4 @@
-// $Id: higgsAnalyzer.h,v 1.25 2012/08/20 01:59:42 andrey Exp $
+// $Id: higgsAnalyzer.h,v 1.26 2012/08/24 16:12:18 andrey Exp $
 
 #ifndef higgsAnalyzer_h
 #define higgsAnalyzer_h
@@ -53,7 +53,7 @@ class higgsAnalyzer : public TSelector {
   //Variables to Fill into histos. Have to be global
 
   TString samp;  
-  Float_t qT, diEta, diPhi, diAngle, Mll, Mll_EB, Mll_EE, Mll_EX;  
+  Float_t qT, diEta, diPhi, diAngle, deltaPhiLep, Mll, Mll_EB, Mll_EE, Mll_EX;  
   Float_t MET, pfMET, pfMET1, puCorrMET, projMET, ZprojMET, redMET1, redMET2, compMET;
   Float_t pfMET_lg, pfMET_recoil;
   Float_t dPhiMetDiLep, metProjOnQt, metPerpQt, metOverQt;
@@ -67,6 +67,7 @@ class higgsAnalyzer : public TSelector {
   Float_t dPhiClos1, dPhiClos2;
   Float_t lep1_eta, lep1_phi, lep1_pt;
   Float_t lep2_eta, lep2_phi, lep2_pt;
+  Float_t lep_dPhi, lep_dEta, lep_dR, lep_angle, lep_ptRatio;
   Float_t dRjetlep1, dRjetlep2, ptLeadJet, etaLeadJet, phiLeadJet, ptLeadBJet;
   Float_t ptTrailJet, etaTrailJet, phiTrailJet;
   Float_t deltaEtaDiJet, massDiJet, zeppDiJetDiLep;
@@ -87,16 +88,16 @@ class higgsAnalyzer : public TSelector {
   TH1F *met5_et[nC], *met6_et[nC], *met7_et[nC], *met8_et[nC], *met9_et[nC], *met10_et[nC];
   TH1F *l1_phi[nC], *l1_eta[nC], *l1_pt[nC];
   TH1F *l2_phi[nC], *l2_eta[nC], *l2_pt[nC];
+  TH1F *l0_dPhi[nC], *l0_dEta[nC], *l0_dR[nC], *l0_ptRatio[nC], *l0_angle[nC];
   TH1F *btag_hp[nC];
   TH1F *di_qt[nC], *di_eta[nC], *di_phi[nC], *di_mass[nC], *di_mass_EB[nC], *di_mass_EE[nC], *di_mass_EX[nC];
-  TH1F *di_dPhiMet[nC], *di_angle[nC];
+  TH1F *di_dPhiMet[nC];
   TH1F *jet_N[nC], *jet_N15[nC], *jet_N24[nC], *jet_dRlep1[nC], *jet_dRlep2[nC];
   TH1F *jet_pt1[nC], *jet_eta1[nC], *jet_phi1[nC];
   TH1F *jet_pt2[nC], *jet_eta2[nC], *jet_phi2[nC];
   TH1F *jet_diM[nC], *jet_deltaEta[nC], *jet_zeppZ[nC];
   TH1F *jet_b_N[nC], *jet_b_Nssv[nC], *jet_b_N25[nC],*jet_b_N30[nC], *jet_b_pt[nC];
   TH1F *ph_nGamma[nC];
-  TH1F *l0_dPhi[nC], *l0_dEta[nC], *l0_dR[nC], *l0_ptRatio[nC];
   TH1F *met1_dPhiLeadJet1[nC], *met1_dPhiLeadJet2[nC], *met1_dPhiClosJet1[nC], *met1_dPhiClosJet2[nC];
   
   TH1F *met1_overQt[nC], *met1_projOnQt[nC], *met1_perpQt[nC];
@@ -310,6 +311,7 @@ void higgsAnalyzer::Init(TTree *tree)
 
 bool higgsAnalyzer::Notify()
 {
+  //cout<<"Notify in work"<<endl;
 	// The Notify() function is called when a new file is opened. This
 	// can be either for a new TTree in a TChain or when when a new TTree
 	// is started when using PROOF. It is normally not necessary to make changes

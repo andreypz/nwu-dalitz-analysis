@@ -341,11 +341,11 @@ void TrainMva(TString myMethodList = "",
     Use["SVM"] = 0; 
     // 
     // --- Boosted Decision Trees
-    Use["BDT"] = 0; // uses Adaptive Boost
-    Use["BDTG"] = 1; // uses Gradient Boost
+    Use["BDT"] = 1; // uses Adaptive Boost
+    Use["BDTG"] = 0; // uses Gradient Boost
     Use["BDTB"] = 0; // uses Bagging
     Use["BDTD"] = 0; // decorrelation + Adaptive Boost
-    Use["BDTF"] = 1; // allow usage of fisher discriminant for node splitting 
+    Use["BDTF"] = 0; // allow usage of fisher discriminant for node splitting 
     // 
     // --- Friedman's RuleFit method, ie, an optimised series of cuts ("rules")
     Use["RuleFit"] = 0; // problem with DY (AA)
@@ -401,7 +401,7 @@ void TrainMva(TString myMethodList = "",
     factory->AddVariable("dPhiMetDiLep", "#Delta#phi(p_{ll},MET)", "rad", 'F');
     factory->AddVariable("mt", "m_{T}(HZZ hypothesis)", "GeV", 'F');
 
-//factory->AddVariable("nJets15", "Number of jets with p_{T}>15", "", 'I');
+    factory->AddVariable("nJets15", "Number of jets with p_{T}>15", "", 'I');
 
 
 //if (_jetMulti > 0) 
@@ -608,7 +608,7 @@ void TrainMva(TString myMethodList = "",
 
     // TMVA ANN: MLP (recommended ANN) -- all ANNs in TMVA are Multilayer Perceptrons
     if (Use["MLP"])
-        factory->BookMethod(TMVA::Types::kMLP, "MLP", "H:!V:NeuronType=tanh:VarTransform=N:NCycles=600:HiddenLayers=N+5:TestRate=5:!UseRegulator");
+      factory->BookMethod(TMVA::Types::kMLP, "MLP", "!H:!V:NeuronType=tanh:VarTransform=N:NCycles=500:HiddenLayers=N:TestRate=10");
 
     if (Use["MLPBFGS"])
         factory->BookMethod(TMVA::Types::kMLP, "MLPBFGS", "H:!V:NeuronType=tanh:VarTransform=N:NCycles=600:HiddenLayers=N+5:TestRate=5:TrainingMethod=BFGS:!UseRegulator");
@@ -644,7 +644,7 @@ void TrainMva(TString myMethodList = "",
 
     if (Use["BDT"]) // Adaptive Boost
         factory->BookMethod(TMVA::Types::kBDT, "BDT",
-            "!H:!V:NTrees=850:nEventsMin=150:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.5:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning");
+            "!H:!V:NTrees=400:nEventsMin=40:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=1:SeparationType=GiniIndex:nCuts=20");
 
 
     if (Use["BDTB"]) // Bagging

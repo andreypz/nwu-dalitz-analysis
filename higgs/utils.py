@@ -133,14 +133,13 @@ def fillStruct(stuff, evt, sel, sample):
     stuff.met      = evt.met
     stuff.metOverQt    =  evt.metOverQt
     stuff.metProjOnQt  =  evt.metProjOnQt
-    stuff.metPerpQt    =  evt.metPerpQt
-    stuff.dPhiMetDiLep = evt.dPhiMetDiLep
+    stuff.metPerpQt    =  abs(evt.metPerpQt)
+    stuff.dPhiMetDiLep = abs(evt.dPhiMetDiLep)
     stuff.dPhiJetMet   = evt.dPhiJetMet  
     stuff.mt      = evt.mt
     stuff.nJets   = evt.nJets
     stuff.nJets15 = evt.nJets15
-    #print stuff.nJet15
-    stuff.deltaEtaDiJet  = evt.deltaEtaDiJet
+    stuff.deltaEtaDiJet  = abs(evt.deltaEtaDiJet)
     stuff.massDiJet      = evt.massDiJet
     stuff.zeppDiJetDiLep = evt.zeppDiJetDiLep
     stuff.evWeight   = evt.weight
@@ -206,9 +205,8 @@ Float_t fullWeight;\
 
     
 
-def printYields(topbg_list, bg_list, sig1_list, sig2_list, sig3_list, data, sel, filename, mode="scaled"):
+def printYields(topbg_list, bg_list, sig1_list, sig2_list, sig3_list, data, sel, filename, favMass="250",mode="scaled"):
     print "Yield are HTML mode"
-    
     cutNames = ["0. Total",
                 "1. HLT",
                 "2. Two Leptons",
@@ -227,19 +225,20 @@ def printYields(topbg_list, bg_list, sig1_list, sig2_list, sig3_list, data, sel,
                 "15. H500 cut based",
                 "16. H550 cut based",
                 "17. H600 cut based",
-                "18. H250 MVA",
-                "19. 0j bin",
-                "20. 1j bin",
-                "21. >1j bin",
-                "22.",
-                "23.",
-                "24.",
-                "25. mvaTree, nj=0",
-                "26. mvaTree, nj=1",
-                "27. mvaTree, nj>1",
+                "18. mvaTree, nj=0",
+                "19. mvaTree, nj=1",
+                "20. mvaTree, nj>1",
+                "21. MVA H"+favMass,
+                "22. 0j bin",
+                "23. 1j bin",
+                "24. >1j bin",
+                "25. MVA H250",
+                "26. 0j",
+                "27. 1j",
+                "28. >1j",
                 ]
 
-    lTot = 28   # Total number of cuts
+    lTot = 30   # Total number of cuts
     lMax = 9 # Lines to print in the main table
     lMax2 = lTot-lMax # additional table
     beginTable = '<table border = "10"    cellpadding="5">'
@@ -389,10 +388,10 @@ def printYields(topbg_list, bg_list, sig1_list, sig2_list, sig3_list, data, sel,
     myTable += "Data"
     myTable += endCellH
     myTable += beginCellH
-    myTable += "ggHZZ 250"
+    myTable += "ggHZZ "+favMass
     myTable += endCellH
     myTable += beginCellH
-    myTable += "vbfHZZ 250"
+    myTable += "vbfHZZ "+favMass
     myTable += endCellH
     
     myTable += endLine
@@ -425,10 +424,10 @@ def printYields(topbg_list, bg_list, sig1_list, sig2_list, sig3_list, data, sel,
         myTable += '%d'% (yields_data[l])
         myTable += endCell
         myTable += beginCell
-        myTable += '%d'% (Yields_sig1[l]["ggHZZ250"][0])
+        myTable += '%d'% (Yields_sig1[l]["ggHZZ"+favMass][0])
         myTable += endCell
         myTable += beginCell
-        myTable += '%d'% (Yields_sig2[l]["VBFHZZ250"][0])
+        myTable += '%d'% (Yields_sig2[l]["VBFHZZ"+favMass][0])
         myTable += endCell
 
         myTable += endLine
@@ -468,11 +467,11 @@ def printYields(topbg_list, bg_list, sig1_list, sig2_list, sig3_list, data, sel,
         myTable += '%d'% (yields_data[l])
         myTable += endCell
         myTable += beginCell
-        myTable += '%0.1f'% (Yields_sig1[l]["ggHZZ250"][0])
+        myTable += '%0.2f'% (Yields_sig1[l]["ggHZZ"+favMass][0])
         #myTable += '%0.1f &pm; %0.1f'% (Yields_sig1[l]["ggHZZ250"][0], Yields_sig1[l]["ggHZZ250"][1])
         myTable += endCell
         myTable += beginCell
-        myTable += '%0.1f'% (Yields_sig2[l]["VBFHZZ250"][0])
+        myTable += '%0.2f'% (Yields_sig2[l]["VBFHZZ"+favMass][0])
         myTable += endCell
         myTable += endLine
         

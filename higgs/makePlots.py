@@ -13,7 +13,7 @@ FNOB = 7
 FB = 8
 FMVA = 25
 
-makeMvaTrees = 1
+makeMvaTrees = 0
 plotSpecial = 0
 plotMVA = 1
 plotMet = 0
@@ -89,8 +89,8 @@ def makePlots(sel=1, dir="./", hPath="v00"):
         #f.Print()
         li_sig2.Add(f)
 
-    f_Data =  TFile(hPath+"/m_Data_"+thissel+".root", "OPEN")
-    #f_Data = None
+    #/f_Data =  TFile(hPath+"/m_Data_"+thissel+".root", "OPEN")
+    f_Data = None
 
     li_ov.Add(f_Data)
     li_ov.Add(li_sig1.At(2))
@@ -98,7 +98,7 @@ def makePlots(sel=1, dir="./", hPath="v00"):
     c1 = TCanvas("c1","small canvas",600,500);
 
     print "\n\n ******** Make the Yield table ******** \n"
-    u.printYields(li_topbg, li_bg, li_sig1, li_sig2, li_sig3, f_Data, sel, "yields_"+thissel+".html")
+    u.printYields(li_topbg, li_bg, li_sig1, li_sig2, li_sig3, f_Data, sel, "yields_"+thissel+".html", "125")
     print "\n **** End of Yield table ****"
 
 
@@ -115,12 +115,12 @@ def makePlots(sel=1, dir="./", hPath="v00"):
         u.drawMultiPlot(imgpath+"mvaPresel/mva01", "nJets=0","BDT discriminator", "mva_discr_0", 0, 0.1, 80, 0.1,3.9, li_ov, li_topbg, li_bg, sel)
         u.drawMultiPlot(imgpath+"mvaPresel/mva02", "nJets=1","BDT discriminator", "mva_discr_1", 0, 0.1, 500, 0.1,3.9, li_ov, li_topbg, li_bg, sel)
         u.drawMultiPlot(imgpath+"mvaPresel/mva03", "nJets>1","BDT discriminator", "mva_discr_2", 0, 0.1, 300, 0.1,3.9, li_ov, li_topbg, li_bg, sel)
-        u.drawMultiPlot(imgpath+"mvaPresel/mva04", "nJets=0","M(ll)", "di_mass_"+str(FMVA), 0, 0.1, 80, 0.3,1.9, li_ov, li_topbg, li_bg, sel)
-        u.drawMultiPlot(imgpath+"mvaPresel/mva05", "nJets=0","qT(ll)", "di_qt_"+str(FMVA), 0, 0.1, 100, 0.3,1.9, li_ov, li_topbg, li_bg, sel)
-        u.drawMultiPlot(imgpath+"mvaPresel/mva06", "nJets=0","pfMet", "met1_et_"+str(FMVA), 0, 0.1, 100, 0.3,1.9, li_ov, li_topbg, li_bg, sel)
-        u.drawMultiPlot(imgpath+"mvaPresel/mva07", "nJets=0","MT", "mt2_"+str(FMVA), 0, 0.1, 100, 0.3,1.9, li_ov, li_topbg, li_bg, sel)
-        u.drawMultiPlot(imgpath+"mvaPresel/mva08", "","Leading Lepton pt", "l1_pt_"+str(FMVA), 0, 0.1, 80, 0.3,1.9, li_ov, li_topbg, li_bg, sel)
-        u.drawMultiPlot(imgpath+"mvaPresel/mva09", "","Trailing Lepton pt", "l2_pt_"+str(FMVA), 0, 0.1, 80, 0.3,1.9, li_ov, li_topbg, li_bg, sel)
+        u.drawMultiPlot(imgpath+"mvaPresel/mva04", "nJets=0","M(ll)", "di_mass_"+str(FMVA), 0, 0.1, 700, 0.3,1.9, li_ov, li_topbg, li_bg, sel)
+        u.drawMultiPlot(imgpath+"mvaPresel/mva05", "nJets=0","qT(ll)", "di_qt_"+str(FMVA), 0, 0.1, 700, 0.3,1.9, li_ov, li_topbg, li_bg, sel)
+        u.drawMultiPlot(imgpath+"mvaPresel/mva06", "nJets=0","pfMet", "met1_et_"+str(FMVA), 0, 0.1, 700, 0.3,1.9, li_ov, li_topbg, li_bg, sel)
+        u.drawMultiPlot(imgpath+"mvaPresel/mva07", "nJets=0","MT", "mt2_"+str(FMVA), 0, 0.1, 700, 0.3,1.9, li_ov, li_topbg, li_bg, sel)
+        u.drawMultiPlot(imgpath+"mvaPresel/mva08", "","Leading Lepton pt", "l1_pt_"+str(FMVA), 0, 0.1, 700, 0.3,1.9, li_ov, li_topbg, li_bg, sel)
+        u.drawMultiPlot(imgpath+"mvaPresel/mva09", "","Trailing Lepton pt", "l2_pt_"+str(FMVA), 0, 0.1, 700, 0.3,1.9, li_ov, li_topbg, li_bg, sel)
 
    
     if plotSpecial:
