@@ -34,12 +34,12 @@ def createDir(dir):
         else:
             raise
 
-#baseDir = "/afs/fnal.gov/files/home/room1/andreypz/public_html/test2/"
 baseDir = "/uscms_data/d2/andreypz/hzz2l2nu_html/"
 dirnameOut = baseDir+hPath
 selection  = ['muon', 'electron']
-plot_types = ['diLepton', 'Jet', 'Met', 'Misc', "mvaPresel"]
-#plot_types = ['diLepton', 'Lepton', 'Jet', 'Met', 'Special', 'Misc', "mvaPresel"]
+#plot_types = ['diLepton', 'Jet', 'Met', 'Misc', "mvaPresel"]
+#plot_types = ['diLepton', 'Lepton', 'Jet', 'Met', 'Misc', "mvaPresel"]
+plot_types = ['diLepton', 'Lepton', 'Jet', 'Met', 'Misc']
 
 thissel = selection[sel-1]
 
@@ -59,6 +59,7 @@ if doMerge:
     os.system("hadd ./"+hPath+"/m_Data_"+thissel+".root  ./"+hPath+"/"+thissel+"/hhhh_Double*.root")
     os.system("hadd ./"+hPath+"/m_ttbar_"+thissel+".root ./"+hPath+"/"+thissel+"/hhhh_ttbar_*.root")
     os.system("hadd ./"+hPath+"/m_DYjets_"+thissel+".root ./"+hPath+"/"+thissel+"/hhhh_DYjets_*.root")
+    os.system("hadd ./"+hPath+"/m_vbfZ_"+thissel+".root ./"+hPath+"/"+thissel+"/hhhh_vbfZ_*.root")
                 
 
 mp.makePlots(sel, baseDir, hPath)

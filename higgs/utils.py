@@ -17,6 +17,11 @@ Float_t lep2Pt;\
 Float_t diLepPt;\
 Float_t diLepM;\
 Float_t diLepEta;\
+Float_t lepDeltaPhi;\
+Float_t lepDeltaEta;\
+Float_t lepDeltaR;\
+Float_t lepAngle;\
+Float_t lepPtRatio;\
 Float_t met;\
 Float_t metOverQt;\
 Float_t metProjOnQt;\
@@ -33,7 +38,8 @@ Float_t evWeight;\
 Float_t fullWeight;\
 };")
 
-    allVars = 'lep1Pt/F:lep2Pt:diLepPt:diLepM:diLepEta:met:metOverQt:metProjOnQt:metPerpQt:\
+    allVars = 'lep1Pt/F:lep2Pt:diLepPt:diLepM:diLepEta:lepDeltaPhi:lepDeltaEta:lepDeltaR:lepAngle:lepPtRatio:\
+met:metOverQt:metProjOnQt:metPerpQt:\
 dPhiMetDiLep:dPhiJetMet:mt:nJets/I:nJets15/I:deltaEtaDiJet/F:massDiJet:zeppDiJetDiLep:evWeight/F:\
 fullWeight/F'
     stuff  = mva_vars()
@@ -130,117 +136,41 @@ def fillStruct(stuff, evt, sel, sample):
     stuff.diLepPt  = evt.diLepPt
     stuff.diLepM   = evt.diLepM
     stuff.diLepEta = evt.diLepEta
-    stuff.met      = evt.met
+    stuff.lepDeltaPhi = evt.lepDeltaPhi
+    stuff.lepDeltaEta = evt.lepDeltaEta
+    stuff.lepDeltaR   = evt.lepDeltaR
+    stuff.lepAngle    = evt.lepAngle
+    stuff.lepPtRatio  = evt.lepPtRatio
+    stuff.met         = evt.met
     stuff.metOverQt    =  evt.metOverQt
     stuff.metProjOnQt  =  evt.metProjOnQt
-    stuff.metPerpQt    =  abs(evt.metPerpQt)
-    stuff.dPhiMetDiLep = abs(evt.dPhiMetDiLep)
+    stuff.metPerpQt    = evt.metPerpQt
+    stuff.dPhiMetDiLep = evt.dPhiMetDiLep
     stuff.dPhiJetMet   = evt.dPhiJetMet  
     stuff.mt      = evt.mt
     stuff.nJets   = evt.nJets
     stuff.nJets15 = evt.nJets15
-    stuff.deltaEtaDiJet  = abs(evt.deltaEtaDiJet)
+    stuff.deltaEtaDiJet  = evt.deltaEtaDiJet
     stuff.massDiJet      = evt.massDiJet
     stuff.zeppDiJetDiLep = evt.zeppDiJetDiLep
     stuff.evWeight   = evt.weight
     stuff.fullWeight = evt.weight* float(lumi*xc[sample][2])/xc[sample][3]
 
 
-#def CalculateTransMass(p1,p2):
-#    transE    = sqrt(p1.Pt()*p1.Pt() + p2.M()*p2.M()) + sqrt(p2.Pt()*p2.Pt() +p2.M()*p2.M())
-#    transPt   = (p1 + p2).Pt()
-#    transMass = sqrt(transE*transE - transPt*transPt)
-#    return transMass      
-
-"""
-def makeWeightBranch(outpatth,bg_list, sig1_list, sig2_list):
-    fbg_train = TFile("allBg_train.root","RECREATE")
-    #fbg_test =  TFile("allBg_test.root","RECREATE")
-
-    tree = bg_list[0].Get("mvaTree/mvaTree")
-    fbg_train.cd()
-    tree.Write()
-    '''
-    gROOT.ProcessLine(
-"struct stuff_t {\
-Float_t fullWeight;\
-};")
-
-    www = stuff_t()
-
-    allList = TList()
-    for b in bg_list:
-        tree = b.Get("mvaTree/mvaTree")
-        newtree = tree.CloneTree(0)
-        br = newtree.Branch("fullWeights",www,"fullWeight/F")
-        #br.SetFile(fbg_train)
-
-        for evt in tree:
-            www.fullWeight = evt.weight * 10
-            #print evt.weight
-            newtree.Fill()
-            
-        allList.Add(newtree)
-        #newtree.Print()
-
-
-    allList.Print()
-    mvaTree_train = TTree("mvaTree","mvaTree")
-    mvaTree_train.MergeTrees(allList)
-    #mvaTree_train.Print()
-
-    
-    #print "number of merged events:", a 
-    '''
-    #mvaTree_train = fbg_train.Get("mvaTree")
-    
-    #for evt in mvaTree_train:
-    #    print "weights", evt.weight
-
-    #fbg_train.cd()
-    #mvaTree_train.AutoSave()
-   
-"""        
-
-
-    
-
-def printYields(topbg_list, bg_list, sig1_list, sig2_list, sig3_list, data, sel, filename, favMass="250",mode="scaled"):
+def printYields(topbg_list, bg_list, sig1_list, sig2_list, sig3_list, data, sel, filename, anaType="HZZ250",mode="scaled"):
     print "Yield are HTML mode"
-    cutNames = ["0. Total",
-                "1. HLT",
-                "2. Two Leptons",
-                "3. third lepton veto",
-                "4. Z peak",
-                "5. Z pt cut",
-                "6. dPhi cut",
-                "7. Met >70",
-                "8. bjet veto",
-                "9. H200 cut based",
-                "10. H250 cut based",
-                "11. H300 cut based",
-                "12. H350 cut based",
-                "13. H400 cut based",
-                "14. H450 cut based",
-                "15. H500 cut based",
-                "16. H550 cut based",
-                "17. H600 cut based",
-                "18. mvaTree, nj=0",
-                "19. mvaTree, nj=1",
-                "20. mvaTree, nj>1",
-                "21. MVA H"+favMass,
-                "22. 0j bin",
-                "23. 1j bin",
-                "24. >1j bin",
-                "25. MVA H250",
-                "26. 0j",
-                "27. 1j",
-                "28. >1j",
-                ]
+    favMass="0"
+    if "VBFZ" not in anaType:
+        favMass = "200"
+        anaType ="HZZ"
 
+    myParams =  c.Params().analysisParams(anaType)
+    #print myParams
+    cutNames    = myParams[0]
+    nominalCuts = myParams[1]
+    extraCuts   = myParams[2]
     lTot = 30   # Total number of cuts
-    lMax = 9 # Lines to print in the main table
-    lMax2 = lTot-lMax # additional table
+    #lMax = 9 # Lines to print in the main table
     beginTable = '<table border = "10"    cellpadding="5">'
     endTable = '</table>'
 
@@ -387,16 +317,18 @@ def printYields(topbg_list, bg_list, sig1_list, sig2_list, sig3_list, data, sel,
     myTable += beginCellH
     myTable += "Data"
     myTable += endCellH
-    myTable += beginCellH
-    myTable += "ggHZZ "+favMass
-    myTable += endCellH
-    myTable += beginCellH
-    myTable += "vbfHZZ "+favMass
-    myTable += endCellH
+
+    if "VBFZ" not in anaType:
+        myTable += beginCellH
+        myTable += "ggHZZ "+favMass
+        myTable += endCellH
+        myTable += beginCellH
+        myTable += "vbfHZZ "+favMass
+        myTable += endCellH
     
     myTable += endLine
             
-    for l in range(0, lMax):
+    for l in nominalCuts:
         if l%2 == 0:
             myTable += beginLineGrey
         else:
@@ -423,21 +355,22 @@ def printYields(topbg_list, bg_list, sig1_list, sig2_list, sig3_list, data, sel,
         myTable += beginCell
         myTable += '%d'% (yields_data[l])
         myTable += endCell
-        myTable += beginCell
-        myTable += '%d'% (Yields_sig1[l]["ggHZZ"+favMass][0])
-        myTable += endCell
-        myTable += beginCell
-        myTable += '%d'% (Yields_sig2[l]["VBFHZZ"+favMass][0])
-        myTable += endCell
-
+        if "VBFZ" not in anaType:
+            myTable += beginCell
+            myTable += '%d'% (Yields_sig1[l]["ggHZZ"+favMass][0])
+            myTable += endCell
+            myTable += beginCell
+            myTable += '%d'% (Yields_sig2[l]["VBFHZZ"+favMass][0])
+            myTable += endCell
+            
         myTable += endLine
 
 
-    for l in [25,26,27,10,18,19,20,21]:
+    for l in extraCuts:
 
-        if l in [25,26,27]:
+        if l in [18,19,20]:
             myTable += beginLineGreen
-        elif l in [10,18]:
+        elif l in [10,25,21]:
             myTable += beginLineBlue
         else:
             myTable += beginLine
@@ -466,13 +399,14 @@ def printYields(topbg_list, bg_list, sig1_list, sig2_list, sig3_list, data, sel,
         myTable += beginCell
         myTable += '%d'% (yields_data[l])
         myTable += endCell
-        myTable += beginCell
-        myTable += '%0.2f'% (Yields_sig1[l]["ggHZZ"+favMass][0])
-        #myTable += '%0.1f &pm; %0.1f'% (Yields_sig1[l]["ggHZZ250"][0], Yields_sig1[l]["ggHZZ250"][1])
-        myTable += endCell
-        myTable += beginCell
-        myTable += '%0.2f'% (Yields_sig2[l]["VBFHZZ"+favMass][0])
-        myTable += endCell
+        if "VBFZ" not in anaType:
+            myTable += beginCell
+            myTable += '%0.2f'% (Yields_sig1[l]["ggHZZ"+favMass][0])
+            #myTable += '%0.1f &pm; %0.1f'% (Yields_sig1[l]["ggHZZ250"][0], Yields_sig1[l]["ggHZZ250"][1])
+            myTable += endCell
+            myTable += beginCell
+            myTable += '%0.2f'% (Yields_sig2[l]["VBFHZZ"+favMass][0])
+            myTable += endCell
         myTable += endLine
         
     myTable += endTable
@@ -584,6 +518,7 @@ def drawMultiPlot(fname,maintitle, xtitle, h_name, isLog, y1min, y1max, y2min, y
                 handleOverflowBinsScaleAndColors(hh[n], sample, lumi)
                 sig.append(hh[n])
 
+    #doRatio = False
     doRatio = True
     if not isLog or h_data==None:
         doRatio = False
@@ -606,17 +541,24 @@ def drawMultiPlot(fname,maintitle, xtitle, h_name, isLog, y1min, y1max, y2min, y
         pad1.SetLogy(isLog)
     
     hs.Draw("hist")
+    if hs.GetHistogram().GetXaxis().GetXmax()>1000:
+        hs.GetHistogram().SetNdivisions(505)
     
     if doRatio:
         hs.SetTitle(maintitle+";; Events")
     else:
-        hs.SetTitle(maintitle+";"+xtitle+"; Data/MC");
+        hs.SetTitle(maintitle+";"+xtitle+"; Events");
     hs.SetMinimum(y1min);
     hs.SetMaximum(y1max);
 
     if h_data!=None:
         h_data.Draw("same e1pl");
-    for s in sig:
+    for i,s in enumerate(sig):
+        #print i,s
+        if i==0:
+            s.Scale(10)  #for ggH
+        elif i==1:
+            s.Scale(100)  #for vbf
         s.Draw("same hist");
                 
     if doRatio:
@@ -665,16 +607,23 @@ def drawMultiPlot(fname,maintitle, xtitle, h_name, isLog, y1min, y1max, y2min, y
     leg01 = TLegend(0.53,0.7,0.95,0.90);
     leg01.SetNColumns(2);
     leg01.SetTextSize(0.04)
+    
     leg01.AddEntry(hs.GetStack()[0],"top","f")
     leg01.AddEntry(hs.GetStack()[1],"WW","f")
     leg01.AddEntry(hs.GetStack()[2],"WZ","f")
     leg01.AddEntry(hs.GetStack()[3],"ZZ","f")
     leg01.AddEntry(hs.GetStack()[4],"ttbar","f")
+    #leg01.AddEntry(hs.GetStack()[5],"vbf Z","f")
     leg01.AddEntry(hs.GetStack()[5],"Z + jets","f")
     if h_data != None:
         leg01.AddEntry(h_data,"Data","epl")
-    for s in sig:
-        leg01.AddEntry(s,"H250","l")
+
+
+    for i,s in enumerate(sig):
+        if i==0:
+            leg01.AddEntry(sig[0],"10x ggH 125","l")
+        elif i==1:
+            leg01.AddEntry(sig[1],"100x vbfH 125","l")
 
     leg01.SetFillColor(kWhite)
     leg01.Draw()

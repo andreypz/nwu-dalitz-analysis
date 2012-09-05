@@ -26,7 +26,8 @@
 #endif
 
 
-TString inputFilesDir = "mvaInputs_v69/muon/";
+TString inputFilesDir = "mvaInputs_v71/muon/";
+//TString inputFilesDir = "mvaInputs_v69/muon/";
 TString outputWeightsDir = "";
 
 
@@ -333,7 +334,7 @@ void TrainMva(TString myMethodList = "",
     // --- Neural Networks (all are feed-forward Multilayer Perceptrons)
     Use["MLP"] = 0; // Recommended ANN
     Use["MLPBFGS"] = 0; // Recommended ANN with optional training method
-    Use["MLPBNN"] = 0; // Recommended ANN with BFGS training method and bayesian regulator
+    Use["MLPBNN"] = 1; // Recommended ANN with BFGS training method and bayesian regulator
     Use["CFMlpANN"] = 0; // Depreciated ANN from ALEPH
     Use["TMlpANN"] = 0; // ROOT's own ANN
     //
@@ -392,8 +393,13 @@ void TrainMva(TString myMethodList = "",
     factory->AddVariable("lep2Pt", "p_{T}(l_{2})", "GeV", 'F');
 
     factory->AddVariable("diLepPt", "p_{T}(ll)", "GeV", 'F');
-    factory->AddVariable("diLepEta", "|#eta(ll)|", "", 'F');
     factory->AddVariable("diLepM", "m_{ll}", "GeV", 'F'); // do not use when using individual bg's that have real Z->ll
+    factory->AddVariable("diLepEta", "|#eta(ll)|", "", 'F');
+    factory->AddVariable("lepDeltaPhi", "#Delta#phi(l_{1},l_{2})", "rad", 'F');
+    factory->AddVariable("lepDeltaEta", "#Delta#eta(l_{1},l_{2})", "", 'F');
+    factory->AddVariable("lepDeltaR", "#Delta R(l_{1},l_{2})", "", 'F');
+    factory->AddVariable("lepAngle", "Open Angle(l_{1},l_{2})", "rad", 'F');
+    factory->AddVariable("lepPtRatio", "p_{T}_{l_{2}}/p_{T}_{l_{1}}", "", 'F');
     factory->AddVariable("met", "MET", "GeV", 'F');
     factory->AddVariable("metOverQt", "MET/p_{T}(ll)", "", 'F');
     factory->AddVariable("metProjOnQt", "MET || p_{T}(ll)", "GeV", 'F');
@@ -410,7 +416,7 @@ void TrainMva(TString myMethodList = "",
      {
        factory->AddVariable("deltaEtaDiJet", "#Delta#eta(jet1,jet2)", "rad", 'F');
        factory->AddVariable("massDiJet", "M(jet1,jet2)", "GeV", 'F');
-       factory->AddVariable("zeppDiJetDiLep", "Zeppelfeld variable", "rad", 'F');
+       factory->AddVariable("zeppDiJetDiLep", "#eta* = #eta_{Z} - 0.5(#eta_{j_{1}} + #eta_{j_{2}})", "", 'F');
      }
 
  

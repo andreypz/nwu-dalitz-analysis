@@ -8,7 +8,6 @@ from ROOT import *
 import shutil
 
 import config as c
-#shutil.copy2('template_higgsAnalyzer.C', 'higgsAnalyzer.C')
 
 
 period    = "2011A"
@@ -34,9 +33,10 @@ if nargs>=6:
 if nargs>=7:
     isbatch   = sys.argv[6]
 
-print sample, selection, sourcefilename, trigger, period, isbatch 
+print "Running on sample", sample, "with selection", selection, "in sourse ", sourcefilename, "and trigger", trigger, period, isbatch 
 
 
+#tempfile = open("template_vbfZAnalyzer.C","r")
 tempfile = open("template_higgsAnalyzer.C","r")
 whole_thing = tempfile.read()
 whole_thing = whole_thing.replace("SUFFIX", sample)

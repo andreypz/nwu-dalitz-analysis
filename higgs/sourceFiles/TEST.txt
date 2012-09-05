@@ -1,3 +1,7 @@
-/eos/uscms/store/user/andreypz/nuTuples_v1_7TeV/ZZ_v3/nuTuple_100_1_VIG.root
-/eos/uscms/store/user/andreypz/nuTuples_v1_7TeV/ZZ_v3/nuTuple_101_1_OJH.root
-/eos/uscms/store/user/andreypz/nuTuples_v1_7TeV/ZZ_v3/nuTuple_102_1_IpN.root
+dcap://cmsdca1.fnal.gov:24140/pnfs/fnal.gov/usr/cms/WAX/11/store/user/naodell/March18/MC/VBFZ/nuTuple_100_1_vLo.root
+dcap://cmsdca1.fnal.gov:24140/pnfs/fnal.gov/usr/cms/WAX/11/store/user/naodell/March18/MC/VBFZ/nuTuple_100_2_2SF.root
+dcap://cmsdca1.fnal.gov:24140/pnfs/fnal.gov/usr/cms/WAX/11/store/user/naodell/March18/MC/VBFZ/nuTuple_101_1_ifE.root
+dcap://cmsdca1.fnal.gov:24140/pnfs/fnal.gov/usr/cms/WAX/11/store/user/naodell/March18/MC/VBFZ/nuTuple_101_2_RoC.root
+dcap://cmsdca1.fnal.gov:24140/pnfs/fnal.gov/usr/cms/WAX/11/store/user/naodell/March18/MC/VBFZ/nuTuple_10_1_ShT.root
+dcap://cmsdca1.fnal.gov:24140/pnfs/fnal.gov/usr/cms/WAX/11/store/user/naodell/March18/MC/VBFZ/nuTuple_10_2_4Dl.root
+dcap://cmsdca1.fnal.gov:24140/pnfs/fnal.gov/usr/cms/WAX/11/store/user/naodell/March18/MC/VBFZ/nuTuple_11_1_L8c.root
