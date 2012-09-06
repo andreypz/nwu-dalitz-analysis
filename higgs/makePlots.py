@@ -1,8 +1,6 @@
-#!/usr/bin/env python
 import sys,os
 
 from ROOT import *
-#import shutil
 import datetime
 
 import config as c
@@ -184,7 +182,7 @@ def makePlots(sel=1, dir="./", hPath="v00"):
         u.drawMultiPlot(imgpath+"Lepton/l05", "","Leading Lepton pt", "l1_pt_"+str(F0), 1, 0.1, 1e6, 0.5,1.49, li_ov, li_topbg, li_bg, sel)
         u.drawMultiPlot(imgpath+"Lepton/l06", "","Trailing Lepton pt", "l2_pt_"+str(F0), 1, 0.1, 1e6, 0.5,1.49, li_ov, li_topbg, li_bg, sel)
 
-        #u.drawMultiPlot(imgpath+"Lepton/l07", "","log(#pi - Angle(lep1, lep2))", "l0_angleLog_"+str(F0), 1, 0.1, 1e6, 0.5,1.49, li_ov, li_topbg, li_bg, sel)
+        u.drawMultiPlot(imgpath+"Lepton/l07", "","log(#pi - Angle(lep1, lep2))", "l0_angleLog_"+str(F0), 1, 0.1, 1e6, 0.5,1.49, li_ov, li_topbg, li_bg, sel)
         u.drawMultiPlot(imgpath+"Lepton/l08", "","Angle(lep1, lep2)", "l0_angle_"+str(F0), 1, 0.1, 1e6, 0.5,1.49, li_ov, li_topbg, li_bg, sel)
         u.drawMultiPlot(imgpath+"Lepton/l09", "","dPhi(lep1, lep2)", "l0_dPhi_"+str(F0), 1, 0.1, 1e6, 0.5,1.49, li_ov, li_topbg, li_bg, sel)
         u.drawMultiPlot(imgpath+"Lepton/l10", "","dEta(lep1, lep2)", "l0_dEta_"+str(F0), 1, 0.1, 1e6, 0.5,1.49, li_ov, li_topbg, li_bg, sel)
@@ -204,7 +202,7 @@ def makePlots(sel=1, dir="./", hPath="v00"):
         u.drawMultiPlot(imgpath+"Jet/j09", "","M(jet1, jet2), (GeV)", "jet_diM_"+str(F0), 1, 0.01, 1e5, 0.1,1.9, li_ov, li_topbg, li_bg, sel)
         u.drawMultiPlot(imgpath+"Jet/j10", "","dEta(jet1, jet2)", "jet_deltaEta_"+str(F0), 1, 0.01, 1e5, 0.1,1.9, li_ov, li_topbg, li_bg, sel)
         u.drawMultiPlot(imgpath+"Jet/j11", "","#eta* = #eta_{Z} - 0.5(#eta_{j1} + #eta_{j2})", "jet_zeppZ_"+str(F0), 1, 0.01, 1e5, 0.1,1.9, li_ov, li_topbg, li_bg, sel)
-        #u.drawMultiPlot(imgpath+"Jet/j12", "","y* = y_{Z} - 0.5(y_{j1} + y_{j2})", "jet_zeppZy_"+str(F0), 1, 0.01, 1e5, 0.1,1.9, li_ov, li_topbg, li_bg, sel)
+        u.drawMultiPlot(imgpath+"Jet/j12", "","y* = y_{Z} - 0.5(y_{j1} + y_{j2})", "jet_zeppZy_"+str(F0), 1, 0.01, 1e5, 0.1,1.9, li_ov, li_topbg, li_bg, sel)
         u.drawMultiPlot(imgpath+"Jet/j13", "","N jets pt>15 | #eta|<4.9", "jet_N15_"+str(F0), 1, 0.01, 1e5, 0.1,1.9, li_ov, li_topbg, li_bg, sel)
 
     if plotMet:
@@ -222,9 +220,9 @@ def makePlots(sel=1, dir="./", hPath="v00"):
 
     if plotMisc:
         u.drawMultiPlot(imgpath+"Misc/mis01", "","evts cut by cut", "evt_byCut", 1, 0.1, 1e6, 0,1.9, li_ov, li_topbg, li_bg, sel)
-        u.drawMultiPlot(imgpath+"Misc/mis02", "","nVtx total", "vtx_nPV_tot_"+str(F0), 1, 0.1, 1e6, 0,1.9, li_ov, li_topbg, li_bg, sel)
-        u.drawMultiPlot(imgpath+"Misc/mis03", "","nVtx raw", "vtx_nPV_raw_"+str(F0), 1, 0.1, 1e6, 0,1.9, li_ov, li_topbg, li_bg, sel)
-        u.drawMultiPlot(imgpath+"Misc/mis04", "","nVtx reweighted", "vtx_nPV_weight_"+str(F0), 1, 0.1, 1e6, 0,1.9, li_ov, li_topbg, li_bg, sel)
+        u.drawMultiPlot(imgpath+"Misc/mis02", "","nVtx total", "vtx_nPV_tot_"+str(F0), 0, 0.1, 1e4, 0,1.9, li_ov, li_topbg, li_bg, sel)
+        u.drawMultiPlot(imgpath+"Misc/mis03", "","nVtx raw", "vtx_nPV_raw_"+str(F0), 0, 0.1, 1e4, 0,1.9, li_ov, li_topbg, li_bg, sel)
+        u.drawMultiPlot(imgpath+"Misc/mis04", "","nVtx reweighted", "vtx_nPV_weight_"+str(F0), 0, 0.1, 1e4, 0,1.9, li_ov, li_topbg, li_bg, sel)
         u.drawMultiPlot(imgpath+"Misc/mis05", "","vtx 1 ndof", "vtx_ndof_1_"+str(F0), 1, 0.1, 1e6, 0,1.9, li_ov, li_topbg, li_bg, sel)
         u.drawMultiPlot(imgpath+"Misc/mis06", "","vtx 2 ndof", "vtx_ndof_2_"+str(F0), 1, 0.1, 1e6, 0,1.9, li_ov, li_topbg, li_bg, sel)
 

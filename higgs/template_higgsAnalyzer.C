@@ -1,4 +1,4 @@
-// $Id: template_higgsAnalyzer.C,v 1.48 2012/08/24 21:51:00 andrey Exp $
+// $Id: template_higgsAnalyzer.C,v 1.49 2012/09/05 19:51:33 andrey Exp $
 
 #define higgsAnalyzer_cxx
 
@@ -14,39 +14,39 @@ using namespace std;
 //Specify parameters here. //
 /////////////////////////////
 
-string  selection      = "SELECTION";
-string  period         = "PERIOD";
-int     JC_LVL         = 0;  //No JEC for Pat jets (they are already applied)
-int     trigger[]      = {TRIGGER};
-TString suffix("SUFFIX");
+const string  selection      = "SELECTION";
+const string  period         = "PERIOD";
+const int     JC_LVL         = 0;  //No JEC for Pat jets (they are already applied)
+const int     trigger[]      = {TRIGGER};
+const TString suffix("SUFFIX");
 
 vector<int> triggers (trigger, trigger + sizeof(trigger)/sizeof(int));
 
-UInt_t verboseLvl  = 1;
 Bool_t makeMvaTree = 0;
-Bool_t doZlibrary  = 0, isFromData=0;
+const UInt_t verboseLvl  = 0;
+const Bool_t doZlibrary  = 0, isFromData=0;
 
 /////////////////
 //Analysis cuts//
 /////////////////
 
-Float_t jetPtCut[]     = {30., 15.};
-Float_t bJetPtCut      = 30.;
-Float_t muPtCut[]      = {20., 10.};
-Float_t elePtCut[]     = {20., 10.};
-float   photonPtCut[]  = {25., 1e9};
-Float_t zMassCut1[]     = {76, 106};
-Float_t zMassCut2[]     = {70, 106};
-Float_t qtCut          = 55.;
-Int_t   nJetsCut[]     = {0, 99};
-Float_t cut_vz = 24, cut_vd0 = 2, cut_vndof = 4;  //PV filter cuts
+const Float_t jetPtCut[]     = {30., 15.};
+const Float_t bJetPtCut      = 30.;
+const Float_t muPtCut[]      = {20., 10.};
+const Float_t elePtCut[]     = {20., 10.};
+const Float_t photonPtCut[]  = {25., 1e9};
+const Float_t zMassCut1[]     = {76, 106};
+const Float_t zMassCut2[]     = {70, 106};
+const Float_t qtCut          = 55.;
+const Int_t   nJetsCut[]     = {0, 99};
+const Float_t cut_vz = 24, cut_vd0 = 2, cut_vndof = 4;  //PV filter cuts
 
 // Cuts for mass points in the PAS. 200, 250,300,350 etc
-Float_t dPhiMinCut = 0.5; //[] = {0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5};
+const Float_t dPhiMinCut = 0.5; //[] = {0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5};
 //Float_t dPhiMinCut[] = {0.47, 0.33, 0.21, 0.12, 0.06, 0.01, 0.00, 0.00};
-Float_t metMinCut[] = {75,   75,   85,  85,  90, 110,  110, 120, 120}; 
-Float_t mtMinCut[]  = {175, 225,  250,  300,  325,  350,  400, 450, 450};
-Float_t mtMaxCut[]  = {275, 325,  350,  400,  425,  500,  650, 700, 9999};
+const Float_t metMinCut[] = {75,   75,   85,  85,  90, 110,  110, 120, 120}; 
+const Float_t mtMinCut[]  = {175, 225,  250,  300,  325,  350,  400, 450, 450};
+const Float_t mtMaxCut[]  = {275, 325,  350,  400,  425,  500,  650, 700, 9999};
 
 //Float_t mva_lep1Pt, mva_lep2Pt, mva_diLepEta, mva_diLepPt, mva_diLepM;
 //Float_t mva_met, mva_mt, mva_dPhiJetMet, mva_metProjOnQt, mva_metPerpQt, mva_dPhiMetDiLep, mva_metOverQt;
@@ -77,31 +77,31 @@ TRandom3 *myRandom;
 #include "TMVA/MethodCuts.h"
 
 // TMVA weights directory
-TString weightsDir = "../data/mvaWeights";
+const TString weightsDir = "../data/mvaWeights";
 
 #define N_DISCR_METHODS 3
 // here we will use only BDTG... but will keep the structure 
 enum DISCR_METHOD {
   MLPBNN, BDTG, BDT
 };
-TString discrMethodName[3] = {
+const TString discrMethodName[3] = {
   "MLPBNN", "BDTG", "BDT"
 };
 
-TString discrSampleName = "allBg";
+const TString discrSampleName = "allBg";
 // multiplicities of jets for the discriminants                                                                                                                 
 #define  N_DISCR_JET_MULTI 3
 
 enum DISCR_JET_MULTI {
   D_0J, D_1J, D_GT1J
 };
-TString discrJetMultiName [N_DISCR_JET_MULTI] = {"0j", "1j", "gt1j"};
+const TString discrJetMultiName [N_DISCR_JET_MULTI] = {"0j", "1j", "gt1j"};
 
 
 #define N_HIGGS_MASSES 3
-Int_t mvaHiggsMassPoint[N_HIGGS_MASSES] = {125,200,250};
+const Int_t mvaHiggsMassPoint[N_HIGGS_MASSES] = {125,200,250};
 
-Float_t bdtCut[N_HIGGS_MASSES][3] = 
+const Float_t bdtCut[N_HIGGS_MASSES][3] = 
   {
     {-0.15, -0.07, -0.05},  //m125
     {0.0, 0.06, 0.05},      //m200
@@ -121,7 +121,7 @@ TMVA::Reader* tmvaReader[N_HIGGS_MASSES][3];
 //The events that Jucub cuts, but I keep:
 //UInt_t myEVTS[] = {};
 //Visa versa
-UInt_t hisEVTS[] = {3912507,3537222, 2260583, 4048415, 1972146, 1294493, 2879208, 65882, 696163, 4124071, 3263050, 640272};
+const UInt_t hisEVTS[] = {3912507,3537222, 2260583, 4048415, 1972146, 1294493, 2879208, 65882, 696163, 4124071, 3263050, 640272};
 
 
 void higgsAnalyzer::Begin(TTree * /*tree*/) 
@@ -276,7 +276,7 @@ void higgsAnalyzer::Begin(TTree * /*tree*/)
 
 	jet_diM[n]      = new TH1F(Form("jet_diM_%i",n), "Mass of di-jet system", 50, 0,2000);
 	jet_deltaEta[n] = new TH1F(Form("jet_deltaEta_%i",n), "Delta eta of two leading jets", 50, 0,10);
-	jet_zeppZ[n]    = new TH1F(Form("jet_zeppZ_%i",n), "Zeppenfeld variable wrt Z", 50,0,5);
+	jet_zeppZ[n]    = new TH1F(Form("jet_zeppZ_%i",n), "Zeppenfeld variable wrt Z", 50,-5,5);
         jet_zeppZy[n]   = new TH1F(Form("jet_zeppZy_%i",n), "Zeppenfeld-y variable wrt Z", 50,-5,5);
 
 	jet_b_N[n]    = new TH1F(Form("jet_b_N_%i",n), "Number of b-jets pt>default", 10,0,10);
@@ -410,8 +410,6 @@ void higgsAnalyzer::Begin(TTree * /*tree*/)
 	  }
 	}
       }
-    //Float_t mva_lep1Pt, mva_lep1Pt, mva_diLepPt, mva_diLepM, mva_met, mva_metProjOnQt, mva_metPerpQt, mva_diLepMetDeltaPhi, mva_mt;
-
               
     // Book the methods
     for (Int_t jm = 0; jm <3; ++jm)
@@ -1222,129 +1220,135 @@ bool higgsAnalyzer::Process(Long64_t entry)
       // -------------------------- MVA stuff -------------------------------------------
 #ifdef USE_MVA
 
-      //Only do this for Odd numbers because even numbers were used for training!!
-      if (eventNumber%2==1){   
+      // ** Only do this for Odd event numbers because even numbers were used for training!!
 
+      Bool_t skipEvent = kFALSE;     
+      if(selection=="muon" && !suffix.Contains("DATA")){
 	eventWeight*=2.0;
+	if (eventNumber%2==0) skipEvent = kTRUE;   
+      }
 
-      //Apply MVA cuts 
-
-      // *additional* cuts for the BDT pre-selection on top of the ones already applied
-      // assign values to the variables used in the BDT      
-      // get the MVA discriminators for the considered methods
-      
-      //             [higgs mass points]
-      Bool_t passBdtCut[N_HIGGS_MASSES] = {kFALSE, kFALSE, kFALSE};
-      Bool_t passAllBdtCuts[N_HIGGS_MASSES] = {kTRUE, kTRUE, kTRUE};
-      
-      
-      //                    [mva method][higgs mass point]
-      Float_t tmvaValue[N_DISCR_METHODS][N_HIGGS_MASSES] = {{-999.0, -999.0, -999.00}};
-      
-      Int_t discrJetMultiInd = D_0J;
-      if (nJets == 1) discrJetMultiInd = D_1J;
-      else if (nJets > 1) discrJetMultiInd = D_GT1J;
-      
-      int discr = BDT; // use only this one for now
-      //int discr = MLPBNN; // use only this one for now
-      
-      for (int mh = 0; mh<N_HIGGS_MASSES; ++mh) {
-	TString label = TString::Format("%s_%s_MVA_hzz%i_%s", discrMethodName[discr].Data(), discrSampleName.Data(),
-					mvaHiggsMassPoint[mh], discrJetMultiName[discrJetMultiInd].Data());
-	tmvaValue[discr][mh] = tmvaReader[mh][discrJetMultiInd]->EvaluateMVA(label.Data());
+      if(!skipEvent){
+	//Apply MVA cuts 
 	
-	mva_discr[mh][discrJetMultiInd] -> Fill(tmvaValue[discr][mh], eventWeight);
-	//cout<<"   ** TMVA value = "<<tmvaValue[discr][mh]<<endl;
-	if (tmvaValue[discr][mh] > bdtCut[mh][discrJetMultiInd]) passBdtCut[mh] = kTRUE;
-	passAllBdtCuts[mh] = (passAllBdtCuts[mh] && passBdtCut[mh]);
-      }
-            
-      // here we can count events, fill histograms etc
-      if (passAllBdtCuts[0])
-	//if (passAllBdtCuts[0] && Mll>76 && Mll<106 && fabs(lep1_eta)<1.4 && fabs(lep2_eta)<1.4)
-	{    
-	  CountEvents(21);
-	  nEventsWeighted[21] += eventWeight;
-	  FillHistosFull(21, eventWeight);
-	  FillHistosBasic(21, eventWeight);
-
-	  if(nJets==0){
-	    CountEvents(22);
-	    nEventsWeighted[22] += eventWeight;
-	    FillHistosFull(22, eventWeight);
-	    FillHistosBasic(22, eventWeight);
-	  }
-	  else if(nJets==1){
-	    CountEvents(23);
-	    nEventsWeighted[23] += eventWeight;
-	    FillHistosFull(23, eventWeight);
-	    FillHistosBasic(23, eventWeight);
-	  }
-	  else{
-	    CountEvents(24);
-	    nEventsWeighted[24] += eventWeight;
-	    FillHistosFull(24, eventWeight);
-	    FillHistosBasic(24, eventWeight);
-	  }
-	}
-
-      if (passAllBdtCuts[1])
-	{    
-	  CountEvents(25);
-	  nEventsWeighted[25] += eventWeight;
-	  FillHistosFull(25, eventWeight);
-	  FillHistosBasic(25, eventWeight);
-
-	  if(nJets==0){
-	    CountEvents(26);
-	    nEventsWeighted[26] += eventWeight;
-	    FillHistosFull(26, eventWeight);
-	    FillHistosBasic(26, eventWeight);
-	  }
-	  else if(nJets==1){
-	    CountEvents(27);
-	    nEventsWeighted[27] += eventWeight;
-	    FillHistosFull(27, eventWeight);
-	    FillHistosBasic(27, eventWeight);
-	  }
-	  else{
-	    CountEvents(28);
-	    nEventsWeighted[28] += eventWeight;
-	    FillHistosFull(28, eventWeight);
-	    FillHistosBasic(28, eventWeight);
-	  }
-	}
+	// *additional* cuts for the BDT pre-selection on top of the ones already applied
+	// assign values to the variables used in the BDT      
+	// get the MVA discriminators for the considered methods
       
-      if (passAllBdtCuts[2])
-	{    
-	  CountEvents(29);
-	  nEventsWeighted[29] += eventWeight;
-	  FillHistosFull(29, eventWeight);
-	  FillHistosBasic(29, eventWeight);
-
-	  if(nJets==0){
-	    CountEvents(30);
-	    nEventsWeighted[30] += eventWeight;
-	    FillHistosFull(30, eventWeight);
-	    FillHistosBasic(30, eventWeight);
-	  }
-	  else if(nJets==1){
-	    CountEvents(31);
-	    nEventsWeighted[31] += eventWeight;
-	    FillHistosFull(31, eventWeight);
-	    FillHistosBasic(31, eventWeight);
-	  }
-	  else{
-	    CountEvents(32);
-	    nEventsWeighted[32] += eventWeight;
-	    FillHistosFull(32, eventWeight);
-	    FillHistosBasic(32, eventWeight);
-	  }
+	//             [higgs mass points]
+	Bool_t passBdtCut[N_HIGGS_MASSES] = {kFALSE, kFALSE, kFALSE};
+	Bool_t passAllBdtCuts[N_HIGGS_MASSES] = {kTRUE, kTRUE, kTRUE};
+	
+	
+	//                    [mva method][higgs mass point]
+	Float_t tmvaValue[N_DISCR_METHODS][N_HIGGS_MASSES] = {{-999.0, -999.0, -999.00}};
+	
+	Int_t discrJetMultiInd = D_0J;
+	if (nJets == 1) discrJetMultiInd = D_1J;
+	else if (nJets > 1) discrJetMultiInd = D_GT1J;
+	
+	int discr = BDT; // use only this one for now
+	//int discr = MLPBNN; // use only this one for now
+	
+	for (int mh = 0; mh<N_HIGGS_MASSES; ++mh) {
+	  TString label = TString::Format("%s_%s_MVA_hzz%i_%s", discrMethodName[discr].Data(), discrSampleName.Data(),
+					  mvaHiggsMassPoint[mh], discrJetMultiName[discrJetMultiInd].Data());
+	  tmvaValue[discr][mh] = tmvaReader[mh][discrJetMultiInd]->EvaluateMVA(label.Data());
+	  
+	  mva_discr[mh][discrJetMultiInd] -> Fill(tmvaValue[discr][mh], eventWeight);
+	  //cout<<"   ** TMVA value = "<<tmvaValue[discr][mh]<<endl;
+	  if (tmvaValue[discr][mh] > bdtCut[mh][discrJetMultiInd]) passBdtCut[mh] = kTRUE;
+	  passAllBdtCuts[mh] = (passAllBdtCuts[mh] && passBdtCut[mh]);
 	}
-      
-      eventWeight/=2.0;
+	
+	// here we can count events, fill histograms etc
+	if (passAllBdtCuts[0])
+	  //if (passAllBdtCuts[0] && Mll>76 && Mll<106 && fabs(lep1_eta)<1.4 && fabs(lep2_eta)<1.4)
+	  {    
+	    CountEvents(21);
+	    nEventsWeighted[21] += eventWeight;
+	    FillHistosFull(21, eventWeight);
+	    FillHistosBasic(21, eventWeight);
+	    
+	    if(nJets==0){
+	      CountEvents(22);
+	      nEventsWeighted[22] += eventWeight;
+	      FillHistosFull(22, eventWeight);
+	      FillHistosBasic(22, eventWeight);
+	    }
+	    else if(nJets==1){
+	      CountEvents(23);
+	      nEventsWeighted[23] += eventWeight;
+	      FillHistosFull(23, eventWeight);
+	      FillHistosBasic(23, eventWeight);
+	    }
+	    else{
+	      CountEvents(24);
+	      nEventsWeighted[24] += eventWeight;
+	      FillHistosFull(24, eventWeight);
+	      FillHistosBasic(24, eventWeight);
+	    }
+	  }
+	
+	if (passAllBdtCuts[1])
+	  {    
+	    CountEvents(25);
+	    nEventsWeighted[25] += eventWeight;
+	    FillHistosFull(25, eventWeight);
+	    FillHistosBasic(25, eventWeight);
+	    
+	    if(nJets==0){
+	      CountEvents(26);
+	      nEventsWeighted[26] += eventWeight;
+	      FillHistosFull(26, eventWeight);
+	      FillHistosBasic(26, eventWeight);
+	    }
+	    else if(nJets==1){
+	      CountEvents(27);
+	      nEventsWeighted[27] += eventWeight;
+	      FillHistosFull(27, eventWeight);
+	      FillHistosBasic(27, eventWeight);
+	    }
+	    else{
+	      CountEvents(28);
+	      nEventsWeighted[28] += eventWeight;
+	      FillHistosFull(28, eventWeight);
+	      FillHistosBasic(28, eventWeight);
+	    }
+	  }
+	
+	if (passAllBdtCuts[2])
+	  {    
+	    CountEvents(29);
+	    nEventsWeighted[29] += eventWeight;
+	    FillHistosFull(29, eventWeight);
+	    FillHistosBasic(29, eventWeight);
+	    
+	    if(nJets==0){
+	      CountEvents(30);
+	      nEventsWeighted[30] += eventWeight;
+	      FillHistosFull(30, eventWeight);
+	      FillHistosBasic(30, eventWeight);
+	    }
+	    else if(nJets==1){
+	      CountEvents(31);
+	      nEventsWeighted[31] += eventWeight;
+	      FillHistosFull(31, eventWeight);
+	      FillHistosBasic(31, eventWeight);
+	    }
+	    else{
+	      CountEvents(32);
+	      nEventsWeighted[32] += eventWeight;
+	      FillHistosFull(32, eventWeight);
+	      FillHistosBasic(32, eventWeight);
+	    }
+	  }
+	
       }
 
+      if(selection=="muon" && !suffix.Contains("DATA"))
+	eventWeight/=2.0;
+      
 #endif
       // --------------------- End of MVA stuff -------------------
 
@@ -1504,7 +1508,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
 
 void higgsAnalyzer::Terminate()
 {
-  for (int i = 6; i < nC; ++i) fout[i].close();
+  for (int i = 2; i < nC; ++i) fout[i].close();
 
   cout<<"\nRunning over "<<suffix<<" dataset with "<<selection<<" selection."<<"\n"<<endl;
   cout<<"| CUT DESCRIPTION                  |\t"<< "\t|"<<endl;

@@ -30,17 +30,22 @@ class Params():
         "18. mvaTree, nj=0",
         "19. mvaTree, nj=1",
         "20. mvaTree, nj>1",
-        "21. MVA H",
-        "22. 0j bin",
-        "23. 1j bin",
-        "24. >1j bin",
-        "25. MVA H250",
-        "26. 0j",
-        "27. 1j",
-        "28. >1j",
+        "21. MVA H125",
+        "22. MVA H125 nj=0",
+        "23. MVA H125 nj=1",
+        "24. MVA H125 nj>1",
+        "25. MVA H200",
+        "26. MVA H200 nj=0",
+        "27. MVA H200 nj=1",
+        "28. MVA H200 nj>1",
+        "29. MVA H250",
+        "30. MVA H250 nj=0",
+        "31. MVA H250 nj=1",
+        "32. MVA H250 nj>1",
+    
         ]
         self._nominalHZZ = [1,2,3,4,5,6,7,8]
-        self._extraHZZ = [10,25,26,27,28,18,19,20]
+        self._extraHZZ = [18,19,20, 9,25,26,27,28, 10,29,30,31,32, 21,22,23,24]
 
         self._cutNamesVBFZ = [
         "0. Total",

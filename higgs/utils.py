@@ -161,7 +161,7 @@ def printYields(topbg_list, bg_list, sig1_list, sig2_list, sig3_list, data, sel,
     print "Yield are HTML mode"
     favMass="0"
     if "VBFZ" not in anaType:
-        favMass = "200"
+        favMass = anaType[3:]
         anaType ="HZZ"
 
     myParams =  c.Params().analysisParams(anaType)
@@ -169,7 +169,7 @@ def printYields(topbg_list, bg_list, sig1_list, sig2_list, sig3_list, data, sel,
     cutNames    = myParams[0]
     nominalCuts = myParams[1]
     extraCuts   = myParams[2]
-    lTot = 30   # Total number of cuts
+    lTot = 33   # Total number of cuts
     #lMax = 9 # Lines to print in the main table
     beginTable = '<table border = "10"    cellpadding="5">'
     endTable = '</table>'
@@ -320,10 +320,10 @@ def printYields(topbg_list, bg_list, sig1_list, sig2_list, sig3_list, data, sel,
 
     if "VBFZ" not in anaType:
         myTable += beginCellH
-        myTable += "ggHZZ "+favMass
+        myTable += "ggHZZ "
         myTable += endCellH
         myTable += beginCellH
-        myTable += "vbfHZZ "+favMass
+        myTable += "vbfHZZ "
         myTable += endCellH
     
     myTable += endLine
@@ -357,10 +357,10 @@ def printYields(topbg_list, bg_list, sig1_list, sig2_list, sig3_list, data, sel,
         myTable += endCell
         if "VBFZ" not in anaType:
             myTable += beginCell
-            myTable += '%d'% (Yields_sig1[l]["ggHZZ"+favMass][0])
+            #myTable += ''
             myTable += endCell
             myTable += beginCell
-            myTable += '%d'% (Yields_sig2[l]["VBFHZZ"+favMass][0])
+            #myTable += '%d'% (Yields_sig2[l]["VBFHZZ"+favMass][0])
             myTable += endCell
             
         myTable += endLine
@@ -370,7 +370,7 @@ def printYields(topbg_list, bg_list, sig1_list, sig2_list, sig3_list, data, sel,
 
         if l in [18,19,20]:
             myTable += beginLineGreen
-        elif l in [10,25,21]:
+        elif l in [9,10,29,25,21]:
             myTable += beginLineBlue
         else:
             myTable += beginLine
@@ -401,11 +401,18 @@ def printYields(topbg_list, bg_list, sig1_list, sig2_list, sig3_list, data, sel,
         myTable += endCell
         if "VBFZ" not in anaType:
             myTable += beginCell
-            myTable += '%0.2f'% (Yields_sig1[l]["ggHZZ"+favMass][0])
+            if l in [21,22,23,24]:
+                hMass = "125"
+            elif l in [9,25,26,27,28]:
+                hMass = "200"
+            elif l in [10,29,30,31,32]:
+                hMass = "250"
+            else: hMass=favMass
+            myTable += '%0.2f'% (Yields_sig1[l]["ggHZZ"+hMass][0])
             #myTable += '%0.1f &pm; %0.1f'% (Yields_sig1[l]["ggHZZ250"][0], Yields_sig1[l]["ggHZZ250"][1])
             myTable += endCell
             myTable += beginCell
-            myTable += '%0.2f'% (Yields_sig2[l]["VBFHZZ"+favMass][0])
+            myTable += '%0.2f'% (Yields_sig2[l]["VBFHZZ"+hMass][0])
             myTable += endCell
         myTable += endLine
         
@@ -493,7 +500,7 @@ def drawMultiPlot(fname,maintitle, xtitle, h_name, isLog, y1min, y1max, y2min, y
         print "To many plots to overlay"
         sys.exit(0)
 
-    print "size of the list", size
+    #print "size of the overlay list", size
 
     h_data = None
     sig = []
