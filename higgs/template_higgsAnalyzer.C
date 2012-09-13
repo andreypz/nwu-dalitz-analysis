@@ -1,4 +1,4 @@
-// $Id: template_higgsAnalyzer.C,v 1.49 2012/09/05 19:51:33 andrey Exp $
+// $Id: template_higgsAnalyzer.C,v 1.50 2012/09/06 18:33:12 andrey Exp $
 
 #define higgsAnalyzer_cxx
 
@@ -42,16 +42,10 @@ const Int_t   nJetsCut[]     = {0, 99};
 const Float_t cut_vz = 24, cut_vd0 = 2, cut_vndof = 4;  //PV filter cuts
 
 // Cuts for mass points in the PAS. 200, 250,300,350 etc
-const Float_t dPhiMinCut = 0.5; //[] = {0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5};
-//Float_t dPhiMinCut[] = {0.47, 0.33, 0.21, 0.12, 0.06, 0.01, 0.00, 0.00};
+const Float_t dPhiMinCut = 0.5;
 const Float_t metMinCut[] = {75,   75,   85,  85,  90, 110,  110, 120, 120}; 
 const Float_t mtMinCut[]  = {175, 225,  250,  300,  325,  350,  400, 450, 450};
 const Float_t mtMaxCut[]  = {275, 325,  350,  400,  425,  500,  650, 700, 9999};
-
-//Float_t mva_lep1Pt, mva_lep2Pt, mva_diLepEta, mva_diLepPt, mva_diLepM;
-//Float_t mva_met, mva_mt, mva_dPhiJetMet, mva_metProjOnQt, mva_metPerpQt, mva_dPhiMetDiLep, mva_metOverQt;
-//Float_t mva_deltaEtaDiJet, mva_massDiJet, mva_zeppDiJetDiLep;
-//UInt_t mva_nJets, mva_nJets15;
 
 Float_t mva_weight, mva_nJets15;
 
@@ -315,7 +309,7 @@ void higgsAnalyzer::Begin(TTree * /*tree*/)
       ffout.precision(4); ffout.setf(ios::fixed, ios::floatfield);
       for(Int_t i=0; i<nC; i++)
 	{
-	  if (i!=2 && i!=4 && i!=8) continue;
+	  if (i!=2 && i!=29) continue;
 	  fout[i].open(Form("./events_printout_SUFFIX_%i.txt",i),ofstream::out);
 	  fout[i].precision(3); fout[i].setf(ios::fixed, ios::floatfield);
 	  fout[i]<<
@@ -451,7 +445,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
     //cout<<"event #"<<nEvents[0]<<endl;
     if (nEvents[0] == 1) weighter->SetDataBit(isRealData);
 
-    //if(nEvents[0]>1000) Abort("\t\t  ** 200 EVENTS PASSED, FINISH   ** ");
+    //if(nEvents[0]>100) Abort("\t\t  ** 200 EVENTS PASSED, FINISH   ** ");
 
     /*
     for(Int_t ev=0; ev<10;ev++)
@@ -584,7 +578,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
 
         if (elecPass) { 
             if (
-                    thisElec->Pt() > 10  
+                    thisElec->Pt() > 10.0
                     && thisElec->PassConversion(80)
                     && fabs(thisElec->Dxy(pvPosition)) < 0.02
                     && fabs(thisElec->Dz(pvPosition))  < 0.1
@@ -653,7 +647,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
 	      )) continue;
 	
         if (
-	    thisMuon->Pt() > 3
+	    thisMuon->Pt() > 3.0
 	    && thisMuon->NumberOfValidTrackerHits() > 10
 	    && fabs(thisMuon->Dxy(pvPosition)) < 0.3
 	    && fabs(thisMuon->Dz(pvPosition))  < 0.30 
@@ -667,20 +661,20 @@ bool higgsAnalyzer::Process(Long64_t entry)
 	     && thisMuon->NumberOfValidTrackerHits() > 10
 	     && thisMuon->NumberOfValidPixelHits()   > 0
 	     && thisMuon->NumberOfMatches() > 1
-	     && thisMuon->NormalizedChi2()  < 10
+	     && thisMuon->NormalizedChi2()  < 10.0
 	     && fabs(thisMuon->Dxy(pvPosition)) < 0.02
 	     && fabs(thisMuon->Dz(pvPosition))  < 0.1 
 	     && (thisMuon->TrkIso() + thisMuon->HadIso() + thisMuon->EmIso() - rhoFactor*TMath::Pi()*0.09)/thisMuon->Pt() < 0.15
 	     )	  muons.push_back(*thisMuon);
      
 	} else if (
-		   thisMuon->Pt() > 10 
+		   thisMuon->Pt() > 10.
 		   //&& thisMuon->Pt() <= muPtCut[0] 
 		   && thisMuon->NumberOfValidMuonHits()    > 0
 		   && thisMuon->NumberOfValidTrackerHits() > 2 
 		   && thisMuon->NumberOfValidPixelHits()   > 0
 		   && thisMuon->NumberOfMatches() > 0
-		   && thisMuon->NormalizedChi2()  < 9999
+		   && thisMuon->NormalizedChi2()  < 9999.
 		   && fabs(thisMuon->Dxy(pvPosition)) < 0.2
 		   && fabs(thisMuon->Dz(pvPosition))  < 0.2
 		   //&& (thisMuon->TrkIso() + thisMuon->HadIso() + thisMuon->EmIso() - rhoFactor*TMath::Pi()*0.09)/thisMuon->Pt() < 0.15
@@ -704,7 +698,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
 	  //cout<<i+1<<" dbg  pt: "<<thisPhoton->Pt()<<"  eta: "<< thisPhoton->Eta()<<endl;
 	  if (thisPhoton->Pt() < photonPtCut[0] || thisPhoton->Pt() > photonPtCut[1]) continue;	  
 	  if ( 
-	      thisPhoton->Pt() >10
+	      thisPhoton->Pt() >10.0
 	      //&& thisPhoton->EmIso()         < (4.2 + 0.006 *thisPhoton->Pt())
 	      //&& thisPhoton->HadIso()        < (2.2 + 0.0025*thisPhoton->Pt())
 	      //&& thisPhoton->TrkIso()        < (2.0 + 0.001 *thisPhoton->Pt())
@@ -761,8 +755,8 @@ bool higgsAnalyzer::Process(Long64_t entry)
 	    && thisJet->NeuHadFrac() < 0.99
 	    && thisJet->NeuEmFrac()  < 0.99
 	    && thisJet->ChEmFrac()   < 0.99
-	    && thisJet->ChHadFrac()  > 0
-	    && thisJet->NumChPart()  > 0
+	    && thisJet->ChHadFrac()  > 0.0
+	    && thisJet->NumChPart()  > 0.0
 
 	    //&& thisJet->P4(JC_LVL).Pt() > jetPtCut[0]
 	    ) {
@@ -963,64 +957,43 @@ bool higgsAnalyzer::Process(Long64_t entry)
     ///////////////////
     
     if (!isRealData && (suffix.Contains("HZZ") || suffix.Contains("HWW") )) {
-      vector<TLorentzVector> genLeptons;
-      vector<TLorentzVector> genNeutrinos;
-    
+      
       // NLO k-faktors weights
       for (int i = 0; i < genParticles->GetSize(); ++i) {
     	TCGenParticle* thisParticle = (TCGenParticle*) genParticles->At(i);    
 	
-    	if (
-    	    (fabs(thisParticle->GetPDGId()) == 11 
-    	     || fabs(thisParticle->GetPDGId()) == 13 
-    	     || fabs(thisParticle->GetPDGId()) == 15) 
-    	    && thisParticle->Mother() ==23
-    	    ) genLeptons.push_back(thisParticle->P4());
-	
-    	if (
-    	    (fabs(thisParticle->GetPDGId()) == 12 
-    	     || fabs(thisParticle->GetPDGId()) == 14 
-    	     || fabs(thisParticle->GetPDGId()) == 16) 
-    	    && thisParticle->Mother() ==23
-    	    ) genNeutrinos.push_back(thisParticle->P4());
-
-
-    	//if (thisParticle->GetPDGId() == 25)
-    	// {
-    	//
-    	// }
-      }
-
-      if (genLeptons.size() > 1 && genNeutrinos.size() > 1) {
-    	hig_Pt   = (genLeptons[0]+genLeptons[1]+genNeutrinos[0]+genNeutrinos[1]).Pt();
-    	hig_M    = (genLeptons[0]+genLeptons[1]+genNeutrinos[0]+genNeutrinos[1]).M();
-
-    	Int_t i_mass = 0;
-    	if (suffix.Contains("ggHZZ") || suffix.Contains("ggHWW")) {
-    	  i_mass = TString(suffix(5,3)).Atoi();
-    	  //eventWeight *= weighter->GluGluHiggsWeight(hig_Pt, i_mass);
-    	} 
-    	else if (suffix.Contains("VBFHZZ")){
-    	  i_mass = TString(suffix(6,3)).Atoi(); //for vbf name
-    	}
-	
-    	//cout<<"nPU vertic = "<<nPUVertices<<"  eventWeight before reweighting  "<<eventWeight<<endl;
-	
-    	// Higgs mass lineshapes weights
-    	//eventWeight *= weighter->HiggsMassLineShapeWeight(hig_M, i_mass);
-    	//cout<<"imass: "<<i_mass<<"   genMass from gen Z's: "<<hig_M<<"   eventWeight= "<<eventWeight<<endl;	  
-
-      }
-      
-      //cout<<"Higgs Pt and Mass form ZZ: "<<hig_Pt<<"  "<<hig_M<<endl;
-      
+    	if (thisParticle->GetPDGId() == 25 && thisParticle->Mother()==25)
+	  {
+	    //cout<<"   * Found a higgs in evt# = "<<eventNumber<<"   weight before = "<<eventWeight<<endl;
+	    //cout<<"Mother:  "<<thisParticle->Mother()<<endl;
+	    Int_t i_mass = 0;
+	    if (suffix.Contains("ggHZZ") || suffix.Contains("ggHWW")) {
+	      i_mass = TString(suffix(5,3)).Atoi();
+	      
+	      hig_Pt = thisParticle->Pt();
+	      hig_M  = thisParticle->P4().M();
+	      eventWeight *= weighter->GluGluHiggsWeight(hig_Pt, i_mass);
+	      
+	      //cout<<i_mass<<" Higgs Pt and Mass: "<<hig_Pt<<"  "<<hig_M<<"   weight after = "<<eventWeight<<endl;
+	    }
+ 
+	    else if (suffix.Contains("VBFHZZ")){
+	      i_mass = TString(suffix(6,3)).Atoi(); //for vbf name
+	    }
+	    
+	    // Higgs mass lineshapes weights
+	    //eventWeight *= weighter->HiggsMassLineShapeWeight(hig_M, i_mass);
+	    //cout<<"imass: "<<i_mass<<"   genMass from gen Z's: "<<hig_M<<"   eventWeight= "<<eventWeight<<endl; 
+	    
+    	 }
+      }      
     }
    
     //cout<<"dbg"<<endl;    
 
 
    if(selection  == "muon" ||  selection  == "electron")
-     if (Lepton1.Pt() < 20 || Lepton2.Pt() < 20) //reject[3]=1;
+     if (Lepton1.Pt() < 20.0 || Lepton2.Pt() < 20.0) //reject[3]=1;
        return kTRUE;
 
    /*
@@ -1262,7 +1235,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
 	}
 	
 	// here we can count events, fill histograms etc
-	if (passAllBdtCuts[0])
+	if (passAllBdtCuts[0]) //h125
 	  //if (passAllBdtCuts[0] && Mll>76 && Mll<106 && fabs(lep1_eta)<1.4 && fabs(lep2_eta)<1.4)
 	  {    
 	    CountEvents(21);
@@ -1290,7 +1263,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
 	    }
 	  }
 	
-	if (passAllBdtCuts[1])
+	if (passAllBdtCuts[1]) //h200
 	  {    
 	    CountEvents(25);
 	    nEventsWeighted[25] += eventWeight;
@@ -1317,12 +1290,14 @@ bool higgsAnalyzer::Process(Long64_t entry)
 	    }
 	  }
 	
-	if (passAllBdtCuts[2])
+	if (passAllBdtCuts[2])  //h250
 	  {    
 	    CountEvents(29);
 	    nEventsWeighted[29] += eventWeight;
 	    FillHistosFull(29, eventWeight);
 	    FillHistosBasic(29, eventWeight);
+	    if(verboseLvl>0)
+	      PrintOut(29,kTRUE);
 	    
 	    if(nJets==0){
 	      CountEvents(30);

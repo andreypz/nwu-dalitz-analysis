@@ -16,8 +16,8 @@ if nargs>1 and sys.argv[1]=="ele":
     
 period    = '2011'
 doTest    = 0
-doData    = 1
-doBG      = 1
+doData    = 0
+doBG      = 0
 doSignal  = 1
 
 ''' 
@@ -29,7 +29,8 @@ test = []
 test.extend([
 #b.JobConfig('vbfZ', dCache+'/naodell/March18/MC/VBFZ', 10, 'vbfZ 0 '+selection+' '+period, selection),
 #b.JobConfig('WW', '/eos/uscms/store/user/bpollack/May15/MC/WWJets/', 1, 'WW 0 '+selection+' '+period, selection),
-b.JobConfig('ggHZZ550', dCache+'/andreypz/nuTuples_v1_7TeV/ggHZZ550', 1, 'ggHZZ550 0 '+selection+' '+period, selection),
+b.JobConfig('ggHZZ250', dCache+'/andreypz/nuTuples_v1_7TeV/ggHZZ250', 1, 'ggHZZ250 0 '+selection+' '+period, selection),
+#b.JobConfig('ggHZZ125', dCache+'/andreypz/nuTuples_v1_7TeV/ggHZZ125', 1, 'ggHZZ125 0 '+selection+' '+period, selection),
 #b.JobConfig('DoubleEle_Run2011A', dCache+'/andreypz/nuTuples_v1_7TeV/DoubleElectron_HZZ_Run2011A', 30, 'DATA 16,17,18 electron 2011A', selection),
 #b.JobConfig('DoubleEle_Run2011B', dCache+'/andreypz/nuTuples_v1_7TeV/DoubleElectron_HZZ_Run2011B', 30, 'DATA 16,17,18 electron 2011B', selection),
 #b.JobConfig('DYjets', dCache+'/andreypz/nuTuples_v1_7TeV/DYJetsToLL', 30, 'DYjets 0 '+selection+' '+period, selection),

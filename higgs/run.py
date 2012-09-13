@@ -10,8 +10,8 @@ import shutil
 import config as c
 
 
-period    = "2011A"
-sample    = "ggHZZ400"
+period    = "2011"
+sample    = "ggHZZ250"
 selection = "muon"
 trigger   = "0"
 isbatch   = ""

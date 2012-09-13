@@ -29,12 +29,19 @@ WeightUtils::WeightUtils(string sampleName, string dataPeriod, string selection,
     //h1_recoilTransElectron  = (TH1D*)_inFile->Get("h1_electronRecoilTransWeight");
 
     // higgs pt weights
-    for (int i = 0; i < 8; ++i) {
-        int higgsMass = 250+50*i;
-        TFile *higgsFile = new TFile(Form("../data/Kfactors_%i_AllScales.root", higgsMass), "OPEN");
-	TH1D *h1_tmp = (TH1D*)higgsFile->GetDirectory("kfactors")->Get(Form("kfact_mh%i_ren%i_fac%i", higgsMass, higgsMass, higgsMass));
-        h1_Higgs[i] = (TH1D*)h1_tmp->Clone();
-        //higgsFile->Close();
+    for (int i = 0; i < 10; ++i) {
+      int higgsMass =0;
+      if (i==0)
+	higgsMass = 125;
+      else
+        higgsMass = 200+ 50*(i-1);
+      
+      TFile *higgsFile = new TFile(Form("../data/Kfactors_%i_AllScales.root", higgsMass), "OPEN");
+      TH1D *h1_tmp = (TH1D*)higgsFile->GetDirectory("kfactors")->Get(Form("kfact_mh%i_ren%i_fac%i", higgsMass, higgsMass, higgsMass));
+      
+      h1_Higgs[i] = (TH1D*)h1_tmp->Clone();
+      //higgsFile->Close();
+      
     }
 }
 
@@ -172,7 +179,11 @@ c     w : the reweighting factor
 
 float WeightUtils::GluGluHiggsWeight(float higgsPt, int higgsMass) 
 {
-    int iMass = (higgsMass - 250)/50;
+  int iMass = 0;
+  if (higgsMass==125)
+    iMass = 0;
+  else
+    iMass = 1+(higgsMass - 200)/50;
     _glugluWeight = h1_Higgs[iMass]->GetBinContent(h1_Higgs[iMass]->FindBin(higgsPt));
     return _glugluWeight;
 }

@@ -5,9 +5,14 @@ https://twiki.cern.ch/twiki/bin/view/CMS/UserCodeNWUHiggs
 
 The log of changes:
 
+2012-Sep-06
+ * V02-08 tag:
+   * MVA for low masses is done (weights are in data). 
+   * Added variables for mva trees. 
+   * Plotting script improved and more...
 
 2012-Aug-23
- *Recent tags: 
+ * Recent tags: 
    * V02-07 - Updated MVA cuts, tree maker and training  
    * V02-05 - Workable MVA code 
    * V02-03 - Added rochcor function for correcting muons, nJets histogram for jets in eta<2.5; 
