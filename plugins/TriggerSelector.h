@@ -23,7 +23,7 @@ class TriggerSelector: public TObject {
         TriggerSelector();
         virtual ~TriggerSelector();
         TriggerSelector(string selection, string dataPeriod, vector<int> triggers);
-        bool SelectTriggers(unsigned int triggerStatus, int hltPrescale[]);
+        bool SelectTriggers(unsigned int triggerStatus, UInt_t hltPrescale[]);
         bool PhotonTriggerBins(float photonPt, bool isoTriggers) const;
         int GetEventPrescale() const;
         int GetPassTrigger() const;

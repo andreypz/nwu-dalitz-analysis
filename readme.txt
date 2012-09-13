@@ -5,6 +5,11 @@ https://twiki.cern.ch/twiki/bin/view/CMS/UserCodeNWUHiggs
 
 The log of changes:
 
+2012-Sep-13
+ * V02-09 tag
+   * k-factors for mH 125 and 200
+   * commit before moving to a new ntuple format
+   
 2012-Sep-06
  * V02-08 tag:
    * MVA for low masses is done (weights are in data). 

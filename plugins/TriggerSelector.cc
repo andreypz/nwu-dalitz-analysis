@@ -11,14 +11,14 @@ TriggerSelector::TriggerSelector(string selection, string dataPeriod, vector<int
     _triggers   = triggers;
 }
 
-bool TriggerSelector::SelectTriggers(unsigned int triggerStatus, int hltPrescale[])
+bool TriggerSelector::SelectTriggers(unsigned int triggerStatus, UInt_t hltPrescale[])
 {
     _eventPrescale = -1;
     _passTrigger   = 0;
     _eventPass     = false; 
 
     if (_triggers[0] != 0) { 
-        int prescale = 1e9;
+        UInt_t prescale = 1e9;
         for (int i = 0; i < _triggers.size(); ++i) {
             unsigned int iHLT = 0x01 << (_triggers[i] - 1);  
 

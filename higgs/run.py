@@ -61,6 +61,8 @@ else:
 gSystem.Load("../plugins/libShapeLine.so");
 
 gROOT.LoadMacro("../plugins/rochcor.cc+");
+
+gROOT.LoadMacro("../src/TCPhysObject.cc+");
 gROOT.LoadMacro("../src/TCJet.cc+");
 gROOT.LoadMacro("../src/TCMET.cc+");
 gROOT.LoadMacro("../src/TCElectron.cc+");
