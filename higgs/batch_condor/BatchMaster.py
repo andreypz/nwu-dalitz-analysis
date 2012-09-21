@@ -1,4 +1,4 @@
-import os, subprocess, fileinput, pickle, math, tempfile
+import os, subprocess, fileinput, math, tempfile
 
 class JobConfig():
     '''Class for storing configuration for each dataset'''

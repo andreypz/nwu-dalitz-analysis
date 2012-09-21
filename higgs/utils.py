@@ -4,8 +4,7 @@ import sys,os
 from ROOT import *
 import config as c
 
-
-def  makeMvaTrees(outpath, bg_list, sig1_list, sig2_list, sel):
+def makeMvaTrees(outpath, bg_list, sig1_list, sig2_list, sel):
     print "\n  ** Creating mva trees ***"
     fbg_train = TFile(outpath+"allBg_train.root","RECREATE")
     fbg_test  = TFile(outpath+"allBg_test.root","RECREATE")
@@ -157,7 +156,117 @@ def fillStruct(stuff, evt, sel, sample):
     stuff.fullWeight = evt.weight* float(lumi*xc[sample][2])/xc[sample][3]
 
 
-def printYields(topbg_list, bg_list, sig1_list, sig2_list, sig3_list, data, sel, filename, anaType="HZZ250",mode="scaled"):
+def calcYields(bg_list, sig1_list, sig2_list, sig3_list, data, sel, mode="scaled"):
+
+    lumi = c.Params().getLumi(sel)
+
+    lTot = 33   # Total number of cuts
+
+
+    Yields_data = []
+    Yields_data_err = []
+
+    Yields_bg = []
+    Yields_sig1 = []
+    Yields_sig2 = []
+    
+
+    for l in range(0,lTot):
+
+        # Data yields:
+        if data != None:
+            dd = data.Get("Andrey/met0_et_"+str(l)).Clone()
+            derr = Double(0)
+            bins = dd.GetNbinsX()
+            dy = dd.IntegralAndError(0, bins+1, derr)
+            Yields_data.append(dy)
+            Yields_data_err.append(derr)
+        else:
+            Yields_data.append(0)
+            Yields_data_err.append(0)
+            
+
+        Yields_bg_per_cut = {}
+        Yields_sig1_per_cut = {}
+        Yields_sig2_per_cut = {}
+
+        # Yields of backgrounds:
+        #Handle single top backgrounds
+        t  = []
+        terr =[]
+
+        top_bg = []
+        
+        for b in bg_list:
+            #print b, bg_list[b]
+            h = bg_list[b].Get("Andrey/met0_et_"+str(l)).Clone()
+            sample = bg_list[b].Get("Andrey/evt_byCut").GetTitle()
+            if mode=="scaled" and l!=0:
+                handleOverflowBinsScaleAndColors(h, sample, lumi)
+            err = Double(0)
+            
+            bins = h.GetNbinsX()
+            y = h.IntegralAndError(0, bins+1, err)
+            #print sample, y
+
+            Yields_bg_per_cut[sample] = ([y,err])
+
+        if b in ["tW","tbarW"]:
+            top_bg.append(b)
+    
+        for t in top_bg:
+            Yields_bg_per_cut["Top"][0] += Yields_bg_per_cut[b][0]
+            Yields_bg_per_cut["Top"][1] += Yields_bg_per_cut[b][1]
+            
+
+        Yields_bg.append(Yields_bg_per_cut)
+
+        # Yields of the signals:
+        for s in sig1_list:
+            h = sig1_list[s].Get("Andrey/met0_et_"+str(l)).Clone()
+            sample = sig1_list[s].Get("Andrey/evt_byCut").GetTitle()
+            #print l, sample
+            if mode=="scaled" and l!=0:
+                handleOverflowBinsScaleAndColors(h, sample, lumi)
+            err = Double(0)
+            
+            bins = h.GetNbinsX()
+            y = h.IntegralAndError(0, bins+1, err)
+            #y = s.Get("Andrey/evt_byCut").GetBinContent(l+1)
+
+            #print "integral = ", y
+            Yields_sig1_per_cut[sample] = ([y,err])
+
+        Yields_sig1.append(Yields_sig1_per_cut)
+
+        # Yields of the signals:
+        for s in sig2_list:
+            h = sig2_list[s].Get("Andrey/met0_et_"+str(l)).Clone()
+            sample = sig2_list[s].Get("Andrey/evt_byCut").GetTitle()
+            #print l, sample
+            if mode=="scaled" and l!=0:
+                handleOverflowBinsScaleAndColors(h, sample, lumi)
+            err = Double(0)
+            
+            bins = h.GetNbinsX()
+            y = h.IntegralAndError(0, bins+1, err)
+            #y = s.Get("Andrey/evt_byCut").GetBinContent(l+1)
+
+            #print "integral = ", y
+            Yields_sig2_per_cut[sample] = ([y,err])
+
+        Yields_sig2.append(Yields_sig2_per_cut)
+
+    return [Yields_data, Yields_bg, Yields_sig1, Yields_sig2]
+
+def printYields(bg_list, sig1_list, sig2_list, sig3_list, data, sel, filename, anaType="HZZ250", mode="scaled"):
+
+    y = calcYields(bg_list, sig1_list, sig2_list, sig3_list, data, sel, mode)
+    Yields_data = y[0]
+    Yields_bg   = y[1]
+    Yields_sig1 = y[2]
+    Yields_sig2 = y[3]
+    
     print "Yield are HTML mode"
     favMass="0"
     if "VBFZ" not in anaType:
@@ -169,7 +278,8 @@ def printYields(topbg_list, bg_list, sig1_list, sig2_list, sig3_list, data, sel,
     cutNames    = myParams[0]
     nominalCuts = myParams[1]
     extraCuts   = myParams[2]
-    lTot = 33   # Total number of cuts
+    bgOrder     = myParams[3]
+    #lTot = 33   # Total number of cuts
     #lMax = 9 # Lines to print in the main table
     beginTable = '<table border = "10"    cellpadding="5">'
     endTable = '</table>'
@@ -185,119 +295,6 @@ def printYields(topbg_list, bg_list, sig1_list, sig2_list, sig3_list, data, sel,
     beginLineGreen = '<tr style="background-color:LightGreen">'
     beginLineBlue = '<tr style="background-color:LightBlue">'
 
-
-    lumi = c.Params().getLumi(sel)
-
-
-    yields_data = []
-    yields_data_err = []
-
-    Yields_bg = []
-    Yields_sig1 = []
-    Yields_sig2 = []
-    
-
-    for l in range(0,lTot):
-
-        # Data yields:
-        if data != None:
-            dd = data.Get("Andrey/met0_et_"+str(l)).Clone()
-            derr = Double(0)
-            bins = dd.GetNbinsX()
-            dy = dd.IntegralAndError(0, bins+1, derr)
-            yields_data.append(dy)
-            yields_data_err.append(derr)
-        else:
-            yields_data.append(0)
-            yields_data_err.append(0)
-            
-
-        Yields_bg_per_cut = {}
-        Yields_sig1_per_cut = {}
-        Yields_sig2_per_cut = {}
-
-        # Yields of backgrounds:
-        #Handle single top backgrounds
-        t  = []
-        terr =[]
-        
-        #print "length of topbg list", len(topbg_list)
-        for b in topbg_list:
-            h = b.Get("Andrey/met0_et_"+str(l)).Clone()
-            sample = b.Get("Andrey/evt_byCut").GetTitle()
-            #print sample
-            if mode=="scaled":
-                handleOverflowBinsScaleAndColors(h, sample, lumi)
-            err = Double(0)
-            bins = h.GetNbinsX()
-            y = h.IntegralAndError(0, bins+1, err)
-            t.append(y)
-            terr.append(err)
-
-        ysum = 0
-        toterr = 0
-        for a in t:
-            ysum += a
-        for a in terr:
-            toterr += a
-
-        Yields_bg_per_cut["Top"] = ([ysum, toterr])
-
-                                                                    
-        # All the other backgrounds
-        for b in bg_list:
-            h = b.Get("Andrey/met0_et_"+str(l)).Clone()
-            sample = b.Get("Andrey/evt_byCut").GetTitle()
-            if mode=="scaled":
-                handleOverflowBinsScaleAndColors(h, sample, lumi)
-            err = Double(0)
-            
-            bins = h.GetNbinsX()
-            y = h.IntegralAndError(0, bins+1, err)
-            #print sample, y
-
-            Yields_bg_per_cut[sample] = ([y,err])
-
-        Yields_bg.append(Yields_bg_per_cut)
-
-      
-        # Yields of the signals:
-        for s in sig1_list:
-            h = s.Get("Andrey/met0_et_"+str(l)).Clone()
-            sample = s.Get("Andrey/evt_byCut").GetTitle()
-            #print l, sample
-            if mode=="scaled":
-                handleOverflowBinsScaleAndColors(h, sample, lumi)
-            err = Double(0)
-            
-            bins = h.GetNbinsX()
-            y = h.IntegralAndError(0, bins+1, err)
-            #y = s.Get("Andrey/evt_byCut").GetBinContent(l+1)
-
-            #print "integral = ", y
-            Yields_sig1_per_cut[sample] = ([y,err])
-
-        Yields_sig1.append(Yields_sig1_per_cut)
-
-        # Yields of the signals:
-        for s in sig2_list:
-            h = s.Get("Andrey/met0_et_"+str(l)).Clone()
-            sample = s.Get("Andrey/evt_byCut").GetTitle()
-            #print l, sample
-            if mode=="scaled":
-                handleOverflowBinsScaleAndColors(h, sample, lumi)
-            err = Double(0)
-            
-            bins = h.GetNbinsX()
-            y = h.IntegralAndError(0, bins+1, err)
-            #y = s.Get("Andrey/evt_byCut").GetBinContent(l+1)
-
-            #print "integral = ", y
-            Yields_sig2_per_cut[sample] = ([y,err])
-
-        Yields_sig2.append(Yields_sig2_per_cut)
-
-    #print Yields_bg
     myTable += beginTable
     
     myTable += beginLine
@@ -305,10 +302,12 @@ def printYields(topbg_list, bg_list, sig1_list, sig2_list, sig3_list, data, sel,
     myTable += endCell
     
     # Make the first line of the table
-    for k, v in Yields_bg[0].iteritems():
-        #print k, v
+    #for k, v in Yields_bg[l].iteritems():
+    for b in bgOrder:
+        if b not in Yields_bg[0].keys(): continue
+        v = Yields_bg[0][b]
         myTable += beginCellH
-        myTable += k
+        myTable += b
         myTable += endCellH
             
     myTable += beginCellH
@@ -327,7 +326,7 @@ def printYields(topbg_list, bg_list, sig1_list, sig2_list, sig3_list, data, sel,
         myTable += endCellH
     
     myTable += endLine
-            
+    
     for l in nominalCuts:
         if l%2 == 0:
             myTable += beginLineGrey
@@ -340,8 +339,12 @@ def printYields(topbg_list, bg_list, sig1_list, sig2_list, sig3_list, data, sel,
         
         total_bg=0
         total_err=0
-        for k, v in Yields_bg[l].iteritems():
-            #print k, v
+
+        #for k, v in Yields_bg[l].iteritems():
+        for b in bgOrder:
+            if b not in Yields_bg[l].keys(): continue
+            v = Yields_bg[l][b]
+            #print v
             myTable += beginCell
             myTable += '%d'% (v[0])
             myTable += endCell
@@ -353,7 +356,7 @@ def printYields(topbg_list, bg_list, sig1_list, sig2_list, sig3_list, data, sel,
         myTable +='%d'% (total_bg)
         myTable += endCell
         myTable += beginCell
-        myTable += '%d'% (yields_data[l])
+        myTable += '%d'% (Yields_data[l])
         myTable += endCell
         if "VBFZ" not in anaType:
             myTable += beginCell
@@ -382,7 +385,9 @@ def printYields(topbg_list, bg_list, sig1_list, sig2_list, sig3_list, data, sel,
         
         total_bg=0
         total_err=0
-        for k, v in Yields_bg[l].iteritems():
+        for b in bgOrder:
+            if b not in Yields_bg[l].keys(): continue
+            v = Yields_bg[l][b]
             #print k, v
             myTable += beginCell
             myTable += '%0.1f'% (v[0])
@@ -397,7 +402,7 @@ def printYields(topbg_list, bg_list, sig1_list, sig2_list, sig3_list, data, sel,
         #myTable +='%0.1f &pm; %0.1f'% (total_bg, total_err)
         myTable += endCell
         myTable += beginCell
-        myTable += '%d'% (yields_data[l])
+        myTable += '%d'% (Yields_data[l])
         myTable += endCell
         if "VBFZ" not in anaType:
             myTable += beginCell
@@ -443,58 +448,76 @@ def handleOverflowBinsScaleAndColors(hist, sample, lumi):
 
     if sample!="Data":
         if lumi!=0:  #don't rescale, for the cases we don't want it 
-            hist.Scale(float(lumi*xc[sample][2])/xc[sample][3])
             #print "rescaling sample", sample, "xsection =", xc[sample][2], " total events: ", xc[sample][3] 
+            hist.Scale(float(lumi*xc[sample][2])/xc[sample][3])
             hist.SetLineColor(xc[sample][0])
         if not "HZZ" in sample: 
             hist.SetFillColor(xc[sample][1])
 
     hist.SetLineWidth(2)
         
-def makeStack(topbglist, otherbglist, histoname, lumi):
+def makeStack(bgList, histoname, lumi):
 
     hs = THStack("temp", "Stacked histo")
     #print " * In makeStack python function"
 
+    bgOrder = c.Params().analysisParams("HZZ")[3]
+
+    leg01 = TLegend(0.53,0.7,0.95,0.90);
+    leg01.SetNColumns(2);
+    leg01.SetTextSize(0.04)
+        
     xc = c.Params().xsec_and_colors()
+    for b in bgOrder:
+        if b not in bgList.keys(): continue
+        if b == "Top":
+            if "tW" in bgList.keys() and "tbarW" in bgList.keys():
+                htw    = bgList["tW"].Get("Andrey/"+histoname).Clone()
+                htw.Scale(float(lumi*xc["tW"][2])/xc["tW"][3])
+                handleOverflowBinsScaleAndColors(htw, "tW", lumi)
+                
+                htbarw = bgList["tbarW"].Get("Andrey/"+histoname).Clone()
+                htbarw.Scale(float(lumi*xc["tbarW"][2])/xc["tbarW"][3])
+                handleOverflowBinsScaleAndColors(htbarw,"tbarW",lumi)    
+                htw.Add(htbarw)
+                hs.Add(htw)
+                leg01.AddEntry(htw,"Top","f")
+            else:
+                print "Number of top bg samples is wrong!"
 
-    htw    = topbglist[0].Get("Andrey/"+histoname).Clone()
-    htw.Scale(float(lumi*xc["tW"][2])/xc["tW"][3])
-    htbarw = topbglist[1].Get("Andrey/"+histoname).Clone()
-    htbarw.Scale(float(lumi*xc["tbarW"][2])/xc["tbarW"][3])
-    handleOverflowBinsScaleAndColors(htw, "tW", lumi)
-    handleOverflowBinsScaleAndColors(htbarw,"tbarW",lumi)    
-    htw.Add(htbarw)
-    hs.Add(htw)
-
-    for f in otherbglist:
         #print f.GetName()
-        evtHisto = f.Get("Andrey/evt_byCut")
+        evtHisto = bgList[b].Get("Andrey/evt_byCut")
         #evtHisto.Print()
         sample = evtHisto.GetTitle()
         #print "Double check the sample:",sample
         
-        hh1 = f.Get("Andrey/"+histoname).Clone()
+        hh1 = bgList[b].Get("Andrey/"+histoname).Clone()
         handleOverflowBinsScaleAndColors(hh1,sample,lumi)
         hs.Add(hh1)
 
-    return hs
+        leg01.AddEntry(hh1,b,"f")
 
-def drawMultiPlot(fname,maintitle, xtitle, h_name, isLog, y1min, y1max, y2min, y2max, ovlist, topbg, bgList, sel):
+    return [hs, leg01]
+
+def drawMultiPlot(fname,maintitle, xtitle, h_name, isLog, y1min, y1max, y2min, y2max, ovList, bgList, sel):
 
     
     lumi = c.Params().getLumi(sel)
+    bgOrder = c.Params().analysisParams("HZZ")[3]
     
     name = "Andrey/"+h_name
     print "   * Plotting:", h_name
     print "   * Making a stack histo."
     
-    hs = makeStack(topbg, bgList, h_name, lumi)
+    ss = makeStack(bgList, h_name, lumi)
+    hs = ss[0]
+    leg01 = ss[1]
+
     #hs.Print()
     #hs = THStack()
     
     ff = []
-    size = ovlist.GetSize()
+    size = len(ovList)
     hh = [];
     if (size>4):
         print "To many plots to overlay"
@@ -504,27 +527,26 @@ def drawMultiPlot(fname,maintitle, xtitle, h_name, isLog, y1min, y1max, y2min, y
 
     h_data = None
     sig = []
-    #ovlist.At(0).Print()
-    #ovlist.At(1).Print()
-    for n in xrange(size):
-        if ovlist.At(n) != None:
-            ff.append(ovlist.At(n))
-            hh.append(ff[n].Get(name).Clone())
-            #print n, "file:", ff[n].GetName(), "   histoname: ", hh[n].GetName()
+    n=0
+    for o in ovList:
+        ff.append(ovList[o])
+        hh.append(ff[n].Get(name).Clone())
+        #print n, "file:", ff[n].GetName(), "   histoname: ", hh[n].GetName()
             
-            sample = ff[n].Get("Andrey/evt_byCut").GetTitle()
-            #print "Double check the sample:",sample
+        sample = ff[n].Get("Andrey/evt_byCut").GetTitle()
+        #print "Double check the sample:",sample
             
-            if sample=="DATA":
-                handleOverflowBinsScaleAndColors(hh[n], "Data", lumi)
-                h_data = hh[0]
-                h_data.SetMarkerStyle(20);
-                h_data.SetMarkerSize(0.7)
+        if sample=="DATA":
+            handleOverflowBinsScaleAndColors(hh[n], "Data", lumi)
+            h_data = hh[n]
+            h_data.SetMarkerStyle(20);
+            h_data.SetMarkerSize(0.7)
 
-            else:
-                handleOverflowBinsScaleAndColors(hh[n], sample, lumi)
-                sig.append(hh[n])
-
+        else:
+            handleOverflowBinsScaleAndColors(hh[n], sample, lumi)
+            sig.append(hh[n])
+        n+=1
+        
     #doRatio = False
     doRatio = True
     if not isLog or h_data==None:
@@ -610,23 +632,11 @@ def drawMultiPlot(fname,maintitle, xtitle, h_name, isLog, y1min, y1max, y2min, y
     prelim.SetTextSize(0.03); 
     selection.Draw();
         
-
-    leg01 = TLegend(0.53,0.7,0.95,0.90);
-    leg01.SetNColumns(2);
-    leg01.SetTextSize(0.04)
-    
-    leg01.AddEntry(hs.GetStack()[0],"top","f")
-    leg01.AddEntry(hs.GetStack()[1],"WW","f")
-    leg01.AddEntry(hs.GetStack()[2],"WZ","f")
-    leg01.AddEntry(hs.GetStack()[3],"ZZ","f")
-    leg01.AddEntry(hs.GetStack()[4],"ttbar","f")
-    #leg01.AddEntry(hs.GetStack()[5],"vbf Z","f")
-    leg01.AddEntry(hs.GetStack()[5],"Z + jets","f")
     if h_data != None:
         leg01.AddEntry(h_data,"Data","epl")
-
-
+        
     for i,s in enumerate(sig):
+        #print i,s
         if i==0:
             leg01.AddEntry(sig[0],"10x ggH 125","l")
         elif i==1:

@@ -35,14 +35,14 @@ class WeightUtils: public TObject {
         void  SetSampleName(string sampleName);
         void  SetSelection(string selection);
 
-        float PUWeight(int nPU);
+        float PUWeight(float);
         float RecoWeight(TLorentzVector l1, TLorentzVector l2);
         float GammaWeight(int nPV, int nJets, TLorentzVector p1);
         float ZZWeight(TLorentzVector l1, TLorentzVector l2);
         float GluGluHiggsWeight(float higgsPt, int higgsMass);
         //float VBFHiggsWeight(float genMass, int higgsMass);
         //float RecoilWeight(TLorentzVector recoilP4, TLorentzVector ZP4);
-        float GetTotalWeight(int nPV, int nJets, TLorentzVector l1, TLorentzVector l2);
+        float GetTotalWeight(float nPV, int nJets, TLorentzVector l1, TLorentzVector l2);
 
 	float HiggsMassLineShapeWeight(float, float);
         float GetElectronEff(TLorentzVector l1) const;
@@ -62,6 +62,7 @@ class WeightUtils: public TObject {
 
         //sources
         TFile *_inFile;
+        TFile *_puFile;
         TH1D  *h1_eGammaPt;   
         TH1D  *h1_muGammaPt;  
         TH1D  *h1_eGammaPV;   

@@ -52,10 +52,11 @@
 
 class higgsAnalyzer : public TSelector {
  private:
+
+  TTree* thisTree;
   TFile* histoFile;
   //Variables to Fill into histos. Have to be global
   
-  TString samp;  
   Float_t qT, diEta, diPhi, diAngle, deltaPhiLep, Mll, Mll_EB, Mll_EE, Mll_EX;  
   Float_t MET, pfMET, pfMET1, puCorrMET, projMET, ZprojMET, redMET1, redMET2, compMET;
   Float_t pfMET_lg, pfMET_recoil;
@@ -114,7 +115,7 @@ class higgsAnalyzer : public TSelector {
   TH1F *vtx_nPV_tot[nC], *vtx_nPV_raw[nC], *vtx_nPV_weight[nC], *vtx_ndof_1[nC], *vtx_ndof_2[nC];
 
   TH1F *run_events[nC];
-  TH1F *evt_weight[nC];
+  TH1F *evt_weight[nC], *evt_pu[nC];
 
   TH1F *higgs_pt[nC], *higgs_mass[nC], *higgs_w_pt[nC], *higgs_w_mass[nC];
 
@@ -259,6 +260,7 @@ void higgsAnalyzer::Init(TTree *tree)
    beamSpot = 0;
    // Set branch addresses and branch pointers
    if (!tree) return;
+   thisTree    = tree; 
    fChain = tree;
    fChain->SetMakeClass(1);
 
@@ -302,7 +304,19 @@ Bool_t higgsAnalyzer::Notify()
    // to the generated code, but the routine can be extended by the
    // user if needed. The return value is currently not used.
 
-   return kTRUE;
+  UInt_t initEvents;
+  TFile   *inFile     = thisTree->GetCurrentFile();
+  TTree   *jobTree    = (TTree*)inFile->Get("ntupleProducer/jobTree");
+  TBranch *eventsInFile    =  jobTree->GetBranch("nEvents");
+
+  eventsInFile->SetAddress(&initEvents);
+  eventsInFile->GetEntry(0);
+  //cout<<" Events in file: "<<initEvents<<"   fname "<<inFile->GetName()<<endl;
+
+  MET = 0;
+  FillHistosBasic(0, initEvents);
+
+  return kTRUE;
 }
 
 #endif // #ifdef higgsAnalyzer_cxx

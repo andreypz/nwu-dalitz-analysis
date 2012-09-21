@@ -39,7 +39,7 @@ dirnameOut = baseDir+hPath
 selection  = ['muon', 'electron']
 #plot_types = ['diLepton', 'Jet', 'Met', 'Misc', "mvaPresel"]
 #plot_types = ['diLepton', 'Lepton', 'Jet', 'Met', 'Misc', "mvaPresel"]
-plot_types = ['diLepton', 'Lepton', 'Jet', 'Met', 'mvaPresel', 'Misc']
+plot_types = ['diLepton', 'Lepton', 'Jet', 'Met', 'mvaPresel', 'Misc', "Special"]
 
 thissel = selection[sel-1]
 

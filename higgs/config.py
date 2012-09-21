@@ -6,7 +6,6 @@ class Params():
 
         self._lumi_ele = 2312 + 2739
         self._lumi_mu  = 2312 + 2739
-        #self._lumi_mu  = 30000
 
         self._cutNamesHZZ = [
         "0. Total",
@@ -45,8 +44,10 @@ class Params():
     
         ]
         self._nominalHZZ = [1,2,3,4,5,6,7,8]
-        self._extraHZZ = [18,19,20, 9,25,26,27,28, 10,29,30,31,32, 21,22,23,24]
-
+        self._bgOrderHZZ = ["Top","ttbar","WW","WZ","ZZ","DYjets"]        
+        self._extraHZZ = [18,19,20, 10,29,30,31,32, 21,22,23,24]
+        #self._extraHZZ = [18,19,20, 9,25,26,27,28, 10,29,30,31,32, 21,22,23,24]
+        
         self._cutNamesVBFZ = [
         "0. Total",
         "1. HLT",
@@ -60,6 +61,7 @@ class Params():
         ]
         self._nominalVBFZ = [3,4,5,6,7]
         self._extraVBFZ = []
+        self._bgOrderVBFZ = ["Top","ttbar","WW","WZ","ZZ","DYjets"]        
         
         self._xsec_and_colors = {
             "DATA": [-1,-1,-1,-1],
@@ -126,8 +128,8 @@ class Params():
 
     def analysisParams(self,anatype="HZZ"):
         if anatype=="HZZ":
-            return [self._cutNamesHZZ,  self._nominalHZZ, self._extraHZZ]
+            return [self._cutNamesHZZ,  self._nominalHZZ, self._extraHZZ, self._bgOrderHZZ]
         elif anatype=="VBFZ":
-            return [self._cutNamesVBFZ,  self._nominalVBFZ, self._extraVBFZ]
+            return [self._cutNamesVBFZ,  self._nominalVBFZ, self._extraVBFZ,self._bgOrderVBFZ]
         else:
             return []

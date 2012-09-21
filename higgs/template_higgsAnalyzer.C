@@ -1,4 +1,4 @@
-// $Id: template_higgsAnalyzer.C,v 1.51 2012/09/13 16:14:46 andrey Exp $
+// $Id: template_higgsAnalyzer.C,v 1.52 2012/09/13 22:10:24 andrey Exp $
 
 #define higgsAnalyzer_cxx
 
@@ -14,11 +14,11 @@ using namespace std;
 //Specify parameters here. //
 /////////////////////////////
 
-const string  selection      = "muon";
-const string  period         = "2011";
+const string  selection      = "SELECTION";
+const string  period         = "PERIOD";
 const int     JC_LVL         = 0;  //No JEC for Pat jets (they are already applied)
-const int     trigger[]      = {0};
-const TString suffix("TEST");
+const int     trigger[]      = {TRIGGER};
+const TString suffix("SUFFIX");
 
 vector<int> triggers (trigger, trigger + sizeof(trigger)/sizeof(int));
 
@@ -144,8 +144,8 @@ void higgsAnalyzer::Begin(TTree * /*tree*/)
       for(Int_t j=0;j<3;j++) //For three bins in jet multiplicity
 	mva_discr[m][j] = new TH1F(Form("mva_discr_mh%i_%i",m,j), "MVA discriminator output", 50, -0.6,0.3);
 
-    evt_byCut = new TH1F("evt_byCut", "TEST", nC, 0,nC);
-    evt_byCut_raw = new TH1F("evt_byCut_raw", "TEST", nC, 0,nC);
+    evt_byCut = new TH1F("evt_byCut", "SUFFIX", nC, 0,nC);
+    evt_byCut_raw = new TH1F("evt_byCut_raw", "SUFFIX", nC, 0,nC);
     evt_libQt = new TH2F("evt_libQt", "Events in a library", 4, 0,4,  10, 0,10);
 
     if (doZlibrary)  zLib->CreateLibrary();
@@ -160,7 +160,8 @@ void higgsAnalyzer::Begin(TTree * /*tree*/)
     for(Int_t n=0; n<nC; n++)
       {
 	met0_et[n]       = new TH1F(Form("met0_et_%i",n), "met0_et", 40, 0,400);
-	evt_weight[n]      = new  TH1F(Form("evt_weight_%i",n), "Weights", 50,0,10);
+	evt_weight[n]    = new  TH1F(Form("evt_weight_%i",n), "Weights", 50,0,10);
+	evt_pu[n]        = new  TH1F(Form("evt_pu_%i",n), "Pile-up", 240,0,60);
       }
 
     for(Int_t n=4; n<nC; n++)
@@ -300,21 +301,21 @@ void higgsAnalyzer::Begin(TTree * /*tree*/)
 
        }
     if (verboseLvl>0){
-      ffout.open("./events_printout_TEST_final.txt",ofstream::out);
-      ncout.open("./counts_for_tex_TEST.txt",ofstream::out);
+      ffout.open("./events_printout_SUFFIX_final.txt",ofstream::out);
+      ncout.open("./counts_for_tex_SUFFIX.txt",ofstream::out);
       
       ffout.precision(4); ffout.setf(ios::fixed, ios::floatfield);
       for(Int_t i=0; i<nC; i++)
 	{
 	  if (i!=2 && i!=29) continue;
-	  fout[i].open(Form("./events_printout_TEST_%i.txt",i),ofstream::out);
+	  fout[i].open(Form("./events_printout_SUFFIX_%i.txt",i),ofstream::out);
 	  fout[i].precision(3); fout[i].setf(ios::fixed, ios::floatfield);
 	  fout[i]<<
 	    "*********\t*********\t*****\t***\t****\t****\t************\t*********\t********\t*****\t*\n"<<
 	    "* Run    \t* Event  \t* LS \t* nVtx\t* nJets\t* m(ll)\t*   MT(llvv)\t* PFMET  \t* PT(ll)\t* rho\t*\n"<<
 	    "*********\t*********\t*****\t****\t****\t***\t************\t*********\t********\t*****\t*\n";
 	  if (verboseLvl>2){
-	    nout[i].open(Form("./events_filtered_TEST_%i.txt",i),ofstream::out);
+	    nout[i].open(Form("./events_filtered_SUFFIX_%i.txt",i),ofstream::out);
 	    nout[i].precision(3); fout[i].setf(ios::fixed, ios::floatfield);
 	    nout[i]<<
 	      "*********\t*********\t*********\t******************************************\n"<<
@@ -434,8 +435,8 @@ bool higgsAnalyzer::Process(Long64_t entry)
     GetEntry(entry);
     CountEvents(0);
     ++nEventsWeighted[0];
-    MET = 0;
-    FillHistosBasic(0, 1);
+    //MET = 0;
+    //FillHistosBasic(0, 1); This is moved to Notify()
 
     //Int_t reject[5] = {0,0,0,0,0};
 
@@ -1588,7 +1589,10 @@ void higgsAnalyzer::FillHistosBasic(Int_t num, Double_t weight){
       evt_byCut -> Fill(num, weight);  
       evt_byCut_raw -> Fill(num, 1);  
     }
+
+
   evt_weight[num] -> Fill(weight);
+  evt_pu[num]     -> Fill(nPUVerticesTrue,weight);
 }
 
 
