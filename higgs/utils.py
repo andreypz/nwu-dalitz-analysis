@@ -4,8 +4,34 @@ import sys,os
 from ROOT import *
 import config as c
 
+
+myParams = c.Params()
+
+def updateNevents(bg_list, sig1_list, sig2_list, sig3_list):
+
+    if not myParams.isUpdated():
+        allsamples = dict(bg_list, **sig1_list)
+        allsamples.update(sig2_list)
+        allsamples.update(sig3_list)
+        #print allsamples
+        for a in allsamples:
+            #print a, myParams.xsec_and_colors()[a]
+            h = allsamples[a].Get("Andrey/met0_et_0")
+            nn =  h.GetBinContent(1)
+            #print "N events ", nn
+            
+            myParams.UpdateNevents(a, nn)
+            #print myParams.xsec_and_colors()[a]
+        return myParams.xsec_and_colors()
+        myParams.SetIsUpdated(True)
+    else:
+        return myParams.xsec_and_colors()
+
 def makeMvaTrees(outpath, bg_list, sig1_list, sig2_list, sel):
     print "\n  ** Creating mva trees ***"
+
+    updateNevents(bg_list, sig1_list, sig2_list, sig3_list)
+
     fbg_train = TFile(outpath+"allBg_train.root","RECREATE")
     fbg_test  = TFile(outpath+"allBg_test.root","RECREATE")
 
@@ -126,10 +152,10 @@ fullWeight/F'
     print "** End of creating mva trees ***"
 
 def fillStruct(stuff, evt, sel, sample):
-    lumi = c.Params().getLumi(sel)
-    xc = c.Params().xsec_and_colors()
+    lumi = myParams.getLumi(sel)
 
-    
+    xc = myParams.xsec_and_colors()
+
     stuff.lep1Pt   = evt.lep1Pt
     stuff.lep2Pt   = evt.lep2Pt
     stuff.diLepPt  = evt.diLepPt
@@ -158,7 +184,9 @@ def fillStruct(stuff, evt, sel, sample):
 
 def calcYields(bg_list, sig1_list, sig2_list, sig3_list, data, sel, mode="scaled"):
 
-    lumi = c.Params().getLumi(sel)
+    updateNevents(bg_list, sig1_list, sig2_list, sig3_list)
+
+    lumi = myParams.getLumi(sel)
 
     lTot = 33   # Total number of cuts
 
@@ -211,12 +239,15 @@ def calcYields(bg_list, sig1_list, sig2_list, sig3_list, data, sel, mode="scaled
 
             Yields_bg_per_cut[sample] = ([y,err])
 
-        if b in ["tW","tbarW"]:
-            top_bg.append(b)
-    
+            if b in ["tW","tbarW"]:
+                top_bg.append(b)
+
+        if len(top_bg)>1:
+            Yields_bg_per_cut["Top"] = ([0,0])
+            
         for t in top_bg:
-            Yields_bg_per_cut["Top"][0] += Yields_bg_per_cut[b][0]
-            Yields_bg_per_cut["Top"][1] += Yields_bg_per_cut[b][1]
+            Yields_bg_per_cut["Top"][0] += Yields_bg_per_cut[t][0]
+            Yields_bg_per_cut["Top"][1] += Yields_bg_per_cut[t][1]
             
 
         Yields_bg.append(Yields_bg_per_cut)
@@ -273,12 +304,12 @@ def printYields(bg_list, sig1_list, sig2_list, sig3_list, data, sel, filename, a
         favMass = anaType[3:]
         anaType ="HZZ"
 
-    myParams =  c.Params().analysisParams(anaType)
+    myAnaParams =  myParams.analysisParams(anaType)
     #print myParams
-    cutNames    = myParams[0]
-    nominalCuts = myParams[1]
-    extraCuts   = myParams[2]
-    bgOrder     = myParams[3]
+    cutNames    = myAnaParams[0]
+    nominalCuts = myAnaParams[1]
+    extraCuts   = myAnaParams[2]
+    bgOrder     = myAnaParams[3]
     #lTot = 33   # Total number of cuts
     #lMax = 9 # Lines to print in the main table
     beginTable = '<table border = "10"    cellpadding="5">'
@@ -428,7 +459,7 @@ def printYields(bg_list, sig1_list, sig2_list, sig3_list, data, sel, filename, a
     hf.close()
     
 def handleOverflowBinsScaleAndColors(hist, sample, lumi):
-    xc = c.Params().xsec_and_colors()
+    xc = myParams.xsec_and_colors()
 
     nBins   = hist.GetNbinsX()
     lastBin = hist.GetBinContent(nBins)
@@ -448,7 +479,8 @@ def handleOverflowBinsScaleAndColors(hist, sample, lumi):
 
     if sample!="Data":
         if lumi!=0:  #don't rescale, for the cases we don't want it 
-            #print "rescaling sample", sample, "xsection =", xc[sample][2], " total events: ", xc[sample][3] 
+            #if sample=="DYjets":
+            #    print "rescaling sample", sample, "xsection =", xc[sample][2], " total events: ", xc[sample][3] 
             hist.Scale(float(lumi*xc[sample][2])/xc[sample][3])
             hist.SetLineColor(xc[sample][0])
         if not "HZZ" in sample: 
@@ -458,26 +490,25 @@ def handleOverflowBinsScaleAndColors(hist, sample, lumi):
         
 def makeStack(bgList, histoname, lumi):
 
+    xc = myParams.xsec_and_colors()
+
     hs = THStack("temp", "Stacked histo")
     #print " * In makeStack python function"
 
-    bgOrder = c.Params().analysisParams("HZZ")[3]
+    bgOrder = myParams.analysisParams("HZZ")[3]
 
     leg01 = TLegend(0.53,0.7,0.95,0.90);
     leg01.SetNColumns(2);
     leg01.SetTextSize(0.04)
         
-    xc = c.Params().xsec_and_colors()
     for b in bgOrder:
-        if b not in bgList.keys(): continue
         if b == "Top":
+            #print "Stacking top. It needs a special treatment: add all components"
             if "tW" in bgList.keys() and "tbarW" in bgList.keys():
                 htw    = bgList["tW"].Get("Andrey/"+histoname).Clone()
-                htw.Scale(float(lumi*xc["tW"][2])/xc["tW"][3])
                 handleOverflowBinsScaleAndColors(htw, "tW", lumi)
                 
                 htbarw = bgList["tbarW"].Get("Andrey/"+histoname).Clone()
-                htbarw.Scale(float(lumi*xc["tbarW"][2])/xc["tbarW"][3])
                 handleOverflowBinsScaleAndColors(htbarw,"tbarW",lumi)    
                 htw.Add(htbarw)
                 hs.Add(htw)
@@ -485,25 +516,26 @@ def makeStack(bgList, histoname, lumi):
             else:
                 print "Number of top bg samples is wrong!"
 
-        #print f.GetName()
-        evtHisto = bgList[b].Get("Andrey/evt_byCut")
-        #evtHisto.Print()
-        sample = evtHisto.GetTitle()
-        #print "Double check the sample:",sample
+        elif b not in bgList.keys(): continue
+        else:
+            #print f.GetName()
+            evtHisto = bgList[b].Get("Andrey/evt_byCut")
+            #evtHisto.Print()
+            sample = evtHisto.GetTitle()
+            #print "Double check the sample:",sample
         
-        hh1 = bgList[b].Get("Andrey/"+histoname).Clone()
-        handleOverflowBinsScaleAndColors(hh1,sample,lumi)
-        hs.Add(hh1)
+            hh1 = bgList[b].Get("Andrey/"+histoname).Clone()
+            handleOverflowBinsScaleAndColors(hh1,sample,lumi)
+            hs.Add(hh1)
 
-        leg01.AddEntry(hh1,b,"f")
+            leg01.AddEntry(hh1,b,"f")
 
     return [hs, leg01]
 
 def drawMultiPlot(fname,maintitle, xtitle, h_name, isLog, y1min, y1max, y2min, y2max, ovList, bgList, sel):
 
-    
-    lumi = c.Params().getLumi(sel)
-    bgOrder = c.Params().analysisParams("HZZ")[3]
+    lumi = myParams.getLumi(sel)
+    bgOrder = myParams.analysisParams("HZZ")[3]
     
     name = "Andrey/"+h_name
     print "   * Plotting:", h_name

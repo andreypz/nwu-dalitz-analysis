@@ -42,19 +42,23 @@
 #include "../src/TCPrimaryVtx.h"
 #include "../src/TCTriggerObject.h"
 
+#include "../plugins/MetDefinitions.h"
 #include "../plugins/WeightUtils.h"
 #include "../plugins/TriggerSelector.h"
 #include "../plugins/ZedEventsLibrary.h"
 #include "../plugins/rochcor.h"
+#include "../plugins/HistManager.h"
 
 
 #define nC 35  //nCuts in the analysis. make plots after each cut
 
 class higgsAnalyzer : public TSelector {
+
  private:
 
-  TTree* thisTree;
   TFile* histoFile;
+  TTree* thisTree;
+
   //Variables to Fill into histos. Have to be global
   
   Float_t qT, diEta, diPhi, diAngle, deltaPhiLep, Mll, Mll_EB, Mll_EE, Mll_EX;  
@@ -80,45 +84,7 @@ class higgsAnalyzer : public TSelector {
   ofstream nout[nC], fout[nC], ffout, ncout;
   TTree * _mvaTree;
 
-  TH1F *evt_byCut, *evt_byCut_raw;
-  TH1F *mva_discr[3][3];
-  TH2F *evt_libQt;
-  TH1F *mtZ[nC], *mt0[nC], *mt1[nC], *mt2[nC], *mt3[nC], *mt4[nC];
-  TH1F *met0_phi[nC], *met0_et[nC], *met0_over_qt[nC];
-  TH1F *met1_phi[nC], *met1_et[nC], *met1_over_qt[nC];
-  TH1F *met2_phi[nC], *met2_et[nC], *met2_over_qt[nC];
-  TH1F *met3_phi[nC], *met3_et[nC], *met3_over_qt[nC];
-  TH1F *met4_phi[nC], *met4_et[nC], *met4_over_qt[nC], *met4_puSig[nC];
-  TH1F *met5_et[nC], *met6_et[nC], *met7_et[nC], *met8_et[nC], *met9_et[nC], *met10_et[nC];
-  TH1F *l1_phi[nC], *l1_eta[nC], *l1_pt[nC];
-  TH1F *l2_phi[nC], *l2_eta[nC], *l2_pt[nC];
-  TH1F *l0_dPhi[nC], *l0_dEta[nC], *l0_dR[nC], *l0_ptRatio[nC], *l0_angle[nC], *l0_angleLog[nC];
-  TH1F *btag_hp[nC];
-  TH1F *di_qt[nC], *di_eta[nC], *di_phi[nC], *di_mass[nC], *di_mass_EB[nC], *di_mass_EE[nC], *di_mass_EX[nC];
-  TH1F *di_dPhiMet[nC];
-  TH1F *jet_N[nC], *jet_N15[nC], *jet_N24[nC], *jet_dRlep1[nC], *jet_dRlep2[nC];
-  TH1F *jet_pt1[nC], *jet_eta1[nC], *jet_phi1[nC];
-  TH1F *jet_pt2[nC], *jet_eta2[nC], *jet_phi2[nC];
-  TH1F *jet_diM[nC], *jet_deltaEta[nC], *jet_zeppZ[nC], *jet_zeppZy[nC];
-  TH1F *jet_b_N[nC], *jet_b_Nssv[nC], *jet_b_N25[nC],*jet_b_N30[nC], *jet_b_pt[nC];
-  TH1F *ph_nGamma[nC];
-  TH1F *met1_dPhiLeadJet1[nC], *met1_dPhiLeadJet2[nC], *met1_dPhiClosJet1[nC], *met1_dPhiClosJet2[nC];
-  
-  TH1F *met1_overQt[nC], *met1_projOnQt[nC], *met1_perpQt[nC];
-  TH1F *met1_recoil_lg[nC];
-  //  TH1F *met2_dPhiLeadJet1[nC], *met2_dPhiLeadJet2[nC], *met2_dPhiClosJet1[nC], *met2_dPhiClosJet2[nC];
-
-  //TH2F *met0_et_ovQt[nC], *met1_et_ovQt[nC], *met2_et_ovQt[nC], *met3_et_ovQt[nC], *met4_et_ovQt[nC];
-  //TH2F *mtZ_met2[nC], *mt2_met2[nC];
-  //TH2F *mtZ_met3[nC], *mt2_met3[nC];
-
-  TH1F *vtx_nPV_tot[nC], *vtx_nPV_raw[nC], *vtx_nPV_weight[nC], *vtx_ndof_1[nC], *vtx_ndof_2[nC];
-
-  TH1F *run_events[nC];
-  TH1F *evt_weight[nC], *evt_pu[nC];
-
-  TH1F *higgs_pt[nC], *higgs_mass[nC], *higgs_w_pt[nC], *higgs_w_mass[nC];
-
+  HistManager *hists;
   rochcor *roch;
   ZedEventsLibrary *zLib;
   WeightUtils *weighter;

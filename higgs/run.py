@@ -72,11 +72,11 @@ gROOT.LoadMacro("../src/TCPhoton.cc+");
 gROOT.LoadMacro("../src/TCGenJet.cc+");
 gROOT.LoadMacro("../src/TCGenParticle.cc+");
 gROOT.LoadMacro("../src/TCPrimaryVtx.cc+");
-#gROOT.LoadMacro("../src/TCTrigger.cc+");
 gROOT.LoadMacro("../src/TCTriggerObject.cc+");
 gROOT.LoadMacro("../plugins/WeightUtils.cc+");
 gROOT.LoadMacro("../plugins/TriggerSelector.cc+");
 gROOT.LoadMacro("../plugins/ZedEventsLibrary.cc+");
+gROOT.LoadMacro("../plugins/HistManager.cc+");
 
 fChain = TChain("ntupleProducer/eventTree");
 

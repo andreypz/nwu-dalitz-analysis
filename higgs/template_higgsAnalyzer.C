@@ -1,10 +1,9 @@
-// $Id: template_higgsAnalyzer.C,v 1.52 2012/09/13 22:10:24 andrey Exp $
+// $Id: template_higgsAnalyzer.C,v 1.53 2012/09/21 15:49:35 andrey Exp $
 
 #define higgsAnalyzer_cxx
 
 #include "higgsAnalyzer.h"
 #include <string>
-#include "../plugins/MetDefinitions.h"
 using namespace std;
 
 // This needs to be un-commented in order to run MVA cuts
@@ -124,7 +123,6 @@ void higgsAnalyzer::Begin(TTree * /*tree*/)
     myRandom = new TRandom3();
 
     //Rochester Corrections for muons:
-
     if (selection=="muon")
       roch = new rochcor();    
 
@@ -134,19 +132,13 @@ void higgsAnalyzer::Begin(TTree * /*tree*/)
     triggerSelector = new TriggerSelector(selection, period, triggers);
 
     histoFile = new TFile("a_higgsHistograms.root", "RECREATE");
-    histoFile->mkdir("Andrey", "Andrey");
+    hists = new HistManager(histoFile);
+
+    histoFile->mkdir("Histos", "Histos");
     histoFile->mkdir("mvaTree", "mvaTree");
-    histoFile->cd("Andrey");
+    //histoFile->cd("Histos");
 
     //In the Title of this histogram I encode the sample!  
-
-    for(Int_t m=0;m<3;m++) //For Higgs masses
-      for(Int_t j=0;j<3;j++) //For three bins in jet multiplicity
-	mva_discr[m][j] = new TH1F(Form("mva_discr_mh%i_%i",m,j), "MVA discriminator output", 50, -0.6,0.3);
-
-    evt_byCut = new TH1F("evt_byCut", "SUFFIX", nC, 0,nC);
-    evt_byCut_raw = new TH1F("evt_byCut_raw", "SUFFIX", nC, 0,nC);
-    evt_libQt = new TH2F("evt_libQt", "Events in a library", 4, 0,4,  10, 0,10);
 
     if (doZlibrary)  zLib->CreateLibrary();
     
@@ -157,6 +149,7 @@ void higgsAnalyzer::Begin(TTree * /*tree*/)
       nEventsWeighted[n]=0;
     }
 
+    /*
     for(Int_t n=0; n<nC; n++)
       {
 	met0_et[n]       = new TH1F(Form("met0_et_%i",n), "met0_et", 40, 0,400);
@@ -227,7 +220,7 @@ void higgsAnalyzer::Begin(TTree * /*tree*/)
 	l0_angleLog[n] = new TH1F(Form("l0_angleLog_%i",n), "l0_angleLog", 50, -5, 1);
 	l0_dPhi[n]    = new TH1F(Form("l0_dPhi_%i",n), "l0_dPhi", 50, 0, TMath::Pi());
 	l0_dEta[n]    = new TH1F(Form("l0_dEta_%i",n), "l0_dEta", 50, 0, 4);
-	l0_dR[n]      = new TH1F(Form("l0_dR_%i",n), "l0_dR", 50, 0, 4);
+	l0_dR[n]      = new TH1F(Form("l0_dR_%i",n), "l0_dR", 50, 0, 5);
 	l0_ptRatio[n] = new TH1F(Form("l0_ptRatio_%i",n), "l0_ptRatio", 50, 0, 1);
 
 	btag_hp[n] = new TH1F(Form("btag_hp_%i",n), "btag_hp", 40, -10, 10);
@@ -300,6 +293,8 @@ void higgsAnalyzer::Begin(TTree * /*tree*/)
        
 
        }
+    */
+
     if (verboseLvl>0){
       ffout.open("./events_printout_SUFFIX_final.txt",ofstream::out);
       ncout.open("./counts_for_tex_SUFFIX.txt",ofstream::out);
@@ -360,9 +355,8 @@ void higgsAnalyzer::Begin(TTree * /*tree*/)
       _mvaTree->Branch("evNumber", &eventNumber, "evNumber/l");
     }
 
-
+    histoFile->cd();
     //cout<<"dbg   End of Begin job"<<endl;
-
 
     // -----------------  MVA stuff ---------------------
 
@@ -420,7 +414,7 @@ void higgsAnalyzer::Begin(TTree * /*tree*/)
 
 	  tmvaReader[mh][jm]->BookMVA(label.Data(), weightFile.Data());
 	  
-	} //hm loop
+	} //mh loop
 
       }// loop over jet multiplicity bin
 
@@ -435,6 +429,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
     GetEntry(entry);
     CountEvents(0);
     ++nEventsWeighted[0];
+
     //MET = 0;
     //FillHistosBasic(0, 1); This is moved to Notify()
 
@@ -1048,7 +1043,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
 
 
     /////////////////////////////////////////////////
-    // Variables for FillHistos() function (Andrey)//
+    // Variables for FillHistos() function (Histos)//
     /////////////////////////////////////////////////
     qT      = ZP4.Pt();
     Mll     = ZP4.M(); Mll_EE=0; Mll_EB=0; Mll_EX=0;
@@ -1225,8 +1220,9 @@ bool higgsAnalyzer::Process(Long64_t entry)
 					  mvaHiggsMassPoint[mh], discrJetMultiName[discrJetMultiInd].Data());
 	  tmvaValue[discr][mh] = tmvaReader[mh][discrJetMultiInd]->EvaluateMVA(label.Data());
 	  
-	  mva_discr[mh][discrJetMultiInd] -> Fill(tmvaValue[discr][mh], eventWeight);
+	  hists->fill1DHist(tmvaValue[discr][mh], Form("mva_discr_mh%i_%i",mh,discrJetMultiInd),"MVA discriminator output", 50, -0.6,0.3, eventWeight, "Histos");
 	  //cout<<"   ** TMVA value = "<<tmvaValue[discr][mh]<<endl;
+
 	  if (tmvaValue[discr][mh] > bdtCut[mh][discrJetMultiInd]) passBdtCut[mh] = kTRUE;
 	  passAllBdtCuts[mh] = (passAllBdtCuts[mh] && passBdtCut[mh]);
 	}
@@ -1520,10 +1516,9 @@ void higgsAnalyzer::Terminate()
   cout<<"| MVA for 250 1j      |\t"<< nEvents[31] <<"\t|"<<nEventsWeighted[31] <<"\t|"<<endl;
   cout<<"| MVA for 250 1+j     |\t"<< nEvents[32] <<"\t|"<<nEventsWeighted[32] <<"\t|"<<endl;
 
-  
-  histoFile->Write();
-  histoFile->Close();  
-  
+  hists -> writeHists(histoFile);  
+
+  cout<<" ** End of Analyzer **"<<endl;
  }
 
 
@@ -1583,133 +1578,111 @@ void higgsAnalyzer::PrintOut(Int_t num, Bool_t isShort){
 }
 
 void higgsAnalyzer::FillHistosBasic(Int_t num, Double_t weight){
-  met0_et[num] -> Fill(MET, weight);
+
+  hists->fill1DHist(MET,Form("met0_et_%i",num),"pfMet", 40,0,400, weight, "Histos");
   if(num!=0)
     { 
-      evt_byCut -> Fill(num, weight);  
-      evt_byCut_raw -> Fill(num, 1);  
+      hists->fill1DHist(num, "evt_byCut","SUFFIX", nC,0,nC, weight, "Histos");
+      hists->fill1DHist(num, "evt_byCut_raw", "SUFFIX", nC, 0,nC, 1, "Histos");
     }
-
-
-  evt_weight[num] -> Fill(weight);
-  evt_pu[num]     -> Fill(nPUVerticesTrue,weight);
+  hists->fill1DHist(weight, Form("evt_weight_%i",num), "Weights", 50,0,10, 1, "Histos");
+  hists->fill1DHist(weight, Form("evt_pu_%i",num), "Pile-up true", 240,0,60, weight, "Histos");
 }
 
 
 void higgsAnalyzer::FillHistosFull(Int_t num, Double_t weight){
-  
-  met1_et[num]      -> Fill(MET, weight);
-  met2_et[num]      -> Fill(pfMET1, weight);
-  met3_et[num]      -> Fill(puCorrMET, weight);
-  met4_et[num]      -> Fill(projMET, weight);
-  met5_et[num]      -> Fill(ZprojMET, weight);
-  met6_et[num]      -> Fill(redMET1, weight);
-  met7_et[num]      -> Fill(redMET2, weight);
-  met8_et[num]      -> Fill(compMET, weight);
 
-  met1_overQt[num] -> Fill(metOverQt, weight);
-  //met1_et_ovQt[num] -> Fill(MET, METqt, weight);
-  met1_phi[num]     -> Fill(MET_phi, weight);
+  hists->fill1DHist(MET, Form("met1_et_%i",num), "met1_et", 80,0,400, weight, "Histos");
+  hists->fill1DHist(pfMET1, Form("met2_et_%i",num), "met2_et", 80,0,400, weight, "Histos");
+  hists->fill1DHist(MET_phi, Form("met1_phi_%i",num), "met1_phi", 40, -TMath::Pi(), TMath::Pi(), weight, "Histos");
 
-  l1_eta[num]  -> Fill(lep1_eta, weight);
-  l1_phi[num]  -> Fill(lep1_phi, weight);
-  l1_pt[num]   -> Fill(lep1_pt, weight);
 
-  l2_eta[num]  -> Fill(lep2_eta, weight);
-  l2_phi[num]  -> Fill(lep2_phi, weight);
-  l2_pt[num]   -> Fill(lep2_pt, weight);
+  hists->fill1DHist(metOverQt, Form("met1_overQt_%i",num), "met over qT", 40,0,4, weight, "Histos");
+  hists->fill1DHist(metProjOnQt, Form("met1_projOnQt_%i",num), "met1_projOnQt", 50, -200,100, weight, "Histos");
+  hists->fill1DHist(metPerpQt, Form("met1_perpQt_%i",num), "met1_perpQt", 50, 0,400, weight, "Histos");
 
-  l0_angle[num]       -> Fill(lep_angle,weight);
-  l0_angleLog[num]    -> Fill(lep_angleLog,weight);
-  l0_dPhi[num]        -> Fill(lep_dPhi,weight);
-  l0_dEta[num]        -> Fill(lep_dEta,weight);
-  l0_dR[num]          -> Fill(lep_dR,weight);
-  l0_ptRatio[num]     -> Fill(lep_ptRatio,weight);
+  hists->fill1DHist(pfMET_recoil, Form("met1_recoil_lg_%i",num), "met1_recoil_lg", 50, -400,100, weight, "Histos");
+
+  hists->fill1DHist(lep1_eta, Form("l1_eta_%i",num), "l1_eta", 52, -2.6, 2.6,  weight, "Histos");
+  hists->fill1DHist(lep1_phi, Form("l1_phi_%i",num), "l1_pi", 50, -TMath::Pi(), TMath::Pi(),  weight, "Histos");
+  hists->fill1DHist(lep1_pt,  Form("l1_pt_%i",num),  "l1_pt", 50, 0, 200,  weight, "Histos");
+  hists->fill1DHist(lep2_eta, Form("l2_eta_%i",num), "l2_eta", 52, -2.6, 2.6,  weight, "Histos");
+  hists->fill1DHist(lep2_phi, Form("l2_phi_%i",num), "l2_pi", 50, -TMath::Pi(), TMath::Pi(),  weight, "Histos");
+  hists->fill1DHist(lep2_pt,  Form("l2_pt_%i",num),  "l2_pt", 50, 0, 200,  weight, "Histos");
+
+  hists->fill1DHist(lep_angle,  Form("l0_angle_%i",num), "l0_angle", 50, 0, TMath::Pi(),  weight, "Histos");
+  hists->fill1DHist(lep_angleLog,  Form("l0_angleLog_%i",num), "l0_angleLog", 50, -5,1,  weight, "Histos");
+
+  hists->fill1DHist(lep_dPhi, Form("l0_dPhi_%i",num), "l0_dPhi", 50, 0, TMath::Pi(),  weight, "Histos");
+  hists->fill1DHist(lep_dEta, Form("l0_dEta_%i",num), "l0_dEta", 50, 0, 4,  weight, "Histos");
+  hists->fill1DHist(lep_dR,   Form("l0_dR_%i",num),   "l0_dR",   50, 0, 4,  weight, "Histos");
+  hists->fill1DHist(lep_ptRatio, Form("l0_ptRatio_%i",num), "l0_ptRatio", 50, 0, 1,  weight, "Histos");
+
+  hists->fill1DHist(MT, Form("mt_%i",num), "mt", 50, 100,600, weight, "Histos");
+
+  hists->fill1DHist(qT, Form("di_qt_%i",num), "di_qt", 80, 0,400, weight, "Histos");
+  hists->fill1DHist(diEta, Form("di_eta_%i",num), "di_eta", 100, -5,5, weight, "Histos");
+  hists->fill1DHist(diPhi, Form("di_phi_%i",num), "di_phi", 50, -TMath::Pi(), TMath::Pi(), weight, "Histos");
+  hists->fill1DHist(Mll, Form("di_mass_%i",num), "di_mass", 50, 70,120, weight, "Histos");
+
+  if(Mll_EB!=0) 
+    hists->fill1DHist(Mll_EB, Form("di_mass_EB_%i",num), "di_mass_EB", 50, 70,120, weight, "Histos");
+  if(Mll_EE!=0) 
+    hists->fill1DHist(Mll_EE, Form("di_mass_EE_%i",num), "di_mass_EE", 50, 70,120, weight, "Histos");
+  if(Mll_EX!=0) 
+    hists->fill1DHist(Mll_EX, Form("di_mass_EX_%i",num), "di_mass_EX", 50, 70,120, weight, "Histos");
 
   Float_t dPhiMetZ =  fabs(TVector2::Phi_mpi_pi(MET_phi-diPhi));
-  di_dPhiMet[num]     -> Fill(dPhiMetZ,weight);
-  met1_projOnQt[num]  -> Fill(metProjOnQt,weight);
-  met1_perpQt[num]    -> Fill(metPerpQt,weight);
-  met1_recoil_lg[num] -> Fill(pfMET_recoil,weight);
+  hists->fill1DHist(dPhiMetZ, Form("di_dPhiMet_%i",num), "dPhiMet", 50, 0, TMath::Pi(), weight, "Histos");
 
-  //met4_over_qt[num] -> Fill(puCorrMETqt, weight);
-  //met4_et_ovQt[num] -> Fill(puCorrMET, puCorrMETqt, weight);
-  //met4_puSig[num]   -> Fill(puSigMET, weight);
+  hists->fill1DHist(nJets, Form("jet_N_%i",num), "jet_N", 20, 0,20, weight, "Histos");
+  hists->fill1DHist(nJets15, Form("jet_N15_%i",num), "jet_N15", 20, 0,20, weight, "Histos");
+  hists->fill1DHist(nJetsEta24, Form("jet_N24_%i",num), "jet_N24", 20, 0,20, weight, "Histos");
 
-  mt2[num]      -> Fill(MT, weight);
-  //mt2_met2[num] -> Fill(MT, MET, weight);
-
-  //mt2_met3[num] -> Fill(MT, projMET, weight);
-  //mtZ_met3[num] -> Fill(MTZ, projMET, weight);
-
-
-  di_qt[num]   -> Fill(qT, weight);
-  di_eta[num]  -> Fill(diEta, weight);
-  di_phi[num]  -> Fill(diPhi, weight);
-  di_mass[num] -> Fill(Mll, weight);
-  if(Mll_EB!=0) di_mass_EB[num]  -> Fill(Mll_EB, weight);
-  if(Mll_EE!=0) di_mass_EE[num]  -> Fill(Mll_EE, weight);
-  if(Mll_EX!=0) di_mass_EX[num]  -> Fill(Mll_EX, weight);
-
-  jet_N[num]     -> Fill(nJets, weight);
-  jet_N15[num]   -> Fill(nJets15, weight);
-  jet_N24[num]   -> Fill(nJetsEta24, weight);
-  jet_b_N[num]   -> Fill(nJetsB, weight);
-  jet_b_Nssv[num]-> Fill(nJetsBssv, weight);
-  jet_b_N25[num] -> Fill(nJetsB25, weight);
-  jet_b_N30[num] -> Fill(nJetsB30, weight);
-
-
-  vtx_nPV_tot[num]    -> Fill(nVtxTotal, weight);
-  vtx_nPV_raw[num]    -> Fill(nVtx);
-  vtx_nPV_weight[num] -> Fill(nVtx, weight);
-  vtx_ndof_1[num]     -> Fill(nDofVtx1, weight);
-  vtx_ndof_2[num]     -> Fill(nDofVtx2, weight);
-
-  if(isRealData)  run_events[num] -> Fill(runNumber);
-
+  hists->fill1DHist(nJetsB, Form("jet_b_N_%i",num), "jet_b_N", 20, 0,20, weight, "Histos");
+  hists->fill1DHist(nJetsB25, Form("jet_b_N25_%i",num), "jet_b_N25", 20, 0,20, weight, "Histos");
 
   if(nJets>0)
     {
-      jet_pt1[num]     -> Fill(ptLeadJet, weight);
-      jet_eta1[num]    -> Fill(etaLeadJet, weight);
-      jet_phi1[num]    -> Fill(phiLeadJet, weight);
+      hists->fill1DHist(ptLeadJet, Form("jet_pt1_%i",num), "jet_pt1", 50, 0,400, weight, "Histos");
+      hists->fill1DHist(etaLeadJet, Form("jet_eta1_%i",num), "jet_eta1", 50, -5,5, weight, "Histos");
+      hists->fill1DHist(phiLeadJet, Form("jet_phi1_%i",num), "jet_phi1", 50,  -TMath::Pi(), TMath::Pi(), weight, "Histos");
+      hists->fill1DHist(dRjetlep1, Form("jet_dRlep1_%i",num), "jet_dRlep1", 50, 0,5, weight, "Histos");
+      hists->fill1DHist(dRjetlep2, Form("jet_dRlep2_%i",num), "jet_dRlep2", 50, 0,5, weight, "Histos");
 
-      met1_dPhiClosJet1[num] -> Fill(dPhiClos1, weight);
-      //met1_dPhiClosJet2[num] -> Fill(dPhiClos2, weight);
-      //met2_dPhiLeadJet1[num] -> Fill(dPhiLead1, weight);
-      //met2_dPhiLeadJet2[num] -> Fill(dPhiLead2, weight);
+      hists->fill1DHist(dPhiClos1, Form("met1_dPhiClosJet1_%i",num), "met1_dPhiClosJet1", 50, 0,TMath::Pi(), weight, "Histos");
+
+      hists->fill1DHist(ptLeadBJet, Form("jet_b_pt_%i",num), "jet_b_pt", 50, 0,400, weight, "Histos");
+
     }
 
   if(nJets>1)
     {
-      jet_pt2[num]    -> Fill(ptTrailJet, weight);
-      jet_eta2[num]   -> Fill(etaTrailJet, weight);
-      jet_phi2[num]   -> Fill(phiTrailJet, weight);
-      jet_b_pt[num]   -> Fill(ptLeadBJet, weight);
-      jet_dRlep1[num] -> Fill(dRjetlep1, weight); 
-      jet_dRlep2[num] -> Fill(dRjetlep2, weight); 
-      
-      jet_diM[num]      -> Fill(massDiJet,weight);
-      jet_deltaEta[num] -> Fill(deltaEtaDiJet, weight);
-      jet_zeppZ[num]    -> Fill(zeppDiJetDiLep, weight);
-      jet_zeppZy[num]   -> Fill(zeppDiJetDiLep_y, weight);
+      hists->fill1DHist(ptTrailJet, Form("jet_pt2_%i",num), "jet_pt2", 50, 0,400, weight, "Histos");
+      hists->fill1DHist(etaTrailJet, Form("jet_eta2_%i",num), "jet_eta2", 50, -5,5, weight, "Histos");
+      hists->fill1DHist(phiTrailJet, Form("jet_phi2_%i",num), "jet_phi2", 50,  -TMath::Pi(), TMath::Pi(), weight, "Histos");
 
+      hists->fill1DHist(massDiJet, Form("jet_diM_%i",num), "jet_diM", 50, 0,2000, weight, "Histos");
+      hists->fill1DHist(deltaEtaDiJet, Form("jet_deltaEta_%i",num), "jet_deltaEta", 50, 0,10, weight, "Histos");
+      hists->fill1DHist(zeppDiJetDiLep, Form("jet_zeppZ_%i",num), "jet_zeppZ", 50, -5,5, weight, "Histos");
+      hists->fill1DHist(zeppDiJetDiLep_y, Form("jet_zeppZy_%i",num), "jet_zeppZy", 50, -5,5, weight, "Histos");
     }
       
 
   // if(selection =="muGamma" || selection =="eGamma" || selection =="gamma"){
   
-  ph_nGamma[num] -> Fill(nGamma, weight);
+  hists->fill1DHist(nGamma, Form("ph_nGamma_%i",num), "ph_nGamma", 20, 0,20, weight, "Histos");
+
+  if(isRealData)  
+    hists->fill1DHist(runNumber, Form("run_events_%i",num), "run_events", 40000, 160000., 200000, 1, "Histos");
 
 
-  if (suffix.Contains("ggHZZ") || suffix.Contains("ggHWW")) {
-    higgs_pt[num]   -> Fill(hig_Pt);
-    higgs_mass[num] -> Fill(hig_M);
-    higgs_w_pt[num]   -> Fill(hig_Pt, weight);
-    higgs_w_mass[num] -> Fill(hig_M, weight);
- 
-  }
+  hists->fill1DHist(nVtxTotal, Form("vtx_nPV_tot_%i",num), "vtx_nPV_tot", 20, 0,20, weight, "Histos");
+  hists->fill1DHist(nVtx, Form("vtx_nPV_raw_%i",num), "vtx_nPV_raw", 20, 0,20, 1, "Histos");
+  hists->fill1DHist(nVtx, Form("vtx_nPV_weight_%i",num), "vtx_nPV_weight", 20, 0,20, weight, "Histos");
+
+  hists->fill1DHist(nVtx, Form("vtx_ndof1_%i",num), "vtx_ndof1", 50, 0,150, weight, "Histos");
+  hists->fill1DHist(nVtx, Form("vtx_ndof2_%i",num), "vtx_ndof2", 50, 0,150, weight, "Histos");
 }
 
 

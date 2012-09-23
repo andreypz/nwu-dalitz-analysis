@@ -5,6 +5,16 @@ https://twiki.cern.ch/twiki/bin/view/CMS/UserCodeNWUHiggs
 
 The log of changes:
 
+2012-Sep-23
+  * Adding HistManager class from Andy. Implemented it in higgs analyzer
+  * Using N events from Notify to scale the samples to lnmi
+  * Removing soucefiles - no use anymore
+
+2012-Sep-21
+ * Adding event counts in Notify()
+ * Cleaning sourcefiles
+ * PU reweighting with fine binning for 2011
+
 2012-Sep-13
  * V02-09 tag
    * k-factors for mH 125 and 200

@@ -17,10 +17,10 @@ if nargs>1 and sys.argv[1]=="ele":
     selection="electron"
     
 period    = '2011'
-doTest    = 1
-doData    = 1
-doBG      = 1
-doSignal  = 0
+doTest    = 0
+doData    = 0
+doBG      = 0
+doSignal  = 1
 
 ''' 
     Set job configurations.  The order of arguments is:
@@ -89,7 +89,7 @@ signal = []
 
 signal.extend([
 b.JobConfig('ggHZZ125', dCache+'/andreypz/nuTuples_v2_7TeV/ggH125', 1, 'ggHZZ125 0 '+selection+' '+period, selection),
-#b.JobConfig('ggHZZ200', dCache+'/andreypz/nuTuples_v2_7TeV/ggH200', 1, 'ggHZZ200 0 '+selection+' '+period, selection),
+b.JobConfig('ggHZZ200', dCache+'/andreypz/nuTuples_v2_7TeV/ggH200', 1, 'ggHZZ200 0 '+selection+' '+period, selection),
 b.JobConfig('ggHZZ250', dCache+'/andreypz/nuTuples_v2_7TeV/ggH250', 1, 'ggHZZ250 0 '+selection+' '+period, selection),
 b.JobConfig('ggHZZ300', dCache+'/andreypz/nuTuples_v2_7TeV/ggH300', 1, 'ggHZZ300 0 '+selection+' '+period, selection),
 b.JobConfig('ggHZZ350', dCache+'/andreypz/nuTuples_v2_7TeV/ggH350', 1, 'ggHZZ350 0 '+selection+' '+period, selection),
@@ -97,7 +97,7 @@ b.JobConfig('ggHZZ400', dCache+'/andreypz/nuTuples_v2_7TeV/ggH400', 1, 'ggHZZ400
 
 
 b.JobConfig('ggHWW125', dCache+'/andreypz/nuTuples_v2_7TeV/ggHWW130', 1, 'ggHWW125 0 '+selection+' '+period, selection),
-#b.JobConfig('ggHWW200', dCache+'/andreypz/nuTuples_v2_7TeV/ggHWW200', 1, 'ggHWW200 0 '+selection+' '+period, selection),
+b.JobConfig('ggHWW200', dCache+'/andreypz/nuTuples_v2_7TeV/ggHWW200', 1, 'ggHWW200 0 '+selection+' '+period, selection),
 b.JobConfig('ggHWW250', dCache+'/andreypz/nuTuples_v2_7TeV/ggHWW250', 1, 'ggHWW250 0 '+selection+' '+period, selection),
 b.JobConfig('ggHWW300', dCache+'/andreypz/nuTuples_v2_7TeV/ggHWW300', 1, 'ggHWW300 0 '+selection+' '+period, selection),
 b.JobConfig('ggHWW350', dCache+'/andreypz/nuTuples_v2_7TeV/ggHWW350', 1, 'ggHWW350 0 '+selection+' '+period, selection),

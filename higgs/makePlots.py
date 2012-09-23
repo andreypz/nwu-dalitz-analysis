@@ -6,7 +6,7 @@ import datetime
 import config as c
 import utils as u
 
-F0 = 6
+F0 = 5
 FNOB =5
 FB = 8
 FMVA = 25
@@ -20,7 +20,7 @@ plotLepton = 1
 plotDiLepton = 1
 plotMisc = 1
 
-makePuWeights = 1
+makePuWeights = 0
 
 def makePlots(sel=1, dir="./", hPath="v00"):
     gROOT.ProcessLine(".L ../data/tdrstyle.C");
@@ -45,8 +45,7 @@ def makePlots(sel=1, dir="./", hPath="v00"):
     print "Making plots from", hPath, "with lumi = ", intLumi
     
     #topbg = ["tW","tbarW"]
-    bg   = ["WW", "ZZ","DYjets"]
-    topbg = []
+    bg   = ["tW","tbarW","ttbar","WW", "ZZ","DYjets"]
     sig1 = ["ggHZZ125","ggHZZ250","ggHZZ300","ggHZZ350","ggHZZ400"]
     sig2 = ["VBFHZZ125","VBFHZZ250","VBFHZZ300","VBFHZZ350","VBFHZZ400"]
     sig3 = ["ggHWW125","ggHWW250","ggHWW300","ggHWW350","ggHWW400"]
@@ -60,11 +59,7 @@ def makePlots(sel=1, dir="./", hPath="v00"):
     li_ov    = {}
 
     li_allbg = {}
-    for a in topbg:
-        #print "Creating TList", a
-        f = TFile(hPath+"/"+thissel+"/hhhh_"+a+"_1.root", "OPEN")
-        li_topbg.Add(f)
-        li_allbg[a] = f
+
     for a in bg:
         #print a
         if a=='ttbar':
@@ -75,8 +70,6 @@ def makePlots(sel=1, dir="./", hPath="v00"):
             f = TFile(hPath+"/m_vbfZ_"+thissel+".root", "OPEN")
         else:
             f = TFile(hPath+"/"+thissel+"/hhhh_"+a+"_1.root", "OPEN")
-        #f.Print()
-        #print "Creating TList", a
         li_allbg[a] = f
             
     for a in sig1:
@@ -134,7 +127,7 @@ def makePlots(sel=1, dir="./", hPath="v00"):
     if plotSpecial:
         u.drawMultiPlot(imgpath+"Special/di01_Mll", "","M(ll)", "di_mass_"+str(F0), 1, 0.1, 1e6, 0.5,1.49, li_ov, li_allbg, sel)
 
-
+        '''
         print "* Making pu weights *"
         pileup2011 = TFile("pileup2011.root","open")
         pu_da = pileup2011.Get("pileup").Clone()
@@ -158,6 +151,7 @@ def makePlots(sel=1, dir="./", hPath="v00"):
             f.cd()
             h1_PU2011.Write("h1_PU2011")
             f.Close()
+        '''
         
         '''
         c1.cd()

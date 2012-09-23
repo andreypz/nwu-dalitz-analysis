@@ -6,9 +6,11 @@ class Params():
 
         self._lumi_ele = 2312 + 2739
         self._lumi_mu  = 2312 + 2739
+        self._lumi_mu  = 2312 + (25./30)*2739
 
+        self._isUpdated = False
         self._cutNamesHZZ = [
-        "0. Total",
+        "0. Total (not scaled)",
         "1. HLT",
         "2. Two Leptons",
         "3. third lepton veto",
@@ -43,7 +45,7 @@ class Params():
         "32. MVA H250 nj>1",
     
         ]
-        self._nominalHZZ = [1,2,3,4,5,6,7,8]
+        self._nominalHZZ = [0,1,2,3,4,5,6,7,8]
         self._bgOrderHZZ = ["Top","ttbar","WW","WZ","ZZ","DYjets"]        
         self._extraHZZ = [18,19,20, 10,29,30,31,32, 21,22,23,24]
         #self._extraHZZ = [18,19,20, 9,25,26,27,28, 10,29,30,31,32, 21,22,23,24]
@@ -61,7 +63,7 @@ class Params():
         ]
         self._nominalVBFZ = [3,4,5,6,7]
         self._extraVBFZ = []
-        self._bgOrderVBFZ = ["Top","ttbar","WW","WZ","ZZ","DYjets"]        
+        self._bgOrderVBFZ = ["Top","ttbar","WW","ZZ","DYjets"]        
         
         self._xsec_and_colors = {
             "DATA": [-1,-1,-1,-1],
@@ -117,6 +119,19 @@ class Params():
     def xsec_and_colors(self):
         return  self._xsec_and_colors
 
+    def setIsUpdated(self, bit=True):
+        self._isUpdated = bit
+
+    def isUpdated(self):
+        return self._isUpdated
+
+    def UpdateNevents(self, sample, n=1):
+        if  self._xsec_and_colors[sample][3] != n:
+            print " --->  Changing the initial number of events in config file for sample", sample,"to", n
+            self._xsec_and_colors[sample][3] = n 
+        if sample not in self._xsec_and_colors.keys():
+            print "Warning!! the sample name was no in the original dictionary"
+            
     def getLumi(self, sel=1):
         if sel==1:
             return self._lumi_mu
