@@ -100,7 +100,8 @@ class BatchMaster():
             if   d == "data":
                 os.system("cp -r "+self._outDir+"/../../"+d+"/* "+code_copy_dir+"/"+d)
             elif d =="plugins":
-                os.system("cp "+self._outDir+"/../../"+d+"/*.so "+code_copy_dir+"/"+d)
+                self.MakeDirectory(code_copy_dir+'/'+d+'/lib', clear=False)
+                os.system("cp "+self._outDir+"/../../"+d+"/lib/*.so "+code_copy_dir+"/"+d+"/lib")
                 os.system("cp "+self._outDir+"/../../"+d+"/*.cc "+code_copy_dir+"/"+d)
                 os.system("cp "+self._outDir+"/../../"+d+"/*.h "+code_copy_dir+"/"+d)
             elif d == "src":

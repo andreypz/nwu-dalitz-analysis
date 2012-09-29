@@ -1,4 +1,4 @@
-// $Id: template_higgsAnalyzer.C,v 1.55 2012/09/29 20:53:21 andrey Exp $
+// $Id: template_higgsAnalyzer.C,v 1.56 2012/09/29 21:05:58 andrey Exp $
 
 #define higgsAnalyzer_cxx
 
@@ -401,8 +401,8 @@ bool higgsAnalyzer::Process(Long64_t entry)
     vector<TCPhysObject> electrons;
     //int eleCount = 0;
 
-    if (recoElectrons->GetSize()>1)
-      cout<<"Event with at least 2 electrons event #  "<<eventNumber<<endl;
+    //if (recoElectrons->GetSize()>1)
+    //cout<<"Event with at least 2 electrons event #  "<<eventNumber<<endl;
     for (int i = 0; i <  recoElectrons->GetSize(); ++i) {
         TCElectron* thisElec = (TCElectron*) recoElectrons->At(i);    
 
@@ -1523,8 +1523,8 @@ void higgsAnalyzer::FillHistosFull(Int_t num, Double_t weight){
   hists->fill1DHist(nVtx, Form("vtx_nPV_raw_%i",num), "vtx_nPV_raw", 20, 0,20, 1, "Histos");
   hists->fill1DHist(nVtx, Form("vtx_nPV_weight_%i",num), "vtx_nPV_weight", 20, 0,20, weight, "Histos");
 
-  hists->fill1DHist(nVtx, Form("vtx_ndof1_%i",num), "vtx_ndof1", 50, 0,150, weight, "Histos");
-  hists->fill1DHist(nVtx, Form("vtx_ndof2_%i",num), "vtx_ndof2", 50, 0,150, weight, "Histos");
+  hists->fill1DHist(nDofVtx1, Form("vtx_ndof1_%i",num), "vtx_ndof1", 50, 0,150, weight, "Histos");
+  hists->fill1DHist(nDofVtx1, Form("vtx_ndof2_%i",num), "vtx_ndof2", 50, 0,150, weight, "Histos");
 }
 
 

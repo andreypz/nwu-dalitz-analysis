@@ -94,7 +94,7 @@ class higgsAnalyzer : public TSelector {
   
   UInt_t nEvents[nC];
   UInt_t nEventsPassNoiseFilter[6][nC]; //1-Hcal, 2-Ecal, 3- Scraping, 4-CSCTight, 5-CSCLoose,   0-passed all
-  
+  UInt_t totEvents;  
 
 public :
    TTree          *fChain;   //!pointer to the analyzed TTree or TChain
@@ -226,10 +226,13 @@ void higgsAnalyzer::Init(TTree *tree)
    primaryVtx = 0;
    beamSpot = 0;
    // Set branch addresses and branch pointers
+
+   totEvents = 0;
    if (!tree) return;
    thisTree    = tree; 
    fChain = tree;
    fChain->SetMakeClass(1);
+
 
    fChain->SetBranchAddress("recoJets", &recoJets, &b_recoJets);
    fChain->SetBranchAddress("recoJPT", &recoJPT, &b_recoJPT);
@@ -278,7 +281,9 @@ Bool_t higgsAnalyzer::Notify()
 
   eventsInFile->SetAddress(&initEvents);
   eventsInFile->GetEntry(0);
-  //cout<<" Events in file: "<<initEvents<<"   fname "<<inFile->GetName()<<endl;
+
+  totEvents += initEvents;
+  cout<<" Events in file: "<<initEvents<<"  total processed: "<<totEvents<<endl;
 
   MET = 0;
   FillHistosBasic(0, initEvents);

@@ -5,6 +5,12 @@ https://twiki.cern.ch/twiki/bin/view/CMS/UserCodeNWUHiggs
 
 The log of changes:
 
+2012-Sep-29
+  * V02-11 tag
+    * HistManager added
+    * plugins/lib for lineshape library
+    * synchronization for 8 TeV
+    
 2012-Sep-23
   * Adding HistManager class from Andy. Implemented it in higgs analyzer
   * Using N events from Notify to scale the samples to lnmi
