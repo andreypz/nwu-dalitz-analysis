@@ -58,7 +58,7 @@ else:
 
 
 
-gSystem.Load("../plugins/libShapeLine.so");
+gSystem.Load("../plugins/lib/libShapeLine.so");
 
 gROOT.LoadMacro("../plugins/rochcor.cc+");
 

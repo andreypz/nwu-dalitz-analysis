@@ -1,4 +1,4 @@
-// $Id: template_higgsAnalyzer.C,v 1.54 2012/09/23 22:28:57 andrey Exp $
+// $Id: template_higgsAnalyzer.C,v 1.55 2012/09/29 20:53:21 andrey Exp $
 
 #define higgsAnalyzer_cxx
 
@@ -111,8 +111,7 @@ TMVA::Reader* tmvaReader[N_HIGGS_MASSES][3];
 //The events that Jucub cuts, but I keep:
 //UInt_t myEVTS[] = {};
 //Visa versa
-//const UInt_t hisEVTS[] = {242, 305966};
-const UInt_t hisEVTS[] = {};
+const UInt_t hisEVTS[] = {242, 305966};
 Int_t evSize = sizeof(hisEVTS)/sizeof(int);
 
 
