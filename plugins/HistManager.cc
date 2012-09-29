@@ -11,7 +11,7 @@
 
   }
     
-    
+/*    
   void HistManager::writeHists(TFile* myFile){
     
     myFile->cd();
@@ -31,7 +31,7 @@
     myFile->Close();
     
   }
-    
+*/  
 
   void HistManager::fill1DHist(float x, std::string name, std::string title,
                                int bins, float xmin, float xmax, float weight, std::string folder){
@@ -40,7 +40,11 @@
     it = the1DMap.find(name);
     //cout<<"fill 1d  "<<name<<endl;
     if (it == the1DMap.end()){
+      //theFile->ls();
+      //cout<<"  ** Before the cd into a directory"<<endl;
       theFile->cd(folder.c_str());
+      //cout<<"  ****** After the cd into a directory"<<endl;
+      //theFile->ls();
       the1DMap[name] = new TH1F(name.c_str(),title.c_str(),bins,xmin,xmax);
       theFile->cd();
     }
@@ -76,7 +80,7 @@
     if (it == the2DMap.end()){
       theFile->cd(folder.c_str());
       the2DMap[name] = new TH2F(name.c_str(),title.c_str(),binsx,xmin,xmax,binsy,ymin,ymax);
-      theFile->cd();
+     theFile->cd();
     }
 
     the2DMap[name]->Fill(x,y,weight);

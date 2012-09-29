@@ -1,4 +1,4 @@
-// $Id: template_higgsAnalyzer.C,v 1.53 2012/09/21 15:49:35 andrey Exp $
+// $Id: template_higgsAnalyzer.C,v 1.54 2012/09/23 22:28:57 andrey Exp $
 
 #define higgsAnalyzer_cxx
 
@@ -111,7 +111,12 @@ TMVA::Reader* tmvaReader[N_HIGGS_MASSES][3];
 //The events that Jucub cuts, but I keep:
 //UInt_t myEVTS[] = {};
 //Visa versa
-const UInt_t hisEVTS[] = {3912507,3537222, 2260583, 4048415, 1972146, 1294493, 2879208, 65882, 696163, 4124071, 3263050, 640272};
+//const UInt_t hisEVTS[] = {242, 305966};
+const UInt_t hisEVTS[] = {};
+Int_t evSize = sizeof(hisEVTS)/sizeof(int);
+
+
+//const UInt_t hisEVTS[] = {3912507,3537222, 2260583, 4048415, 1972146, 1294493, 2879208, 65882, 696163, 4124071, 3263050, 640272};
 
 
 void higgsAnalyzer::Begin(TTree * /*tree*/) 
@@ -132,11 +137,12 @@ void higgsAnalyzer::Begin(TTree * /*tree*/)
     triggerSelector = new TriggerSelector(selection, period, triggers);
 
     histoFile = new TFile("a_higgsHistograms.root", "RECREATE");
-    hists = new HistManager(histoFile);
 
     histoFile->mkdir("Histos", "Histos");
     histoFile->mkdir("mvaTree", "mvaTree");
-    //histoFile->cd("Histos");
+    histoFile->cd("Histos");
+
+    hists = new HistManager(histoFile);
 
     //In the Title of this histogram I encode the sample!  
 
@@ -148,152 +154,6 @@ void higgsAnalyzer::Begin(TTree * /*tree*/)
       nEvents[n]=0;
       nEventsWeighted[n]=0;
     }
-
-    /*
-    for(Int_t n=0; n<nC; n++)
-      {
-	met0_et[n]       = new TH1F(Form("met0_et_%i",n), "met0_et", 40, 0,400);
-	evt_weight[n]    = new  TH1F(Form("evt_weight_%i",n), "Weights", 50,0,10);
-	evt_pu[n]        = new  TH1F(Form("evt_pu_%i",n), "Pile-up", 240,0,60);
-      }
-
-    for(Int_t n=4; n<nC; n++)
-      {
-	//cout<<n<<"  dbg hists"<<endl;
-
-	met1_et[n]      = new TH1F(Form("met1_et_%i",n), "met1_et", 80, 0,400);
-	met2_et[n]      = new TH1F(Form("met2_et_%i",n), "met2_et", 80, 0,400);
-	met3_et[n]      = new TH1F(Form("met3_et_%i",n), "met3_et", 84, -20,400);
-	met4_et[n]      = new TH1F(Form("met4_et_%i",n), "met4_et", 80, 0,400);
-	met5_et[n]      = new TH1F(Form("met5_et_%i",n), "met5_et", 80, 0,400);
-	met6_et[n]      = new TH1F(Form("met6_et_%i",n), "met6_et", 80, 0,400);
-	met7_et[n]      = new TH1F(Form("met7_et_%i",n), "met7_et", 80, 0,400);
-	met8_et[n]      = new TH1F(Form("met8_et_%i",n), "met8_et", 80, 0,400);
-	met9_et[n]      = new TH1F(Form("met9_et_%i",n), "met9_et", 80, 0,400);
-	met10_et[n]     = new TH1F(Form("met10_et_%i",n), "met10_et", 80, 0,400);
-
-	met1_overQt[n] = new TH1F(Form("met1_overQt_%i",n), "met1_overQt", 40, 0,4);
-	met1_projOnQt[n]    = new TH1F(Form("met1_projOnQt_%i",n), "Met projected on QT", 50, -200,100);
-	met1_perpQt[n]      = new TH1F(Form("met1_perpQt_%i",n), "Met perpendicular to QT", 50, 0,400);
-	met1_phi[n]     = new TH1F(Form("met1_phi_%i",n), "met1_phi", 40, -TMath::Pi(), TMath::Pi());
-
-
-	//met0_et_ovQt[n]  = new TH2F(Form("met0_et_ovQt_%i",n), "pfMET vs Met/qt", 40, 0,400, 40, 0,4);
-	//met1_et_ovQt[n]  = new TH2F(Form("met1_et_ovQt_%i",n), "MET1 vs Met/qt", 40, 0,400, 40, 0,4);
-	//met2_et_ovQt[n]  = new TH2F(Form("met2_et_ovQt_%i",n), "pfMet noise vs Met/qt", 40, 0,400, 40, 0,4);
-	//met3_et_ovQt[n]  = new TH2F(Form("met3_et_ovQt_%i",n), "projMET vs Met/qt", 40, 0,400, 40, 0,4);
-	//met4_et_ovQt[n]  = new TH2F(Form("met4_et_ovQt_%i",n), "puCorrMET vs Met/qt", 40, 0,400, 40, 0,4);
-
-	//met1_lg[n]         = new TH1F(Form("met1_lg_%i",n), "met1_lg", 50,-200,100);
-	met1_recoil_lg[n]  = new TH1F(Form("met1_recoil_lg_%i",n), "met1_recoil_lg", 50,-400,100);
-
-	//met2_phi[n]     = new TH1F(Form("met2_phi_%i",n), "met2_phi", 40, -TMath::Pi(), TMath::Pi());
-	//met2_over_qt[n] = new TH1F(Form("met2_over_qt_%i",n), "met2_over_qt", 40, 0,4);
-
-	//met3_phi[n]     = new TH1F(Form("met3_phi_%i",n), "met3_phi", 40, -TMath::Pi(), TMath::Pi());
-	//met3_over_qt[n] = new TH1F(Form("met3_over_qt_%i",n), "met2_over_qt", 40, 0,4);
-
-	//met4_phi[n]     = new TH1F(Form("met4_phi_%i",n), "met4_phi", 40, -TMath::Pi(), TMath::Pi());
-	//met4_over_qt[n] = new TH1F(Form("met4_over_qt_%i",n), "met4_over_qt", 42, -0.2,4);
-	//	met4_puSig[n]   = new TH1F(Form("met4_sig_%i",n), "met4_sig", 42, -0.4,8);
-
-	//met1_dPhiLeadJet1[n] =  new TH1F(Form("met1_dPhiLeadJet1_%i",n), "delta phi to lead jets", 50, 0, TMath::Pi());
-	//met1_dPhiLeadJet2[n] =  new TH1F(Form("met1_dPhiLeadJet2_%i",n), "delta phi to lead jets", 50, 0, TMath::Pi());
-	met1_dPhiClosJet1[n] =  new TH1F(Form("met1_dPhiClosJet1_%i",n), "delta phi to closest jets", 50, 0, TMath::Pi());
-	//met1_dPhiClosJet2[n] =  new TH1F(Form("met1_dPhiClosJet2_%i",n), "delta phi to closest jets", 50, 0, TMath::Pi());
-
-
-	//met2_dPhiLeadJet1[n] =  new TH1F(Form("met2_dPhiLeadJet1_%i",n), "delta phi to lead jets", 50, 0, TMath::Pi());
-	//met2_dPhiLeadJet2[n] =  new TH1F(Form("met2_dPhiLeadJet2_%i",n), "delta phi to lead jets", 50, 0, TMath::Pi());
-	//met2_dPhiClosJet1[n] =  new TH1F(Form("met2_dPhiClosJet1_%i",n), "delta phi to closest jets", 50, 0, TMath::Pi());
-	//met2_dPhiClosJet2[n] =  new TH1F(Form("met2_dPhiClosJet2_%i",n), "delta phi to closest jets", 50, 0, TMath::Pi());
-
-
-	l1_phi[n] = new TH1F(Form("l1_phi_%i",n), "l1_phi", 50, -TMath::Pi(), TMath::Pi());
-	l1_eta[n] = new TH1F(Form("l1_eta_%i",n), "l1_eta", 52, -2.6, 2.6);
-	l1_pt[n]  = new TH1F(Form("l1_pt_%i",n), "l1_pt", 50, 0, 200);
-	l2_phi[n] = new TH1F(Form("l2_phi_%i",n), "l2_phi", 50, -TMath::Pi(), TMath::Pi());
-	l2_eta[n] = new TH1F(Form("l2_eta_%i",n), "l2_eta", 52, -2.6, 2.6);
-	l2_pt[n]  = new TH1F(Form("l2_pt_%i",n), "l2_pt", 50, 0, 200);
-
-	l0_angle[n]    = new TH1F(Form("l0_angle_%i",n), "l0_angle", 50, 0, TMath::Pi());
-	l0_angleLog[n] = new TH1F(Form("l0_angleLog_%i",n), "l0_angleLog", 50, -5, 1);
-	l0_dPhi[n]    = new TH1F(Form("l0_dPhi_%i",n), "l0_dPhi", 50, 0, TMath::Pi());
-	l0_dEta[n]    = new TH1F(Form("l0_dEta_%i",n), "l0_dEta", 50, 0, 4);
-	l0_dR[n]      = new TH1F(Form("l0_dR_%i",n), "l0_dR", 50, 0, 5);
-	l0_ptRatio[n] = new TH1F(Form("l0_ptRatio_%i",n), "l0_ptRatio", 50, 0, 1);
-
-	btag_hp[n] = new TH1F(Form("btag_hp_%i",n), "btag_hp", 40, -10, 10);
-
-	//mtZ[n]     = new TH1F(Form("mtZ_%i",n), "MTZ pf", 50, 100, 600);
-	mt0[n]     = new TH1F(Form("mt0_%i",n), "MT pf", 50, 100, 600);
-	mt1[n]     = new TH1F(Form("mt1_%i",n), "MT type1", 50, 100, 600);
-	mt2[n]     = new TH1F(Form("mt2_%i",n), "MT noise", 50, 100, 600);
-	mt3[n]     = new TH1F(Form("mt3_%i",n), "MT proj", 50, 100, 600);
-	mt4[n]     = new TH1F(Form("mt4_%i",n), "MT pu corr", 50, 100, 600);
-
-	//mtZ_met2[n]   = new TH2F(Form("mtZ_met2_%i",n), "MTZ pf vs pfMet noise", 50, 100, 600, 40, 0,400);
-	//mt2_met2[n]   = new TH2F(Form("mt2_met2_%i",n), "MT pf vs pfMet noise", 50, 100, 600, 40, 0,400);
-
-	//mtZ_met3[n]   = new TH2F(Form("mtZ_met3_%i",n), "MTZ pf vs projMet noise", 50, 100, 600, 40, 0,400);
-	//mt2_met3[n]   = new TH2F(Form("mt2_met3_%i",n), "MT pf vs projfMet noise", 50, 100, 600, 40, 0,400);
-
-	di_qt[n]      = new TH1F(Form("di_qt_%i",n), "di-lepton qt", 80, 0,400);
-	di_eta[n]     = new TH1F(Form("di_eta_%i",n), "di-lepton Eta", 100, -5,5);
-	di_phi[n]     = new TH1F(Form("di_phi_%i",n), "di-lepton Phi", 50,  -TMath::Pi(), TMath::Pi());
-	di_mass[n]    = new TH1F(Form("di_mass_%i",n), "di-lepton Mass", 50, 70,120);
-	di_mass_EB[n] = new TH1F(Form("di_mass_EB_%i",n), "di-lepton Mass in Ecal Barrel", 50, 70,120);
-	di_mass_EE[n] = new TH1F(Form("di_mass_EE_%i",n), "di-lepton Mass in Ecal Endcap", 50, 70,120);
-	di_mass_EX[n] = new TH1F(Form("di_mass_EX_%i",n), "di-lepton Mass in Ecal E/B mix", 50, 70,120);
-	di_dPhiMet[n] = new TH1F(Form("di_dPhiMet_%i",n), "di_dPhiMet", 50, 0, TMath::Pi());
-
-	jet_N[n]      = new TH1F(Form("jet_N_%i",n), "Number of jets", 20,0,20);
-	jet_N15[n]    = new TH1F(Form("jet_N15_%i",n), "Number of jets pt>15", 20,0,20);
-	jet_N24[n]    = new TH1F(Form("jet_N24_%i",n), "Number of jets in |eta|<2.4", 20,0,20);
-	jet_dRlep1[n] = new TH1F(Form("jet_dRlep1_%i",n), "dR(jet, lepton1)", 50, 0,5);
-	jet_dRlep2[n] = new TH1F(Form("jet_dRlep2_%i",n), "dR(jet, lepton2)", 50, 0,5);
-	jet_pt1[n]     = new TH1F(Form("jet_pt1_%i",n),  "Pt of leading jet", 50,0,400);
-	jet_eta1[n]    = new TH1F(Form("jet_eta1_%i",n), "Eta of leading jet", 50,-5,5);
-	jet_phi1[n]    = new TH1F(Form("jet_phi1_%i",n), "Phi of leading jet", 50, -TMath::Pi(), TMath::Pi());
-	jet_pt2[n]     = new TH1F(Form("jet_pt2_%i",n),  "Pt of second jet", 50,0,400);
-	jet_eta2[n]    = new TH1F(Form("jet_eta2_%i",n), "Eta of second jet", 50,-5,5);
-	jet_phi2[n]    = new TH1F(Form("jet_phi2_%i",n), "Phi of second jet", 50, -TMath::Pi(), TMath::Pi());
-
-	jet_diM[n]      = new TH1F(Form("jet_diM_%i",n), "Mass of di-jet system", 50, 0,2000);
-	jet_deltaEta[n] = new TH1F(Form("jet_deltaEta_%i",n), "Delta eta of two leading jets", 50, 0,10);
-	jet_zeppZ[n]    = new TH1F(Form("jet_zeppZ_%i",n), "Zeppenfeld variable wrt Z", 50,-5,5);
-        jet_zeppZy[n]   = new TH1F(Form("jet_zeppZy_%i",n), "Zeppenfeld-y variable wrt Z", 50,-5,5);
-
-	jet_b_N[n]    = new TH1F(Form("jet_b_N_%i",n), "Number of b-jets pt>default", 10,0,10);
-	jet_b_Nssv[n] = new TH1F(Form("jet_b_Nssv_%i",n), "Number of b-jets pt>default", 10,0,10);
-	jet_b_N25[n]  = new TH1F(Form("jet_b_N25_%i",n), "Number of b-jets pt>25", 10,0,10);
-	jet_b_N30[n]  = new TH1F(Form("jet_b_N30_%i",n), "Number of b-jets pt>30", 10,0,10);
-	jet_b_pt[n]   = new TH1F(Form("jet_b_pt_%i",n), "Pt of b-jets, eta<2.4", 50,0,400);
-
-
-	vtx_nPV_tot[n]    = new  TH1F(Form("vtx_nPV_tot_%i",n), "Total Number of PVs, raw", 20,0,20);
-	vtx_nPV_raw[n]    = new  TH1F(Form("vtx_nPV_raw_%i",n), "Number of PVs, raw", 20,0,20);
-	vtx_nPV_weight[n] = new  TH1F(Form("vtx_nPV_weight_%i",n), "Number of PVs, reweighted", 20,0,20);
-	vtx_ndof_1[n]     = new  TH1F(Form("vtx_ndof_1_%i",n), "Ndof of first PV", 50,0,150);
-	vtx_ndof_2[n]     = new  TH1F(Form("vtx_ndof_2_%i",n), "Ndof of second PV", 50,0,150);
-
-	ph_nGamma[n]      = new  TH1F(Form("ph_nGamma_%i",n), "photon multiplicity (pt>25)", 10,0,10);
-
-	run_events[n]     =  new  TH1F(Form("run_events_%i",n), "Events per run", 18000, 160000., 178000.);
-
-
-	if (suffix.Contains("ggHZZ") || suffix.Contains("ggHWW")) {
-	  higgs_pt[n]     = new  TH1F(Form("higgs_pt_%i",n), "Higgs pt", 50,0,500);
-	  higgs_w_pt[n]   = new  TH1F(Form("higgs_w_pt_%i",n), "Higgs pt, wighted", 50,0,500);
-	  
-	  higgs_mass[n]   = new  TH1F(Form("higgs_mass_%i",n), "Higgs mass", 150, 0,1500);
-	  higgs_w_mass[n] = new  TH1F(Form("higgs_w_mass_%i",n), "Higgs mass, weighted", 150, 0,1500);
-	  //higgs_mass[n] = new  TH1F(Form("higgs_mass_%i",n), "Higgs mass", 70,100,800);
-	}
-       
-
-       }
-    */
 
     if (verboseLvl>0){
       ffout.open("./events_printout_SUFFIX_final.txt",ofstream::out);
@@ -435,20 +295,18 @@ bool higgsAnalyzer::Process(Long64_t entry)
 
     //Int_t reject[5] = {0,0,0,0,0};
 
-    //cout<<"event #"<<nEvents[0]<<endl;
+    //cout<<"event #  "<<eventNumber<<"  **N events**: "<<nEvents[0]<<endl;
     if (nEvents[0] == 1) weighter->SetDataBit(isRealData);
 
     //if(nEvents[0]>100) Abort("\t\t  ** 200 EVENTS PASSED, FINISH   ** ");
 
-    /*
-    for(Int_t ev=0; ev<10;ev++)
+    for(Int_t ev=0; ev<evSize;ev++)
       {
 	if (eventNumber==hisEVTS[ev]){
 	  cout<<eventNumber<<"  Found an event in  beginnings!"<<endl;
 	  break;
 	}
       }
-    */
 
     //cout<<"dbg"<<endl;    
     if (nEvents[0] % (int)5e4 == 0) cout<<nEvents[3]<<" events passed of "<<nEvents[0]<<" checked! (at Z-peak cut)"<<endl;
@@ -472,7 +330,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
     Bool_t triggerPass   = triggerSelector->SelectTriggers(triggerStatus, hltPrescale);
     if (!triggerPass) return kTRUE;
     // Double electron workaround.  Gets rid of hopelessly prescaled events of July 20-26, 2011
-    if (selection == "electron" && (runNumber > 171200 && runNumber < 171600)) return kTRUE;
+    //if (selection == "electron" && (runNumber > 171200 && runNumber < 171600)) return kTRUE;
 
     Int_t  eventPrescale = triggerSelector->GetEventPrescale();
 
@@ -524,16 +382,16 @@ bool higgsAnalyzer::Process(Long64_t entry)
 
     // Apply the PV filters here! -------------
     if (!vertexFilter) return kTRUE;  
-    /*
-    for(Int_t ev=0; ev<10;ev++)
+    
+    for(Int_t ev=0; ev<evSize;ev++)
       {
 	if (eventNumber==hisEVTS[ev]){
 	  cout<<eventNumber<<"  After vertex filter"<<endl;
 	  break;
 	}
       }
-    */
-    TVector3* pvPosition = new TVector3();
+   
+    TVector3* pvPosition;// = new TVector3();
     pvPosition = mainPrimaryVertex;
     
 
@@ -544,14 +402,32 @@ bool higgsAnalyzer::Process(Long64_t entry)
     vector<TCPhysObject> electrons;
     //int eleCount = 0;
 
+    if (recoElectrons->GetSize()>1)
+      cout<<"Event with at least 2 electrons event #  "<<eventNumber<<endl;
     for (int i = 0; i <  recoElectrons->GetSize(); ++i) {
         TCElectron* thisElec = (TCElectron*) recoElectrons->At(i);    
 
+	for(Int_t ev=0; ev<evSize;ev++)
+	  {
+	    if (eventNumber==hisEVTS[ev]){
+	      cout<<eventNumber<<"  n Ele =2 cut"<<endl;
+	      DumpElectronInfo(thisElec, pvPosition, rhoFactor, rhoFactor);
+	      break;
+
+	    }
+	  }
+
         if (fabs(thisElec->Eta()) > 2.5) continue;
 
-        float eleISOendcap = (thisElec->IsoMap("SumPt_R03") + thisElec->IsoMap("EmIso_R03") + thisElec->IsoMap("HadIso_R03") - rhoFactor*TMath::Pi()*0.09)/thisElec->Pt(); 
-        float eleISObarrel = (thisElec->IsoMap("SumPt_R03") +  TMath::Max(0.0, thisElec->IsoMap("EmIso_R03")-1.0) + thisElec->IsoMap("EmIso_R03") + thisElec->IsoMap("HadIso_R03") - rhoFactor*TMath::Pi()*0.09)/thisElec->Pt(); 
+
+	// PF iso:
+        float eleISOendcap = (thisElec->IsoMap("pfPhotonEt_R03") + thisElec->IsoMap("pfChargedHadron_R03") + thisElec->IsoMap("pfNeutralHadron_R03") - rhoFactor*TMath::Pi()*0.09)/thisElec->Pt(); 
+        float eleISObarrel = ( TMath::Max(0.0, thisElec->IsoMap("pfPhotonEt_R03")-1.0) + thisElec->IsoMap("pfChargedHadron_R03")  + thisElec->IsoMap("pfNeutralHadron_R03") - rhoFactor*TMath::Pi()*0.09)/thisElec->Pt(); 
+
+        //float eleISOendcap = (thisElec->IsoMap("SumPt_R03") + thisElec->IsoMap("EmIso_R03") + thisElec->IsoMap("HadIso_R03") - rhoFactor*TMath::Pi()*0.09)/thisElec->Pt(); 
+        //float eleISObarrel = (thisElec->IsoMap("SumPt_R03") +  TMath::Max(0.0, thisElec->IsoMap("EmIso_R03")-1.0) + thisElec->IsoMap("HadIso_R03") - rhoFactor*TMath::Pi()*0.09)/thisElec->Pt(); 
         bool  elecPass = false;
+
 
         if (
                 (fabs(thisElec->Eta()) < 1.442     
@@ -610,30 +486,6 @@ bool higgsAnalyzer::Process(Long64_t entry)
     for (int i = 0; i < recoMuons->GetSize(); ++ i) {
         TCMuon* thisMuon = (TCMuon*) recoMuons->At(i);    
 
-	/*
-	for(Int_t ev=0; ev<10;ev++)
-	  {
-	    if (eventNumber==hisEVTS[ev]){
-	      cout<<i<<"  A muon with pt="<<thisMuon->Pt()<<"  eta="<<thisMuon->Eta()<<"  charge="<<thisMuon->Charge()<<endl;
-	      cout<<"\t\t  thisMuon->NumberOfValidTrackerHits() = "<<thisMuon->NumberOfValidTrackerHits()<<endl;
-	      cout<<"\t\t  fabs(thisMuon->Dxy(pvPosition))   "<<fabs(thisMuon->Dxy(pvPosition))<<endl;
-	      cout<<"\t\t  fabs(thisMuon->Dz(pvPosition))   "<<fabs(thisMuon->Dz(pvPosition))<<endl;
-	      cout<<"\t\t  rhoFactor   "<<rhoFactor<<endl;
-	      cout<<"\t\t  (thisMuon->TrkIso() + thisMuon->HadIso() + thisMuon->EmIso() - rhoFactor*TMath::Pi()*0.09)/thisMuon->Pt()   "<<(thisMuon->TrkIso() + thisMuon->HadIso() + thisMuon->EmIso() - rhoFactor*TMath::Pi()*0.09)/thisMuon->Pt()<<endl;
-	      cout<<"\t\t  thisMuon->PtError()/thisMuon->Pt()   "<<thisMuon->PtError()/thisMuon->Pt()<<endl;
-	      cout<<"\t\t  thisMuon->NumberOfValidTrackerHits()   "<<thisMuon->NumberOfValidTrackerHits()<<endl;
-	      cout<<"\t\t  thisMuon->NumberOfValidPixelHits()   "<<thisMuon->NumberOfValidPixelHits()<<endl;
-	      cout<<"\t\t  thisMuon->NumberOfMatches()   "<<thisMuon->NumberOfMatches()<<endl;
-	      cout<<"\t\t  thisMuon->NormalizedChi2()   "<<thisMuon->NormalizedChi2()<<endl;
-	      //cout<<"\t\t     "<<<<endl;
-	      //cout<<"\t\t     "<<<<endl;
-
-	      break;
-	    }
-      }
-	    */
-
-	
         if (!(fabs(thisMuon->Eta()) < 2.4	
 	      && thisMuon->IsGLB() 
 	      && thisMuon->IsTRK()
@@ -746,8 +598,8 @@ bool higgsAnalyzer::Process(Long64_t entry)
 	if (
 	    // Loose ID jets. Those are used fo deltaPhi(Jet, Met) cut
 	    thisJet->NumConstit()    > 1
-	    && thisJet->NeuHadFrac() < 0.99
-	    && thisJet->NeuEmFrac()  < 0.99
+	    && thisJet->NeuHadFrac() < 0.90
+	    && thisJet->NeuEmFrac()  < 0.90
 	    && thisJet->ChEmFrac()   < 0.99
 	    && thisJet->ChHadFrac()  > 0.0
 	    && thisJet->NumChPart()  > 0.0
@@ -771,8 +623,8 @@ bool higgsAnalyzer::Process(Long64_t entry)
       } else if (fabs(thisJet->Eta()) < 4.9) {
     	if (thisJet->Pt() > jetPtCut[0]
     	    && thisJet->NumConstit()    > 1
-    	    && thisJet->NeuHadFrac() < 0.99
-    	    && thisJet->NeuEmFrac()  < 0.99
+    	    && thisJet->NeuHadFrac() < 0.90
+    	    && thisJet->NeuEmFrac()  < 0.90
     	    ) {
      	  jetP4.push_back(*thisJet); 
     	  sumJetP4 += TLorentzVector(*thisJet);
@@ -823,6 +675,14 @@ bool higgsAnalyzer::Process(Long64_t entry)
         /////////////////////
 
         if (electrons.size() < 2) return kTRUE;
+	
+	for(Int_t ev=0; ev<evSize;ev++)
+	  {
+	    if (eventNumber==hisEVTS[ev]){
+	      cout<<eventNumber<<" Same charge leptons"<<endl;
+	      break;
+	    }
+	  }
     	//opposite charge requirement
     	//if (electrons[0].Charge() == electrons[1].Charge()) return kTRUE;
 
@@ -843,27 +703,9 @@ bool higgsAnalyzer::Process(Long64_t entry)
         //////////////////////////////////////////
 
       if (muons.size() < 2) return kTRUE;
-      /*
-      for(Int_t ev=0; ev<10;ev++)
-	{
-	  if (eventNumber==hisEVTS[ev]){
-	    cout<<eventNumber<<"  n Mu =2 cut"<<endl;
-	    break;
-	  }
-	}
-      */
       //opposite charge requirement
       //if (muons[0].Charge() == muons[1].Charge()) reject[3]=1;//return kTRUE;
 
-      /*
-      for(Int_t ev=0; ev<10;ev++)
-	{
-	  if (eventNumber==hisEVTS[ev]){
-	    cout<<eventNumber<<" Same charge leptons"<<endl;
-	    break;
-	  }
-	}
-      */
 	ch1 = muons[0].Charge();
 	ch2 = muons[1].Charge();
 
@@ -988,11 +830,10 @@ bool higgsAnalyzer::Process(Long64_t entry)
      if (Lepton1.Pt() < 20.0 || Lepton2.Pt() < 20.0) //reject[3]=1;
        return kTRUE;
 
-   /*
-   for(Int_t ev=0; ev<10; ev++)
+   for(Int_t ev=0; ev<evSize; ev++)
       {
 	if (eventNumber==hisEVTS[ev]){
-	  cout<<eventNumber<<"  Veto on pt>20 cut?   "<<reject[3]
+	  cout<<eventNumber
 	      <<"\t\t lep1: pt"<<Lepton1.Pt()<<"  eta: "<<Lepton1.Eta()<<"  phi: "<<Lepton1.Phi()
 	      <<"\t\t lep2: pt"<<Lepton2.Pt()<<"  eta: "<<Lepton2.Eta()<<"  phi: "<<Lepton2.Phi()
 	      <<endl;
@@ -1000,9 +841,8 @@ bool higgsAnalyzer::Process(Long64_t entry)
 	}
 
       }
-    return kTRUE;
-   */
-   
+   //return kTRUE;
+      
     CountEvents(2);
     nEventsWeighted[2] += eventWeight;
     FillHistosBasic(2, eventWeight);
@@ -1516,7 +1356,10 @@ void higgsAnalyzer::Terminate()
   cout<<"| MVA for 250 1j      |\t"<< nEvents[31] <<"\t|"<<nEventsWeighted[31] <<"\t|"<<endl;
   cout<<"| MVA for 250 1+j     |\t"<< nEvents[32] <<"\t|"<<nEventsWeighted[32] <<"\t|"<<endl;
 
-  hists -> writeHists(histoFile);  
+
+  histoFile->cd();
+  histoFile->Write();
+  histoFile->Close();
 
   cout<<" ** End of Analyzer **"<<endl;
  }
@@ -1699,3 +1542,24 @@ void higgsAnalyzer::CountEvents(Int_t num)
     nEventsPassNoiseFilter[0][num]++;
   */
 }
+
+void higgsAnalyzer::DumpElectronInfo(TCElectron *lep, TVector3 *vert, Float_t rho44, Float_t rho25)
+{
+  cout<<"  A Electron with pt="<<lep->Pt()<<"  eta="<<lep->Eta()<<"  charge="<<lep->Charge()<<endl;
+  //cout<<"\t\t  lep->NumberOfValidTrackerHits() = "<<lep->NumberOfValidTrackerHits()<<endl;
+  cout<<"\t\t  fabs(lep->Dxy(vert))  = "<<fabs(lep->Dxy(vert))<<endl;
+  cout<<"\t\t  fabs(lep->Dz(vert))   = "<<fabs(lep->Dz(vert))<<endl;
+  cout<<"\t\t  rho44     = "<<rho44<<"\t  rho25    = "<<rho25<<endl;
+  float eleISOendcap = (lep->IsoMap("pfPhotonEt_R03") + lep->IsoMap("pfChargedHadron_R03") + lep->IsoMap("pfNeutralHadron_R03") - rho25*TMath::Pi()*0.09)/lep->Pt(); 
+  float eleISObarrel = (TMath::Max(0.0, lep->IsoMap("pfPhotonEt_R03")-1.0) + lep->IsoMap("pfChargedHadron_R03")  + lep->IsoMap("pfNeutralHadron_R03") - rho25*TMath::Pi()*0.09)/lep->Pt(); 
+
+  cout<<"\t\t  rel isolation (-rho) in barrel = "<<eleISObarrel<<"    and endcup = "<< eleISOendcap<<endl;
+  cout<<"\t\t  pfPhotonEt_R03        = "<<lep->IsoMap("pfPhotonEt_R03")<<endl;
+  cout<<"\t\t  pfChargedHadron_R03   = "<<lep->IsoMap("pfChargedHadron_R03")<<endl;
+  cout<<"\t\t  pfNeutralHadron_R03   = "<<lep->IsoMap("pffNeutralHadron_R03")<<endl;
+  cout<<"\t\t  PtError()/Pt()        = "<<lep->PtError()/lep->Pt()<<endl;
+  cout<<"\t\t  NormalizedChi2()      = "<<lep->NormalizedChi2()<<endl;
+  
+}
+	
+

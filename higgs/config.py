@@ -119,7 +119,7 @@ class Params():
     def xsec_and_colors(self):
         return  self._xsec_and_colors
 
-    def setIsUpdated(self, bit=True):
+    def SetIsUpdated(self, bit=True):
         self._isUpdated = bit
 
     def isUpdated(self):

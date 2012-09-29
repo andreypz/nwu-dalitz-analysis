@@ -1,5 +1,5 @@
-dcap://cmsdca1.fnal.gov:24140/pnfs/fnal.gov/usr/cms/WAX/11/store/user/andreypz/nuTuples_v2_7TeV/DYjets/nuTuple_80_1_smI.root
-dcap://cmsdca1.fnal.gov:24140/pnfs/fnal.gov/usr/cms/WAX/11/store/user/andreypz/nuTuples_v2_7TeV/DYjets/nuTuple_87_1_w9c.root
-dcap://cmsdca1.fnal.gov:24140/pnfs/fnal.gov/usr/cms/WAX/11/store/user/andreypz/nuTuples_v2_7TeV/DYjets/nuTuple_8_1_ob3.root
-dcap://cmsdca1.fnal.gov:24140/pnfs/fnal.gov/usr/cms/WAX/11/store/user/andreypz/nuTuples_v2_7TeV/DYjets/nuTuple_92_1_DmS.root
-dcap://cmsdca1.fnal.gov:24140/pnfs/fnal.gov/usr/cms/WAX/11/store/user/andreypz/nuTuples_v2_7TeV/DYjets/nuTuple_9_1_xMO.root
+dcap://cmsdca1.fnal.gov:24140/pnfs/fnal.gov/usr/cms/WAX/11/store/user/andreypz/nuTuples_v3_8TeV/ZZJets_try2/nuTuple_90_1_25f.root
+dcap://cmsdca1.fnal.gov:24140/pnfs/fnal.gov/usr/cms/WAX/11/store/user/andreypz/nuTuples_v3_8TeV/ZZJets_try2/nuTuple_91_1_fG0.root
+dcap://cmsdca1.fnal.gov:24140/pnfs/fnal.gov/usr/cms/WAX/11/store/user/andreypz/nuTuples_v3_8TeV/ZZJets_try2/nuTuple_79_1_MqU.root
+dcap://cmsdca1.fnal.gov:24140/pnfs/fnal.gov/usr/cms/WAX/11/store/user/andreypz/nuTuples_v3_8TeV/ZZJets_try2/nuTuple_69_1_LG3.root
+dcap://cmsdca1.fnal.gov:24140/pnfs/fnal.gov/usr/cms/WAX/11/store/user/andreypz/nuTuples_v3_8TeV/ZZJets_try2/nuTuple_63_1_qAY.root

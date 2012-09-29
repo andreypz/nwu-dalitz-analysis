@@ -187,6 +187,7 @@ public :
    virtual float   DeltaPhiJetMET(TLorentzVector , std::vector<TLorentzVector> ); 
 
   
+   void DumpElectronInfo(TCElectron *lep, TVector3 *v, Float_t, Float_t);
    void FillHistosBasic(Int_t, Double_t);
    void FillHistosFull(Int_t, Double_t);
    void CountEvents(Int_t);
@@ -237,7 +238,7 @@ void higgsAnalyzer::Init(TTree *tree)
    fChain->SetBranchAddress("recoTaus", &recoTaus, &b_recoTaus);
    fChain->SetBranchAddress("recoPhotons", &recoPhotons, &b_recoPhotons);
    fChain->SetBranchAddress("recoMET", &recoMET, &b_recoMET);
-   fChain->SetBranchAddress("recoMETNoPU", &recoMETNoPU, &b_recoMETNoPU);
+   //fChain->SetBranchAddress("recoMETNoPU", &recoMETNoPU, &b_recoMETNoPU);
    fChain->SetBranchAddress("triggerObjects", &triggerObjects, &b_triggerObjects);
    fChain->SetBranchAddress("genJets", &genJets, &b_genJets);
    fChain->SetBranchAddress("genParticles", &genParticles, &b_genParticles);
@@ -250,10 +251,10 @@ void higgsAnalyzer::Init(TTree *tree)
    fChain->SetBranchAddress("eventNumber", &eventNumber, &b_eventNumber);
    fChain->SetBranchAddress("lumiSection", &lumiSection, &b_lumiSection);
    fChain->SetBranchAddress("bunchCross", &bunchCross, &b_bunchCross);
-   fChain->SetBranchAddress("isScraping", &isScraping, &b_isScraping);
-   fChain->SetBranchAddress("isNoiseHcal", &isNoiseHcal, &b_isNoiseHcal);
-   fChain->SetBranchAddress("isCSCTightHalo", &isCSCTightHalo, &b_isCSCTightHalo);
-   fChain->SetBranchAddress("isCSCLooseHalo", &isCSCLooseHalo, &b_isCSCLooseHalo);
+   //fChain->SetBranchAddress("isScraping", &isScraping, &b_isScraping);
+   //fChain->SetBranchAddress("isNoiseHcal", &isNoiseHcal, &b_isNoiseHcal);
+   //fChain->SetBranchAddress("isCSCTightHalo", &isCSCTightHalo, &b_isCSCTightHalo);
+   //fChain->SetBranchAddress("isCSCLooseHalo", &isCSCLooseHalo, &b_isCSCLooseHalo);
    fChain->SetBranchAddress("ptHat", &ptHat, &b_ptHat);
    fChain->SetBranchAddress("qScale", &qScale, &b_qScale);
    fChain->SetBranchAddress("evtWeight", &evtWeight, &b_evtWeight);

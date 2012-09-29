@@ -15,18 +15,20 @@ def updateNevents(bg_list, sig1_list, sig2_list, sig3_list):
         allsamples.update(sig3_list)
         #print allsamples
         for a in allsamples:
-            #print a, myParams.xsec_and_colors()[a]
-            h = allsamples[a].Get("Andrey/met0_et_0")
+            print a, myParams.xsec_and_colors()[a]
+            h = allsamples[a].Get("Histos/met0_et_0")
             nn =  h.GetBinContent(1)
             #print "N events ", nn
             
             myParams.UpdateNevents(a, nn)
             #print myParams.xsec_and_colors()[a]
-        return myParams.xsec_and_colors()
         myParams.SetIsUpdated(True)
+        print "  --> End of updating Nevts in config file: updateNevents() function"
+        return myParams.xsec_and_colors()
     else:
         return myParams.xsec_and_colors()
 
+    
 def makeMvaTrees(outpath, bg_list, sig1_list, sig2_list, sel):
     print "\n  ** Creating mva trees ***"
 
@@ -77,7 +79,7 @@ fullWeight/F'
     br_test = mvaTree_test.Branch("mvaVars", stuff, allVars)
 
     for b in bg_list:
-        sample = b.Get("Andrey/evt_byCut").GetTitle()
+        sample = b.Get("Histos/evt_byCut").GetTitle()
         #if sample!="tW": continue  # for tests
        
         tree = b.Get("mvaTree/mvaTree")
@@ -123,7 +125,7 @@ fullWeight/F'
         sig_list.Add(sig2_list.At(mhmap[str(mh)]))
         
         for s in sig_list:
-            sample = s.Get("Andrey/evt_byCut").GetTitle()
+            sample = s.Get("Histos/evt_byCut").GetTitle()
             tree = s.Get("mvaTree/mvaTree")
             
             print sample, "Total events in a tree: ", tree.GetEntries()
@@ -203,10 +205,10 @@ def calcYields(bg_list, sig1_list, sig2_list, sig3_list, data, sel, mode="scaled
 
         # Data yields:
         if data != None:
-            dd = data.Get("Andrey/met0_et_"+str(l)).Clone()
+            dd = data.Get("Histos/evt_byCut").Clone()
             derr = Double(0)
-            bins = dd.GetNbinsX()
-            dy = dd.IntegralAndError(0, bins+1, derr)
+
+            dy = dd.GetBinContent(l+1)
             Yields_data.append(dy)
             Yields_data_err.append(derr)
         else:
@@ -227,15 +229,12 @@ def calcYields(bg_list, sig1_list, sig2_list, sig3_list, data, sel, mode="scaled
         
         for b in bg_list:
             #print b, bg_list[b]
-            h = bg_list[b].Get("Andrey/met0_et_"+str(l)).Clone()
-            sample = bg_list[b].Get("Andrey/evt_byCut").GetTitle()
+            h = bg_list[b].Get("Histos/evt_byCut").Clone()
+            sample = h.GetTitle()
             if mode=="scaled" and l!=0:
                 handleOverflowBinsScaleAndColors(h, sample, lumi)
+            y = h.GetBinContent(l+1)
             err = Double(0)
-            
-            bins = h.GetNbinsX()
-            y = h.IntegralAndError(0, bins+1, err)
-            #print sample, y
 
             Yields_bg_per_cut[sample] = ([y,err])
 
@@ -254,16 +253,14 @@ def calcYields(bg_list, sig1_list, sig2_list, sig3_list, data, sel, mode="scaled
 
         # Yields of the signals:
         for s in sig1_list:
-            h = sig1_list[s].Get("Andrey/met0_et_"+str(l)).Clone()
-            sample = sig1_list[s].Get("Andrey/evt_byCut").GetTitle()
-            #print l, sample
+            #print l, s
+
+            h = sig1_list[s].Get("Histos/evt_byCut").Clone()
+            sample = h.GetTitle()
             if mode=="scaled" and l!=0:
                 handleOverflowBinsScaleAndColors(h, sample, lumi)
+            y = h.GetBinContent(l+1)
             err = Double(0)
-            
-            bins = h.GetNbinsX()
-            y = h.IntegralAndError(0, bins+1, err)
-            #y = s.Get("Andrey/evt_byCut").GetBinContent(l+1)
 
             #print "integral = ", y
             Yields_sig1_per_cut[sample] = ([y,err])
@@ -272,18 +269,13 @@ def calcYields(bg_list, sig1_list, sig2_list, sig3_list, data, sel, mode="scaled
 
         # Yields of the signals:
         for s in sig2_list:
-            h = sig2_list[s].Get("Andrey/met0_et_"+str(l)).Clone()
-            sample = sig2_list[s].Get("Andrey/evt_byCut").GetTitle()
-            #print l, sample
+            h = sig2_list[s].Get("Histos/evt_byCut").Clone()
+            sample = h.GetTitle()
             if mode=="scaled" and l!=0:
                 handleOverflowBinsScaleAndColors(h, sample, lumi)
+            y = h.GetBinContent(l+1)
             err = Double(0)
             
-            bins = h.GetNbinsX()
-            y = h.IntegralAndError(0, bins+1, err)
-            #y = s.Get("Andrey/evt_byCut").GetBinContent(l+1)
-
-            #print "integral = ", y
             Yields_sig2_per_cut[sample] = ([y,err])
 
         Yields_sig2.append(Yields_sig2_per_cut)
@@ -505,10 +497,10 @@ def makeStack(bgList, histoname, lumi):
         if b == "Top":
             #print "Stacking top. It needs a special treatment: add all components"
             if "tW" in bgList.keys() and "tbarW" in bgList.keys():
-                htw    = bgList["tW"].Get("Andrey/"+histoname).Clone()
+                htw    = bgList["tW"].Get("Histos/"+histoname).Clone()
                 handleOverflowBinsScaleAndColors(htw, "tW", lumi)
                 
-                htbarw = bgList["tbarW"].Get("Andrey/"+histoname).Clone()
+                htbarw = bgList["tbarW"].Get("Histos/"+histoname).Clone()
                 handleOverflowBinsScaleAndColors(htbarw,"tbarW",lumi)    
                 htw.Add(htbarw)
                 hs.Add(htw)
@@ -519,12 +511,12 @@ def makeStack(bgList, histoname, lumi):
         elif b not in bgList.keys(): continue
         else:
             #print f.GetName()
-            evtHisto = bgList[b].Get("Andrey/evt_byCut")
+            evtHisto = bgList[b].Get("Histos/evt_byCut")
             #evtHisto.Print()
             sample = evtHisto.GetTitle()
             #print "Double check the sample:",sample
         
-            hh1 = bgList[b].Get("Andrey/"+histoname).Clone()
+            hh1 = bgList[b].Get("Histos/"+histoname).Clone()
             handleOverflowBinsScaleAndColors(hh1,sample,lumi)
             hs.Add(hh1)
 
@@ -537,7 +529,7 @@ def drawMultiPlot(fname,maintitle, xtitle, h_name, isLog, y1min, y1max, y2min, y
     lumi = myParams.getLumi(sel)
     bgOrder = myParams.analysisParams("HZZ")[3]
     
-    name = "Andrey/"+h_name
+    name = "Histos/"+h_name
     print "   * Plotting:", h_name
     print "   * Making a stack histo."
     
@@ -565,7 +557,7 @@ def drawMultiPlot(fname,maintitle, xtitle, h_name, isLog, y1min, y1max, y2min, y
         hh.append(ff[n].Get(name).Clone())
         #print n, "file:", ff[n].GetName(), "   histoname: ", hh[n].GetName()
             
-        sample = ff[n].Get("Andrey/evt_byCut").GetTitle()
+        sample = ff[n].Get("Histos/evt_byCut").GetTitle()
         #print "Double check the sample:",sample
             
         if sample=="DATA":
@@ -678,4 +670,4 @@ def drawMultiPlot(fname,maintitle, xtitle, h_name, isLog, y1min, y1max, y2min, y
     leg01.Draw()
 
                                             
-    cc.SaveAs(fname+".png")
+    cc.SaveAs(fname+"_"+h_name+".png")

@@ -92,21 +92,6 @@ for l in f.readlines():
 print nfiles, " files added!"
 
 
-"""
-para = c.SampleParams()
-xsec_and_colors = para.xsec_and_colors()
-
-fillColor = xsec_and_colors[sample][0]
-lineColor = xsec_and_colors[sample][1]
-cs = xsec_and_colors[sample][2]
-Ne = xsec_and_colors[sample][3]
-
-
-params = open("./params.txt","w")
-params.write(selection+" "+sample+" "+str(Ne)+" "+str(cs)+" "+str(fillColor)+" "+str(lineColor))
-params.close();
-"""
-
 timer = TStopwatch()
 timer.Start()
 

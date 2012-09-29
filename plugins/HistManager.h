@@ -21,8 +21,8 @@ class HistManager : public TObject {
   // destructor
   ~HistManager();
 
-    // write histograms the theFile
-  void writeHists(TFile* theFile);
+  // write histograms the theFile
+  //void writeHists(TFile* theFile);
 
   // fill 1D histogram 
   void fill1DHist(float x, std::string name, std::string title,
