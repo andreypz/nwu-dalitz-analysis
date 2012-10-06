@@ -30,6 +30,9 @@
 #include <TProfile.h>
 #include <TRandom3.h>
 
+#include "../src/srcProjectHeaders.h"
+#include "../src/srcProjectSource.cxx"
+/*
 #include "../src/TCPhysObject.h"
 #include "../src/TCJet.h"
 #include "../src/TCMET.h"
@@ -41,6 +44,7 @@
 #include "../src/TCGenJet.h"
 #include "../src/TCPrimaryVtx.h"
 #include "../src/TCTriggerObject.h"
+*/
 
 #include "../plugins/MetDefinitions.h"
 #include "../plugins/WeightUtils.h"
@@ -128,6 +132,8 @@ public :
    Float_t         qScale;
    Float_t         evtWeight;
    Float_t         rhoFactor;
+   Float_t         rho25Factor;
+   Float_t         rhoMuFactor;
    ULong64_t       triggerStatus;
    UInt_t          hltPrescale[64];
 
@@ -160,6 +166,8 @@ public :
    TBranch        *b_qScale;   //!
    TBranch        *b_evtWeight;   //!
    TBranch        *b_rhoFactor;   //!
+   TBranch        *b_rho25Factor;   //!
+   TBranch        *b_rhoMuFactor;   //!
    TBranch        *b_triggerStatus;   //!
    TBranch        *b_hltPrescale;   //!
 
@@ -181,13 +189,16 @@ public :
 
 
 
-   virtual bool    CosmicMuonFilter(TCMuon , TCMuon );
+   //virtual bool    CosmicMuonFilter(TCMuon , TCMuon );
    virtual float   CalculateTransMass(TLorentzVector p1, TLorentzVector p2);
    virtual float   CalculateTransMassAlt(TLorentzVector p1, TLorentzVector p2);
    virtual float   DeltaPhiJetMET(TLorentzVector , std::vector<TLorentzVector> ); 
 
   
-   void DumpElectronInfo(TCElectron *lep, TVector3 *v, Float_t, Float_t);
+   virtual float EffAreaMuon(TCMuon *lep, TString, Bool_t, Int_t);
+   virtual float EffAreaElectron(TCElectron *lep, TString, Bool_t, Int_t);
+   void DumpMuonInfo(TCMuon *lep, TVector3 *v, Float_t, Float_t, Float_t);
+   void DumpElectronInfo(TCElectron *lep, TVector3 *v, Float_t, Float_t, Float_t);
    void FillHistosBasic(Int_t, Double_t);
    void FillHistosFull(Int_t, Double_t);
    void CountEvents(Int_t);
@@ -262,6 +273,8 @@ void higgsAnalyzer::Init(TTree *tree)
    fChain->SetBranchAddress("qScale", &qScale, &b_qScale);
    fChain->SetBranchAddress("evtWeight", &evtWeight, &b_evtWeight);
    fChain->SetBranchAddress("rhoFactor", &rhoFactor, &b_rhoFactor);
+   fChain->SetBranchAddress("rho25Factor", &rho25Factor, &b_rho25Factor);
+   fChain->SetBranchAddress("rhoMuFactor", &rhoMuFactor, &b_rhoMuFactor);
    fChain->SetBranchAddress("triggerStatus", &triggerStatus, &b_triggerStatus);
    fChain->SetBranchAddress("hltPrescale", hltPrescale, &b_hltPrescale);
 }

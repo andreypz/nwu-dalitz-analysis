@@ -45,7 +45,7 @@ def makePlots(sel=1, dir="./", hPath="v00"):
     print "Making plots from", hPath, "with lumi = ", intLumi
     
     #topbg = ["tW","tbarW"]
-    bg   = ["tW","tbarW","ttbar","WW", "ZZ","DYjets"]
+    bg   = ["tW","tbarW","ttbar","WW", "WZ","ZZ","DYjets"]
     sig1 = ["ggHZZ125","ggHZZ250","ggHZZ300","ggHZZ350","ggHZZ400"]
     sig2 = ["VBFHZZ125","VBFHZZ250","VBFHZZ300","VBFHZZ350","VBFHZZ400"]
     sig3 = ["ggHWW125","ggHWW250","ggHWW300","ggHWW350","ggHWW400"]

@@ -1,4 +1,4 @@
-// $Id: template_higgsAnalyzer.C,v 1.56 2012/09/29 21:05:58 andrey Exp $
+// $Id: template_higgsAnalyzer.C,v 1.57 2012/09/29 23:08:20 andrey Exp $
 
 #define higgsAnalyzer_cxx
 
@@ -111,7 +111,9 @@ TMVA::Reader* tmvaReader[N_HIGGS_MASSES][3];
 //The events that Jucub cuts, but I keep:
 //UInt_t myEVTS[] = {};
 //Visa versa
-const UInt_t hisEVTS[] = {242, 305966};
+const UInt_t hisEVTS[] = {888043, 888050,888055, //mu
+			  242, 305966, 58878818, 58878887, 58878917,  //ele
+			  43345};
 Int_t evSize = sizeof(hisEVTS)/sizeof(int);
 
 
@@ -410,7 +412,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
 	  {
 	    if (eventNumber==hisEVTS[ev]){
 	      cout<<eventNumber<<"  n Ele =2 cut"<<endl;
-	      DumpElectronInfo(thisElec, pvPosition, rhoFactor, rhoFactor);
+	      DumpElectronInfo(thisElec, pvPosition, rhoFactor, rho25Factor,rhoMuFactor);
 	      break;
 
 	    }
@@ -418,26 +420,26 @@ bool higgsAnalyzer::Process(Long64_t entry)
 
         if (fabs(thisElec->Eta()) > 2.5) continue;
 
+	// PF isocorr:
+        //Double_t eleISOcorr = (thisElec->IsoMap("pfChIso_R04") + TMath::Max(0.,  thisElec->IsoMap("pfPhoIso_R04")))/thisElec->Pt(); 
+        Double_t eleISOcorr = (thisElec->IsoMap("pfChIso_R04") + TMath::Max(0.0, (Double_t)(thisElec->IsoMap("pfPhoIso_R04") + thisElec->IsoMap("pfNeuIso_R04") - rho25Factor*thisElec->IdMap("EffArea_R04"))))/thisElec->Pt(); 
 
-	// PF iso:
-        float eleISOendcap = (thisElec->IsoMap("pfPhotonEt_R03") + thisElec->IsoMap("pfChargedHadron_R03") + thisElec->IsoMap("pfNeutralHadron_R03") - rhoFactor*TMath::Pi()*0.09)/thisElec->Pt(); 
-        float eleISObarrel = ( TMath::Max(0.0, thisElec->IsoMap("pfPhotonEt_R03")-1.0) + thisElec->IsoMap("pfChargedHadron_R03")  + thisElec->IsoMap("pfNeutralHadron_R03") - rhoFactor*TMath::Pi()*0.09)/thisElec->Pt(); 
-
-        //float eleISOendcap = (thisElec->IsoMap("SumPt_R03") + thisElec->IsoMap("EmIso_R03") + thisElec->IsoMap("HadIso_R03") - rhoFactor*TMath::Pi()*0.09)/thisElec->Pt(); 
-        //float eleISObarrel = (thisElec->IsoMap("SumPt_R03") +  TMath::Max(0.0, thisElec->IsoMap("EmIso_R03")-1.0) + thisElec->IsoMap("HadIso_R03") - rhoFactor*TMath::Pi()*0.09)/thisElec->Pt(); 
+        //float eleISOendcap = (thisElec->IsoMap("pfPhoIso_R04") + thisElec->IsoMap("pfChIso_R04") + thisElec->IsoMap("pfNeuIso_R04") - rho25Factor*thisElec->IdMap("EffArea_R04"))/thisElec->Pt(); 
+	//float eleISObarrel = (TMath::Max(0.0, thisElec->IsoMap("pfPhoIso_R04")-1.0) + thisElec->IsoMap("pfChIso_R04") + thisElec->IsoMap("pfNeuIso_R04") - rho25Factor*thisElec->IdMap("EffArea_R04"))/thisElec->Pt(); 
+	
         bool  elecPass = false;
 
 
         if (
                 (fabs(thisElec->Eta()) < 1.442     
-                 && eleISObarrel                        < 0.1
+                 && eleISOcorr                        < 0.15
                  && thisElec->SigmaIetaIeta()           < 0.01  
                  && fabs(thisElec->DphiSuperCluster())  < 0.06  
                  && fabs(thisElec->DetaSuperCluster())  < 0.004 
                  && thisElec->HadOverEm()               < 0.12      
                 ) ||
                 (fabs(thisElec->Eta()) >  1.556  
-                 && eleISOendcap                        < 0.1 
+                 && eleISOcorr                        < 0.15 
                  && thisElec->SigmaIetaIeta()           < 0.03  
                  && fabs(thisElec->DphiSuperCluster())  < 0.03  
                  && fabs(thisElec->DetaSuperCluster())  < 0.007 
@@ -485,17 +487,31 @@ bool higgsAnalyzer::Process(Long64_t entry)
     for (int i = 0; i < recoMuons->GetSize(); ++ i) {
         TCMuon* thisMuon = (TCMuon*) recoMuons->At(i);    
 
+	for(Int_t ev=0; ev<evSize;ev++)
+	  {
+	    if (eventNumber==hisEVTS[ev]){
+	      cout<<eventNumber<<"  n Mu =2 cut"<<endl;
+	      DumpMuonInfo(thisMuon, pvPosition, rhoFactor, rho25Factor, rhoMuFactor);
+	      break;
+
+	    }
+	  }
+
+
         if (!(fabs(thisMuon->Eta()) < 2.4	
 	      && thisMuon->IsGLB() 
 	      && thisMuon->IsTRK()
 	      )) continue;
 	
-        if (
+	Double_t area = EffAreaMuon(thisMuon, "2012",0,0);
+	//Double_t isoCorr = (thisMuon->IsoMap("pfChargedHadronPt_R04") + TMath::Max(0.0, (Double_t)(thisMuon->IsoMap("pfPhoIso_R04") + thisMuon->IsoMap("pfNeutralHadronEt_R04")  - TMath::Max(0.0, (Double_t)rho25Factor)*area)))/thisMuon->Pt();	
+	float isoCorr = (thisMuon->IsoMap("pfChargedHadronPt_R04") + TMath::Max(0.0, thisMuon->IsoMap("pfPhoIso_R04") + thisMuon->IsoMap("pfNeutralHadronEt_R04")  - TMath::Max(0.0, (Double_t)rho25Factor)*area))/thisMuon->Pt();
+	  if (
 	    thisMuon->Pt() > 3.0
 	    && thisMuon->NumberOfValidTrackerHits() > 10
 	    && fabs(thisMuon->Dxy(pvPosition)) < 0.3
 	    && fabs(thisMuon->Dz(pvPosition))  < 0.30 
-	    && (thisMuon->IsoMap("SumPt_R03") + thisMuon->IsoMap("EmIso_R03") + thisMuon->IsoMap("HadIso_R03")  - rhoFactor*TMath::Pi()*0.09)/thisMuon->Pt() < 0.15
+	    && isoCorr<0.2
 	    
 	    ) {
 	  softMuons++;
@@ -509,7 +525,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
 	     && thisMuon->NormalizedChi2()  < 10.0
 	     && fabs(thisMuon->Dxy(pvPosition)) < 0.02
 	     && fabs(thisMuon->Dz(pvPosition))  < 0.1 
-	     && (thisMuon->IsoMap("SumPt_R03") + thisMuon->IsoMap("EmIso_R03") + thisMuon->IsoMap("HadIso_R03") - rhoFactor*TMath::Pi()*0.09)/thisMuon->Pt() < 0.15
+	     && isoCorr<0.2
 	     )	  muons.push_back(*thisMuon);
      
 	} else if (
@@ -522,7 +538,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
 		   && thisMuon->NormalizedChi2()  < 9999.
 		   && fabs(thisMuon->Dxy(pvPosition)) < 0.2
 		   && fabs(thisMuon->Dz(pvPosition))  < 0.2
-		   //&& (thisMuon->TrkIso() + thisMuon->HadIso() + thisMuon->EmIso() - rhoFactor*TMath::Pi()*0.09)/thisMuon->Pt() < 0.15
+	
 		   ) {
 	  looseLeptons.push_back(*thisMuon);
         }
@@ -1380,6 +1396,7 @@ float higgsAnalyzer::CalculateTransMassAlt(TLorentzVector p1, TLorentzVector p2)
   return transMass;
 }
 
+/*
 bool higgsAnalyzer::CosmicMuonFilter(TCMuon muon1, TCMuon muon2)
 {
     float dimuonAngle = muon1.Angle(muon2.Vect());
@@ -1388,6 +1405,7 @@ bool higgsAnalyzer::CosmicMuonFilter(TCMuon muon1, TCMuon muon2)
     else
         return false;
 }
+*/
 
 float higgsAnalyzer::DeltaPhiJetMET(TLorentzVector metP4, vector<TLorentzVector> jets)
 {
@@ -1434,6 +1452,7 @@ void higgsAnalyzer::FillHistosBasic(Int_t num, Double_t weight){
 
 void higgsAnalyzer::FillHistosFull(Int_t num, Double_t weight){
 
+  /*
   hists->fill1DHist(MET, Form("met1_et_%i",num), "met1_et", 80,0,400, weight, "Histos");
   hists->fill1DHist(pfMET1, Form("met2_et_%i",num), "met2_et", 80,0,400, weight, "Histos");
   hists->fill1DHist(MET_phi, Form("met1_phi_%i",num), "met1_phi", 40, -TMath::Pi(), TMath::Pi(), weight, "Histos");
@@ -1525,6 +1544,7 @@ void higgsAnalyzer::FillHistosFull(Int_t num, Double_t weight){
 
   hists->fill1DHist(nDofVtx1, Form("vtx_ndof1_%i",num), "vtx_ndof1", 50, 0,150, weight, "Histos");
   hists->fill1DHist(nDofVtx1, Form("vtx_ndof2_%i",num), "vtx_ndof2", 50, 0,150, weight, "Histos");
+  */
 }
 
 
@@ -1542,23 +1562,132 @@ void higgsAnalyzer::CountEvents(Int_t num)
   */
 }
 
-void higgsAnalyzer::DumpElectronInfo(TCElectron *lep, TVector3 *vert, Float_t rho44, Float_t rho25)
+void higgsAnalyzer::DumpElectronInfo(TCElectron *lep, TVector3 *vert, Float_t rho44, Float_t rho25, Float_t rhoMu)
 {
   cout<<"  A Electron with pt="<<lep->Pt()<<"  eta="<<lep->Eta()<<"  charge="<<lep->Charge()<<endl;
   //cout<<"\t\t  lep->NumberOfValidTrackerHits() = "<<lep->NumberOfValidTrackerHits()<<endl;
   cout<<"\t\t  fabs(lep->Dxy(vert))  = "<<fabs(lep->Dxy(vert))<<endl;
   cout<<"\t\t  fabs(lep->Dz(vert))   = "<<fabs(lep->Dz(vert))<<endl;
-  cout<<"\t\t  rho44     = "<<rho44<<"\t  rho25    = "<<rho25<<endl;
-  float eleISOendcap = (lep->IsoMap("pfPhotonEt_R03") + lep->IsoMap("pfChargedHadron_R03") + lep->IsoMap("pfNeutralHadron_R03") - rho25*TMath::Pi()*0.09)/lep->Pt(); 
-  float eleISObarrel = (TMath::Max(0.0, lep->IsoMap("pfPhotonEt_R03")-1.0) + lep->IsoMap("pfChargedHadron_R03")  + lep->IsoMap("pfNeutralHadron_R03") - rho25*TMath::Pi()*0.09)/lep->Pt(); 
+  cout<<"\t\t  rho44     = "<<rho44<<"\t  rho25    = "<<rho25<<"  "<<rhoMu<<endl;
+  //float eleISOendcap = (lep->IsoMap("pfPhotonEt_R03") + lep->IsoMap("pfChargedHadron_R03") + lep->IsoMap("pfNeutralHadron_R03") - rho25*TMath::Pi()*0.09)/lep->Pt(); 
+  //float eleISObarrel = (TMath::Max(0.0, lep->IsoMap("pfPhotonEt_R03")-1.0) + lep->IsoMap("pfChargedHadron_R03")  + lep->IsoMap("pfNeutralHadron_R03") - rho25*TMath::Pi()*0.09)/lep->Pt(); 
 
-  cout<<"\t\t  rel isolation (-rho) in barrel = "<<eleISObarrel<<"    and endcup = "<< eleISOendcap<<endl;
+  //cout<<"\t\t  rel isolation (-rho) in barrel = "<<eleISObarrel<<"    and endcup = "<< eleISOendcap<<endl;
+
   cout<<"\t\t  pfPhotonEt_R03        = "<<lep->IsoMap("pfPhotonEt_R03")<<endl;
   cout<<"\t\t  pfChargedHadron_R03   = "<<lep->IsoMap("pfChargedHadron_R03")<<endl;
-  cout<<"\t\t  pfNeutralHadron_R03   = "<<lep->IsoMap("pffNeutralHadron_R03")<<endl;
+  cout<<"\t\t  pfNeutralHadron_R03   = "<<lep->IsoMap("pfNeutralHadron_R03")<<endl;
+
+  cout<<"\t\t  pfChIso_R04         = "<<lep->IsoMap("pfChIso_R04")<<endl;
+  cout<<"\t\t  pfNeuIso_R04        = "<<lep->IsoMap("pfNeuIso_R04")<<endl;
+  cout<<"\t\t  pfPhoIso_R04        = "<<lep->IsoMap("pfPhoIso_R04")<<endl;
+
+  cout<<"\t\t  EffArea_R03        = "<<lep->IdMap("EffArea_R03")<<endl;
+  cout<<"\t\t  EffArea_R04        = "<<lep->IdMap("EffArea_R04")<<endl;
+  cout<<"\t\t eff area from the table  = "<<  EffAreaElectron(lep, "2012", 0, 0)<<endl;
+
+  cout<<"\t\t HadOvEm              = "<<lep->HadOverEm()<<endl;
+  cout<<"\t\t DphiSuperCluster      = "<<lep->DphiSuperCluster()<<endl;
+  cout<<"\t\t DetaSuperCluster      = "<<lep->DetaSuperCluster()<<endl;
+  cout<<"\t\t SigmaIetaIeta         = "<<lep->SigmaIetaIeta()<<endl;
+  cout<<"\t\t ConversionFlag        = "<<lep->ConversionFlag()<<endl;
+
+
   cout<<"\t\t  PtError()/Pt()        = "<<lep->PtError()/lep->Pt()<<endl;
   cout<<"\t\t  NormalizedChi2()      = "<<lep->NormalizedChi2()<<endl;
   
 }
 	
 
+
+void higgsAnalyzer::DumpMuonInfo(TCMuon *lep, TVector3 *vert, Float_t rho44, Float_t rho25, Float_t rhoMu)
+{
+  cout<<"  A Muon with pt="<<lep->Pt()<<"  eta="<<lep->Eta()<<"  charge="<<lep->Charge()<<endl;
+  //cout<<"\t\t  lep->NumberOfValidTrackerHits() = "<<lep->NumberOfValidTrackerHits()<<endl;
+  cout<<"\t\t  fabs(lep->Dxy(vert))  = "<<fabs(lep->Dxy(vert))<<endl;
+  cout<<"\t\t  fabs(lep->Dz(vert))   = "<<fabs(lep->Dz(vert))<<endl;
+  cout<<"\t\t  rho44     = "<<rho44<<"\t  rho25    = "<<rho25<<"  "<<rhoMu<<endl;
+
+  //cout<<"\t\t  rel isolation (-rho) in barrel = "<<eleISObarrel<<"    and endcup = "<< eleISOendcap<<endl;
+
+  cout<<"\t\t  pfChargedPt_R04              = "<<lep->IsoMap("pfChargedPt_R04")<<endl;
+  cout<<"\t\t  pfChargedHadronPt_R04        = "<<lep->IsoMap("pfChargedHadronPt_R04")<<endl;
+  cout<<"\t\t  pfPhoIso_R04                 = "<<lep->IsoMap("pfPhotonEt_R04")<<endl;
+  cout<<"\t\t  pfNeutralHadronEt_R04        = "<<lep->IsoMap("pfNeutralHadronEt_R04")<<endl;
+
+  cout<<"\t\t tot iso - effrho              = "<<(lep->IsoMap("pfChargedHadronPt_R04") + lep->IsoMap("pfPhoIso_R04") + lep->IsoMap("pfNeutralHadronEt_R04")  - rho25*EffAreaMuon(lep, "2012", 0, 0))/lep->Pt()<<endl;
+
+  cout<<"\t\t  EffArea_R03        = "<<lep->IdMap("EffArea_R03")<<endl;
+  cout<<"\t\t  EffArea_R04        = "<<lep->IdMap("EffArea_R04")<<endl;
+
+  cout<<"\t\t eff area from the table  = "<<  EffAreaMuon(lep, "2012", 0, 0)<<endl;
+
+  cout<<"\t\t  PtError()/Pt()        = "<<lep->PtError()/lep->Pt()<<endl;
+  cout<<"\t\t  NormalizedChi2()      = "<<lep->NormalizedChi2()<<endl;
+  
+}
+	
+float higgsAnalyzer::EffAreaElectron(TCElectron *lep, TString dataPeriod, Bool_t isData, Int_t a)
+{
+  Float_t area=0, area_neu = 0, area_phot=0, area_both=0;
+
+  if (isData && dataPeriod.Contains("2011"))
+    {
+      if (fabs(lep->Eta())<1.0)         {area_neu = 0.044; area_phot = 0.140; area_both = 0.18;}
+      else if  (fabs(lep->Eta())<1.479) {area_neu = 0.065; area_phot = 0.130; area_both = 0.20;}
+      else if  (fabs(lep->Eta())<2.0)   {area_neu = 0.068; area_phot = 0.079; area_both = 0.15;}
+      else if  (fabs(lep->Eta())<2.2)   {area_neu = 0.057; area_phot = 0.130; area_both = 0.19;}
+      else if  (fabs(lep->Eta())<2.3)   {area_neu = 0.058; area_phot = 0.150; area_both = 0.21;}
+      else if  (fabs(lep->Eta())<2.4)   {area_neu = 0.061; area_phot = 0.160; area_both = 0.22;}
+      else                             {area_neu = 0.110; area_phot = 0.180; area_both = 0.29;}
+    }
+
+  if (dataPeriod.Contains("2012"))
+    {
+      if (fabs(lep->Eta())<1.0)         {area_both = 0.19;}
+      else if  (fabs(lep->Eta())<1.479) {area_both = 0.25;}
+      else if  (fabs(lep->Eta())<2.0)   {area_both = 0.12;}
+      else if  (fabs(lep->Eta())<2.2)   {area_both = 0.21;}
+      else if  (fabs(lep->Eta())<2.3)   {area_both = 0.27;}
+      else if  (fabs(lep->Eta())<2.4)   {area_both = 0.44;}
+      else                             {area_both = 0.52;}
+    }
+
+  if (a==0) area = area_both;
+  else if  (a==1) area = area_neu;
+  else if  (a==2) area = area_phot;
+
+  return area;
+}
+float higgsAnalyzer::EffAreaMuon(TCMuon *lep, TString dataPeriod, Bool_t isData, Int_t a)
+{
+  Float_t area=0, area_neu = 0, area_phot=0, area_both=0;
+
+  if (dataPeriod.Contains("2012"))
+    {
+      if (fabs(lep->Eta())<1.0)         {area_neu = 0.166; area_phot = 0.504; area_both = 0.674;}
+      else if  (fabs(lep->Eta())<1.5)   {area_neu = 0.259; area_phot = 0.306; area_both = 0.565;}
+      else if  (fabs(lep->Eta())<2.0)   {area_neu = 0.247; area_phot = 0.198; area_both = 0.442;}
+      else if  (fabs(lep->Eta())<2.2)   {area_neu = 0.220; area_phot = 0.287; area_both = 0.515;}
+      else if  (fabs(lep->Eta())<2.3)   {area_neu = 0.340; area_phot = 0.525; area_both = 0.821;}
+      else if  (fabs(lep->Eta())<2.4)   {area_neu = 0.216; area_phot = 0.488; area_both = 0.660;}
+      else                              {area_neu = 0.000; area_phot = 0.000; area_both = 0.00;}
+    }
+
+  if (dataPeriod.Contains("2011"))
+    {
+      if (fabs(lep->Eta())<1.0)         {area_both = 0.132;}
+      else if  (fabs(lep->Eta())<1.5)   {area_both = 0.120;}
+      else if  (fabs(lep->Eta())<2.0)   {area_both = 0.114;}
+      else if  (fabs(lep->Eta())<2.2)   {area_both = 0.139;}
+      else if  (fabs(lep->Eta())<2.3)   {area_both = 0.168;}
+      else if  (fabs(lep->Eta())<2.4)   {area_both = 0.189;}
+      else                              {area_both = 0.00;}
+    }
+
+  if (a==0) area = area_both;
+  else if  (a==1) area = area_neu;
+  else if  (a==2) area = area_phot;
+
+  return area;
+}

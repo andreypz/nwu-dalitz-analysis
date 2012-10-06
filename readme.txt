@@ -6,7 +6,7 @@ https://twiki.cern.ch/twiki/bin/view/CMS/UserCodeNWUHiggs
 The log of changes:
 
 2012-Sep-29
-  * V02-11 tag
+  * V02-12 tag
     * HistManager added
     * plugins/lib for lineshape library
     * synchronization for 8 TeV
