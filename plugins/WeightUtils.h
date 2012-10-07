@@ -70,6 +70,7 @@ class WeightUtils: public TObject {
         TH1D  *h1_eGammaMass; 
         TH1D  *h1_muGammaMass;
         TH1D  *h1_puReweight2011;
+        TH1D  *h1_puReweight2012;
 
         TH1D  *h1_Higgs[8];
 

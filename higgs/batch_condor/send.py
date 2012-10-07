@@ -35,7 +35,7 @@ test.extend([
 #b.JobConfig('ZZ', dCache+'/andreypz/nuTuples_v5_8TeV/ZZJetsTo2L2Nu', 1, 'ZZ 0 '+selection+' '+period, selection),
 #b.JobConfig('DoubleMu_Run2011A', dCache+'/andreypz/nuTuples_v2_7TeV/DoubleMu_HZZ_Run2011A', 25, 'DATA 4,5,8 muon 2011A', selection),
 #b.JobConfig('DoubleMu_Run2011B', dCache+'/andreypz/nuTuples_v2_7TeV/DoubleMu_HZZ_Run2011B_try2', 30, 'DATA 4,5,8 muon 2011B', selection),
-b.JobConfig('DoubleMu_Run2011B', EOS+'/andreypz/nuTuples_v2_7TeV/DoubleMu_HZZ_Run2011B', 30, 'DATA 4,5,8 muon 2011B', selection),
+b.JobConfig('DoubleMu_Run2011B', EOS+'/andreypz/nuTuples_v2_7TeV/DoubleMu_HZZ_Run2011B', 144, 'DATA 4,5,8 muon 2011B', selection),
 
 ])
 

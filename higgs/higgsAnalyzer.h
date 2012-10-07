@@ -30,9 +30,6 @@
 #include <TProfile.h>
 #include <TRandom3.h>
 
-#include "../src/srcProjectHeaders.h"
-#include "../src/srcProjectSource.cxx"
-/*
 #include "../src/TCPhysObject.h"
 #include "../src/TCJet.h"
 #include "../src/TCMET.h"
@@ -44,7 +41,6 @@
 #include "../src/TCGenJet.h"
 #include "../src/TCPrimaryVtx.h"
 #include "../src/TCTriggerObject.h"
-*/
 
 #include "../plugins/MetDefinitions.h"
 #include "../plugins/WeightUtils.h"
@@ -56,6 +52,38 @@
 
 #define nC 35  //nCuts in the analysis. make plots after each cut
 
+struct muIdAndIsoCuts{
+  Bool_t IsPF;
+  Bool_t IsGLB;
+  Float_t ptErrorOverPt;
+  Float_t NumberOfValidMuonHits;
+  Float_t NumberOfValidTrackerHits;
+  Float_t NumberOfValidPixelHits;
+  Float_t NumberOfMatches;
+  Float_t NormalizedChi2;
+  Float_t dxy;
+  Float_t dz;
+  Float_t chIso04;
+  Float_t nhIso04;
+  Float_t phIso04;
+  Float_t pfIso04;
+};
+
+struct elIdAndIsoCuts{
+  //broken into [0] barrel and [1] endcap
+  float ptErrorOverPt[2];
+  float dEtaIn[2];
+  float dPhiIn[2];
+  float sigmaIetaIeta[2];
+  float HadOverEm[2];
+  float dxy[2];
+  float dz[2];
+  float fabsEPDiff[2];
+  float ConversionMissHits[2];
+  float PassedConversionProb[2];
+  float pfIso04[2];
+};
+
 class higgsAnalyzer : public TSelector {
 
  private:
@@ -63,6 +91,8 @@ class higgsAnalyzer : public TSelector {
   TFile* histoFile;
   TTree* thisTree;
 
+  muIdAndIsoCuts muIdAndIsoCutsTight, muIdAndIsoCutsLoose, muIdAndIsoCutsSoft;
+  elIdAndIsoCuts elIdAndIsoCutsTight, elIdAndIsoCutsLoose;
   //Variables to Fill into histos. Have to be global
   
   Float_t qT, diEta, diPhi, diAngle, deltaPhiLep, Mll, Mll_EB, Mll_EE, Mll_EX;  
@@ -103,15 +133,14 @@ class higgsAnalyzer : public TSelector {
 public :
    TTree          *fChain;   //!pointer to the analyzed TTree or TChain
 
-   // Declaration of leaf types
+   // Declaration of leaf types                                                                                                               
    TClonesArray    *recoJets;
-   TClonesArray    *recoJPT;
+   //TClonesArray    *recoJPT;
    TClonesArray    *recoElectrons;
    TClonesArray    *recoMuons;
    TClonesArray    *recoTaus;
    TClonesArray    *recoPhotons;
    TCMET           *recoMET;
-   TCMET           *recoMETNoPU;
    TClonesArray    *triggerObjects;
    TClonesArray    *genJets;
    TClonesArray    *genParticles;
@@ -124,10 +153,6 @@ public :
    ULong64_t       eventNumber;
    UInt_t          lumiSection;
    UInt_t          bunchCross;
-   Bool_t          isScraping;
-   Bool_t          isNoiseHcal;
-   Bool_t          isCSCTightHalo;
-   Bool_t          isCSCLooseHalo;
    Float_t         ptHat;
    Float_t         qScale;
    Float_t         evtWeight;
@@ -136,40 +161,42 @@ public :
    Float_t         rhoMuFactor;
    ULong64_t       triggerStatus;
    UInt_t          hltPrescale[64];
+   Bool_t          NoiseFilters_isScraping;
+   Bool_t          NoiseFilters_isNoiseHcalHBHE;
+   Bool_t          NoiseFilters_isNoiseHcalLaser;
+   Bool_t          NoiseFilters_isNoiseEcalTP;
+   Bool_t          NoiseFilters_isNoiseEcalBE;
+   Bool_t          NoiseFilters_isCSCTightHalo;
+   Bool_t          NoiseFilters_isCSCLooseHalo;
 
    // List of branches
    TBranch        *b_recoJets;   //!
-   TBranch        *b_recoJPT;   //!
    TBranch        *b_recoElectrons;   //!
    TBranch        *b_recoMuons;   //!
    TBranch        *b_recoTaus;   //!
    TBranch        *b_recoPhotons;   //!
    TBranch        *b_recoMET;   //!
-   TBranch        *b_recoMETNoPU;   //!
    TBranch        *b_triggerObjects;   //!
    TBranch        *b_genJets;   //!
    TBranch        *b_genParticles;   //!
    TBranch        *b_primaryVtx;   //!
    TBranch        *b_beamSpot;   //!
    TBranch        *b_nPUVertices;   //!
-   TBranch        *b_nPUVerticesTrue;   //!
+   TBranch        *b_nPUVerticesTrue;   //! 
    TBranch        *b_isRealData;   //!
    TBranch        *b_runNumber;   //!
-   TBranch        *b_eventNumber;   //!
-   TBranch        *b_lumiSection;   //!
+   TBranch        *b_eventNumber;   //!  
+   TBranch        *b_lumiSection;   //! 
    TBranch        *b_bunchCross;   //!
-   TBranch        *b_isScraping;   //!
-   TBranch        *b_isNoiseHcal;   //!
-   TBranch        *b_isCSCTightHalo;   //!
-   TBranch        *b_isCSCLooseHalo;   //!
-   TBranch        *b_ptHat;   //!
+   TBranch        *b_ptHat;   //!   
    TBranch        *b_qScale;   //!
-   TBranch        *b_evtWeight;   //!
-   TBranch        *b_rhoFactor;   //!
+   TBranch        *b_evtWeight;   //! 
+   TBranch        *b_rhoFactor;   //! 
    TBranch        *b_rho25Factor;   //!
    TBranch        *b_rhoMuFactor;   //!
    TBranch        *b_triggerStatus;   //!
    TBranch        *b_hltPrescale;   //!
+   TBranch        *b_NoiseFilters;   //!
 
    higgsAnalyzer(TTree * /*tree*/ =0) { }
    virtual ~higgsAnalyzer() { }
@@ -194,6 +221,8 @@ public :
    virtual float   CalculateTransMassAlt(TLorentzVector p1, TLorentzVector p2);
    virtual float   DeltaPhiJetMET(TLorentzVector , std::vector<TLorentzVector> ); 
 
+   virtual bool PassMuonIdAndIso(TCMuon *l, muIdAndIsoCuts c, TVector3 *pv);
+   virtual bool PassElectronIdAndIso(TCElectron *l, elIdAndIsoCuts c, TVector3 *pv);
   
    virtual float EffAreaMuon(TCMuon *lep, TString, Bool_t, Int_t);
    virtual float EffAreaElectron(TCElectron *lep, TString, Bool_t, Int_t);
@@ -224,13 +253,13 @@ void higgsAnalyzer::Init(TTree *tree)
 
    // Set object pointer
    recoJets = 0;
-   recoJPT = 0;
+   //recoJPT = 0;
    recoElectrons = 0;
    recoMuons = 0;
    recoTaus = 0;
    recoPhotons = 0;
    recoMET = 0;
-   recoMETNoPU = 0;
+   //recoMETNoPU = 0;
    triggerObjects = 0;
    genJets = 0;
    genParticles = 0;
@@ -246,7 +275,7 @@ void higgsAnalyzer::Init(TTree *tree)
 
 
    fChain->SetBranchAddress("recoJets", &recoJets, &b_recoJets);
-   fChain->SetBranchAddress("recoJPT", &recoJPT, &b_recoJPT);
+   //fChain->SetBranchAddress("recoJPT", &recoJPT, &b_recoJPT);
    fChain->SetBranchAddress("recoElectrons", &recoElectrons, &b_recoElectrons);
    fChain->SetBranchAddress("recoMuons", &recoMuons, &b_recoMuons);
    fChain->SetBranchAddress("recoTaus", &recoTaus, &b_recoTaus);
@@ -265,10 +294,6 @@ void higgsAnalyzer::Init(TTree *tree)
    fChain->SetBranchAddress("eventNumber", &eventNumber, &b_eventNumber);
    fChain->SetBranchAddress("lumiSection", &lumiSection, &b_lumiSection);
    fChain->SetBranchAddress("bunchCross", &bunchCross, &b_bunchCross);
-   //fChain->SetBranchAddress("isScraping", &isScraping, &b_isScraping);
-   //fChain->SetBranchAddress("isNoiseHcal", &isNoiseHcal, &b_isNoiseHcal);
-   //fChain->SetBranchAddress("isCSCTightHalo", &isCSCTightHalo, &b_isCSCTightHalo);
-   //fChain->SetBranchAddress("isCSCLooseHalo", &isCSCLooseHalo, &b_isCSCLooseHalo);
    fChain->SetBranchAddress("ptHat", &ptHat, &b_ptHat);
    fChain->SetBranchAddress("qScale", &qScale, &b_qScale);
    fChain->SetBranchAddress("evtWeight", &evtWeight, &b_evtWeight);
@@ -277,6 +302,90 @@ void higgsAnalyzer::Init(TTree *tree)
    fChain->SetBranchAddress("rhoMuFactor", &rhoMuFactor, &b_rhoMuFactor);
    fChain->SetBranchAddress("triggerStatus", &triggerStatus, &b_triggerStatus);
    fChain->SetBranchAddress("hltPrescale", hltPrescale, &b_hltPrescale);
+   fChain->SetBranchAddress("NoiseFilters", &NoiseFilters_isScraping, &b_NoiseFilters);
+
+   //Cuts
+
+   //electrons are two types: Barrel/Endcap 
+   elIdAndIsoCutsTight.ptErrorOverPt[0] = 0.1;
+   elIdAndIsoCutsTight.dxy[0]           = 0.02;
+   elIdAndIsoCutsTight.dz[0]            = 0.1;
+   elIdAndIsoCutsTight.dPhiIn[0]        = 0.06;
+   elIdAndIsoCutsTight.dEtaIn[0]        = 0.004;
+   elIdAndIsoCutsTight.sigmaIetaIeta[0] = 0.01;
+   elIdAndIsoCutsTight.HadOverEm[0]     = 0.12;
+   elIdAndIsoCutsTight.dxy[0]           = 0.02;
+   elIdAndIsoCutsTight.dz[0]            = 0.1;
+   elIdAndIsoCutsTight.fabsEPDiff[0]    = 99999;
+   elIdAndIsoCutsTight.pfIso04[0]       = 0.15;
+
+   elIdAndIsoCutsTight.ptErrorOverPt[1] = 0.1;
+   elIdAndIsoCutsTight.dxy[1]           = 0.02;
+   elIdAndIsoCutsTight.dz[1]            = 0.1;
+   elIdAndIsoCutsTight.dPhiIn[1]        = 0.03;
+   elIdAndIsoCutsTight.dEtaIn[1]        = 0.007;
+   elIdAndIsoCutsTight.sigmaIetaIeta[1] = 0.03;
+   elIdAndIsoCutsTight.HadOverEm[1]     = 0.12;
+   elIdAndIsoCutsTight.dxy[1]           = 0.02;
+   elIdAndIsoCutsTight.dz[1]            = 0.1;
+   elIdAndIsoCutsTight.fabsEPDiff[1]    = 99999;
+   elIdAndIsoCutsTight.pfIso04[1]       = 0.15;
+
+
+   elIdAndIsoCutsLoose.ptErrorOverPt[0] = 0.1;
+   elIdAndIsoCutsLoose.dxy[0]           = 0.02;
+   elIdAndIsoCutsLoose.dz[0]            = 0.1;
+   elIdAndIsoCutsLoose.dPhiIn[0]        = 0.06;
+   elIdAndIsoCutsLoose.dEtaIn[0]        = 0.004;
+   elIdAndIsoCutsLoose.sigmaIetaIeta[0] = 0.01;
+   elIdAndIsoCutsLoose.HadOverEm[0]     = 0.12;
+   elIdAndIsoCutsLoose.dxy[0]           = 0.02;
+   elIdAndIsoCutsLoose.dz[0]            = 0.1;
+   elIdAndIsoCutsLoose.fabsEPDiff[0]    = 99999;
+   elIdAndIsoCutsLoose.pfIso04[0]       = 0.15;
+
+   elIdAndIsoCutsLoose.ptErrorOverPt[1] = 0.1;
+   elIdAndIsoCutsLoose.dxy[1]           = 0.02;
+   elIdAndIsoCutsLoose.dz[1]            = 0.1;
+   elIdAndIsoCutsLoose.dPhiIn[1]        = 0.03;
+   elIdAndIsoCutsLoose.dEtaIn[1]        = 0.007;
+   elIdAndIsoCutsLoose.sigmaIetaIeta[1] = 0.03;
+   elIdAndIsoCutsLoose.HadOverEm[1]     = 0.12;
+   elIdAndIsoCutsLoose.dxy[1]           = 0.02;
+   elIdAndIsoCutsLoose.dz[1]            = 0.1;
+   elIdAndIsoCutsLoose.fabsEPDiff[1]    = 99999;
+   elIdAndIsoCutsLoose.pfIso04[1]       = 0.15;
+
+
+   muIdAndIsoCutsTight.ptErrorOverPt            = 0.1;
+   muIdAndIsoCutsTight.NumberOfValidMuonHits    = 0;
+   muIdAndIsoCutsTight.NumberOfValidTrackerHits = 10;
+   muIdAndIsoCutsTight.NumberOfValidPixelHits   = 0;
+   muIdAndIsoCutsTight.NumberOfMatches          = 1;
+   muIdAndIsoCutsTight.NormalizedChi2           = 10;
+   muIdAndIsoCutsTight.dxy             = 0.02;
+   muIdAndIsoCutsTight.dz              = 0.1;
+   muIdAndIsoCutsTight.pfIso04         = 0.2;
+
+   muIdAndIsoCutsLoose.ptErrorOverPt            = 9999;
+   muIdAndIsoCutsLoose.NumberOfValidMuonHits    = 0;
+   muIdAndIsoCutsLoose.NumberOfValidTrackerHits = 2;
+   muIdAndIsoCutsLoose.NumberOfValidPixelHits   = 0;
+   muIdAndIsoCutsLoose.NumberOfMatches          = 0;
+   muIdAndIsoCutsLoose.NormalizedChi2           = 9999;
+   muIdAndIsoCutsLoose.dxy            = 0.2;
+   muIdAndIsoCutsLoose.dz             = 0.2;
+   muIdAndIsoCutsLoose.pfIso04        = 9999;
+
+   muIdAndIsoCutsSoft.ptErrorOverPt            = 9999;
+   muIdAndIsoCutsSoft.NumberOfValidMuonHits    = -1;
+   muIdAndIsoCutsSoft.NumberOfValidTrackerHits = 10;
+   muIdAndIsoCutsSoft.NumberOfValidPixelHits   = -1;
+   muIdAndIsoCutsSoft.NumberOfMatches          = -1;
+   muIdAndIsoCutsSoft.NormalizedChi2           = 9999;
+   muIdAndIsoCutsSoft.dxy                 = 0.3;
+   muIdAndIsoCutsSoft.dz                  = 0.3;
+   muIdAndIsoCutsSoft.pfIso04             = 0.2;
 }
 
 Bool_t higgsAnalyzer::Notify()

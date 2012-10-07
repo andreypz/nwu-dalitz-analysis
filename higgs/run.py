@@ -10,7 +10,7 @@ import shutil
 import config as c
 
 
-period    = "2011"
+period    = "2012"
 sample    = "ggHZZ250"
 selection = "muon"
 trigger   = "0"
@@ -57,23 +57,20 @@ else:
     print "Run locally, source files: \n", sourceFiles
 
 
-
-#gSystem.Load("../src/src.so");
-gROOT.ProcessLine(".L ../src/srcProjectSource.cxx+")
-
 gSystem.Load("../plugins/lib/libShapeLine.so");
 gROOT.LoadMacro("../plugins/rochcor.cc+");
-#gROOT.LoadMacro("../src/TCPhysObject.cc+");
-#gROOT.LoadMacro("../src/TCJet.cc+");
-#gROOT.LoadMacro("../src/TCMET.cc+");
-#gROOT.LoadMacro("../src/TCElectron.cc+");
-#gROOT.LoadMacro("../src/TCMuon.cc+");
-#gROOT.LoadMacro("../src/TCTau.cc+");
-#gROOT.LoadMacro("../src/TCPhoton.cc+");
-#gROOT.LoadMacro("../src/TCGenJet.cc+");
-#gROOT.LoadMacro("../src/TCGenParticle.cc+");
-#gROOT.LoadMacro("../src/TCPrimaryVtx.cc+");
-#gROOT.LoadMacro("../src/TCTriggerObject.cc+");
+gROOT.LoadMacro("../src/TCPhysObject.cc+");
+gROOT.LoadMacro("../src/TCJet.cc+");
+gROOT.LoadMacro("../src/TCMET.cc+");
+gROOT.LoadMacro("../src/TCElectron.cc+");
+gROOT.LoadMacro("../src/TCMuon.cc+");
+gROOT.LoadMacro("../src/TCTau.cc+");
+gROOT.LoadMacro("../src/TCPhoton.cc+");
+gROOT.LoadMacro("../src/TCGenJet.cc+");
+gROOT.LoadMacro("../src/TCGenParticle.cc+");
+gROOT.LoadMacro("../src/TCPrimaryVtx.cc+");
+gROOT.LoadMacro("../src/TCTriggerObject.cc+");
+
 gROOT.LoadMacro("../plugins/WeightUtils.cc+");
 gROOT.LoadMacro("../plugins/TriggerSelector.cc+");
 gROOT.LoadMacro("../plugins/ZedEventsLibrary.cc+");

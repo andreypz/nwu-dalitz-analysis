@@ -22,6 +22,7 @@ WeightUtils::WeightUtils(string sampleName, string dataPeriod, string selection,
 
     // PU weights
     h1_puReweight2011  = (TH1D*)_puFile->Get("h1_PU2011");
+    h1_puReweight2012  = (TH1D*)_puFile->Get("h1_PU2011");
   
     // Recoil weights
     //h1_recoilLongMuon       = (TH1D*)_inFile->Get("h1_muonRecoilTransWeight");
@@ -105,7 +106,7 @@ float WeightUtils::PUWeight(float nPUtrue)
       //cout<<"  Pu weights, bin = "<<myBin<<endl;
     }
   else 
-    _puWeight = 0;
+    _puWeight = 1;
   //cout  <<" PU  weight = "<<_puWeight<<endl;
   return _puWeight;
 }
