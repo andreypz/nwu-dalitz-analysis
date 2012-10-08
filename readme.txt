@@ -5,6 +5,13 @@ https://twiki.cern.ch/twiki/bin/view/CMS/UserCodeNWUHiggs
 
 The log of changes:
 
+2012-Oct-07
+   * 8 TeV cross section in config file
+    
+2012-Oct-06
+  * V02-13 tag for the latest version of 7TeV analyzer
+  * Moving to struct for Mu/Ele isolation and Id.
+
 2012-Sep-29
   * V02-12 tag
     * HistManager added

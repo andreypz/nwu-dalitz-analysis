@@ -5,7 +5,7 @@ from ROOT import *
 import config as c
 
 
-myParams = c.Params()
+myParams = c.Params("8TeV")
 
 def updateNevents(bg_list, sig1_list, sig2_list, sig3_list):
 
@@ -15,7 +15,7 @@ def updateNevents(bg_list, sig1_list, sig2_list, sig3_list):
         allsamples.update(sig3_list)
         #print allsamples
         for a in allsamples:
-            print a, myParams.xsec_and_colors()[a]
+            #print a, myParams.xsec_and_colors()[a]
             h = allsamples[a].Get("Histos/met0_et_0")
             nn =  h.GetBinContent(1)
             #print "N events ", nn
@@ -156,7 +156,7 @@ fullWeight/F'
 def fillStruct(stuff, evt, sel, sample):
     lumi = myParams.getLumi(sel)
 
-    xc = myParams.xsec_and_colors()
+    #xc = myParams.xsec_and_colors()
 
     stuff.lep1Pt   = evt.lep1Pt
     stuff.lep2Pt   = evt.lep2Pt
@@ -181,7 +181,7 @@ def fillStruct(stuff, evt, sel, sample):
     stuff.massDiJet      = evt.massDiJet
     stuff.zeppDiJetDiLep = evt.zeppDiJetDiLep
     stuff.evWeight   = evt.weight
-    stuff.fullWeight = evt.weight* float(lumi*xc[sample][2])/xc[sample][3]
+    stuff.fullWeight = evt.weight* float(lumi*myParams.getCS(sample))/myParams.getNev(sample)
 
 
 def calcYields(bg_list, sig1_list, sig2_list, sig3_list, data, sel, mode="scaled"):
@@ -434,7 +434,7 @@ def printYields(bg_list, sig1_list, sig2_list, sig3_list, data, sel, filename, a
             elif l in [9,25,26,27,28]:
                 hMass = "200"
             elif l in [10,29,30,31,32]:
-                hMass = "250"
+                hMass = "300"
             else: hMass=favMass
             myTable += '%0.2f'% (Yields_sig1[l]["ggHZZ"+hMass][0])
             #myTable += '%0.1f &pm; %0.1f'% (Yields_sig1[l]["ggHZZ250"][0], Yields_sig1[l]["ggHZZ250"][1])
@@ -473,16 +473,19 @@ def handleOverflowBinsScaleAndColors(hist, sample, lumi):
         if lumi!=0:  #don't rescale, for the cases we don't want it 
             #if sample=="DYjets":
             #    print "rescaling sample", sample, "xsection =", xc[sample][2], " total events: ", xc[sample][3] 
-            hist.Scale(float(lumi*xc[sample][2])/xc[sample][3])
+
+            hist.Scale(float(lumi*myParams.getCS(sample))/myParams.getNev(sample))
             hist.SetLineColor(xc[sample][0])
         if not "HZZ" in sample: 
-            hist.SetFillColor(xc[sample][1])
+            hist.SetFillStyle(xc[sample][1])
+            hist.SetFillColor(xc[sample][2])
+
 
     hist.SetLineWidth(2)
         
 def makeStack(bgList, histoname, lumi):
 
-    xc = myParams.xsec_and_colors()
+    #xc = myParams.xsec_and_colors()
 
     hs = THStack("temp", "Stacked histo")
     #print " * In makeStack python function"

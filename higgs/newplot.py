@@ -47,8 +47,6 @@ for x in selection:
     for y in plot_types:
         createDir(dirnameOut+'/'+x+'/'+y)
         
-#gROOT.LoadMacro("./makePlot.C");
-  
 timer = TStopwatch()	
 timer.Start()
 

@@ -307,7 +307,7 @@ void higgsAnalyzer::Init(TTree *tree)
    //Cuts
 
    //electrons are two types: Barrel/Endcap 
-   elIdAndIsoCutsTight.ptErrorOverPt[0] = 0.1;
+   elIdAndIsoCutsTight.ptErrorOverPt[0] = 0.8;
    elIdAndIsoCutsTight.dxy[0]           = 0.02;
    elIdAndIsoCutsTight.dz[0]            = 0.1;
    elIdAndIsoCutsTight.dPhiIn[0]        = 0.06;
@@ -316,23 +316,23 @@ void higgsAnalyzer::Init(TTree *tree)
    elIdAndIsoCutsTight.HadOverEm[0]     = 0.12;
    elIdAndIsoCutsTight.dxy[0]           = 0.02;
    elIdAndIsoCutsTight.dz[0]            = 0.1;
-   elIdAndIsoCutsTight.fabsEPDiff[0]    = 99999;
+   elIdAndIsoCutsTight.fabsEPDiff[0]    = 0.05;
    elIdAndIsoCutsTight.pfIso04[0]       = 0.15;
 
-   elIdAndIsoCutsTight.ptErrorOverPt[1] = 0.1;
+   elIdAndIsoCutsTight.ptErrorOverPt[1] = 0.8;
    elIdAndIsoCutsTight.dxy[1]           = 0.02;
    elIdAndIsoCutsTight.dz[1]            = 0.1;
    elIdAndIsoCutsTight.dPhiIn[1]        = 0.03;
    elIdAndIsoCutsTight.dEtaIn[1]        = 0.007;
    elIdAndIsoCutsTight.sigmaIetaIeta[1] = 0.03;
-   elIdAndIsoCutsTight.HadOverEm[1]     = 0.12;
+   elIdAndIsoCutsTight.HadOverEm[1]     = 0.10;
    elIdAndIsoCutsTight.dxy[1]           = 0.02;
    elIdAndIsoCutsTight.dz[1]            = 0.1;
-   elIdAndIsoCutsTight.fabsEPDiff[1]    = 99999;
+   elIdAndIsoCutsTight.fabsEPDiff[1]    = 0.05;
    elIdAndIsoCutsTight.pfIso04[1]       = 0.15;
 
 
-   elIdAndIsoCutsLoose.ptErrorOverPt[0] = 0.1;
+   elIdAndIsoCutsLoose.ptErrorOverPt[0] = 99999;
    elIdAndIsoCutsLoose.dxy[0]           = 0.02;
    elIdAndIsoCutsLoose.dz[0]            = 0.1;
    elIdAndIsoCutsLoose.dPhiIn[0]        = 0.06;
@@ -344,7 +344,7 @@ void higgsAnalyzer::Init(TTree *tree)
    elIdAndIsoCutsLoose.fabsEPDiff[0]    = 99999;
    elIdAndIsoCutsLoose.pfIso04[0]       = 0.15;
 
-   elIdAndIsoCutsLoose.ptErrorOverPt[1] = 0.1;
+   elIdAndIsoCutsLoose.ptErrorOverPt[1] = 99999;
    elIdAndIsoCutsLoose.dxy[1]           = 0.02;
    elIdAndIsoCutsLoose.dz[1]            = 0.1;
    elIdAndIsoCutsLoose.dPhiIn[1]        = 0.03;
@@ -364,14 +364,14 @@ void higgsAnalyzer::Init(TTree *tree)
    muIdAndIsoCutsTight.NumberOfMatches          = 1;
    muIdAndIsoCutsTight.NormalizedChi2           = 10;
    muIdAndIsoCutsTight.dxy             = 0.02;
-   muIdAndIsoCutsTight.dz              = 0.1;
+   muIdAndIsoCutsTight.dz              = 0.05;
    muIdAndIsoCutsTight.pfIso04         = 0.2;
 
    muIdAndIsoCutsLoose.ptErrorOverPt            = 9999;
-   muIdAndIsoCutsLoose.NumberOfValidMuonHits    = 0;
+   muIdAndIsoCutsLoose.NumberOfValidMuonHits    = -1;
    muIdAndIsoCutsLoose.NumberOfValidTrackerHits = 2;
-   muIdAndIsoCutsLoose.NumberOfValidPixelHits   = 0;
-   muIdAndIsoCutsLoose.NumberOfMatches          = 0;
+   muIdAndIsoCutsLoose.NumberOfValidPixelHits   = -1;
+   muIdAndIsoCutsLoose.NumberOfMatches          = -1;
    muIdAndIsoCutsLoose.NormalizedChi2           = 9999;
    muIdAndIsoCutsLoose.dxy            = 0.2;
    muIdAndIsoCutsLoose.dz             = 0.2;
@@ -384,7 +384,7 @@ void higgsAnalyzer::Init(TTree *tree)
    muIdAndIsoCutsSoft.NumberOfMatches          = -1;
    muIdAndIsoCutsSoft.NormalizedChi2           = 9999;
    muIdAndIsoCutsSoft.dxy                 = 0.3;
-   muIdAndIsoCutsSoft.dz                  = 0.3;
+   muIdAndIsoCutsSoft.dz                  = 3.;
    muIdAndIsoCutsSoft.pfIso04             = 0.2;
 }
 
