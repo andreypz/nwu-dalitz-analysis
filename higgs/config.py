@@ -10,8 +10,8 @@ class Params():
             self._lumi_mu  = 2312 + 2739
             self._lumi_mu  = 2312 + (25./30)*2739
         else:
-            self._lumi_ele = 25000
-            self._lumi_mu  = 25000
+            self._lumi_ele = 10200
+            self._lumi_mu  = 10200
             
             
         self._isUpdated = False
@@ -75,14 +75,14 @@ class Params():
             "DATA": [-1,-1,-1,-1,-1],
             # schenme: lineColor, fill style, fill color, cs@7, cs@8, Nevts
             #"ZZ":   [kBlue,     3004, kMagenta, 6.46, ,0],  #pythia
-            "ZZ":   [kBlue,     3244, kMagenta,  6.46, 7.92,   0],  #madgraph
-            "WZ":   [kYellow-1, 3023, kBlue-1,  18.57, 22.9,   0], #or 0.879?
-            "WW":   [kOrange+1, 1001, kGreen+2, 47.04, 57.25,  0],
+            "ZZ":   [kBlue,     3244, kMagenta, 0.1787, 0.32,  0],  #madgraph
+            "WZ":   [kYellow-1, 3023, kBlue-1,   0.856, 0.75,  0], #or 0.879?
+            "WW":   [kOrange+1, 1001, kGreen+2,  4.783, 6.01,  0],
 
             "DYjets":[kRed,     3004, kRed+1,   3048.0,   3503.71, 0],
             "Wjets": [kGreen-2, 3004, kCyan+1,  31314.0, 12085.73, 0],
             
-            #"ttbar":[kOrange+1,3004, kGreen+2, 16.71, 10.34e6, 0],
+            #"ttbar":[kOrange+1,3004, kGreen+2, 16.71, 000, 0], 
             "ttbar": [kOrange+1,1001, kSpring-9, 165, 227.197,  0], #madgraph
             "tW":    [kOrange+9,1001, kOrange+6, 7.87, 11.1773, 0],
             "tbarW": [kRed,     1001, kWhite,    7.87, 11.1773, 0],
@@ -134,7 +134,8 @@ class Params():
 
     def UpdateNevents(self, sample, n=1):
         if  self._xsec_and_colors[sample][5] != n:
-            #print " --->  Changing the initial number of events in config file for sample", sample,"to", n
+            if sample in ["ttbar","tW","tbarW"]:
+                print " --->  Changing the initial number of events in config file for sample", sample,"to", n
             self._xsec_and_colors[sample][5] = n 
         if sample not in self._xsec_and_colors.keys():
             print "Warning!! the sample name was no in the original dictionary"

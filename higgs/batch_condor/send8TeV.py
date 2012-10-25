@@ -17,10 +17,10 @@ if nargs>1 and sys.argv[1]=="ele":
     selection="electron"
     
 period    = '2012'
-doTest    = 0
+doTest    = 1
 doData    = 0
-doBG      = 1
-doSignal  = 1
+doBG      = 0
+doSignal  = 0
 
 ''' 
     Set job configurations.  The order of arguments is:
@@ -31,6 +31,7 @@ test = []
 test.extend([
 #b.JobConfig('vbfZ', dCache+'/naodell/March18/MC/VBFZ', 10, 'vbfZ 0 '+selection+' '+period, selection),
 #b.JobConfig('ggHZZ125', dCache+'/andreypz/nuTuples_v2_8TeV/ggH125', 10, 'ggHZZ125 0 '+selection+' '+period, selection),#b.JobConfig('WZ', dCache+'/naodell/nuTuples_v5_8TeV/WZJetsTo3LNu', 10, 'WZ 0 '+selection+' '+period, selection),
+b.JobConfig('ZZ', dCache+'/andreypz/nuTuples_v5_8TeV/ZZJetsTo2L2Nu', 10, 'ZZ 0 '+selection+' '+period, selection),
 ])
 
 
@@ -68,7 +69,7 @@ if selection == 'muEG':
  
 bg = []
 bg.extend([
-b.JobConfig('DYjets', dCache+'/andreypz/nuTuples_v5_8TeV/DYJets', 30, 'DYjets 0 '+selection+' '+period, selection),
+b.JobConfig('DYjets', dCache+'/andreypz/nuTuples_v5_8TeV/DYjets', 30, 'DYjets 0 '+selection+' '+period, selection),
 b.JobConfig('ZZ', dCache+'/andreypz/nuTuples_v5_8TeV/ZZJetsTo2L2Nu', 1, 'ZZ 0 '+selection+' '+period, selection),
 b.JobConfig('WZ', dCache+'/andreypz/nuTuples_v5_8TeV/WZJetsTo3LNu', 1, 'WZ 0 '+selection+' '+period, selection),
 b.JobConfig('WW', dCache+'/andreypz/nuTuples_v5_8TeV/WWJetsTo2L2Nu', 1, 'WW 0 '+selection+' '+period, selection),

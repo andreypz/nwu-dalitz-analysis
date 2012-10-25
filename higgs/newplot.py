@@ -15,15 +15,17 @@ sel = 1
 doMerge = False
 
 if (nargs<2):
-    print "you have to specify the path where to llok for the files!\nLike v62, or something"
+    print "you have to specify the path where to look for the files!\nLike v62, or something"
     sys.exit()
 if (nargs>=3):
     sel = int(sys.argv[2])
 if (nargs==4):
     doMerge = bool(int(sys.argv[3]))
 
-hPath = sys.argv[1]
-print hPath, sel, doMerge
+fullPath = sys.argv[1]
+hPath = fullPath[0:3]
+
+print fullPath, hPath, sel, doMerge
 
 def createDir(dir):
     try:
@@ -35,11 +37,11 @@ def createDir(dir):
             raise
 
 baseDir = "/uscms_data/d2/andreypz/hzz2l2nu_html/"
-dirnameOut = baseDir+hPath
+dirnameOut = baseDir+fullPath
 selection  = ['muon', 'electron']
 #plot_types = ['diLepton', 'Jet', 'Met', 'Misc', "mvaPresel"]
 #plot_types = ['diLepton', 'Lepton', 'Jet', 'Met', 'Misc', "mvaPresel"]
-plot_types = ['diLepton', 'Lepton', 'Jet', 'Met', 'mvaPresel', 'Misc', "Special"]
+plot_types = ['diLepton', 'Lepton', 'Jet', 'Met', "Special"]
 
 thissel = selection[sel-1]
 
@@ -60,7 +62,8 @@ if doMerge:
     os.system("hadd ./"+hPath+"/m_vbfZ_"+thissel+".root ./"+hPath+"/"+thissel+"/hhhh_vbfZ_*.root")
                 
 
-mp.makePlots(sel, baseDir, hPath)
+
+mp.makePlots(sel, baseDir, fullPath)
 
 print "\n\nDone!"
 print "CPU Time : ", timer.CpuTime()

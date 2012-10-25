@@ -90,7 +90,7 @@ float WeightUtils::GetTotalWeight(float nPV, int nJets, TLorentzVector l1, TLore
     if (!_isRealData) {
         weight *= PUWeight(nPV);
         weight *= RecoWeight(l1, l2);
-        if (_sampleName.compare(0,2,"ZZ") == 0) weight *= ZZWeight(l1, l2);
+        //if (_sampleName.compare(0,2,"ZZ") == 0 && _dataPeriod!="2012") weight *= ZZWeight(l1, l2);
     } else {
         weight *= GammaWeight(nPV, nJets, l1);
     }

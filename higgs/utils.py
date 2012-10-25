@@ -202,7 +202,6 @@ def calcYields(bg_list, sig1_list, sig2_list, sig3_list, data, sel, mode="scaled
     
 
     for l in range(0,lTot):
-
         # Data yields:
         if data != None:
             dd = data.Get("Histos/evt_byCut").Clone()
@@ -325,7 +324,7 @@ def printYields(bg_list, sig1_list, sig2_list, sig3_list, data, sel, filename, a
     myTable += endCell
     
     # Make the first line of the table
-    #for k, v in Yields_bg[l].iteritems():
+
     for b in bgOrder:
         if b not in Yields_bg[0].keys(): continue
         v = Yields_bg[0][b]
@@ -363,7 +362,8 @@ def printYields(bg_list, sig1_list, sig2_list, sig3_list, data, sel, filename, a
         total_bg=0
         total_err=0
 
-        #for k, v in Yields_bg[l].iteritems():
+        #print l, Yields_bg[l]
+        
         for b in bgOrder:
             if b not in Yields_bg[l].keys(): continue
             v = Yields_bg[l][b]
@@ -471,9 +471,10 @@ def handleOverflowBinsScaleAndColors(hist, sample, lumi):
 
     if sample!="Data":
         if lumi!=0:  #don't rescale, for the cases we don't want it 
-            #if sample=="DYjets":
-            #    print "rescaling sample", sample, "xsection =", xc[sample][2], " total events: ", xc[sample][3] 
-
+            #if sample=="ttbar":
+            #    print "rescaling sample", sample, "xsection =", myParams.getCS(sample), " total events: ", myParams.getNev(sample) 
+            #    print "lumi=", lumi
+                
             hist.Scale(float(lumi*myParams.getCS(sample))/myParams.getNev(sample))
             hist.SetLineColor(xc[sample][0])
         if not "HZZ" in sample: 
@@ -583,7 +584,7 @@ def drawMultiPlot(fname,maintitle, xtitle, h_name, isLog, y1min, y1max, y2min, y
     if doRatio:
         cc = TCanvas("c2","big canvas",600,700);
     else:
-        cc = TCanvas("c1","small canvas",600,600);
+        cc = TCanvas("c3","small canvas",600,600);
         cc.SetLogy(isLog)
                 
     cc.cd()

@@ -4,6 +4,7 @@ from ROOT import *
 import datetime
 
 import config as c
+import top_bkg as t
 import utils as u
 
 F0 = 6
@@ -22,10 +23,12 @@ plotMisc = 0
 
 makePuWeights = 0
 
-def makePlots(sel=1, dir="./", hPath="v00"):
+myParams = c.Params("8TeV")
+def makePlots(sel=1, dir="./", fullPath="v00"):
+    hPath = fullPath[0:3]
     gROOT.ProcessLine(".L ../data/tdrstyle.C");
     setTDRStyle()
-    
+     
     gStyle.SetPadGridX(1)
     gStyle.SetPadGridY(1);
     gStyle.SetHistLineWidth(2)
@@ -34,11 +37,11 @@ def makePlots(sel=1, dir="./", hPath="v00"):
     
     if sel==1:
         thissel = "muon"
-        imgpath = dir+hPath+"/muon/" 
+        imgpath = dir+fullPath+"/muon/" 
     if sel==2:
         thissel = "electron"
-        imgpath = dir+hPath+"/electron/"
-    print "Making plots from", hPath
+        imgpath = dir+fullPath+"/electron/"
+    print "Making plots from", hPath, fullPath
     
     #topbg = ["tW","tbarW"]
     bg   = ["tW","tbarW","ttbar","WW", "WZ","ZZ","DYjets"]
@@ -97,6 +100,7 @@ def makePlots(sel=1, dir="./", hPath="v00"):
     u.printYields(li_allbg, li_sig1, li_sig2, li_sig3, f_Data, sel, "yields_"+thissel+".html", "HZZ125")
     print "\n **** End of Yield table ****"
 
+
     if makeMvaTrees:
         mvaInputsDir = "../mva/mvaInputs_"+hPath+"/"+thissel+"/"
         if not os.path.exists(mvaInputsDir):
@@ -121,9 +125,23 @@ def makePlots(sel=1, dir="./", hPath="v00"):
         u.drawMultiPlot(imgpath+sdr+"mva09", "","Trailing Lepton pt", "l2_pt_"+str(FMVA), 0, 0.1, 700, 0.3,1.9, li_ov, li_allbg, sel)
 
     if plotSpecial:
-        sdr = "Special/"
-        u.drawMultiPlot(imgpath+sdr+"di01", "","M(ll)", "di_mass_ext_2", 1, 0.1, 1e10, 0.5,1.49, li_ov, li_allbg, sel)
 
+        sdr = "Special/"
+        u.drawMultiPlot(imgpath+sdr+"sp01", "","M(ll)", "di_mass_ext_2", 1, 0.1, 1e10, 0.5,1.49, li_ov, li_allbg, sel)
+
+        lumi = myParams.getLumi(sel) 
+        c1.cd()
+        h_ttbar_N = li_allbg["ttbar"].Get("Histos/jet_b_N_7")
+        h_tW_N = li_allbg["tW"].Get("Histos/jet_b_N_7")
+        h_tbarW_N = li_allbg["tbarW"].Get("Histos/jet_b_N_7")
+        u.handleOverflowBinsScaleAndColors(h_ttbar_N, "ttbar", lumi)
+        u.handleOverflowBinsScaleAndColors(h_tW_N, "tW", lumi)
+        u.handleOverflowBinsScaleAndColors(h_tbarW_N, "tbarW", lumi)
+        t.topbg(h_ttbar_N, h_tW_N, h_tbarW_N,  sel)
+        h_ttbar_N.Draw()
+    
+        c1.SaveAs(imgpath+sdr+"sp02.png")
+        
         '''
         print "* Making pu weights *"
         pileup2011 = TFile("pileup2011.root","open")
@@ -180,7 +198,7 @@ def makePlots(sel=1, dir="./", hPath="v00"):
         
          '''
     if plotDiLepton:
-        sdr = "dilepron/"
+        sdr = "diLepton/"
         u.drawMultiPlot(imgpath+sdr+"di01", "","M(ll)", "di_mass_"+str(F0), 1, 0.1, 1e6, 0.5,1.49, li_ov, li_allbg, sel)
         u.drawMultiPlot(imgpath+sdr+"di02", "","Leptons in Barrel, |#eta|<1.444, M(ll)", "di_mass_EB_"+str(F0), 1, 0.1, 1e6, 0.5,1.49, li_ov, li_allbg, sel)
         u.drawMultiPlot(imgpath+sdr+"di03", "","Leptons in Endcap, |#eta|>1.566, M(ll)", "di_mass_EE_"+str(F0), 1, 0.1, 1e6, 0.5,1.49, li_ov, li_allbg, sel)

@@ -1,4 +1,4 @@
-// $Id: template_higgsAnalyzer.C,v 1.59 2012/10/07 06:21:46 andrey Exp $
+// $Id: template_higgsAnalyzer.C,v 1.60 2012/10/08 04:43:23 andrey Exp $
 
 #define higgsAnalyzer_cxx
 
@@ -21,7 +21,7 @@ const TString suffix("SUFFIX");
 
 vector<int> triggers (trigger, trigger + sizeof(trigger)/sizeof(int));
 
-Bool_t makeMvaTree = 1;
+Bool_t makeMvaTree = 0;
 const UInt_t verboseLvl  = 0;
 const Bool_t doZlibrary  = 0, isFromData=0;
 
@@ -313,6 +313,8 @@ bool higgsAnalyzer::Process(Long64_t entry)
 
     //cout<<"dbg"<<endl;    
     if (nEvents[0] % (int)5e4 == 0) cout<<nEvents[3]<<" events passed of "<<nEvents[0]<<" checked! (at Z-peak cut)"<<endl;
+
+    return kTRUE;
 
     //if (selection == "gamma"   && (eventNumber % 3) != 0) return kTRUE;
     //if (selection == "eGamma"  && (eventNumber % 3) != 1) return kTRUE;
@@ -725,6 +727,45 @@ bool higgsAnalyzer::Process(Long64_t entry)
     // Gen particles //
     ///////////////////
     
+    if (!isRealData) {
+
+      vector<TCPhysObject> genleps, genneutrinos;
+      for (int i = 0; i < genParticles->GetSize(); ++i) {
+    	TCGenParticle* thisParticle = (TCGenParticle*) genParticles->At(i);    
+    	if (thisParticle->GetPDGId() == 23 && thisParticle->Mother()==23)
+	  {
+	    hists->fill1DHist(thisParticle->M(), "gen_Z_M", "Mass of gen Z", 50,0,200, eventWeight, "Histos");
+
+	    //cout<<eventNumber<<"  Mass = "<<thisParticle->M()<<"    pt= "<<thisParticle->Pt()<<endl;
+	  }
+
+    	if ((abs(thisParticle->GetPDGId()) == 11 || abs(thisParticle->GetPDGId())==13) && thisParticle->Mother()==23)
+	  {
+	    //cout<<eventNumber<<"    Lepton from Z, ID= "<<thisParticle->GetPDGId()<<"   "<<thisParticle->M()<<endl;
+	    genleps.push_back(*thisParticle);
+	  }
+    	if ((abs(thisParticle->GetPDGId()) == 12 || abs(thisParticle->GetPDGId())==14 || abs(thisParticle->GetPDGId())==16) && thisParticle->Mother()==23)
+	  {
+	    //cout<<eventNumber<<"    Lepton from Z, ID= "<<thisParticle->GetPDGId()<<"   "<<thisParticle->M()<<endl;
+	    genneutrinos.push_back(*thisParticle);
+	  }
+      }
+      if (genneutrinos.size()==2)
+	{
+	  hists->fill1DHist(genneutrinos[0].Eta(), "gen_nu1_eta", "eta of gen lep1", 40,-5,5, eventWeight, "Histos");
+	  hists->fill1DHist(genneutrinos[1].Eta(), "gen_nu2_eta", "eta of gen lep1", 40,-5,5, eventWeight, "Histos");
+	}
+      if (genleps.size()==2)
+	{
+	  Float_t genll = (genleps[0]+genleps[1]).M(); 
+	  hists->fill1DHist(genll, "gen_ll_M", "Gen level m(ll)", 50,0,200, eventWeight, "Histos");
+	  hists->fill1DHist(genleps[0].Eta(), "gen_l1_eta", "eta of gen lep1", 40,-5,5, eventWeight, "Histos");
+	  hists->fill1DHist(genleps[1].Eta(), "gen_l2_eta", "eta of gen lep2", 40,-5,5, eventWeight, "Histos");
+	}
+      //else cout<<" wrong size of gen leptons collection  "<<genleps.size()<<endl;
+      
+    }
+
     if (!isRealData && (suffix.Contains("HZZ") || suffix.Contains("HWW") )) {
       
       // NLO k-faktors weights
@@ -762,7 +803,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
 
 
    if(selection  == "muon" ||  selection  == "electron")
-     if (Lepton1.Pt() < 20.0 || Lepton2.Pt() < 20.0) //reject[3]=1;
+     if (Lepton1.Pt() < 30.0 || Lepton2.Pt() < 10.0) //reject[3]=1;
        return kTRUE;
    /*
    for(Int_t ev=0; ev<evSize; ev++)
