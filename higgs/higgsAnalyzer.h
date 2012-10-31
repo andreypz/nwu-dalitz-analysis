@@ -405,6 +405,7 @@ Bool_t higgsAnalyzer::Notify()
   eventsInFile->GetEntry(0);
 
   totEvents += initEvents;
+  cout<<"  Opened file: \n"<<inFile->GetName()<<endl;
   cout<<" Events in file: "<<initEvents<<"  total processed: "<<totEvents<<endl;
 
   MET = 0;

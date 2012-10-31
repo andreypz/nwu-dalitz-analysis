@@ -58,6 +58,7 @@
     std::map<std::string,TH1F*>::iterator it;
     it = the1DMap.find(name);
     if (it == the1DMap.end()){
+
       theFile->cd(folder.c_str());
       the1DMap[name] = new TH1F(name.c_str(),title.c_str(),bins,binEdges);
       theFile->cd();

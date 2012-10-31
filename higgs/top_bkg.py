@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 import sys,os
 
-from ROOT import *
+#from ROOT import *
+import utils as u
 
 effic = {
     "ee":  [0.8469, 0.0369],
@@ -17,14 +18,28 @@ accep = {
         "A0t":  [0.000061, 0.000006],
         },
     "mumu": {
-        "A2tt": [0.001956, 0.000087],
-        "A1tt": [0.001798, 0.000013],
-        "A0tt": [0.000385, 0.000006],
-        "A2t":  [0.000057, 0.000006],
-        "A1t":  [0.000215, 0.000008],
-        "A0t":  [0.000059, 0.000004],
+        "A0tt": [ 4.36e-5, 0.000087],
+        "A1tt": [22.81e-5, 0.000013],
+        "A2tt": [25.76e-5, 0.000006],
+        "A3tt": [ 0.33e-5, 0.000006],
+        "A4tt": [ 0.04e-5, 0.000006],
+
+        "A0t":  [0.000215, 0.000008],
+        "A1t":  [0.000059, 0.000004],
+        "A2t":  [0.000215, 0.000008],
+        "A3t":  [0.000059, 0.000004],
+
+        #Radek's:
+        #"A2tt": [0.001956, 0.000087],
+        #"A1tt": [0.001798, 0.000013],
+        #"A0tt": [0.000385, 0.000006],
+        #"A2t":  [0.000057, 0.000006],
+        #"A1t":  [0.000215, 0.000008],
+        #"A0t":  [0.000059, 0.000004],
         }
     } 
+
+myParams = u.myParams
 
 
 def topbg(h_ttbar, h_tW, h_tbarW, sel):
@@ -36,7 +51,7 @@ def topbg(h_ttbar, h_tW, h_tbarW, sel):
         N0 = h_ttbar.GetBinContent(1)
         N1 = h_ttbar.GetBinContent(2)
         N2 = h_ttbar.GetBinContent(3)
-    
+
     print "ttbar Numbers:\n\
     N2 = %.2f\n\
     N1 = %.2f\n\
@@ -46,6 +61,10 @@ def topbg(h_ttbar, h_tW, h_tbarW, sel):
     A2tt = accep[selstr]["A2tt"][0]
     A1tt = accep[selstr]["A1tt"][0]
     A0tt = accep[selstr]["A0tt"][0]
+
+    A2t = accep[selstr]["A2t"][0]
+    A1t = accep[selstr]["A1t"][0]
+    A0t = accep[selstr]["A0t"][0]
  
     eps = N2*(2*A2tt+A1tt)/(N1+2*N2)/A2tt
     Ntt = N2/(eps**2*A2tt)
@@ -53,6 +72,34 @@ def topbg(h_ttbar, h_tW, h_tbarW, sel):
     N0_calc = Ntt*(A2tt*(1-eps)**2 + A1tt*(1-eps) + A0tt) 
     
     print "Calculated:\n\
+    Ntt = %.2f\n\
+    eff = %.2f\n\
+    N0 = %.2f\n\
+    " % (Ntt, eps, N0_calc)
+
+    sigma_tt = myParams.getCS("ttbar")
+    sigma_t  = 2*myParams.getCS("tW") # multiply by two because of tbarW 
+
+    if h_tW!=None and h_tbarW!=None:
+        N0 += (h_tW.GetBinContent(1) + h_tbarW.GetBinContent(1)) 
+        N1 += (h_tW.GetBinContent(2) + h_tbarW.GetBinContent(2))
+        N2 += (h_tW.GetBinContent(3) + h_tbarW.GetBinContent(3))
+    
+    print " tt + top Numbers:\n\
+    N2 = %.2f\n\
+    N1 = %.2f\n\
+    N0 = %.2f\n\
+    "  % (N2,N1,N0)
+
+    print "*** Including tW. cs(tt) = ", sigma_tt, " cs(t) =", sigma_t
+
+
+    eps = N2*(2*A2tt+A1tt + (sigma_t/sigma_tt)*A1t)/(N1+2*N2)/A2tt
+    Ntt = N2/(eps**2*A2tt)
+
+    N0_calc = Ntt*(A2tt*(1-eps)**2 + A1tt*(1-eps) + A0tt + A0t) 
+
+    print "Calculated with signle top:\n\
     Ntt = %.2f\n\
     eff = %.2f\n\
     N0 = %.2f\n\

@@ -5,7 +5,7 @@ from ROOT import *
 import config as c
 
 
-myParams = c.Params("8TeV")
+myParams = c.Params("7TeV")
 
 def updateNevents(bg_list, sig1_list, sig2_list, sig3_list):
 
@@ -557,6 +557,7 @@ def drawMultiPlot(fname,maintitle, xtitle, h_name, isLog, y1min, y1max, y2min, y
     sig = []
     n=0
     for o in ovList:
+        #print o
         ff.append(ovList[o])
         hh.append(ff[n].Get(name).Clone())
         #print n, "file:", ff[n].GetName(), "   histoname: ", hh[n].GetName()
@@ -613,9 +614,9 @@ def drawMultiPlot(fname,maintitle, xtitle, h_name, isLog, y1min, y1max, y2min, y
     for i,s in enumerate(sig):
         #print i,s
         if i==0:
-            s.Scale(10)  #for ggH
+            s.Scale(5)  #for ggH
         elif i==1:
-            s.Scale(100)  #for vbf
+            s.Scale(5)  #for vbf
         s.Draw("same hist");
                 
     if doRatio:
@@ -666,9 +667,9 @@ def drawMultiPlot(fname,maintitle, xtitle, h_name, isLog, y1min, y1max, y2min, y
     for i,s in enumerate(sig):
         #print i,s
         if i==0:
-            leg01.AddEntry(sig[0],"10x ggH 125","l")
+            leg01.AddEntry(sig[0],"5x ggH 200","l")
         elif i==1:
-            leg01.AddEntry(sig[1],"100x vbfH 125","l")
+            leg01.AddEntry(sig[1],"5x vbfH 200","l")
 
     leg01.SetFillColor(kWhite)
     leg01.Draw()

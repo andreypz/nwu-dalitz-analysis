@@ -8,7 +8,7 @@ class Params():
         if self._s=="7TeV":
             self._lumi_ele = 2312 + 2739
             self._lumi_mu  = 2312 + 2739
-            self._lumi_mu  = 2312 + (25./30)*2739
+            self._lumi_mu  = 2312 + (21./30)*2739
         else:
             self._lumi_ele = 10200
             self._lumi_mu  = 10200
@@ -76,7 +76,7 @@ class Params():
             # schenme: lineColor, fill style, fill color, cs@7, cs@8, Nevts
             #"ZZ":   [kBlue,     3004, kMagenta, 6.46, ,0],  #pythia
             "ZZ":   [kBlue,     3244, kMagenta, 0.1787, 0.32,  0],  #madgraph
-            "WZ":   [kYellow-1, 3023, kBlue-1,   0.856, 0.75,  0], #or 0.879?
+            "WZ":   [kYellow-1, 1001, kBlue-1,   0.856, 0.75,  0], #or 0.879?
             "WW":   [kOrange+1, 1001, kGreen+2,  4.783, 6.01,  0],
 
             "DYjets":[kRed,     3004, kRed+1,   3048.0,   3503.71, 0],

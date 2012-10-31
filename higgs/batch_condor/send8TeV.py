@@ -10,17 +10,17 @@ print "Running", sys.argv[0], nargs
 ''' Specify parameters '''
 dCache      = '/pnfs/cms/WAX/11/store/user' 
 EOS = '/eos/uscms/store/user'
-outputPath  = '/uscms_data/d2/andreypz/cmssw/higgs2/CMSSW_4_4_4/src/NWU/Higgs/higgs/batch_condor'
+outputPath  = '/uscms_data/d2/andreypz/cmssw/higgs2/CMSSW_4_4_4/src/NWU/Higgs/higgs/batch_condor/8TeV'
 
 selection = 'muon'
 if nargs>1 and sys.argv[1]=="ele":
     selection="electron"
     
 period    = '2012'
-doTest    = 1
-doData    = 0
-doBG      = 0
-doSignal  = 0
+doTest    = 0
+doData    = 1
+doBG      = 1
+doSignal  = 1
 
 ''' 
     Set job configurations.  The order of arguments is:
@@ -31,7 +31,8 @@ test = []
 test.extend([
 #b.JobConfig('vbfZ', dCache+'/naodell/March18/MC/VBFZ', 10, 'vbfZ 0 '+selection+' '+period, selection),
 #b.JobConfig('ggHZZ125', dCache+'/andreypz/nuTuples_v2_8TeV/ggH125', 10, 'ggHZZ125 0 '+selection+' '+period, selection),#b.JobConfig('WZ', dCache+'/naodell/nuTuples_v5_8TeV/WZJetsTo3LNu', 10, 'WZ 0 '+selection+' '+period, selection),
-b.JobConfig('ZZ', dCache+'/andreypz/nuTuples_v5_8TeV/ZZJetsTo2L2Nu', 10, 'ZZ 0 '+selection+' '+period, selection),
+#b.JobConfig('ZZ', dCache+'/andreypz/nuTuples_v5_8TeV/ZZJetsTo2L2Nu', 10, 'ZZ 0 '+selection+' '+period, selection),
+b.JobConfig('ttbar', dCache+'/andreypz/nuTuples_v5_8TeV/TTJets', 10, 'ttbar 0 '+selection+' '+period, selection),
 ])
 
 
@@ -39,8 +40,8 @@ b.JobConfig('ZZ', dCache+'/andreypz/nuTuples_v5_8TeV/ZZJetsTo2L2Nu', 10, 'ZZ 0 '
 if selection == 'muon':
     data = []
     data.extend([
-        b.JobConfig('DoubleMu_Run2011A', dCache+'/andreypz/nuTuples_v5_8TeV/DoubleMu_HZZ_Run2011A', 25, 'DATA 4,5,8 muon 2011A', selection),
-        b.JobConfig('DoubleMu_Run2011B', dCache+'/andreypz/nuTuples_v5_8TeV/DoubleMu_HZZ_Run2011B_try2', 30, 'DATA 4,5,8 muon 2011B', selection),
+        b.JobConfig('DoubleMu_Run2012A', dCache+'/devildog/nuTuples_v5_8TeV/DoubleMu_HZZ_Run2012A', 40, 'DATA 0 muon 2012', selection),
+        b.JobConfig('DoubleMu_Run2012B', dCache+'/devildog/nuTuples_v5_8TeV/DoubleMu_HZZ_Run2012B', 40, 'DATA 0 muon 2012', selection),
         ])
 
                             
@@ -49,34 +50,22 @@ if selection == 'muon':
 if selection == 'electron':
     data = []
     data.extend([
-        b.JobConfig('DoubleEle_Run2011A', dCache+'/andreypz/nuTuples_v1_8TeV/DoubleElectron_HZZ_Run2011A', 30, 'DATA 16,17,18 electron 2011A', selection),
-        b.JobConfig('DoubleEle_Run2011B', dCache+'/andreypz/nuTuples_v1_8TeV/DoubleElectron_HZZ_Run2011B', 30, 'DATA 16,17,18 electron 2011B', selection),
+        b.JobConfig('DoubleEle_Run2012A', dCache+'/naodell/nuTuples_v5_8TeV/DoubleElectron_Run2012A', 30, 'DATA 0 electron 2012', selection),
+        b.JobConfig('DoubleEle_Run2012B', dCache+'/naodell/nuTuples_v5_8TeV/DoubleElectron_Run2012B', 30, 'DATA 0 electron 2012', selection),
         ])
 
 
 
-if selection == 'gamma' or selection == 'muGamma' or selection == 'eGamma':
-    data = []
-    if period in ['2011']:
-        data.extend([
-        ])
-
-if selection == 'muEG':
-    data = []
-    if period in ['2011',]:
-        data.extend([
-         ])
- 
 bg = []
 bg.extend([
-b.JobConfig('DYjets', dCache+'/andreypz/nuTuples_v5_8TeV/DYjets', 30, 'DYjets 0 '+selection+' '+period, selection),
-b.JobConfig('ZZ', dCache+'/andreypz/nuTuples_v5_8TeV/ZZJetsTo2L2Nu', 1, 'ZZ 0 '+selection+' '+period, selection),
-b.JobConfig('WZ', dCache+'/andreypz/nuTuples_v5_8TeV/WZJetsTo3LNu', 1, 'WZ 0 '+selection+' '+period, selection),
-b.JobConfig('WW', dCache+'/andreypz/nuTuples_v5_8TeV/WWJetsTo2L2Nu', 1, 'WW 0 '+selection+' '+period, selection),
-b.JobConfig('ttbar', dCache+'/andreypz/nuTuples_v5_8TeV/TTJets', 10, 'ttbar 0 '+selection+' '+period, selection),
-b.JobConfig('tW', dCache+'/andreypz/nuTuples_v5_8TeV/tW', 1, 'tW 0 '+selection+' '+period, selection),
-b.JobConfig('tbarW', dCache+'/andreypz/nuTuples_v5_8TeV/tbarW', 1, 'tbarW 0 '+selection+' '+period, selection),
-b.JobConfig('vbfZ', dCache+'/andreypz/nuTuples_v5_8TeV/Zvbf', 1, 'vbfZ 0 '+selection+' '+period, selection),
+b.JobConfig('DYjets',        dCache+'/andreypz/nuTuples_v5_8TeV/DYjets',       30, 'DYjets 0 '+selection+' '+period, selection),
+b.JobConfig('ZZJetsTo2L2Nu', dCache+'/andreypz/nuTuples_v5_8TeV/ZZJetsTo2L2Nu', 1, 'ZZ 0 '+selection+' '+period, selection),
+b.JobConfig('WZJetsTo3LNu',  dCache+'/andreypz/nuTuples_v5_8TeV/WZJetsTo3LNu',  1, 'WZ 0 '+selection+' '+period, selection),
+b.JobConfig('WWJetsTo2L2Nu', dCache+'/andreypz/nuTuples_v5_8TeV/WWJetsTo2L2Nu', 1, 'WW 0 '+selection+' '+period, selection),
+b.JobConfig('ttbar',         dCache+'/andreypz/nuTuples_v5_8TeV/TTJets',       10, 'ttbar 0 '+selection+' '+period, selection),
+b.JobConfig('tW',            dCache+'/andreypz/nuTuples_v5_8TeV/tW',            1, 'tW 0 '+selection+' '+period, selection),
+b.JobConfig('tbarW',         dCache+'/andreypz/nuTuples_v5_8TeV/tbarW',         1, 'tbarW 0 '+selection+' '+period, selection),
+b.JobConfig('vbfZ',          dCache+'/andreypz/nuTuples_v5_8TeV/Zvbf',          1, 'vbfZ 0 '+selection+' '+period, selection),
 ])
 
 

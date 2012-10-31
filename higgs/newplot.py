@@ -80,8 +80,8 @@ for x in plot_types:
     fileList = {}
     for s in selection:
         fileList[s] = os.listdir(dirnameOut+'/'+s+'/'+x)
-    #print fileList
-    nmu = len(fileList["muon"])
+    #print x,fileList
+    nmu  = len(fileList["muon"])
     nele = len(fileList["electron"])
     if (nmu!=0 and fileList["muon"]==fileList["electron"]):
         for pl in  sorted(fileList["muon"]):
@@ -102,6 +102,7 @@ for x in plot_types:
     elif(nmu==0):
         print "No plots in", x
         
+
     imgfile.write("</body></html>")
     imgfile.close()
     os.system("mv "+fname+" "+dirnameOut)
