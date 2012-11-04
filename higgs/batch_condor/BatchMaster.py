@@ -17,7 +17,7 @@ class JobConfig():
 
 class BatchMaster():
     '''A tool for submitting batch jobs'''
-    def __init__(self, configList, outDir = '.', shortQueue = False):
+    def __init__(self, configList,outDir = '.', shortQueue = False):
         self._current    = os.path.abspath('.')
         self._outDir     = outDir
         self._configList = configList
@@ -80,9 +80,9 @@ class BatchMaster():
         batch_tmp.write('Requirements = Memory >= 199 &&OpSys == "LINUX"&& (Arch != "DUMMY" )&& Disk > 1000000\n')
         if self._shortQueue:
             batch_tmp.write('+LENGTH               = "SHORT"\n')
-        batch_tmp.write('Output                = reports/report_$(Cluster)_$(Process).stdout\n')
-        batch_tmp.write('Error                 = reports/report_$(Cluster)_$(Process).stderr\n')
-        batch_tmp.write('Log                   = reports/report_$(Cluster)_$(Process).log   \n')
+        batch_tmp.write('Output                = '+self._outDir+'/reports/report_$(Cluster)_$(Process).stdout\n')
+        batch_tmp.write('Error                 = '+self._outDir+'/reports/report_$(Cluster)_$(Process).stderr\n')
+        batch_tmp.write('Log                   = '+self._outDir+'/reports/report_$(Cluster)_$(Process).log   \n')
         batch_tmp.write('Queue\n')
             
         batch_tmp.seek(0)
@@ -91,26 +91,12 @@ class BatchMaster():
 
     def CreateWorkingDir(self, codedir):
         '''Creating local working directory which will be used for copying all the files'''
-        self.MakeDirectory(self._outDir, clear=False)
-        code_copy_dir = self._outDir+'/'+codedir
+        code_copy_dir = self._current+'/'+codedir
         self.MakeDirectory(code_copy_dir, clear=True)
 
         for d in ["src", "plugins", "data", "higgs"]:
             self.MakeDirectory(code_copy_dir+'/'+d, clear=True)
-            if   d == "data":
-                os.system("cp -r "+self._outDir+"/../../"+d+"/* "+code_copy_dir+"/"+d)
-            elif d =="plugins":
-                self.MakeDirectory(code_copy_dir+'/'+d+'/lib', clear=False)
-                os.system("cp "+self._outDir+"/../../"+d+"/lib/*.so "+code_copy_dir+"/"+d+"/lib")
-                os.system("cp "+self._outDir+"/../../"+d+"/*.cc "+code_copy_dir+"/"+d)
-                os.system("cp "+self._outDir+"/../../"+d+"/*.h "+code_copy_dir+"/"+d)
-            elif d == "src":
-                os.system("cp "+self._outDir+"/../../"+d+"/*.cc "+code_copy_dir+"/"+d)
-                os.system("cp "+self._outDir+"/../../"+d+"/*.h "+code_copy_dir+"/"+d)
-            else:
-                os.system("cp "+self._outDir+"/../../"+d+"/*.C "+code_copy_dir+"/"+d)
-                os.system("cp "+self._outDir+"/../../"+d+"/*.h "+code_copy_dir+"/"+d)
-                os.system("cp "+self._outDir+"/../../"+d+"/*.py "+code_copy_dir+"/"+d)
+            os.system("cp -r "+self._current+"/../../"+d+"/* "+code_copy_dir+"/"+d)
 
         
     def SubmitToLPC(self):

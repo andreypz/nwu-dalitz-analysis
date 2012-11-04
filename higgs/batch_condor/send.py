@@ -31,7 +31,8 @@ test = []
 test.extend([
 #b.JobConfig('vbfZ', dCache+'/naodell/March18/MC/VBFZ', 10, 'vbfZ 0 '+selection+' '+period, selection),
 #b.JobConfig('ggHZZ125', dCache+'/andreypz/nuTuples_v2_7TeV/ggH125', 10, 'ggHZZ125 0 '+selection+' '+period, selection),
-b.JobConfig('ZZJetsTo2L2Nu', dCache+'/naodell/nuTuples_v2_7TeV/ZZJetsTo2L2Nu', 1, 'ZZ 0 '+selection+' '+period, selection),
+#b.JobConfig('ZZJetsTo2L2Nu', dCache+'/naodell/nuTuples_v2_7TeV/ZZJetsTo2L2Nu', 1, 'ZZ 0 '+selection+' '+period, selection),
+b.JobConfig('DoubleEle_Run2011B', dCache+'/devildog/nuTuples_v2_7TeV/DoubleElectron_Run2011B', 30, 'DATA 0 electron 2011B', selection),
 
 ])
 
@@ -40,8 +41,8 @@ b.JobConfig('ZZJetsTo2L2Nu', dCache+'/naodell/nuTuples_v2_7TeV/ZZJetsTo2L2Nu', 1
 if selection == 'muon':
     data = []
     data.extend([
-        b.JobConfig('DoubleMu_Run2011A', dCache+'/andreypz/nuTuples_v2_7TeV/DoubleMu_HZZ_Run2011A', 25, 'DATA 4,5,8 muon 2011A', selection),
-        b.JobConfig('DoubleMu_Run2011B', dCache+'/andreypz/nuTuples_v2_7TeV/DoubleMu_HZZ_Run2011B_try2', 30, 'DATA 4,5,8 muon 2011B', selection),
+        b.JobConfig('DoubleMu_Run2011A', dCache+'/andreypz/nuTuples_v2_7TeV/DoubleMu_HZZ_Run2011A', 25, 'DATA 0 muon 2011A', selection),
+        b.JobConfig('DoubleMu_Run2011B', dCache+'/andreypz/nuTuples_v2_7TeV/DoubleMu_HZZ_Run2011B_try2', 30, 'DATA 0 muon 2011B', selection),
         ])
 
                             
@@ -71,9 +72,9 @@ if selection == 'muEG':
 bg = []
 bg.extend([
 b.JobConfig('DYjets',        dCache+'/andreypz/nuTuples_v2_7TeV/DYjets',      30, 'DYjets 0 '+selection+' '+period, selection),
-b.JobConfig('ZZJetsTo2L2Nu', dCache+'/naodell/nuTuples_v2_7TeV/ZZJetsTo2L2Nu', 1, 'ZZ 0 '+selection+' '+period, selection),
-b.JobConfig('WZJetsTo3LNu',  dCache+'/naodell/nuTuples_v2_7TeV/WZJetsTo3LNu',  1, 'WZ 0 '+selection+' '+period, selection),
-b.JobConfig('WWJetsTo2L2Nu', dCache+'/naodell/nuTuples_v2_7TeV/WWJetsTo2L2Nu', 1, 'WW 0 '+selection+' '+period, selection),
+b.JobConfig('ZZJetsTo2L2Nu', dCache+'/naodell/nuTuples_v2_7TeV/ZZJetsTo2L2Nu', 1, 'ZZJetsTo2L2Nu 0 '+selection+' '+period, selection),
+b.JobConfig('WZJetsTo3LNu',  dCache+'/naodell/nuTuples_v2_7TeV/WZJetsTo3LNu',  1, 'WZJetsTo3LNu 0 '+selection+' '+period, selection),
+b.JobConfig('WWJetsTo2L2Nu', dCache+'/naodell/nuTuples_v2_7TeV/WWJetsTo2L2Nu', 1, 'WWJetsTo2L2Nu 0 '+selection+' '+period, selection),
 b.JobConfig('ttbar',         dCache+'/andreypz/nuTuples_v2_7TeV/TTJets',      10, 'ttbar 0 '+selection+' '+period, selection),
 b.JobConfig('tW',            dCache+'/andreypz/nuTuples_v2_7TeV/tW',           1, 'tW 0 '+selection+' '+period, selection),
 b.JobConfig('tbarW',         dCache+'/andreypz/nuTuples_v2_7TeV/tbarW',        1, 'tbarW 0 '+selection+' '+period, selection),

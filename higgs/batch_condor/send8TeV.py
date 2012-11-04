@@ -10,17 +10,17 @@ print "Running", sys.argv[0], nargs
 ''' Specify parameters '''
 dCache      = '/pnfs/cms/WAX/11/store/user' 
 EOS = '/eos/uscms/store/user'
-outputPath  = '/uscms_data/d2/andreypz/cmssw/higgs2/CMSSW_4_4_4/src/NWU/Higgs/higgs/batch_condor/8TeV'
+outputPath  = '/uscms_data/d2/andreypz/batch_output/8TeV/'
 
 selection = 'muon'
 if nargs>1 and sys.argv[1]=="ele":
     selection="electron"
     
 period    = '2012'
-doTest    = 0
-doData    = 1
-doBG      = 1
-doSignal  = 1
+doTest    = 1
+doData    = 0
+doBG      = 0
+doSignal  = 0
 
 ''' 
     Set job configurations.  The order of arguments is:
@@ -29,10 +29,9 @@ doSignal  = 1
 
 test = []
 test.extend([
-#b.JobConfig('vbfZ', dCache+'/naodell/March18/MC/VBFZ', 10, 'vbfZ 0 '+selection+' '+period, selection),
-#b.JobConfig('ggHZZ125', dCache+'/andreypz/nuTuples_v2_8TeV/ggH125', 10, 'ggHZZ125 0 '+selection+' '+period, selection),#b.JobConfig('WZ', dCache+'/naodell/nuTuples_v5_8TeV/WZJetsTo3LNu', 10, 'WZ 0 '+selection+' '+period, selection),
 #b.JobConfig('ZZ', dCache+'/andreypz/nuTuples_v5_8TeV/ZZJetsTo2L2Nu', 10, 'ZZ 0 '+selection+' '+period, selection),
-b.JobConfig('ttbar', dCache+'/andreypz/nuTuples_v5_8TeV/TTJets', 10, 'ttbar 0 '+selection+' '+period, selection),
+b.JobConfig('DoubleMu_Run2012A', dCache+'/devildog/nuTuples_v1_8TeV/DoubleMu_HZZ_Run2012A', 1, 'DATA 0 muon 2012', selection),
+#b.JobConfig('DoubleMu_Run2012B', dCache+'/devildog/nuTuples_v1_8TeV/DoubleMu_HZZ_Run2012B', 10, 'DATA 0 muon 2012', selection),
 ])
 
 

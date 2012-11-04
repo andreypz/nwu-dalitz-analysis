@@ -96,7 +96,7 @@ class higgsAnalyzer : public TSelector {
   //Variables to Fill into histos. Have to be global
   
   Float_t qT, diEta, diPhi, diAngle, deltaPhiLep, Mll, Mll_EB, Mll_EE, Mll_EX;  
-  Float_t MET, pfMET, pfMET1, puCorrMET, projMET, ZprojMET, redMET1, redMET2, compMET;
+  Float_t MET, MET_sumEt,pfMET, pfMET1, puCorrMET, projMET, ZprojMET, redMET1, redMET2, compMET;
   Float_t pfMET_lg, pfMET_recoil;
   Float_t dPhiMetDiLep, metProjOnQt, metPerpQt, metOverQt;
 
@@ -221,9 +221,15 @@ public :
    virtual float   CalculateTransMassAlt(TLorentzVector p1, TLorentzVector p2);
    virtual float   DeltaPhiJetMET(TLorentzVector , std::vector<TLorentzVector> ); 
 
+   virtual float CalculateMuonIso(TCMuon *lep);
+   virtual float CalculateElectronIso(TCElectron *lep);
+
    virtual bool PassMuonIdAndIso(TCMuon *l, muIdAndIsoCuts c, TVector3 *pv);
    virtual bool PassElectronIdAndIso(TCElectron *l, elIdAndIsoCuts c, TVector3 *pv);
   
+   virtual void MakeMuonPlots(TCMuon *mu, TVector3 *pv);
+   virtual void MakeElectronPlots(TCElectron *ele, TVector3 *pv);
+
    virtual float EffAreaMuon(TCMuon *lep, TString, Bool_t, Int_t);
    virtual float EffAreaElectron(TCElectron *lep, TString, Bool_t, Int_t);
    void DumpMuonInfo(TCMuon *lep, TVector3 *v, Float_t, Float_t, Float_t);

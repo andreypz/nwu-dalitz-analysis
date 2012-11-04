@@ -5,11 +5,16 @@
 #ifndef _TriggerSelector_H
 #define _TriggerSelector_H
 
+// c++ libraries
 #include <string>
 #include <iostream>
 #include <vector>
+#include <map>
+#include <algorithm>
 #include <stdio.h>
 #include <stdlib.h>
+
+// ROOT libraries
 #include "TROOT.h"
 #include "TObject.h"
 #include "TH1D.h"
@@ -18,29 +23,41 @@
 
 using namespace std;
 
+typedef vector<string> vstring;
+
 class TriggerSelector: public TObject {
     public:
         TriggerSelector();
         virtual ~TriggerSelector();
-        TriggerSelector(string selection, string dataPeriod, vector<int> triggers);
-        bool SelectTriggers(unsigned int triggerStatus, UInt_t hltPrescale[]);
-        bool PhotonTriggerBins(float photonPt, bool isoTriggers) const;
-        int GetEventPrescale() const;
-        int GetPassTrigger() const;
+        TriggerSelector(string, string, vstring);
+
+        bool    SelectTrigger(string,unsigned, UInt_t*);
+        bool    CheckOverlap();
+        bool    CheckPrescales(unsigned, UInt_t*);
+
+        int     GetEventPrescale() const;
+
+        void    SetPassNames(unsigned);
+        void    SetDataBit(bool);
+        void    SetSelectedBits();
+        void    TriggerDefaults();
+        void    AddTriggers(vstring);
 
         ClassDef(TriggerSelector, 0);
 
     private:
-        //input parameters
-        string _dataPeriod;
-        string _selection;
-        vector<int> _triggers;
+        // input parameters
+        vstring         _triggerNames;
+        vstring         _triggers;
+        string          _dataPeriod;
+        string          _type;
+        bool            _isRealData;
 
-        //trigger info
-        bool   _eventPass;
-        int    _eventPrescale;
-        int    _passTrigger;
-        vector<int> _passTriggers;
+        // trigger info
+        vstring         _passNames;
+        bool            _eventPass;
+        int             _eventPrescale;
+        int             _passTriggers;
 };
 
 #endif

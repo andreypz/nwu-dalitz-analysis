@@ -12,7 +12,17 @@ nargs = len(sys.argv)
 print sys.argv[0], "nargs:", nargs
 
 sel = 1
-doMerge = False
+doMerge = 0
+
+plotSpecial = 1
+plotMVA = 0
+plotMet = 1
+plotJet = 1
+plotLepton = 1
+plotDiLepton = 1
+plotMisc = 1
+plotMuons= 1
+plotElectrons= 1
 
 if (nargs<2):
     print "you have to specify the path where to look for the files!\nLike v62, or something"
@@ -23,8 +33,8 @@ if (nargs==4):
     doMerge = bool(int(sys.argv[3]))
 
 fullPath = sys.argv[1]
-hPath = fullPath[0:3]
-
+#hPath = fullPath[0:3]
+hPath = '/uscms_data/d2/andreypz/hzz2l2nu_hists/'+fullPath[0:3]
 print fullPath, hPath, sel, doMerge
 
 def createDir(dir):
@@ -41,7 +51,24 @@ dirnameOut = baseDir+fullPath
 selection  = ['muon', 'electron']
 #plot_types = ['diLepton', 'Jet', 'Met', 'Misc', "mvaPresel"]
 #plot_types = ['diLepton', 'Lepton', 'Jet', 'Met', 'Misc', "mvaPresel"]
-plot_types = ['diLepton', 'Lepton', 'Jet', 'Met', "Special"]
+plot_types = []
+
+if plotDiLepton:
+    plot_types.append('diLepton')
+if plotLepton:
+    plot_types.append('Lepton')
+if plotJet:
+    plot_types.append('Jet')
+if plotMet:
+    plot_types.append('Met')
+if plotSpecial:
+    plot_types.append('Special')
+if plotMuons:
+    plot_types.append('Muons')
+if plotElectrons:
+    plot_types.append('Electrons')
+if plotMisc:
+    plot_types.append('Misc')
 
 thissel = selection[sel-1]
 
@@ -56,14 +83,14 @@ gROOT.SetBatch()
 print "Merging?", doMerge
 if doMerge:
     os.system("rm "+hPath+"/m_*_"+thissel+".root") #removing the old merged files
-    os.system("hadd ./"+hPath+"/m_Data_"+thissel+".root  ./"+hPath+"/"+thissel+"/hhhh_Double*.root")
-    os.system("hadd ./"+hPath+"/m_ttbar_"+thissel+".root ./"+hPath+"/"+thissel+"/hhhh_ttbar_*.root")
-    os.system("hadd ./"+hPath+"/m_DYjets_"+thissel+".root ./"+hPath+"/"+thissel+"/hhhh_DYjets_*.root")
-    os.system("hadd ./"+hPath+"/m_vbfZ_"+thissel+".root ./"+hPath+"/"+thissel+"/hhhh_vbfZ_*.root")
+    os.system("hadd "+hPath+"/m_Data_"+thissel+".root   "+hPath+"/"+thissel+"/hhhh_Double*.root")
+    os.system("hadd "+hPath+"/m_ttbar_"+thissel+".root  "+hPath+"/"+thissel+"/hhhh_ttbar_*.root")
+    os.system("hadd "+hPath+"/m_DYjets_"+thissel+".root "+hPath+"/"+thissel+"/hhhh_DYjets_*.root")
+    os.system("hadd "+hPath+"/m_vbfZ_"+thissel+".root   "+hPath+"/"+thissel+"/hhhh_vbfZ_*.root")
                 
 
 
-mp.makePlots(sel, baseDir, fullPath)
+mp.makePlots(sel, baseDir, fullPath, plotMuons, plotElectrons, plotSpecial, plotMVA, plotMet, plotJet, plotLepton, plotDiLepton, plotMisc)
 
 print "\n\nDone!"
 print "CPU Time : ", timer.CpuTime()
@@ -81,15 +108,8 @@ for x in plot_types:
     for s in selection:
         fileList[s] = os.listdir(dirnameOut+'/'+s+'/'+x)
     #print x,fileList
-    nmu  = len(fileList["muon"])
-    nele = len(fileList["electron"])
-    if (nmu!=0 and fileList["muon"]==fileList["electron"]):
-        for pl in  sorted(fileList["muon"]):
-            imgfile.write('<nobr><img src=muon/'+x+'/'+pl+' width=47%>')
-            imgfile.write('    <img src=electron/'+x+'/'+pl+' width=47%></nobr>\n') 
-    elif(nmu!=0 and  nele!=0 and fileList["muon"]!=fileList["electron"]):
-        print "Something is wrong: muons and electrons are not symmetric!"
-    elif(nmu!=0 and nele==0):
+
+    if x =="Muons":
         count =1
         mod =1
         for pl in  sorted(fileList["muon"]):
@@ -99,8 +119,37 @@ for x in plot_types:
             count+=1
         if mod==0: imgfile.write("")
         if mod==1: imgfile.write("</nobr>")
-    elif(nmu==0):
-        print "No plots in", x
+    elif x =="Electrons":
+        count =1
+        mod =1
+        for pl in  sorted(fileList["electron"]):
+            mod = count % 2
+            if mod==1: imgfile.write('<nobr><img src=electron/'+x+'/'+pl+' width=47%>')
+            if mod==0: imgfile.write('      <img src=electron/'+x+'/'+pl+' width=47%></nobr>\n')
+            count+=1
+        if mod==0: imgfile.write("")
+        if mod==1: imgfile.write("</nobr>")
+    else:
+        nmu  = len(fileList["muon"])
+        nele = len(fileList["electron"])
+        if (nmu!=0 and fileList["muon"]==fileList["electron"]):
+            for pl in  sorted(fileList["muon"]):
+                imgfile.write('<nobr><img src=muon/'+x+'/'+pl+' width=47%>')
+                imgfile.write('    <img src=electron/'+x+'/'+pl+' width=47%></nobr>\n') 
+        elif(nmu!=0 and  nele!=0 and fileList["muon"]!=fileList["electron"]):
+            print "Something is wrong: muons and electrons are not symmetric!"
+        elif(nmu!=0 and nele==0):
+            count =1
+            mod =1
+            for pl in  sorted(fileList["muon"]):
+                mod = count % 2
+                if mod==1: imgfile.write('<nobr><img src=muon/'+x+'/'+pl+' width=47%>')
+                if mod==0: imgfile.write('      <img src=muon/'+x+'/'+pl+' width=47%></nobr>\n')
+                count+=1
+            if mod==0: imgfile.write("")
+            if mod==1: imgfile.write("</nobr>")
+        elif(nmu==0):
+            print "No plots in", x
         
 
     imgfile.write("</body></html>")

@@ -231,7 +231,8 @@ def calcYields(bg_list, sig1_list, sig2_list, sig3_list, data, sel, mode="scaled
             h = bg_list[b].Get("Histos/evt_byCut").Clone()
             sample = h.GetTitle()
             if mode=="scaled" and l!=0:
-                handleOverflowBinsScaleAndColors(h, sample, lumi)
+                handleOverflowBinsScaleAndColors(h, b, lumi)
+                #handleOverflowBinsScaleAndColors(h, sample, lumi)
             y = h.GetBinContent(l+1)
             err = Double(0)
 
@@ -327,9 +328,9 @@ def printYields(bg_list, sig1_list, sig2_list, sig3_list, data, sel, filename, a
 
     for b in bgOrder:
         if b not in Yields_bg[0].keys(): continue
-        v = Yields_bg[0][b]
+        #v = Yields_bg[0][b]
         myTable += beginCellH
-        myTable += b
+        myTable += b[0:5]
         myTable += endCellH
             
     myTable += beginCellH
@@ -451,6 +452,8 @@ def printYields(bg_list, sig1_list, sig2_list, sig3_list, data, sel, filename, a
     hf.close()
     
 def handleOverflowBinsScaleAndColors(hist, sample, lumi):
+    if hist == None:
+        return 
     xc = myParams.xsec_and_colors()
 
     nBins   = hist.GetNbinsX()
@@ -472,7 +475,7 @@ def handleOverflowBinsScaleAndColors(hist, sample, lumi):
     if sample!="Data":
         if lumi!=0:  #don't rescale, for the cases we don't want it 
             #if sample=="ttbar":
-            #    print "rescaling sample", sample, "xsection =", myParams.getCS(sample), " total events: ", myParams.getNev(sample) 
+            #print "rescaling sample", sample, "xsection =", myParams.getCS(sample), " total events: ", myParams.getNev(sample) 
             #    print "lumi=", lumi
                 
             hist.Scale(float(lumi*myParams.getCS(sample))/myParams.getNev(sample))
@@ -498,13 +501,19 @@ def makeStack(bgList, histoname, lumi):
     leg01.SetTextSize(0.04)
         
     for b in bgOrder:
+        dirname = "Histos/"
+        if histoname[0:2] == "mu":
+            dirname = "Muons/"
+        if histoname[0:2] == "el":
+            dirname = "Electrons/"
         if b == "Top":
+           
             #print "Stacking top. It needs a special treatment: add all components"
             if "tW" in bgList.keys() and "tbarW" in bgList.keys():
-                htw    = bgList["tW"].Get("Histos/"+histoname).Clone()
+                htw    = bgList["tW"].Get(dirname+histoname).Clone()
                 handleOverflowBinsScaleAndColors(htw, "tW", lumi)
                 
-                htbarw = bgList["tbarW"].Get("Histos/"+histoname).Clone()
+                htbarw = bgList["tbarW"].Get(dirname+histoname).Clone()
                 handleOverflowBinsScaleAndColors(htbarw,"tbarW",lumi)    
                 htw.Add(htbarw)
                 hs.Add(htw)
@@ -520,20 +529,27 @@ def makeStack(bgList, histoname, lumi):
             sample = evtHisto.GetTitle()
             #print "Double check the sample:",sample
         
-            hh1 = bgList[b].Get("Histos/"+histoname).Clone()
-            handleOverflowBinsScaleAndColors(hh1,sample,lumi)
+            hh1 = bgList[b].Get(dirname+histoname).Clone()
+            handleOverflowBinsScaleAndColors(hh1,b,lumi)
+            #handleOverflowBinsScaleAndColors(hh1,sample,lumi)
             hs.Add(hh1)
 
-            leg01.AddEntry(hh1,b,"f")
+            leg01.AddEntry(hh1,b[0:2],"f")
 
     return [hs, leg01]
 
-def drawMultiPlot(fname,maintitle, xtitle, h_name, isLog, y1min, y1max, y2min, y2max, ovList, bgList, sel):
+def drawMultiPlot(fname,maintitle, xtitle, h_name, isLog, y1min, y1max, y2min, y2max, ovList, bgList, sel, doRatio):
 
     lumi = myParams.getLumi(sel)
     bgOrder = myParams.analysisParams("HZZ")[3]
     
-    name = "Histos/"+h_name
+    dirname = "Histos/"
+    if h_name[0:2] == "mu":
+        dirname = "Muons/"
+    if h_name[0:2] == "el":
+        dirname = "Electrons/"
+        
+    name = dirname+h_name
     print "   * Plotting:", h_name
     print "   * Making a stack histo."
     
@@ -559,10 +575,12 @@ def drawMultiPlot(fname,maintitle, xtitle, h_name, isLog, y1min, y1max, y2min, y
     for o in ovList:
         #print o
         ff.append(ovList[o])
-        hh.append(ff[n].Get(name).Clone())
-        #print n, "file:", ff[n].GetName(), "   histoname: ", hh[n].GetName()
-            
-        sample = ff[n].Get("Histos/evt_byCut").GetTitle()
+        if ff[n].Get(name) !=None:
+            hh.append(ff[n].Get(name).Clone())
+            #print n, "file:", ff[n].GetName(), "   histoname: ", hh[n].GetName()
+        else:
+            hh.append(None)            
+        sample = o#ff[n].Get("Histos/evt_byCut").GetTitle()
         #print "Double check the sample:",sample
             
         if sample=="DATA":
@@ -572,13 +590,12 @@ def drawMultiPlot(fname,maintitle, xtitle, h_name, isLog, y1min, y1max, y2min, y
             h_data.SetMarkerSize(0.7)
 
         else:
-            handleOverflowBinsScaleAndColors(hh[n], sample, lumi)
-            sig.append(hh[n])
+            if hh[n]!=None:
+                handleOverflowBinsScaleAndColors(hh[n], sample, lumi)
+                sig.append(hh[n])
         n+=1
         
-    #doRatio = False
-    doRatio = True
-    if not isLog or h_data==None:
+    if h_data==None:
         doRatio = False
 
     cc =None
@@ -667,9 +684,9 @@ def drawMultiPlot(fname,maintitle, xtitle, h_name, isLog, y1min, y1max, y2min, y
     for i,s in enumerate(sig):
         #print i,s
         if i==0:
-            leg01.AddEntry(sig[0],"5x ggH 200","l")
+            leg01.AddEntry(sig[1],"5x ggH 200","l")
         elif i==1:
-            leg01.AddEntry(sig[1],"5x vbfH 200","l")
+            leg01.AddEntry(sig[0],"5x vbfH 200","l")
 
     leg01.SetFillColor(kWhite)
     leg01.Draw()

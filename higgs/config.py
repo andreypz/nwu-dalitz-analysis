@@ -7,8 +7,10 @@ class Params():
 
         if self._s=="7TeV":
             self._lumi_ele = 2312 + 2739
+            self._lumi_ele = 2312 +  (277./312)*2739
             self._lumi_mu  = 2312 + 2739
-            self._lumi_mu  = 2312 + (21./30)*2739
+            self._lumi_mu  = 2312 +  (137./144)*2739
+            #self._lumi_mu  = 2312 +  (21./30)*2739
         else:
             self._lumi_ele = 10200
             self._lumi_mu  = 10200
@@ -52,7 +54,8 @@ class Params():
     
         ]
         self._nominalHZZ = [0,1,2,3,4,5,6,7,8]
-        self._bgOrderHZZ = ["Top","ttbar","WW","WZ","ZZ","DYjets"]        
+        #self._bgOrderHZZ = ["Top","ttbar","WW","WZ","ZZ","DYjets"]        
+        self._bgOrderHZZ = ["Top","ttbar","WWJetsTo2L2Nu","WZJetsTo3LNu","ZZJetsTo2L2Nu","DYjets"]        
         self._extraHZZ = [18,19,20, 10,29,30,31,32, 21,22,23,24]
         #self._extraHZZ = [18,19,20, 9,25,26,27,28, 10,29,30,31,32, 21,22,23,24]
         
@@ -75,17 +78,17 @@ class Params():
             "DATA": [-1,-1,-1,-1,-1],
             # schenme: lineColor, fill style, fill color, cs@7, cs@8, Nevts
             #"ZZ":   [kBlue,     3004, kMagenta, 6.46, ,0],  #pythia
-            "ZZ":   [kBlue,     3244, kMagenta, 0.1787, 0.32,  0],  #madgraph
-            "WZ":   [kYellow-1, 1001, kBlue-1,   0.856, 0.75,  0], #or 0.879?
-            "WW":   [kOrange+1, 1001, kGreen+2,  4.783, 6.01,  0],
+            "ZZJetsTo2L2Nu":   [kBlue,    3244, kMagenta, 0.1787, 0.32,  0],  #madgraph
+            "WZJetsTo3LNu":   [kYellow-1, 1001, kBlue-1,   0.856, 0.75,  0], #or 0.879?
+            "WWJetsTo2L2Nu":   [kOrange+1,1001, kGreen+2,  4.783, 6.01,  0],
 
             "DYjets":[kRed,     3004, kRed+1,   3048.0,   3503.71, 0],
             "Wjets": [kGreen-2, 3004, kCyan+1,  31314.0, 12085.73, 0],
             
             #"ttbar":[kOrange+1,3004, kGreen+2, 16.71, 000, 0], 
             "ttbar": [kOrange+1,1001, kSpring-9, 165, 227.197,  0], #madgraph
-            "tW":    [kOrange+9,1001, kOrange+6, 7.87, 11.1773, 0],
-            "tbarW": [kRed,     1001, kWhite,    7.87, 11.1773, 0],
+            "tW":    [kOrange+9,1001, kOrange+6, 7.87, 11.18, 0],
+            "tbarW": [kRed,     1001, kWhite,    7.87, 11.18, 0],
 
             "vbfZ": [kBlue+3,  3004, -1,   0.248/2, 0.248/2,0],
 
