@@ -8,21 +8,19 @@ cmsenv
 
 #############################
 
-set srcDir    = $1
-set outDir    = $2
-set count     = $3
-set dataName  = $4  #e.g. Photon_Aug05, Run2011B , May10
+set outDir    = $1
+set count     = $2
+set dataName  = $3  #e.g. Photon_Aug05, Run2011B , May10
 
 ### Specify addtional arguments here ####
-set suffix    = $5  #e.g. DATA. WZ, ZZ etc
-set trigger   = $6
-set selection = $7
-set period    = $8
+set suffix    = $4  #e.g. DATA. WZ, ZZ etc
+set selection = $5
+set period    = $6
 
 
-set dir = ${srcDir}/code_dir
+set dir = ${outDir}/code_dir
 
-echo "Copy all files needed from a working directory"
+echo "Copy all files needed from a working directory" $dir
 cd ../
 cp -r $dir/* .
 
@@ -34,7 +32,7 @@ mv ../src/input.txt .
 #ls
 
 chmod 755 run.py
-./run.py ${suffix} ${selection} ${dataName} ${trigger} ${period} b
+./run.py ${suffix} ${selection} ${dataName} ${period} b
 
-cp hhhh_${dataName}.root $outDir/hhhh_${dataName}_${count}.root
-cp  events_printout_* $outDir/printouts/
+cp hhhh_${dataName}.root $outDir/$selection/hhhh_${dataName}_${count}.root
+#cp  events_printout_* $outDir/$selection/printouts/

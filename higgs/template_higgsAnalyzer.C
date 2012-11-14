@@ -1,4 +1,4 @@
-// $Id: template_higgsAnalyzer.C,v 1.62 2012/10/31 21:10:31 andrey Exp $
+// $Id: template_higgsAnalyzer.C,v 1.63 2012/11/04 22:32:54 andrey Exp $
 
 #define higgsAnalyzer_cxx
 #include "higgsAnalyzer.h"
@@ -8,7 +8,7 @@
 using namespace std;
 
 // This needs to be un-commented in order to run MVA cuts
-//#define USE_MVA  
+#define USE_MVA  
 
 /////////////////////////////
 //Specify parameters here. //
@@ -17,10 +17,7 @@ using namespace std;
 const string  selection      = "SELECTION";
 const string  period         = "PERIOD";
 const int     JC_LVL         = 0;  //No JEC for Pat jets (they are already applied)
-const int     trigger[]      = {TRIGGER};
 const TString suffix("SUFFIX");
-
-vector<int> triggers (trigger, trigger + sizeof(trigger)/sizeof(int));
 
 Bool_t makeMvaTree = 0;
 const UInt_t verboseLvl  = 0;
@@ -151,6 +148,7 @@ void higgsAnalyzer::Begin(TTree * tree)
 
   histoFile->mkdir("gen_b", "gen_b");
   histoFile->mkdir("Histos", "Histos");
+  histoFile->mkdir("DataInfo", "DataInfo");
   histoFile->mkdir("Muons", "Muons");
   histoFile->mkdir("Electrons", "Electrons");
   histoFile->mkdir("mvaTree", "mvaTree");
@@ -170,10 +168,10 @@ void higgsAnalyzer::Begin(TTree * tree)
     }
 
   if (verboseLvl>0){
-    ffout.open("./events_printout_SUFFIX_final.txt",ofstream::out);
-    ncout.open("./counts_for_tex_SUFFIX.txt",ofstream::out);
+    //ffout.open("./events_printout_SUFFIX_final.txt",ofstream::out);
+    //ncout.open("./counts_for_tex_SUFFIX.txt",ofstream::out);
       
-    ffout.precision(4); ffout.setf(ios::fixed, ios::floatfield);
+    //ffout.precision(4); ffout.setf(ios::fixed, ios::floatfield);
     for(Int_t i=0; i<nC; i++)
       {
         if (i!=2 && i!=29) continue;
@@ -312,7 +310,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
   //cout<<"event #  "<<eventNumber<<"  **N events** at cut 0: "<<nEvents[0]<<endl;
   if (nEvents[0] == 1) weighter->SetDataBit(isRealData);
   
-  //return kTRUE;
+  //if(!isRealData)  return kTRUE;
   
   //if(nEvents[0]>100) Abort("\t\t  ** 200 EVENTS PASSED, FINISH   ** ");
   
@@ -338,12 +336,34 @@ bool higgsAnalyzer::Process(Long64_t entry)
   //Trigger status//
   //////////////////
   Bool_t triggerPass  = 1;
+  if (isRealData) 
+    {
+      UInt_t prescale = 99;
+      if (selection=="muon")
+        {
+          if(runNumber>1 && runNumber <196046)
+            prescale = triggerSelector->SelectTrigger("HLT_Mu17_TkMu8_v", triggerStatus, hltPrescale);  
+          else if(runNumber>=196046 && runNumber <9999999)
+            prescale = triggerSelector->SelectTrigger("HLT_Mu22_TkMu8_v", triggerStatus, hltPrescale);  
+        }
+      if (selection=="electron")
+        {
+          if(runNumber>1 && runNumber <999999)
+            prescale = triggerSelector->SelectTrigger("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v", triggerStatus, hltPrescale);  
+          //prescale = triggerSelector->SelectTrigger("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v", triggerStatus, hltPrescale);  
+        }
 
-  if (isRealData && selection=="muon")
-    if(runNumber>1 && runNumber <9999999)
-      triggerSelector->SelectTrigger("HLT_Mu17_TkMu8_v", triggerStatus, hltPrescale);  
-      
+      if(prescale != 1)
+        {
+          triggerPass = kFALSE;
+          if (prescale!=90)
+            cout<<"Run #  "<<runNumber<<"  **N events** at this cut: "<<nEvents[1]<<"  prescale "<<prescale<<endl;
+        }
 
+      if (prescale!=90)
+        hists->fillProfile(runNumber, prescale, "run_prescale", "run_prescale", 40000, 200000., 240000, 0,100, 1, "DataInfo");
+    
+    }
   if (!triggerPass) return kTRUE;
   // Double electron workaround.  Gets rid of hopelessly prescaled events of July 20-26, 2011
   //if (selection == "electron" && (runNumber > 171200 && runNumber < 171600)) return kTRUE;
@@ -493,37 +513,37 @@ bool higgsAnalyzer::Process(Long64_t entry)
   /////////////
   nGamma = 0;
   vector<TCPhysObject> photons; 
-  if (selection == "eGamma" || selection == "muGamma" || selection == "gamma") {
-    for (Int_t i = 0; i < recoPhotons->GetSize(); ++i)
-      {
-        TCPhoton* thisPhoton = (TCPhoton*) recoPhotons->At(i);
-        //cout<<i+1<<" dbg  pt: "<<thisPhoton->Pt()<<"  eta: "<< thisPhoton->Eta()<<endl;
-        if (thisPhoton->Pt() < photonPtCut[0] || thisPhoton->Pt() > photonPtCut[1]) continue;	  
-        if ( 
-            thisPhoton->Pt() >10.0
-            //&& thisPhoton->EmIso()         < (4.2 + 0.006 *thisPhoton->Pt())
-            //&& thisPhoton->HadIso()        < (2.2 + 0.0025*thisPhoton->Pt())
-            //&& thisPhoton->TrkIso()        < (2.0 + 0.001 *thisPhoton->Pt())
-            && thisPhoton->HadOverEm()     < 0.05 
-            && thisPhoton->SigmaIEtaIEta() > 0.001
-            && thisPhoton->SigmaIEtaIEta() < 0.013
-            && thisPhoton->TrackVeto() == 0
-            && fabs(thisPhoton->Eta()) < 1.442
-             )  
-          {
-            photons.push_back(*thisPhoton);
-
-            //for gamma multiplicity plot:
-            if(thisPhoton->Pt() > 25) nGamma++;	
-          }
-
-      }
-	sort(photons.begin(), photons.end(), P4SortCondition);
-	  
+  for (Int_t i = 0; i < recoPhotons->GetSize(); ++i)
+    {
+      TCPhoton* thisPhoton = (TCPhoton*) recoPhotons->At(i);
+      //cout<<i+1<<" dbg  pt: "<<thisPhoton->Pt()<<"  eta: "<< thisPhoton->Eta()<<endl;
+      if (thisPhoton->Pt() < photonPtCut[0] || thisPhoton->Pt() > photonPtCut[1]) continue;	  
+      if ( 
+          thisPhoton->Pt() >10.0
+          //&& thisPhoton->EmIso()         < (4.2 + 0.006 *thisPhoton->Pt())
+          //&& thisPhoton->HadIso()        < (2.2 + 0.0025*thisPhoton->Pt())
+          //&& thisPhoton->TrkIso()        < (2.0 + 0.001 *thisPhoton->Pt())
+          && thisPhoton->HadOverEm()     < 0.05 
+          && thisPhoton->SigmaIEtaIEta() > 0.001
+          && thisPhoton->SigmaIEtaIEta() < 0.013
+          && thisPhoton->TrackVeto() == 0
+          && fabs(thisPhoton->Eta()) < 1.442
+           )  
+        {
+          photons.push_back(*thisPhoton);
+          
+          //for gamma multiplicity plot:
+          if(thisPhoton->Pt() > 25) nGamma++;	
+        }
+      
+    }
+  sort(photons.begin(), photons.end(), P4SortCondition);
+  
+  //if (selection == "eGamma" || selection == "muGamma" || selection == "gamma") {
     //if (photons.size() > 0 && eventPrescale > 1) {
     //if (!triggerSelector->PhotonTriggerBins(photons[0].Pt(), true)) return kTRUE;
     //}
-  }
+  //}
 
 
   //////////
@@ -532,7 +552,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
 
   vector<TLorentzVector> jetP4, bJetP4, softJetP4, bSSVJetP4, testJetP4;
   TLorentzVector sumJetP4(0,0,0,0);
-  int jetCount = 0;
+
   float fwdJetSumPt = 0.;
   int fwdJetCount = 0;
 
@@ -571,24 +591,25 @@ bool higgsAnalyzer::Process(Long64_t entry)
 	    
           jetP4.push_back(*thisJet);
           sumJetP4 += TLorentzVector(*thisJet);
-          ++jetCount;
           ++nJetsEta24;
         }
         else if (thisJet->Pt() > jetPtCut[1]) softJetP4.push_back(*thisJet);
       }
     	
     } else if (fabs(thisJet->Eta()) < 4.9) {
-      if (thisJet->Pt() > jetPtCut[0]
-          && thisJet->NumConstit()    > 1
+      if (thisJet->NumConstit()    > 1
           && thisJet->NeuHadFrac() < 0.90
           && thisJet->NeuEmFrac()  < 0.90
           ) {
-        jetP4.push_back(*thisJet); 
-        sumJetP4 += TLorentzVector(*thisJet);
-        fwdJetSumPt += thisJet->Pt();
-        ++fwdJetCount;
-        ++jetCount;
-      } else if (thisJet->Pt() > jetPtCut[1]) softJetP4.push_back(*thisJet);
+        if (thisJet->Pt() > jetPtCut[0])
+          {
+            jetP4.push_back(*thisJet); 
+            sumJetP4 += TLorentzVector(*thisJet);
+            fwdJetSumPt += thisJet->Pt();
+            ++fwdJetCount;
+          }
+        else if (thisJet->Pt() > jetPtCut[1]) softJetP4.push_back(*thisJet);
+      }
     }
   }
     
@@ -629,15 +650,36 @@ bool higgsAnalyzer::Process(Long64_t entry)
   if (selection == "electron") {
 
     //Find out if electrons reconstracted while it's actually a muon!
-    for (UInt_t i = 0; i<electrons.size(); i++)
-      for (UInt_t j = 0; j<muons.size(); j++)
-        {
-          Float_t dR = electrons[i].DeltaR(muons[j]);
-          hists->fill1DHist(dR, "ele_dRmu","dR(ele, mu)", 50, 0,4, 1, "Electrons");
-          if (dR>0.1)
-            electrons.erase(electrons.begin()+i); //This is actually a muon faking an electron! Remove it
-        }
-	
+    //UInt_t initsize =     electrons.size();
+    //if(initsize>0)
+    //cout<<"DBG  electrons   size = "<<electrons.size()<<endl;
+    vector<TCPhysObject>::iterator it = electrons.begin();
+    for (; it!= electrons.end(); )
+      {
+        vector<TCPhysObject>::iterator jt = muons.begin();
+
+        Bool_t isErased = kFALSE;
+        for (; jt!= muons.end(); )
+          {
+            Float_t dR = (*it).DeltaR(*jt);
+            jt++;
+            hists->fill1DHist(dR, "ele_dRmu","dR(ele, mu)", 40, 0,4, 1, "Electrons");
+            //cout<<"DBG  erasing electrons?  dR = "<<dR<<endl;
+
+            if (dR<0.1)
+              {
+                //cout<<" yes"<<endl;
+                it = electrons.erase(it); //This is actually a muon faking an electron! Remove it.
+                isErased = kTRUE;
+                break;
+              }
+          }
+        if (!isErased)
+          ++it; //if it's not erased we need to increment the iterator, otherwise it's infinite loop... 
+      }
+
+    //if(initsize>electrons.size())
+    //cout<<"DBG  electrons   size = "<<electrons.size()<<"   init size = "<<initsize<<endl;
 
 
     /////////////////////
@@ -938,6 +980,8 @@ bool higgsAnalyzer::Process(Long64_t entry)
     etaLeadJet = jetP4[0].Eta();
     phiLeadJet = jetP4[0].Phi();
 
+    dRjetDiLept = jetP4[0].DeltaR(ZP4);
+
     if (jetP4.size()>1){
       ptTrailJet  = jetP4[1].Pt();
       etaTrailJet = jetP4[1].Eta();
@@ -954,6 +998,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
 
   ///-------------------/////
 
+  if(Mll<10) return kTRUE;
  
   CountEvents(2);
   nEventsWeighted[2] += eventWeight;
@@ -993,6 +1038,15 @@ bool higgsAnalyzer::Process(Long64_t entry)
       nEventsWeighted[4] += eventWeight;
       FillHistosBasic(4, eventWeight);
       FillHistosFull(4, eventWeight);
+      if(NoiseFilters_isScraping 
+         || NoiseFilters_isNoiseHcalHBHE
+         || NoiseFilters_isNoiseHcalLaser
+         || NoiseFilters_isNoiseEcalTP
+         || NoiseFilters_isNoiseEcalBE
+         ){
+        hists->fill1DHist(4, "evt_byCut_filters", "Filtered events", nC, 0,nC, 1, "Histos");
+        hists->fill1DHist(MET, "met_filters_4", "Met", 80, 0,400, eventWeight, "Histos");
+      }
     }
 
 
@@ -1189,30 +1243,34 @@ PrintOut(4,kTRUE);
   */
 
 
-  if (ZP4.Pt() < qtCut) return kTRUE;
-    
+  if (MET < 70) return kTRUE;    
   CountEvents(5);
   nEventsWeighted[5] += eventWeight;
   FillHistosFull(5, eventWeight);
   FillHistosBasic(5, eventWeight);
-   
+
+  if(NoiseFilters_isScraping 
+     || NoiseFilters_isNoiseHcalHBHE
+     || NoiseFilters_isNoiseHcalLaser
+     || NoiseFilters_isNoiseEcalTP
+     || NoiseFilters_isNoiseEcalBE
+     ) {
+    hists->fill1DHist(5, "evt_byCut_filters", "SUFFIX", nC, 0,nC, 1, "Histos");
+    hists->fill1DHist(MET, "met_filters_5", "Met", 80, 0,400, eventWeight, "Histos");
+  }
   if (deltaPhiJetMET < dPhiMinCut) return kTRUE;
   CountEvents(6);
   nEventsWeighted[6] += eventWeight;
   FillHistosFull(6, eventWeight);
   FillHistosBasic(6, eventWeight);
     
-
-  /*
-    for(Int_t ev=0; ev<10;ev++)
-    {
-	if (eventNumber==hisEVTS[ev]){
-    cout<<eventNumber<<"  After cosmic filter"<<endl;
-    break;
-	}
-    }
-  */
-
+  if (ZP4.Pt() < qtCut) return kTRUE;
+  CountEvents(7);
+  nEventsWeighted[7] += eventWeight;
+  FillHistosFull(7, eventWeight);
+  FillHistosBasic(7, eventWeight);
+  //cout<<"event #  "<<eventNumber<<"  **N events** at cut 7: "<<nEvents[7]<<endl;
+    
 
   //Data quality
   //if (isRealData && (isNoiseHcal || isScraping || isCSCTightHalo)) return kTRUE;
@@ -1284,20 +1342,23 @@ PrintOut(4,kTRUE);
     hists->fill1DHist(Nb25, "b_Nb25", "Number of b-quarks with pt>25, eta<2.5", 10,0,10, 1,"gen_b");
     hists->fill1DHist(Nb30, "b_Nb30", "Number of b-quarks with pt>30, eta<2.5", 10,0,10, 1,"gen_b");
     hists->fill1DHist(Nb_fromW, "b_Nb_fromW", "Number of b-quarks in the event from a W", 10,0,10, 1,"gen_b");
+
+    /* need more thought into it
+    if(nJets==0)
+      {
+        hists->fill1DHist(Nb25, "b_Nb25_nj0", "Number of b-quarks with pt>25, eta<2.5", 10,0,10, 1,"gen_b");
+        hists->fill1DHist(Nb30, "b_Nb30_nj0", "Number of b-quarks with pt>30, eta<2.5", 10,0,10, 1,"gen_b");
+      }
+    else
+      {
+        hists->fill1DHist(Nb25, "b_Nb25_nj1", "Number of b-quarks with pt>25, eta<2.5", 10,0,10, 1,"gen_b");
+        hists->fill1DHist(Nb30, "b_Nb30_nj1", "Number of b-quarks with pt>30, eta<2.5", 10,0,10, 1,"gen_b");
+      }
+    */
 	
 
   }
       
-
-
-
-  if (MET < 70) return kTRUE;
-  CountEvents(7);
-  nEventsWeighted[7] += eventWeight;
-  FillHistosFull(7, eventWeight);
-  FillHistosBasic(7, eventWeight);
-  //cout<<"event #  "<<eventNumber<<"  **N events** at cut 7: "<<nEvents[7]<<endl;
-    
 
 
   if(passBveto){
@@ -1523,6 +1584,7 @@ void higgsAnalyzer::FillHistosBasic(Int_t num, Double_t weight)
       hists->fill1DHist(num, "evt_byCut_raw", "SUFFIX", nC, 0,nC, 1, "Histos");
     }
   hists->fill1DHist(weight, Form("evt_weight_%i",num), "Weights", 50,0,10, 1, "Histos");
+  hists->fill1DHist(nPUVerticesTrue, Form("evt_puTrue_raw_%i",num), "PU true raw", 240, 0,60, 1, "Histos");
   hists->fill1DHist(nPUVerticesTrue, Form("evt_puTrue_%i",num), "PU true", 240, 0,60, weight, "Histos");
   hists->fill1DHist(nPUVertices, Form("evt_pu_%i",num), "PU observed", 240, 0,60, weight, "Histos");
 }
@@ -1530,7 +1592,7 @@ void higgsAnalyzer::FillHistosBasic(Int_t num, Double_t weight)
 
 void higgsAnalyzer::FillHistosFull(Int_t num, Double_t weight){
   hists->fill1DHist(MET, Form("met1_et_%i",num), "met1_et", 80,0,400, weight, "Histos");
-  hists->fill1DHist(MET_sumEt, Form("met1_SumEt_%i",num), "met1_SumEt", 50,0,1000, weight, "Histos");
+  hists->fill1DHist(MET_sumEt, Form("met1_SumEt_%i",num), "met1_SumEt", 50,0,2000, weight, "Histos");
   hists->fill1DHist(pfMET1, Form("met2_et_%i",num), "met2_et", 80,0,400, weight, "Histos");
   hists->fill1DHist(MET_phi, Form("met1_phi_%i",num), "met1_phi", 40, -TMath::Pi(), TMath::Pi(), weight, "Histos");
 
@@ -1576,6 +1638,7 @@ void higgsAnalyzer::FillHistosFull(Int_t num, Double_t weight){
   Float_t dPhiMetZ =  fabs(TVector2::Phi_mpi_pi(MET_phi-diPhi));
   hists->fill1DHist(dPhiMetZ, Form("di_dPhiMet_%i",num), "dPhiMet", 50, 0, TMath::Pi(), weight, "Histos");
 
+
   hists->fill1DHist(nJets, Form("jet_N_%i",num), "jet_N", 20, 0,20, weight, "Histos");
   hists->fill1DHist(nJets15, Form("jet_N15_%i",num), "jet_N15", 20, 0,20, weight, "Histos");
   hists->fill1DHist(nJetsEta24, Form("jet_N24_%i",num), "jet_N24", 20, 0,20, weight, "Histos");
@@ -1594,6 +1657,9 @@ void higgsAnalyzer::FillHistosFull(Int_t num, Double_t weight){
       hists->fill1DHist(dPhiClos1, Form("met1_dPhiClosJet1_%i",num), "met1_dPhiClosJet1", 50, 0,TMath::Pi(), weight, "Histos");
 
       hists->fill1DHist(ptLeadBJet, Form("jet_b_pt_%i",num), "jet_b_pt", 50, 0,400, weight, "Histos");
+
+      hists->fill1DHist(dRjetDiLept, Form("jet_dRDiLept_%i",num), "dR (di-elpt,jet)", 50, 0,5, weight, "Histos");
+
 
     }
 
@@ -1615,12 +1681,12 @@ void higgsAnalyzer::FillHistosFull(Int_t num, Double_t weight){
   hists->fill1DHist(nGamma, Form("ph_nGamma_%i",num), "ph_nGamma", 20, 0,20, weight, "Histos");
 
   if(isRealData)  
-    hists->fill1DHist(runNumber, Form("run_events_%i",num), "run_events", 40000, 160000., 200000, 1, "Histos");
+    hists->fill1DHist(runNumber, Form("run_events_%i",num), "run_events", 40000, 200000., 240000, 1, "DataInfo");
 
 
-  hists->fill1DHist(nVtxTotal, Form("vtx_nPV_tot_%i",num), "vtx_nPV_tot", 20, 0,20, weight, "Histos");
-  hists->fill1DHist(nVtx, Form("vtx_nPV_raw_%i",num), "vtx_nPV_raw", 20, 0,20, 1, "Histos");
-  hists->fill1DHist(nVtx, Form("vtx_nPV_weight_%i",num), "vtx_nPV_weight", 20, 0,20, weight, "Histos");
+  hists->fill1DHist(nVtxTotal, Form("vtx_nPV_tot_%i",num), "vtx_nPV_tot", 40, 0,40, weight, "Histos");
+  hists->fill1DHist(nVtx, Form("vtx_nPV_raw_%i",num), "vtx_nPV_raw", 40, 0,40, 1, "Histos");
+  hists->fill1DHist(nVtx, Form("vtx_nPV_weight_%i",num), "vtx_nPV_weight", 40, 0,40, weight, "Histos");
 
   hists->fill1DHist(nDofVtx1, Form("vtx_ndof1_%i",num), "vtx_ndof1", 50, 0,200, weight, "Histos");
   hists->fill1DHist(nDofVtx1, Form("vtx_ndof2_%i",num), "vtx_ndof2", 50, 0,200, weight, "Histos");
@@ -1777,9 +1843,10 @@ void higgsAnalyzer::MakeElectronPlots(TCElectron *ele, TVector3 *pv)
 {
   Float_t eleIso = CalculateElectronIso(ele);
 
-  hists->fill1DHist(ele->Dxy(pv), "ele_dxy", "dxy", 50, 0,0.2, 1, "Electrons");
-  hists->fill1DHist(eleIso, "ele_iso", "Isolation", 50, 0,0.5, 1, "Electrons");
+  hists->fill1DHist(ele->Dxy(pv), "ele_dxy", "dxy", 50, 0,0.3, 1, "Electrons");
+  hists->fill1DHist(eleIso, "ele_iso", "Isolation", 50, 0,0.7, 1, "Electrons");
   hists->fill1DHist(ele->PtError()/ele->Pt(), "ele_ptErrorOverPt", "ptErrorOverPt", 50, 0,0.6, 1, "Electrons");
+  hists->fill1DHist(ele->M(), "ele_mass", "Mass of the electron", 50, -20,20, 1, "Electrons");
 
 }
 
@@ -1835,11 +1902,11 @@ void higgsAnalyzer::MakeMuonPlots(TCMuon *mu, TVector3 *pv)
   hists->fill1DHist(mu->NumberOfValidMuonHits(), "mu_NumberOfValidMuonHits", "NumberOfValidMuonHits", 60, 0,60, 1, "Muons");
   hists->fill1DHist(mu->NumberOfValidTrackerHits(), "mu_NumberOfValidTrackerHits", "NumberOfValidTrackerHits", 40, 0,40, 1, "Muons");
   hists->fill1DHist(mu->NumberOfValidPixelHits(), "mu_NumberOfValidPixelHits", "NumberOfValidPixelHits", 20, 0,20, 1, "Muons");
-  hists->fill1DHist(mu->NormalizedChi2(), "mu_NormalizedChi2", "NormalizedChi2", 50, 0,10, 1, "Muons");
-  hists->fill1DHist(mu->Dxy(pv), "mu_dxy", "dxy", 50, 0,0.2, 1, "Muons");
+  hists->fill1DHist(mu->NormalizedChi2(), "mu_NormalizedChi2", "NormalizedChi2", 50, 0,12, 1, "Muons");
+  hists->fill1DHist(mu->Dxy(pv), "mu_dxy", "dxy", 50, 0,0.3, 1, "Muons");
 
   Float_t muIso = CalculateMuonIso(mu);
-  hists->fill1DHist(muIso, "mu_iso", "Isoalation", 50, 0,0.5, 1, "Muons");
+  hists->fill1DHist(muIso, "mu_iso", "Isoalation", 50, 0,0.7, 1, "Muons");
 
   hists->fill1DHist(mu->PtError()/mu->Pt(), "mu_ptErrorOverPt", "ptErrorOverPt", 50, 0,0.6, 1, "Muons");
 }

@@ -2,7 +2,7 @@ import os, subprocess, fileinput, math, tempfile
 
 class JobConfig():
     '''Class for storing configuration for each dataset'''
-    def __init__(self, dataName = 'TEST', inDir = '/uscms/home/andreypz/nobackup/TEST', nJobs = 1, arguments = 'TEST 0 muon 2011A', selection = 'muon'):
+    def __init__(self, dataName = 'TEST', inDir = '/uscms/home/andreypz/nobackup/TEST', nJobs = 1, arguments = 'TEST muon 2011A', selection = 'muon'):
         self._dataName  = dataName
         self._inDir     = inDir
         self._nJobs     = nJobs
@@ -17,7 +17,7 @@ class JobConfig():
 
 class BatchMaster():
     '''A tool for submitting batch jobs'''
-    def __init__(self, configList,outDir = '.', shortQueue = False):
+    def __init__(self, configList, outDir = '.', shortQueue = False):
         self._current    = os.path.abspath('.')
         self._outDir     = outDir
         self._configList = configList
@@ -71,7 +71,7 @@ class BatchMaster():
         '''Write batch configuration file'''
         batch_tmp = tempfile.NamedTemporaryFile(prefix = 'TEST', delete=False)
 
-        batch_tmp.write('Arguments  = %s %s %s %s %s\n' % (self._current, self._outDir+'/'+config._selection, str(count+1), config._dataName, config._args))
+        batch_tmp.write('Arguments  = %s %s %s %s\n' % (self._outDir, str(count+1), config._dataName, config._args))
         batch_tmp.write('Executable            = %s\n' % exec_tmp.name)
         batch_tmp.write('Should_Transfer_Files = YES\n')
         batch_tmp.write('WhenToTransferOutput  = ON_EXIT\n')
@@ -91,11 +91,12 @@ class BatchMaster():
 
     def CreateWorkingDir(self, codedir):
         '''Creating local working directory which will be used for copying all the files'''
-        code_copy_dir = self._current+'/'+codedir
+        code_copy_dir = self._outDir+codedir
         self.MakeDirectory(code_copy_dir, clear=True)
 
         for d in ["src", "plugins", "data", "higgs"]:
-            self.MakeDirectory(code_copy_dir+'/'+d, clear=True)
+            self.MakeDirectory(code_copy_dir+"/"+d, clear=True)
+            #print d, code_copy_dir
             os.system("cp -r "+self._current+"/../../"+d+"/* "+code_copy_dir+"/"+d)
 
         

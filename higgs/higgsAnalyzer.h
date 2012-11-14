@@ -99,6 +99,7 @@ class higgsAnalyzer : public TSelector {
   Float_t MET, MET_sumEt,pfMET, pfMET1, puCorrMET, projMET, ZprojMET, redMET1, redMET2, compMET;
   Float_t pfMET_lg, pfMET_recoil;
   Float_t dPhiMetDiLep, metProjOnQt, metPerpQt, metOverQt;
+  Float_t dRjetDiLept;
 
   Float_t MET_phi, MET1_phi;
   Float_t MT, MT1, MTZ, pTll;
@@ -115,7 +116,7 @@ class higgsAnalyzer : public TSelector {
   Float_t deltaEtaDiJet, massDiJet, zeppDiJetDiLep, zeppDiJetDiLep_y;
   Float_t hig_M, hig_Pt;
 
-  ofstream nout[nC], fout[nC], ffout, ncout;
+  ofstream nout[nC], fout[nC];//, ffout, ncout;
   TTree * _mvaTree;
 
   HistManager *hists;
@@ -313,7 +314,7 @@ void higgsAnalyzer::Init(TTree *tree)
    //Cuts
 
    //electrons are two types: Barrel/Endcap 
-   elIdAndIsoCutsTight.ptErrorOverPt[0] = 0.8;
+   elIdAndIsoCutsTight.ptErrorOverPt[0] = 9999.;
    elIdAndIsoCutsTight.dxy[0]           = 0.02;
    elIdAndIsoCutsTight.dz[0]            = 0.1;
    elIdAndIsoCutsTight.dPhiIn[0]        = 0.06;
@@ -325,7 +326,7 @@ void higgsAnalyzer::Init(TTree *tree)
    elIdAndIsoCutsTight.fabsEPDiff[0]    = 0.05;
    elIdAndIsoCutsTight.pfIso04[0]       = 0.15;
 
-   elIdAndIsoCutsTight.ptErrorOverPt[1] = 0.8;
+   elIdAndIsoCutsTight.ptErrorOverPt[1] = 9999.;
    elIdAndIsoCutsTight.dxy[1]           = 0.02;
    elIdAndIsoCutsTight.dz[1]            = 0.1;
    elIdAndIsoCutsTight.dPhiIn[1]        = 0.03;
@@ -363,7 +364,7 @@ void higgsAnalyzer::Init(TTree *tree)
    elIdAndIsoCutsLoose.pfIso04[1]       = 0.15;
 
 
-   muIdAndIsoCutsTight.ptErrorOverPt            = 0.1;
+   muIdAndIsoCutsTight.ptErrorOverPt            = 9999.;
    muIdAndIsoCutsTight.NumberOfValidMuonHits    = 0;
    muIdAndIsoCutsTight.NumberOfValidTrackerHits = 10;
    muIdAndIsoCutsTight.NumberOfValidPixelHits   = 0;

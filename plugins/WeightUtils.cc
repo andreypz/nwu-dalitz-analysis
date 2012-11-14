@@ -22,7 +22,7 @@ WeightUtils::WeightUtils(string sampleName, string dataPeriod, string selection,
 
     // PU weights
     h1_puReweight2011  = (TH1D*)_puFile->Get("h1_PU2011");
-    h1_puReweight2012  = (TH1D*)_puFile->Get("h1_PU2011");
+    h1_puReweight2012  = (TH1D*)_puFile->Get("h1_PU2012");
   
     // Recoil weights
     //h1_recoilLongMuon       = (TH1D*)_inFile->Get("h1_muonRecoilTransWeight");
@@ -102,10 +102,18 @@ float WeightUtils::PUWeight(float nPUtrue)
   if (nPUtrue < 60 && (_dataPeriod == "2011" || _dataPeriod == "2011A" || _dataPeriod == "2011B"))
     {
       Int_t myBin = h1_puReweight2011->FindBin(nPUtrue);
-      _puWeight = h1_puReweight2011->GetBinContent(myBin);
-      //cout<<"  Pu weights, bin = "<<myBin<<endl;
+      _puWeight   = h1_puReweight2011->GetBinContent(myBin);
+      //cout<<"period = "<<_dataPeriod<<"  Pu weight "<<_puWeight<<"  bin = "<<myBin<<endl;
     }
-  else 
+  else if  (nPUtrue < 60 &&  _dataPeriod == "2012") 
+    {
+      Int_t myBin = h1_puReweight2012->FindBin(nPUtrue);
+      _puWeight   = h1_puReweight2012->GetBinContent(myBin);
+      //_puWeight = 1;
+
+      //cout<<"period = "<<_dataPeriod<<"  Pu weight "<<_puWeight<<"  bin = "<<myBin<<endl;
+    } 
+  else
     _puWeight = 1;
   //cout  <<" PU  weight = "<<_puWeight<<endl;
   return _puWeight;

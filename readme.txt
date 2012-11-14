@@ -5,6 +5,12 @@ https://twiki.cern.ch/twiki/bin/view/CMS/UserCodeNWUHiggs
 
 The log of changes:
 
+2012-Nov-13
+  * Pile-up for 2012 samples is included
+  * More plots in Muons and electrons
+  * Cut on dR(ele, mu) to reject fake electrons
+  * Top background estimation scripts are added
+
 2012-Oct-31
   * Make it run with 2012 and 2011 ntuples using same code (although, the ntuples are diferent)
     * Lepton selection is modified

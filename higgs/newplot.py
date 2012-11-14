@@ -11,18 +11,21 @@ import makePlots as mp
 nargs = len(sys.argv)
 print sys.argv[0], "nargs:", nargs
 
+plotNone = 0
+
+plotSpecial  = 1
+plotMVA      = 1
+plotMet      = 1
+plotJet      = 1
+plotLepton   = 1
+plotDiLepton = 1
+plotMisc     = 1
+plotMuons    = 1
+plotElectrons= 1
+
+
 sel = 1
 doMerge = 0
-
-plotSpecial = 1
-plotMVA = 0
-plotMet = 1
-plotJet = 1
-plotLepton = 1
-plotDiLepton = 1
-plotMisc = 1
-plotMuons= 1
-plotElectrons= 1
 
 if (nargs<2):
     print "you have to specify the path where to look for the files!\nLike v62, or something"
@@ -33,7 +36,12 @@ if (nargs==4):
     doMerge = bool(int(sys.argv[3]))
 
 fullPath = sys.argv[1]
-#hPath = fullPath[0:3]
+if fullPath[4:7]!="cut":
+    print "the path has to be like v76_cut6  where 6 represent the cut number at which the plots are made "
+    sys.exit()
+F0 = fullPath[7] # cut number
+print 'cut number = ', F0
+    
 hPath = '/uscms_data/d2/andreypz/hzz2l2nu_hists/'+fullPath[0:3]
 print fullPath, hPath, sel, doMerge
 
@@ -49,10 +57,8 @@ def createDir(dir):
 baseDir = "/uscms_data/d2/andreypz/hzz2l2nu_html/"
 dirnameOut = baseDir+fullPath
 selection  = ['muon', 'electron']
-#plot_types = ['diLepton', 'Jet', 'Met', 'Misc', "mvaPresel"]
-#plot_types = ['diLepton', 'Lepton', 'Jet', 'Met', 'Misc', "mvaPresel"]
-plot_types = []
 
+plot_types = []
 if plotDiLepton:
     plot_types.append('diLepton')
 if plotLepton:
@@ -69,6 +75,8 @@ if plotElectrons:
     plot_types.append('Electrons')
 if plotMisc:
     plot_types.append('Misc')
+if plotMVA:
+    plot_types.append('mvaPresel')
 
 thissel = selection[sel-1]
 
@@ -86,11 +94,15 @@ if doMerge:
     os.system("hadd "+hPath+"/m_Data_"+thissel+".root   "+hPath+"/"+thissel+"/hhhh_Double*.root")
     os.system("hadd "+hPath+"/m_ttbar_"+thissel+".root  "+hPath+"/"+thissel+"/hhhh_ttbar_*.root")
     os.system("hadd "+hPath+"/m_DYjets_"+thissel+".root "+hPath+"/"+thissel+"/hhhh_DYjets_*.root")
+    os.system("hadd "+hPath+"/m_DYjets10_"+thissel+".root "+hPath+"/"+thissel+"/hhhh_DYjets10_*.root")
     os.system("hadd "+hPath+"/m_vbfZ_"+thissel+".root   "+hPath+"/"+thissel+"/hhhh_vbfZ_*.root")
                 
 
 
-mp.makePlots(sel, baseDir, fullPath, plotMuons, plotElectrons, plotSpecial, plotMVA, plotMet, plotJet, plotLepton, plotDiLepton, plotMisc)
+if plotNone:
+    mp.makePlots(sel, baseDir, fullPath, F0, 0, 0, 1, 0, 0, 0, 0, 0, 0)
+else:
+    mp.makePlots(sel, baseDir, fullPath, F0, plotMuons, plotElectrons, plotSpecial, plotMVA, plotMet, plotJet, plotLepton, plotDiLepton, plotMisc)
 
 print "\n\nDone!"
 print "CPU Time : ", timer.CpuTime()
@@ -165,10 +177,17 @@ menu += '<li><a href="yields_electron.html" target="iframe_a">Yields ele</a></li
 today = datetime.date.today()
 print today
 
+message = '<h2>Comments</h2>\
+<ul><li><font color ="dark-blue">Most of the plots are made after cut #<font size="+1"><b>'+F0+'</b></font> from the list of cuts</font></li>\
+<li>Top samlpe is a tW + tbarW</li>\
+<li>DY samlpe is a combination of DY10_40 and DY_40_inf</li>\
+</ul>'
+
 tempfile = open("indextemplate.html","r")
 whole_thing = tempfile.read()
 whole_thing = whole_thing.replace("{MENU}", menu)
 whole_thing = whole_thing.replace("{DATE}", str(today))
+whole_thing = whole_thing.replace("{ASIDEMESSAGE}", str(message))
 tempfile.close()
 
 ifile = open("index.html","w")

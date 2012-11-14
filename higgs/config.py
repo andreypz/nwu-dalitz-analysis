@@ -12,8 +12,8 @@ class Params():
             self._lumi_mu  = 2312 +  (137./144)*2739
             #self._lumi_mu  = 2312 +  (21./30)*2739
         else:
-            self._lumi_ele = 10200
-            self._lumi_mu  = 10200
+            self._lumi_ele = 5000
+            self._lumi_mu  = 5000
             
             
         self._isUpdated = False
@@ -23,9 +23,9 @@ class Params():
         "2. Two Leptons",
         "3. third lepton veto",
         "4. Z peak",
-        "5. Z pt cut",
+        "5. Met >70",
         "6. dPhi cut",
-        "7. Met >70",
+        "7. Z pt cut",
         "8. bjet veto",
         "9. H200 cut based",
         "10. H250 cut based",
@@ -56,8 +56,10 @@ class Params():
         self._nominalHZZ = [0,1,2,3,4,5,6,7,8]
         #self._bgOrderHZZ = ["Top","ttbar","WW","WZ","ZZ","DYjets"]        
         self._bgOrderHZZ = ["Top","ttbar","WWJetsTo2L2Nu","WZJetsTo3LNu","ZZJetsTo2L2Nu","DYjets"]        
-        self._extraHZZ = [18,19,20, 10,29,30,31,32, 21,22,23,24]
+        self._extraHZZ = [18,19,20, 9,13]
         #self._extraHZZ = [18,19,20, 9,25,26,27,28, 10,29,30,31,32, 21,22,23,24]
+        self._toMerge ={"Top":["tW","tbarW"],
+                        "DYjets":["DYjets","DYjets10"]}
         
         self._cutNamesVBFZ = [
         "0. Total",
@@ -75,7 +77,7 @@ class Params():
         self._bgOrderVBFZ = ["Top","ttbar","WW","ZZ","DYjets"]        
         
         self._xsec_and_colors = {
-            "DATA": [-1,-1,-1,-1,-1],
+            "DATA": [-1,-1,-1,-1,-1,-1],
             # schenme: lineColor, fill style, fill color, cs@7, cs@8, Nevts
             #"ZZ":   [kBlue,     3004, kMagenta, 6.46, ,0],  #pythia
             "ZZJetsTo2L2Nu":   [kBlue,    3244, kMagenta, 0.1787, 0.32,  0],  #madgraph
@@ -83,6 +85,7 @@ class Params():
             "WWJetsTo2L2Nu":   [kOrange+1,1001, kGreen+2,  4.783, 6.01,  0],
 
             "DYjets":[kRed,     3004, kRed+1,   3048.0,   3503.71, 0],
+            "DYjets10":[kRed,   3004, kRed+1,   0,   860, 0],
             "Wjets": [kGreen-2, 3004, kCyan+1,  31314.0, 12085.73, 0],
             
             #"ttbar":[kOrange+1,3004, kGreen+2, 16.71, 000, 0], 
@@ -137,8 +140,8 @@ class Params():
 
     def UpdateNevents(self, sample, n=1):
         if  self._xsec_and_colors[sample][5] != n:
-            if sample in ["ttbar","tW","tbarW"]:
-                print " --->  Changing the initial number of events in config file for sample", sample,"to", n
+            #if sample in ["ttbar","tW","tbarW", "DATA"]:
+            #    print " --->  Changing the initial number of events in config file for sample", sample,"to", n
             self._xsec_and_colors[sample][5] = n 
         if sample not in self._xsec_and_colors.keys():
             print "Warning!! the sample name was no in the original dictionary"
@@ -151,6 +154,12 @@ class Params():
             return self._xsec_and_colors[sample][3]
         else: 
             return self._xsec_and_colors[sample][4]
+
+    def getS(self):
+        return self._s
+
+    def toMerge(self):
+        return self._toMerge
 
     def getLumi(self, sel=1):
         if sel==1:

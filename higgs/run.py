@@ -13,7 +13,6 @@ import config as c
 period    = "2012"
 sample    = "ggHZZ250"
 selection = "muon"
-trigger   = "0"
 isbatch   = ""
 nargs = len(sys.argv)
 print sys.argv[0], nargs
@@ -27,20 +26,17 @@ if nargs>=3:
 if nargs>=4:
     sourcefilename =  sys.argv[3]
 if nargs>=5:
-    trigger   = sys.argv[4] 
+    period    = sys.argv[4]      
 if nargs>=6:
-    period    = sys.argv[5]      
-if nargs>=7:
-    isbatch   = sys.argv[6]
+    isbatch   = sys.argv[5]
 
-print "Running on sample", sample, "with selection", selection, "in sourse ", sourcefilename, "and trigger", trigger, period, isbatch 
+print "Running on sample", sample, "with selection", selection, "in sourse ", sourcefilename, "in period", period, isbatch 
 
 
 #tempfile = open("template_vbfZAnalyzer.C","r")
 tempfile = open("template_higgsAnalyzer.C","r")
 whole_thing = tempfile.read()
 whole_thing = whole_thing.replace("SUFFIX", sample)
-whole_thing = whole_thing.replace("TRIGGER", str(trigger))
 whole_thing = whole_thing.replace("SELECTION",selection)
 whole_thing = whole_thing.replace("PERIOD",period)
 tempfile.close()

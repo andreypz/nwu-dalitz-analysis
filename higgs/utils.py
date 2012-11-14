@@ -5,7 +5,13 @@ from ROOT import *
 import config as c
 
 
-myParams = c.Params("7TeV")
+myParams = c.Params("8TeV")
+
+myAnaParams =  myParams.analysisParams("HZZ")
+cutNames    = myAnaParams[0]
+nominalCuts = myAnaParams[1]
+extraCuts   = myAnaParams[2]
+bgOrder     = myAnaParams[3]
 
 def updateNevents(bg_list, sig1_list, sig2_list, sig3_list):
 
@@ -193,10 +199,10 @@ def calcYields(bg_list, sig1_list, sig2_list, sig3_list, data, sel, mode="scaled
     lTot = 33   # Total number of cuts
 
 
-    Yields_data = []
+    Yields_data     = []
     Yields_data_err = []
 
-    Yields_bg = []
+    Yields_bg   = []
     Yields_sig1 = []
     Yields_sig2 = []
     
@@ -207,7 +213,11 @@ def calcYields(bg_list, sig1_list, sig2_list, sig3_list, data, sel, mode="scaled
             dd = data.Get("Histos/evt_byCut").Clone()
             derr = Double(0)
 
-            dy = dd.GetBinContent(l+1)
+            if l!=0:
+                dy = dd.GetBinContent(l+1)
+            else:
+                dy = data.Get("Histos/met0_et_0").GetBinContent(1)
+                
             Yields_data.append(dy)
             Yields_data_err.append(derr)
         else:
@@ -215,7 +225,7 @@ def calcYields(bg_list, sig1_list, sig2_list, sig3_list, data, sel, mode="scaled
             Yields_data_err.append(0)
             
 
-        Yields_bg_per_cut = {}
+        Yields_bg_per_cut   = {}
         Yields_sig1_per_cut = {}
         Yields_sig2_per_cut = {}
 
@@ -226,28 +236,50 @@ def calcYields(bg_list, sig1_list, sig2_list, sig3_list, data, sel, mode="scaled
 
         top_bg = []
         
-        for b in bg_list:
-            #print b, bg_list[b]
-            h = bg_list[b].Get("Histos/evt_byCut").Clone()
-            sample = h.GetTitle()
-            if mode=="scaled" and l!=0:
-                handleOverflowBinsScaleAndColors(h, b, lumi)
-                #handleOverflowBinsScaleAndColors(h, sample, lumi)
-            y = h.GetBinContent(l+1)
-            err = Double(0)
+        #for b in bg_list:
+        for b in bgOrder:
 
-            Yields_bg_per_cut[sample] = ([y,err])
+            #print "yields making", b
 
-            if b in ["tW","tbarW"]:
-                top_bg.append(b)
+            if b not in myParams.toMerge().keys():
+                h = bg_list[b].Get("Histos/evt_byCut").Clone()
+                sample = b
+                if mode=="scaled" and l!=0:
+                    handleOverflowBinsScaleAndColors(h, b, lumi)
+                    #handleOverflowBinsScaleAndColors(h, sample, lumi)
+                    y = h.GetBinContent(l+1)
+                else:
+                    if l!=0:
+                        y = h.GetBinContent(l+1)
+                    else:
+                        y = myParams.getNev(b)
 
-        if len(top_bg)>1:
-            Yields_bg_per_cut["Top"] = ([0,0])
-            
-        for t in top_bg:
-            Yields_bg_per_cut["Top"][0] += Yields_bg_per_cut[t][0]
-            Yields_bg_per_cut["Top"][1] += Yields_bg_per_cut[t][1]
-            
+                err = Double(0)
+
+                Yields_bg_per_cut[sample] = ([y,err])
+            else:
+                #print "in to merge dict! ", b
+                Yields_bg_per_cut[b] = ([0,0])
+
+                samplesToMerge = myParams.toMerge()[b]
+                #print samplesToMerge
+                for m in samplesToMerge:
+                    hm = bg_list[m].Get("Histos/evt_byCut").Clone()
+                    #print m
+                    if mode=="scaled" and l!=0:
+                        handleOverflowBinsScaleAndColors(hm, m, lumi)
+                        #handleOverflowBinsScaleAndColors(h, sample, lumi)
+                        y = hm.GetBinContent(l+1)
+                        #print l+1,y
+                    else:
+                        if l!=0:
+                            y = hm.GetBinContent(l+1)
+                        else:
+                            y = myParams.getNev(m)
+                    #print "y=",y
+                    Yields_bg_per_cut[b][0] += y
+                    Yields_bg_per_cut[b][1] = 0
+
 
         Yields_bg.append(Yields_bg_per_cut)
 
@@ -256,7 +288,7 @@ def calcYields(bg_list, sig1_list, sig2_list, sig3_list, data, sel, mode="scaled
             #print l, s
 
             h = sig1_list[s].Get("Histos/evt_byCut").Clone()
-            sample = h.GetTitle()
+            sample = s
             if mode=="scaled" and l!=0:
                 handleOverflowBinsScaleAndColors(h, sample, lumi)
             y = h.GetBinContent(l+1)
@@ -270,7 +302,7 @@ def calcYields(bg_list, sig1_list, sig2_list, sig3_list, data, sel, mode="scaled
         # Yields of the signals:
         for s in sig2_list:
             h = sig2_list[s].Get("Histos/evt_byCut").Clone()
-            sample = h.GetTitle()
+            sample = s
             if mode=="scaled" and l!=0:
                 handleOverflowBinsScaleAndColors(h, sample, lumi)
             y = h.GetBinContent(l+1)
@@ -280,30 +312,24 @@ def calcYields(bg_list, sig1_list, sig2_list, sig3_list, data, sel, mode="scaled
 
         Yields_sig2.append(Yields_sig2_per_cut)
 
+    #print Yields_bg
     return [Yields_data, Yields_bg, Yields_sig1, Yields_sig2]
 
 def printYields(bg_list, sig1_list, sig2_list, sig3_list, data, sel, filename, anaType="HZZ250", mode="scaled"):
 
     y = calcYields(bg_list, sig1_list, sig2_list, sig3_list, data, sel, mode)
+
     Yields_data = y[0]
     Yields_bg   = y[1]
     Yields_sig1 = y[2]
     Yields_sig2 = y[3]
-    
+
     print "Yield are HTML mode"
     favMass="0"
     if "VBFZ" not in anaType:
         favMass = anaType[3:]
         anaType ="HZZ"
 
-    myAnaParams =  myParams.analysisParams(anaType)
-    #print myParams
-    cutNames    = myAnaParams[0]
-    nominalCuts = myAnaParams[1]
-    extraCuts   = myAnaParams[2]
-    bgOrder     = myAnaParams[3]
-    #lTot = 33   # Total number of cuts
-    #lMax = 9 # Lines to print in the main table
     beginTable = '<table border = "10"    cellpadding="5">'
     endTable = '</table>'
 
@@ -499,27 +525,32 @@ def makeStack(bgList, histoname, lumi):
     leg01 = TLegend(0.53,0.7,0.95,0.90);
     leg01.SetNColumns(2);
     leg01.SetTextSize(0.04)
-        
+
+
+    samplesToMerge = myParams.toMerge()
+
     for b in bgOrder:
         dirname = "Histos/"
         if histoname[0:2] == "mu":
             dirname = "Muons/"
         if histoname[0:2] == "el":
             dirname = "Electrons/"
-        if b == "Top":
-           
-            #print "Stacking top. It needs a special treatment: add all components"
-            if "tW" in bgList.keys() and "tbarW" in bgList.keys():
-                htw    = bgList["tW"].Get(dirname+histoname).Clone()
-                handleOverflowBinsScaleAndColors(htw, "tW", lumi)
-                
-                htbarw = bgList["tbarW"].Get(dirname+histoname).Clone()
-                handleOverflowBinsScaleAndColors(htbarw,"tbarW",lumi)    
-                htw.Add(htbarw)
-                hs.Add(htw)
-                leg01.AddEntry(htw,"Top","f")
-            else:
-                print "Number of top bg samples is wrong!"
+
+        if b in samplesToMerge.keys():
+            hm = TH1F()
+            for i,m in enumerate(samplesToMerge[b]):
+                #print "stack for ", b, i,m, samplesToMerge[b]
+                if bgList[m].Get(dirname+histoname) != None:
+                    h = bgList[m].Get(dirname+histoname).Clone()
+                    handleOverflowBinsScaleAndColors(h, m, lumi)
+                    if i==0:
+                        hm = h 
+                    else:
+                        hm.Add(h)
+
+            if hm!= None:
+                hs.Add(hm)
+                leg01.AddEntry(hm,b,"f")
 
         elif b not in bgList.keys(): continue
         else:
@@ -660,7 +691,7 @@ def drawMultiPlot(fname,maintitle, xtitle, h_name, isLog, y1min, y1max, y2min, y
     
         pad1.cd();
 
-    prelim = TLatex(0.25,0.95, "CMS Preliminary       #it{L_{int}} = %0.1f fb^{-1}" % (lumi/1000.))
+    prelim = TLatex(0.15,0.95, "CMS Preliminary  %s    #it{L_{int}} = %0.1f fb^{-1}" % (myParams.getS(), lumi/1000.))
     prelim.SetNDC();
     prelim.SetTextSize(0.03); 
     prelim.Draw();

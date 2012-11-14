@@ -31,17 +31,7 @@ class TriggerSelector: public TObject {
         virtual ~TriggerSelector();
         TriggerSelector(string, string, vstring);
 
-        bool    SelectTrigger(string,unsigned, UInt_t*);
-        bool    CheckOverlap();
-        bool    CheckPrescales(unsigned, UInt_t*);
-
-        int     GetEventPrescale() const;
-
-        void    SetPassNames(unsigned);
-        void    SetDataBit(bool);
-        void    SetSelectedBits();
-        void    TriggerDefaults();
-        void    AddTriggers(vstring);
+        unsigned int  SelectTrigger(string,unsigned, UInt_t*);
 
         ClassDef(TriggerSelector, 0);
 
@@ -53,11 +43,7 @@ class TriggerSelector: public TObject {
         string          _type;
         bool            _isRealData;
 
-        // trigger info
-        vstring         _passNames;
-        bool            _eventPass;
-        int             _eventPrescale;
-        int             _passTriggers;
+
 };
 
 #endif
