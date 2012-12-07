@@ -1,4 +1,4 @@
-// $Id: template_higgsAnalyzer.C,v 1.63 2012/11/04 22:32:54 andrey Exp $
+// $Id: template_higgsAnalyzer.C,v 1.64 2012/11/14 00:13:11 andrey Exp $
 
 #define higgsAnalyzer_cxx
 #include "higgsAnalyzer.h"
@@ -8,7 +8,7 @@
 using namespace std;
 
 // This needs to be un-commented in order to run MVA cuts
-#define USE_MVA  
+//#define USE_MVA  
 
 /////////////////////////////
 //Specify parameters here. //
@@ -20,7 +20,7 @@ const int     JC_LVL         = 0;  //No JEC for Pat jets (they are already appli
 const TString suffix("SUFFIX");
 
 Bool_t makeMvaTree = 0;
-const UInt_t verboseLvl  = 0;
+const UInt_t verboseLvl  = 1;
 const Bool_t doZlibrary  = 0, isFromData=0;
 
 /////////////////
@@ -36,7 +36,7 @@ const Float_t zMassCut1[]   = {76,106};
 const Float_t zMassCut2[]   = {70,106};
 const Float_t	qtCut       = 55.;
 const Int_t   nJetsCut[]    = {0,99};
-Float_t	cut_vz  = 24,cut_vd0 = 2,cut_vndof = 4;	//PV filter cuts
+Float_t	cut_vz  = 24., cut_vd0 = 2. ,cut_vndof = 4.;	//PV filter cuts
 
 // Cuts for mass points in the PAS. 200,	250,	300,	350 etc
 const Float_t	dPhiMinCut = 0.5;
@@ -343,6 +343,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
         {
           if(runNumber>1 && runNumber <196046)
             prescale = triggerSelector->SelectTrigger("HLT_Mu17_TkMu8_v", triggerStatus, hltPrescale);  
+            //prescale = triggerSelector->SelectTrigger("HLT_Mu22_TkMu8_v", triggerStatus, hltPrescale);  
           else if(runNumber>=196046 && runNumber <9999999)
             prescale = triggerSelector->SelectTrigger("HLT_Mu22_TkMu8_v", triggerStatus, hltPrescale);  
         }
@@ -364,15 +365,15 @@ bool higgsAnalyzer::Process(Long64_t entry)
         hists->fillProfile(runNumber, prescale, "run_prescale", "run_prescale", 40000, 200000., 240000, 0,100, 1, "DataInfo");
     
     }
+
+
+  //triggerPass = kTRUE;
   if (!triggerPass) return kTRUE;
   // Double electron workaround.  Gets rid of hopelessly prescaled events of July 20-26, 2011
   //if (selection == "electron" && (runNumber > 171200 && runNumber < 171600)) return kTRUE;
+
   
   Int_t  eventPrescale = 1;//triggerSelector->GetEventPrescale();
-  
-  CountEvents(1);
-  ++nEventsWeighted[1];
-  FillHistosBasic(1, 1);
   
   //cout<<"event #  "<<eventNumber<<"  **N events** at cut 1: "<<nEvents[1]<<endl;
   
@@ -401,10 +402,10 @@ bool higgsAnalyzer::Process(Long64_t entry)
          pVtx->NDof() > cut_vndof                      //4
          && fabs(pVtx->z()) <= cut_vz      //15
          && fabs(pVtx->Perp()) <= cut_vd0   //Not Mag()!; 2
-          )
+         )
         {
           vertexFilter = kTRUE;
-	  
+          
           if (PVind[0]==-1) PVind[0] = vv; //Set first main PV
           if (PVind[1]==-1 && PVind[0]!=vv) PVind[1] = vv; //Second PV
           nVtx++;
@@ -414,11 +415,17 @@ bool higgsAnalyzer::Process(Long64_t entry)
   TCPrimaryVtx *mainPrimaryVertex = 0, *secondPrimaryVertex = 0;
   if (PVind[0]!=-1) mainPrimaryVertex   = (TCPrimaryVtx*)(primaryVtx->At(PVind[0]));
   if (PVind[1]!=-1) secondPrimaryVertex = (TCPrimaryVtx*)(primaryVtx->At(PVind[1]));  
-  
+  //mainPrimaryVertex   = (TCPrimaryVtx*)(primaryVtx->At(0));
+  //if (nVtx>1) secondPrimaryVertex = (TCPrimaryVtx*)(primaryVtx->At(1));  
   
   // Apply the PV filters here! -------------
   if (!vertexFilter) return kTRUE;  
   //cout<<"event #  "<<eventNumber<<"  **N events** after vertex: "<<nEvents[1]<<endl;
+
+  CountEvents(1);
+  ++nEventsWeighted[1];
+  FillHistosBasic(1, 1);
+  
   
   /*
     for(Int_t ev=0; ev<evSize;ev++)
@@ -440,6 +447,9 @@ bool higgsAnalyzer::Process(Long64_t entry)
   vector<TCPhysObject> electrons;
   //int eleCount = 0;
   
+  if (recoMuons->GetSize() < 2) return kTRUE;
+  CountEvents(4);
+
   //if (recoElectrons->GetSize()>1)
   //cout<<"Event with at least 2 electrons event #  "<<eventNumber<<endl;
   for (int i = 0; i <  recoElectrons->GetSize(); ++i) {
@@ -463,11 +473,9 @@ bool higgsAnalyzer::Process(Long64_t entry)
 
     if (thisElec->Pt() > 10.0
         && PassElectronIdAndIso(thisElec, elIdAndIsoCutsTight, pvPosition)
-        //&& thisElec->PassConversion(80)
         ) electrons.push_back(*thisElec);			
     else if (thisElec->Pt() > 10.0
              && PassElectronIdAndIso(thisElec, elIdAndIsoCutsLoose, pvPosition)
-             && thisElec->PassConversion(80)
              ) looseLeptons.push_back(*thisElec);
   }
   
@@ -669,8 +677,8 @@ bool higgsAnalyzer::Process(Long64_t entry)
             if (dR<0.1)
               {
                 //cout<<" yes"<<endl;
-                it = electrons.erase(it); //This is actually a muon faking an electron! Remove it.
-                isErased = kTRUE;
+                // it = electrons.erase(it); //This is actually a muon faking an electron! Remove it.
+                // test isErased = kTRUE;
                 break;
               }
           }
@@ -688,6 +696,8 @@ bool higgsAnalyzer::Process(Long64_t entry)
 
 
     if (electrons.size() < 2) return kTRUE;
+    CountEvents(5);
+
 	/*
       for(Int_t ev=0; ev<evSize;ev++)
 	  {
@@ -1028,6 +1038,9 @@ bool higgsAnalyzer::Process(Long64_t entry)
   //FillHistosFull(3, eventWeight);
   //cout<<"event #  "<<eventNumber<<"  **N events** at cut 3: "<<nEvents[3]<<endl;
 
+
+  return kTRUE;
+
   ////////////
   // Z mass //
   ////////////
@@ -1195,8 +1208,8 @@ bool higgsAnalyzer::Process(Long64_t entry)
           nEventsWeighted[29] += eventWeight;
           FillHistosFull(29, eventWeight);
           FillHistosBasic(29, eventWeight);
-          if(verboseLvl>0)
-            PrintOut(29,kTRUE);
+          //if(verboseLvl>0)
+          // PrintOut(29,kTRUE);
 	    
           if(nJets==0){
             CountEvents(30);
@@ -1378,6 +1391,8 @@ PrintOut(4,kTRUE);
   // DeltaPhi(MET, jet); MET and MT cuts //
   /////////////////////////////////////////
 
+  passBveto = kTRUE;
+
   if (passBveto &&  MET>metMinCut[0]  && (MT > mtMinCut[0] && MT < mtMaxCut[0]))
     {
       //For Higgs  200 . The cuts need to be defined
@@ -1470,9 +1485,9 @@ void higgsAnalyzer::Terminate()
   cout<<"\nRunning over "<<suffix<<" dataset with "<<selection<<" selection."<<"\n"<<endl;
   cout<<"| CUT DESCRIPTION                  |\t"<< "\t|"<<endl;
   cout<<"| Initial number of events:        |\t"<< nEvents[0]  <<"\t|"<<nEventsWeighted[0]  <<"\t|"<<endl;
-  cout<<"| Pass HLT selection:              |\t"<< nEvents[1]  <<"\t|"<<nEventsWeighted[1]  <<"\t|"<<endl;
+  cout<<"| Ntuple evts; HLT; vertex         |\t"<< nEvents[1]  <<"\t|"<<nEventsWeighted[1]  <<"\t|"<<endl;
   cout<<"| Two leptons (id and iso):        |\t"<< nEvents[2]  <<"\t|"<<nEventsWeighted[2]  <<"\t|"<<endl;
-  cout<<"| Third lepton veto:Z mass window  |\t"<< nEvents[3]  <<"\t|"<<nEventsWeighted[3]  <<"\t|"<<endl;
+  cout<<"| Third lepton veto:               |\t"<< nEvents[3]  <<"\t|"<<nEventsWeighted[3]  <<"\t|"<<endl;
   cout<<"| Z mass window                    |\t"<< nEvents[4]  <<"\t|"<<nEventsWeighted[4]  <<"\t|"<<endl;
   cout<<"| Z Qt > 55 :                      |\t"<< nEvents[5]  <<"\t|"<<nEventsWeighted[5]  <<"\t|"<<endl;
   cout<<"| dPi(Jet, Met) > 0.5              |\t"<< nEvents[6]  <<"\t|"<<nEventsWeighted[6]  <<"\t|"<<endl;
@@ -1844,9 +1859,10 @@ void higgsAnalyzer::MakeElectronPlots(TCElectron *ele, TVector3 *pv)
   Float_t eleIso = CalculateElectronIso(ele);
 
   hists->fill1DHist(ele->Dxy(pv), "ele_dxy", "dxy", 50, 0,0.3, 1, "Electrons");
+  hists->fill1DHist(ele->Dz(pv), "ele_dz", "dz", 50, 0,0.3, 1, "Electrons");
   hists->fill1DHist(eleIso, "ele_iso", "Isolation", 50, 0,0.7, 1, "Electrons");
   hists->fill1DHist(ele->PtError()/ele->Pt(), "ele_ptErrorOverPt", "ptErrorOverPt", 50, 0,0.6, 1, "Electrons");
-  hists->fill1DHist(ele->M(), "ele_mass", "Mass of the electron", 50, -20,20, 1, "Electrons");
+  hists->fill1DHist(ele->M(), "ele_mass", "Mass of the electron", 50, -4,4, 1, "Electrons");
 
 }
 
@@ -1870,28 +1886,33 @@ bool higgsAnalyzer::PassElectronIdAndIso(TCElectron *lep, elIdAndIsoCuts cuts, T
   
   Float_t eleISO = CalculateElectronIso(lep);
 
-  if((fabs(lep->Eta()) < 1.442     
-      && lep->PtError()/lep->Pt()       < cuts.ptErrorOverPt[0]
-      && lep->SigmaIetaIeta()           < cuts.sigmaIetaIeta[0]   
-      && fabs(lep->DphiSuperCluster())  < cuts.dPhiIn[0]
-      && fabs(lep->DetaSuperCluster())  < cuts.dEtaIn[0]
-      && lep->HadOverEm()               < cuts.HadOverEm[0]      
-      && (period=="2011" || lep->IsoMap("fabsEPDiff")      < cuts.fabsEPDiff[0])
-      && fabs(lep->Dxy(pv))             < cuts.dxy[0]
-      && fabs(lep->Dz(pv))              < cuts.dz[0]
-      && eleISO                         < cuts.pfIso04[0]
-      )||
-     (fabs(lep->Eta()) >  1.556  
-      && lep->PtError()/lep->Pt()       < cuts.ptErrorOverPt[1]
-      && lep->SigmaIetaIeta()           < cuts.sigmaIetaIeta[1]   
-      && fabs(lep->DphiSuperCluster())  < cuts.dPhiIn[1]
-      && fabs(lep->DetaSuperCluster())  < cuts.dEtaIn[1]
-      && lep->HadOverEm()               < cuts.HadOverEm[1]      
-      && (period=="2011" || lep->IsoMap("fabsEPDiff")      < cuts.fabsEPDiff[1])
-      && fabs(lep->Dxy(pv))             < cuts.dxy[1]
-      && fabs(lep->Dz(pv))              < cuts.dz[1]
-      && eleISO                         < cuts.pfIso04[1]
-      )) pass = true;
+  if(((fabs(lep->Eta()) < 1.442     
+       && lep->PtError()/lep->Pt()       < cuts.ptErrorOverPt[0]
+       && lep->SigmaIetaIeta()           < cuts.sigmaIetaIeta[0]   
+       && fabs(lep->DphiSuperCluster())  < cuts.dPhiIn[0]
+       && fabs(lep->DetaSuperCluster())  < cuts.dEtaIn[0]
+       && lep->HadOverEm()               < cuts.HadOverEm[0]      
+       && (period=="2011" || lep->IsoMap("fabsEPDiff")      < cuts.fabsEPDiff[0])
+       && fabs(lep->Dxy(pv))             < cuts.dxy[0]
+       && fabs(lep->Dz(pv))              < cuts.dz[0]
+       && eleISO                         < cuts.pfIso04[0]
+       )||
+      (fabs(lep->Eta()) >  1.556  
+       && lep->PtError()/lep->Pt()       < cuts.ptErrorOverPt[1]
+       && lep->SigmaIetaIeta()           < cuts.sigmaIetaIeta[1]   
+       && fabs(lep->DphiSuperCluster())  < cuts.dPhiIn[1]
+       && fabs(lep->DetaSuperCluster())  < cuts.dEtaIn[1]
+       && lep->HadOverEm()               < cuts.HadOverEm[1]      
+       && (period=="2011" || lep->IsoMap("fabsEPDiff")      < cuts.fabsEPDiff[1])
+       && fabs(lep->Dxy(pv))             < cuts.dxy[1]
+       && fabs(lep->Dz(pv))              < cuts.dz[1]
+       && eleISO                         < cuts.pfIso04[1]
+       ))
+     && lep->ConversionVeto()
+     
+     ) pass = true;
+  
+  //pass = true;
 
   //cout<<"ele pass? "<<pass<<endl;
   return pass;
@@ -1904,6 +1925,7 @@ void higgsAnalyzer::MakeMuonPlots(TCMuon *mu, TVector3 *pv)
   hists->fill1DHist(mu->NumberOfValidPixelHits(), "mu_NumberOfValidPixelHits", "NumberOfValidPixelHits", 20, 0,20, 1, "Muons");
   hists->fill1DHist(mu->NormalizedChi2(), "mu_NormalizedChi2", "NormalizedChi2", 50, 0,12, 1, "Muons");
   hists->fill1DHist(mu->Dxy(pv), "mu_dxy", "dxy", 50, 0,0.3, 1, "Muons");
+  hists->fill1DHist(mu->Dz(pv), "mu_dxy", "dz", 50, 0,0.3, 1, "Muons");
 
   Float_t muIso = CalculateMuonIso(mu);
   hists->fill1DHist(muIso, "mu_iso", "Isoalation", 50, 0,0.7, 1, "Muons");
@@ -1943,8 +1965,12 @@ bool higgsAnalyzer::PassMuonIdAndIso(TCMuon *lep, muIdAndIsoCuts cuts, TVector3 
       && muISO                  < cuts.pfIso04
       )
     pass = true;
-
   //cout<<"muon pass? "<<pass<<endl;
+
+  //pass = false;
+  //if (muISO < cuts.pfIso04) 
+  //  pass = true;
+  
   return pass;
 }
 

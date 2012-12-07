@@ -11,10 +11,10 @@ import makePlots as mp
 nargs = len(sys.argv)
 print sys.argv[0], "nargs:", nargs
 
-plotNone = 0
+plotNone = 1
 
 plotSpecial  = 1
-plotMVA      = 1
+plotMVA      = 0
 plotMet      = 1
 plotJet      = 1
 plotLepton   = 1

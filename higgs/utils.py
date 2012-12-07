@@ -250,7 +250,8 @@ def calcYields(bg_list, sig1_list, sig2_list, sig3_list, data, sel, mode="scaled
                     y = h.GetBinContent(l+1)
                 else:
                     if l!=0:
-                        y = h.GetBinContent(l+1)
+                        #print sample, mode, l
+                        y =  bg_list[b].Get("Histos/evt_byCut_raw").GetBinContent(l+1)
                     else:
                         y = myParams.getNev(b)
 
@@ -273,7 +274,8 @@ def calcYields(bg_list, sig1_list, sig2_list, sig3_list, data, sel, mode="scaled
                         #print l+1,y
                     else:
                         if l!=0:
-                            y = hm.GetBinContent(l+1)
+                            print m, mode, l
+                            y =  bg_list[m].Get("Histos/evt_byCut_raw").GetBinContent(l+1)
                         else:
                             y = myParams.getNev(m)
                     #print "y=",y

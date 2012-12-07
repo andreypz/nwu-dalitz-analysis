@@ -1,36 +1,34 @@
 #!/usr/bin/env python
-
 import sys,os
 #sys.argv.append( '-b' )
 
+from optparse import OptionParser
+parser = OptionParser(usage="usage: %prog [options -e], -m], -p 2011] samplename sourcefile")
+parser.add_option("-e", "--ele", dest="electron", action="store_true", default=False, help="Use electron selection")
+parser.add_option("-p", "--period", dest="period", default="2012", help="Set data period (2011/2012)")
+parser.add_option("-b", "--batch", dest="batch", action="store_true", default=False, help="Run in batch")
+
 from ROOT import *
-
 import shutil
-
 import config as c
 
+(options, args) = parser.parse_args()
 
-period    = "2012"
-sample    = "ggHZZ250"
+if len(args) < 2:
+    parser.print_usage()
+    exit(1)
+
+sample    = args[0]
+sourcefilename = args[1]
+
+period    = options.period
 selection = "muon"
-isbatch   = ""
-nargs = len(sys.argv)
-print sys.argv[0], nargs
-if nargs>=1:
-    sourcefilename = sample
-if nargs>=2:
-    sample    = sys.argv[1]
-    sourcefilename = sample
-if nargs>=3:
-    selection = sys.argv[2]
-if nargs>=4:
-    sourcefilename =  sys.argv[3]
-if nargs>=5:
-    period    = sys.argv[4]      
-if nargs>=6:
-    isbatch   = sys.argv[5]
+if options.electron :
+    print "options.electorn???", options.electron
+    selection="electron"
+isbatch   = options.batch
 
-print "Running on sample", sample, "with selection", selection, "in sourse ", sourcefilename, "in period", period, isbatch 
+print "Running on sample", sample, "with selection", selection, "in source ", sourcefilename, ", period =", period, " batch =",  isbatch
 
 
 #tempfile = open("template_vbfZAnalyzer.C","r")
@@ -81,7 +79,7 @@ for l in f.readlines():
     line = l.split('\n')[0]
     if line.strip():
         print line
-        fChain.Add(line)      
+        fChain.Add(line)
         nfiles+=1
 print nfiles, " files added!"
 
@@ -91,7 +89,7 @@ timer.Start()
 
 fChain.Process("higgsAnalyzer.C+")
 
-print "Done!", "CPU Time: ", timer.CpuTime(), "RealTime : ", timer.RealTime() 
+print "Done!", "CPU Time: ", timer.CpuTime(), "RealTime : ", timer.RealTime()
 
 os.system('mv a_higgsHistograms.root hhhh_'+sourcefilename+'.root')
 

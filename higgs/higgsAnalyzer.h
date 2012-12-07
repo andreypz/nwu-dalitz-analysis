@@ -315,52 +315,44 @@ void higgsAnalyzer::Init(TTree *tree)
 
    //electrons are two types: Barrel/Endcap 
    elIdAndIsoCutsTight.ptErrorOverPt[0] = 9999.;
-   elIdAndIsoCutsTight.dxy[0]           = 0.02;
-   elIdAndIsoCutsTight.dz[0]            = 0.1;
    elIdAndIsoCutsTight.dPhiIn[0]        = 0.06;
    elIdAndIsoCutsTight.dEtaIn[0]        = 0.004;
    elIdAndIsoCutsTight.sigmaIetaIeta[0] = 0.01;
    elIdAndIsoCutsTight.HadOverEm[0]     = 0.12;
+   elIdAndIsoCutsTight.fabsEPDiff[0]    = 0.05;
    elIdAndIsoCutsTight.dxy[0]           = 0.02;
    elIdAndIsoCutsTight.dz[0]            = 0.1;
-   elIdAndIsoCutsTight.fabsEPDiff[0]    = 0.05;
    elIdAndIsoCutsTight.pfIso04[0]       = 0.15;
 
    elIdAndIsoCutsTight.ptErrorOverPt[1] = 9999.;
-   elIdAndIsoCutsTight.dxy[1]           = 0.02;
-   elIdAndIsoCutsTight.dz[1]            = 0.1;
    elIdAndIsoCutsTight.dPhiIn[1]        = 0.03;
    elIdAndIsoCutsTight.dEtaIn[1]        = 0.007;
    elIdAndIsoCutsTight.sigmaIetaIeta[1] = 0.03;
    elIdAndIsoCutsTight.HadOverEm[1]     = 0.10;
+   elIdAndIsoCutsTight.fabsEPDiff[1]    = 0.05;
    elIdAndIsoCutsTight.dxy[1]           = 0.02;
    elIdAndIsoCutsTight.dz[1]            = 0.1;
-   elIdAndIsoCutsTight.fabsEPDiff[1]    = 0.05;
    elIdAndIsoCutsTight.pfIso04[1]       = 0.15;
 
 
    elIdAndIsoCutsLoose.ptErrorOverPt[0] = 99999;
-   elIdAndIsoCutsLoose.dxy[0]           = 0.02;
-   elIdAndIsoCutsLoose.dz[0]            = 0.1;
    elIdAndIsoCutsLoose.dPhiIn[0]        = 0.06;
    elIdAndIsoCutsLoose.dEtaIn[0]        = 0.004;
    elIdAndIsoCutsLoose.sigmaIetaIeta[0] = 0.01;
    elIdAndIsoCutsLoose.HadOverEm[0]     = 0.12;
+   elIdAndIsoCutsLoose.fabsEPDiff[0]    = 99999;
    elIdAndIsoCutsLoose.dxy[0]           = 0.02;
    elIdAndIsoCutsLoose.dz[0]            = 0.1;
-   elIdAndIsoCutsLoose.fabsEPDiff[0]    = 99999;
    elIdAndIsoCutsLoose.pfIso04[0]       = 0.15;
 
    elIdAndIsoCutsLoose.ptErrorOverPt[1] = 99999;
-   elIdAndIsoCutsLoose.dxy[1]           = 0.02;
-   elIdAndIsoCutsLoose.dz[1]            = 0.1;
    elIdAndIsoCutsLoose.dPhiIn[1]        = 0.03;
    elIdAndIsoCutsLoose.dEtaIn[1]        = 0.007;
    elIdAndIsoCutsLoose.sigmaIetaIeta[1] = 0.03;
    elIdAndIsoCutsLoose.HadOverEm[1]     = 0.12;
+   elIdAndIsoCutsLoose.fabsEPDiff[1]    = 99999;
    elIdAndIsoCutsLoose.dxy[1]           = 0.02;
    elIdAndIsoCutsLoose.dz[1]            = 0.1;
-   elIdAndIsoCutsLoose.fabsEPDiff[1]    = 99999;
    elIdAndIsoCutsLoose.pfIso04[1]       = 0.15;
 
 

@@ -97,7 +97,7 @@ def makePlots(sel, dir, fullPath, F0, plotMuons,plotElectrons,plotSpecial,plotMV
     print "\n\n ******** Make the Yield table ******** \n"
 
     #u.printYields(li_topbg, li_bg, li_sig1, li_sig2, li_sig3, f_Data, sel, "yields_"+thissel+".html", "VBFZ")
-    u.printYields(li_allbg, li_sig1, li_sig2, li_sig3, f_Data, sel, "yields_"+thissel+".html", "HZZ125")
+    u.printYields(li_allbg, li_sig1, li_sig2, li_sig3, f_Data, sel, "yields_"+thissel+".html", "HZZ125", "notscaled")
     print "\n **** End of Yield table ****"
 
 
@@ -124,7 +124,7 @@ def makePlots(sel, dir, fullPath, F0, plotMuons,plotElectrons,plotSpecial,plotMV
         u.drawMultiPlot(path+"ele01", "","dR(ele, mu)", "ele_dRmu", 1, 0.1,1e9, 0,1.9, li_ov, li_allbg, sel, 0)
         u.drawMultiPlot(path+"ele02", "","isolation", "ele_iso", 1, 0.1,1e9, 0,1.9, li_ov, li_allbg, sel, 0)
         u.drawMultiPlot(path+"ele03", "","dxy", "ele_dxy", 1, 0.1,1e9, 0,1.9, li_ov, li_allbg, sel, 0)
-        #u.drawMultiPlot(path+"ele04", "","#delta (p_{T})/p_{T}", "ptErrorOverPt", 1, 0.1,1e9, 0,1.9, li_ov, li_allbg, sel, 0)
+        u.drawMultiPlot(path+"ele04", "","#delta (p_{T})/p_{T}", "ele_ptErrorOverPt", 1, 0.1,1e9, 0,1.9, li_ov, li_allbg, sel, 0)
         u.drawMultiPlot(path+"ele05", "","e-Mass", "ele_mass", 1, 0.1,1e9, 0,1.9, li_ov, li_allbg, sel, 0)
        
     if plotMVA:
@@ -165,7 +165,22 @@ def makePlots(sel, dir, fullPath, F0, plotMuons,plotElectrons,plotSpecial,plotMV
         h_tW_N.Draw("hist  same")
     
         c1.SaveAs(path+"sp02.png")
-
+        '''
+        presel_ttbar = h_ttbar_N.Integral()
+        presel_tW = h_tW_N.Integral()
+        for c in range(9,14):
+            h_ttbar_c = li_allbg["ttbar"].Get("Histos/jet_b_N_"+str(c))
+            h_tW_c    = li_allbg["tW"].Get("Histos/jet_b_N_"+str(c))
+            u.handleOverflowBinsScaleAndColors(h_ttbar_c, "ttbar", lumi)
+            u.handleOverflowBinsScaleAndColors(h_tW_c, "tW", lumi)
+            if h_ttbar_c!=None:
+                y = h_ttbar_c.Integral()
+                print c, "R = ", y/presel_ttbar
+            if h_tW_c!=None:
+                y = h_tW_c.Integral()
+                print c, "R = ", y/presel_tW
+        '''
+        
         gen_b_Nb30 = {}
         gen_b_Nb30["ttbar"] = li_allbg["ttbar"].Get("gen_b/b_Nb30") 
         gen_b_Nb30["tW"]    = li_allbg["tW"].Get("gen_b/b_Nb30") 
@@ -181,7 +196,10 @@ def makePlots(sel, dir, fullPath, F0, plotMuons,plotElectrons,plotSpecial,plotMV
         c1.SaveAs(path+"sp03.png")
                 
         t.CalcAccept(gen_b_Nb30)
+
         
+        
+        # Runs and trigger prescales
         runs = f_Data.Get("DataInfo/run_events_2")
         runs.Draw()
         c1.SaveAs(path+"sp04_runs.png")

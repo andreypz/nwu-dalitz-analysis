@@ -25,7 +25,7 @@ unsigned int TriggerSelector::SelectTrigger(string name, unsigned triggerStatus,
   for (vstring::const_iterator iName = _triggerNames.begin(); iName != _triggerNames.end(); ++iName) {
     if (*iName == name) {
       isFound = true;
-      if (triggerStatus & (0x1 << count)) 
+      if (triggerStatus & (ULong64_t(0x1) << count)) 
         passed = true;
       
       //cout<<"TRG dbg: iName = "<<name<<" matches to the name  "<<name<<endl;

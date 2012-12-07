@@ -59,7 +59,8 @@ class Params():
         self._extraHZZ = [18,19,20, 9,13]
         #self._extraHZZ = [18,19,20, 9,25,26,27,28, 10,29,30,31,32, 21,22,23,24]
         self._toMerge ={"Top":["tW","tbarW"],
-                        "DYjets":["DYjets","DYjets10"]}
+                        #"DYjets":["DYjets","DYjets10"]}
+                        "DYjets":["DYjets10"]}
         
         self._cutNamesVBFZ = [
         "0. Total",
