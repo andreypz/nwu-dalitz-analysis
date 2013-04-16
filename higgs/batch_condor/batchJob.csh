@@ -17,7 +17,6 @@ set suffix    = $4  #e.g. DATA. WZ, ZZ etc
 set selection = $5
 set period    = $6
 
-
 set dir = ${outDir}/code_dir
 
 echo "Copy all files needed from a working directory" $dir
@@ -32,7 +31,20 @@ mv ../src/input.txt .
 #ls
 
 chmod 755 run.py
-./run.py ${suffix} ${selection} ${dataName} ${period} b
 
+#./run.py ${suffix} ${dataName} -p ${period} -b
+echo $selection
+if ( $selection == "electron" ) then
+    echo "Electrons"
+    #./run.py ${suffix} ${dataName} --ele -p ${period} -b
+else
+    echo "Muons"
+    ./run.py ${suffix} ${dataName} -p ${period} -b
+endif
+
+echo 'ls in higgs'
+ls
+
+echo "Done. copying files"
 cp hhhh_${dataName}.root $outDir/$selection/hhhh_${dataName}_${count}.root
 #cp  events_printout_* $outDir/$selection/printouts/

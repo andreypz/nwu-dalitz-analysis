@@ -97,7 +97,7 @@ def makePlots(sel, dir, fullPath, F0, plotMuons,plotElectrons,plotSpecial,plotMV
     print "\n\n ******** Make the Yield table ******** \n"
 
     #u.printYields(li_topbg, li_bg, li_sig1, li_sig2, li_sig3, f_Data, sel, "yields_"+thissel+".html", "VBFZ")
-    u.printYields(li_allbg, li_sig1, li_sig2, li_sig3, f_Data, sel, "yields_"+thissel+".html", "HZZ125", "notscaled")
+    #u.printYields(li_allbg, li_sig1, li_sig2, li_sig3, f_Data, sel, "yields_"+thissel+".html", "HZZ125", "notscaled")
     print "\n **** End of Yield table ****"
 
 
@@ -147,9 +147,21 @@ def makePlots(sel, dir, fullPath, F0, plotMuons,plotElectrons,plotSpecial,plotMV
 
         path = imgpath+"Special/"
         print path
-        u.drawMultiPlot(path+"sp01", "","M(ll)", "di_mass_ext_2", 1, 0.1, 1e8, 0.5,1.49, li_ov, li_allbg, sel, 1)
-        u.drawMultiPlot(path+"sp01", "No b-veto","N b-jets", "jet_b_N_7", 0, 0.1, 600, 0,1.9, li_ov, li_allbg, sel, 0)
 
+
+
+        #u.drawMultiPlot(path+"sp01", "","M(ll)", "di_mass_ext_2", 1, 0.1, 1e8, 0.5,1.49, li_ov, li_allbg, sel, 1)
+        #u.drawMultiPlot(path+"sp01", "No b-veto","N b-jets", "jet_b_N_7", 0, 0.1, 600, 0,1.9, li_ov, li_allbg, sel, 0)
+
+        if sel==1:
+            h = f_Data.Get("Muons/mu_triM")
+            h.Draw("hist")
+            c1.SaveAs(path+"sp05_mu_triM.png")
+        elif sel==2:
+
+            c1.SaveAs(path+"sp05_ele_triM.png")
+
+        '''
         lumi = myParams.getLumi(sel) 
         c1.cd()
         h_ttbar_N = li_allbg["ttbar"].Get("Histos/jet_b_N_7")
@@ -165,6 +177,9 @@ def makePlots(sel, dir, fullPath, F0, plotMuons,plotElectrons,plotSpecial,plotMV
         h_tW_N.Draw("hist  same")
     
         c1.SaveAs(path+"sp02.png")
+
+        '''
+        
         '''
         presel_ttbar = h_ttbar_N.Integral()
         presel_tW = h_tW_N.Integral()
@@ -180,7 +195,7 @@ def makePlots(sel, dir, fullPath, F0, plotMuons,plotElectrons,plotSpecial,plotMV
                 y = h_tW_c.Integral()
                 print c, "R = ", y/presel_tW
         '''
-        
+        '''
         gen_b_Nb30 = {}
         gen_b_Nb30["ttbar"] = li_allbg["ttbar"].Get("gen_b/b_Nb30") 
         gen_b_Nb30["tW"]    = li_allbg["tW"].Get("gen_b/b_Nb30") 
@@ -197,8 +212,9 @@ def makePlots(sel, dir, fullPath, F0, plotMuons,plotElectrons,plotSpecial,plotMV
                 
         t.CalcAccept(gen_b_Nb30)
 
-        
-        
+        '''
+
+        '''
         # Runs and trigger prescales
         runs = f_Data.Get("DataInfo/run_events_2")
         runs.Draw()
@@ -257,7 +273,8 @@ def makePlots(sel, dir, fullPath, F0, plotMuons,plotElectrons,plotSpecial,plotMV
         filt_mc_norm.SetTitle(";cut number;fraction of events")
         filt_mc_norm.SetLineColor(kRed+1)
         c3.SaveAs(path+"filters.png")
-                
+        '''
+        
         '''
         c1.cd()
         for a in ["ggHZZ400","ggHZZ450","ggHZZ500","ggHZZ550","ggHZZ600"]:

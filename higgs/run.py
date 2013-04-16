@@ -7,6 +7,7 @@ parser = OptionParser(usage="usage: %prog [options -e], -m], -p 2011] samplename
 parser.add_option("-e", "--ele", dest="electron", action="store_true", default=False, help="Use electron selection")
 parser.add_option("-p", "--period", dest="period", default="2012", help="Set data period (2011/2012)")
 parser.add_option("-b", "--batch", dest="batch", action="store_true", default=False, help="Run in batch")
+parser.add_option("--ss", dest="same_sign", action="store_true", default=False, help="Run in batch")
 
 from ROOT import *
 import shutil
@@ -23,10 +24,25 @@ sourcefilename = args[1]
 
 period    = options.period
 selection = "muon"
+do_ss = "kFALSE"
+if options.same_sign:
+    do_ss = "kTRUE"
+    print "Doing same sign analysis"
+
 if options.electron :
     print "options.electorn???", options.electron
     selection="electron"
+
 isbatch   = options.batch
+    
+if(isbatch):
+    sourceFiles = "./input.txt"
+    print "Do batch, source files: \n", sourceFiles
+else:
+    sourceFiles = "./sourceFiles/"+sourcefilename+".txt"
+    print "Run locally, source files: \n", sourceFiles
+
+
 
 print "Running on sample", sample, "with selection", selection, "in source ", sourcefilename, ", period =", period, " batch =",  isbatch
 
@@ -34,22 +50,15 @@ print "Running on sample", sample, "with selection", selection, "in source ", so
 #tempfile = open("template_vbfZAnalyzer.C","r")
 tempfile = open("template_higgsAnalyzer.C","r")
 whole_thing = tempfile.read()
-whole_thing = whole_thing.replace("SUFFIX", sample)
+whole_thing = whole_thing.replace("SUFFIX",sample)
 whole_thing = whole_thing.replace("SELECTION",selection)
 whole_thing = whole_thing.replace("PERIOD",period)
+whole_thing = whole_thing.replace('"DOSAMESIGN"',do_ss)
 tempfile.close()
 
 cfile = open("higgsAnalyzer.C","w")
 cfile.write(whole_thing)
 cfile.close()
-
-if(isbatch == "b"):
-    sourceFiles = "./input.txt"
-    print "Do batch, source files: \n", sourceFiles
-else:
-    sourceFiles = "./sourceFiles/"+sourcefilename+".txt"
-    print "Run locally, source files: \n", sourceFiles
-
 
 gSystem.Load("../plugins/lib/libShapeLine.so");
 gROOT.LoadMacro("../plugins/rochcor.cc+");

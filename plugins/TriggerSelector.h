@@ -31,7 +31,7 @@ class TriggerSelector: public TObject {
         virtual ~TriggerSelector();
         TriggerSelector(string, string, vstring);
 
-        unsigned int  SelectTrigger(string,unsigned, UInt_t*);
+        void SelectTrigger(string,unsigned, UInt_t*, bool&, bool&,Int_t&);
 
         ClassDef(TriggerSelector, 0);
 

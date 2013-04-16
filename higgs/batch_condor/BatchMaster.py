@@ -25,7 +25,7 @@ class BatchMaster():
         self._shortQueue = shortQueue
     
     def MakeDirectory(self, filePath, clear = True):
-        '''Create save path in case it doesn't already exist'''
+        '''Create save path in case it doesnt already exist'''
         if not os.path.exists(filePath):
             os.system('mkdir -p '+filePath)
         elif clear:
@@ -91,17 +91,19 @@ class BatchMaster():
 
     def CreateWorkingDir(self, codedir):
         '''Creating local working directory which will be used for copying all the files'''
+        print "Creating working directory"
         code_copy_dir = self._outDir+codedir
         self.MakeDirectory(code_copy_dir, clear=True)
-
+        print "After MakeDirectory()"
         for d in ["src", "plugins", "data", "higgs"]:
             self.MakeDirectory(code_copy_dir+"/"+d, clear=True)
-            #print d, code_copy_dir
+            print "Copying", d, code_copy_dir
             os.system("cp -r "+self._current+"/../../"+d+"/* "+code_copy_dir+"/"+d)
 
         
     def SubmitToLPC(self):
         '''Submits batch jobs to lpc batch'''
+        print "Submitting the Job"
         for cfg in self._configList:
             self.MakeDirectory(self._outDir+'/'+cfg._selection, clear=False)
             self.MakeDirectory(self._outDir+'/'+cfg._selection+'/printouts', clear=False)
