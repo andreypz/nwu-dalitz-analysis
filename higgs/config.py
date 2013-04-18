@@ -12,8 +12,8 @@ class Params():
             self._lumi_mu  = 2312 +  (137./144)*2739
             #self._lumi_mu  = 2312 +  (21./30)*2739
         else:
-            self._lumi_ele = 5000
-            self._lumi_mu  = 5000
+            self._lumi_ele = 19600
+            self._lumi_mu  = 19600
             
             
         self._isUpdated = False
@@ -55,12 +55,13 @@ class Params():
         ]
         self._nominalHZZ = [0,1,2,3,4,5,6,7,8]
         #self._bgOrderHZZ = ["Top","ttbar","WW","WZ","ZZ","DYjets"]        
-        self._bgOrderHZZ = ["Top","ttbar","WWJetsTo2L2Nu","WZJetsTo3LNu","ZZJetsTo2L2Nu","DYjets"]        
+        self._bgOrderHZZ = ["Top","ttbar","DYjets"]        
+        #self._bgOrderHZZ = ["Top","ttbar","WWJetsTo2L2Nu","WZJetsTo3LNu","ZZJetsTo2L2Nu","DYjets"]        
         self._extraHZZ = [18,19,20, 9,13]
         #self._extraHZZ = [18,19,20, 9,25,26,27,28, 10,29,30,31,32, 21,22,23,24]
         self._toMerge ={"Top":["tW","tbarW"],
-                        #"DYjets":["DYjets","DYjets10"]}
-                        "DYjets":["DYjets10"]}
+                        "DYjets":["DYjets","DYjets10"]}
+                        #"DYjets":["DYjets10"]}
         
         self._cutNamesVBFZ = [
         "0. Total",
@@ -82,7 +83,7 @@ class Params():
             # schenme: lineColor, fill style, fill color, cs@7, cs@8, Nevts
             #"ZZ":   [kBlue,     3004, kMagenta, 6.46, ,0],  #pythia
             "ZZJetsTo2L2Nu":   [kBlue,    3244, kMagenta, 0.1787, 0.32,  0],  #madgraph
-            "WZJetsTo3LNu":   [kYellow-1, 1001, kBlue-1,   0.856, 0.75,  0], #or 0.879?
+            "WZJetsTo3LNu":    [kYellow-1,1001, kBlue-1,   0.856, 0.75,  0], #or 0.879?
             "WWJetsTo2L2Nu":   [kOrange+1,1001, kGreen+2,  4.783, 6.01,  0],
 
             "DYjets":[kRed,     3004, kRed+1,   3048.0,   3503.71, 0],

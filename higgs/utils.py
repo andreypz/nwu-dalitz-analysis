@@ -274,7 +274,7 @@ def calcYields(bg_list, sig1_list, sig2_list, sig3_list, data, sel, mode="scaled
                         #print l+1,y
                     else:
                         if l!=0:
-                            print m, mode, l
+                            #print m, mode, l
                             y =  bg_list[m].Get("Histos/evt_byCut_raw").GetBinContent(l+1)
                         else:
                             y = myParams.getNev(m)
@@ -556,9 +556,9 @@ def makeStack(bgList, histoname, lumi):
 
         elif b not in bgList.keys(): continue
         else:
-            #print f.GetName()
+            #print bgList[b].GetName()
             evtHisto = bgList[b].Get("Histos/evt_byCut")
-            #evtHisto.Print()
+            evtHisto.Print()
             sample = evtHisto.GetTitle()
             #print "Double check the sample:",sample
         
@@ -574,6 +574,7 @@ def makeStack(bgList, histoname, lumi):
 def drawMultiPlot(fname,maintitle, xtitle, h_name, isLog, y1min, y1max, y2min, y2max, ovList, bgList, sel, doRatio):
 
     lumi = myParams.getLumi(sel)
+    #print lumi
     bgOrder = myParams.analysisParams("HZZ")[3]
     
     dirname = "Histos/"

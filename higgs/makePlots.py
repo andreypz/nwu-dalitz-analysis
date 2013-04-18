@@ -11,8 +11,10 @@ makeMvaTrees = 0
 makePuWeights = 0
 myParams = u.myParams
 
-def makePlots(sel, dir, fullPath, F0, plotMuons,plotElectrons,plotSpecial,plotMVA,plotMet,plotJet,plotLepton,plotDiLepton,plotMisc):
-    hPath = '/uscms_data/d2/andreypz/hzz2l2nu_hists/'+fullPath[0:3]
+def makePlots(sel, dir, ver, F0, plotMuons,plotElectrons,plotSpecial,plotMVA,plotMet,plotJet,plotLepton,plotDiLepton,plotMisc):
+
+    subdir = ver+"_cut"+F0
+    hPath = '/eos/uscms/store/user/andreypz/batch_output/8TeV/'+ver
     gROOT.ProcessLine(".L ../data/tdrstyle.C");
     setTDRStyle()
     UP = 1e10
@@ -25,6 +27,7 @@ def makePlots(sel, dir, fullPath, F0, plotMuons,plotElectrons,plotSpecial,plotMV
     elif F0=="6":
         UP=1e6
         
+    period = "2012"
     gStyle.SetPadGridX(1)
     gStyle.SetPadGridY(1);
     gStyle.SetHistLineWidth(2)
@@ -33,19 +36,20 @@ def makePlots(sel, dir, fullPath, F0, plotMuons,plotElectrons,plotSpecial,plotMV
     
     if sel==1:
         thissel = "muon"
-        imgpath = dir+fullPath+"/muon/" 
+        imgpath = dir+"/"+thissel+"/"
     if sel==2:
         thissel = "electron"
-        imgpath = dir+fullPath+"/electron/"
-    print "Making plots from", hPath, fullPath
+        imgpath = dir+"/"+thissel+"/"
+    print "Making plots from", hPath, ver
     
     #topbg = ["tW","tbarW"]
     #bg   = ["tW","tbarW","ttbar","WW", "WZ","ZZ","DYjets"]
+    #bg   = ["tW","tbarW","ttbar", "WZJetsTo3LNu","ZZJetsTo2L2Nu","DYjets", "DYjets10"]
     bg   = ["tW","tbarW","ttbar","WWJetsTo2L2Nu", "WZJetsTo3LNu","ZZJetsTo2L2Nu","DYjets", "DYjets10"]
     
-    sig1 = ["ggHZZ125","ggHZZ200","ggHZZ300","ggHZZ350","ggHZZ400"]
-    sig2 = ["VBFHZZ125","VBFHZZ200","VBFHZZ300","VBFHZZ350","VBFHZZ400"]
-    sig3 = ["ggHWW125","ggHWW250","ggHWW300","ggHWW350","ggHWW400"]
+    sig1 = ["ggHZZ125","ggHZZ200"]#,"ggHZZ300","ggHZZ350","ggHZZ400"]
+    sig2 = ["VBFHZZ125","VBFHZZ200"]#,"VBFHZZ300","VBFHZZ350","VBFHZZ400"]
+    sig3 = ["ggHWW125","ggHWW200"]#,"ggHWW300","ggHWW350","ggHWW400"]
 
     sig4 = [""]
     
@@ -60,33 +64,33 @@ def makePlots(sel, dir, fullPath, F0, plotMuons,plotElectrons,plotSpecial,plotMV
     for a in bg:
         #print a
         if a=='ttbar':
-            f = TFile(hPath+"/m_ttbar_"+thissel+".root", "OPEN")
+            f = TFile(hPath+"/m_ttbar_"+thissel+"_"+period+".root", "OPEN")
         elif a=='DYjets':
-            f = TFile(hPath+"/m_DYjets_"+thissel+".root", "OPEN")
+            f = TFile(hPath+"/m_DYjets_"+thissel+"_"+period+".root", "OPEN")
         elif a=='DYjets10':
-            f = TFile(hPath+"/m_DYjets10_"+thissel+".root", "OPEN")
+            f = TFile(hPath+"/m_DYjets10_"+thissel+"_"+period+".root", "OPEN")
         elif a=='vbfZ':
-            f = TFile(hPath+"/m_vbfZ_"+thissel+".root", "OPEN")
+            f = TFile(hPath+"/m_vbfZ_"+thissel+"_"+period+".root", "OPEN")
         else:
-            f = TFile(hPath+"/"+thissel+"/hhhh_"+a+"_1.root", "OPEN")
+            f = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_"+a+"_1.root", "OPEN")
         li_allbg[a] = f
             
     for a in sig1:
         #print a
-        f = TFile(hPath+"/"+thissel+"/hhhh_"+a+"_1.root", "OPEN")
+        f = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_"+a+"_1.root", "OPEN")
         #f.Print()
         li_sig1[a] =f
         if a in ["ggHZZ200"]:
             li_ov[a] = f
     for a in sig2:
         #print a
-        f = TFile(hPath+"/"+thissel+"/hhhh_"+a+"_1.root", "OPEN")
+        f = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_"+a+"_1.root", "OPEN")
         #f.Print()
         li_sig2[a] =f
         if a in ["VBFHZZ200"]:
             li_ov[a] = f
             
-    f_Data =  TFile(hPath+"/m_Data_"+thissel+".root", "OPEN")
+    f_Data =  TFile(hPath+"/m_Data_"+thissel+"_"+period+".root", "OPEN")
     #f_Data = None
 
     #print  li_allbg
@@ -96,13 +100,13 @@ def makePlots(sel, dir, fullPath, F0, plotMuons,plotElectrons,plotSpecial,plotMV
 
     print "\n\n ******** Make the Yield table ******** \n"
 
-    #u.printYields(li_topbg, li_bg, li_sig1, li_sig2, li_sig3, f_Data, sel, "yields_"+thissel+".html", "VBFZ")
-    #u.printYields(li_allbg, li_sig1, li_sig2, li_sig3, f_Data, sel, "yields_"+thissel+".html", "HZZ125", "notscaled")
+    #u.printYields(li_topbg, li_bg, li_sig1, li_sig2, li_sig3, f_Data, sel, "yields_"+thissel+"_"+period+".html", "VBFZ")
+    u.printYields(li_allbg, li_sig1, li_sig2, li_sig3, f_Data, sel, "yields_"+thissel+"_"+period+".html", "HZZ125", "notscaled")
     print "\n **** End of Yield table ****"
 
 
     if makeMvaTrees:
-        mvaInputsDir = "../mva/mvaInputs_"+hPath+"/"+thissel+"/"
+        mvaInputsDir = "../mva/mvaInputs_"+hPath+"/"+thissel+"_"+period+"/"
         if not os.path.exists(mvaInputsDir):
             os.makedirs(mvaInputsDir)
         u.makeMvaTrees(mvaInputsDir,li_allbg, li_sig1, li_sig2,sel)
@@ -148,19 +152,25 @@ def makePlots(sel, dir, fullPath, F0, plotMuons,plotElectrons,plotSpecial,plotMV
         path = imgpath+"Special/"
         print path
 
+        u.drawMultiPlot(path+"sp01", "","M(ll)", "di_mass_ext_2", 1, 0.1, 1e8, 0.5,1.49, li_ov, li_allbg, sel, 1)
+        u.drawMultiPlot(path+"sp02", "","M(ll)", "di_mass_ext_2", 1, 0.1, 1e8, 0.5,1.49, li_ov, li_allbg, sel, 1)
+        u.drawMultiPlot(path+"sp03", "","triM", "mu_triM", 0, 0.1, 300, 0.5,1.49, li_ov, li_allbg, sel, 1)
+        u.drawMultiPlot(path+"sp04", "","triM", "mu_triM", 1, 0.1, 1e3, 0.5,1.49, li_ov, li_allbg, sel, 1)
+        u.drawMultiPlot(path+"sp05", "","triM", "mu_triM_noLowMass", 0, 0.1, 300, 0.5,1.49, li_ov, li_allbg, sel, 1)
+        u.drawMultiPlot(path+"sp06", "","triM", "mu_triM_noLowMass", 1, 0.1, 1e3, 0.5,1.49, li_ov, li_allbg, sel, 1)
 
-
-        #u.drawMultiPlot(path+"sp01", "","M(ll)", "di_mass_ext_2", 1, 0.1, 1e8, 0.5,1.49, li_ov, li_allbg, sel, 1)
-        #u.drawMultiPlot(path+"sp01", "No b-veto","N b-jets", "jet_b_N_7", 0, 0.1, 600, 0,1.9, li_ov, li_allbg, sel, 0)
-
+        '''
         if sel==1:
             h = f_Data.Get("Muons/mu_triM")
             h.Draw("hist")
             c1.SaveAs(path+"sp05_mu_triM.png")
+            h = f_Data.Get("Muons/mu_triM_noLowMass")
+            h.Draw("hist")
+            c1.SaveAs(path+"sp05_mu_triM_noLowMass.png")
         elif sel==2:
 
             c1.SaveAs(path+"sp05_ele_triM.png")
-
+        '''
         '''
         lumi = myParams.getLumi(sel) 
         c1.cd()

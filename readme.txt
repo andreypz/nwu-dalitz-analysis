@@ -5,6 +5,11 @@ https://twiki.cern.ch/twiki/bin/view/CMS/UserCodeNWUHiggs
 
 The log of changes:
 
+2013-Apr-17
+  * Nate's tri-lepton plot is produced
+  * Trigger Selector is modified to return: isFound, isPassed and a prescale
+  * Modified the Batch master to create a tar.gz before submission and to write output to EOS
+  
 2012-Dec-06
   * Introduced option parser to run.py script 
   * Synchroization with Nate is more or less succesefull

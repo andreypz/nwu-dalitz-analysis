@@ -17,18 +17,15 @@ set suffix    = $4  #e.g. DATA. WZ, ZZ etc
 set selection = $5
 set period    = $6
 
-set dir = ${outDir}/code_dir
 
-echo "Copy all files needed from a working directory" $dir
-cd ../
-cp -r $dir/* .
+echo "Copy all files needed from a working directory"
 
+cp ../../source.tar.gz .
+tar -xzf source.tar.gz
+cd Higgs/higgs
 
-cd higgs
-mv ../src/input.txt .
+cp ../../../../input_${dataName}_${count}.txt input.txt
 
-#echo 'ls in higgs'
-#ls
 
 chmod 755 run.py
 
@@ -45,6 +42,6 @@ endif
 echo 'ls in higgs'
 ls
 
-echo "Done. copying files"
-cp hhhh_${dataName}.root $outDir/$selection/hhhh_${dataName}_${count}.root
+echo "Done. Will copy the files to " $outDir
+cp hhhh_${dataName}.root $outDir/hhhh_${dataName}_${count}.root
 #cp  events_printout_* $outDir/$selection/printouts/

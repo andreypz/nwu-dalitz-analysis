@@ -1,4 +1,4 @@
-// $Id: template_higgsAnalyzer.C,v 1.65 2012/12/07 01:01:57 andrey Exp $
+// $Id: template_higgsAnalyzer.C,v 1.66 2013/04/16 22:11:42 andrey Exp $
 
 #define higgsAnalyzer_cxx
 #include "higgsAnalyzer.h"
@@ -336,7 +336,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
   //////////////////
   //Trigger status//
   //////////////////
-  Bool_t triggerPass  = 0;
+  Bool_t triggerPass  = 1;
   Bool_t isFound  = 0;
   Int_t prescale = 99;
   if (isRealData)
@@ -487,7 +487,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
   sort(electrons.begin(), electrons.end(), P4SortCondition);
 
   if (electrons.size()==3 && electrons[0].Pt()>20){
-    if (electrons[0].Charge()*electrons[1].Charge()==-1 || electrons[0].Charge()*electrons[2].Charge()==-1)
+    if (fabs(electrons[0].Charge() + electrons[1].Charge() + electrons[2].Charge())==1)
       {    
         Float_t triM = (electrons[0]+electrons[1]+electrons[2]).M();
         hists->fill1DHist(triM, "ele_triM","M(eee)", 40, 0,200, 1, "Electrons");
@@ -543,7 +543,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
 
 
   if (muons.size()==3 && muons[0].Pt()>20 ){
-    if (fabs(muons[0].Charge() + muons[1].Charge() + muons[2].Charge())!=1)
+    if (fabs(muons[0].Charge() + muons[1].Charge() + muons[2].Charge())==1)
       {
         Float_t triM = (muons[0]+muons[1]+muons[2]).M();
         hists->fill1DHist(triM, "mu_triM","M(mumumu)", 60, 0,300, 1, "Muons");
