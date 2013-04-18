@@ -7,7 +7,7 @@ import datetime
 
 from optparse import OptionParser
 parser = OptionParser(usage="usage: %prog [options -e], -c 4], -m] vXX")
-parser.add_option("-e", "--ele",   dest="electron", action="store_true", default=False, help="Use electron selection")
+parser.add_option("-e", "--ele",   dest="ele", action="store_true", default=False, help="Use electron selection")
 parser.add_option("-c", "--cut",   dest="cut", default="2", help="Cut number")
 parser.add_option("-p", "--period",dest="period", default="2012", help="Year period; 2011 or 2012")
 parser.add_option("-m", "--merge", action="store_true", dest="merge", default=False, help="Do merging?")
@@ -46,7 +46,8 @@ doMerge = options.merge
 F0      = options.cut    
 ver     = sys.argv[1]
 period = options.period
-
+if options.ele:
+    sel=2
 print 'ver = ', ver, 'cut number = ', F0
     
 hPath = '/eos/uscms/store/user/andreypz/batch_output/8TeV/'+ver
@@ -99,7 +100,7 @@ timer.Start()
 gROOT.SetBatch()
 print "Merging?", doMerge
 if doMerge:
-    os.system("rm "+hPath+"/m_*.root") #removing the old merged files
+    os.system("rm "+hPath+"/m_*"+thissel+"*.root") #removing the old merged files
     os.system("hadd "+hPath+"/m_Data_"    +thissel+"_"+period+".root "+hPath+"/"+thissel+"_"+period+"/hhhh_Double*.root")
     os.system("hadd "+hPath+"/m_ttbar_"   +thissel+"_"+period+".root "+hPath+"/"+thissel+"_"+period+"/hhhh_ttbar_*.root")
     os.system("hadd "+hPath+"/m_DYjets_"  +thissel+"_"+period+".root "+hPath+"/"+thissel+"_"+period+"/hhhh_DYjets_*.root")
@@ -178,8 +179,8 @@ for x in plot_types:
     os.system("mv "+fname+" "+dirNameOut)
     menu = menu+"<li><a href=\""+x+".html\" target=\"iframe_a\">"+x+"</a></li>"
 
-menu += '<li><a href="yields_muon.html" target="iframe_a">Yields mu</a></li>'
-menu += '<li><a href="yields_electron.html" target="iframe_a">Yields ele</a></li>'
+menu += '<li><a href="yields_muon_2012.html" target="iframe_a">Yields mu</a></li>'
+menu += '<li><a href="yields_electron_2012.html" target="iframe_a">Yields ele</a></li>'
 #print menu
 
 

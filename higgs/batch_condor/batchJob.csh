@@ -18,7 +18,7 @@ set selection = $5
 set period    = $6
 
 
-echo "Copy all files needed from a working directory"
+echo "Copy the tarball with the source code from Condor scratch directory"
 
 cp ../../source.tar.gz .
 tar -xzf source.tar.gz
@@ -29,11 +29,10 @@ cp ../../../../input_${dataName}_${count}.txt input.txt
 
 chmod 755 run.py
 
-#./run.py ${suffix} ${dataName} -p ${period} -b
 echo $selection
 if ( $selection == "electron" ) then
     echo "Electrons"
-    #./run.py ${suffix} ${dataName} --ele -p ${period} -b
+    ./run.py ${suffix} ${dataName} -e -p ${period} -b
 else
     echo "Muons"
     ./run.py ${suffix} ${dataName} -p ${period} -b

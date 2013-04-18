@@ -122,6 +122,12 @@ def makePlots(sel, dir, ver, F0, plotMuons,plotElectrons,plotSpecial,plotMVA,plo
         u.drawMultiPlot(path+"mu05", "","dxy", "mu_dxy", 1, 0.1,1e9, 0,1.9, li_ov, li_allbg, sel, 0)
         u.drawMultiPlot(path+"mu06", "","isolation", "mu_iso", 1, 0.1,1e9, 0,1.9, li_ov, li_allbg, sel, 0)
         u.drawMultiPlot(path+"mu07", "","#delta (p_{T})/p_{T}", "mu_ptErrorOverPt", 1, 0.1,1e8, 0,1.9, li_ov, li_allbg, sel, 0)
+        u.drawMultiPlot(path+"mu08", "","#delta (p_{T})/p_{T}", "mu_ptErrorOverPt", 1, 0.1,1e8, 0,1.9, li_ov, li_allbg, sel, 0)
+
+        u.drawMultiPlot(path+"mu09", "","triM", "mu_triM", 0, 0.1, 300, 0.5,1.49, li_ov, li_allbg, sel, 1)
+        u.drawMultiPlot(path+"mu10", "","triM", "mu_triM", 1, 0.1, 1e3, 0.5,1.49, li_ov, li_allbg, sel, 1)
+        u.drawMultiPlot(path+"mu11", "","triM", "mu_triM_noLowMass", 0, 0.1, 300, 0.5,1.49, li_ov, li_allbg, sel, 1)
+        u.drawMultiPlot(path+"mu12", "","triM", "mu_triM_noLowMass", 1, 0.1, 1e3, 0.5,1.49, li_ov, li_allbg, sel, 1)
 
     if plotElectrons and sel==2:
         path = imgpath+"Electrons/"
@@ -130,6 +136,14 @@ def makePlots(sel, dir, ver, F0, plotMuons,plotElectrons,plotSpecial,plotMVA,plo
         u.drawMultiPlot(path+"ele03", "","dxy", "ele_dxy", 1, 0.1,1e9, 0,1.9, li_ov, li_allbg, sel, 0)
         u.drawMultiPlot(path+"ele04", "","#delta (p_{T})/p_{T}", "ele_ptErrorOverPt", 1, 0.1,1e9, 0,1.9, li_ov, li_allbg, sel, 0)
         u.drawMultiPlot(path+"ele05", "","e-Mass", "ele_mass", 1, 0.1,1e9, 0,1.9, li_ov, li_allbg, sel, 0)
+        u.drawMultiPlot(path+"ele06", "","e-Mass", "ele_mass", 1, 0.1,1e9, 0,1.9, li_ov, li_allbg, sel, 0)
+        u.drawMultiPlot(path+"ele07", "","e-Mass", "ele_mass", 1, 0.1,1e9, 0,1.9, li_ov, li_allbg, sel, 0)
+        u.drawMultiPlot(path+"ele08", "","e-Mass", "ele_mass", 1, 0.1,1e9, 0,1.9, li_ov, li_allbg, sel, 0)
+
+        u.drawMultiPlot(path+"ele09", "","triM", "ele_triM", 0, 0.1, 300, 0.5,1.49, li_ov, li_allbg, sel, 1)
+        u.drawMultiPlot(path+"ele10", "","triM", "ele_triM", 1, 0.1, 1e3, 0.5,1.49, li_ov, li_allbg, sel, 1)
+        u.drawMultiPlot(path+"ele11", "","triM", "ele_triM_noLowMass", 0, 0.1, 300, 0.5,1.49, li_ov, li_allbg, sel, 1)
+        u.drawMultiPlot(path+"ele12", "","triM", "ele_triM_noLowMass", 1, 0.1, 1e3, 0.5,1.49, li_ov, li_allbg, sel, 1)
        
     if plotMVA:
         path = imgpath+"mvaPresel/"
@@ -154,10 +168,6 @@ def makePlots(sel, dir, ver, F0, plotMuons,plotElectrons,plotSpecial,plotMVA,plo
 
         u.drawMultiPlot(path+"sp01", "","M(ll)", "di_mass_ext_2", 1, 0.1, 1e8, 0.5,1.49, li_ov, li_allbg, sel, 1)
         u.drawMultiPlot(path+"sp02", "","M(ll)", "di_mass_ext_2", 1, 0.1, 1e8, 0.5,1.49, li_ov, li_allbg, sel, 1)
-        u.drawMultiPlot(path+"sp03", "","triM", "mu_triM", 0, 0.1, 300, 0.5,1.49, li_ov, li_allbg, sel, 1)
-        u.drawMultiPlot(path+"sp04", "","triM", "mu_triM", 1, 0.1, 1e3, 0.5,1.49, li_ov, li_allbg, sel, 1)
-        u.drawMultiPlot(path+"sp05", "","triM", "mu_triM_noLowMass", 0, 0.1, 300, 0.5,1.49, li_ov, li_allbg, sel, 1)
-        u.drawMultiPlot(path+"sp06", "","triM", "mu_triM_noLowMass", 1, 0.1, 1e3, 0.5,1.49, li_ov, li_allbg, sel, 1)
 
         '''
         if sel==1:

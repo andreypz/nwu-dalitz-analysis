@@ -20,10 +20,10 @@ if nargs>1 and sys.argv[1]=="ele":
     
 version   = "v80"
 period    = '2012'
-doTest    = 0
-doData    = 1
-doBG      = 1
-doSignal  = 1
+doTest    = 1
+doData    = 0
+doBG      = 0
+doSignal  = 0
 
 ''' 
     Set job configurations.  The order of arguments is:
@@ -42,7 +42,8 @@ test.extend([
 #cfg('DYjets10',      dCache+'/naodell/nuTuples_v5_8TeV/DYJetsToLL_M-10To50', 20, 'DYjets10 '+selection+' '+period),
 #cfg('WZJetsTo3LNu',  dCache+'/andreypz/nuTuples_v5_8TeV/WZJetsTo3LNu',  1, 'WZ '+selection+' '+period),
 #cfg('DYjets',        dCache+'/andreypz/nuTuples_v5_8TeV/DYjets',       30, 'DYjets '+selection+' '+period),
-    cfg('DoubleMu_Run2012C_24Aug',  dCache+'/naodell/nuTuples_v5_5_8TeV/DoubleMu_Run2012C_24Aug_v2',   5, 'DATA muon 2012'),
+    #cfg('DoubleMu_Run2012C_24Aug',  dCache+'/naodell/nuTuples_v5_5_8TeV/DoubleMu_Run2012C_24Aug_v2',   5, 'DATA muon 2012'),
+    cfg('DoubleEle_Run2012D',        dCache+'/naodell/nuTuples_v5_5_8TeV/DoubleElectron_Run2012D',         20, 'DATA electron 2012'),
 ])
 
 
@@ -66,7 +67,7 @@ if selection == 'electron':
         cfg('DoubleEle_Run2012C_prompt', dCache+'/naodell/nuTuples_v5_5_8TeV/DoubleElectron_Run2012C_Prompt_v2',  20, 'DATA electron 2012'),
         cfg('DoubleEle_Run2012C_recover',dCache+'/naodell/nuTuples_v5_5_8TeV/DoubleElectron_Run2012C_Recover_v2', 20, 'DATA electron 2012'),
         cfg('DoubleEle_Run2012C_24Aug',  dCache+'/naodell/nuTuples_v5_5_8TeV/DoubleElectron_Run2012C_24Aug_v2',   20, 'DATA electron 2012'),
-        cfg('DoubleEle_Run2012D',        dCache+'/naodell/nuTuples_v5_5_8TeV/DoubleElectron_Run2012D_v2',         20, 'DATA electron 2012'),
+        cfg('DoubleEle_Run2012D',        dCache+'/naodell/nuTuples_v5_5_8TeV/DoubleElectron_Run2012D',         20, 'DATA electron 2012'),
 
         #cfg('DoubleEle_Run2012A', dCache+'/naodell/nuTuples_v5_8TeV/DoubleElectron_Run2012A', 10, 'DATA electron 2012'),
         #cfg('DoubleEle_Run2012B', dCache+'/naodell/nuTuples_v5_8TeV/DoubleElectron_Run2012B', 30, 'DATA electron 2012'),

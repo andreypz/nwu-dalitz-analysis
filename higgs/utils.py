@@ -558,7 +558,7 @@ def makeStack(bgList, histoname, lumi):
         else:
             #print bgList[b].GetName()
             evtHisto = bgList[b].Get("Histos/evt_byCut")
-            evtHisto.Print()
+            #evtHisto.Print()
             sample = evtHisto.GetTitle()
             #print "Double check the sample:",sample
         

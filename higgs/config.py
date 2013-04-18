@@ -55,8 +55,8 @@ class Params():
         ]
         self._nominalHZZ = [0,1,2,3,4,5,6,7,8]
         #self._bgOrderHZZ = ["Top","ttbar","WW","WZ","ZZ","DYjets"]        
-        self._bgOrderHZZ = ["Top","ttbar","DYjets"]        
-        #self._bgOrderHZZ = ["Top","ttbar","WWJetsTo2L2Nu","WZJetsTo3LNu","ZZJetsTo2L2Nu","DYjets"]        
+        #self._bgOrderHZZ = ["Top","ttbar","DYjets"]        
+        self._bgOrderHZZ = ["Top","ttbar","WWJetsTo2L2Nu","WZJetsTo3LNu","ZZJetsTo2L2Nu","DYjets"]        
         self._extraHZZ = [18,19,20, 9,13]
         #self._extraHZZ = [18,19,20, 9,25,26,27,28, 10,29,30,31,32, 21,22,23,24]
         self._toMerge ={"Top":["tW","tbarW"],

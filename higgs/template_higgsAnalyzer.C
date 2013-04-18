@@ -1,4 +1,4 @@
-// $Id: template_higgsAnalyzer.C,v 1.66 2013/04/16 22:11:42 andrey Exp $
+// $Id: template_higgsAnalyzer.C,v 1.67 2013/04/18 00:13:48 andrey Exp $
 
 #define higgsAnalyzer_cxx
 #include "higgsAnalyzer.h"
@@ -486,11 +486,28 @@ bool higgsAnalyzer::Process(Long64_t entry)
 
   sort(electrons.begin(), electrons.end(), P4SortCondition);
 
-  if (electrons.size()==3 && electrons[0].Pt()>20){
+
+  //!! low mass resonance rejection !!//
+  bool lowMassOS = false;
+
+  for (unsigned i = 1; i < electrons.size(); ++i) {
+    for (unsigned j = 0; j < i; ++j) {
+      if (
+          electrons[i].Type() == electrons[j].Type()
+          && electrons[i].Charge() != electrons[j].Charge()
+          && (electrons[i] + electrons[j]).M() < 12
+          ) lowMassOS = true;
+    }
+  }
+
+
+  if (electrons.size()==3 && electrons[0].Pt()>20 ){
     if (fabs(electrons[0].Charge() + electrons[1].Charge() + electrons[2].Charge())==1)
-      {    
+      {
         Float_t triM = (electrons[0]+electrons[1]+electrons[2]).M();
-        hists->fill1DHist(triM, "ele_triM","M(eee)", 40, 0,200, 1, "Electrons");
+        hists->fill1DHist(triM, "ele_triM","M(eee)", 60, 0,300, 1, "Electrons");
+        if (!lowMassOS)
+          hists->fill1DHist(triM, "ele_triM_noLowMass","M(eee)", 60, 0,300, 1, "Electrons");
       }
   }
 
@@ -530,7 +547,7 @@ bool higgsAnalyzer::Process(Long64_t entry)
   sort(looseLeptons.begin(), looseLeptons.end(), P4SortCondition);
 
   //!! low mass resonance rejection !!//
-  bool lowMassOS = false;
+  lowMassOS = false;
   for (unsigned i = 1; i < muons.size(); ++i) {
     for (unsigned j = 0; j < i; ++j) {
       if (
