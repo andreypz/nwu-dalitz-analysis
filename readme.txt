@@ -5,6 +5,14 @@ https://twiki.cern.ch/twiki/bin/view/CMS/UserCodeNWUHiggs
 
 The log of changes:
 
+2013-May-10
+  * Apparently, forgot to commit a TCPhysObject class, doing it now.
+  * Tag with V02-16    
+
+2013-Apr-18
+  * Tagged with V02-15
+    * See previous logs for changes
+    
 2013-Apr-17
   * Nate's tri-lepton plot is produced
   * Trigger Selector is modified to return: isFound, isPassed and a prescale
