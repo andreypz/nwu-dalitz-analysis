@@ -5,7 +5,9 @@ https://twiki.cern.ch/twiki/bin/view/CMS/UserCodeNWUHiggs
 
 The log of changes:
 
+
 2013-Jul-04
+  * Ported to Git!
   * Updated the TC classes with the latest version
   * Introduced Zgamma analyzer
 
