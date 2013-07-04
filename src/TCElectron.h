@@ -15,6 +15,7 @@ class TCElectron : public TCPhysObject {
         float _sigmaIetaIeta;
         float _eOverP;
         float _fBrem;
+        float _r9;
 
         float _scEta;
 
@@ -38,6 +39,8 @@ class TCElectron : public TCPhysObject {
         int _cut70;
         int _cut60;
 
+        TLorentzVector _regressionMomCombP4;
+
 
     public:
         TCElectron();
@@ -50,12 +53,13 @@ class TCElectron : public TCPhysObject {
         float HadOverEm() const;
         float DphiSuperCluster() const;
         float DetaSuperCluster() const;
-        float SigmaIetaIeta() const;
+        float SigmaIEtaIEta() const;
         float FBrem() const;
         float EOverP() const;
         float NormalizedChi2() const;
 
         float SCEta() const;
+        float R9() const; 
 
         bool  ConversionVeto() const;
         short ConversionMissHits() const;
@@ -74,6 +78,8 @@ class TCElectron : public TCPhysObject {
         bool PassConversion(int lvl) const;
         bool PassIsolation(int lvl) const;
 
+        TLorentzVector RegressionMomCombP4() const;
+
         //--------------------------
         // "set" methods ---------
         //--------------------------
@@ -82,7 +88,7 @@ class TCElectron : public TCPhysObject {
         void SetHadOverEm(float h);
         void SetDphiSuperCluster(float dp);
         void SetDetaSuperCluster(float de);
-        void SetSigmaIetaIeta(float sieie);
+        void SetSigmaIEtaIEta(float sieie);
         void SetEOverP(float e);
         void SetFBrem(float fb);
 
@@ -96,12 +102,15 @@ class TCElectron : public TCPhysObject {
         void SetNumberOfLostPixelHits(int n);
         void SetNumberOfLostTrackerHits(int n);
         void SetNormalizedChi2(float n);
+        void SetR9(float r);
 
         void SetIsEB(bool b);
         void SetIsEE(bool b);
         void SetIsInGap(bool b);
 
         void SetCutLevel(int cut, int lvl);
+
+        void SetRegressionMomCombP4(TLorentzVector tmpP4);
 
         ClassDef(TCElectron, 1);
 };

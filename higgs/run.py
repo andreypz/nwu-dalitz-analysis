@@ -48,15 +48,16 @@ print "Running on sample", sample, "with selection", selection, "in source ", so
 
 
 #tempfile = open("template_vbfZAnalyzer.C","r")
-tempfile = open("template_higgsAnalyzer.C","r")
+#tempfile = open("template_higgsAnalyzer.C","r")
+tempfile = open("template_zgamma.C","r")
 whole_thing = tempfile.read()
-whole_thing = whole_thing.replace("SUFFIX",sample)
-whole_thing = whole_thing.replace("SELECTION",selection)
-whole_thing = whole_thing.replace("PERIOD",period)
-whole_thing = whole_thing.replace('"DOSAMESIGN"',do_ss)
+#whole_thing = whole_thing.replace("SUFFIX",sample)
+#whole_thing = whole_thing.replace("SELECTION",selection)
+#whole_thing = whole_thing.replace("PERIOD",period)
+#whole_thing = whole_thing.replace('"DOSAMESIGN"',do_ss)
 tempfile.close()
 
-cfile = open("higgsAnalyzer.C","w")
+cfile = open("zgamma.C","w")
 cfile.write(whole_thing)
 cfile.close()
 
@@ -96,10 +97,12 @@ print nfiles, " files added!"
 timer = TStopwatch()
 timer.Start()
 
-fChain.Process("higgsAnalyzer.C+")
+fChain.Process("zgamma.C+")
+#fChain.Process("higgsAnalyzer.C+")
 
 print "Done!", "CPU Time: ", timer.CpuTime(), "RealTime : ", timer.RealTime()
 
-os.system('mv a_higgsHistograms.root hhhh_'+sourcefilename+'.root')
+#os.system('mv a_higgsHistograms.root hhhh_'+sourcefilename+'.root')
 
 print "End runninng"
+os.system("rm zgamma.C")

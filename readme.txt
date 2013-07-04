@@ -5,6 +5,10 @@ https://twiki.cern.ch/twiki/bin/view/CMS/UserCodeNWUHiggs
 
 The log of changes:
 
+2013-Jul-04
+  * Updated the TC classes with the latest version
+  * Introduced Zgamma analyzer
+
 2013-May-10
   * Apparently, forgot to commit a TCPhysObject class, doing it now.
   * Tag with V02-16    

@@ -11,6 +11,7 @@ TCElectron::~TCElectron() {
 
 // "get" methods -------------------------------------
 
+float TCElectron::R9() const { return _r9; } 
 
 float TCElectron::PtError() const {
   return _ptError;
@@ -69,7 +70,7 @@ float TCElectron::DphiSuperCluster() const {
 float TCElectron::DetaSuperCluster() const {
   return _dEtaSuperCluster;
 }
-float TCElectron::SigmaIetaIeta() const {
+float TCElectron::SigmaIEtaIEta() const {
   return _sigmaIetaIeta;
 }
 
@@ -117,10 +118,16 @@ bool TCElectron::PassConversion(int lvl) const {
   else return false;
 }
 
+TLorentzVector TCElectron::RegressionMomCombP4() const {
+  return _regressionMomCombP4;
+}
+
 //------------------------------------------------
 // "set" methods ---------------------------------------------
 //------------------------------------------------------------------------
 
+
+void TCElectron::SetR9(float r){ _r9 = r; } 
 
 void TCElectron::SetPtError(float e) {
   _ptError = e;
@@ -155,7 +162,7 @@ void TCElectron::SetDetaSuperCluster(float de){
   _dEtaSuperCluster = de;
 }
 
-void TCElectron::SetSigmaIetaIeta(float sieie){
+void TCElectron::SetSigmaIEtaIEta(float sieie){
   _sigmaIetaIeta = sieie;
 }
 
@@ -209,3 +216,8 @@ void TCElectron::SetCutLevel(int cut, int lvl){
     _cut60 = cut;
   }
 }
+
+void TCElectron::SetRegressionMomCombP4(TLorentzVector tmpP4){
+  _regressionMomCombP4 = tmpP4;
+}
+
