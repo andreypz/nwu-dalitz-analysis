@@ -7,7 +7,7 @@ parser = OptionParser(usage="usage: %prog [options -e], -m], -p 2011] samplename
 parser.add_option("-e", "--ele", dest="electron", action="store_true", default=False, help="Use electron selection")
 parser.add_option("-p", "--period", dest="period", default="2012", help="Set data period (2011/2012)")
 parser.add_option("-b", "--batch", dest="batch", action="store_true", default=False, help="Run in batch")
-parser.add_option("--ss", dest="same_sign", action="store_true", default=False, help="Run in batch")
+parser.add_option("--ss", dest="same_sign", action="store_true", default=False, help="Run same sign selection")
 
 from ROOT import *
 import shutil
@@ -48,16 +48,15 @@ print "Running on sample", sample, "with selection", selection, "in source ", so
 
 
 #tempfile = open("template_vbfZAnalyzer.C","r")
-#tempfile = open("template_higgsAnalyzer.C","r")
-tempfile = open("template_zgamma.C","r")
+tempfile = open("template_higgsAnalyzer.C","r")
 whole_thing = tempfile.read()
-#whole_thing = whole_thing.replace("SUFFIX",sample)
-#whole_thing = whole_thing.replace("SELECTION",selection)
-#whole_thing = whole_thing.replace("PERIOD",period)
-#whole_thing = whole_thing.replace('"DOSAMESIGN"',do_ss)
+whole_thing = whole_thing.replace("SUFFIX",sample)
+whole_thing = whole_thing.replace("SELECTION",selection)
+whole_thing = whole_thing.replace("PERIOD",period)
+whole_thing = whole_thing.replace('"DOSAMESIGN"',do_ss)
 tempfile.close()
 
-cfile = open("zgamma.C","w")
+cfile = open("higgsAnalyzer.C","w")
 cfile.write(whole_thing)
 cfile.close()
 
@@ -97,8 +96,7 @@ print nfiles, " files added!"
 timer = TStopwatch()
 timer.Start()
 
-fChain.Process("zgamma.C+")
-#fChain.Process("higgsAnalyzer.C+")
+fChain.Process("higgsAnalyzer.C+")
 
 print "Done!", "CPU Time: ", timer.CpuTime(), "RealTime : ", timer.RealTime()
 
