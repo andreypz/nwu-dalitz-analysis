@@ -1,6 +1,0 @@
-dcap://cmsdca1.fnal.gov:24140/pnfs/fnal.gov/usr/cms/WAX/11/store/user/andreypz/nuTuples_v6_8TeV/HZgamma_stoyan_hack/nuTuple_1_1_8Mu.root
-dcap://cmsdca1.fnal.gov:24140/pnfs/fnal.gov/usr/cms/WAX/11/store/user/andreypz/nuTuples_v3_8TeV/ZZJets_try2/nuTuple_90_1_25f.root
-dcap://cmsdca1.fnal.gov:24140/pnfs/fnal.gov/usr/cms/WAX/11/store/user/andreypz/nuTuples_v3_8TeV/ZZJets_try2/nuTuple_91_1_fG0.root
-dcap://cmsdca1.fnal.gov:24140/pnfs/fnal.gov/usr/cms/WAX/11/store/user/andreypz/nuTuples_v3_8TeV/ZZJets_try2/nuTuple_79_1_MqU.root
-dcap://cmsdca1.fnal.gov:24140/pnfs/fnal.gov/usr/cms/WAX/11/store/user/andreypz/nuTuples_v3_8TeV/ZZJets_try2/nuTuple_69_1_LG3.root
-dcap://cmsdca1.fnal.gov:24140/pnfs/fnal.gov/usr/cms/WAX/11/store/user/andreypz/nuTuples_v3_8TeV/ZZJets_try2/nuTuple_63_1_qAY.root

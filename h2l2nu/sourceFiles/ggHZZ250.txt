@@ -1,2 +1,0 @@
-dcap://cmsdca1.fnal.gov:24140/pnfs/fnal.gov/usr/cms/WAX/11/store/user/andreypz/nuTuples_v2_7TeV/ggH250/nuTuple_10_2_cCE.root
-dcap://cmsdca1.fnal.gov:24140/pnfs/fnal.gov/usr/cms/WAX/11/store/user/andreypz/nuTuples_v2_7TeV/ggH250/nuTuple_11_1_z75.root
