@@ -47,11 +47,9 @@
 #include "../src/TCPrimaryVtx.h"
 #include "../src/TCTriggerObject.h"
 
-#include "../plugins/MetDefinitions.h"
-#include "../plugins/WeightUtils.h"
+//#include "../plugins/WeightUtils.h"
 #include "../plugins/TriggerSelector.h"
-#include "../plugins/ZedEventsLibrary.h"
-#include "../plugins/rochcor.h"
+//#include "../plugins/rochcor.h"
 #include "../plugins/HistManager.h"
 
 // Header file for the classes stored in the TTree if any.
@@ -298,7 +296,6 @@ Bool_t zgamma::Notify()
   cout<<"  Opened file: \n"<<inFile->GetName()<<endl;
   cout<<" Events in file: "<<initEvents<<"  total processed: "<<totEvents<<endl;
 
-  //MET = 0;
   //FillHistosBasic(0, initEvents);
 
 

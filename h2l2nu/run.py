@@ -11,7 +11,6 @@ parser.add_option("--ss", dest="same_sign", action="store_true", default=False, 
 
 from ROOT import *
 import shutil
-import config as c
 
 (options, args) = parser.parse_args()
 

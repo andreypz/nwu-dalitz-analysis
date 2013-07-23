@@ -5,17 +5,17 @@
 
 
 const string period   = "2012";
-const string selection = "el";
+const string selection = "@SELECTION";
 
 const UInt_t ntrig = 38;
 string myTriggers[ntrig] = {
-  "HLT_Mu22_Photon22_CaloIdL_v",
   "HLT_IsoMu24_v",
   "HLT_IsoMu24_eta2p1_v",
   "HLT_Mu13_Mu8_v",
   "HLT_Mu17_Mu8_v",
   "HLT_Mu17_TkMu8_v",
   "HLT_Mu22_TkMu8_v",
+  "HLT_Mu22_Photon22_CaloIdL_v",
   "HLT_Photon90_CaloIdVL_v",
   "HLT_Photon135_v",
   "HLT_Photon22_R9Id90_HE10_Iso40_EBOnly_v",
@@ -63,6 +63,9 @@ bool P4SortCondition(const TLorentzVector& p1, const TLorentzVector& p2) {return
 
 void zgamma::Begin(TTree * tree)
 {
+  cout<<"\n***      Begin the Analyzer      ****"<<endl;
+  TString option = GetOption();
+  TH1::SetDefaultSumw2(kTRUE);
 
   vector<string>* triggerNames = 0;
   TFile   *inFile         = tree->GetCurrentFile();
@@ -70,12 +73,10 @@ void zgamma::Begin(TTree * tree)
   jobTree->SetBranchAddress("triggerNames", &triggerNames);
   jobTree->GetEntry();
 
+  //cout<<"Printing all the trigger names:"<<endl;
   //for (unsigned i = 0; i < triggerNames->size(); ++i) cout << triggerNames->at(i) << endl;
 
-  TString option = GetOption();
-  TH1::SetDefaultSumw2(kTRUE);
 
-  cout<<"\n***      Begin the Analyzer      ****"<<endl;
   //myRandom = new TRandom3();
 
   triggerSelector = new TriggerSelector("", period, *triggerNames);
@@ -171,7 +172,6 @@ void zgamma::SlaveBegin(TTree * /*tree*/)
 
 Bool_t zgamma::Process(Long64_t entry)
 {
-
   GetEntry(entry);
   CountEvents(0);
   if (nEvents[0] % (int)5e4 == 0) cout<<nEvents[3]<<" events passed of "<<nEvents[0]<<" checked! (at Z-peak cut)"<<endl;
@@ -183,8 +183,80 @@ Bool_t zgamma::Process(Long64_t entry)
   Bool_t isFound  = 0;
   Int_t  prescale = 99;
 
+  for (UInt_t i =0; i<ntrig; i++)
+    {
+      triggerSelector->SelectTrigger(myTriggers[i], triggerStatus, hltPrescale, isFound, triggerPass, prescale);
+      if(triggerPass) nEventsTrig[0][i]++;
+    }
 
-  TCPrimaryVtx *mainPrimaryVertex = 0, *secondPrimaryVertex = 0;
+
+
+
+  // ----------------------//
+  // Gen level particles --//
+  //-----------------------//
+  vector<TCPhysObject> gen_mu, gen_el;
+  TCPhysObject gen_ph, gen_l1, gen_l2;
+  
+  UInt_t ZID = 3000001;
+  //UInt_t ZID = 23;
+  for (int i = 0; i < genParticles->GetSize(); ++i) {
+    TCGenParticle* thisParticle = (TCGenParticle*) genParticles->At(i);
+    if (thisParticle->Mother()==ZID) {
+      if (abs(thisParticle->GetPDGId()) == 11 && thisParticle->GetStatus()==1) 
+        gen_el.push_back(*thisParticle);
+      if (abs(thisParticle->GetPDGId()) == 13 && thisParticle->GetStatus()==1) 
+        gen_mu.push_back(*thisParticle);
+    }
+  }
+  sort(gen_el.begin(), gen_el.end(), P4SortCondition);
+  sort(gen_mu.begin(), gen_mu.end(), P4SortCondition);
+
+  if(selection=="el"){ //eegamma
+    if (gen_el.size()<2) return kTRUE;
+    //Abort("No gen electrons? What's up with that?");
+    gen_l1 = gen_el[0];
+    gen_l2 = gen_el[1];
+
+    if (gen_el.size()>2) return kTRUE;
+    //Abort("Can't have more than two electrons from a decay!!!");
+  }
+
+  
+  if(selection=="mu"){//mumugamma
+    if (gen_mu.size()<2)  return kTRUE;
+
+    gen_l1 = gen_mu[0];
+    gen_l2 = gen_mu[1];
+    // If there are more muons - it's confusing, so let's just ignore them for now.
+    // (they may come from ZH -> ZZgamma process)
+    if (gen_mu.size()>2) 
+      return kTRUE;
+    
+    //{
+    //for (int i = 0; i < genParticles->GetSize(); ++i) {
+    //  TCGenParticle* thisParticle = (TCGenParticle*) genParticles->At(i);
+    //if (abs(thisParticle->GetPDGId()) == 11 && thisParticle->Mother()==3000001) {
+    //if (abs(thisParticle->GetPDGId()) == 13)
+    //cout<<"event = "<<eventNumber<<"   "<<thisParticle->GetPDGId()
+    //        <<"  st = "<<thisParticle->GetStatus()<<"    mother = "<<thisParticle->Mother()<<"    grandother = "<<thisParticle->Grandmother()
+    //        <<" pt="<<thisParticle->Pt()<<" eta="<<thisParticle->Eta()<<" phi="<<thisParticle->Phi()<<endl;
+          
+    //}
+    //}
+
+    //Abort("Can't have more than two muons from a decay!!!");
+  }
+
+
+  CountEvents(1);
+
+  for (UInt_t i =0; i<ntrig; i++){
+    triggerSelector->SelectTrigger(myTriggers[i], triggerStatus, hltPrescale, isFound, triggerPass, prescale);
+    if(triggerPass) nEventsTrig[1][i]++;
+  }
+
+  TCPrimaryVtx *mainPrimaryVertex = 0;//, *secondPrimaryVertex = 0;
   mainPrimaryVertex   = (TCPrimaryVtx*)(primaryVtx->At(0));
   //secondPrimaryVertex = (TCPrimaryVtx*)(primaryVtx->At(1));  
   TVector3* pvPosition;// = new TVector3();
@@ -234,22 +306,6 @@ Bool_t zgamma::Process(Long64_t entry)
   
   
   
-  vector<TCPhysObject> gen_lep;
-  TCPhysObject gen_ph;
-
-  for (int i = 0; i < genParticles->GetSize(); ++i) {
-    TCGenParticle* thisParticle = (TCGenParticle*) genParticles->At(i);
-    if (abs(thisParticle->GetPDGId()) == 11 && thisParticle->Mother()==3000001) {
-      //cout<<eventNumber<<"  Found an electron from 3000001"<<endl; 
-      gen_lep.push_back(*thisParticle);
-    }
-  }
-  if (gen_lep.size()>2) Abort("Can't have more than two leptons from a decay!!!");
-  if (gen_lep.size()>=2)
-    hists->fill1DHist(gen_lep[0].DeltaR(gen_lep[1]),"gen_ll_deltaR","gen_ll_deltaR",100,0,5, 1,"");
-
-
-
   if(selection=="el"){ //eegamma
     if (electrons.size()<2) return kTRUE;
     l1 = electrons[0];
@@ -263,13 +319,22 @@ Bool_t zgamma::Process(Long64_t entry)
   }
 
 
-  CountEvents(1);
+
+  hists->fill1DHist(gen_l1.DeltaR(gen_l2),"gen_ll_deltaR","gen_ll_deltaR",100,0,5, 1,"");
+
+  hists->fill1DHist(gen_l1.DeltaR(l1),"reco_gen_l1_deltaR","reco_gen_l1_deltaR",100,0,5, 1,"");
+  hists->fill1DHist(gen_l2.DeltaR(l2),"reco_gen_l2_deltaR","reco_gen_l2_deltaR",100,0,5, 1,"");
+  
+  
+  
+
+  CountEvents(2);
   for (UInt_t i =0; i<ntrig; i++)
     {
       triggerSelector->SelectTrigger(myTriggers[i], triggerStatus, hltPrescale, isFound, triggerPass, prescale);
       //if(nEvents[0]==0)
       //cout<<i<<"   "<<myTriggers[i]<<"   is Found = "<<isFound<<"   ispassed = "<<triggerPass<<"  prescale = "<<prescale<<endl;
-      if(triggerPass) nEventsTrig[1][i]++;
+      if(triggerPass) nEventsTrig[2][i]++;
     }
 
  
@@ -278,7 +343,7 @@ Bool_t zgamma::Process(Long64_t entry)
   hists->fill1DHist(l2.Pt(),"l2_pt","Second Lepton pt", 50,0,200, 1,"");
   hists->fill1DHist(ph.Pt(),"ph_pt","Photon pt", 50,0,200, 1,"");
 
-  hists->fill1DHist((l1+l2).M(),"ll_mass","ll_mass",100,0,100, 1,"");
+  hists->fill1DHist((l1+l2).M(),  "ll_mass","ll_mass",100,0,100, 1,"");
   hists->fill1DHist(l1.DeltaR(l2),"ll_deltaR","ll_deltaR",100,0,5, 1,"");
   hists->fill1DHist(l1.DeltaR(ph),"l1_ph_deltaR","l1_ph_deltaR",100,0,5, 1,"");
   hists->fill1DHist(l2.DeltaR(ph),"l2_ph_deltaR","l2_ph_deltaR",100,0,5, 1,"");
@@ -288,20 +353,19 @@ Bool_t zgamma::Process(Long64_t entry)
   
 
 
-  CountEvents(2);
-  for (UInt_t i =0; i<ntrig; i++)
-    {
+  CountEvents(3);
+  for (UInt_t i =0; i<ntrig; i++) {
       triggerSelector->SelectTrigger(myTriggers[i], triggerStatus, hltPrescale, isFound, triggerPass, prescale);
-      if(triggerPass) nEventsTrig[2][i]++;
+      if(triggerPass) nEventsTrig[3][i]++;
     }
 
 
-  if (fabs(ph.Eta()) > 1.44) return kTRUE;
-  CountEvents(3);
+  if (fabs(ph.Eta()) > 2.5) return kTRUE;
+  CountEvents(4);
 
   for (UInt_t i =0; i<ntrig; i++){
     triggerSelector->SelectTrigger(myTriggers[i], triggerStatus, hltPrescale, isFound, triggerPass, prescale);
-    if(triggerPass) nEventsTrig[3][i]++;
+    if(triggerPass) nEventsTrig[4][i]++;
   }
 
 
@@ -317,17 +381,19 @@ void zgamma::SlaveTerminate() {}
 void zgamma::Terminate()
 {
 
-  cout<<"| CUT DESCRIPTION                  |\t"<< "\t|"<<endl;
-  cout<<"| Initial number of events:        |\t"<< nEvents[0]  <<"\t|"<<"\t|"<<endl;
-  cout<<"| number of events:        |\t"<< nEvents[1]  <<"\t|"<<"\t|"<<endl;
-  cout<<"| number of events:        |\t"<< nEvents[2]  <<"\t|"<<"\t|"<<endl;
-  cout<<"| number of events:        |\t"<< nEvents[3]  <<"\t|"<<"\t|"<<endl;
+  cout<<"| CUT DESCRIPTION             |\t"<< "\t|"<<endl;
+  cout<<"| Initial number of events:   |\t"<< nEvents[0]  <<"\t|"<<float(nEvents[0])/nEvents[0]<<"\t|"<<endl;
+  cout<<"| Gen particles cuts:         |\t"<< nEvents[1]  <<"\t|"<<float(nEvents[1])/nEvents[0]<<"\t|"<<endl;
+  cout<<"| Reco selection:             |\t"<< nEvents[2]  <<"\t|"<<float(nEvents[2])/nEvents[0]<<"\t|"<<endl;
+  cout<<"| semi-Final selection:       |\t"<< nEvents[3]  <<"\t|"<<float(nEvents[3])/nEvents[0]<<"\t|"<<endl;
+  cout<<"| photon eta cut :       |\t"<< nEvents[4]  <<"\t|"<<float(nEvents[4])/nEvents[0]<<"\t|"<<endl;
 
 
   cout<<"\n\n | Trigger efficiency 2              |\t"<<endl;
   for(UInt_t n=0; n<ntrig; n++){ 
-    UInt_t N=2;
-    cout<<n<<"  "<<float(nEventsTrig[N][n])/nEvents[N]<<"   "<<myTriggers[n]<<endl;;
+    UInt_t N=3;
+    //cout<<n<<"  "<<float(nEventsTrig[N][n])/nEvents[N]<<"   "<<myTriggers[n]<<endl;;
+    cout<<n<<"  "<<float(nEventsTrig[0][n])/nEvents[0]<<"   after sel: "<<nEventsTrig[N][n]<<"/"<<nEvents[N]<<"="<<float(nEventsTrig[N][n])/nEvents[N]<<"   "<<myTriggers[n]<<endl;;
   }
 
   //cout<<"\n\n | Trigger efficiency 3              |\t"<<endl;
@@ -375,8 +441,8 @@ float zgamma::CalculateElectronIso(TCElectron *lep)
 bool zgamma::PassElectronIdAndIso(TCElectron *lep, elIdAndIsoCuts cuts, TVector3 *pv)
 {
   bool pass = false;
-
-  Float_t eleISO = CalculateElectronIso(lep);
+  
+  //Float_t eleISO = CalculateElectronIso(lep);
 
   if(((fabs(lep->Eta()) < 1.442
        && lep->PtError()/lep->Pt()       < cuts.ptErrorOverPt[0]
@@ -385,7 +451,7 @@ bool zgamma::PassElectronIdAndIso(TCElectron *lep, elIdAndIsoCuts cuts, TVector3
        && fabs(lep->DetaSuperCluster())  < cuts.dEtaIn[0]
        && lep->HadOverEm()               < cuts.HadOverEm[0]
        //&& (period=="2011" || lep->IsoMap("fabsEPDiff")      < cuts.fabsEPDiff[0])
-       //&& fabs(lep->Dxy(pv))             < cuts.dxy[0]
+       && fabs(lep->Dxy(pv))             < cuts.dxy[0]
        //&& fabs(lep->Dz(pv))              < cuts.dz[0]
        //&& eleISO                         < cuts.pfIso04[0]
        )||
@@ -430,7 +496,7 @@ bool zgamma::PassMuonIdAndIso(TCMuon *lep, muIdAndIsoCuts cuts, TVector3 *pv)
 {
   bool pass = false;
   
-  Float_t muISO =  CalculateMuonIso(lep);
+  //Float_t muISO =  CalculateMuonIso(lep);
   
   if( lep->PtError()/lep->Pt() < cuts.ptErrorOverPt
       && lep->NumberOfValidMuonHits()    > cuts.NumberOfValidMuonHits
@@ -438,7 +504,7 @@ bool zgamma::PassMuonIdAndIso(TCMuon *lep, muIdAndIsoCuts cuts, TVector3 *pv)
       && lep->NumberOfValidPixelHits()   > cuts.NumberOfValidPixelHits
       && lep->NumberOfMatches() > cuts.NumberOfMatches
       && lep->NormalizedChi2()  < cuts.NormalizedChi2
-      //&& fabs(lep->Dxy(pv))     < cuts.dxy
+      && fabs(lep->Dxy(pv))     < cuts.dxy
       //&& fabs(lep->Dz(pv))      < cuts.dz
       //&& muISO                  < cuts.pfIso04
       )

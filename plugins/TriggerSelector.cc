@@ -13,7 +13,7 @@ TriggerSelector::TriggerSelector(string type, string dataPeriod, vstring trigger
 
 }
 
-void TriggerSelector::SelectTrigger(string name, unsigned triggerStatus, UInt_t* hltPrescales, Bool_t& isFound, Bool_t& isPassed, Int_t& prescale )
+void TriggerSelector::SelectTrigger(string name, ULong64_t triggerStatus, UInt_t* hltPrescales, Bool_t& isFound, Bool_t& isPassed, Int_t& prescale )
 {
 
   prescale = 90; 
@@ -28,10 +28,10 @@ void TriggerSelector::SelectTrigger(string name, unsigned triggerStatus, UInt_t*
       if (triggerStatus & (ULong64_t(0x1) << count)) 
         isPassed = true;
       
-      //cout<<"TRG dbg: iName = "<<name<<" matches to the name  "<<name<<endl;
+      //cout<<"TRG dbg: iName = "<<*iName<<" matches to the name  "<<name<<endl;
       //cout<<"which is   number "<<count<<"  in the array of trigger names"<<endl;
-      //cout<<"Is it passed? = "<<passed<<"    is it prescaled? prescsle = "<<hltPrescales[count]<<endl;
-      
+      //cout<<"Is it passed? = "<<isPassed<<"    is it prescaled? prescsle = "<<hltPrescales[count]<<endl;
+      // Note: prescales may not be saved in the ntuple: default is 1
       break;
     }
     ++count;

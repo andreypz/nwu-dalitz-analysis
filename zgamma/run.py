@@ -7,49 +7,47 @@ parser = OptionParser(usage="usage: %prog [options -e], -m], -p 2011] samplename
 parser.add_option("-e", "--ele", dest="electron", action="store_true", default=False, help="Use electron selection")
 parser.add_option("-p", "--period", dest="period", default="2012", help="Set data period (2011/2012)")
 parser.add_option("-b", "--batch", dest="batch", action="store_true", default=False, help="Run in batch")
+parser.add_option("-c", "--clean", dest="clean", action="store_true", default=False, help="Clean the libs")
 
 from ROOT import *
-import shutil
-import config as c
+#import shutil
 
 (options, args) = parser.parse_args()
 
+if options.clean:
+    os.system("rm ../src/*.so ../src/*.d ../plugins/*.so ../plugins/*.d")
+    print "All cleaned"
+    exit(0)
+    
 if len(args) < 2:
     parser.print_usage()
     exit(1)
 
 sample    = args[0]
-sourcefilename = args[1]
+sourcefilename = args[1] 
 
 period    = options.period
-selection = "muon"
-do_ss = "kFALSE"
-if options.same_sign:
-    do_ss = "kTRUE"
-    print "Doing same sign analysis"
+selection = "mu"
 
 if options.electron :
     print "options.electorn???", options.electron
-    selection="electron"
+    selection="el"
 
-isbatch   = options.batch
-    
+isbatch   = options.batch    
 if(isbatch):
     sourceFiles = "./input.txt"
     print "Do batch, source files: \n", sourceFiles
 else:
-    sourceFiles = "./"+sourcefilename+".txt"
+    sourceFiles = "./"+sourcefilename
     print "Run locally, source files: \n", sourceFiles
-
 
 
 print "Running on sample", sample, "with selection", selection, "in source ", sourcefilename, ", period =", period, " batch =",  isbatch
 
 
-
 tempfile = open("template_zgamma.C","r")
 whole_thing = tempfile.read()
-#whole_thing = whole_thing.replace("SUFFIX",sample)
+whole_thing = whole_thing.replace("@SELECTION",selection)
 tempfile.close()
 
 cfile = open("zgamma.C","w")
@@ -57,7 +55,7 @@ cfile.write(whole_thing)
 cfile.close()
 
 #gSystem.Load("../plugins/lib/libShapeLine.so");
-gROOT.LoadMacro("../plugins/rochcor.cc+");
+#gROOT.LoadMacro("../plugins/rochcor.cc+");
 gROOT.LoadMacro("../src/TCPhysObject.cc+");
 gROOT.LoadMacro("../src/TCJet.cc+");
 gROOT.LoadMacro("../src/TCMET.cc+");
