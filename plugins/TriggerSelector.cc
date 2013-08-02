@@ -44,7 +44,7 @@ void TriggerSelector::SelectTrigger(string name, ULong64_t triggerStatus, UInt_t
   //cout<<count<<"  Caution **: the trigger "<<name<<"   passed but it is Prescaled!  with a prescale = "<<hltPrescales[count]<<"  "<<prescale<<endl;
 
   //if(!isFound)
-  // cout<<"TRG **** Warning ***\n The trigger name you specified is not in the list of trigger names"<<endl;
+  //cout<<"TRG **** Warning ***\n The trigger name "<<name<<" is not in the list of trigger names"<<endl;
 
 
   //return prescale;

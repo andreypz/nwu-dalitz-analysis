@@ -25,28 +25,28 @@ string myTriggers[ntrig] = {
   "HLT_Ele17_CaloIdL_CaloIsoVL_v",
   "HLT_Ele27_WP80_v",
   "HLT_Ele22_CaloIdL_CaloIsoVL_v",
-  "HLT_Ele20_CaloIdVT_CaloIsoVT_TrkIdT_TrkIsoVT_SC4_Mass50",
-  "HLT_Ele32_CaloIdT_CaloIsoT_TrkIdT_TrkIsoT_SC17_Mass50",
+  "HLT_Ele20_CaloIdVT_CaloIsoVT_TrkIdT_TrkIsoVT_SC4_Mass50_v",
+  "HLT_Ele32_CaloIdT_CaloIsoT_TrkIdT_TrkIsoT_SC17_Mass50_v",
   "HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v",
   "HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_v",
   "HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v",
   "HLT_DoubleEle33_CaloIdL_GsfTrkIdVL_v",
-  "HLT_Ele15_Ele8_Ele5_CaloIdL_TrkIdVL",
-  "HLT_DoubleEle10_CaloIdL_TrkIdVL_Ele10_CaloIdT_TrkIdVL ",
-  "HLT_TripleEle10_CaloIdL_TrkIdVL",
-  "HLT_Ele30_CaloIdVT_TrkIdT_PFJet100_PFJet25",
-  "HLT_DoubleEle8_CaloIdT_TrkIdVL_Mass8_PFHT175",
-  "HLT_Photon26_R9Id85_OR_CaloId10_Iso50_Photon18_R9Id85_OR_CaloId10_Iso50_Mass60",
-  "HLT_Photon26_R9Id85_OR_CaloId10_Iso50_Photon18_R9Id85_OR_CaloId10_Iso50_Mass70",
-  "HLT_Photon26_CaloId10_Iso50_Photon18_CaloId10_Iso50_Mass60",
-  "HLT_Photon26_CaloId10_Iso50_Photon18_R9Id85_Mass60",
-  "HLT_Photon26_R9Id85_Photon18_CaloId10_Iso50_Mass60",
-  "HLT_Photon26_R9Id85_Photon18_R9Id85_Mass60",
-  "HLT_Photon36_CaloId10_Iso50_Photon22_CaloId10_Iso50",
-  "HLT_Photon36_CaloId10_Iso50_Photon22_R9Id85",
-  "HLT_Photon36_R9Id85_OR_CaloId10_Iso50_Photon22_R9Id85_OR_CaloId10_Iso50",
-  "HLT_Photon36_R9Id85_Photon22_CaloId10_Iso50",
-  "HLT_Photon36_R9Id85_Photon22_R9Id85"};
+  "HLT_Ele15_Ele8_Ele5_CaloIdL_TrkIdVL_v",
+  "HLT_DoubleEle10_CaloIdL_TrkIdVL_Ele10_CaloIdT_TrkIdVL_v",
+  "HLT_TripleEle10_CaloIdL_TrkIdVL_v",
+  "HLT_Ele30_CaloIdVT_TrkIdT_PFJet100_PFJet25_v",
+  "HLT_DoubleEle8_CaloIdT_TrkIdVL_Mass8_PFHT175_v",
+  "HLT_Photon26_R9Id85_OR_CaloId10_Iso50_Photon18_R9Id85_OR_CaloId10_Iso50_Mass60_v",
+  "HLT_Photon26_R9Id85_OR_CaloId10_Iso50_Photon18_R9Id85_OR_CaloId10_Iso50_Mass70_v",
+  "HLT_Photon26_CaloId10_Iso50_Photon18_CaloId10_Iso50_Mass60_v",
+  "HLT_Photon26_CaloId10_Iso50_Photon18_R9Id85_Mass60_v",
+  "HLT_Photon26_R9Id85_Photon18_CaloId10_Iso50_Mass60_v",
+  "HLT_Photon26_R9Id85_Photon18_R9Id85_Mass60_v",
+  "HLT_Photon36_CaloId10_Iso50_Photon22_CaloId10_Iso50_v",
+  "HLT_Photon36_CaloId10_Iso50_Photon22_R9Id85_v",
+  "HLT_Photon36_R9Id85_OR_CaloId10_Iso50_Photon22_R9Id85_OR_CaloId10_Iso50_v",
+  "HLT_Photon36_R9Id85_Photon22_CaloId10_Iso50_v",
+  "HLT_Photon36_R9Id85_Photon22_R9Id85_v"};
 
 UInt_t nEventsTrig[nC][ntrig];
 float EAPho[7][3] = {
@@ -76,12 +76,11 @@ void zgamma::Begin(TTree * tree)
   //cout<<"Printing all the trigger names:"<<endl;
   //for (unsigned i = 0; i < triggerNames->size(); ++i) cout << triggerNames->at(i) << endl;
 
-
   //myRandom = new TRandom3();
 
   triggerSelector = new TriggerSelector("", period, *triggerNames);
 
-  histoFile = new TFile("a_higgsHistograms.root", "RECREATE");
+  histoFile = new TFile(Form("a_%s_higgsHistograms.root", selection.c_str()), "RECREATE");
   hists = new HistManager(histoFile);
 
   for (Int_t n1=0; n1<nC; n1++){
@@ -174,7 +173,7 @@ Bool_t zgamma::Process(Long64_t entry)
 {
   GetEntry(entry);
   CountEvents(0);
-  if (nEvents[0] % (int)5e4 == 0) cout<<nEvents[3]<<" events passed of "<<nEvents[0]<<" checked! (at Z-peak cut)"<<endl;
+  if (nEvents[0] % (int)5e4 == 0) cout<<nEvents[3]<<" events passed of "<<nEvents[0]<<" checked!"<<endl;
   
   //////////////////
   //Trigger status//
@@ -191,73 +190,130 @@ Bool_t zgamma::Process(Long64_t entry)
 
 
 
-
   // ----------------------//
   // Gen level particles --//
   //-----------------------//
   vector<TCPhysObject> gen_mu, gen_el;
-  TCPhysObject gen_ph, gen_l1, gen_l2;
-  
-  UInt_t ZID = 3000001;
-  //UInt_t ZID = 23;
-  for (int i = 0; i < genParticles->GetSize(); ++i) {
-    TCGenParticle* thisParticle = (TCGenParticle*) genParticles->At(i);
-    if (thisParticle->Mother()==ZID) {
+  TCPhysObject gen_gamma, gen_l1, gen_l2, gen_lPt1, gen_lPt2;
+  if(!isRealData){    
+    //Int_t ZID = 3000001; //made-up particle that decays to l+l-
+    Int_t ZID = 23;
+    for (int i = 0; i < genParticles->GetSize(); ++i) {
+      TCGenParticle* thisParticle = (TCGenParticle*) genParticles->At(i);
+      //if (thisParticle->Mother()==ZID) {
       if (abs(thisParticle->GetPDGId()) == 11 && thisParticle->GetStatus()==1) 
         gen_el.push_back(*thisParticle);
-      if (abs(thisParticle->GetPDGId()) == 13 && thisParticle->GetStatus()==1) 
+      if (abs(thisParticle->GetPDGId()) == 13 && (thisParticle->GetStatus()==1 || thisParticle->GetStatus()==2) && (fabs(thisParticle->Grandmother())<7 || thisParticle->Grandmother()==23)) 
+        //if (abs(thisParticle->GetPDGId()) == 13 && thisParticle->GetStatus()==1) 
         gen_mu.push_back(*thisParticle);
+        //}
+      if (thisParticle->GetPDGId()==22 && thisParticle->GetStatus()==1 && (fabs(thisParticle->Grandmother())<7 || thisParticle->Grandmother()==23) ) // a photon from higgs decay
+        //if (thisParticle->GetPDGId()==22 && thisParticle->Mother()==25) // a photon from higgs decay
+        gen_gamma = *thisParticle;
     }
-  }
-  sort(gen_el.begin(), gen_el.end(), P4SortCondition);
-  sort(gen_mu.begin(), gen_mu.end(), P4SortCondition);
-
-  if(selection=="el"){ //eegamma
-    if (gen_el.size()<2) return kTRUE;
-    //Abort("No gen electrons? What's up with that?");
-    gen_l1 = gen_el[0];
-    gen_l2 = gen_el[1];
-
-    if (gen_el.size()>2) return kTRUE;
-    //Abort("Can't have more than two electrons from a decay!!!");
-  }
-
-  
-  if(selection=="mu"){//mumugamma
-    if (gen_mu.size()<2)  return kTRUE;
-
-    gen_l1 = gen_mu[0];
-    gen_l2 = gen_mu[1];
-    // If there are more muons - it's confusing, so let's just ignore them for now.
-    // (they may come from ZH -> ZZgamma process)
-    if (gen_mu.size()>2) 
-      return kTRUE;
+    sort(gen_el.begin(), gen_el.end(), P4SortCondition);
+    sort(gen_mu.begin(), gen_mu.end(), P4SortCondition);
     
-    //{
-    //for (int i = 0; i < genParticles->GetSize(); ++i) {
-    //  TCGenParticle* thisParticle = (TCGenParticle*) genParticles->At(i);
-    //if (abs(thisParticle->GetPDGId()) == 11 && thisParticle->Mother()==3000001) {
-    //if (abs(thisParticle->GetPDGId()) == 13)
-    //cout<<"event = "<<eventNumber<<"   "<<thisParticle->GetPDGId()
-    //        <<"  st = "<<thisParticle->GetStatus()<<"    mother = "<<thisParticle->Mother()<<"    grandother = "<<thisParticle->Grandmother()
-    //        <<" pt="<<thisParticle->Pt()<<" eta="<<thisParticle->Eta()<<" phi="<<thisParticle->Phi()<<endl;
-          
-    //}
-    //}
+    if(selection=="el"){ //eegamma
+      if (gen_el.size()<2) return kTRUE;
+      //Abort("No gen electrons? What's up with that?");
+      gen_lPt1 = gen_el[0];
+      gen_lPt2 = gen_el[1];
+      
+      if (gen_el[0].Charge()==1 && gen_el[1].Charge()==-1){
+        gen_l1 = gen_el[0];
+        gen_l2 = gen_el[1];
+      }
+      else if (gen_el[0].Charge()==-1 && gen_el[1].Charge()==1){
+        gen_l1 = gen_el[1];
+        gen_l2 = gen_el[0];
+      }
+      else
+        Abort("They are the same charge!");
+      
+      if (gen_el.size()>2) return kTRUE;
+      //Abort("Can't have more than two electrons from a decay!!!");
+    }
 
-    //Abort("Can't have more than two muons from a decay!!!");
+    if (gen_gamma.E()==0) Abort("No gamma in an event? that sounds bad");//return kTRUE;
+    
+    
+    for (int i = 0; i < genParticles->GetSize(); ++i) {
+      TCGenParticle* thisParticle = (TCGenParticle*) genParticles->At(i);
+      //if (abs(thisParticle->GetPDGId()) == 11 && thisParticle->Mother()==3000001) {
+      //if (abs(thisParticle->GetPDGId()) == 22)
+      //if (abs(thisParticle->GetPDGId()) == 13){
+      if (abs(thisParticle->GetPDGId()) == 22 ||
+          (abs(thisParticle->GetPDGId()) == 13 && (thisParticle->GetStatus()==1 || thisParticle->GetStatus()==2))){
+        cout<<"event = "<<eventNumber<<"   "<<thisParticle->GetPDGId()
+            <<"  st = "<<thisParticle->GetStatus()<<"    mother = "<<thisParticle->Mother()<<"    grandMother = "<<thisParticle->Grandmother()
+            <<" pt="<<thisParticle->Pt()<<" eta="<<thisParticle->Eta()<<" phi="<<thisParticle->Phi()<<" px="<<thisParticle->Px()<<endl;
+        if ( thisParticle->Grandmother() == thisParticle->GetPDGId())
+          cout<<"\t grandma ?:"<<endl;
+        
+      }
+    }
+
+
+    if(selection=="mu"){//mumugamma
+      if (gen_mu.size()<2)  return kTRUE;
+      
+      gen_lPt1 = gen_mu[0];
+      gen_lPt2 = gen_mu[1];
+      // If there are more muons - it's confusing, so let's just ignore them for now.
+      // (they may come from ZH -> ZZgamma process)
+      
+      
+      if (gen_mu[0].Charge()==1 && gen_mu[1].Charge()==-1){
+        gen_l1 = gen_mu[0];
+        gen_l2 = gen_mu[1];
+      }
+      else if (gen_mu[0].Charge()==-1 && gen_mu[1].Charge()==1){
+        gen_l1 = gen_mu[1];
+        gen_l2 = gen_mu[0];
+      }
+      else
+        Abort("They are the same charge!");
+      
+      if (gen_mu.size()>2) 
+        return kTRUE;
+      
+      //cout<<"\t\t event = "<<eventNumber<<"  "<<endl;
+      //cout<<" charge = "<<gen_l1.Charge()<<" pt = "<<gen_l1.Pt()<<" eta="<<gen_l1.Eta()<<" phi="<<gen_l1.Phi()<<endl;
+      //cout<<" charge = "<<gen_l2.Charge()<<" pt = "<<gen_l2.Pt()<<" eta="<<gen_l2.Eta()<<" phi="<<gen_l2.Phi()<<endl;
+      
+      //{
+      //}
+      //}
+      
+      //Abort("Can't have more than two muons from a decay!!!");
+    }
+    
+    
+    //if(!( gen_lPt1.Pt()>23 && gen_lPt2.Pt()>8 && gen_gamma.Pt()>23)) return kTRUE;
+    //if(!( fabs(gen_lPt1.Eta())<2.5 && fabs(gen_lPt2.Eta())<2.5 && fabs(gen_gamma.Eta())<2.5)) return kTRUE;
+    
+    hists->fill1DHist(gen_l1.DeltaR(gen_l2),"gen_ll_deltaR","gen_ll_deltaR",100,0,1, 1,"");
+    hists->fill1DHist(gen_l1.DeltaR(gen_gamma),"gen_l1gamma_deltaR","gen_l1gamma_deltaR",100,0,5, 1,"");
+    hists->fill1DHist(gen_l2.DeltaR(gen_gamma),"gen_l2gamma_deltaR","gen_l2gamma_deltaR",100,0,5, 1,"");
+
   }
-
-
+  
   CountEvents(1);
-
+  
   for (UInt_t i =0; i<ntrig; i++){
     triggerSelector->SelectTrigger(myTriggers[i], triggerStatus, hltPrescale, isFound, triggerPass, prescale);
     if(triggerPass) nEventsTrig[1][i]++;
+
+    if (!isFound)
+      cout<<"TRG **** Warning ***\n The trigger name "<<myTriggers[i]<<" is not in the list of trigger names"<<endl;                                                                       
   }
 
+
+  if (primaryVtx->GetSize()<1) return kTRUE;
   TCPrimaryVtx *mainPrimaryVertex = 0;//, *secondPrimaryVertex = 0;
   mainPrimaryVertex   = (TCPrimaryVtx*)(primaryVtx->At(0));
+
   //secondPrimaryVertex = (TCPrimaryVtx*)(primaryVtx->At(1));  
   TVector3* pvPosition;// = new TVector3();
   pvPosition = mainPrimaryVertex;
@@ -274,20 +330,22 @@ Bool_t zgamma::Process(Long64_t entry)
        ) photons.push_back(*thisPhoton);
   }
   
-  
-  TCPhysObject l1,l2, ph;
+  sort(photons.begin(), photons.end(), P4SortCondition);
+
+
+  TCPhysObject l1,l2, lPt1, lPt2, gamma;
   if (photons.size()<1) return kTRUE;
-  ph = photons[0];
+  gamma = photons[0];
 
   for (Int_t i = 0; i <  recoElectrons->GetSize(); ++i) {
     TCElectron* thisElec = (TCElectron*) recoElectrons->At(i);
 
     if (!(fabs(thisElec->Eta()) < 2.5)) continue;
 
-    if (thisElec->Pt() > 8.0
-        && PassElectronIdAndIso(thisElec, elIdAndIsoCutsTight, pvPosition)
-        //&& PassElectronIdAndIso(thisElec, elIdAndIsoCutsLoose, pvPosition)
-        //&& ph.DeltaR(*thisElec) > 0.4 // this should not fake a photon!
+    if (thisElec->Pt() > 7.0
+        //&& PassElectronIdAndIso(thisElec, elIdAndIsoCutsTight, pvPosition)
+        && PassElectronIdAndIso(thisElec, elIdAndIsoCutsLoose, pvPosition)
+        && gamma.DeltaR(*thisElec) > 0.4 // this should not fake a photon!
         ) electrons.push_back(*thisElec);
   }
   sort(electrons.begin(), electrons.end(), P4SortCondition);
@@ -303,53 +361,127 @@ Bool_t zgamma::Process(Long64_t entry)
   }
 
   sort(muons.begin(), muons.end(), P4SortCondition);
-  
-  
+    
   
   if(selection=="el"){ //eegamma
-    if (electrons.size()<2) return kTRUE;
+    //Only one electron!
+    if (electrons.size()<1) return kTRUE;
+    lPt1 = electrons[0];
+    lPt2 = lPt1;
+    
     l1 = electrons[0];
-    l2 = electrons[1];}
+    l2 = l1;
+
+  }
 
   
   if(selection=="mu"){//mumugamma
     if (muons.size()<2) return kTRUE;
-    l1 = muons[0];
-    l2 = muons[1];
+    lPt1 = muons[0];
+    lPt2 = muons[1];
+    if (muons[0].Charge()==1 && muons[1].Charge()==-1){
+      l1 = muons[0];
+      l2 = muons[1];
+    }
+    else if (muons[0].Charge()==-1 && muons[1].Charge()==1){
+      l1 = muons[1];
+      l2 = muons[0];
+    }
+    else{
+      cout<<"ch1 = "<<muons[0].Charge()<<"ch1 = "<<muons[1].Charge()<<endl;
+      return kTRUE;//Abort("reco * They are the same charge!");
+    }
   }
+  TLorentzVector diLep = l1+l2;
+  if(selection=="el") diLep = l1;
+  TLorentzVector tri = diLep + gamma;
 
-
-
-  hists->fill1DHist(gen_l1.DeltaR(gen_l2),"gen_ll_deltaR","gen_ll_deltaR",100,0,5, 1,"");
-
-  hists->fill1DHist(gen_l1.DeltaR(l1),"reco_gen_l1_deltaR","reco_gen_l1_deltaR",100,0,5, 1,"");
-  hists->fill1DHist(gen_l2.DeltaR(l2),"reco_gen_l2_deltaR","reco_gen_l2_deltaR",100,0,5, 1,"");
+  TLorentzVector gammaCM = gamma;
+  TLorentzVector diLepCM = diLep;
+  TVector3    b1  = -tri.BoostVector();
+  gammaCM.Boost(b1);
+  diLepCM.Boost(b1);
   
+
+  if(!isRealData){
+    hists->fill1DHist(gen_l1.DeltaR(l1),"reco_gen_l1_deltaR","reco_gen_l1_deltaR",100,0,5, 1,"");
+    hists->fill1DHist(gen_l2.DeltaR(l2),"reco_gen_l2_deltaR","reco_gen_l2_deltaR",100,0,5, 1,"");
+    
+    
+    hists->fill2DHist(gen_l1.DeltaR(l1), gen_l2.DeltaR(l2),"reco_gen_2D_ll_deltaR","reco_gen_2D_ll_deltaR",100,0,5, 100,0,5, 1,"");
+    hists->fill2DHist(gen_l1.DeltaR(l1), gen_gamma.DeltaR(gamma),"reco_gen_2D_l1gamma_deltaR","reco_gen_2D_l1gamma_deltaR",100,0,5, 100,0,5, 1,"");
+    
+    hists->fill1DHist(gen_gamma.DeltaR(gamma),"reco_gen_gamma_deltaR","reco_gen_gamma_deltaR",100,0,5, 1,"");
+  }
   
+  hists->fill1DHist(tri.M(),     "tri_mass",";M(ll#gamma)",  50, 0,200,  1, "");
+  hists->fill1DHist(gammaCM.E(), "gamma_Ecom",";E_{#gamma} in CoM",  50, 0,200,  1, "");
+  hists->fill1DHist(diLepCM.E(), "diLep_Ecom",";Ecom(ll)", 50, 0,100,  1, "");
   
+  hists->fill1DHist(diLep.M(),     "diLep_mass",";M(ll)", 50, 0,50,  1, "");
+  hists->fill1DHist(diLep.Pt(),    "diLep_pt",  ";diLep_pt",    50, 0,100, 1, "");
+  hists->fill1DHist(diLep.Eta(),   "diLep_eta", ";diLep_eta",   50, -3.5,3.5, 1, "");
+  hists->fill1DHist(diLep.Phi(),   "diLep_phi", ";diLep_phi",   50, -TMath::Pi(),TMath::Pi(), 1, "");
+  hists->fill1DHist(gamma.E(),  "gamma_E", ";gamma_E",  50, 0,100, 1, "");
+  hists->fill1DHist(gamma.Pt(), "gamma_pt", ";gamma_pt",  50, 0,100, 1, "");
+  hists->fill1DHist(gamma.Eta(),"gamma_eta",";gamma_eta", 50, -3.5,3.5, 1, "");
+  hists->fill1DHist(gamma.Phi(),"gamma_phi",";gamma_phi", 50, -TMath::Pi(),TMath::Pi(), 1, "");
+  
+  hists->fill1DHist(l1.Pt(),    "l1_pt",  ";l+ pt",    50, 0,100, 1, "");
+  hists->fill1DHist(l1.Eta(),   "l1_eta", ";l+ eta",   50, -3.5,3.5, 1, "");
+  hists->fill1DHist(l1.Phi(),   "l1_phi", ";l+ phi",   50, -TMath::Pi(),TMath::Pi(), 1, "");
+  hists->fill1DHist(l2.Pt(),    "l2_pt",  ";l- pt",    50, 0,100, 1, "");
+  hists->fill1DHist(l2.Eta(),   "l2_eta", ";l- eta",   50, -3.5,3.5, 1, "");
+  hists->fill1DHist(l2.Phi(),   "l2_phi", ";l- phi",   50, -TMath::Pi(),TMath::Pi(), 1, "");
+  
+
+  hists->fill1DHist(lPt1.Pt(),    "lPt1_pt",  ";Leading lepton pt",    50, 0,100, 1, "");
+  hists->fill1DHist(lPt1.Eta(),   "lPt1_eta", ";Leading lepton eta",   50, -3.5,3.5, 1, "");
+  hists->fill1DHist(lPt1.Phi(),   "lPt1_phi", ";Leading lepton phi",   50, -TMath::Pi(),TMath::Pi(), 1, "");
+  hists->fill1DHist(lPt2.Pt(),    "lPt2_pt",  ";Trailing lepton pt",    50, 0,100, 1, "");
+  hists->fill1DHist(lPt2.Eta(),   "lPt2_eta", ";Trailing lepton  eta",  50, -3.5,3.5, 1, "");
+  hists->fill1DHist(lPt2.Phi(),   "lPt2_phi", ";Trailing lepton  phi",  50, -TMath::Pi(),TMath::Pi(), 1, "");
+  
+  hists->fill2DHist(lPt1.Pt(), lPt2.Pt(), "h2D_Pt1_vs_Pt2", ";Leading lepton pt; Trailing lepton pt",    50, 0,100, 50,0,100, 1, "");
+  hists->fill2DHist(l1.Pt(),   l2.Pt(),   "h2D_l1_vs_l2",   ";l+ pt; l- pt",    50, 0,100, 50,0,100, 1, "");
+  hists->fill2DHist(diLep.Pt(),gamma.Pt(),"h2D_diLep_vs_gamma", ";Pt of ll system; pt of gamma",    50, 0,100, 50,0,100, 1, "");
+  
+  hists->fill2DHist(gammaCM.E(), gamma.Pt(),"h2D_gamma_Ecom_vs_Pt", ";E_{#gamma} in CoM; Photon Pt",    50, 0,100, 50,0,100, 1, "");
+  hists->fill2DHist(gammaCM.E(), tri.M(),   "h2D_gamma_Ecom_vs_triM", ";E_{#gamma} in CoM; M(ll#gamma)",    50, 0,100, 50,0,200, 1, "");
+  
+  hists->fill2DHist(gamma.Pt(), diLep.Eta()-gamma.Eta(),"h2D_gammaPt_vs_deltaEta", ";Pt_{#gamma}; #Delta#eta(ll, #gamma)",    50, 0,100, 50,-5,5, 1, ""); 
+
+  hists->fill1DHist(l1.Pt(),"l1_pt","Leading lepton_pt", 50,0,200, 1,"");
+  hists->fill1DHist(l2.Pt(),"l2_pt","Second Lepton pt", 50,0,200, 1,"");
+  hists->fill1DHist(gamma.Pt(),"gamma_pt","Photon pt", 50,0,200, 1,"");
+
+  hists->fill1DHist((l1+l2).M(),  "ll_mass","ll_mass",100,0,100, 1,"");
+  hists->fill1DHist(l1.DeltaR(l2),"ll_deltaR","ll_deltaR",100,0,5, 1,"");
+  hists->fill1DHist(l1.DeltaR(gamma),"l1_gamma_deltaR","l1_gamma_deltaR",100,0,5, 1,"");
+  hists->fill1DHist(l2.DeltaR(gamma),"l2_gamma_deltaR","l2_gamma_deltaR",100,0,5, 1,"");
+
 
   CountEvents(2);
   for (UInt_t i =0; i<ntrig; i++)
     {
       triggerSelector->SelectTrigger(myTriggers[i], triggerStatus, hltPrescale, isFound, triggerPass, prescale);
+
+      Bool_t pa  = 1;
+      Bool_t fo  = 0;
+      Int_t  pr  = 99;
+      triggerSelector->SelectTrigger("HLT_Ele27_WP80_v", triggerStatus, hltPrescale, fo, pa, pr);
+
+
       //if(nEvents[0]==0)
       //cout<<i<<"   "<<myTriggers[i]<<"   is Found = "<<isFound<<"   ispassed = "<<triggerPass<<"  prescale = "<<prescale<<endl;
       if(triggerPass) nEventsTrig[2][i]++;
+      if(triggerPass || pa) nEventsTrig[5][i]++;
     }
 
- 
-
-  hists->fill1DHist(l1.Pt(),"l1_pt","Leading lepton_pt", 50,0,200, 1,"");
-  hists->fill1DHist(l2.Pt(),"l2_pt","Second Lepton pt", 50,0,200, 1,"");
-  hists->fill1DHist(ph.Pt(),"ph_pt","Photon pt", 50,0,200, 1,"");
-
-  hists->fill1DHist((l1+l2).M(),  "ll_mass","ll_mass",100,0,100, 1,"");
-  hists->fill1DHist(l1.DeltaR(l2),"ll_deltaR","ll_deltaR",100,0,5, 1,"");
-  hists->fill1DHist(l1.DeltaR(ph),"l1_ph_deltaR","l1_ph_deltaR",100,0,5, 1,"");
-  hists->fill1DHist(l2.DeltaR(ph),"l2_ph_deltaR","l2_ph_deltaR",100,0,5, 1,"");
+  /*  
 
   if (l1.Pt() < 23 || l2.Pt() < 7) return kTRUE;
-  if (ph.Pt() < 23) return kTRUE;
+  if (gamma.Pt() < 23) return kTRUE;
   
 
 
@@ -360,7 +492,7 @@ Bool_t zgamma::Process(Long64_t entry)
     }
 
 
-  if (fabs(ph.Eta()) > 2.5) return kTRUE;
+  if (fabs(gamma.Eta()) > 2.5) return kTRUE;
   CountEvents(4);
 
   for (UInt_t i =0; i<ntrig; i++){
@@ -370,7 +502,11 @@ Bool_t zgamma::Process(Long64_t entry)
 
 
 
+  */
 
+  //  CountEvents(2);
+  CountEvents(3);
+  CountEvents(4);
 
   return kTRUE;
   
@@ -391,9 +527,16 @@ void zgamma::Terminate()
 
   cout<<"\n\n | Trigger efficiency 2              |\t"<<endl;
   for(UInt_t n=0; n<ntrig; n++){ 
-    UInt_t N=3;
+    //UInt_t N=3;
     //cout<<n<<"  "<<float(nEventsTrig[N][n])/nEvents[N]<<"   "<<myTriggers[n]<<endl;;
-    cout<<n<<"  "<<float(nEventsTrig[0][n])/nEvents[0]<<"   after sel: "<<nEventsTrig[N][n]<<"/"<<nEvents[N]<<"="<<float(nEventsTrig[N][n])/nEvents[N]<<"   "<<myTriggers[n]<<endl;;
+    cout<<n<<"  "<<float(nEventsTrig[0][n])/nEvents[0]<<"   after sel: "
+      //<<nEventsTrig[N][n]<<"/"<<nEvents[N]<<"="
+        <<float(nEventsTrig[1][n])/nEvents[1]<<"   "
+        <<float(nEventsTrig[2][n])/nEvents[2]<<"   "
+        <<float(nEventsTrig[3][n])/nEvents[3]<<"   "
+        <<float(nEventsTrig[5][n])/nEvents[2]<<"   "
+      
+        <<myTriggers[n]<<endl;;
   }
 
   //cout<<"\n\n | Trigger efficiency 3              |\t"<<endl;
@@ -442,7 +585,7 @@ bool zgamma::PassElectronIdAndIso(TCElectron *lep, elIdAndIsoCuts cuts, TVector3
 {
   bool pass = false;
   
-  //Float_t eleISO = CalculateElectronIso(lep);
+  Float_t eleISO = CalculateElectronIso(lep);
 
   if(((fabs(lep->Eta()) < 1.442
        && lep->PtError()/lep->Pt()       < cuts.ptErrorOverPt[0]
@@ -450,9 +593,9 @@ bool zgamma::PassElectronIdAndIso(TCElectron *lep, elIdAndIsoCuts cuts, TVector3
        && fabs(lep->DphiSuperCluster())  < cuts.dPhiIn[0]
        && fabs(lep->DetaSuperCluster())  < cuts.dEtaIn[0]
        && lep->HadOverEm()               < cuts.HadOverEm[0]
-       //&& (period=="2011" || lep->IsoMap("fabsEPDiff")      < cuts.fabsEPDiff[0])
+       //&& lep->IsoMap("fabsEPDiff")      < cuts.fabsEPDiff[0]
        && fabs(lep->Dxy(pv))             < cuts.dxy[0]
-       //&& fabs(lep->Dz(pv))              < cuts.dz[0]
+       && fabs(lep->Dz(pv))              < cuts.dz[0]
        //&& eleISO                         < cuts.pfIso04[0]
        )||
       (fabs(lep->Eta()) >  1.556
@@ -461,9 +604,9 @@ bool zgamma::PassElectronIdAndIso(TCElectron *lep, elIdAndIsoCuts cuts, TVector3
        && fabs(lep->DphiSuperCluster())  < cuts.dPhiIn[1]
        && fabs(lep->DetaSuperCluster())  < cuts.dEtaIn[1]
        && lep->HadOverEm()               < cuts.HadOverEm[1]
-       //&& (period=="2011" || lep->IsoMap("fabsEPDiff")      < cuts.fabsEPDiff[1])
-       //&& fabs(lep->Dxy(pv))             < cuts.dxy[1]
-       //&& fabs(lep->Dz(pv))              < cuts.dz[1]
+       //&& lep->IsoMap("fabsEPDiff")      < cuts.fabsEPDiff[1]
+       && fabs(lep->Dxy(pv))             < cuts.dxy[1]
+       && fabs(lep->Dz(pv))              < cuts.dz[1]
        //&& eleISO                         < cuts.pfIso04[1]
        ))
      //&& lep->ConversionVeto()
@@ -496,7 +639,7 @@ bool zgamma::PassMuonIdAndIso(TCMuon *lep, muIdAndIsoCuts cuts, TVector3 *pv)
 {
   bool pass = false;
   
-  //Float_t muISO =  CalculateMuonIso(lep);
+  Float_t muISO =  CalculateMuonIso(lep);
   
   if( lep->PtError()/lep->Pt() < cuts.ptErrorOverPt
       && lep->NumberOfValidMuonHits()    > cuts.NumberOfValidMuonHits
@@ -505,8 +648,8 @@ bool zgamma::PassMuonIdAndIso(TCMuon *lep, muIdAndIsoCuts cuts, TVector3 *pv)
       && lep->NumberOfMatches() > cuts.NumberOfMatches
       && lep->NormalizedChi2()  < cuts.NormalizedChi2
       && fabs(lep->Dxy(pv))     < cuts.dxy
-      //&& fabs(lep->Dz(pv))      < cuts.dz
-      //&& muISO                  < cuts.pfIso04
+      && fabs(lep->Dz(pv))      < cuts.dz
+      && muISO                  < cuts.pfIso04
       )
     pass = true;
   //cout<<"muon pass? "<<pass<<endl;

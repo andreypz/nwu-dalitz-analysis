@@ -3,7 +3,7 @@ import sys,os
 #sys.argv.append( '-b' )
 
 from optparse import OptionParser
-parser = OptionParser(usage="usage: %prog [options -e], -m], -p 2011] samplename sourcefile")
+parser = OptionParser(usage="usage: %prog [options -e], -m], -p 2011] sample sourcefile")
 parser.add_option("-e", "--ele", dest="electron", action="store_true", default=False, help="Use electron selection")
 parser.add_option("-p", "--period", dest="period", default="2012", help="Set data period (2011/2012)")
 parser.add_option("-b", "--batch", dest="batch", action="store_true", default=False, help="Run in batch")
