@@ -4,13 +4,12 @@ import sys,os
 
 from optparse import OptionParser
 parser = OptionParser(usage="usage: %prog [options -e], -m], -p 2011] sample sourcefile")
-parser.add_option("-e", "--ele", dest="electron", action="store_true", default=False, help="Use electron selection")
+parser.add_option("-e", "--ele", dest="electron", action="store_true", default=False, help="Use electron selection (by default it will run muon selection)")
+parser.add_option("--mugamma", dest="mugamma", action="store_true", default=False, help="Use Mu+Photon trigger (for running on MuEG path)")
 parser.add_option("-p", "--period", dest="period", default="2012", help="Set data period (2011/2012)")
-parser.add_option("-b", "--batch", dest="batch", action="store_true", default=False, help="Run in batch")
+parser.add_option("-b", "--batch", dest="batch", action="store_true", default=False,
+                  help="Run in batch (uning the scripts in batch_condor).That would imply the use of input.txt")
 parser.add_option("-c", "--clean", dest="clean", action="store_true", default=False, help="Clean the libs")
-
-from ROOT import *
-#import shutil
 
 (options, args) = parser.parse_args()
 
@@ -29,10 +28,15 @@ sourcefilename = args[1]
 period    = options.period
 selection = "mu"
 
-if options.electron :
-    print "options.electorn???", options.electron
+if options.electron:
+    print "options.electorn", options.electron
     selection="el"
-
+if options.mugamma:
+    selection="mugamma"
+    if options.electron:
+        print "Warning! We can't run both selections simultaneously.."
+        exit(1)
+    
 isbatch   = options.batch    
 if(isbatch):
     sourceFiles = "./input.txt"
@@ -53,6 +57,8 @@ tempfile.close()
 cfile = open("zgamma.C","w")
 cfile.write(whole_thing)
 cfile.close()
+
+from ROOT import *
 
 #gSystem.Load("../plugins/lib/libShapeLine.so");
 #gROOT.LoadMacro("../plugins/rochcor.cc+");
@@ -93,7 +99,7 @@ fChain.Process("zgamma.C+")
 
 print "Done!", "CPU Time: ", timer.CpuTime(), "RealTime : ", timer.RealTime()
 
-#os.system('mv a_higgsHistograms.root hhhh_'+sourcefilename+'.root')
+os.system('mv a_'+selection+'_higgsHistograms.root hhhh_'+sourcefilename+'.root')
 
 print "End runninng"
 os.system("rm zgamma.C")

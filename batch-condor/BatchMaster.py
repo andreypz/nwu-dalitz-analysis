@@ -22,8 +22,7 @@ class BatchMaster():
 
     def get_current_time(self):
         ''' 
-        Returns a string of the current time with
-        the format  
+        Returns a string of the current time with the format  
         '''
 
         now = datetime.datetime.now()
@@ -123,11 +122,10 @@ class BatchMaster():
 
         ## Creating tarball of current workspace
         print "Making a tar-ball", self._stageDir
-        os.system('tar czf {0}/source.tar.gz ../../../Higgs/higgs ../../../Higgs/src ../../../Higgs/plugins ../../../Higgs/data 2> /dev/null'.format(self._stageDir))
+        os.system('tar czf {0}/source.tar.gz ../zgamma ../src ../plugins ../data 2> /dev/null'.format(self._stageDir))
         
         
         if bSystem is 'lpc':
-
             for cfg in self._configList:
                 sourceFiles = self.split_jobs(cfg._inDir, cfg._nJobs)
 
@@ -138,5 +136,6 @@ class BatchMaster():
                     #subprocess.call('condor_submit .batch_tmp_{1}_{2}'.format(self._stageDir, cfg._dataName, i+1), shell=True)
 
                     subprocess.call('condor_submit {0}/.batch_tmp_{1}_{2}'.format(self._stageDir, cfg._dataName, i+1), shell=True)
-
-
+        else:
+            print "Non LPC?  Sorry, this is not supported yet"
+                    

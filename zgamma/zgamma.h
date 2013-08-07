@@ -211,6 +211,8 @@ class zgamma : public TSelector {
    virtual bool PassPhotonIdAndIso(TCPhoton *p, phIdAndIsoCuts c, TVector3 *pv);
    
    void CalculatePhotonIso(TCPhoton *p, float& chIsoCor, float& nhIsoCor, float& phIsoCor);
+   virtual void FillHistosFull(Int_t n, Double_t w, TCPhysObject , TCPhysObject , TCPhysObject , TCPhysObject , TCPhysObject );
+   virtual void FillHistoCounts(Int_t n, Double_t w);
 
    ClassDef(zgamma,0);
 };

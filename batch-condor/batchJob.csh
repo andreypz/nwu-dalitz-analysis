@@ -1,7 +1,7 @@
 #!/bin/csh
 source /uscmst1/prod/sw/cms/cshrc prod
-scram pro CMSSW CMSSW_4_4_4
-cd CMSSW_4_4_4/src
+scram pro CMSSW CMSSW_5_3_8
+cd CMSSW_5_3_8/src
 cmsenv 
 
 #### Leave this blank #######
@@ -20,12 +20,17 @@ set period    = $6
 
 echo "Copy the tarball with the source code from Condor scratch directory"
 
-cp ../../source.tar.gz .
+
+mkdir nwu-my-analysis
+cd nwu-my-analysis
+cp ../../../source.tar.gz .
 tar -xzf source.tar.gz
-cd Higgs/higgs
 
+cd zgamma
+
+#ls -l
 cp ../../../../input_${dataName}_${count}.txt input.txt
-
+#ls -l ../../../../
 
 chmod 755 run.py
 
@@ -33,13 +38,16 @@ echo $selection
 if ( $selection == "electron" ) then
     echo "Electrons"
     ./run.py ${suffix} ${dataName} -e -p ${period} -b
+else if ( $selection == "mugamma" ) then
+    echo "Mu+photon trigger will be used"
+    ./run.py ${suffix} ${dataName} --mugamma -p ${period} -b
 else
     echo "Muons"
     ./run.py ${suffix} ${dataName} -p ${period} -b
 endif
 
-echo 'ls in higgs'
-ls
+echo 'ls in analysis directory'
+ls -l
 
 echo "Done. Will copy the files to " $outDir
 cp hhhh_${dataName}.root $outDir/hhhh_${dataName}_${count}.root

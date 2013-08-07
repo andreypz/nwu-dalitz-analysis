@@ -1,6 +1,13 @@
 The log of changes:
 ==================
 
+2013-Aug-06
+  * zgamma analyzer developments:
+    * Trigger efficiency study for h->llgamma dalitz decay
+    * Selections for mu, el, and mugamma introduced
+    * Filling histograms in a similar way as in h2l2nu analysis (by cut)
+  * batch master revieved and made to work with zgamma sample.
+
 2013-Jul-04
   * Ported to Git!
   * Updated the TC classes with the latest version
