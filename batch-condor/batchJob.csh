@@ -36,14 +36,17 @@ chmod 755 run.py
 
 echo $selection
 if ( $selection == "electron" ) then
-    echo "Electrons"
-    ./run.py ${suffix} ${dataName} -e -p ${period} -b
+    echo "Electrons,  double-photon trigger is used"
+    ./run.py ${suffix} ${dataName} -e -t pho -p ${period} -b
 else if ( $selection == "mugamma" ) then
     echo "Mu+photon trigger will be used"
-    ./run.py ${suffix} ${dataName} --mugamma -p ${period} -b
-else
+    ./run.py ${suffix} ${dataName} -t mu-pho -p ${period} -b
+else if ( $selection == "single-mu" ) then
+    echo "Single - IsoMu trigger will be used"
+    ./run.py ${suffix} ${dataName} -t single-mu -p ${period} -b
+else 
     echo "Muons"
-    ./run.py ${suffix} ${dataName} -p ${period} -b
+    ./run.py ${suffix} ${dataName} -t double-mu -p ${period} -b
 endif
 
 echo 'ls in analysis directory'

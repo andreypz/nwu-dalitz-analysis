@@ -1,12 +1,20 @@
 The log of changes:
 ==================
 
+2013-Aug-13
+  * Make Id/Iso plots for muons.
+  * Photon eta < 2.5 cut (apparently the go up to 3.0 by default. Why?)
+  * Run with different trigger selections implemented: 
+        double-mu, single-mu, muon-photon, double-photon (for electron selection).
+  * Data samples added to run on batch.
+  * Plotting script updated: a mix of h2l2nu and a simple plotting from a file.
+
 2013-Aug-06
   * zgamma analyzer developments:
     * Trigger efficiency study for h->llgamma dalitz decay
     * Selections for mu, el, and mugamma introduced
     * Filling histograms in a similar way as in h2l2nu analysis (by cut)
-  * batch master revieved and made to work with zgamma sample.
+  * batch master revived and made to work with zgamma sample.
 
 2013-Jul-04
   * Ported to Git!
@@ -28,9 +36,9 @@ The log of changes:
   
 2012-Dec-06
   * Introduced option parser to run.py script 
-  * Synchroization with Nate is more or less succesefull
+  * Synchronization with Nate is more or less successful
     * Ulong64 bug in trigger selector is fixed 
-    * Covnersion veto for electrons
+    * Conversion veto for electrons
 
 2012-Nov-13
   * V02-14 tag
@@ -40,7 +48,7 @@ The log of changes:
     * Top background estimation scripts are added
 
 2012-Oct-31
-  * Made it to run with 2012 and 2011 ntuples using same code (although, the ntuples are diferent)
+  * Made it to run with 2012 and 2011 ntuples using same code (although, the ntuples are different)
     * Lepton selection is modified
   * b quarks study and top-background estimation scripts are updated
 
@@ -83,7 +91,7 @@ The log of changes:
    * V02-07 - Updated MVA cuts, tree maker and training  
    * V02-05 - Workable MVA code 
    * V02-03 - Added rochcor function for correcting muons, nJets histogram for jets in eta<2.5; 
-         batch maser is modified to copy the files to a local directory before sendingthem over to batch 
+         batch maser is modified to copy the files to a local directory before sending them over to batch 
 
 2012-Jul-18
   * V02-02 tag
@@ -101,7 +109,7 @@ The log of changes:
   * Updating to the recent TC object classes
 
 2011-Dec-17
-  * New version of Weight Utils and reweight files.
+  * New version of Weight Utils and re-weight files.
       * Fixed k-nlo for ggH samples 
   * Third muon veto updated (closer to Nate/ Pas-like)
   
@@ -114,7 +122,7 @@ The log of changes:
 
 2011-Dec-09
   V01-03 tag
-  * Switching to B-master for condor jobs submitions
+  * Switching to B-master for condor jobs submissions
   * Created plugins directory where all new classes will go
   (moved there weight utils and trigger selector)
   * Starting ZedEvensLibrary class
@@ -141,7 +149,7 @@ The log of changes:
   
 2011-Nov-24
   The following updates are added to the code:
-  * Some more histograms added: angle correlationsleptons of leptons, di-lepton, met
+  * Some more histograms added: angle correlations of leptons, dd-lepton, met
   * Z-library implementation
   * Photon+gets reweighting for Z+jets background estimation
   * Ntuples for MVA, in "Anton" directory of a root file
@@ -185,3 +193,5 @@ V00-04 - synchronized with Nate's code
 
 V00-03 - latest version based on old code.
 
+
+ LocalWords:  VBF

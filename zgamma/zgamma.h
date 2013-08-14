@@ -210,9 +210,10 @@ class zgamma : public TSelector {
    virtual bool PassElectronIdAndIso(TCElectron *l, elIdAndIsoCuts c, TVector3 *pv);
    virtual bool PassPhotonIdAndIso(TCPhoton *p, phIdAndIsoCuts c, TVector3 *pv);
    
-   void CalculatePhotonIso(TCPhoton *p, float& chIsoCor, float& nhIsoCor, float& phIsoCor);
+   virtual void CalculatePhotonIso(TCPhoton *p, float& chIsoCor, float& nhIsoCor, float& phIsoCor);
    virtual void FillHistosFull(Int_t n, Double_t w, TCPhysObject , TCPhysObject , TCPhysObject , TCPhysObject , TCPhysObject );
    virtual void FillHistoCounts(Int_t n, Double_t w);
+   virtual void MakeMuonPlots(TCMuon *mu, TVector3 *pv);
 
    ClassDef(zgamma,0);
 };

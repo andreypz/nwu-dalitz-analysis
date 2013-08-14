@@ -5,7 +5,8 @@ import sys,os
 from optparse import OptionParser
 parser = OptionParser(usage="usage: %prog [options -e], -m], -p 2011] sample sourcefile")
 parser.add_option("-e", "--ele", dest="electron", action="store_true", default=False, help="Use electron selection (by default it will run muon selection)")
-parser.add_option("--mugamma", dest="mugamma", action="store_true", default=False, help="Use Mu+Photon trigger (for running on MuEG path)")
+parser.add_option("-t","--trigger", dest="trigger", type="string", default="none",
+                  help="Select a trigger to run. options are: double-mu, single-mu, mu-pho, pho, single-el")
 parser.add_option("-p", "--period", dest="period", default="2012", help="Set data period (2011/2012)")
 parser.add_option("-b", "--batch", dest="batch", action="store_true", default=False,
                   help="Run in batch (uning the scripts in batch_condor).That would imply the use of input.txt")
@@ -27,16 +28,11 @@ sourcefilename = args[1]
 
 period    = options.period
 selection = "mu"
-
 if options.electron:
     print "options.electorn", options.electron
     selection="el"
-if options.mugamma:
-    selection="mugamma"
-    if options.electron:
-        print "Warning! We can't run both selections simultaneously.."
-        exit(1)
-    
+trigger = options.trigger
+
 isbatch   = options.batch    
 if(isbatch):
     sourceFiles = "./input.txt"
@@ -45,13 +41,15 @@ else:
     sourceFiles = "./"+sourcefilename
     print "Run locally, source files: \n", sourceFiles
 
-
-print "Running on sample", sample, "with selection", selection, "in source ", sourcefilename, ", period =", period, " batch =",  isbatch
+    
+print "Running on sample", sample, "with selection", selection, "and trigger", trigger,\
+      "in source ", sourcefilename, ", period =", period, " batch =",  isbatch
 
 
 tempfile = open("template_zgamma.C","r")
 whole_thing = tempfile.read()
 whole_thing = whole_thing.replace("@SELECTION",selection)
+whole_thing = whole_thing.replace("@TRIGGER",trigger)
 tempfile.close()
 
 cfile = open("zgamma.C","w")

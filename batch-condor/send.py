@@ -6,14 +6,16 @@ cfg = b.JobConfig
 
 from optparse import OptionParser
 parser = OptionParser(usage="usage: %prog [options -e], -m, --data, --bg, --mc], -p 2011] version")
+parser.add_option("-c", "--clean", dest="clean",  action="store_true", default=False, help="Clean the directory with histogram output.")
 parser.add_option("-e", "--ele", dest="electron", action="store_true", default=False, help="Use electron selection (by default it will run muon selection)")
-parser.add_option("--mugamma", dest="mugamma", action="store_true", default=False, help="Use Mu+Photon trigger (for running on MuEG path)")
-parser.add_option("-c", "--clean", dest="clean", action="store_true", default=False, help="Clean the directory with histogram output.")
+parser.add_option("--mugamma",   dest="mugamma",  action="store_true", default=False, help="Use Mu+Photon trigger (for running on MuEG path)")
+parser.add_option("--singlemu",  dest="singlemu", action="store_true", default=False, help="Use Iso-mu trigger")
 parser.add_option("--data", dest="data", action="store_true", default=False, help="Run over the data sample")
+parser.add_option("--sig",  dest="sig",  action="store_true", default=False, help="Run over the signal sample")
 parser.add_option("--test", dest="test", action="store_true", default=False, help="Run over the test sample")
+parser.add_option("--all",  dest="all",  action="store_true", default=False, help="Run over all the samples!")
 
 (options, args) = parser.parse_args()
-
 
 if len(args) < 1:
     parser.print_usage()
@@ -30,9 +32,8 @@ if options.electron:
     selection="electron"
 if options.mugamma:
     selection="mugamma"
-    if options.electron:
-        print "Warning! We can't run both selections simultaneously.."
-        exit(1)
+if options.singlemu:
+    selection="single-mu"
                                             
     
 version    = args[0]
@@ -40,7 +41,10 @@ period    = '2012'
 doTest    = options.test
 doData    = options.data
 doBG      = 0
-doSignal  = 0
+doSignal  = options.sig
+if options.all:
+    doData = 1
+    doSignal = 1
 
 ''' 
     Set job configurations.  The order of arguments is:
@@ -51,7 +55,8 @@ test = []
 data = []
 
 test.extend([
-    cfg('MuEG_Run2012A',        dCache+'/andreypz/nuTuples_v6_8TeV/MuEG/Run2012A-22Jan2013',         5, 'DATA mugamma 2012'),
+    cfg('SingleMu_Run2012A',        dCache+'/andreypz/nuTuples_v6_8TeV/SingleMu/Run2012A-22Jan2013',         5, 'DATA '+selection+' 2012'),
+    #cfg('MuEG_Run2012A',        dCache+'/andreypz/nuTuples_v6_8TeV/MuEG/Run2012A-22Jan2013',         5, 'DATA mugamma 2012'),
 ])
 
 
@@ -65,6 +70,14 @@ if period =="2012":
             cfg('DoubleMu_Run2012D',        dCache+'/andreypz/nuTuples_v6_8TeV/DoubleMuParked/Run2012D-22Jan2013',        10, 'DATA muon 2012'),
             ])
 
+    if selection == 'single-mu':
+        data.extend([
+            cfg('SingleMu_Run2012A',        dCache+'/andreypz/nuTuples_v6_8TeV/SingleMu/Run2012A-22Jan2013',         5, 'DATA '+selection+' 2012'),
+            cfg('SingleMu_Run2012B',        dCache+'/andreypz/nuTuples_v6_8TeV/SingleMu/Run2012B-22Jan2013',         5, 'DATA '+selection+' 2012'),
+            cfg('SingleMu_Run2012C',        dCache+'/andreypz/nuTuples_v6_8TeV/SingleMu/Run2012C-22Jan2013-v1',      5, 'DATA '+selection+' 2012'),
+            cfg('SingleMu_Run2012D',        dCache+'/andreypz/nuTuples_v6_8TeV/SingleMu/Run2012D-22Jan2013',         5, 'DATA '+selection+' 2012'),
+            ])
+        
     if selection == 'mugamma':
         data.extend([
             cfg('MuEG_Run2012A',        dCache+'/andreypz/nuTuples_v6_8TeV/MuEG/Run2012A-22Jan2013',         5, 'DATA mugamma 2012'),
@@ -76,10 +89,10 @@ if period =="2012":
 
     if selection == 'electron':
         data.extend([
-            cfg('DoublePhoton_Run2012A',        dCache+'/andreypz/nuTuples_v6_8TeV/Photon/Run2012A-22Jan2013',         10, 'DATA electron 2012'),
-            cfg('DoublePhoton_Run2012B',        dCache+'/andreypz/nuTuples_v6_8TeV/DoublePhoton/Run2012B-22Jan2013',         10, 'DATA electron 2012'),
-            cfg('DoublePhoton_Run2012C',        dCache+'/andreypz/nuTuples_v6_8TeV/DoublePhoton/Run2012C-22Jan2013',         10, 'DATA electron 2012'),
-            cfg('DoublePhoton_Run2012D',        dCache+'/andreypz/nuTuples_v6_8TeV/DoublePhoton/Run2012D-22Jan2013',         10, 'DATA electron 2012'),
+            cfg('DoublePhoton_Run2012A',        dCache+'/andreypz/nuTuples_v6_8TeV/Photon/Run2012A-22Jan2013',         5, 'DATA electron 2012'),
+            cfg('DoublePhoton_Run2012B',        dCache+'/andreypz/nuTuples_v6_8TeV/DoublePhoton/Run2012B-22Jan2013',   10, 'DATA electron 2012'),
+            cfg('DoublePhoton_Run2012C',        dCache+'/andreypz/nuTuples_v6_8TeV/DoublePhoton/Run2012C-22Jan2013',   10, 'DATA electron 2012'),
+            cfg('DoublePhoton_Run2012D',        dCache+'/andreypz/nuTuples_v6_8TeV/DoublePhoton/Run2012D-22Jan2013',   10, 'DATA electron 2012'),
             ])
         
         
@@ -102,13 +115,19 @@ if period =="2012":
 
 
     signal = []
-    
-    signal.extend([
-        cfg('ggHZZ125', dCache+'/andreypz/nuTuples_v5_8TeV/ggH130', 1, 'ggHZZ125 '+selection+' '+period),
-        #cfg('ggHWW125', dCache+'/andreypz/nuTuples_v5_8TeV/ggHWW130', 1, 'ggHWW125 '+selection+' '+period),
-        cfg('VBFHZZ125', dCache+'/andreypz/nuTuples_v5_8TeV/VBFHZZ130', 1, 'VBFHZZ125 '+selection+' '+period),
-        ])
 
+    if selection in ["muon","mugamma","single-mu"]:
+        signal.extend([
+            cfg('h-dalitz', dCache+'/andreypz/nuTuples_v6_8TeV/HDalitz_mu_v3', 1, 'h-dalitz '+selection+' '+period),
+            ])
+    elif selection=="electron":
+        signal.extend([
+            cfg('h-dalitz', dCache+'/andreypz/nuTuples_v6_8TeV/HDalitz_el_v3', 1, 'h-dalitz '+selection+' '+period),
+            ])
+        
+        #cfg('ggHZZ125', dCache+'/andreypz/nuTuples_v5_8TeV/ggH130', 1, 'ggHZZ125 '+selection+' '+period),
+        #cfg('ggHWW125', dCache+'/andreypz/nuTuples_v5_8TeV/ggHWW130', 1, 'ggHWW125 '+selection+' '+period),
+        #cfg('VBFHZZ125', dCache+'/andreypz/nuTuples_v5_8TeV/VBFHZZ130', 1, 'VBFHZZ125 '+selection+' '+period),
 else:
     print "Only 2012! Other periods are not supported"
 
