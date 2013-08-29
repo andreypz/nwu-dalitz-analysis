@@ -1,6 +1,13 @@
 The log of changes:
 ==================
 
+2013-Aug-28
+  * Adding LHEanalyzer (in zgamma) form making plots of LHE root files produced with ExRootLHEFConverter. Need a shared library to run it.
+  * Switched to Stoyan's cut ordering (temporarly)  	
+ 
+2013-Aug-14
+  * Adding a config file as well as the parser
+
 2013-Aug-13
   * Make Id/Iso plots for muons.
   * Photon eta < 2.5 cut (apparently the go up to 3.0 by default. Why?)

@@ -61,6 +61,11 @@ float EAPho[7][3] = {
 };
 
 const bool makeGen = false;
+string myTrigger = "";
+Float_t cut_l1pt  = 23;
+Float_t cut_l2pt  = 9;
+Float_t cut_gammapt = 25;
+
 bool P4SortCondition(const TLorentzVector& p1, const TLorentzVector& p2) {return (p1.Pt() > p2.Pt());}
 
 void zgamma::Begin(TTree * tree)
@@ -175,6 +180,7 @@ Bool_t zgamma::Process(Long64_t entry)
 {
   GetEntry(entry);
   CountEvents(0);
+  FillHistoCounts(0, 1);
   if (nEvents[0] % (int)5e4 == 0) cout<<nEvents[3]<<" events passed of "<<nEvents[0]<<" checked!"<<endl;
   
   //////////////////
@@ -195,10 +201,11 @@ Bool_t zgamma::Process(Long64_t entry)
   //-----------------------//
   vector<TCPhysObject> gen_mu, gen_el;
   TCPhysObject gen_gamma, gen_l1, gen_l2, gen_lPt1, gen_lPt2;
+  TCPhysObject gen_higgs, gen_gamma_st1;
 
   if(!isRealData && makeGen){    
-    Int_t ZID = 3000001; //made-up particle that decays to l+l-
-    //Int_t ZID = 23;
+    //Int_t ZID = 3000001; //made-up particle that decays to l+l-
+    Int_t ZID = 23;
     for (int i = 0; i < genParticles->GetSize(); ++i) {
       TCGenParticle* thisParticle = (TCGenParticle*) genParticles->At(i);
       //if (thisParticle->Mother()==ZID) {
@@ -207,10 +214,15 @@ Bool_t zgamma::Process(Long64_t entry)
       if (abs(thisParticle->GetPDGId()) == 13 && (thisParticle->GetStatus()==1 || thisParticle->GetStatus()==2) && (fabs(thisParticle->Grandmother())<7 || thisParticle->Grandmother()==23)) 
         //if (abs(thisParticle->GetPDGId()) == 13 && thisParticle->GetStatus()==1) 
         gen_mu.push_back(*thisParticle);
-        //}
-      if (thisParticle->GetPDGId()==22 && thisParticle->GetStatus()==1 && (fabs(thisParticle->Grandmother())<7 || thisParticle->Grandmother()==23) ) // a photon from higgs decay
-        //if (thisParticle->GetPDGId()==22 && thisParticle->Mother()==25) // a photon from higgs decay
+      //}
+      //if (thisParticle->GetPDGId()==22 && thisParticle->GetStatus()==1 && (fabs(thisParticle->Grandmother())<7 || thisParticle->Grandmother()==23) ) // a photon from higgs decay
+      if (thisParticle->GetPDGId()==22 && thisParticle->Mother()==25) // a photon from higgs decay
         gen_gamma = *thisParticle;
+      if (thisParticle->GetPDGId()==22 && thisParticle->GetStatus()==1) // a photon from higgs decay
+        gen_gamma_st1 = *thisParticle;
+      if (thisParticle->GetPDGId()==25)
+        gen_higgs = *thisParticle;
+
     }
     sort(gen_el.begin(), gen_el.end(), P4SortCondition);
     sort(gen_mu.begin(), gen_mu.end(), P4SortCondition);
@@ -235,26 +247,27 @@ Bool_t zgamma::Process(Long64_t entry)
       if (gen_el.size()>2) return kTRUE;
       //Abort("Can't have more than two electrons from a decay!!!");
     }
-
-    if (gen_gamma.E()==0) Abort("No gamma in an event? that sounds bad");//return kTRUE;
     
     
     for (int i = 0; i < genParticles->GetSize(); ++i) {
       TCGenParticle* thisParticle = (TCGenParticle*) genParticles->At(i);
       //if (abs(thisParticle->GetPDGId()) == 11 && thisParticle->Mother()==3000001) {
-      //if (abs(thisParticle->GetPDGId()) == 22)
+      //if (abs(thisParticle->GetPDGId()) == 25)
       //if (abs(thisParticle->GetPDGId()) == 13){
-      if (abs(thisParticle->GetPDGId()) == 22 ||
-          (abs(thisParticle->GetPDGId()) == 13 && (thisParticle->GetStatus()==1 || thisParticle->GetStatus()==2))){
+      if (abs(thisParticle->GetPDGId()) == 22 || abs(thisParticle->GetPDGId()) == 13){
+        //  (abs(thisParticle->GetPDGId()) == 13 && (thisParticle->GetStatus()==1 || thisParticle->GetStatus()==2))){
         cout<<"event = "<<eventNumber<<"   "<<thisParticle->GetPDGId()
             <<"  st = "<<thisParticle->GetStatus()<<"    mother = "<<thisParticle->Mother()<<"    grandMother = "<<thisParticle->Grandmother()
-            <<" pt="<<thisParticle->Pt()<<" eta="<<thisParticle->Eta()<<" phi="<<thisParticle->Phi()<<" px="<<thisParticle->Px()<<endl;
-        if ( thisParticle->Grandmother() == thisParticle->GetPDGId())
-          cout<<"\t grandma ?:"<<endl;
+            <<"\n pt="<<thisParticle->Pt()<<" eta="<<thisParticle->Eta()<<" phi="<<thisParticle->Phi()<<" px="<<thisParticle->Px()<<endl;
+        //if ( thisParticle->Grandmother() == thisParticle->GetPDGId())
+        //cout<<"\t grandma ?: "<<thisParticle->GetPDGId()<<endl;
         
       }
+
     }
 
+    if (gen_gamma.E()==0) return kTRUE;
+      //Abort(Form("%i: No gen gamma in an event? that sounds bad",eventNumber));//return kTRUE;
 
     if(selection=="mu"){//mumugamma
       if (gen_mu.size()<2)  return kTRUE;
@@ -298,6 +311,15 @@ Bool_t zgamma::Process(Long64_t entry)
     hists->fill1DHist(gen_l1.DeltaR(gen_gamma),"gen_l1gamma_deltaR","gen_l1gamma_deltaR",100,0,5, 1,"");
     hists->fill1DHist(gen_l2.DeltaR(gen_gamma),"gen_l2gamma_deltaR","gen_l2gamma_deltaR",100,0,5, 1,"");
 
+    hists->fill1DHist(gen_higgs.Pt(),     "gen_higgs_pt","Pt of higgs",   100, 0,150,  1, "");
+    hists->fill1DHist(gen_higgs.M(),      "gen_higgs_mass","Mass of higgs",   100, 50,180,  1, "");
+
+    hists->fill1DHist(gen_gamma.Pt(),     "gen_gamma_pt","Pt of gamma",   50, 0,150,  1, "");
+    hists->fill1DHist(gen_gamma.Eta(),    "gen_gamma_eta","Eta of gamma", 50, -3,3,  1, "");
+    hists->fill1DHist(gen_gamma_st1.Pt(), "gen_gamma_st1_pt","Pt of gamma",   50, 0,150,  1, "");
+    hists->fill1DHist(gen_gamma_st1.Eta(),"gen_gamma_st1_eta","Eta of gamma", 50, -3,3,  1, "");
+
+
   }
 
   FillHistoCounts(1, eventWeight);
@@ -311,28 +333,46 @@ Bool_t zgamma::Process(Long64_t entry)
       cout<<"TRG **** Warning ***\n The trigger name "<<myTriggers[i]<<" is not in the list of trigger names"<<endl;
   }
 
+
+
   //----------------------//
   // Selecting triggers   //
   //----------------------//
-  if (trigger=="double-mu"){
-    triggerSelector->SelectTrigger("HLT_Mu17_Mu8_v", triggerStatus, hltPrescale, isFound, triggerPass, prescale);
-    if (!triggerPass) return kTRUE;
-  }
-  else if (trigger=="mu-pho"){
-    triggerSelector->SelectTrigger("HLT_Mu22_Photon22_CaloIdL_v", triggerStatus, hltPrescale, isFound, triggerPass, prescale);
-    if (!triggerPass) return kTRUE;
-  }
-  else if (trigger=="single-mu"){
-    triggerSelector->SelectTrigger("HLT_IsoMu24_eta2p1_v", triggerStatus, hltPrescale, isFound, triggerPass, prescale);
-    if (!triggerPass) return kTRUE;
-  }
-  //else   if (trigger=="single-el"){
-  else   if (trigger=="pho"){
-    triggerSelector->SelectTrigger("HLT_Photon36_R9Id85_OR_CaloId10_Iso50_Photon22_R9Id85_OR_CaloId10_Iso50_v", 
-                                   triggerStatus, hltPrescale, isFound, triggerPass, prescale);
-    if (!triggerPass) return kTRUE;
-  }
-  //  else Abort("Event trigger should mu or el");
+
+  Bool_t checkTrigger = kTRUE;
+  if (trigger=="double-mu")
+    {
+      myTrigger = "HLT_Mu13_Mu8_v";
+      //myTrigger = "HLT_Mu17_Mu8_v";
+      //cut_l1pt = 15;
+      //cut_l2pt = 9;
+      //cut_gammapt = 23;
+    }
+  else if (trigger=="mu-pho")
+    {
+      myTrigger = "HLT_Mu22_Photon22_CaloIdL_v";
+      //cut_l1pt = 23;
+      //cut_l2pt = 7;
+      //cut_gammapt = 25;
+    }
+  else if (trigger=="single-mu")
+    {
+      myTrigger = "HLT_IsoMu24_eta2p1_v";
+      cut_l1pt = 25;
+      cut_l2pt = 7;
+      cut_gammapt = 23;
+    }
+  else if (trigger=="pho")
+    {
+      myTrigger = "HLT_Photon36_R9Id85_OR_CaloId10_Iso50_Photon22_R9Id85_OR_CaloId10_Iso50_v";
+      cut_l1pt = 38;
+      cut_l2pt = 7;
+      cut_gammapt = 25;
+    }
+  else
+    checkTrigger = kFALSE;
+  //cout<<"Other options are not supported!"<<endl;
+
 
   FillHistoCounts(2, eventWeight);
   CountEvents(2);
@@ -354,7 +394,10 @@ Bool_t zgamma::Process(Long64_t entry)
   for (Int_t i = 0; i < recoPhotons->GetSize(); ++i) {
     //cout<<"new photon!!!!!!!"<<endl;
     TCPhoton* thisPhoton = (TCPhoton*) recoPhotons->At(i);
+    //cout<<"event = "<<eventNumber
+    //  <<"\n pt="<<thisPhoton->Pt()<<" eta="<<thisPhoton->Eta()<<" phi="<<thisPhoton->Phi()<<" px="<<thisPhoton->Px()<<endl;
     if (!(fabs(thisPhoton->Eta()) < 2.5)) continue;
+
     if(thisPhoton->Pt() > 15
        && PassPhotonIdAndIso(thisPhoton, phIdAndIsoCutsTight, pvPosition)
        ) photons.push_back(*thisPhoton);
@@ -378,6 +421,8 @@ Bool_t zgamma::Process(Long64_t entry)
   
   for (Int_t i = 0; i < recoMuons->GetSize(); ++ i) {
     TCMuon* thisMuon = (TCMuon*) recoMuons->At(i);
+    //cout<<"event = "<<eventNumber
+    //  <<"\n pt="<<thisMuon->Pt()<<" eta="<<thisMuon->Eta()<<" phi="<<thisMuon->Phi()<<" px="<<thisMuon->Px()<<endl;
 
     if (!(fabs(thisMuon->Eta()) < 2.4)) continue;
     
@@ -416,11 +461,20 @@ Bool_t zgamma::Process(Long64_t entry)
       l2 = muons[0];
     }
     else{
-      cout<<"ch1 = "<<muons[0].Charge()<<"ch1 = "<<muons[1].Charge()<<endl;
+      cout<<"ch1 = "<<muons[0].Charge()<<"  ch2 = "<<muons[1].Charge()<<endl;
       return kTRUE;//Abort("reco * They are the same charge!");
     }
   }
   Double_t Mll = (l1+l2).M();
+
+
+
+  hists->fill1DHist(Mll,  Form("diLep_mass_low_cut%i", 3), ";M(ll)", 50, 0,20,  1, "");
+  hists->fill1DHist(Mll,  Form("diLep_mass_high_cut%i", 3),";M(ll)", 50, 0,120, 1, "");
+
+
+  if (photons.size()<1) return kTRUE;
+  gamma = photons[0];
 
   if(!isRealData && makeGen){
     hists->fill1DHist(gen_l1.DeltaR(l1),"reco_gen_l1_deltaR","reco_gen_l1_deltaR",100,0,5, 1,"");
@@ -434,44 +488,76 @@ Bool_t zgamma::Process(Long64_t entry)
   
 
 
-  hists->fill1DHist(Mll,  Form("diLep_mass_low_cut%i", 3), ";M(ll)", 50, 0,20,  1, "");
-  hists->fill1DHist(Mll,  Form("diLep_mass_high_cut%i", 3),";M(ll)", 50, 0,120, 1, "");
+  FillHistosFull(2, eventWeight, l1, l2, lPt1, lPt2, gamma);
 
-
-  if (photons.size()<1) return kTRUE;
-  gamma = photons[0];
-
-  if (lPt1.Pt() < 23 || lPt2.Pt() < 7) return kTRUE;
-  if (gamma.Pt() < 23) return kTRUE;
+  if (lPt1.Pt() < cut_l1pt || lPt2.Pt() < cut_l2pt) return kTRUE;
 
   FillHistosFull(3, eventWeight, l1, l2, lPt1, lPt2, gamma);
   FillHistoCounts(3, eventWeight);
   CountEvents(3);
 
-  
-  if (Mll < 20){
-    FillHistosFull(4, eventWeight, l1, l2, lPt1, lPt2, gamma);
-    FillHistoCounts(4, eventWeight);
-    CountEvents(4);
-  }
-  
   if (Mll > 20) return kTRUE;
-  if (lPt1.DeltaR(gamma)<1.0 || lPt2.DeltaR(gamma)<1.0) return kTRUE;
+  FillHistosFull(4, eventWeight, l1, l2, lPt1, lPt2, gamma);
+  FillHistoCounts(4, eventWeight);
+  CountEvents(4);
+
+  if (gamma.Pt() < cut_gammapt) return kTRUE;
   FillHistosFull(5, eventWeight, l1, l2, lPt1, lPt2, gamma);
   FillHistoCounts(5, eventWeight);
   CountEvents(5);
 
+  if (lPt1.DeltaR(gamma)<1.0 || lPt2.DeltaR(gamma)<1.0) return kTRUE;
 
-  if (Mll>2 && Mll<5){ //jpsi window
-    FillHistosFull(6, eventWeight, l1, l2, lPt1, lPt2, gamma);
-    FillHistoCounts(6, eventWeight);
-    CountEvents(6);
+  FillHistosFull(6, eventWeight, l1, l2, lPt1, lPt2, gamma);
+  FillHistoCounts(6, eventWeight);
+  CountEvents(6);
+
+  if (checkTrigger){
+    triggerSelector->SelectTrigger(myTrigger, triggerStatus, hltPrescale, isFound, triggerPass, prescale);
+    if (!triggerPass) return kTRUE;
+    //  else Abort("Event trigger should mu or el");
   }
 
 
   FillHistosFull(7, eventWeight, l1, l2, lPt1, lPt2, gamma);
   FillHistoCounts(7, eventWeight);
   CountEvents(7);
+
+
+
+  for (UInt_t i =0; i<ntrig; i++){
+    triggerSelector->SelectTrigger(myTriggers[i], triggerStatus, hltPrescale, isFound, triggerPass, prescale);
+    if(triggerPass) nEventsTrig[3][i]++;
+  }
+
+
+  if (Mll < 20){
+    for (UInt_t i=0; i<ntrig; i++){
+      triggerSelector->SelectTrigger(myTriggers[i], triggerStatus, hltPrescale, isFound, triggerPass, prescale);
+      if(triggerPass) nEventsTrig[4][i]++;
+    }
+
+  }
+  
+
+  for (UInt_t i =0; i<ntrig; i++){
+    triggerSelector->SelectTrigger(myTriggers[i], triggerStatus, hltPrescale, isFound, triggerPass, prescale);
+    if(triggerPass) nEventsTrig[5][i]++;
+
+    Bool_t pa  = 1;
+    Bool_t fo  = 0;
+    Int_t  pr  = 99;
+    triggerSelector->SelectTrigger("HLT_Mu22_Photon22_CaloIdL_v", triggerStatus, hltPrescale, fo, pa, pr);
+
+    if(triggerPass || pa) nEventsTrig[6][i]++;
+  }
+
+
+
+  if (Mll>2 && Mll<5){ //jpsi window
+
+
+  }
 
 
   /* single ele trigger study
@@ -520,9 +606,9 @@ void zgamma::Terminate()
   cout<<"| Gen particles cuts:         |\t"<< nEvents[1]  <<"\t|"<<float(nEvents[1])/nEvents[0]<<"\t|"<<endl;
   cout<<"| Trigger selection:          |\t"<< nEvents[2]  <<"\t|"<<float(nEvents[2])/nEvents[1]<<"\t|"<<endl;
   cout<<"| pt1,pt2, ptgamma cuts:      |\t"<< nEvents[3]  <<"\t|"<<float(nEvents[3])/nEvents[2]<<"\t|"<<endl;
-  cout<<"| M(l,l) <20               |\t"<< nEvents[4]  <<"\t|"<<float(nEvents[4])/nEvents[3]<<"\t|"<<endl;
-  cout<<"| deltaR(lep, gamma) cut   |\t"<< nEvents[5]  <<"\t|"<<float(nEvents[5])/nEvents[4]<<"\t|"<<endl;
-  cout<<"| j/psi selection         |\t"<< nEvents[6]  <<"\t|"<<float(nEvents[6])/nEvents[5]<<"\t|"<<endl;
+  cout<<"| M(l,l) <20                  |\t"<< nEvents[4]  <<"\t|"<<float(nEvents[4])/nEvents[3]<<"\t|"<<endl;
+  cout<<"| deltaR(lep, gamma) cut      |\t"<< nEvents[5]  <<"\t|"<<float(nEvents[5])/nEvents[4]<<"\t|"<<endl;
+  cout<<"| j/psi selection             |\t"<< nEvents[6]  <<"\t|"<<float(nEvents[6])/nEvents[5]<<"\t|"<<endl;
 
 
   cout<<"\n\n | Trigger efficiency 2              |\t"<<endl;
@@ -536,7 +622,7 @@ void zgamma::Terminate()
         <<float(nEventsTrig[3][n])/nEvents[3]<<"   "
         <<float(nEventsTrig[4][n])/nEvents[4]<<"   "
         <<float(nEventsTrig[5][n])/nEvents[5]<<"   "
-        <<float(nEventsTrig[6][n])/nEvents[6]<<"   "
+        <<float(nEventsTrig[6][n])/nEvents[5]<<"   "
       
         <<myTriggers[n]<<endl;;
   }
@@ -547,8 +633,8 @@ void zgamma::Terminate()
   //cout<<n<<"  "<<float(nEventsTrig[N][n])/nEvents[N]<<"   "<<myTriggers[n]<<endl;;
   //}
 
-  hists->fill1DHist(-1, "evt_byCut",";cut #;weighted events", nC,-1,nC, totEvents, "Counts");
-  hists->fill1DHist(-1, "evt_byCut_raw", ";cut #;events",     nC,-1,nC, totEvents, "Counts");
+  hists->fill1DHist(-1, "evt_byCut",";cut #;weighted events", nC+1,-1,nC, totEvents, "Counts");
+  hists->fill1DHist(-1, "evt_byCut_raw", ";cut #;events",     nC+1,-1,nC, totEvents, "Counts");
 
 
   histoFile->cd();
@@ -742,8 +828,8 @@ bool zgamma::PassPhotonIdAndIso(TCPhoton *ph, phIdAndIsoCuts cuts, TVector3 *pv)
 
 void zgamma::FillHistoCounts(Int_t num, Double_t weight)
 {
-  hists->fill1DHist(num, "evt_byCut",";cut #;weighted events", nC, -1,nC, weight, "Counts");
-  hists->fill1DHist(num, "evt_byCut_raw", ";cut #;events",     nC, -1,nC, 1, "Counts");
+  hists->fill1DHist(num, "evt_byCut",";cut #;weighted events", nC+1, -1,nC, weight, "Counts");
+  hists->fill1DHist(num, "evt_byCut_raw", ";cut #;events",     nC+1, -1,nC, 1, "Counts");
 }
 
 void zgamma::FillHistosFull(Int_t num, Double_t weight,   
@@ -819,4 +905,3 @@ void zgamma::MakeMuonPlots(TCMuon *mu, TVector3 *pv)
 
   hists->fill1DHist(mu->PtError()/mu->Pt(), "mu_ptErrorOverPt", "ptErrorOverPt", 50, 0,0.6, 1, "Muons");
 }
-
