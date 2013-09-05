@@ -46,7 +46,7 @@ doSignal  = options.sig
 if options.all:
     doData = 1
     doSignal = 1
-    doBG = 1
+    doBG = 0
 ''' 
     Set job configurations.  The order of arguments is:
     (Dataset, path to data, number of jobs, arguments to pass to executable, output directory name)
@@ -81,9 +81,9 @@ if period =="2012":
         
     if selection == 'mugamma':
         data.extend([
-            cfg('MuEG_Run2012A',  dCache+'/andreypz/nuTuples_v6_8TeV/MuEG/Run2012A-22Jan2013',   5, 'DATA mugamma 2012'),
-            cfg('MuEG_Run2012B',  dCache+'/andreypz/nuTuples_v6_8TeV/MuEG/Run2012B-22Jan2013',  10, 'DATA mugamma 2012'),
-            cfg('MuEG_Run2012C',  dCache+'/andreypz/nuTuples_v6_8TeV/MuEG/Run2012C-22Jan2013',  10, 'DATA mugamma 2012'),
+            cfg('MuEG_Run2012A',  dCache+'/andreypz/nuTuples_v6_8TeV/MuEG/Run2012A-22Jan2013',  5, 'DATA mugamma 2012'),
+            cfg('MuEG_Run2012B',  dCache+'/andreypz/nuTuples_v6_8TeV/MuEG/Run2012B-22Jan2013',  5, 'DATA mugamma 2012'),
+            cfg('MuEG_Run2012C',  dCache+'/andreypz/nuTuples_v6_8TeV/MuEG/Run2012C-22Jan2013',  5, 'DATA mugamma 2012'),
             cfg('MuEG_Run2012D',  dCache+'/andreypz/nuTuples_v6_8TeV/MuEG/Run2012D-22Jan2013',  10, 'DATA mugamma 2012'),
 
             ])
@@ -124,12 +124,13 @@ if period =="2012":
 
     if selection in ["muon","mugamma","single-mu"]:
         signal.extend([
-            cfg('h-dalitz', dCache+'/andreypz/nuTuples_v6_8TeV/MCFM_dalitz_v2', 1, 'h-dalitz '+selection+' '+period),
+            cfg('h-dalitz', dCache+'/andreypz/nuTuples_v6_8TeV/MCFM_dalitz_v4', 1, 'h-dalitz '+selection+' '+period),
+            #cfg('h-dalitz', dCache+'/andreypz/nuTuples_v6_8TeV/MCFM_dalitz_v2', 1, 'h-dalitz '+selection+' '+period),
             #cfg('h-dalitz', dCache+'/andreypz/nuTuples_v6_8TeV/HDalitz_mu_v3', 1, 'h-dalitz '+selection+' '+period),
             ])
     elif selection=="electron":
         signal.extend([
-            cfg('h-dalitz', dCache+'/andreypz/nuTuples_v6_8TeV/MCFM_dalitz_v2', 1, 'h-dalitz '+selection+' '+period),
+            cfg('h-dalitz', dCache+'/andreypz/nuTuples_v6_8TeV/MCFM_dalitz_v4', 1, 'h-dalitz '+selection+' '+period),
             ])
         
         #cfg('ggHZZ125', dCache+'/andreypz/nuTuples_v5_8TeV/ggH130', 1, 'ggHZZ125 '+selection+' '+period),

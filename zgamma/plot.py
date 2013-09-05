@@ -1,11 +1,13 @@
 #! /usr/bin/env python
 from optparse import OptionParser
 import sys,os,datetime
+from array import *
 from ROOT import *
+import makeHTML as ht
 gROOT.SetBatch()
 
 parser = OptionParser(usage="usage: %prog ver [options -c, -e, -p, -m]")
-parser.add_option("-c","--cut",    dest="cut", type="int", default=3,    help="Plots after a certain cut")
+parser.add_option("-c","--cut",    dest="cut", type="int", default=4,    help="Plots after a certain cut")
 parser.add_option("-m", "--merge", dest="merge",action="store_true", default=False, help="Do merging?")
 parser.add_option("-e", "--ele",   dest="ele",  action="store_true", default=False, help="Use electron selection")
 parser.add_option("-p", "--period",dest="period", default="2012",  help="Year period; 2011 or 2012")
@@ -18,12 +20,49 @@ conf = cp.ConfigParser()
 conf.read('config.cfg')
 lumi2012 = float(conf.get("lumi","lumi2012A")) + float(conf.get("lumi","lumi2012B"))+\
            float(conf.get("lumi","lumi2012C")) + float(conf.get("lumi","lumi2012D"))
-cuts = []
-sel = ["mugamma","muon","electron"]
+lumi = lumi2012
+#sel = ["electron"]
+sel = ["mugamma","electron"]
+#sel = ["mugamma","muon","electron"]
 
-for key, cut in sorted(conf.items("cuts_stoyan")):
+cuts = []
+for key, cut in sorted(conf.items("cuts2")):
     cuts.append(cut)
     #print key, cut
+
+cs = {}
+for sample, c in conf.items("cs"):
+    print sample,c
+    cs[sample] = float(c)
+cs["h"]=2*cs["h"]
+
+def handleOverflowBinsScaleAndColors(hist, sample, lumi):
+    if hist == None:
+        return
+    nBins   = hist.GetNbinsX()
+    lastBin = hist.GetBinContent(nBins)
+    ovflBin = hist.GetBinContent(nBins+1);
+    lastBinErr = hist.GetBinError(nBins);
+    ovflBinErr = hist.GetBinError(nBins+1);
+    firstBin    = hist.GetBinContent(1);
+    undflBin    = hist.GetBinContent(0);
+    firstBinErr = hist.GetBinError(1);
+    undflBinErr = hist.GetBinError(0);
+    hist.SetBinContent(nBins, lastBin+ovflBin);
+    hist.SetBinError(nBins, sqrt(pow(lastBinErr,2) + pow(ovflBinErr,2)) );
+    hist.SetBinContent(1, firstBin+undflBin);
+    hist.SetBinError(1, sqrt(pow(firstBinErr,2) + pow(undflBinErr,2)) );
+    hist.SetBinContent(0,0);
+    hist.SetBinContent(nBins+1,0);
+
+    #if sample!="data":
+     #   if lumi!=0: #don't rescale, for the cases we don't want it
+      #      hist.Scale(float(lumi*cs(sample))/Nev(sample))
+            #hist.SetLineColor(xc[sample][0])
+            #hist.SetFillStyle(xc[sample][1])
+            #hist.SetFillColor(xc[sample][2])
+
+
 def draw(h1, path):
     h = h1
     if h.InheritsFrom("TH2"):
@@ -33,46 +72,111 @@ def draw(h1, path):
 
     c1.SaveAs(path+h.GetName()+".png")
 
-
-def drawAllInFile(f, fsig, dir,path, N):
-    f.cd(dir)
-    dirList = gDirectory.GetListOfKeys()
-    dirList.Print()
+def blindIt(h):
+    hbin =  h.FindBin(125)
+    for b in xrange(hbin-10,hbin+10):
+        h.SetBinContent(b,0)
     
+def set_palette(name="palette", ncontours=999):
+    """Set a color palette from a given RGB list
+    stops, red, green and blue should all be lists of the same length
+    see set_decent_colors for an example"""
+
+    if name == "gray" or name == "grayscale":
+        stops = [0.00, 0.34, 0.61, 0.84, 1.00]
+        red   = [1.00, 0.84, 0.61, 0.34, 0.00]
+        green = [1.00, 0.84, 0.61, 0.34, 0.00]
+        blue  = [1.00, 0.84, 0.61, 0.34, 0.00]
+    elif name=="signal":
+        stops = [0.00, 0.34, 0.61, 0.84, 1.00]
+        red   = [1.00, 0.90, 0.60, 0.40, 0.20]
+        green = [0.00, 0.00, 0.00, 0.00, 0.00]
+        blue  = [0.00, 0.00, 0.00, 0.00, 0.00]
+    # elif name == "whatever":
+        # (define more palettes)
+    else:
+        # default palette, looks cool
+        stops = [0.00, 0.34, 0.61, 0.84, 1.00]
+        red   = [0.00, 0.00, 0.87, 1.00, 0.51]
+        green = [0.00, 0.81, 1.00, 0.20, 0.00]
+        blue  = [0.51, 1.00, 0.12, 0.00, 0.00]
+
+    s = array('d', stops)
+    r = array('d', red)
+    g = array('d', green)
+    b = array('d', blue)
+
+    npoints = len(s)
+    TColor.CreateGradientColorTable(npoints, s, r, g, b, ncontours)
+    gStyle.SetNumberContours(ncontours)
+    
+def drawAllInFile(f1, name1, f2, name2, dir,path, N, howToScale="none"):
+    f1.cd(dir)
+    dirList = gDirectory.GetListOfKeys()
+    #dirList.Print()
+
+    scale = 1
+
+    if f2!=None and howToScale=="lumi": # only assume signal MC for now
+        Nev = f2.Get("Counts/evt_byCut_raw").GetBinContent(1)
+        cro = cs["h"]
+        scale = float(1000*lumi*cro)/Nev
+        print Nev, lumi, cro, scale
+
     for k1 in dirList:
         if k1.GetName() in ["Counts"]: continue
         if N!=None:
             if not("cut"+N) in k1.GetName(): continue
         h1 = k1.ReadObj()
 
-        if fsig!=None:
+        h2 = TH1F()
+        
+        if f2!=None:
+            #f2.Print()
             if dir!="":
-                hsig = fsig.Get(dir+"/"+k1.GetName()) #assumes that the histograms in signal file have the same names  
+                h2 = f2.Get(dir+"/"+k1.GetName()) #assumes that the histograms in signal file have the same names  
             else:
-                hsig = fsig.Get(k1.GetName())
+                print k1.GetName()
+                h2 = f2.Get(k1.GetName()).Clone()
+                h2.Scale(float(scale))
+                
         print "drawing", h1.GetName()
 
         if h1.InheritsFrom("TH2"):
-            h1.Draw("col")
+            #set_palette("signal")
+            h2.Draw("col")
+            #set_palette("gray")
+            #h1.Draw("col same")
+            if "h2D_tri_vs_diLep_mass" in h1.GetName():
+                c1.SetLogy()
         else:
             h1.Draw("hist")
+            if "tri_mass" in k1.GetName() and name1 not in ["madgra","mcfm"]:
+                blindIt(h1)
             leg = TLegend(0.70,0.8,0.90,0.90);
-            leg.AddEntry(h1,"data", "l")
+            leg.AddEntry(h1,name1, "l")
             leg.SetTextSize(0.04)
-            if fsig!=None and hsig!=None:
-                hsig.Draw("same hist")
-                hsig.SetLineColor(kRed)
+
+            if f2!=None:
+                h2.Draw("same hist")
+                h2.SetLineColor(kRed+1)
                 norm1 = h1.Integral()
-                norm2 = hsig.Integral()
+                norm2 = h2.Integral()
+                if howToScale =="norm":
+                    h1.Scale(1./norm1)
+                    h2.Scale(1./norm2)
                 #print "Integrals = ", norm1, norm2
-                hsig.Scale(float(norm1)/2/float(norm2))
-                leg.AddEntry(hsig,"signal", "l")
-            if h1.GetName() in ["reco_gen_l1_deltaR", "reco_gen_l2_deltaR", "gen_ll_deltaR",
+                if name1 not in ["madgra","mcfm"] and howToScale!="norm":
+                    h2.Scale(100)
+                leg.AddEntry(h2,name2, "l")
+                if h1.GetName() in ["reco_gen_l1_deltaR", "reco_gen_l2_deltaR", "gen_ll_deltaR",
                                 "reco_gen_gamma_deltaR", "ll_deltaR"]:
-                c1.SetLogy()
+                    c1.SetLogy()
                 
             leg.SetFillColor(kWhite)
             leg.Draw()
+
+            #c1.SetLogy()
 
         c1.SaveAs(path+h1.GetName()+".png")
         c1.SetLogy(0)
@@ -87,75 +191,22 @@ def createDir(dir):
                 pass
             else:
                 raise
-                                            
-def makeHTML(title, htmlDir, plot_types, description, IFRAMEA):
-
-    print "\n\n ******** Now making HTML pages ******** \n"
-    menu=""
-    #plot_types = ["comb","h_dist1","h_dist2","h_dist3","fit","4mu","4e"]
-
-    fileList = {}
-    for x in plot_types:
-        newDir = htmlDir+"/"+x
-        createDir(newDir)
-        #if not os.path.exists(newDir):
-        #    print "Creating ", newDir
-        #    os.makedirs(newDir)
-
-
-        fname = x+".html"
-        imgfile = open(fname,"w")
-        imgfile.write("<html><head><title>"+x+"</title></head><body>\n")
-
-        fileList[x] = os.listdir(newDir)
-        #print fileList[x]
+def yieldsTable(yi):
+    t = []
+    l1 = ["Cut/trigger"]
+    l1.extend([a for a in sel])
+    print l1
+    t.append(l1)
+    for line in xrange(len(cuts)):
+        l=[]
+        l.append(cuts[line])
+        for thissel in sel:
+            l.append(yi[thissel][line])
+            #print l
+        t.append(l)
         
-        count =1
-        mod =1
-        for pl in  sorted(fileList[x]):
-            mod = count % 2
-            if mod==1: imgfile.write('<nobr><img src='+x+'/'+pl+' width=45%>')
-            if mod==0: imgfile.write('      <img src='+x+'/'+pl+' width=45%></nobr>\n')
-            count+=1
-        if mod==0: imgfile.write("")
-        if mod==1: imgfile.write("</nobr>")
-
-        imgfile.write("</body></html>")
-        imgfile.close()
-        os.system("mv "+fname+" "+htmlDir)
-
-        menu = menu+"<li><a href=\""+x+".html\" target=\"iframe_a\">"+x+"</a></li>"
-
-    menu += "<li><a href=\"yields.html\" target=\"iframe_a\">yields</a></li>"
-
-    today = datetime.date.today()
-    print today
-
-    message = '<h2>Comments</h2>'
-    message+='<ul>'
-    for d in description:
-        message+="<li>"+d+" </li>"
-        message+='</ul>'
-
-    tempfile = open("indextemplate.html","r")
-    whole_thing = tempfile.read()
-    whole_thing = whole_thing.replace("{TITLE}", title)
-    whole_thing = whole_thing.replace("{MENU}", menu)
-    whole_thing = whole_thing.replace("{DATE}", str(today))
-    whole_thing = whole_thing.replace("{ASIDEMESSAGE}", str(message))
-    whole_thing = whole_thing.replace("{IFRAMEA}", IFRAMEA)
-    tempfile.close()
-
-
-    ifile = open(htmlDir+"/index.html","w")
-    ifile.write(whole_thing)
-    ifile.close()
-
-    os.system("cp yields.html "+htmlDir)
-    
-    print "\n\n *** End of  making HTML pages - all done *** \n"
-
-
+    return t
+                                                        
 def makeTable(table, opt="tex"):
     print "Making sure that the list is alright"
     n_row = len(table)
@@ -199,7 +250,7 @@ def makeTable(table, opt="tex"):
         for c in range(n_col):
             val = table[l][c]
             if not isinstance(val,str):
-                myTable+="%.0f" % (table[l][c])
+                myTable+="%.2f" % (table[l][c])
             else:
                 myTable+=val
             if c!=n_col-1:
@@ -213,12 +264,18 @@ def makeTable(table, opt="tex"):
     ifile.close()
     print myTable
 
-def getYields(f):
+def getYields(f, doLumiScale=False):
     ev = f.Get("Counts/evt_byCut")
 
     y = []
+    scale=1
+    if doLumiScale: # only assume signal MC for now
+        Nev = ev.GetBinContent(1)
+        cro = cs["h"]
+        scale = float(1000*lumi*cro)/Nev
+
     for a in xrange(len(cuts)):
-        y.append(ev.GetBinContent(a+1)) # well, that's how the histogram is set up
+        y.append(scale*ev.GetBinContent(a+1)) # well, that's how the histogram is set up
     return y
 
 if __name__ == "__main__":
@@ -252,7 +309,6 @@ if __name__ == "__main__":
     yields_sig  = {}
 
     tri_hists = {}
-    h1 = TH1F()
     dataFile = {}
     for thissel in sel:
     #for thissel in ["muon","mugamma","single-mu"]:
@@ -267,22 +323,20 @@ if __name__ == "__main__":
         createDir(pathBase+"/Muons")
 
         sigFile = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_h-dalitz_1.root", "OPEN")
-        bkgFile = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_DY-mg5_1.root",   "OPEN")
+        #bkgFile = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_DY-mg5_1.root",   "OPEN")
         dataFile[thissel] = TFile(hPath+"/m_Data_"+thissel+"_"+period+".root","OPEN")
-        
+
         yields_data[thissel] = getYields(dataFile[thissel])
-        yields_sig[thissel]  = getYields(sigFile)
+        yields_sig[thissel]  = getYields(sigFile,True)
         #yields_bkg[thissel]  = getYields(bkgFile)
 
         if int(cut) >2:
             tri_hists[thissel]   = dataFile[thissel].Get("tri_mass_cut"+cut).Clone()
         
-        if doBkg:
-            drawAllInFile(bkgFile, sigFile, path, cut)
-        else:
-            drawAllInFile(dataFile[thissel], sigFile, "",path, cut)
-            if thissel =="mugamma":
-                drawAllInFile(dataFile[thissel], sigFile, "Muons",pathBase+"/Muons/", None)
+
+        drawAllInFile(dataFile[thissel], "data", sigFile,"100x h #rightarrow ll#gamma",  "",path, cut, "lumi")
+        if thissel =="mugamma":
+            drawAllInFile(dataFile[thissel], "data",sigFile,"signal",  "Muons",pathBase+"/Muons/", None,"norm")
         
         #dataFile.Close()
     #print yields_data
@@ -311,28 +365,17 @@ if __name__ == "__main__":
     
         c1.SaveAs("tri_plot.png")
     '''
-    #table = [["Cut/trigger", ]
-    table = [["Cut/trigger", "Mu22_Pho22","mumu","phopho"]]
 
-    for line in xrange(len(cuts)):
-        l=[]
-        l.append(cuts[line])
-        for thissel in sel:
-            #
-            #l.append(yields_sig[thissel][line])
-            if doBkg:
-                l.append(yields_bkg[thissel][line])
-            else:
-                #l.append(yields_data[thissel][line])
-                l.append(yields_sig[thissel][line])
-        table.append(l)
 
-        
-    makeTable(table,"twiki")
+    table_sig  = yieldsTable(yields_sig)
+    table_data = yieldsTable(yields_data)
+
+    makeTable(table_data,"twiki")
+    makeTable(table_sig,"twiki")
 
     comments = ["These plots are made for "+thissel+" selection.",
                 "Blah"]
     
-    makeHTML("h &rarr; dalitz decay plots",pathBase, plot_types, comments, "mugamma")
+    ht.makeHTML("h &rarr; dalitz decay plots",pathBase, plot_types, comments, "mugamma")
 
     print "\n\t\t finita la comedia \n"

@@ -62,10 +62,12 @@ struct muIdAndIsoCuts{
   Bool_t IsPF;
   Bool_t IsGLB;
   Float_t ptErrorOverPt;
+  Float_t TrackLayersWithMeasurement;
   Float_t NumberOfValidMuonHits;
   Float_t NumberOfValidTrackerHits;
   Float_t NumberOfValidPixelHits;
   Float_t NumberOfMatches;
+  Float_t NumberOfMatchedStations;
   Float_t NormalizedChi2;
   Float_t dxy;
   Float_t dz;
