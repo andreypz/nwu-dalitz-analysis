@@ -96,6 +96,7 @@ class BatchMaster():
         batch_tmp.write('Executable            = {0}\n'.format(self._executable))
         batch_tmp.write('Should_Transfer_Files = YES\n')
         batch_tmp.write('WhenToTransferOutput  = ON_EXIT\n')
+        batch_tmp.write('Transfer_Output_Files  = nwu-my-analysis/zgamma/hhhh_{0}_{1}.root\n'.format(cfg._dataName,  str(count+1)))
         batch_tmp.write('Transfer_Input_Files  = {0}/source.tar.gz, {0}/input_{1}_{2}.txt\n'.format(self._stageDir, cfg._dataName,  str(count+1)))
         batch_tmp.write('Requirements = Memory >= 199 &&OpSys == "LINUX"&& (Arch != "DUMMY" )&& Disk > 1000000\n')
         batch_tmp.write('Notification          = Never\n')
@@ -119,11 +120,12 @@ class BatchMaster():
         self._outDir    = self._outDir + '/' + self._selection
         self.make_directory(self._stageDir, clear=False)
         self.make_directory(self._outDir, clear=False)
+        os.system('cp {0} {1}'.format(self._executable, self._stageDir))
+        os.chdir(self._stageDir)
 
         ## Creating tarball of current workspace
         print "Making a tar-ball", self._stageDir
         os.system('tar czf {0}/source.tar.gz ../zgamma ../src ../plugins ../data 2> /dev/null'.format(self._stageDir))
-        
         
         if bSystem is 'lpc':
             for cfg in self._configList:
@@ -132,10 +134,10 @@ class BatchMaster():
                 for i, source in enumerate(sourceFiles):
                     self.make_batch_lpc(cfg, i, source)
 
-                    #subprocess.call('cd {0}'.format(self._stageDir), shell = True)
-                    #subprocess.call('condor_submit .batch_tmp_{1}_{2}'.format(self._stageDir, cfg._dataName, i+1), shell=True)
+                    #os.system("ls -l")
+                    subprocess.call('condor_submit .batch_tmp_{0}_{1}'.format(cfg._dataName, i+1), shell=True)
 
-                    subprocess.call('condor_submit {0}/.batch_tmp_{1}_{2}'.format(self._stageDir, cfg._dataName, i+1), shell=True)
+                    #subprocess.call('condor_submit {0}/.batch_tmp_{1}_{2}'.format(self._stageDir, cfg._dataName, i+1), shell=True)
         else:
             print "Non LPC?  Sorry, this is not supported yet"
                     

@@ -25,6 +25,7 @@ if len(args) < 1:
 ''' Specify parameters '''
 dCache      = '/pnfs/cms/WAX/11/store/user' 
 EOS         = '/eos/uscms/store/user'
+#outputPath  = dCache+'/andreypz/batch_output/zgamma/8TeV'
 outputPath  = EOS+'/andreypz/batch_output/zgamma/8TeV'
 executable  = 'batchJob.csh'
 
@@ -81,10 +82,10 @@ if period =="2012":
         
     if selection == 'mugamma':
         data.extend([
-            cfg('MuEG_Run2012A',  dCache+'/andreypz/nuTuples_v6_8TeV/MuEG/Run2012A-22Jan2013',  5, 'DATA mugamma 2012'),
-            cfg('MuEG_Run2012B',  dCache+'/andreypz/nuTuples_v6_8TeV/MuEG/Run2012B-22Jan2013',  5, 'DATA mugamma 2012'),
-            cfg('MuEG_Run2012C',  dCache+'/andreypz/nuTuples_v6_8TeV/MuEG/Run2012C-22Jan2013',  5, 'DATA mugamma 2012'),
-            cfg('MuEG_Run2012D',  dCache+'/andreypz/nuTuples_v6_8TeV/MuEG/Run2012D-22Jan2013',  10, 'DATA mugamma 2012'),
+            cfg('MuEG_Run2012A',  dCache+'/andreypz/nuTuples_v6a_8TeV/MuEG/Run2012A-22Jan2013',  5, 'DATA mugamma 2012'),
+            cfg('MuEG_Run2012B',  dCache+'/andreypz/nuTuples_v6a_8TeV/MuEG/Run2012B-22Jan2013',  5, 'DATA mugamma 2012'),
+            cfg('MuEG_Run2012C',  dCache+'/andreypz/nuTuples_v6a_8TeV/MuEG/Run2012C-22Jan2013',  5, 'DATA mugamma 2012'),
+            cfg('MuEG_Run2012D',  dCache+'/andreypz/nuTuples_v6a_8TeV/MuEG/Run2012D-22Jan2013',  10, 'DATA mugamma 2012'),
 
             ])
 

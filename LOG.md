@@ -1,6 +1,11 @@
 The log of changes:
 ==================
 
+2013-Sep-05
+  * Improvements to zgamma: 
+     * more plots
+     * selection for muons updated according to POG (new TCMuon object added)
+     
 2013-Aug-28
   * Adding LHEanalyzer (in zgamma) form making plots of LHE root files produced with ExRootLHEFConverter. Need a shared library to run it.
   * Switched to Stoyan's cut ordering (temporarly)  	

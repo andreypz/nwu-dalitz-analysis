@@ -22,7 +22,7 @@ lumi2012 = float(conf.get("lumi","lumi2012A")) + float(conf.get("lumi","lumi2012
            float(conf.get("lumi","lumi2012C")) + float(conf.get("lumi","lumi2012D"))
 lumi = lumi2012
 #sel = ["electron"]
-sel = ["mugamma","electron"]
+sel = ["mugamma"]
 #sel = ["mugamma","muon","electron"]
 
 cuts = []
@@ -144,7 +144,7 @@ def drawAllInFile(f1, name1, f2, name2, dir,path, N, howToScale="none"):
 
         if h1.InheritsFrom("TH2"):
             #set_palette("signal")
-            h2.Draw("col")
+            h1.Draw("col")
             #set_palette("gray")
             #h1.Draw("col same")
             if "h2D_tri_vs_diLep_mass" in h1.GetName():
@@ -153,6 +153,10 @@ def drawAllInFile(f1, name1, f2, name2, dir,path, N, howToScale="none"):
             h1.Draw("hist")
             if "tri_mass" in k1.GetName() and name1 not in ["madgra","mcfm"]:
                 blindIt(h1)
+            if "h_mass" in k1.GetName():
+                print "\n *** H-mass RMS:", h1.GetRMS(),h2.GetRMS()
+                print "\n *** H-mass Mean:", h1.GetMean(),h2.GetMean()
+                
             leg = TLegend(0.70,0.8,0.90,0.90);
             leg.AddEntry(h1,name1, "l")
             leg.SetTextSize(0.04)
@@ -176,7 +180,7 @@ def drawAllInFile(f1, name1, f2, name2, dir,path, N, howToScale="none"):
             leg.SetFillColor(kWhite)
             leg.Draw()
 
-            #c1.SetLogy()
+            c1.SetLogy()
 
         c1.SaveAs(path+h1.GetName()+".png")
         c1.SetLogy(0)
@@ -300,6 +304,7 @@ if __name__ == "__main__":
     
     pathBase = "/uscms_data/d2/andreypz/html/zgamma/dalitz/"+ver+"_cut"+cut
     hPath = "/eos/uscms/store/user/andreypz/batch_output/zgamma/8TeV/"+ver
+    hPath = "/uscms_data/d2/andreypz/zgamma/"+ver
 
 
     if doMerge:

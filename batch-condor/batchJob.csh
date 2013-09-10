@@ -46,5 +46,9 @@ echo 'ls in analysis directory'
 ls -l
 
 echo "Done. Will copy the files to " $outDir
+# for EOS:
 cp hhhh_${dataName}.root $outDir/hhhh_${dataName}_${count}.root
+# For condor internal output:
+cp hhhh_${dataName}.root hhhh_${dataName}_${count}.root
+
 #cp  events_printout_* $outDir/$selection/printouts/
