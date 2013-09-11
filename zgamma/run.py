@@ -75,6 +75,7 @@ gROOT.LoadMacro("../src/TCTriggerObject.cc+");
 
 #gROOT.LoadMacro("../plugins/WeightUtils.cc+");
 gROOT.LoadMacro("../plugins/TriggerSelector.cc+");
+gROOT.LoadMacro("../plugins/ZGAngles.cc+");
 gROOT.LoadMacro("../plugins/HistManager.cc+");
 
 fChain = TChain("ntupleProducer/eventTree");

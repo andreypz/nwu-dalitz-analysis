@@ -110,6 +110,79 @@ def set_palette(name="palette", ncontours=999):
     TColor.CreateGradientColorTable(npoints, s, r, g, b, ncontours)
     gStyle.SetNumberContours(ncontours)
     
+def effPlots(f1, dir, path):
+    print "Now making efficiency plots"
+    #f1.cd(dir)
+    h0 = f1.Get("eff/gen_Mll_0")
+    h1 = f1.Get("eff/gen_Mll_1")
+    h2 = f1.Get("eff/gen_Mll_2")
+    h3 = f1.Get("eff/gen_Mll_3")
+
+    h0.Draw("hist")
+    h1.Draw("hist same")
+    h2.Draw("hist same")
+    h3.Draw("hist same")
+    c1.SaveAs(path+h1.GetName()+".png")
+
+    r = h1.Clone()
+    r.Divide(h0)
+    r.Draw("hist")
+    r.SetTitle(";M(l,l) gen; acceptance")
+    r.SetMinimum(0)
+    r.SetMaximum(1)
+    c1.SaveAs(path+"eff_"+r.GetName()+".png")
+
+    r = h2.Clone()
+    r.Divide(h1)
+    r.Draw("hist")
+    r.SetTitle(";M(l,l) gen; reco eff")
+    r.SetMinimum(0)
+    r.SetMaximum(1)
+    c1.SaveAs(path+"eff_"+r.GetName()+".png")
+
+    r = h3.Clone()
+    r.Divide(h1)
+    r.Draw("hist")
+    r.SetTitle(";M(l,l) gen; reco eff")
+    r.SetMinimum(0)
+    r.SetMaximum(1)
+    c1.SaveAs(path+"eff_"+r.GetName()+".png")
+
+    h0 = f1.Get("eff/gen_ll_deltaR_0")
+    h1 = f1.Get("eff/gen_ll_deltaR_1")
+    h2 = f1.Get("eff/gen_ll_deltaR_2")
+    h3 = f1.Get("eff/gen_ll_deltaR_3")
+    
+    h0.Draw("hist")
+    h1.Draw("hist same")
+    h2.Draw("hist same")
+    h3.Draw("hist same")
+    c1.SaveAs(path+h1.GetName()+".png")
+
+    r = h1.Clone()
+    r.Divide(h0)
+    r.Draw("hist")
+    r.SetTitle(";#Delta R(l1,l2) gen; acceptance")
+    r.SetMinimum(0)
+    r.SetMaximum(1)
+    c1.SaveAs(path+"eff_"+r.GetName()+".png")
+
+    r = h2.Clone()
+    r.Divide(h1)
+    r.Draw("hist")
+    r.SetTitle(";#Delta R(l1,l2) gen; reco eff")
+    r.SetMinimum(0)
+    r.SetMaximum(1)
+    c1.SaveAs(path+"eff_"+r.GetName()+".png")
+
+    r = h3.Clone()
+    r.Divide(h1)
+    r.Draw("hist")
+    r.SetTitle(";#Delta R(l1,l2) gen; reco eff")
+    r.SetMinimum(0)
+    r.SetMaximum(1)
+    c1.SaveAs(path+"eff_"+r.GetName()+".png")
+
 def drawAllInFile(f1, name1, f2, name2, dir,path, N, howToScale="none"):
     f1.cd(dir)
     dirList = gDirectory.GetListOfKeys()
@@ -124,7 +197,7 @@ def drawAllInFile(f1, name1, f2, name2, dir,path, N, howToScale="none"):
         print Nev, lumi, cro, scale
 
     for k1 in dirList:
-        if k1.GetName() in ["Counts"]: continue
+        if k1.GetName() in ["eff"]: continue
         if N!=None:
             if not("cut"+N) in k1.GetName(): continue
         h1 = k1.ReadObj()
@@ -151,8 +224,8 @@ def drawAllInFile(f1, name1, f2, name2, dir,path, N, howToScale="none"):
                 c1.SetLogy()
         else:
             h1.Draw("hist")
-            if "tri_mass" in k1.GetName() and name1 not in ["madgra","mcfm"]:
-                blindIt(h1)
+            #if "tri_mass" in k1.GetName() and name1 not in ["madgra","mcfm"]:
+            #    blindIt(h1)
             if "h_mass" in k1.GetName():
                 print "\n *** H-mass RMS:", h1.GetRMS(),h2.GetRMS()
                 print "\n *** H-mass Mean:", h1.GetMean(),h2.GetMean()
@@ -180,9 +253,9 @@ def drawAllInFile(f1, name1, f2, name2, dir,path, N, howToScale="none"):
             leg.SetFillColor(kWhite)
             leg.Draw()
 
-            c1.SetLogy()
+            #c1.SetLogy()
 
-        c1.SaveAs(path+h1.GetName()+".png")
+            c1.SaveAs(path+h1.GetName()+".png")
         c1.SetLogy(0)
         
 
@@ -263,9 +336,10 @@ def makeTable(table, opt="tex"):
 
     myTable +=endTable
     
-    ifile = open("yields.html","w")
+    ifile = open("yields."+opt,"w")
     ifile.write(myTable)
     ifile.close()
+    
     print myTable
 
 def getYields(f, doLumiScale=False):
@@ -281,6 +355,7 @@ def getYields(f, doLumiScale=False):
     for a in xrange(len(cuts)):
         y.append(scale*ev.GetBinContent(a+1)) # well, that's how the histogram is set up
     return y
+
 
 if __name__ == "__main__":
     timer = TStopwatch()
@@ -326,6 +401,7 @@ if __name__ == "__main__":
             path = pathBase+"/bkg_"+subdir+"/"
         createDir(path)
         createDir(pathBase+"/Muons")
+        createDir(pathBase+"/eff")
 
         sigFile = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_h-dalitz_1.root", "OPEN")
         #bkgFile = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_DY-mg5_1.root",   "OPEN")
@@ -345,6 +421,7 @@ if __name__ == "__main__":
         
         #dataFile.Close()
     #print yields_data
+    effPlots(sigFile, "eff", pathBase+"/eff/")
 
     plot_types =[]
     list = os.listdir(pathBase)
@@ -375,6 +452,8 @@ if __name__ == "__main__":
     table_sig  = yieldsTable(yields_sig)
     table_data = yieldsTable(yields_data)
 
+    makeTable(table_data,"html")
+    makeTable(table_sig,"html")
     makeTable(table_data,"twiki")
     makeTable(table_sig,"twiki")
 

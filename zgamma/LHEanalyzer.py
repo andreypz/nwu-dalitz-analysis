@@ -23,10 +23,12 @@ gSystem.Load("/uscms/home/andreypz/work/MadGraph5/ExRootAnalysis/lib/libExRootAn
 gROOT.LoadMacro("../plugins/HistManager.cc+");
 
 mcfmFile = TFile(outpath+"out_mcfm_"+subdir+".root","RECREATE")
+mcfmFile.mkdir("eff")
 mcfmFile.cd()
 h1 = HistManager(mcfmFile)
 
 madFile = TFile(outpath+"out_mad_"+subdir+".root","RECREATE")
+madFile.mkdir("eff")
 madFile.cd()
 h2 = HistManager(madFile)
 
@@ -114,7 +116,12 @@ def FillAllHists(files, h):
         #h.fill1DHist(g2.M(),    "g2_M",  ";g2 M",    200, -2,2, 1, "")
         
         
-        
+        h.fill1DHist(diLep.M(),     "gen_Mll_0",";gen_Mll",100,0,50, 1,"eff");
+        if lPt1.Pt()>23 and lPt2.Pt()>7 and fabs(lPt1.Eta())<2.4 and  fabs(lPt2.Eta())<2.4 \
+           and gamma.Pt()>23 and fabs(gamma.Eta())<2.5:
+            h.fill1DHist(diLep.M(),     "gen_Mll_1",";gen_Mll",100,0,50, 1,"eff");
+            h.fill1DHist(diLep.M(),     "gen_Mll_2",";gen_Mll",100,0,50, 1,"eff");
+                    
         h.fill1DHist(gamma.M(),"gamma_mass",  ";gamma mass",    200, -2,2, 1, "")
         #h.fill1DHist(g1.Pt(),    "g1_pt",  ";g1 pt",    50, 0,100, 1, "")
         #h.fill1DHist(g2.Pt(),    "g2_pt",  ";g2 pt",    50, 0,100, 1, "")
@@ -208,7 +215,8 @@ if __name__ == "__main__":
     plot.drawAllInFile(madFile, "madgra",mcfmFile,"mcfm","", path, None,"norm")
     #plot.drawAllInFile(madFile, "mad", None, "","", path, None)
 
-    plot_types =["mcfm","mad"]
+    plot.effPlots(madFile, "eff", path)
+    plot_types =["mcfm","mad","eff"]
     if subdir not in plot_types:
         plot_types.append(subdir)
     ht.makeHTML("Plots from an lhe file",pathBase, plot_types, blah, "mad")

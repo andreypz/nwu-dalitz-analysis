@@ -1,10 +1,20 @@
 The log of changes:
 ==================
 
+2013-Sep-11
+  * Added ZGAngles plugin
+    * Need to be validated against Kristian's code (from Brian)
+    * Different approached don't give the same results in angles, need to understand why.
+
+2013-Sep-09
+  * Batch master improvements:
+    * Output root file is now copied into Stage directory alsong with reports
+  * Histograms for acceptance vs Mll added
+   
 2013-Sep-05
   * Improvements to zgamma: 
-     * more plots
-     * selection for muons updated according to POG (new TCMuon object added)
+    * more plots
+    * selection for muons updated according to POG (new TCMuon object added)
      
 2013-Aug-28
   * Adding LHEanalyzer (in zgamma) form making plots of LHE root files produced with ExRootLHEFConverter. Need a shared library to run it.

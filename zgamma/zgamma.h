@@ -50,6 +50,7 @@
 //#include "../plugins/WeightUtils.h"
 #include "../plugins/TriggerSelector.h"
 //#include "../plugins/rochcor.h"
+#include "../plugins/ZGAngles.h"
 #include "../plugins/HistManager.h"
 
 // Header file for the classes stored in the TTree if any.
@@ -110,6 +111,7 @@ class zgamma : public TSelector {
  private:
   TFile* histoFile;  TTree* thisTree;
 
+  ZGAngles *ang;
   TriggerSelector *triggerSelector;
   HistManager *hists;
   UInt_t nEvents[nC];

@@ -178,6 +178,9 @@ void zgamma::Begin(TTree * tree)
   phIdAndIsoCutsTight.phIso03[1] = 1.0;
 
 
+  //Angles class:
+  ang = new ZGAngles();
+
 }
 
 void zgamma::SlaveBegin(TTree * /*tree*/)
@@ -189,6 +192,8 @@ Bool_t zgamma::Process(Long64_t entry)
   CountEvents(0);
   FillHistoCounts(0, 1);
   if (nEvents[0] % (int)5e4 == 0) cout<<nEvents[3]<<" events passed of "<<nEvents[0]<<" checked!"<<endl;
+  
+  //if (nEvents[0]>20) Abort("enough is enosugh!");
   
   //////////////////
   //Trigger status//
@@ -305,25 +310,32 @@ Bool_t zgamma::Process(Long64_t entry)
       //cout<<" charge = "<<gen_l2.Charge()<<" pt = "<<gen_l2.Pt()<<" eta="<<gen_l2.Eta()<<" phi="<<gen_l2.Phi()<<endl;
       
       //{
-      //}
-      //}
       
       //Abort("Can't have more than two muons from a decay!!!");
     }
     
+    float co1,co2,phi,co3;
+    ang->GetAngles(gen_l1,gen_l2,gen_gamma,co1,co2,phi,co3);
+    cout<<eventNumber<<"  Angles: c1= "<<co1<<"  c2="<<co2<<"   phi="<<phi<<"   coTh="<<co3<<endl;
     
+
+    hists->fill1DHist(co1, "gen_co1",";gen cos_lp",100,-1,1, 1,"");
+    hists->fill1DHist(co2, "gen_co2",";gen cos_l,",100,-1,1, 1,"");
+    hists->fill1DHist(co3, "gen_co3",";gen cosTheta",100,-1,1, 1,"");
+    hists->fill1DHist(phi, "gen_phi",";gen phi lp",100, -TMath::Pi(), TMath::Pi(), 1,"");
+
     //if(!( gen_lPt1.Pt()>23 && gen_lPt2.Pt()>8 && gen_gamma.Pt()>23)) return kTRUE;
     //if(!( fabs(gen_lPt1.Eta())<2.5 && fabs(gen_lPt2.Eta())<2.5 && fabs(gen_gamma.Eta())<2.5)) return kTRUE;
     
-    hists->fill1DHist(gen_l1.DeltaR(gen_l2),   "gen_ll_deltaR_0","gen_ll_deltaR",100,0,1, 1,"eff");
-    hists->fill1DHist((gen_l1+gen_l2).M(),   "gen_Mll_0","gen_Mll",100,0,1, 1,"eff");
-    
+    hists->fill1DHist(gen_l1.DeltaR(gen_l2), "gen_ll_deltaR_0",";gen_ll_deltaR",50,0,3, 1,"eff");
+    hists->fill1DHist((gen_l1+gen_l2).M(),   "gen_Mll_0",";gen_Mll",50,0,50, 1,"eff");
+        
     if (
         gen_lPt1.Pt()>23 && fabs(gen_lPt1.Eta())<2.4 &&
-        gen_lPt2.Pt()>23 && fabs(gen_lPt2.Eta())<2.4 &&
+        gen_lPt2.Pt()>7  && fabs(gen_lPt2.Eta())<2.4 &&
         gen_gamma.Pt()>23 && fabs(gen_gamma.Eta())<2.5){
-      hists->fill1DHist(gen_l1.DeltaR(gen_l2),   "gen_ll_deltaR_1","gen_ll_deltaR",100,0,1, 1,"eff");
-      hists->fill1DHist((gen_l1+gen_l2).M(),      "gen_Mll_1","gen_Mll",100,0,1, 1,"eff");
+      hists->fill1DHist(gen_l1.DeltaR(gen_l2),   "gen_ll_deltaR_1",";gen_ll_deltaR",50,0,1, 1,"eff");
+      hists->fill1DHist((gen_l1+gen_l2).M(),     "gen_Mll_1",";gen_Mll",50,0,50, 1,"eff");
     }
 
     hists->fill1DHist(gen_l1.DeltaR(gen_gamma),"gen_l1gamma_deltaR","gen_l1gamma_deltaR",100,0,5, 1,"");
@@ -404,6 +416,7 @@ Bool_t zgamma::Process(Long64_t entry)
 
   //secondPrimaryVertex = (TCPrimaryVtx*)(primaryVtx->At(1));  
   TVector3* pvPosition;// = new TVector3();
+
   pvPosition = mainPrimaryVertex;
 
 
@@ -509,6 +522,11 @@ Bool_t zgamma::Process(Long64_t entry)
   CountEvents(2);
 
 
+  if(!isRealData && makeGen){
+    hists->fill1DHist(gen_l1.DeltaR(gen_l2),   "gen_ll_deltaR_2",";gen_ll_deltaR",50,0,3, 1,"eff");
+    hists->fill1DHist((gen_l1+gen_l2).M(),     "gen_Mll_2",";gen_Mll",50,0,50, 1,"eff");
+  }
+
   if (Mll > 20) return kTRUE;
   FillHistoCounts(3, eventWeight);
   CountEvents(3);
@@ -546,8 +564,8 @@ Bool_t zgamma::Process(Long64_t entry)
   CountEvents(6);
 
   if(!isRealData && makeGen){
-    hists->fill1DHist(gen_l1.DeltaR(gen_l2),   "gen_ll_deltaR_2","gen_ll_deltaR",100,0,1, 1,"eff");
-    hists->fill1DHist((gen_l1+gen_l2).M(),      "gen_Mll_2","gen_Mll",100,0,1, 1,"eff");
+    hists->fill1DHist(gen_l1.DeltaR(gen_l2),   "gen_ll_deltaR_3",";gen_ll_deltaR",50,0,3, 1,"eff");
+    hists->fill1DHist((gen_l1+gen_l2).M(),     "gen_Mll_3",";gen_Mll",50,0,50, 1,"eff");
   }
   if (checkTrigger){
     triggerSelector->SelectTrigger(myTrigger, triggerStatus, hltPrescale, isFound, triggerPass, prescale);
@@ -570,7 +588,13 @@ Bool_t zgamma::Process(Long64_t entry)
     MakeElectronPlots(electrons[0]);
     MakeElectronPlots(electrons[1]);
   }
-  
+
+
+  float co1,co2,phi,co3;
+  ang->GetAngles(l1,l2,gamma0,co1,co2,phi,co3);
+  cout<<eventNumber<<"  Angles: c1= "<<co1<<"  c2="<<co2<<"   phi="<<phi<<"   coco="<<co3<<endl;
+
+
 
   Float_t Mllg = 0;
   if(selection=="el")
@@ -590,6 +614,8 @@ Bool_t zgamma::Process(Long64_t entry)
     CountEvents(9);
     
   }
+
+
   /*
 
   for (UInt_t i =0; i<ntrig; i++){
