@@ -15,12 +15,14 @@ files={}
 files["mcfm"] = ['/uscms_data/d2/andreypz/lhe_mcfm_hzg_dalitz_lord_fixed_unweighted.lhe.root']
 #files["mad"] = ['/uscms_data/d2/andreypz/lhe_mad_hzg_dalitz_unweighted.root']
 files["mad"] = ['/uscms_data/d2/andreypz/lhe_mad_hzg_dalitz_unweighted_Mmu.root']
+#files["mad"] = ['pp_hzg_signal.root']
 
 print files
 #gSystem.Load("/home/andreypz/workspace/MadGraph5/ExRootAnalysis/lib/libExRootAnalysis.so")
 gSystem.Load("/uscms/home/andreypz/work/MadGraph5/ExRootAnalysis/lib/libExRootAnalysis.so")
 
 gROOT.LoadMacro("../plugins/HistManager.cc+");
+gROOT.LoadMacro("../plugins/ZGAngles.cc+");
 
 mcfmFile = TFile(outpath+"out_mcfm_"+subdir+".root","RECREATE")
 mcfmFile.mkdir("eff")
@@ -31,6 +33,8 @@ madFile = TFile(outpath+"out_mad_"+subdir+".root","RECREATE")
 madFile.mkdir("eff")
 madFile.cd()
 h2 = HistManager(madFile)
+
+ang = ZGAngles()
 
 newDir = outpath 
 print newDir
@@ -44,7 +48,10 @@ def FillAllHists(files, h):
         fChain.Add(f)
         #fChain.Print()
 
-    for evt in fChain:    
+    dcount = 0
+    for evt in fChain:
+        dcount += 1
+
         g1 = TLorentzVector(0)
         g2 = TLorentzVector(0)
         g3 = TLorentzVector(0)
@@ -53,7 +60,6 @@ def FillAllHists(files, h):
         gamma = TLorentzVector(0)
         diLep = TLorentzVector(0)
 
-        dcount = 0
         hasZ = 0
         hasGlu3=0
         hasGamma=0
@@ -85,8 +91,7 @@ def FillAllHists(files, h):
                 hasGlu3=1
                 g3.SetPxPyPzE(px,py,pz,E)
 
-        dcount += 1
-
+    
 
         if l1.Pt()>l2.Pt():
             lPt1 = l1
@@ -107,8 +112,23 @@ def FillAllHists(files, h):
         b1  = TVector3(-tri.BoostVector())
         gammaCM.Boost(b1)
         diLepCM.Boost(b1)
+
+        c1=Double(0)
+        c2=c3=phi=1.1
+        ang.SetAngles(l2,l1,gamma)
+        c1 = ang.GetCos1()
+        c2 = ang.GetCos2()
+        c3 = ang.GetCosTheta()
+        phi = ang.GetPhi()
+        #print dcount, c1, c2, phi, c3
+        #if dcount>20: break
         
-        
+        #h.fill1DHist(c1, "ang_co1",";gen cos_lp",100,-1,1, 1,"");
+        h.fill1DHist(c2, "ang_co2",";gen cos_lm,",100,-1,1, 1,"");
+        h.fill1DHist(c3, "ang_co3",";gen cosTheta",100,-1,1, 1,"");
+        h.fill1DHist(phi, "ang_phi",";gen phi lp",100, -TMath.Pi(), TMath.Pi(), 1,"");
+
+                   
         h.fill1DHist(l1.M(),    "l1_mass",  ";l+ mass",    200, -2,2, 1, "")
         h.fill1DHist(l2.M(),    "l2_mass",  ";l- mass",    200, -2,2, 1, "")
 
@@ -121,7 +141,9 @@ def FillAllHists(files, h):
            and gamma.Pt()>23 and fabs(gamma.Eta())<2.5:
             h.fill1DHist(diLep.M(),     "gen_Mll_1",";gen_Mll",100,0,50, 1,"eff");
             h.fill1DHist(diLep.M(),     "gen_Mll_2",";gen_Mll",100,0,50, 1,"eff");
-                    
+
+        h.fill1DHist(diLep.M(),     "gen_Mll_3",";gen_Mll",100,0,50, 1,"eff");
+
         h.fill1DHist(gamma.M(),"gamma_mass",  ";gamma mass",    200, -2,2, 1, "")
         #h.fill1DHist(g1.Pt(),    "g1_pt",  ";g1 pt",    50, 0,100, 1, "")
         #h.fill1DHist(g2.Pt(),    "g2_pt",  ";g2 pt",    50, 0,100, 1, "")

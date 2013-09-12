@@ -148,6 +148,7 @@ def effPlots(f1, dir, path):
     r.SetMaximum(1)
     c1.SaveAs(path+"eff_"+r.GetName()+".png")
 
+    '''
     h0 = f1.Get("eff/gen_ll_deltaR_0")
     h1 = f1.Get("eff/gen_ll_deltaR_1")
     h2 = f1.Get("eff/gen_ll_deltaR_2")
@@ -182,7 +183,7 @@ def effPlots(f1, dir, path):
     r.SetMinimum(0)
     r.SetMaximum(1)
     c1.SaveAs(path+"eff_"+r.GetName()+".png")
-
+    '''
 def drawAllInFile(f1, name1, f2, name2, dir,path, N, howToScale="none"):
     f1.cd(dir)
     dirList = gDirectory.GetListOfKeys()

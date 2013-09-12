@@ -14,11 +14,15 @@ class ZGAngles {
   ZGAngles();
   virtual ~ZGAngles();
   void SetAngles(TLorentzVector l1, TLorentzVector l2, TLorentzVector g);
-  void GetAngles(float& cos1, float& cos2, float& phi, float& cos3);
-  void GetAngles(TLorentzVector l1, TLorentzVector l2, TLorentzVector g, float& cos1, float& cos2, float& phi, float& cos3);
-  
+  void GetAngles(double& cos1, double& cos2, double& phi, double& cos3);
+  void GetAngles(TLorentzVector l1, TLorentzVector l2, TLorentzVector g, double& cos1, double& cos2, double& phi, double& cos3);
+  double GetCos1();
+  double GetCos2();
+  double GetCosTheta();
+  double GetPhi();
+
  private:
-  float _costheta_lplus, _costheta_lminus, _phi, _cosTheta;
+  double _costheta_lplus, _costheta_lminus, _phi, _cosTheta;
 };
 
 

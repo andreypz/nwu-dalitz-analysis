@@ -91,6 +91,7 @@ void zgamma::Begin(TTree * tree)
 
   histoFile = new TFile(Form("a_%s_higgsHistograms.root", selection.c_str()), "RECREATE");
   histoFile->mkdir("Counts", "Counts");
+  histoFile->mkdir("Electrons", "Electrons");
   histoFile->mkdir("Muons", "Muons");
   histoFile->mkdir("Photon", "Photon");
   histoFile->mkdir("jpsi", "jpsi");
@@ -208,6 +209,7 @@ Bool_t zgamma::Process(Long64_t entry)
       if(triggerPass) nEventsTrig[0][i]++;
     }
 
+
   // ----------------------//
   // Gen level particles --//
   //-----------------------//
@@ -314,11 +316,12 @@ Bool_t zgamma::Process(Long64_t entry)
       //Abort("Can't have more than two muons from a decay!!!");
     }
     
+    //ZGanlgles:
     float co1,co2,phi,co3;
-    ang->GetAngles(gen_l1,gen_l2,gen_gamma,co1,co2,phi,co3);
-    cout<<eventNumber<<"  Angles: c1= "<<co1<<"  c2="<<co2<<"   phi="<<phi<<"   coTh="<<co3<<endl;
-    
 
+    ang->GetAngles(gen_l1,gen_l2,gen_gamma,co1,co2,phi,co3);
+    //cout<<eventNumber<<"  Angles: c1= "<<co1<<"  c2="<<co2<<"   phi="<<phi<<"   coTh="<<co3<<endl;
+    
     hists->fill1DHist(co1, "gen_co1",";gen cos_lp",100,-1,1, 1,"");
     hists->fill1DHist(co2, "gen_co2",";gen cos_l,",100,-1,1, 1,"");
     hists->fill1DHist(co3, "gen_co3",";gen cosTheta",100,-1,1, 1,"");
@@ -588,11 +591,6 @@ Bool_t zgamma::Process(Long64_t entry)
     MakeElectronPlots(electrons[0]);
     MakeElectronPlots(electrons[1]);
   }
-
-
-  float co1,co2,phi,co3;
-  ang->GetAngles(l1,l2,gamma0,co1,co2,phi,co3);
-  cout<<eventNumber<<"  Angles: c1= "<<co1<<"  c2="<<co2<<"   phi="<<phi<<"   coco="<<co3<<endl;
 
 
 
@@ -997,6 +995,20 @@ void zgamma::FillHistosFull(Int_t num, Double_t weight,
   hists->fill1DHist(lPt1.DeltaR(lPt2), Form("ll_deltaR_cut%i",       num),";#Delta R(l_{1}, l_{2})",100,0,5, weight,dir);
   hists->fill1DHist(lPt1.DeltaR(gamma),Form("l1_gamma_deltaR_cut%i", num),";#Delta R(#gamma,l_{1})",100,0,5, weight,dir);
   hists->fill1DHist(lPt2.DeltaR(gamma),Form("l2_gamma_deltaR_cut%i", num),";#Delta R(#gamma,l_{2})",100,0,5, weight,dir);
+
+
+  //ZGanlgles:
+  float co1,co2,phi,co3;
+  ang->GetAngles(l1,l2,gamma,co1,co2,phi,co3);
+  //cout<<eventNumber<<"  Angles: c1= "<<co1<<"  c2="<<co2<<"   phi="<<phi<<"   coco="<<co3<<endl;
+    
+  hists->fill1DHist(co1, "co1","; cos_lp",100,-1,1, 1,"Angles");
+  hists->fill1DHist(co2, "co2","; cos_l,",100,-1,1, 1,"");
+  hists->fill1DHist(co3, "co3","; cosTheta",100,-1,1, 1,"");
+  hists->fill1DHist(phi, "phi","; phi lp",100, -TMath::Pi(), TMath::Pi(), 1,"");
+
+
+
 }
 
 void zgamma::MakeMuonPlots(TCMuon mu, TVector3 *pv)
@@ -1023,9 +1035,9 @@ void zgamma::MakeMuonPlots(TCMuon mu, TVector3 *pv)
 
 void zgamma::MakePhotonPlots(TCPhoton ph)
 {
-  hists->fill1DHist(ph.R9(), "ph_R9",";R9", 100, 0, 3, 1, "Photon");
+  hists->fill1DHist(ph.R9(), "ph_R9",";R9", 100, 0, 1, 1, "Photon");
   hists->fill1DHist(ph.TrackVeto(), "ph_trackVeto",";track veto", 3,  0, 3, 1, "Photon");
-  hists->fill1DHist(ph.HadOverEm(), "ph_HadOverEm",";HadOverEm", 100, 0, 3, 1, "Photon");
+  hists->fill1DHist(ph.HadOverEm(), "ph_HadOverEm",";HadOverEm", 100, 0, 0.3, 1, "Photon");
   //hists->fill1DHist(ph->, "ph_",";", 3, 0, 3, 1, "Photon");
   //hists->fill1DHist(ph->, "ph_",";", 3, 0, 3, 1, "Photon");
   //hists->fill1DHist(ph->, "ph_",";", 3, 0, 3, 1, "Photon");
@@ -1033,6 +1045,6 @@ void zgamma::MakePhotonPlots(TCPhoton ph)
 
 void zgamma::MakeElectronPlots(TCElectron el)
 {
-  hists->fill1DHist(el.R9(), "el_R9",";R9", 100, 0, 3, 1, "Electron");
+  hists->fill1DHist(el.R9(), "el_R9",";R9", 100, 0, 1, 1, "Electrons");
 
 }

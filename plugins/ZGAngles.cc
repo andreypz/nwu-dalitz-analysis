@@ -77,15 +77,17 @@ void ZGAngles::SetAngles(TLorentzVector lplus, TLorentzVector lminus, TLorentzVe
   
   TLorentzVector lplus_inZFrame(lplus_CM);
   TLorentzVector lminus_inZFrame(lminus_CM);
-  lplus_inZFrame.Boost(b2);
   lminus_inZFrame.Boost(b2);
+  lplus_inZFrame.Boost(b2);
   
   //Angle between the lepton(+) and a Z direction in the Z rest frame
   // ANGLES:
   _costheta_lplus  = lplus_inZFrame.CosTheta();
   _costheta_lminus = lminus_inZFrame.CosTheta();
-  _phi             = lplus_inZFrame.Phi();
+  //_phi             = lplus_inZFrame.Phi();
+  _phi             = lminus_inZFrame.Phi();
   //Filled!
+  //cout<<"c1 ="<<_costheta_lplus<<"  c2 ="<<_costheta_lminus<<"  phi ="<<_phi<<"c1 ="<<_cosTheta<<endl;
 
   //cout<<"lplus in Z frame: px = "<<lplus_inZFrame.Px()<<"  py = "<<lplus_inZFrame.Py()<<endl;
   //cout<<"lminus in Z frame: px = "<<lminus_inZFrame.Px()<<"  py = "<<lminus_inZFrame.Py()<<endl;
@@ -95,7 +97,7 @@ void ZGAngles::SetAngles(TLorentzVector lplus, TLorentzVector lminus, TLorentzVe
   //There are some problems with other definitions (c2, and c3). They are not always the same
   //It has to be investigated later.
   
-  //float c2 = (lplus_CM.E() - lminus_CM.E())/ (lplus_CM.Vect() + lminus_CM.Vect()).Mag(); //from a formula
+  //double c2 = (lplus_CM.E() - lminus_CM.E())/ (lplus_CM.Vect() + lminus_CM.Vect()).Mag(); //from a formula
   //if (abs(costheta1)>1 || isnan(costheta1)
   // throw cms::Exception("This is exceptional! ")<<"Cosine is greater than 1,  wha?"<<endl;
   
@@ -110,14 +112,14 @@ void ZGAngles::SetAngles(TLorentzVector lplus, TLorentzVector lminus, TLorentzVe
   //cout<<"\t lminus in Z frame: px = "<<lminus_ZFrame.Px()<<"  py = "<<lminus_ZFrame.Py()<<endl;
   
   //c3 = lplus_ZFrame.Vect().Unit().Dot(b3.Unit());
-  //float  c3 = cos(TMath::Pi() - lplus_ZFrame.Angle(b3));
+  //double  c3 = cos(TMath::Pi() - lplus_ZFrame.Angle(b3));
   //cout<<"Debug \n"<<"\t\t cos_lp = "<<_costheta_lplus<<"\t cos_lm = "<<_costheta_lminus<<"\n \t\t c2 = "<<c2<<"\n \t\t c3 = "<<c3<<"\n \t\t c4 = "<<endl;
   //costheta1 = c3;
 
 
 
 }
-void ZGAngles::GetAngles(float& costheta_lplus, float& costheta_lminus, float& phi, float& cosTheta)
+void ZGAngles::GetAngles(double& costheta_lplus, double& costheta_lminus, double& phi, double& cosTheta)
 {
   //Just a simple getter to acces private angles
   costheta_lplus  = _costheta_lplus;
@@ -127,7 +129,7 @@ void ZGAngles::GetAngles(float& costheta_lplus, float& costheta_lminus, float& p
 }
 
 
-void ZGAngles::GetAngles(TLorentzVector lplus, TLorentzVector lminus, TLorentzVector g, float& costheta_lplus, float& costheta_lminus, float& phi, float& cosTheta)
+void ZGAngles::GetAngles(TLorentzVector lplus, TLorentzVector lminus, TLorentzVector g, double& costheta_lplus, double& costheta_lminus, double& phi, double& cosTheta)
 {
   SetAngles(lminus, lplus, g);
 
@@ -137,3 +139,7 @@ void ZGAngles::GetAngles(TLorentzVector lplus, TLorentzVector lminus, TLorentzVe
   cosTheta = _cosTheta;
 }
 
+double ZGAngles::GetCos1(){return _costheta_lplus;}
+double ZGAngles::GetCos2(){return _costheta_lminus;}
+double ZGAngles::GetCosTheta(){return _cosTheta;}
+double ZGAngles::GetPhi(){return _phi;}
