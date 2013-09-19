@@ -59,6 +59,11 @@ cfile.close()
 
 from ROOT import *
 
+gROOT.LoadMacro("../plugins/HistManager.cc+");
+gROOT.LoadMacro("../plugins/ZGAngles.cc+");
+#gROOT.LoadMacro("../plugins/WeightUtils.cc+");
+gROOT.LoadMacro("../plugins/TriggerSelector.cc+");
+
 #gSystem.Load("../plugins/lib/libShapeLine.so");
 #gROOT.LoadMacro("../plugins/rochcor.cc+");
 gROOT.LoadMacro("../src/TCPhysObject.cc+");
@@ -73,10 +78,6 @@ gROOT.LoadMacro("../src/TCGenParticle.cc+");
 gROOT.LoadMacro("../src/TCPrimaryVtx.cc+");
 gROOT.LoadMacro("../src/TCTriggerObject.cc+");
 
-#gROOT.LoadMacro("../plugins/WeightUtils.cc+");
-gROOT.LoadMacro("../plugins/TriggerSelector.cc+");
-gROOT.LoadMacro("../plugins/ZGAngles.cc+");
-gROOT.LoadMacro("../plugins/HistManager.cc+");
 
 fChain = TChain("ntupleProducer/eventTree");
 

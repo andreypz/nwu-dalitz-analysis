@@ -241,8 +241,10 @@ def drawAllInFile(f1, name1, f2, name2, dir,path, N, howToScale="none"):
                 norm1 = h1.Integral()
                 norm2 = h2.Integral()
                 if howToScale =="norm":
-                    h1.Scale(1./norm1)
-                    h2.Scale(1./norm2)
+                   if norm1!=0:
+                       h1.Scale(1./norm1)
+                   if norm2!=0:
+                       h2.Scale(1./norm2)
                 #print "Integrals = ", norm1, norm2
                 if name1 not in ["madgra","mcfm"] and howToScale!="norm":
                     h2.Scale(100)

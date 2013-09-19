@@ -14,13 +14,14 @@ files={}
 #files["mad"] = ['/uscms/home/andreypz/work/MadGraph5/PROC_ANO_HEFT_JGF_v2_1/Events/run_01/unweighted_events.root']
 files["mcfm"] = ['/uscms_data/d2/andreypz/lhe_mcfm_hzg_dalitz_lord_fixed_unweighted.lhe.root']
 #files["mad"] = ['/uscms_data/d2/andreypz/lhe_mad_hzg_dalitz_unweighted.root']
-files["mad"] = ['/uscms_data/d2/andreypz/lhe_mad_hzg_dalitz_unweighted_Mmu.root']
+#files["mad"] = ['/uscms_data/d2/andreypz/lhe_mad_hzg_dalitz_unweighted_Mmu.root']
+files["mad"] = ['/uscms_data/d2/andreypz/lhe_mad_hzg4.root']
 #files["mad"] = ['pp_hzg_signal.root']
 
 print files
 #gSystem.Load("/home/andreypz/workspace/MadGraph5/ExRootAnalysis/lib/libExRootAnalysis.so")
 gSystem.Load("/uscms/home/andreypz/work/MadGraph5/ExRootAnalysis/lib/libExRootAnalysis.so")
-
+#gSystem.Load("../plugins/HistManager_cc.so")
 gROOT.LoadMacro("../plugins/HistManager.cc+");
 gROOT.LoadMacro("../plugins/ZGAngles.cc+");
 
@@ -160,6 +161,7 @@ def FillAllHists(files, h):
         #h.fill1DHist(l2.Phi(),   "l2_phi", ";l- phi",   50, -TMath.Pi(),TMath.Pi(), 1, "")
         
         h.fill1DHist(diLep.M(),   "diLep_mass",";M(ll)", 200, 0,60,  1, "")
+        h.fill1DHist(diLep.M(),   "diLep_mass_full",";M(ll)", 200, 0,130,  1, "")
         h.fill1DHist(diLep.M(),   "diLep_mass_low",";M(ll)", 200, 0,1,  1, "")
         h.fill1DHist(tri.M(),     "h_mass",";M(ll#gamma)",  200, 80,200,  1, "")
 
@@ -211,7 +213,8 @@ def FillAllHists(files, h):
         h.fill1DHist(diLep.DeltaR(l1),  "dR_diLep_l1",  ";dR(diLep, l+)",   50, 0,5, 1, "")
         h.fill1DHist(diLep.DeltaR(l2),  "dR_diLep_l2",  ";dR(diLep, l-)",   50, 0,5, 1, "")
         
-
+    print "Total events = ", dcount
+    
 if __name__ == "__main__":
     gROOT.ProcessLine(".L ~/tdrstyle.C")
     setTDRStyle()
