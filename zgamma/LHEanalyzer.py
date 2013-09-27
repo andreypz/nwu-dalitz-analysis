@@ -13,9 +13,9 @@ outpath = '/uscms_data/d2/andreypz/html/zgamma/lhe/'
 files={}
 #files["mad"] = ['/uscms/home/andreypz/work/MadGraph5/PROC_ANO_HEFT_JGF_v2_1/Events/run_01/unweighted_events.root']
 files["mcfm"] = ['/uscms_data/d2/andreypz/lhe_mcfm_hzg_dalitz_lord_fixed_unweighted.lhe.root']
-#files["mad"] = ['/uscms_data/d2/andreypz/lhe_mad_hzg_dalitz_unweighted.root']
+files["mad"] = ['/uscms_data/d2/andreypz/lhe_mad_hzg_dalitz_unweighted.root']
 #files["mad"] = ['/uscms_data/d2/andreypz/lhe_mad_hzg_dalitz_unweighted_Mmu.root']
-files["mad"] = ['/uscms_data/d2/andreypz/lhe_mad_hzg4.root']
+#files["mad"] = ['/uscms_data/d2/andreypz/lhe_mad_hzg4.root']
 #files["mad"] = ['pp_hzg_signal.root']
 
 print files
@@ -240,8 +240,8 @@ if __name__ == "__main__":
     plot.drawAllInFile(madFile, "madgra",mcfmFile,"mcfm","", path, None,"norm")
     #plot.drawAllInFile(madFile, "mad", None, "","", path, None)
 
-    plot.effPlots(madFile, "eff", path)
-    plot_types =["mcfm","mad","eff"]
+    #plot.effPlots(madFile, "eff", path)
+    plot_types =["mcfm","mad"]
     if subdir not in plot_types:
         plot_types.append(subdir)
     ht.makeHTML("Plots from an lhe file",pathBase, plot_types, blah, "mad")

@@ -114,40 +114,117 @@ def effPlots(f1, dir, path):
     print "Now making efficiency plots"
     #f1.cd(dir)
     h0 = f1.Get("eff/gen_Mll_0")
-    h1 = f1.Get("eff/gen_Mll_1")
-    h2 = f1.Get("eff/gen_Mll_2")
-    h3 = f1.Get("eff/gen_Mll_3")
-
+    h1 = f1.Get("eff/gen_Mll_acc_gamma")
+    h2 = f1.Get("eff/gen_Mll_acc_lept")
+    h3 = f1.Get("eff/gen_Mll_reco_gamma_iso")
+    h4 = f1.Get("eff/gen_Mll_one_ele_reco_ID")
+    h5 = f1.Get("eff/gen_Mll_two_ele_reco")
+    h6 = f1.Get("eff/gen_Mll_two_ele_reco_ID")
+    h7 = f1.Get("eff/gen_Mll_one_ele_reco")
+ 
+    '''
     h0.Draw("hist")
     h1.Draw("hist same")
     h2.Draw("hist same")
     h3.Draw("hist same")
     c1.SaveAs(path+h1.GetName()+".png")
+    '''
+    
+    r1 = h1.Clone()
+    r1.Divide(h0)
+    #r1.Draw("hist")
+    #r1.SetTitle(";M(l,l) gen; acceptance gamma")
+    #r1.SetMinimum(0)
+    #r1.SetMaximum(1)
+    #c1.SaveAs(path+"eff_"+r.GetName()+".png")
 
-    r = h1.Clone()
-    r.Divide(h0)
-    r.Draw("hist")
-    r.SetTitle(";M(l,l) gen; acceptance")
-    r.SetMinimum(0)
-    r.SetMaximum(1)
-    c1.SaveAs(path+"eff_"+r.GetName()+".png")
+    r2 = h2.Clone()
+    r2.Divide(h0)
+    #r2.Draw("hist")
+    #r2.SetTitle(";M(l,l) gen;accepance gamma+l1,l2")
+    #r2.SetMinimum(0)
+    #r2.SetMaximum(1)
+    #c1.SaveAs(path+"eff_"+r.GetName()+".png")
 
-    r = h2.Clone()
-    r.Divide(h1)
-    r.Draw("hist")
-    r.SetTitle(";M(l,l) gen; reco eff")
-    r.SetMinimum(0)
-    r.SetMaximum(1)
-    c1.SaveAs(path+"eff_"+r.GetName()+".png")
+    r3 = h3.Clone()
+    r3.Divide(h2)
+    #r3.Draw("hist")
+    #r3.SetTitle(";M(l,l) gen; reco eff gamma")
+    #r3.SetMinimum(0)
+    #r3.SetMaximum(1)
+    #c1.SaveAs(path+"eff_"+r.GetName()+".png")
 
-    r = h3.Clone()
-    r.Divide(h1)
-    r.Draw("hist")
-    r.SetTitle(";M(l,l) gen; reco eff")
-    r.SetMinimum(0)
-    r.SetMaximum(1)
-    c1.SaveAs(path+"eff_"+r.GetName()+".png")
+    r4 = h4.Clone()
+    r4.Divide(h2)
+    #r4.Draw("hist")
+    #r4.SetTitle(";M(l,l) gen; reco eff gamma iso")
+    #c1.SaveAs(path+"eff_"+r.GetName()+".png")
 
+    r5 = h5.Clone()
+    r5.Divide(h2)
+    #r5.Draw("hist")
+    #r5.SetTitle(";M(l,l) gen; reco eff gamma + 2 ele")
+    #r5.SetMinimum(0)
+    #r5.SetMaximum(1)
+    #c1.SaveAs(path+"eff_"+r.GetName()+".png")
+
+    r6 = h6.Clone()
+    r6.Divide(h2)
+    #r6.Draw("hist")
+    #r6.SetTitle(";M(l,l) gen; reco eff gamma + 2 ele ID")
+    #r6.SetMinimum(0)
+    #r6.SetMaximum(1)
+    #c1.SaveAs(path+"eff_"+r.GetName()+".png")
+
+    r7 = h7.Clone()
+    r7.Divide(h2)
+    #r7.Draw("hist")
+    #r7.SetTitle(";M(l,l) gen; reco eff gamma + 2 ele ID reco")
+    #r7.SetMinimum(0)
+    #r7.SetMaximum(1)
+    #c1.SaveAs(path+"eff_"+r.GetName()+".png")
+
+
+
+    r1.Draw("hist")
+    r2.Draw("hist same")
+    r1.SetMinimum(0)
+    r1.SetMaximum(1)
+    r1.SetTitle(";M(l1,l2) gen; acc")
+    r1.SetLineColor(kRed+1)
+    r2.SetLineColor(kGreen+1)
+    leg = TLegend(0.20,0.2,0.90,0.30);
+    leg.AddEntry(r1,"photon pt>38, eta<2.5", "l")
+    leg.AddEntry(r2,"photon pt>38 and  pt(e1,e2) > (23,7)", "l")
+    leg.SetTextSize(0.04)
+    leg.SetFillColor(kWhite)
+    leg.Draw()
+    c1.SaveAs(path+"acceptance_.png")
+
+    r3.Draw("hist")
+    r3.SetMinimum(0)
+    r3.SetMaximum(1)
+    r3.SetTitle(";M(l1,l2) gen; reco eff")    
+    r4.Draw("hist same")
+    r5.Draw("hist same")
+    r6.Draw("hist same")
+    r7.Draw("hist same")
+    
+    r3.SetLineColor(kBlack)
+    r4.SetLineColor(kOrange+1)
+    r5.SetLineColor(kGreen+1)
+    r6.SetLineColor(kRed+1)
+    leg = TLegend(0.25,0.15,0.90,0.30);
+    leg.AddEntry(r3,"Reco photon pt>38, tight ID", "l")
+    leg.AddEntry(r5,"Photon + 2 electrons NO ID pt(e1,e2) > (23,7)", "l")
+    leg.AddEntry(r6,"Photon + 2 electrons ELE ID pt(e1,e2) > (23,7)", "l")
+    leg.AddEntry(r7,"Photon + ONE electron pt(e) > 45, No ID", "l")
+    leg.AddEntry(r4,"Photon + ONE electron pt(e) > 45, ID", "l")
+    leg.SetTextSize(0.03)
+    leg.SetFillColor(kWhite)
+    leg.Draw()
+    c1.SaveAs(path+"eff_.png")
+    
     '''
     h0 = f1.Get("eff/gen_ll_deltaR_0")
     h1 = f1.Get("eff/gen_ll_deltaR_1")
@@ -250,8 +327,11 @@ def drawAllInFile(f1, name1, f2, name2, dir,path, N, howToScale="none"):
                     h2.Scale(100)
                 leg.AddEntry(h2,name2, "l")
                 if h1.GetName() in ["reco_gen_l1_deltaR", "reco_gen_l2_deltaR", "gen_ll_deltaR",
-                                "reco_gen_gamma_deltaR", "ll_deltaR"]:
+                                    "reco_gen_gamma_deltaR", "ll_deltaR"]:
                     c1.SetLogy()
+                if "phi" in h1.GetName():
+                    h1.SetMinimum(0)
+                    h1.SetMaximum(0.035)
                 
             leg.SetFillColor(kWhite)
             leg.Draw()
@@ -424,6 +504,8 @@ if __name__ == "__main__":
         
         #dataFile.Close()
     #print yields_data
+
+    sigFile = TFile("hhhh_xxx.root", "OPEN")
     effPlots(sigFile, "eff", pathBase+"/eff/")
 
     plot_types =[]
