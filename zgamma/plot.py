@@ -307,13 +307,17 @@ def drawAllInFile(f1, name1, f2, name2, dir,path, N, howToScale="none"):
             if "h_mass" in k1.GetName():
                 print "\n *** H-mass RMS:", h1.GetRMS(),h2.GetRMS()
                 print "\n *** H-mass Mean:", h1.GetMean(),h2.GetMean()
-                
+                 
             leg = TLegend(0.70,0.8,0.90,0.90);
             leg.AddEntry(h1,name1, "l")
             leg.SetTextSize(0.04)
 
+            if "phi" in h1.GetName():
+                h1.SetMinimum(0)
+                h1.SetMaximum(0.035)
+
             if f2!=None:
-                h2.Draw("same hist")
+                h2.Draw("sames hist")
                 h2.SetLineColor(kRed+1)
                 norm1 = h1.Integral()
                 norm2 = h2.Integral()
@@ -329,14 +333,35 @@ def drawAllInFile(f1, name1, f2, name2, dir,path, N, howToScale="none"):
                 if h1.GetName() in ["reco_gen_l1_deltaR", "reco_gen_l2_deltaR", "gen_ll_deltaR",
                                     "reco_gen_gamma_deltaR", "ll_deltaR"]:
                     c1.SetLogy()
-                if "phi" in h1.GetName():
-                    h1.SetMinimum(0)
-                    h1.SetMaximum(0.035)
-                
+
+                if "h_mass" in h2.GetName():
+                    print "we're hererer" 
+                    f1 = TF1("f1", "gaus", 124.9, 125.1);
+                    h1.Fit("f1", "R+");
+                    f1.SetLineColor(kBlack)
+                    gStyle.SetOptStat("mrv")
+                    h2.Draw("sames hist")
+                    gPad.Update()
+                    st1 = h1.FindObject("stats")
+                    st2 = h2.FindObject("stats")
+                    
+                    st1.SetX1NDC(0.2)
+                    st1.SetX2NDC(0.5)
+                    
+                    st1.SetY1NDC(0.65)
+                    st1.SetY2NDC(0.95)
+                    st2.SetY1NDC(0.5)
+                    st2.SetY2NDC(0.65)
+                    st2.SetX1NDC(0.2)
+                    st2.SetX2NDC(0.5)
+                    
+                    st2.SetTextColor(kRed+2)
+
+                    
             leg.SetFillColor(kWhite)
             leg.Draw()
 
-            #c1.SetLogy()
+            c1.SetLogy()
 
             c1.SaveAs(path+h1.GetName()+".png")
         c1.SetLogy(0)

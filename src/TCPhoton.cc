@@ -1,12 +1,34 @@
 #include "TCPhoton.h"
 #include <iostream>
 
-TCPhoton::TCPhoton() { }
 
-TCPhoton::~TCPhoton() { }
+//TCPhoton::TCPhoton() { }
+
+
+TCPhoton::TCPhoton() {}
+
+/*
+TCPhoton::TCPhoton(const TCPhoton& other){
+  _crysArray = new CrystalInfo[100];
+  for(int i=0; i < 100; i++){
+    TCPhoton:: SetCrystal(i, other.GetCrystalArray()[i]);
+  }
+}
+
+TCPhoton& TCPhoton::operator=(const TCPhoton& other){
+  TCPhoton temp(other);
+  swap(_crysArray,temp._crysArray);
+  return *this;
+}
+*/
+
+//TCPhoton::~TCPhoton() { delete[] _crysArray; }
+TCPhoton::~TCPhoton() {}
 
 // "get" methods -------------------------------------
 
+std::vector<TCPhoton::CrystalInfo> TCPhoton::GetCrystalVect() const { return _crysVect; }
+int   TCPhoton::GetNCrystals() const { return _nCrystals;}
 float TCPhoton::NormChi2() const { return _normChi2; }
 float TCPhoton::HadOverEm() const { return _hadOverEm; } 
 float TCPhoton::SigmaIEtaIEta() const { return _sigmaIEtaIEta; } 
@@ -25,6 +47,11 @@ bool  TCPhoton::ConversionVeto() const { return _convVeto; }
 
 // "set" methods ---------------------------------------------
 
+
+void TCPhoton::AddCrystal(TCPhoton::CrystalInfo crys) {_crysVect.push_back(crys);}
+void TCPhoton::SetNCrystals(int n){ _nCrystals = n;}
+
+
 void TCPhoton::SetNormChi2(float c){ _normChi2 = c; } 
 void TCPhoton::SetHadOverEm(float h){ _hadOverEm = h; } 
 void TCPhoton::SetSigmaIEtaIEta(float s){ _sigmaIEtaIEta = s; } 
@@ -40,3 +67,4 @@ void TCPhoton::SetSCPhi(float p) { _SCphi = p; }
 void TCPhoton::SetSCEnergy(float e) { _SCenergy = e; }
 
 void TCPhoton::SetConversionVeto(bool v) { _convVeto = v; }
+

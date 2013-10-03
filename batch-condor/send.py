@@ -125,7 +125,7 @@ if period =="2012":
 
     if selection in ["muon","mugamma","single-mu"]:
         signal.extend([
-            cfg('h-dalitz', dCache+'/andreypz/nuTuples_v6_8TeV/MCFM_dalitz_v4', 1, 'h-dalitz '+selection+' '+period),
+            cfg('h-dalitz', dCache+'/andreypz/nuTuples_v8_8TeV/MCFM_dalitz_v2', 1, 'h-dalitz '+selection+' '+period),
             #cfg('h-dalitz', dCache+'/andreypz/nuTuples_v6_8TeV/MCFM_dalitz_v2', 1, 'h-dalitz '+selection+' '+period),
             #cfg('h-dalitz', dCache+'/andreypz/nuTuples_v6_8TeV/HDalitz_mu_v3', 1, 'h-dalitz '+selection+' '+period),
             ])

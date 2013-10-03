@@ -70,6 +70,7 @@ struct muIdAndIsoCuts{
   Float_t NumberOfMatches;
   Float_t NumberOfMatchedStations;
   Float_t NormalizedChi2;
+  Float_t NormalizedChi2_tracker;
   Float_t dxy;
   Float_t dz;
   Float_t chIso04;
@@ -103,7 +104,7 @@ struct phIdAndIsoCuts{
   float phIso03[2];
 };
 
-muIdAndIsoCuts muIdAndIsoCutsTight, muIdAndIsoCutsLoose;
+muIdAndIsoCuts muIdAndIsoCutsTight, muIdAndIsoCutsLoose, muIdAndIsoCutsSoft;
 elIdAndIsoCuts elIdAndIsoCutsTight, elIdAndIsoCutsLoose;
 phIdAndIsoCuts phIdAndIsoCutsTight, phIdAndIsoCutsLoose;
 
@@ -220,6 +221,8 @@ class zgamma : public TSelector {
    virtual void MakeMuonPlots(TCMuon mu, TVector3 *pv);
    virtual void MakePhotonPlots(TCPhoton ph);
    virtual void MakeElectronPlots(TCElectron el);
+
+   TCGenParticle * GetPrimaryAncestor(TCGenParticle *p);
    
    ClassDef(zgamma,0);
 };

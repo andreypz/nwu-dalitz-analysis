@@ -1,6 +1,7 @@
 #ifndef _TCPHOTON_H
 #define	_TCPHOTON_H
 
+#include <memory>
 #include "TObject.h"
 #include "TLorentzVector.h"
 #include "TArrayF.h"
@@ -10,6 +11,21 @@
 using namespace std;
 
 class TCPhoton : public TCPhysObject {
+public:
+    struct CrystalInfo{
+      int rawId;
+      int ieta;
+      int iphi;
+      int ix;
+      int iy;
+      double energy;
+      double time;
+      double timeErr;
+      int recoFlag;
+    };
+
+    TCPhoton();
+    virtual ~TCPhoton();
 private:
 
     // ID variables
@@ -31,11 +47,17 @@ private:
     //conversion info
     bool    _convVeto;
 
+    // crystal stuff
+    vector<TCPhoton::CrystalInfo> _crysVect;
+    int  _nCrystals; 
+
 public:
-    TCPhoton();
-    virtual ~TCPhoton();
 
     // "get" methods -----------
+
+    vector<TCPhoton::CrystalInfo> GetCrystalVect() const;
+
+    int   GetNCrystals() const;
 
     float NormChi2() const;
     float HadOverEm() const;
@@ -54,6 +76,9 @@ public:
     bool  ConversionVeto() const;
 
     // "set" methods ---------
+
+    void AddCrystal(TCPhoton::CrystalInfo);
+    void SetNCrystals(int);
 
     void SetNormChi2(float);
     void SetHadOverEm(float);

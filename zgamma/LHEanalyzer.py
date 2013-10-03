@@ -51,7 +51,6 @@ def FillAllHists(files, h):
 
     dcount = 0
     for evt in fChain:
-        dcount += 1
 
         g1 = TLorentzVector(0)
         g2 = TLorentzVector(0)
@@ -76,9 +75,11 @@ def FillAllHists(files, h):
                 gamma.SetPxPyPzE(px,py,pz,E)
                 hasGamma=1
                 
-            if (p.PID == 13 or p.PID == 11):
+            if (p.PID == 13  or p.PID == 13):
+            #if (p.PID == 13 or p.PID == 11):
                 l1.SetPxPyPzE(px,py,pz,E)
-            if (p.PID == -13 or p.PID ==-11):
+            if (p.PID == -13 or p.PID ==-13):
+            #if (p.PID == -13 or p.PID ==-11):
                 l2.SetPxPyPzE(px,py,pz,E)
 
             if p.PID==23:
@@ -103,6 +104,12 @@ def FillAllHists(files, h):
 
     
         diLep = l1+l2
+        if diLep.Pt()==0:
+            continue
+
+        dcount += 1
+        #if dcount >10000:
+        #    continue
 
         #if not hasGamma: continue
     
@@ -124,10 +131,10 @@ def FillAllHists(files, h):
         #print dcount, c1, c2, phi, c3
         #if dcount>20: break
         
-        #h.fill1DHist(c1, "ang_co1",";gen cos_lp",100,-1,1, 1,"");
-        h.fill1DHist(c2, "ang_co2",";gen cos_lm,",100,-1,1, 1,"");
-        h.fill1DHist(c3, "ang_co3",";gen cosTheta",100,-1,1, 1,"");
-        h.fill1DHist(phi, "ang_phi",";gen phi lp",100, -TMath.Pi(), TMath.Pi(), 1,"");
+        h.fill1DHist(c1,  "ang_co1",";gen cos_lp",100,-1,1, 1,"");
+        h.fill1DHist(c2,  "ang_co2",";gen cos_lm,", 100,-1,1, 1,"");
+        h.fill1DHist(c3,  "ang_co3",";gen cosTheta",100,-1,1, 1,"");
+        h.fill1DHist(phi, "ang_phi",";gen phi lp",  100, -TMath.Pi(), TMath.Pi(), 1,"");
 
                    
         h.fill1DHist(l1.M(),    "l1_mass",  ";l+ mass",    200, -2,2, 1, "")
@@ -135,7 +142,6 @@ def FillAllHists(files, h):
 
         #h.fill1DHist(g1.M(),    "g1_M",  ";g1 M",    200, -2,2, 1, "")
         #h.fill1DHist(g2.M(),    "g2_M",  ";g2 M",    200, -2,2, 1, "")
-        
         
         h.fill1DHist(diLep.M(),     "gen_Mll_0",";gen_Mll",100,0,50, 1,"eff");
         if lPt1.Pt()>23 and lPt2.Pt()>7 and fabs(lPt1.Eta())<2.4 and  fabs(lPt2.Eta())<2.4 \
@@ -162,8 +168,10 @@ def FillAllHists(files, h):
         
         h.fill1DHist(diLep.M(),   "diLep_mass",";M(ll)", 200, 0,60,  1, "")
         h.fill1DHist(diLep.M(),   "diLep_mass_full",";M(ll)", 200, 0,130,  1, "")
-        h.fill1DHist(diLep.M(),   "diLep_mass_low",";M(ll)", 200, 0,1,  1, "")
-        h.fill1DHist(tri.M(),     "h_mass",";M(ll#gamma)",  200, 80,200,  1, "")
+        h.fill1DHist(diLep.M(),   "diLep_mass_low",";M(ll)",  200, 0,1,  1, "")
+        h.fill1DHist(tri.M(),     "h_mass",";M(ll#gamma)",    200, 80,180,  1, "")
+        h.fill1DHist(tri.M(),     "h_mass_zoom",";M(ll#gamma)",  200, 124,126,  1, "")
+        h.fill1DHist(tri.M(),     "h_mass_zoom2",";M(ll#gamma)", 200, 124.9,125.1,  1, "")
 
         if not hasGlu3:
             h.fill1DHist(tri.Pt(),    "h_pt",";Pt of the Higgs",  200, 0,200,  1, "")
@@ -182,7 +190,7 @@ def FillAllHists(files, h):
         h.fill1DHist(diLep.Pt(),    "diLep_pt",  ";diLep_pt",    50, 0,100, 1, "")
         h.fill1DHist(diLep.Eta(),   "diLep_eta", ";diLep_eta",   50, -3.5,3.5, 1, "")
         h.fill1DHist(diLep.Phi(),   "diLep_phi", ";diLep_phi",   50, -TMath.Pi(),TMath.Pi(), 1, "")
-        h.fill1DHist(gamma.E(),  "gamma_E", ";gamma_E",    50, 0,200, 1, "")
+        h.fill1DHist(gamma.E(),  "gamma_E",  ";gamma_E",   50, 0,200, 1, "")
         h.fill1DHist(gamma.Pt(), "gamma_pt", ";gamma_pt",  50, 0,100, 1, "")
         h.fill1DHist(gamma.Eta(),"gamma_eta",";gamma_eta", 50, -3.5,3.5, 1, "")
         h.fill1DHist(gamma.Phi(),"gamma_phi",";gamma_phi", 50, -TMath.Pi(),TMath.Pi(), 1, "")
@@ -196,10 +204,9 @@ def FillAllHists(files, h):
         
         h.fill2DHist(lPt1.Pt(), lPt2.Pt(), "h2D_Pt1_vs_Pt2", ";Leading lepton pt; Trailing lepton pt",    50, 0,100, 50,0,100, 1, "")
         h.fill2DHist(l1.Pt(),   l2.Pt(),   "h2D_l1_vs_l2",   ";l+ pt; l- pt",    50, 0,100, 50,0,100, 1, "")
-        h.fill2DHist(diLep.Pt(),    gamma.Pt(),"h2D_diLep_vs_gamma", ";Pt of ll system; pt of gamma",    50, 0,100, 50,0,100, 1, "")
-        
-        h.fill2DHist(gammaCM.E(), gamma.Pt(),"h2D_gamma_Ecom_vs_Pt", ";E_{#gamma} in CoM; Photon Pt",    50, 0,100, 50,0,100, 1, "")
-        h.fill2DHist(gammaCM.E(), tri.M(),"h2D_gamma_Ecom_vs_triM", ";E_{#gamma} in CoM; M(ll#gamma)",    50, 0,100, 50,0,200, 1, "")
+        h.fill2DHist(diLep.Pt(),  gamma.Pt(),"h2D_diLep_vs_gamma",     ";Pt of ll system; pt of gamma",   50, 0,100, 50,0,100, 1, "")
+        h.fill2DHist(gammaCM.E(), gamma.Pt(),"h2D_gamma_Ecom_vs_Pt",   ";E_{#gamma} in CoM; Photon Pt",   50, 0,100, 50,0,100, 1, "")
+        h.fill2DHist(gammaCM.E(), tri.M(),   "h2D_gamma_Ecom_vs_triM", ";E_{#gamma} in CoM; M(ll#gamma)", 50, 0,100, 50,0,200, 1, "")
         
         h.fill2DHist(gamma.Pt(), diLep.Eta()-gamma.Eta(),"h2D_gammaPt_vs_deltaEta", ";Pt_{#gamma}; #Delta#eta(ll, #gamma)",    50, 0,100, 50,-5,5, 1, "")
         
@@ -207,11 +214,13 @@ def FillAllHists(files, h):
         h.fill1DHist(diLep.DeltaR(gamma),               "dR_diLep_gamma", ";dR(ll, #gamma)",         50, 0,10, 1, "")
         h.fill1DHist(fabs(diLep.Eta() - gamma.Eta()),   "dEta_diLep_gamma", ";|dEta(ll, #gamma)|",   50, 0,10, 1, "")
         h.fill1DHist((diLep.Vect()+gamma.Vect()).Pt(),  "diff_diLep_gamma_pt", ";four vector sum (diLep+#gamma).Pt()", 50, -20,20, 1, "")
+
         h.fill1DHist(TVector2.Phi_mpi_pi(diLep.Phi()-gamma.Phi()), "dPhi_diLep_gamma", ";dPhi(ll, #gamma)",            50, -10,10, 1, "")
         
-        h.fill1DHist(l1.DeltaR(l2), "dR_l1_l2", ";dR(l+, l-)", 50, 0,5, 1, "")
+        h.fill1DHist(l1.DeltaR(l2),     "dR_l1_l2",     ";dR(l+, l-)",      50, 0,5, 1, "")
         h.fill1DHist(diLep.DeltaR(l1),  "dR_diLep_l1",  ";dR(diLep, l+)",   50, 0,5, 1, "")
         h.fill1DHist(diLep.DeltaR(l2),  "dR_diLep_l2",  ";dR(diLep, l-)",   50, 0,5, 1, "")
+
         
     print "Total events = ", dcount
     
@@ -219,7 +228,8 @@ if __name__ == "__main__":
     gROOT.ProcessLine(".L ~/tdrstyle.C")
     setTDRStyle()
     TH1.SetDefaultSumw2(kTRUE)
-
+    gStyle.SetOptStat(1)
+    
     pathBase = outpath
     path = pathBase+subdir+"/"
     if not os.path.exists(path):

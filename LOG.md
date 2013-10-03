@@ -1,6 +1,11 @@
 The log of changes:
 ==================
 
+2013-Oct-02
+  * Updated to run over v8 ntuples:
+    * Electron, Photon, Met classes changed (Mva Id, regression etc,)
+    * More Muon variables added (soft muons)
+    
 2013-Sep-11
   * Added ZGAngles plugin
     * Need to be validated against Kristian's code (from Brian)
