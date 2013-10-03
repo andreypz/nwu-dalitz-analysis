@@ -223,6 +223,8 @@ class zgamma : public TSelector {
    virtual void MakeElectronPlots(TCElectron el);
 
    TCGenParticle * GetPrimaryAncestor(TCGenParticle *p);
+
+   virtual void DiscoverGeneology(TCGenParticle *p, ULong64_t ev);
    
    ClassDef(zgamma,0);
 };

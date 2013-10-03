@@ -1,6 +1,11 @@
 The log of changes:
 ==================
 
+2013-Oct-03
+  * DiscoverGeneology()
+  * Figured out mothers for leptons and photons
+  * Implementing synch cuts with Stoyan (triangle, muon ID, etc)
+
 2013-Oct-02
   * Updated to run over v8 ntuples:
     * Electron, Photon, Met classes changed (Mva Id, regression etc,)

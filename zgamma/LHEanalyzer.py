@@ -75,10 +75,10 @@ def FillAllHists(files, h):
                 gamma.SetPxPyPzE(px,py,pz,E)
                 hasGamma=1
                 
-            if (p.PID == 13  or p.PID == 13):
+            if (p.PID == 11  or p.PID == 11):
             #if (p.PID == 13 or p.PID == 11):
                 l1.SetPxPyPzE(px,py,pz,E)
-            if (p.PID == -13 or p.PID ==-13):
+            if (p.PID == -11 or p.PID ==-11):
             #if (p.PID == -13 or p.PID ==-11):
                 l2.SetPxPyPzE(px,py,pz,E)
 

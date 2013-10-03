@@ -274,6 +274,7 @@ Bool_t zgamma::Process(Long64_t entry)
     //Int_t ZID = 3000001; //made-up particle that decays to l+l-
     //Int_t ZID = 23;
     Int_t fsr_mu_count = 0, fsr_el_count=0;
+    Int_t ph=0;
     for (int i = 0; i < genParticles->GetSize(); ++i) {
       TCGenParticle* thisParticle = (TCGenParticle*) genParticles->At(i);
 
@@ -286,17 +287,11 @@ Bool_t zgamma::Process(Long64_t entry)
           }
 
         if (thisParticle->Mother() && thisParticle->Mother()->Mother() 
-            && thisParticle->Mother()->Mother()->GetPDGId()==23)
-          {
-            //this is the case with No FSR
-            //gen_mu.push_back(*thisParticle);
-          }
-        else if (thisParticle->Mother() && thisParticle->Mother()->Mother() 
-                 && thisParticle->Mother()->Mother()->Mother()
-                 && thisParticle->Mother()->Mother()->Mother()->GetPDGId()==23)
+            && thisParticle->Mother()->Mother()->Mother()
+            && thisParticle->Mother()->Mother()->Mother()->GetPDGId()==23)
           {
             //There is an extra, intermediate muon with FSR.
-            //gen_mu.push_back(*thisParticle);
+            
             //Let's get it recorded!
             Float_t nofsr_pt = thisParticle->Mother()->Mother()->Pt();
             hists->fill1DHist((nofsr_pt - thisParticle->Pt())/nofsr_pt, "gen_mu_fsr_dPt",";gen mu (Pt_noFSR - Pt_afterFSR)/pt",  200, -1,1, 1,"Muons");
@@ -307,7 +302,7 @@ Bool_t zgamma::Process(Long64_t entry)
                  && thisParticle->Mother()->Mother()->Mother()->Mother()->GetPDGId()==23)
           {
             //Sometimes it is grand-grand-grandmother
-            //gen_mu.push_back(*thisParticle);
+            
             Float_t nofsr_pt = thisParticle->Mother()->Mother()->Mother()->Pt();
             hists->fill1DHist((nofsr_pt - thisParticle->Pt())/nofsr_pt, "gen_mu_fsr_dPt",";gen mu FSR dPt",  200, -1,1, 1,"Muons");
             fsr_mu_count++;
@@ -318,43 +313,17 @@ Bool_t zgamma::Process(Long64_t entry)
                  && thisParticle->Mother()->Mother()->Mother()->Mother()->Mother()->GetPDGId()==23)
           {
             //Sometimes it is grand-grand-grand--grandmother, sic
-            //gen_mu.push_back(*thisParticle);
+            
             Float_t nofsr_pt = thisParticle->Mother()->Mother()->Mother()->Mother()->Pt();
             hists->fill1DHist((nofsr_pt - thisParticle->Pt())/nofsr_pt, "gen_mu_fsr_dPt",";gen mu FSR dPt",  200, -1,1, 1,"Muons");
             fsr_mu_count++;
           }
-        else
-          {
-            /*
-            //or yea, there is else!
-            if(thisParticle->Mother()){
-              cout<<"event = "<<eventNumber<<"   "<<thisParticle->GetPDGId()<<"  st = "<<thisParticle->GetStatus()
-                  <<"\n pt="<<thisParticle->Pt()<<" eta="<<thisParticle->Eta()<<" phi="<<thisParticle->Phi()<<" pt="<<thisParticle->Pt()<<endl;         
-              TCGenParticle *m = thisParticle->Mother();
-              cout<<"    mother = "<<m->GetPDGId()<<"  st="<<m->GetStatus()<<"\n pt="<<m->Pt()<<endl;
-              if(m->Mother()){
-                TCGenParticle *g = m->Mother();
-                cout<<"  grandmother = "<<g->GetPDGId()<<"  st="<<g->GetStatus()<<"\n pt="<<g->Pt()<<endl;
-                if(g->Mother()){
-                  TCGenParticle *gg = g->Mother();
-                  cout<<"  grand-grandmother = "<<gg->GetPDGId()<<"  st="<<gg->GetStatus()<<"\n pt="<<gg->Pt()<<endl;
-                  if(gg->Mother()){
-                    TCGenParticle *ggg = gg->Mother();
-                    cout<<"  grand-grand-grandmother = "<<ggg->GetPDGId()<<"  st="<<ggg->GetStatus()<<"\n pt="<<ggg->Pt()<<endl;
-
-                    if(ggg->Mother()){
-                      TCGenParticle *gggg = ggg->Mother();
-                      cout<<"  grand-grand-grand-grandmother = "<<gggg->GetPDGId()<<"  st="<<gggg->GetStatus()<<"\n pt="<<gggg->Pt()<<endl;
-                    }
-                  }
-                }
-              }
-            }
-            */
-          }
+        else{
+          //or yea, there is else!
+          //zgamma::DiscoverGeneology(thisParticle, eventNumber);            
+        }
       }
-
-
+   
 
       //GEN ELECTRONS
       if (abs(thisParticle->GetPDGId()) == 11 && thisParticle->GetStatus()==1) {
@@ -363,17 +332,10 @@ Bool_t zgamma::Process(Long64_t entry)
             gen_el.push_back(*thisParticle);
           }
 
-        if (thisParticle->Mother() && thisParticle->Mother()->Mother() 
-            && thisParticle->Mother()->Mother()->GetPDGId()==23)
-          {
-            //this is the case with No FSR
-            gen_el.push_back(*thisParticle);
-          }
-        else if (thisParticle->Mother() && thisParticle->Mother()->Mother() && thisParticle->Mother()->Mother()->Mother()
+        if (thisParticle->Mother() && thisParticle->Mother()->Mother() && thisParticle->Mother()->Mother()->Mother()
                  && thisParticle->Mother()->Mother()->Mother()->GetPDGId()==23)
           {
             //There is an extra, intermediate muon with FSR.
-            gen_el.push_back(*thisParticle);
             //Let's get it recorded!
             Float_t nofsr_pt = thisParticle->Mother()->Mother()->Pt();
             hists->fill1DHist((nofsr_pt - thisParticle->Pt())/nofsr_pt, "gen_el_fsr_dPt",";gen el FSR dPt",  200, -1,1, 1,"Electrons");
@@ -381,17 +343,24 @@ Bool_t zgamma::Process(Long64_t entry)
           }
       }
 
-
-      //if (thisParticle->GetPDGId()==22 && thisParticle->GetStatus()==1 && (fabs(thisParticle->Grandmother())<7 || thisParticle->Grandmother()==23) ) // a photon from higgs decay
       //PHOTON amd Higgs
-      if (thisParticle->GetPDGId()==22 && thisParticle->GetStatus()==1 && thisParticle->Mother() && thisParticle->Mother()->Mother() 
-          && thisParticle->Mother()->Mother()->GetPDGId()==25) // a photon from higgs decay
-        gen_gamma = *thisParticle;
-      
+      if (thisParticle->GetPDGId()==22 && thisParticle->GetStatus()==1
+          && zgamma::GetPrimaryAncestor(thisParticle)->GetPDGId()==25
+          && thisParticle->Mother() &&  abs(thisParticle->Mother()->GetPDGId())!=13 &&  abs(thisParticle->Mother()->GetPDGId())!=11)
+         {
+           gen_gamma = *thisParticle;
+           //zgamma::DiscoverGeneology(thisParticle, eventNumber);            
+           ph++;
+         }
+
       if (thisParticle->GetPDGId()==25)
         gen_higgs = *thisParticle;
 
     }
+
+    if (ph!=1)
+      Abort(" NONONO There has to be exactly one photon from the Higgs!");
+
     sort(gen_el.begin(), gen_el.end(), P4SortCondition);
     sort(gen_mu.begin(), gen_mu.end(), P4SortCondition);
     
@@ -400,8 +369,9 @@ Bool_t zgamma::Process(Long64_t entry)
       
 
     if(selection=="el"){ //eegamma
-      if (gen_el.size()<2) return kTRUE;
-      //Abort("No gen electrons? What's up with that?");
+      if (gen_el.size()!=2) 
+        return kTRUE;
+    
       gen_lPt1 = gen_el[0];
       gen_lPt2 = gen_el[1];
       
@@ -415,48 +385,15 @@ Bool_t zgamma::Process(Long64_t entry)
       }
       else
         Abort("They are the same charge!");
-      
-      if (gen_el.size()>2) return kTRUE;
-      //Abort("Can't have more than two electrons from a decay!!!");
     }
     
-
-    /*
-    for (int i = 0; i < genParticles->GetSize(); ++i) {
-      TCGenParticle* thisParticle = (TCGenParticle*) genParticles->At(i);
-      //if (abs(thisParticle->GetPDGId()) == 11 && thisParticle->Mother()==3000001) {
-      //if (abs(thisParticle->GetPDGId()) == 25)
-      //if (abs(thisParticle->GetPDGId()) == 13){
-      //if (abs(thisParticle->GetPDGId()) == 22 || abs(thisParticle->GetPDGId()) == 13){
-      if (abs(thisParticle->GetPDGId()) == 13)
-        {
-        cout<<"event = "<<eventNumber<<"   "<<thisParticle->GetPDGId()<<"  st = "<<thisParticle->GetStatus()
-        <<"\n pt="<<thisParticle->Pt()<<" eta="<<thisParticle->Eta()<<" phi="<<thisParticle->Phi()<<" pt="<<thisParticle->Pt()<<endl;         
-        if(thisParticle->Mother()){
-        TCGenParticle *m = thisParticle->Mother();
-        cout<<"    mother = "<<m->GetPDGId()<<"  st="<<m->GetStatus()<<endl;
-        if(m->Mother()){
-        TCGenParticle *g = m->Mother();
-        cout<<"  grandmother = "<<g->GetPDGId()<<"  st="<<g->GetStatus()<<endl;
-        }
-        }
-          //if ( thisParticle->Grandmother() == thisParticle->GetPDGId())
-          //cout<<"\t grandma ?: "<<thisParticle->GetPDGId()<<endl;
-        }
-    }
-    */
-
-    if (gen_gamma.E()==0)// return kTRUE;
-      Abort(Form("%i: No gen gamma in an event? that sounds bad",eventNumber));//return kTRUE;
-
     if(selection=="mu"){//mumugamma
-      if (gen_mu.size()<2)  return kTRUE;
+      if (gen_mu.size()!=2)  return kTRUE;
       
       gen_lPt1 = gen_mu[0];
       gen_lPt2 = gen_mu[1];
       // If there are more muons - it's confusing, so let's just ignore them for now.
       // (they may come from ZH -> ZZgamma process)
-      
       
       if (gen_mu[0].Charge()==1 && gen_mu[1].Charge()==-1){
         gen_l1 = gen_mu[0];
@@ -469,17 +406,20 @@ Bool_t zgamma::Process(Long64_t entry)
       else
         Abort("They are the same charge!");
       
-      if (gen_mu.size()>2) return kTRUE;
       
       //cout<<"\t\t event = "<<eventNumber<<"  "<<endl;
       //cout<<" charge = "<<gen_l1.Charge()<<" pt = "<<gen_l1.Pt()<<" eta="<<gen_l1.Eta()<<" phi="<<gen_l1.Phi()<<endl;
       //cout<<" charge = "<<gen_l2.Charge()<<" pt = "<<gen_l2.Pt()<<" eta="<<gen_l2.Eta()<<" phi="<<gen_l2.Phi()<<endl;
       
-      //{
-      
-      //Abort("Can't have more than two muons from a decay!!!");
     }
     
+
+    if (gen_el.size()!=2 && gen_mu.size()!=2)
+      Abort(Form("  - - WARNING - - What's up with that?\n  There should be exact two leptons from Higgs. Insteat there %i", (int)(gen_el.size() + gen_mu.size())));
+    
+    if (gen_gamma.E()==0)// return kTRUE;
+      Abort(Form("%i: No gen gamma in an event? that sounds bad",(int)eventNumber));//return kTRUE;
+
 
     //ZGAnlgles:
     double co1,co2,phi,co3;
@@ -495,10 +435,8 @@ Bool_t zgamma::Process(Long64_t entry)
     //if(!( gen_lPt1.Pt()>23 && gen_lPt2.Pt()>8 && gen_gamma.Pt()>23)) return kTRUE;
     //if(!( fabs(gen_lPt1.Eta())<2.5 && fabs(gen_lPt2.Eta())<2.5 && fabs(gen_gamma.Eta())<2.5)) return kTRUE;
 
-
-
-    FillHistoCounts(1, eventWeight);
-    CountEvents(1);
+    //FillHistoCounts(1, eventWeight);
+    //CountEvents(1);
 
     gendR = gen_l1.DeltaR(gen_l2);
     genMll = (gen_l1+gen_l2).M();
@@ -508,14 +446,15 @@ Bool_t zgamma::Process(Long64_t entry)
         
 
     if (gen_gamma.Pt()>cut_gammapt && fabs(gen_gamma.Eta())<2.5){
-      hists->fill1DHist(gendR,  "gen_dR_acc_gamma", ";gen_dR", 50,0,1, 1,"eff");
       hists->fill1DHist(genMll, "gen_Mll_acc_gamma",";gen_Mll",50,0,50,1,"eff");
+      hists->fill1DHist(gendR,  "gen_dR_acc_gamma", ";gen_dR", 50,0,1, 1,"eff");
      
       if(
          gen_lPt1.Pt()>cut_l1pt && fabs(gen_lPt1.Eta())<2.4 &&
          gen_lPt2.Pt()>cut_l2pt && fabs(gen_lPt2.Eta())<2.4
          ){
         hists->fill1DHist(genMll,  "gen_Mll_acc_lept",  ";gen_Mll",50,0,50,1,"eff");
+        hists->fill1DHist(gendR,   "gen_dR_acc_lept",   ";gen_dR", 50,0,1, 1,"eff");
 
       }
       else 
@@ -539,9 +478,6 @@ Bool_t zgamma::Process(Long64_t entry)
 
   }
 
-  //FillHistoCounts(1, eventWeight);
-  //CountEvents(1);
-    
   for (UInt_t i =0; i<ntrig; i++){
     triggerSelector->SelectTrigger(myTriggers[i], triggerStatus, hltPrescale, isFound, triggerPass, prescale);
     if(triggerPass) nEventsTrig[1][i]++;
@@ -551,9 +487,8 @@ Bool_t zgamma::Process(Long64_t entry)
   }
 
 
-
-  //FillHistoCounts(2, eventWeight);
-  //CountEvents(2);
+  FillHistoCounts(1, eventWeight);
+  CountEvents(1);
     
 
   // --- Primary vertex ---//
@@ -583,7 +518,9 @@ Bool_t zgamma::Process(Long64_t entry)
 
     if(thisPhoton->Pt() > 15){
       photons0.push_back(*thisPhoton);
-      if(PassPhotonIdAndIso(thisPhoton, phIdAndIsoCutsTight, pvPosition))
+      if(PassPhotonIdAndIso(thisPhoton, phIdAndIsoCutsTight, pvPosition)
+         && (makeGen && gen_gamma.DeltaR(*thisPhoton) < 0.2) 
+         )
         photons.push_back(*thisPhoton);
     }
   }
@@ -608,6 +545,7 @@ Bool_t zgamma::Process(Long64_t entry)
       if (
           PassElectronIdAndIso(thisElec, elIdAndIsoCutsTight, pvPosition)
           //PassElectronIdAndIso(thisElec, elIdAndIsoCutsLoose, pvPosition)
+          &&(selection=="el" && makeGen && (gen_l1.DeltaR(*thisElec) < 0.2 ||  gen_l2.DeltaR(*thisElec) < 0.2)) // this should not fake a photon!
           //&&(selection=="el" && gamma.DeltaR(*thisElec) > 0.4) // this should not fake a photon!
           )
         electrons.push_back(*thisElec);
@@ -648,6 +586,7 @@ Bool_t zgamma::Process(Long64_t entry)
 
   if(!isRealData && makeGen){
     hists->fill1DHist(genMll,  "gen_Mll_reco_gamma",  ";gen_Mll",50,0,50,1,"eff");
+    hists->fill1DHist(gendR,   "gen_dR_reco_gamma",  " ;gen_dR",50,0,1,1,"eff");
   }
 
   if (photons.size()<1) return kTRUE;
@@ -656,6 +595,8 @@ Bool_t zgamma::Process(Long64_t entry)
 
   if(!isRealData && makeGen){
     hists->fill1DHist(genMll,  "gen_Mll_reco_gamma_iso",  ";gen_Mll",50,0,50,1,"eff");
+    hists->fill1DHist(gendR,   "gen_dR_reco_gamma_iso",  " ;gen_dR",50,0,1,1,"eff");
+
   }
 
 
@@ -667,24 +608,29 @@ Bool_t zgamma::Process(Long64_t entry)
 
     if (electrons0.size()>=1)
       if(!isRealData && makeGen)
-        if (electrons0[0].Pt() > 45)
+        if (electrons0[0].Pt() > 30){
           hists->fill1DHist(genMll,  "gen_Mll_one_ele_reco",  ";gen_Mll",50,0,50,1,"eff");
-
+          hists->fill1DHist(gendR,   "gen_dR_one_ele_reco",  " ;gen_dR",50,0,1,1,"eff");
+        }
     if (electrons.size()>=1)
       if(!isRealData && makeGen)
-        if (electrons[0].Pt() > 45)
+        if (electrons[0].Pt() > 30){
           hists->fill1DHist(genMll,  "gen_Mll_one_ele_reco_ID",  ";gen_Mll",50,0,50,1,"eff");
-
+          hists->fill1DHist(gendR,   "gen_dR_one_ele_reco_ID",  " ;gen_dR",50,0,1,1,"eff");
+        }
     if (electrons0.size()>=2)
       if(!isRealData && makeGen)
-        if (electrons0[0].Pt() > cut_l1pt && electrons0[1].Pt() > cut_l2pt)
+        if (electrons0[0].Pt() > cut_l1pt && electrons0[1].Pt() > cut_l2pt){
           hists->fill1DHist(genMll,  "gen_Mll_two_ele_reco",  ";gen_Mll",50,0,50,1,"eff");
-    
+          hists->fill1DHist(gendR,   "gen_dR_two_ele_reco",  " ;gen_dR",50,0,1,1,"eff");
+        }    
+
     if (electrons.size()>=2)
       if(!isRealData && makeGen)
-        if (electrons[0].Pt() > cut_l1pt && electrons[1].Pt() > cut_l2pt)
+        if (electrons[0].Pt() > cut_l1pt && electrons[1].Pt() > cut_l2pt){
           hists->fill1DHist(genMll,  "gen_Mll_two_ele_reco_ID",  ";gen_Mll",50,0,50,1,"eff");
-
+          hists->fill1DHist(gendR,   "gen_dR_two_ele_reco_ID",  " ;gen_dR",50,0,1,1,"eff");
+        }
     
     if (electrons.size()<2) return kTRUE;
     
@@ -722,15 +668,15 @@ Bool_t zgamma::Process(Long64_t entry)
   Double_t Mll = (l1+l2).M();
 
 
-
   hists->fill1DHist(Mll,  Form("diLep_mass_low_cut%i", 3), ";M(ll)", 50, 0,20,  1, "");
   hists->fill1DHist(Mll,  Form("diLep_mass_high_cut%i", 3),";M(ll)", 50, 0,120, 1, "");
 
 
   if (lPt1.Pt() < cut_l1pt || lPt2.Pt() < cut_l2pt) return kTRUE;
-  if(!isRealData && makeGen)
+  if(!isRealData && makeGen){
     hists->fill1DHist(genMll,  "gen_Mll_two_ele_reco_crosscheck",  ";gen_Mll",50,0,50,1,"eff");
-
+    hists->fill1DHist(gendR,   "gen_dR_two_ele_reco_crosscheck",  " ;gen_dR",50,0,1,1,"eff");
+  }
 
   FillHistosFull(3, eventWeight, l1, l2, lPt1, lPt2, gamma0);
   FillHistoCounts(3, eventWeight);
@@ -778,22 +724,11 @@ Bool_t zgamma::Process(Long64_t entry)
   }
 
 
-  if(!isRealData && makeGen){
-    hists->fill1DHist(gendR,   "gen_dR_3",";gen_dR",50,0,3, 1,"eff");
-    hists->fill1DHist(genMll,  "gen_Mll_3",";gen_Mll",50,0,50, 1,"eff");
+  if ((l1+l2).Pt()+gamma.Pt() < 180){
+    FillHistosFull(7, eventWeight, l1, l2, lPt1, lPt2, gamma);
+    FillHistoCounts(7, eventWeight);
+    CountEvents(7);
   }
-  if (checkTrigger){
-    triggerSelector->SelectTrigger(myTrigger, triggerStatus, hltPrescale, isFound, triggerPass, prescale);
-    if (!triggerPass) return kTRUE;
-    //  else Abort("Event trigger should mu or el");
-  }
-
-  FillHistosFull(7, eventWeight, l1, l2, lPt1, lPt2, gamma);
-  FillHistoCounts(7, eventWeight);
-  CountEvents(7);
-
-
-
 
   Float_t Mllg = 0;
   if(selection=="el")
@@ -807,10 +742,26 @@ Bool_t zgamma::Process(Long64_t entry)
     CountEvents(8);
   }
 
-  if (Mll>2.7 && Mllg<3.5){ //jpsi window
+
+  if(!isRealData && makeGen){
+    hists->fill1DHist(gendR,   "gen_dR_3",";gen_dR",50,0,3, 1,"eff");
+    hists->fill1DHist(genMll,  "gen_Mll_3",";gen_Mll",50,0,50, 1,"eff");
+  }
+  if (checkTrigger){
+    triggerSelector->SelectTrigger(myTrigger, triggerStatus, hltPrescale, isFound, triggerPass, prescale);
+    if (!triggerPass) return kTRUE;
+    //  else Abort("Event trigger should mu or el");
+
     FillHistosFull(9, eventWeight, l1, l2, lPt1, lPt2, gamma,"jpsi");
     FillHistoCounts(9, eventWeight);
     CountEvents(9);
+  }
+
+
+
+
+
+  if (Mll>2.7 && Mllg<3.5){ //jpsi window
     
   }
 
@@ -899,13 +850,13 @@ void zgamma::Terminate()
   cout<<"| 2: reco gamma iso        |\t"<< nEvents[2]  <<"\t|"<<float(nEvents[2])/nEvents[1]<<"\t|"<<endl;
   cout<<"| 3: reco lep       |\t"<< nEvents[3]  <<"\t|"<<float(nEvents[3])/nEvents[2]<<"\t|"<<endl;
   cout<<"| 4: mll <20        |\t"<< nEvents[4]  <<"\t|"<<float(nEvents[4])/nEvents[3]<<"\t|"<<endl;
-  cout<<"| 5:         |\t"<< nEvents[5]  <<"\t|"<<float(nEvents[5])/nEvents[4]<<"\t|"<<endl;
-  cout<<"| 6:         |\t"<< nEvents[6]  <<"\t|"<<float(nEvents[6])/nEvents[5]<<"\t|"<<endl;
-  cout<<"| 7:         |\t"<< nEvents[7]  <<"\t|"<<float(nEvents[7])/nEvents[6]<<"\t|"<<endl;
-  cout<<"| 8:         |\t"<< nEvents[8]  <<"\t|"<<float(nEvents[8])/nEvents[7]<<"\t|"<<endl;
-  cout<<"| 9:         |\t"<< nEvents[9]  <<"\t|"<<float(nEvents[9])/nEvents[8]<<"\t|"<<endl;
+  cout<<"| 5:            |\t"<< nEvents[5]  <<"\t|"<<float(nEvents[5])/nEvents[4]<<"\t|"<<endl;
+  cout<<"| 6:            |\t"<< nEvents[6]  <<"\t|"<<float(nEvents[6])/nEvents[5]<<"\t|"<<endl;
+  cout<<"| 7: triangle   |\t"<< nEvents[7]  <<"\t|"<<float(nEvents[7])/nEvents[6]<<"\t|"<<endl;
+  cout<<"| 8: mH         |\t"<< nEvents[8]  <<"\t|"<<float(nEvents[8])/nEvents[7]<<"\t|"<<endl;
+  cout<<"| 9: trig       |\t"<< nEvents[9]  <<"\t|"<<float(nEvents[9])/nEvents[8]<<"\t|"<<endl;
 
-
+  /*
   cout<<"\n\n | Trigger efficiency 2              |\t"<<endl;
   for(UInt_t n=0; n<ntrig; n++){ 
     //UInt_t N=3;
@@ -921,6 +872,7 @@ void zgamma::Terminate()
       
         <<myTriggers[n]<<endl;;
   }
+  */
 
   //cout<<"\n\n | Trigger efficiency 3              |\t"<<endl;
   //for(UInt_t n=0; n<ntrig; n++){ 
@@ -1269,4 +1221,33 @@ TCGenParticle * zgamma::GetPrimaryAncestor(TCGenParticle *p)
   while (p->Mother())
     p = p->Mother();
   return p;
+}
+
+
+void zgamma::DiscoverGeneology(TCGenParticle *p, ULong64_t ev)
+{
+  if(p->Mother()){
+    cout<<"---->> event = "<<ev<<"   "<<p->GetPDGId()<<"  st = "<<p->GetStatus()
+        <<"\n pt="<<p->Pt()<<" eta="<<p->Eta()<<" phi="<<p->Phi()<<" pt="<<p->Pt()<<endl;         
+    TCGenParticle *m = p->Mother();
+    cout<<"    mother = "<<m->GetPDGId()<<"  st="<<m->GetStatus()<<"\n pt="<<m->Pt()<<endl;
+    if(m->Mother()){
+      TCGenParticle *g = m->Mother();
+      cout<<"  grandmother = "<<g->GetPDGId()<<"  st="<<g->GetStatus()<<"\n pt="<<g->Pt()<<endl;
+      if(g->Mother()){
+        TCGenParticle *gg = g->Mother();
+        cout<<"  grand-grandmother = "<<gg->GetPDGId()<<"  st="<<gg->GetStatus()<<"\n pt="<<gg->Pt()<<endl;
+        if(gg->Mother()){
+          TCGenParticle *ggg = gg->Mother();
+          cout<<"  grand-grand-grandmother = "<<ggg->GetPDGId()<<"  st="<<ggg->GetStatus()<<"\n pt="<<ggg->Pt()<<endl;
+          
+          if(ggg->Mother()){
+            TCGenParticle *gggg = ggg->Mother();
+            cout<<"  grand-grand-grand-grandmother = "<<gggg->GetPDGId()<<"  st="<<gggg->GetStatus()<<"\n pt="<<gggg->Pt()<<endl;
+          }
+        }
+      }
+    }
+  }
+  
 }
