@@ -27,6 +27,8 @@ cp ../../input_${dataName}_${count}.txt input.txt
 
 chmod 755 run.py
 
+./run --clean
+
 echo $selection
 if ( $selection == "electron" ) then
     echo "Electrons,  double-photon trigger is used"

@@ -441,20 +441,20 @@ Bool_t zgamma::Process(Long64_t entry)
     gendR = gen_l1.DeltaR(gen_l2);
     genMll = (gen_l1+gen_l2).M();
 
-    hists->fill1DHist(gendR, "gen_dR_0", ";gen_dR", 50,0,1, 1,"eff");
-    hists->fill1DHist(genMll,"gen_Mll_0",";gen_Mll",50,0,50,1,"eff");
-        
+    hists->fill1DHist(genMll,"gen_Mll_0",";gen_Mll",50,0,15, 1,"eff");
+    hists->fill1DHist(gendR, "gen_dR_0", ";gen_dR", 50,0,0.3,1,"eff");
+    hists->fillProfile(gendR, genMll, "gen_Mll_vs_dR", ";dR(l1,l2);M(l1,l2)", 100, 0, 0.5, 0, 20, 1,"eff");
 
     if (gen_gamma.Pt()>cut_gammapt && fabs(gen_gamma.Eta())<2.5){
-      hists->fill1DHist(genMll, "gen_Mll_acc_gamma",";gen_Mll",50,0,50,1,"eff");
-      hists->fill1DHist(gendR,  "gen_dR_acc_gamma", ";gen_dR", 50,0,1, 1,"eff");
+      hists->fill1DHist(genMll, "gen_Mll_acc_gamma",";gen_Mll",50,0,15, 1,"eff");
+      hists->fill1DHist(gendR,  "gen_dR_acc_gamma", ";gen_dR", 50,0,0.3,1,"eff");
      
       if(
          gen_lPt1.Pt()>cut_l1pt && fabs(gen_lPt1.Eta())<2.4 &&
          gen_lPt2.Pt()>cut_l2pt && fabs(gen_lPt2.Eta())<2.4
          ){
-        hists->fill1DHist(genMll,  "gen_Mll_acc_lept",  ";gen_Mll",50,0,50,1,"eff");
-        hists->fill1DHist(gendR,   "gen_dR_acc_lept",   ";gen_dR", 50,0,1, 1,"eff");
+        hists->fill1DHist(genMll,  "gen_Mll_acc_lept",  ";gen_Mll",50,0,15, 1,"eff");
+        hists->fill1DHist(gendR,   "gen_dR_acc_lept",   ";gen_dR", 50,0,0.3,1,"eff");
 
       }
       else 
@@ -467,8 +467,8 @@ Bool_t zgamma::Process(Long64_t entry)
     hists->fill1DHist(gen_l1.DeltaR(gen_gamma),"gen_l1gamma_deltaR","gen_l1gamma_deltaR",100,0,5, 1,"");
     hists->fill1DHist(gen_l2.DeltaR(gen_gamma),"gen_l2gamma_deltaR","gen_l2gamma_deltaR",100,0,5, 1,"");
 
-    hists->fill1DHist(gen_higgs.Pt(),     "gen_higgs_pt","Pt of higgs",   100, 0,150,  1, "");
-    hists->fill1DHist(gen_higgs.M(),      "gen_higgs_mass","Mass of higgs",   100, 50,180,  1, "");
+    hists->fill1DHist(gen_higgs.Pt(),     "gen_higgs_pt","Pt of higgs",     100, 0,150,  1, "");
+    hists->fill1DHist(gen_higgs.M(),      "gen_higgs_mass","Mass of higgs", 100, 50,180,  1, "");
 
     hists->fill1DHist(gen_gamma.Pt(),     "gen_gamma_pt","Pt of gamma",   50, 0,150,  1, "");
     hists->fill1DHist(gen_gamma.Eta(),    "gen_gamma_eta","Eta of gamma", 50, -3,3,  1, "");
@@ -519,7 +519,7 @@ Bool_t zgamma::Process(Long64_t entry)
     if(thisPhoton->Pt() > 15){
       photons0.push_back(*thisPhoton);
       if(PassPhotonIdAndIso(thisPhoton, phIdAndIsoCutsTight, pvPosition)
-         && (makeGen && gen_gamma.DeltaR(*thisPhoton) < 0.2) 
+         && (isRealData || ( makeGen && gen_gamma.DeltaR(*thisPhoton) < 0.2) ) 
          )
         photons.push_back(*thisPhoton);
     }
@@ -545,7 +545,7 @@ Bool_t zgamma::Process(Long64_t entry)
       if (
           PassElectronIdAndIso(thisElec, elIdAndIsoCutsTight, pvPosition)
           //PassElectronIdAndIso(thisElec, elIdAndIsoCutsLoose, pvPosition)
-          &&(selection=="el" && makeGen && (gen_l1.DeltaR(*thisElec) < 0.2 ||  gen_l2.DeltaR(*thisElec) < 0.2)) // this should not fake a photon!
+          &&(isRealData || ( selection=="el" && makeGen && (gen_l1.DeltaR(*thisElec) < 0.2 ||  gen_l2.DeltaR(*thisElec) < 0.2) )) // this should not fake a photon!
           //&&(selection=="el" && gamma.DeltaR(*thisElec) > 0.4) // this should not fake a photon!
           )
         electrons.push_back(*thisElec);
@@ -585,8 +585,8 @@ Bool_t zgamma::Process(Long64_t entry)
   if (gamma0.Pt() < cut_gammapt) return kTRUE;
 
   if(!isRealData && makeGen){
-    hists->fill1DHist(genMll,  "gen_Mll_reco_gamma",  ";gen_Mll",50,0,50,1,"eff");
-    hists->fill1DHist(gendR,   "gen_dR_reco_gamma",  " ;gen_dR",50,0,1,1,"eff");
+    hists->fill1DHist(genMll,  "gen_Mll_reco_gamma",  ";gen_Mll",50,0,15, 1,"eff");
+    hists->fill1DHist(gendR,   "gen_dR_reco_gamma",   ";gen_dR", 50,0,0.3,1,"eff");
   }
 
   if (photons.size()<1) return kTRUE;
@@ -594,8 +594,8 @@ Bool_t zgamma::Process(Long64_t entry)
   if (gamma.Pt() < cut_gammapt) return kTRUE;
 
   if(!isRealData && makeGen){
-    hists->fill1DHist(genMll,  "gen_Mll_reco_gamma_iso",  ";gen_Mll",50,0,50,1,"eff");
-    hists->fill1DHist(gendR,   "gen_dR_reco_gamma_iso",  " ;gen_dR",50,0,1,1,"eff");
+    hists->fill1DHist(genMll,  "gen_Mll_reco_gamma_iso",  ";gen_Mll",50,0,15, 1,"eff");
+    hists->fill1DHist(gendR,   "gen_dR_reco_gamma_iso",   ";gen_dR", 50,0,0.3,1,"eff");
 
   }
 
@@ -609,27 +609,27 @@ Bool_t zgamma::Process(Long64_t entry)
     if (electrons0.size()>=1)
       if(!isRealData && makeGen)
         if (electrons0[0].Pt() > 30){
-          hists->fill1DHist(genMll,  "gen_Mll_one_ele_reco",  ";gen_Mll",50,0,50,1,"eff");
-          hists->fill1DHist(gendR,   "gen_dR_one_ele_reco",  " ;gen_dR",50,0,1,1,"eff");
+          hists->fill1DHist(genMll,  "gen_Mll_one_ele_reco", ";gen_Mll",50,0,15, 1,"eff");
+          hists->fill1DHist(gendR,   "gen_dR_one_ele_reco",  ";gen_dR", 50,0,0.3,1,"eff");
         }
     if (electrons.size()>=1)
       if(!isRealData && makeGen)
         if (electrons[0].Pt() > 30){
-          hists->fill1DHist(genMll,  "gen_Mll_one_ele_reco_ID",  ";gen_Mll",50,0,50,1,"eff");
-          hists->fill1DHist(gendR,   "gen_dR_one_ele_reco_ID",  " ;gen_dR",50,0,1,1,"eff");
+          hists->fill1DHist(genMll,  "gen_Mll_one_ele_reco_ID", ";gen_Mll",50,0,15, 1,"eff");
+          hists->fill1DHist(gendR,   "gen_dR_one_ele_reco_ID",  ";gen_dR", 50,0,0.3,1,"eff");
         }
     if (electrons0.size()>=2)
       if(!isRealData && makeGen)
         if (electrons0[0].Pt() > cut_l1pt && electrons0[1].Pt() > cut_l2pt){
-          hists->fill1DHist(genMll,  "gen_Mll_two_ele_reco",  ";gen_Mll",50,0,50,1,"eff");
-          hists->fill1DHist(gendR,   "gen_dR_two_ele_reco",  " ;gen_dR",50,0,1,1,"eff");
+          hists->fill1DHist(genMll,  "gen_Mll_two_ele_reco", ";gen_Mll",50,0,15, 1,"eff");
+          hists->fill1DHist(gendR,   "gen_dR_two_ele_reco",  ";gen_dR", 50,0,0.3,1,"eff");
         }    
 
     if (electrons.size()>=2)
       if(!isRealData && makeGen)
         if (electrons[0].Pt() > cut_l1pt && electrons[1].Pt() > cut_l2pt){
-          hists->fill1DHist(genMll,  "gen_Mll_two_ele_reco_ID",  ";gen_Mll",50,0,50,1,"eff");
-          hists->fill1DHist(gendR,   "gen_dR_two_ele_reco_ID",  " ;gen_dR",50,0,1,1,"eff");
+          hists->fill1DHist(genMll,  "gen_Mll_two_ele_reco_ID", ";gen_Mll",50,0,15, 1,"eff");
+          hists->fill1DHist(gendR,   "gen_dR_two_ele_reco_ID",  ";gen_dR", 50,0,0.3,1,"eff");
         }
     
     if (electrons.size()<2) return kTRUE;
@@ -674,8 +674,8 @@ Bool_t zgamma::Process(Long64_t entry)
 
   if (lPt1.Pt() < cut_l1pt || lPt2.Pt() < cut_l2pt) return kTRUE;
   if(!isRealData && makeGen){
-    hists->fill1DHist(genMll,  "gen_Mll_two_ele_reco_crosscheck",  ";gen_Mll",50,0,50,1,"eff");
-    hists->fill1DHist(gendR,   "gen_dR_two_ele_reco_crosscheck",  " ;gen_dR",50,0,1,1,"eff");
+    hists->fill1DHist(genMll,  "gen_Mll_two_ele_reco_crosscheck", ";gen_Mll",50,0,15, 1,"eff");
+    hists->fill1DHist(gendR,   "gen_dR_two_ele_reco_crosscheck",  ";gen_dR", 50,0,0.3,1,"eff");
   }
 
   FillHistosFull(3, eventWeight, l1, l2, lPt1, lPt2, gamma0);
@@ -744,8 +744,8 @@ Bool_t zgamma::Process(Long64_t entry)
 
 
   if(!isRealData && makeGen){
-    hists->fill1DHist(gendR,   "gen_dR_3",";gen_dR",50,0,3, 1,"eff");
-    hists->fill1DHist(genMll,  "gen_Mll_3",";gen_Mll",50,0,50, 1,"eff");
+    hists->fill1DHist(genMll,  "gen_Mll_3",";gen_Mll",50,0,15, 1,"eff");
+    hists->fill1DHist(gendR,   "gen_dR_3", ";gen_dR", 50,0,0.3,1,"eff");
   }
   if (checkTrigger){
     triggerSelector->SelectTrigger(myTrigger, triggerStatus, hltPrescale, isFound, triggerPass, prescale);

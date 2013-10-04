@@ -66,7 +66,7 @@ void ZGAngles::SetAngles(TLorentzVector lplus, TLorentzVector lminus, TLorentzVe
   
   //cout<<"Debug \n"<<"\t\t c1 = "<<_cosTheta<<"\n \t\t c2 = "<<c2<<"\n \t\t c3 = "<<c3<<endl;
   
-  if (fabs(_cosTheta)>1 || isnan(_cosTheta)){
+  if (fabs(_cosTheta)>1 || std::isnan(_cosTheta)){
     cout<<"Cosine is greater than 1 or nan,  wha?"<<endl;
     exit(0);
   //throw cms::Exception("This is exceptional! ")<<"Cosine is greater than 1 or nan,  wha?"<<endl;
