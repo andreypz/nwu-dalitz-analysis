@@ -1214,6 +1214,9 @@ void zgamma::MakeElectronPlots(TCElectron el)
   hists->fill1DHist(el.SigmaIEtaIEta(),    "el_SigmaIEtaIEta",";SigmaIEtaIEta", 100, 0, 0.1, 1, "Electrons");
   hists->fill1DHist(el.DphiSuperCluster(), "el_DphiSuperCluster",";DphiSuperCluster", 100, 0, 0.3, 1, "Electrons");
   hists->fill1DHist(el.DetaSuperCluster(), "el_DetaSuperCluster",";DetaSuperCluster", 100, 0, 0.3, 1, "Electrons");
+
+  //hists->fill1DHist(ph., "ph_",";", 3, 0, 3, 1, "Photon");
+
 }
 
 TCGenParticle * zgamma::GetPrimaryAncestor(TCGenParticle *p)
