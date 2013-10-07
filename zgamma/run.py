@@ -12,6 +12,7 @@ parser.add_option("-p", "--period", dest="period", default="2012", help="Set dat
 parser.add_option("-b", "--batch", dest="batch", action="store_true", default=False,
                   help="Run in batch (uning the scripts in batch_condor).That would imply the use of input.txt")
 parser.add_option("-c", "--clean", dest="clean", action="store_true", default=False, help="Clean the libs")
+parser.add_option("-g", "--gen", dest="gen", action="store_true", default=False, help="Make gen selection")
 
 (options, args) = parser.parse_args()
 
@@ -44,13 +45,16 @@ else:
 
     
 print "Running on sample", sample, "with selection", selection, "and trigger", trigger,\
-      "in source ", sourcefilename, ", period =", period, " batch =",  isbatch
+      "in source ", sourcefilename, ", period =", period, " batch =",  isbatch, " and gen selection = ", options.gen
+
 
 
 tempfile = open("template_zgamma.C","r")
 whole_thing = tempfile.read()
 whole_thing = whole_thing.replace("@SELECTION",selection)
 whole_thing = whole_thing.replace("@TRIGGER",trigger)
+whole_thing = whole_thing.replace("@GEN",str(options.gen).lower())
+
 tempfile.close()
 
 cfile = open("zgamma.C","w")

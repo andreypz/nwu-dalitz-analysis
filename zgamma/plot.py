@@ -23,9 +23,9 @@ lumi2012 = float(conf.get("lumi","lumi2012A")) + float(conf.get("lumi","lumi2012
            float(conf.get("lumi","lumi2012C")) + float(conf.get("lumi","lumi2012D"))
 lumi = lumi2012
 #sel = ["electron"]
-sel = ["mugamma"]
-#sel = ["mugamma","muon","electron"]
-sel = []
+#sel = ["mugamma"]
+sel = ["mugamma","electron"]
+#sel = []
 
 cuts = []
 for key, cut in sorted(conf.items("cuts2")):
@@ -184,6 +184,11 @@ if __name__ == "__main__":
         u.drawAllInFile(dataFile[thissel], "data", sigFile,"100x h #rightarrow ll#gamma",  "",path, cut, "lumi")
         if thissel =="mugamma":
             u.drawAllInFile(dataFile[thissel], "data",sigFile,"signal",  "Muons",pathBase+"/Muons/", None,"norm")
+            u.drawAllInFile(dataFile[thissel], "data",sigFile,"signal",  "Photon",pathBase+"/Pho-1/", None,"norm")
+        elif thissel =="electron":
+            u.drawAllInFile(dataFile[thissel], "data",sigFile,"signal",  "Photon",pathBase+"/Pho-2/", None,"norm")
+            u.drawAllInFile(dataFile[thissel], "data",sigFile,"signal",  "Electrons",pathBase+"/Ele/", None,"norm")
+            
         
         #dataFile.Close()
     #print yields_data

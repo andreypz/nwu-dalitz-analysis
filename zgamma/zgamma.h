@@ -118,6 +118,8 @@ class zgamma : public TSelector {
   UInt_t nEvents[nC];
   UInt_t totEvents;  
 
+  ofstream fout;
+
  public :
   TTree          *fChain;   //!pointer to the analyzed TTree or TChain
 

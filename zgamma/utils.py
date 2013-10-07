@@ -96,11 +96,22 @@ def set_palette(name="palette", ncontours=999):
     TColor.CreateGradientColorTable(npoints, s, r, g, b, ncontours)
     gStyle.SetNumberContours(ncontours)
     
+
+def createDir(dir):
+    if not os.path.exists(dir):
+        try:
+            os.makedirs(dir)
+        except OSError:
+            if os.path.isdir(dir):
+                pass
+            else:
+                raise
+
 def drawAllInFile(f1, name1, f2, name2, dir,path, N, howToScale="none"):
     f1.cd(dir)
     dirList = gDirectory.GetListOfKeys()
     #dirList.Print()
-
+    createDir(path)
     scale = 1
 
     if f2!=None and howToScale=="lumi": # only assume signal MC for now
@@ -147,9 +158,10 @@ def drawAllInFile(f1, name1, f2, name2, dir,path, N, howToScale="none"):
             leg.AddEntry(h1,name1, "l")
             leg.SetTextSize(0.04)
 
-            if "phi" in h1.GetName():
-                h1.SetMinimum(0)
-                h1.SetMaximum(0.035)
+            #if "phi" in h1.GetName():
+            #    h1.SetMinimum(0)
+            #    if howToScale=="norm":
+            #        h1.SetMaximum(0.035)
 
             if f2!=None:
                 h2.Draw("sames hist")
@@ -201,16 +213,6 @@ def drawAllInFile(f1, name1, f2, name2, dir,path, N, howToScale="none"):
             c1.SaveAs(path+h1.GetName()+".png")
         c1.SetLogy(0)
         
-
-def createDir(dir):
-    if not os.path.exists(dir):
-        try:
-            os.makedirs(dir)
-        except OSError:
-            if os.path.isdir(dir):
-                pass
-            else:
-                raise
 def yieldsTable(yi, sel):
     t = []
     l1 = ["Cut/trigger"]
