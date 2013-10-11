@@ -107,13 +107,29 @@ def createDir(dir):
             else:
                 raise
 
-def drawAllInFile(f1, name1, f2, name2, dir,path, N, howToScale="none"):
+def drawAllInFile(f1, name1, f2, name2, dir,path, N, howToScale="none", isLog=False, doRatio=False):
     f1.cd(dir)
     dirList = gDirectory.GetListOfKeys()
     #dirList.Print()
     createDir(path)
     scale = 1
 
+    if doRatio:
+        c1 = TCanvas("c2","big canvas",600,700);
+    else:
+        c1 = TCanvas("c3","small canvas",600,600);
+    c1.SetLogy(isLog)
+    c1.cd()
+    
+    if doRatio:
+        pad1 = TPad("pad1","pad1",0,0.3,1,1);
+        pad1.SetBottomMargin(0);
+        pad1.Draw();
+        pad1.cd();
+        pad1.SetLogy(isLog)
+
+
+        
     if f2!=None and howToScale=="lumi": # only assume signal MC for now
         Nev = f2.Get("Counts/evt_byCut_raw").GetBinContent(1)
         cro = cs["h"]
@@ -135,7 +151,7 @@ def drawAllInFile(f1, name1, f2, name2, dir,path, N, howToScale="none"):
             else:
                 print k1.GetName()
                 h2 = f2.Get(k1.GetName()).Clone()
-                h2.Scale(float(scale))
+                #h2.Scale(float(scale))
                 
         print "drawing", h1.GetName()
 
@@ -156,14 +172,14 @@ def drawAllInFile(f1, name1, f2, name2, dir,path, N, howToScale="none"):
                  
             leg = TLegend(0.70,0.8,0.90,0.90);
             leg.AddEntry(h1,name1, "l")
-            leg.SetTextSize(0.04)
+            leg.SetTextSize(0.03)
 
             #if "phi" in h1.GetName():
             #    h1.SetMinimum(0)
             #    if howToScale=="norm":
             #        h1.SetMaximum(0.035)
 
-            if f2!=None:
+            if f2!=None and h2!=None:
                 h2.Draw("sames hist")
                 h2.SetLineColor(kRed+1)
                 norm1 = h1.Integral()
@@ -180,6 +196,30 @@ def drawAllInFile(f1, name1, f2, name2, dir,path, N, howToScale="none"):
                 if h1.GetName() in ["reco_gen_l1_deltaR", "reco_gen_l2_deltaR", "gen_ll_deltaR",
                                     "reco_gen_gamma_deltaR", "ll_deltaR"]:
                     c1.SetLogy()
+
+
+                if doRatio:
+                    c1.cd()
+                    pad2 = TPad("pad2","pad2",0,0,1,0.3);
+                    pad2.SetBottomMargin(0.25);
+                    pad2.SetTopMargin(0);
+                    pad2.Draw();
+                    pad2.cd();
+                    
+                    r = h1.Clone("")                                        
+                    r.Divide(h2);
+                    r.GetYaxis().SetTitle("Data/MC");
+                    r.SetMaximum(10);
+                    r.SetMinimum(0);
+                    r.GetYaxis().SetNdivisions(206);
+                    r.GetYaxis().SetTitleOffset(0.4);
+                    r.SetTitleSize(0.1,"XYZ");
+                    r.SetLabelSize(0.1,"XY");
+                    
+                    r.Draw("e1p");
+                    
+                    pad1.cd();
+
 
                 if "h_mass" in h2.GetName():
                     print "we're hererer" 
@@ -204,14 +244,20 @@ def drawAllInFile(f1, name1, f2, name2, dir,path, N, howToScale="none"):
                     
                     st2.SetTextColor(kRed+2)
 
-                    
+
+            #prelim = TLatex(0.15,0.95, "CMS Preliminary %s #it{L_{int}} = %0.1f fb^{-1}" % (8, 19.6))
+            #prelim.SetNDC();
+            #prelim.SetTextSize(0.03);
+            #prelim.Draw();
+            
             leg.SetFillColor(kWhite)
             leg.Draw()
 
-            c1.SetLogy()
+            c1.SetLogy(int(isLog))
 
-            c1.SaveAs(path+h1.GetName()+".png")
+        c1.SaveAs(path+h1.GetName()+".png")
         c1.SetLogy(0)
+    c1.Delete()
         
 def yieldsTable(yi, sel):
     t = []

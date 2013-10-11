@@ -32,7 +32,7 @@ chmod 755 run.py
 echo $selection
 if ( $selection == "electron" ) then
     echo "Electrons,  double-photon trigger is used"
-    ./run.py ${suffix} ${dataName} -e -t pho -p ${period} -b
+    ./run.py ${suffix} ${dataName} -e -t pho -p ${period} --gen -b
 else if ( $selection == "mugamma" ) then
     echo "Mu+photon trigger will be used"
     ./run.py ${suffix} ${dataName} -t mu-pho -p ${period} -b

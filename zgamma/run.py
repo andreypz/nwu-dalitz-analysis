@@ -52,6 +52,7 @@ print "Running on sample", sample, "with selection", selection, "and trigger", t
 tempfile = open("template_zgamma.C","r")
 whole_thing = tempfile.read()
 whole_thing = whole_thing.replace("@SELECTION",selection)
+whole_thing = whole_thing.replace("@SAMPLE",sample)
 whole_thing = whole_thing.replace("@TRIGGER",trigger)
 whole_thing = whole_thing.replace("@GEN",str(options.gen).lower())
 
@@ -63,24 +64,25 @@ cfile.close()
 
 from ROOT import *
 
-gROOT.LoadMacro("../plugins/HistManager.cc+");
-gROOT.LoadMacro("../plugins/ZGAngles.cc+");
-#gROOT.LoadMacro("../plugins/WeightUtils.cc+");
-gROOT.LoadMacro("../plugins/TriggerSelector.cc+");
+gROOT.SetMacroPath(".:../src/:../plugins/");
+gROOT.LoadMacro("HistManager.cc+");
+gROOT.LoadMacro("ZGAngles.cc+");
+#gROOT.LoadMacro("WeightUtils.cc+");
+gROOT.LoadMacro("TriggerSelector.cc+");
 
-#gSystem.Load("../plugins/lib/libShapeLine.so");
-#gROOT.LoadMacro("../plugins/rochcor.cc+");
-gROOT.LoadMacro("../src/TCPhysObject.cc+");
-gROOT.LoadMacro("../src/TCJet.cc+");
-gROOT.LoadMacro("../src/TCMET.cc+");
-gROOT.LoadMacro("../src/TCElectron.cc+");
-gROOT.LoadMacro("../src/TCMuon.cc+");
-gROOT.LoadMacro("../src/TCTau.cc+");
-gROOT.LoadMacro("../src/TCPhoton.cc+");
-gROOT.LoadMacro("../src/TCGenJet.cc+");
-gROOT.LoadMacro("../src/TCGenParticle.cc+");
-gROOT.LoadMacro("../src/TCPrimaryVtx.cc+");
-gROOT.LoadMacro("../src/TCTriggerObject.cc+");
+#gSystem.Load("lib/libShapeLine.so");
+#gROOT.LoadMacro("rochcor.cc+");
+gROOT.LoadMacro("TCPhysObject.cc+");
+gROOT.LoadMacro("TCJet.cc+");
+gROOT.LoadMacro("TCMET.cc+");
+gROOT.LoadMacro("TCElectron.cc+");
+gROOT.LoadMacro("TCMuon.cc+");
+gROOT.LoadMacro("TCTau.cc+");
+gROOT.LoadMacro("TCPhoton.cc+");
+gROOT.LoadMacro("TCGenJet.cc+");
+gROOT.LoadMacro("TCGenParticle.cc+");
+gROOT.LoadMacro("TCPrimaryVtx.cc+");
+gROOT.LoadMacro("TCTriggerObject.cc+");
 
 
 fChain = TChain("ntupleProducer/eventTree");

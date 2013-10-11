@@ -222,7 +222,10 @@ class zgamma : public TSelector {
    virtual void FillHistoCounts(Int_t n, Double_t w);
    virtual void MakeMuonPlots(TCMuon mu, TVector3 *pv);
    virtual void MakePhotonPlots(TCPhoton ph);
-   virtual void MakeElectronPlots(TCElectron el);
+   //virtual void MakeElectronPlots(TCElectron el);
+   virtual void MakeElectronPlots(TCElectron el, string d="Electrons");
+
+   virtual void MuonDump(TCMuon mu, TVector3 *pv);
 
    TCGenParticle * GetPrimaryAncestor(TCGenParticle *p);
 

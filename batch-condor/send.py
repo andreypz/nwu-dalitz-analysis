@@ -46,8 +46,8 @@ doBG      = options.bkg
 doSignal  = options.sig
 if options.all:
     doData = 1
+    doBG   = 1
     doSignal = 1
-    doBG = 1
 ''' 
     Set job configurations.  The order of arguments is:
     (Dataset, path to data, number of jobs, arguments to pass to executable, output directory name)
@@ -92,7 +92,7 @@ if period =="2012":
     if selection == 'electron':
         data.extend([
             cfg('DoublePhoton_Run2012A', dCache+'/andreypz/nuTuples_v8_8TeV/Photon/Run2012A-22Jan2013',         10, 'DATA electron 2012'),
-            cfg('DoublePhoton_Run2012B', dCache+'/andreypz/nuTuples_v8_8TeV/DoublePhoton/Run2012B-22Jan2013',  15, 'DATA electron 2012'),
+            cfg('DoublePhoton_Run2012B', dCache+'/andreypz/nuTuples_v8_8TeV/DoublePhoton/Run2012B-22Jan2013',   15, 'DATA electron 2012'),
             cfg('DoublePhoton_Run2012C', dCache+'/andreypz/nuTuples_v8_8TeV/DoublePhoton/Run2012C-22Jan2013-v2',  20, 'DATA electron 2012'),
             cfg('DoublePhoton_Run2012D', dCache+'/andreypz/nuTuples_v8_8TeV/DoublePhoton/Run2012D-22Jan2013-v3',  20, 'DATA electron 2012'),
             ])
@@ -100,7 +100,7 @@ if period =="2012":
         
     bg = []
     bg.extend([
-        cfg('DYjets50', dCache+'/bpollack/V08_01_8TeV/DYJetsToLL_M-50', 20, 'DYjets50 '+selection+' '+period),
+        cfg('DYjets50', dCache+'/bpollack/V08_01_8TeV/DYJetsToLL_M-50', 20, 'DY '+selection+' '+period),
         cfg('ZG',       dCache+'/bpollack/V08_01_8TeV/ZGToLLG',         10, 'ZG '      +selection+' '+period)
         ])
     
@@ -126,18 +126,13 @@ if period =="2012":
 
     if selection in ["muon","mugamma","single-mu"]:
         signal.extend([
-            cfg('h-dalitz', dCache+'/andreypz/nuTuples_v8_8TeV/MCFM_dalitz_v2', 1, 'h-dalitz '+selection+' '+period),
-            #cfg('h-dalitz', dCache+'/andreypz/nuTuples_v6_8TeV/MCFM_dalitz_v2', 1, 'h-dalitz '+selection+' '+period),
-            #cfg('h-dalitz', dCache+'/andreypz/nuTuples_v6_8TeV/HDalitz_mu_v3', 1, 'h-dalitz '+selection+' '+period),
+            cfg('h-dalitz', dCache+'/andreypz/nuTuples_v8_8TeV/MCFM_dalitz_v2', 1, 'dalitz '+selection+' '+period),
             ])
     elif selection=="electron":
         signal.extend([
-            cfg('h-dalitz', dCache+'/andreypz/nuTuples_v8_8TeV/MCFM_dalitz_v2', 1, 'h-dalitz '+selection+' '+period),
+            cfg('h-dalitz', dCache+'/andreypz/nuTuples_v8_8TeV/MCFM_dalitz_v2', 1, 'dalitz '+selection+' '+period),
             ])
         
-        #cfg('ggHZZ125', dCache+'/andreypz/nuTuples_v5_8TeV/ggH130', 1, 'ggHZZ125 '+selection+' '+period),
-        #cfg('ggHWW125', dCache+'/andreypz/nuTuples_v5_8TeV/ggHWW130', 1, 'ggHWW125 '+selection+' '+period),
-        #cfg('VBFHZZ125', dCache+'/andreypz/nuTuples_v5_8TeV/VBFHZZ130', 1, 'VBFHZZ125 '+selection+' '+period),
 else:
     print "Only 2012! Other periods are not supported"
 
