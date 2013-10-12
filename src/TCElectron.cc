@@ -1,4 +1,5 @@
-#include "TCElectron.h"
+#include "../interface/TCElectron.h"
+#include "TCElectronLinkDef.h"
 #include <iostream>
 
 TCElectron::TCElectron() {

@@ -5,7 +5,9 @@
  * Created on April 30, 2010, 2:49 PM
  */
 
-#include "TCJet.h"
+#include "../interface/TCJet.h"
+#include "TCJetLinkDef.h"
+
 
 TCJet::TCJet() {
 }
