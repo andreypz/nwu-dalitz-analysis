@@ -1,6 +1,11 @@
 The log of changes:
 ==================
 
+2013-Oct-12
+  * Running on v8 ntuples, tag v4.2
+  * Interface and linkdefs implemented just like in ntuple producer
+  * Analysis on DY and dalitz electrons
+
 2013-Oct-03
   * DiscoverGeneology()
   * Figured out mothers for leptons and photons
