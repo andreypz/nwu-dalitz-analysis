@@ -106,11 +106,12 @@ struct phIdAndIsoCuts{
 
 muIdAndIsoCuts muIdAndIsoCutsTight, muIdAndIsoCutsLoose, muIdAndIsoCutsSoft;
 elIdAndIsoCuts elIdAndIsoCutsTight, elIdAndIsoCutsLoose;
-phIdAndIsoCuts phIdAndIsoCutsTight, phIdAndIsoCutsLoose;
+phIdAndIsoCuts phIdAndIsoCutsHZG,   phIdAndIsoCutsTight, phIdAndIsoCutsLoose;
 
 class zgamma : public TSelector {
  private:
-  TFile* histoFile;  TTree* thisTree;
+  TFile* histoFile;  
+  TTree* thisTree;
 
   ZGAngles *ang;
   TriggerSelector *triggerSelector;
@@ -119,6 +120,19 @@ class zgamma : public TSelector {
   UInt_t totEvents;  
 
   ofstream fout;
+
+  TTree* _mvaTree;
+  Float_t mva_SCPhiWidth, mva_SCEtaWidth, mva_SigmaIEtaIEta, mva_SigmaIPhiIPhi;
+  Float_t mva_fabsEPDiff, mva_EoP, mva_fbrem, mva_SCdPhi, mva_SCdEta;
+  Float_t mva_SCEta, mva_R9, mva_HadOverEm, mva_ome1x5oe5x5;
+
+  string period;
+  string sample;
+  string selection;
+  string trigger;
+  string  gen;
+  bool   makeGen;
+
 
  public :
   TTree          *fChain;   //!pointer to the analyzed TTree or TChain
@@ -215,15 +229,18 @@ class zgamma : public TSelector {
    virtual float CalculateElectronIso(TCElectron *lep);
    virtual bool PassMuonIdAndIso(TCMuon *l, muIdAndIsoCuts c, TVector3 *pv);
    virtual bool PassElectronIdAndIso(TCElectron *l, elIdAndIsoCuts c, TVector3 *pv);
+   virtual bool PassElectronIdAndIsoMVA(TCElectron *l);
+   virtual bool PassElectronIdAndIsoDalitz(TCElectron *l);
    virtual bool PassPhotonIdAndIso(TCPhoton *p, phIdAndIsoCuts c, TVector3 *pv);
    
    virtual void CalculatePhotonIso(TCPhoton *p, float& chIsoCor, float& nhIsoCor, float& phIsoCor);
-   virtual void FillHistosFull(Int_t n, Double_t w, TCPhysObject , TCPhysObject , TCPhysObject , TCPhysObject , TCPhysObject, string s="");
+   virtual void FillHistosFull(Int_t n, Double_t w, TCPhysObject , TCPhysObject , TCPhysObject , TCPhysObject , TCPhysObject, string s="", bool isMergedEle=false);
    virtual void FillHistoCounts(Int_t n, Double_t w);
    virtual void MakeMuonPlots(TCMuon mu, TVector3 *pv);
    virtual void MakePhotonPlots(TCPhoton ph);
    //virtual void MakeElectronPlots(TCElectron el);
    virtual void MakeElectronPlots(TCElectron el, string d="Electrons");
+   virtual void FillElecronMVATree(TCElectron el);
 
    virtual void MuonDump(TCMuon mu, TVector3 *pv);
 

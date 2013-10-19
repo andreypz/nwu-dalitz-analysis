@@ -12,7 +12,7 @@ lumi2012 = float(conf.get("lumi","lumi2012A")) + float(conf.get("lumi","lumi2012
 lumi = lumi2012
 
 cuts = []
-for key, cut in sorted(conf.items("cuts2")):
+for key, cut in sorted(conf.items("cuts")):
     cuts.append(cut)
     #print key, cut
 
@@ -22,7 +22,7 @@ for sample, c in conf.items("cs"):
     cs[sample] = float(c)
 cs["h"]=2*cs["h"]
 
-def handleOverflowBinsScaleAndColors(hist, sample, lumi):
+def handleOverflowBins(hist):
     if hist == None:
         return
     nBins   = hist.GetNbinsX()
@@ -107,12 +107,12 @@ def createDir(dir):
             else:
                 raise
 
-def drawAllInFile(f1, name1, f2, name2, dir,path, N, howToScale="none", isLog=False, doRatio=False):
+def drawAllInFile(f1, name1, f2, name2, f3, name3, dir,path, N, howToScale="none", isLog=False, doRatio=False):
     f1.cd(dir)
     dirList = gDirectory.GetListOfKeys()
     #dirList.Print()
     createDir(path)
-    scale = 1
+    scale2 = scale3 = 1
 
     if doRatio:
         c1 = TCanvas("c2","big canvas",600,700);
@@ -129,12 +129,20 @@ def drawAllInFile(f1, name1, f2, name2, dir,path, N, howToScale="none", isLog=Fa
         pad1.SetLogy(isLog)
 
 
-        
+
     if f2!=None and howToScale=="lumi": # only assume signal MC for now
         Nev = f2.Get("Counts/evt_byCut_raw").GetBinContent(1)
+        cro = cs["dy"]
+        scale2 = float(1000*lumi*cro)/Nev
+        print Nev, lumi, cro, scale2
+        
+        
+    if f3!=None and howToScale=="lumi": # only assume signal MC for now
+        Nev = f3.Get("Counts/evt_byCut_raw").GetBinContent(1)
         cro = cs["h"]
-        scale = float(1000*lumi*cro)/Nev
-        print Nev, lumi, cro, scale
+        scale3 = float(1000*lumi*cro)/Nev
+        print Nev, lumi, cro, scale3
+
 
     for k1 in dirList:
         if k1.GetName() in ["eff"]: continue
@@ -143,6 +151,7 @@ def drawAllInFile(f1, name1, f2, name2, dir,path, N, howToScale="none", isLog=Fa
         h1 = k1.ReadObj()
 
         h2 = TH1F()
+        h3 = TH1F()
         
         if f2!=None:
             #f2.Print()
@@ -151,8 +160,16 @@ def drawAllInFile(f1, name1, f2, name2, dir,path, N, howToScale="none", isLog=Fa
             else:
                 print k1.GetName()
                 h2 = f2.Get(k1.GetName()).Clone()
-                #h2.Scale(float(scale))
-                
+                h2.Scale(float(scale2))
+
+        if f3!=None:
+            if dir!="":
+                h3 = f3.Get(dir+"/"+k1.GetName())
+            else:
+                h3 = f3.Get(k1.GetName()).Clone()
+                h3.Scale(float(scale3))
+
+
         print "drawing", h1.GetName()
 
         if h1.InheritsFrom("TH2"):
@@ -163,11 +180,16 @@ def drawAllInFile(f1, name1, f2, name2, dir,path, N, howToScale="none", isLog=Fa
             if "h2D_tri_vs_diLep_mass" in h1.GetName():
                 c1.SetLogy()
         else:
+            handleOverflowBins(h1)
             h1.Draw("hist")
+            #h1.SetMarkerStyle(20)
+            h1.SetLineColor(kBlack)
+            h1.UseCurrentStyle()
+            
             #if "tri_mass" in k1.GetName() and name1 not in ["madgra","mcfm"]:
             #    blindIt(h1)
             if "h_mass" in k1.GetName():
-                print "\n *** H-mass RMS:", h1.GetRMS(),h2.GetRMS()
+                print "\n *** H-mass RMS:",  h1.GetRMS(), h2.GetRMS()
                 print "\n *** H-mass Mean:", h1.GetMean(),h2.GetMean()
                  
             leg = TLegend(0.70,0.8,0.90,0.90);
@@ -179,25 +201,31 @@ def drawAllInFile(f1, name1, f2, name2, dir,path, N, howToScale="none", isLog=Fa
             #    if howToScale=="norm":
             #        h1.SetMaximum(0.035)
 
+            norm1 = h1.Integral()
+            if howToScale =="norm" and  norm1!=0:
+                h1.Scale(1./norm1)
+                         
             if f2!=None and h2!=None:
-                h2.Draw("sames hist")
-                h2.SetLineColor(kRed+1)
-                norm1 = h1.Integral()
+                handleOverflowBins(h2)
+                h2.Draw("same hist")
+                h2.SetLineColor(kBlue+1)
                 norm2 = h2.Integral()
-                if howToScale =="norm":
-                   if norm1!=0:
-                       h1.Scale(1./norm1)
-                   if norm2!=0:
-                       h2.Scale(1./norm2)
-                #print "Integrals = ", norm1, norm2
-                if name1 not in ["madgra","mcfm"] and howToScale!="norm":
-                    h2.Scale(100)
+                if howToScale =="norm" and  norm2!=0:
+                    h2.Scale(1./norm2)
+
                 leg.AddEntry(h2,name2, "l")
-                if h1.GetName() in ["reco_gen_l1_deltaR", "reco_gen_l2_deltaR", "gen_ll_deltaR",
-                                    "reco_gen_gamma_deltaR", "ll_deltaR"]:
-                    c1.SetLogy()
+                
 
-
+            if f3!=None and h3!=None:
+                handleOverflowBins(h3)
+                h3.Draw("sames hist")
+                h3.SetLineColor(kRed+1)
+                h3.Scale(5000)
+                norm3 = h3.Integral()
+                if howToScale =="norm" and  norm3!=0:
+                    h3.Scale(1./norm3)
+                leg.AddEntry(h3,name3, "l")
+                
                 if doRatio:
                     c1.cd()
                     pad2 = TPad("pad2","pad2",0,0,1,0.3);
@@ -207,7 +235,7 @@ def drawAllInFile(f1, name1, f2, name2, dir,path, N, howToScale="none", isLog=Fa
                     pad2.cd();
                     
                     r = h1.Clone("")                                        
-                    r.Divide(h2);
+                    r.Divide(h3);
                     r.GetYaxis().SetTitle("Data/MC");
                     r.SetMaximum(10);
                     r.SetMinimum(0);
@@ -221,7 +249,7 @@ def drawAllInFile(f1, name1, f2, name2, dir,path, N, howToScale="none", isLog=Fa
                     pad1.cd();
 
 
-                if "h_mass" in h2.GetName():
+                if "h_mass" in h3.GetName():
                     print "we're hererer" 
                     f1 = TF1("f1", "gaus", 124.9, 125.1);
                     h1.Fit("f1", "R+");
@@ -230,7 +258,7 @@ def drawAllInFile(f1, name1, f2, name2, dir,path, N, howToScale="none", isLog=Fa
                     h2.Draw("sames hist")
                     gPad.Update()
                     st1 = h1.FindObject("stats")
-                    st2 = h2.FindObject("stats")
+                    st2 = h3.FindObject("stats")
                     
                     st1.SetX1NDC(0.2)
                     st1.SetX2NDC(0.5)
@@ -257,7 +285,6 @@ def drawAllInFile(f1, name1, f2, name2, dir,path, N, howToScale="none", isLog=Fa
 
         c1.SaveAs(path+h1.GetName()+".png")
         c1.SetLogy(0)
-    c1.Delete()
         
 def yieldsTable(yi, sel):
     t = []

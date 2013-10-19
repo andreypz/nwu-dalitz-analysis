@@ -125,7 +125,7 @@ class BatchMaster():
 
         ## Creating tarball of current workspace
         print "Making a tar-ball", self._stageDir
-        os.system('tar czf {0}/source.tar.gz ../zgamma ../src ../plugins ../data 2> /dev/null'.format(self._stageDir))
+        os.system('tar czf {0}/source.tar.gz ../zgamma ../src ../interface ../plugins ../data 2> /dev/null'.format(self._stageDir))
         
         if bSystem is 'lpc':
             for cfg in self._configList:

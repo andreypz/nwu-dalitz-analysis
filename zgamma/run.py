@@ -47,21 +47,6 @@ else:
 print "Running on sample", sample, "with selection", selection, "and trigger", trigger,\
       "in source ", sourcefilename, ", period =", period, " batch =",  isbatch, " and gen selection = ", options.gen
 
-
-
-tempfile = open("template_zgamma.C","r")
-whole_thing = tempfile.read()
-whole_thing = whole_thing.replace("@SELECTION",selection)
-whole_thing = whole_thing.replace("@SAMPLE",sample)
-whole_thing = whole_thing.replace("@TRIGGER",trigger)
-whole_thing = whole_thing.replace("@GEN",str(options.gen).lower())
-
-tempfile.close()
-
-cfile = open("zgamma.C","w")
-cfile.write(whole_thing)
-cfile.close()
-
 from ROOT import *
 
 gROOT.SetMacroPath(".:../src/:../plugins/:../interface/");
@@ -99,14 +84,15 @@ for l in f.readlines():
 print nfiles, " files added!"
 
 
-timer = TStopwatch()
-timer.Start()
 
-fChain.Process("zgamma.C+")
+fChain.Process("zgamma.C+", "%s %s %s %s" % (sample,selection,trigger,str(options.gen).lower()))
 
-print "Done!", "CPU Time: ", timer.CpuTime(), "RealTime : ", timer.RealTime()
 
 os.system('mv a_'+selection+'_higgsHistograms.root hhhh_'+sourcefilename+'.root')
+
+timer = TStopwatch()
+timer.Start()
+print "Done!", "CPU Time: ", timer.CpuTime(), "RealTime : ", timer.RealTime()
 
 print "End runninng"
 os.system("rm zgamma.C")

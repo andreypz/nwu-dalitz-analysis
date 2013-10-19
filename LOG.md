@@ -1,8 +1,16 @@
 The log of changes:
 ==================
 
+2013-Oct-18
+  * Mva Tree is saved for further electron training
+
+2013-Oct-17
+  * cmsenv.sh script is added: no need to install CMSSW anymore
+  * First selection of merged dalitz electrons is implemented
+  * Photon ID and iso synchronized with official recommendations
+  
 2013-Oct-12
-  * Running on v8 ntuples, tag v4.2
+  * Running on v8 ntuples, tag v4.3
   * Interface and linkdefs implemented just like in ntuple producer
   * Analysis on DY and dalitz electrons
 
@@ -23,7 +31,7 @@ The log of changes:
 
 2013-Sep-09
   * Batch master improvements:
-    * Output root file is now copied into Stage directory alsong with reports
+    * Output root file is now copied into Stage directory along with reports
   * Histograms for acceptance vs Mll added
    
 2013-Sep-05
@@ -33,7 +41,7 @@ The log of changes:
      
 2013-Aug-28
   * Adding LHEanalyzer (in zgamma) form making plots of LHE root files produced with ExRootLHEFConverter. Need a shared library to run it.
-  * Switched to Stoyan's cut ordering (temporarly)  	
+  * Switched to Stoyan's cut ordering (temporarily)  	
  
 2013-Aug-14
   * Adding a config file as well as the parser
@@ -137,7 +145,7 @@ The log of changes:
     * b-tagging
     * jet cuts
     * lepton iso and third lepton veto
-    * Met and MT cuts reoptimised
+    * Met and MT cuts re-optimized
     * etc
     
 2012-Jun-14
@@ -213,7 +221,7 @@ The log of changes:
 *  Moved to higgs7 directory
 *  Updated cs and Nev (few things were missed)
 *  Mote ttbar samples to run
-*  Renamed a banch of files
+*  Renamed a bunch of files
 
   
 2011-Aug-25
@@ -231,4 +239,4 @@ V00-04 - synchronized with Nate's code
 V00-03 - latest version based on old code.
 
 
- LocalWords:  VBF
+ LocalWords:  VBF soucefiles sourcefiles

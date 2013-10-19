@@ -81,27 +81,28 @@ if period =="2012":
             ])
         
     if selection == 'mugamma':
+    
         data.extend([
             cfg('MuEG_Run2012A',  dCache+'/andreypz/nuTuples_v8_8TeV/MuEG/Run2012A-22Jan2013',  8, 'DATA mugamma 2012'),
             cfg('MuEG_Run2012B',  dCache+'/andreypz/nuTuples_v8_8TeV/MuEG/Run2012B-22Jan2013',  8, 'DATA mugamma 2012'),
             cfg('MuEG_Run2012C',  dCache+'/andreypz/nuTuples_v8_8TeV/MuEG/Run2012C-22Jan2013',  8, 'DATA mugamma 2012'),
-            cfg('MuEG_Run2012D',  dCache+'/andreypz/nuTuples_v8_8TeV/MuEG/Run2012D-22Jan2013',  15, 'DATA mugamma 2012'),
+            cfg('MuEG_Run2012D',  dCache+'/andreypz/nuTuples_v8_8TeV/MuEG/Run2012D-22Jan2013',  15,'DATA mugamma 2012'),
 
             ])
-
+    
     if selection == 'electron':
         data.extend([
             cfg('DoublePhoton_Run2012A', dCache+'/andreypz/nuTuples_v8_8TeV/Photon/Run2012A-22Jan2013',         10, 'DATA electron 2012'),
             cfg('DoublePhoton_Run2012B', dCache+'/andreypz/nuTuples_v8_8TeV/DoublePhoton/Run2012B-22Jan2013',   15, 'DATA electron 2012'),
             cfg('DoublePhoton_Run2012C', dCache+'/andreypz/nuTuples_v8_8TeV/DoublePhoton/Run2012C-22Jan2013-v2',  20, 'DATA electron 2012'),
-            cfg('DoublePhoton_Run2012D', dCache+'/andreypz/nuTuples_v8_8TeV/DoublePhoton/Run2012D-22Jan2013-v3',  20, 'DATA electron 2012'),
+            cfg('DoublePhoton_Run2012D', dCache+'/andreypz/nuTuples_v8_8TeV/DoublePhoton/Run2012D-22Jan2013-v3',  30, 'DATA electron 2012'),
             ])
         
         
     bg = []
     bg.extend([
         cfg('DYjets50', dCache+'/bpollack/V08_01_8TeV/DYJetsToLL_M-50', 20, 'DY '+selection+' '+period),
-        cfg('ZG',       dCache+'/bpollack/V08_01_8TeV/ZGToLLG',         10, 'ZG '      +selection+' '+period)
+        #cfg('ZG',       dCache+'/bpollack/V08_01_8TeV/ZGToLLG',         5, 'ZG '      +selection+' '+period)
         ])
     
     """
