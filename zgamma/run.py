@@ -95,4 +95,3 @@ timer.Start()
 print "Done!", "CPU Time: ", timer.CpuTime(), "RealTime : ", timer.RealTime()
 
 print "End runninng"
-os.system("rm zgamma.C")
