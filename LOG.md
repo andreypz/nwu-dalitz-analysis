@@ -3,7 +3,7 @@ The log of changes:
 
 2013-Oct-18
   * Mva Tree is saved for further electron training
-
+  * Options in TSelector class are used (instead of templete files)
 2013-Oct-17
   * cmsenv.sh script is added: no need to install CMSSW anymore
   * First selection of merged dalitz electrons is implemented

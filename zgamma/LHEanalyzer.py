@@ -3,8 +3,9 @@
 import sys,os
 import time
 from ROOT import *
-import plot as plot
+import utils as u
 import makeHTML as ht
+gROOT.SetBatch()
 
 
 subdir = sys.argv[1]
@@ -13,8 +14,9 @@ outpath = '/uscms_data/d2/andreypz/html/zgamma/lhe/'
 files={}
 #files["mad"] = ['/uscms/home/andreypz/work/MadGraph5/PROC_ANO_HEFT_JGF_v2_1/Events/run_01/unweighted_events.root']
 files["mcfm"] = ['/uscms_data/d2/andreypz/lhe_mcfm_hzg_dalitz_lord_fixed_unweighted.lhe.root']
-files["mad"] = ['/uscms_data/d2/andreypz/lhe_mad_hzg_dalitz_unweighted.root']
+#files["mad"] = ['/uscms_data/d2/andreypz/lhe_mad_hzg_dalitz_unweighted.root']
 #files["mad"] = ['/uscms_data/d2/andreypz/lhe_mad_hzg_dalitz_unweighted_Mmu.root']
+files["mad"] = ['/uscms_data/d2/andreypz/lhe_mad_LO_HiggsToMuMuGamma.root']
 #files["mad"] = ['/uscms_data/d2/andreypz/lhe_mad_hzg4.root']
 #files["mad"] = ['pp_hzg_signal.root']
 
@@ -75,10 +77,10 @@ def FillAllHists(files, h):
                 gamma.SetPxPyPzE(px,py,pz,E)
                 hasGamma=1
                 
-            if (p.PID == 11  or p.PID == 11):
+            if (p.PID == 13  or p.PID == 13):
             #if (p.PID == 13 or p.PID == 11):
                 l1.SetPxPyPzE(px,py,pz,E)
-            if (p.PID == -11 or p.PID ==-11):
+            if (p.PID == -13 or p.PID ==-13):
             #if (p.PID == -13 or p.PID ==-11):
                 l2.SetPxPyPzE(px,py,pz,E)
 
@@ -143,13 +145,14 @@ def FillAllHists(files, h):
         #h.fill1DHist(g1.M(),    "g1_M",  ";g1 M",    200, -2,2, 1, "")
         #h.fill1DHist(g2.M(),    "g2_M",  ";g2 M",    200, -2,2, 1, "")
         
-        h.fill1DHist(diLep.M(),     "gen_Mll_0",";gen_Mll",100,0,50, 1,"eff");
+        h.fill1DHist(diLep.M(),     "gen_Mll_0",";gen_Mll",100,0,50, 1,"");
+        #h.fill1DHist(diLep.M(),     "gen_Mll_0",";gen_Mll",100,0,50, 1,"eff");
         if lPt1.Pt()>23 and lPt2.Pt()>7 and fabs(lPt1.Eta())<2.4 and  fabs(lPt2.Eta())<2.4 \
-           and gamma.Pt()>23 and fabs(gamma.Eta())<2.5:
-            h.fill1DHist(diLep.M(),     "gen_Mll_1",";gen_Mll",100,0,50, 1,"eff");
-            h.fill1DHist(diLep.M(),     "gen_Mll_2",";gen_Mll",100,0,50, 1,"eff");
-
-        h.fill1DHist(diLep.M(),     "gen_Mll_3",";gen_Mll",100,0,50, 1,"eff");
+               and gamma.Pt()>23 and fabs(gamma.Eta())<2.5:
+            h.fill1DHist(diLep.M(),     "gen_Mll_1",";gen_Mll",100,0,50, 1,"");
+            h.fill1DHist(diLep.M(),     "gen_Mll_2",";gen_Mll",100,0,50, 1,"");
+            
+            h.fill1DHist(diLep.M(),     "gen_Mll_3",";gen_Mll",100,0,50, 1,"");
 
         h.fill1DHist(gamma.M(),"gamma_mass",  ";gamma mass",    200, -2,2, 1, "")
         #h.fill1DHist(g1.Pt(),    "g1_pt",  ";g1 pt",    50, 0,100, 1, "")
@@ -166,10 +169,10 @@ def FillAllHists(files, h):
         #h.fill1DHist(l2.Eta(),   "l2_eta", ";l- eta",   50, -3.5,3.5, 1, "")
         #h.fill1DHist(l2.Phi(),   "l2_phi", ";l- phi",   50, -TMath.Pi(),TMath.Pi(), 1, "")
         
-        h.fill1DHist(diLep.M(),   "diLep_mass",";M(ll)", 200, 0,60,  1, "")
-        h.fill1DHist(diLep.M(),   "diLep_mass_full",";M(ll)", 200, 0,130,  1, "")
-        h.fill1DHist(diLep.M(),   "diLep_mass_low",";M(ll)",  200, 0,1,  1, "")
-        h.fill1DHist(tri.M(),     "h_mass",";M(ll#gamma)",    200, 80,180,  1, "")
+        h.fill1DHist(diLep.M(),   "diLep_mass",     ";M(ll)", 200, 0,60,  1, "")
+        h.fill1DHist(diLep.M(),   "diLep_mass_full",";M(ll)", 200, 0,130, 1, "")
+        h.fill1DHist(diLep.M(),   "diLep_mass_low", ";M(ll)", 200, 0,1,   1, "")
+        h.fill1DHist(tri.M(),     "h_mass",";M(ll#gamma)",    200, 80,180,1, "")
         h.fill1DHist(tri.M(),     "h_mass_zoom",";M(ll#gamma)",  200, 124,126,  1, "")
         h.fill1DHist(tri.M(),     "h_mass_zoom2",";M(ll#gamma)", 200, 124.9,125.1,  1, "")
 
@@ -247,10 +250,8 @@ if __name__ == "__main__":
 
 
     blah = []
-    plot.drawAllInFile(madFile, "madgra",mcfmFile,"mcfm","", path, None,"norm")
-    #plot.drawAllInFile(madFile, "mad", None, "","", path, None)
+    u.drawAllInFile(madFile, "madgra",mcfmFile,"mcfm",None,"","", path, None,"norm")
 
-    #plot.effPlots(madFile, "eff", path)
     plot_types =["mcfm","mad"]
     if subdir not in plot_types:
         plot_types.append(subdir)

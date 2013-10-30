@@ -3,6 +3,7 @@ from optparse import OptionParser
 import sys,os,datetime
 from array import *
 from ROOT import *
+gROOT.SetBatch()
 
 import ConfigParser as cp
 conf = cp.ConfigParser()
@@ -34,7 +35,8 @@ def handleOverflowBins(hist):
     undflBin    = hist.GetBinContent(0);
     firstBinErr = hist.GetBinError(1);
     undflBinErr = hist.GetBinError(0);
-    hist.SetBinContent(nBins, lastBin+ovflBin);
+    if hist.GetName()!="diLep_mass_low":
+        hist.SetBinContent(nBins, lastBin+ovflBin);
     hist.SetBinError(nBins, sqrt(pow(lastBinErr,2) + pow(ovflBinErr,2)) );
     hist.SetBinContent(1, firstBin+undflBin);
     hist.SetBinError(1, sqrt(pow(firstBinErr,2) + pow(undflBinErr,2)) );
@@ -113,7 +115,9 @@ def drawAllInFile(f1, name1, f2, name2, f3, name3, dir,path, N, howToScale="none
     #dirList.Print()
     createDir(path)
     scale2 = scale3 = 1
-
+    split = os.path.split(path)
+    print "Split lit lit", split[0], split[1]
+    
     if doRatio:
         c1 = TCanvas("c2","big canvas",600,700);
     else:
@@ -160,25 +164,34 @@ def drawAllInFile(f1, name1, f2, name2, f3, name3, dir,path, N, howToScale="none
             else:
                 print k1.GetName()
                 h2 = f2.Get(k1.GetName()).Clone()
-                h2.Scale(float(scale2))
+            h2.Scale(float(scale2))
 
         if f3!=None:
             if dir!="":
                 h3 = f3.Get(dir+"/"+k1.GetName())
             else:
                 h3 = f3.Get(k1.GetName()).Clone()
-                h3.Scale(float(scale3))
+            h3.Scale(float(scale3))
 
 
         print "drawing", h1.GetName()
 
         if h1.InheritsFrom("TH2"):
-            #set_palette("signal")
+            createDir(split[0]+"/TH2_"+split[1])
             h1.Draw("col")
+            prename = split[0]+"/TH2_"+split[1]+"/"+h1.GetName()
+            c1.SaveAs(prename+"_data.png")
+            if f3!=None and h3!=None:
+                h3.Draw("col")
+                c1.SaveAs(prename+"_sig.png")
+
+            continue
+        
             #set_palette("gray")
             #h1.Draw("col same")
-            if "h2D_tri_vs_diLep_mass" in h1.GetName():
-                c1.SetLogy()
+            #if "h2D_tri_vs_diLep_mass" in h1.GetName():
+            #    c1.SetLogy()
+                
         else:
             handleOverflowBins(h1)
             h1.Draw("hist")
@@ -220,7 +233,7 @@ def drawAllInFile(f1, name1, f2, name2, f3, name3, dir,path, N, howToScale="none
                 handleOverflowBins(h3)
                 h3.Draw("sames hist")
                 h3.SetLineColor(kRed+1)
-                h3.Scale(5000)
+                h3.Scale(10)
                 norm3 = h3.Integral()
                 if howToScale =="norm" and  norm3!=0:
                     h3.Scale(1./norm3)
@@ -248,31 +261,6 @@ def drawAllInFile(f1, name1, f2, name2, f3, name3, dir,path, N, howToScale="none
                     
                     pad1.cd();
 
-
-                if "h_mass" in h3.GetName():
-                    print "we're hererer" 
-                    f1 = TF1("f1", "gaus", 124.9, 125.1);
-                    h1.Fit("f1", "R+");
-                    f1.SetLineColor(kBlack)
-                    gStyle.SetOptStat("mrv")
-                    h2.Draw("sames hist")
-                    gPad.Update()
-                    st1 = h1.FindObject("stats")
-                    st2 = h3.FindObject("stats")
-                    
-                    st1.SetX1NDC(0.2)
-                    st1.SetX2NDC(0.5)
-                    
-                    st1.SetY1NDC(0.65)
-                    st1.SetY2NDC(0.95)
-                    st2.SetY1NDC(0.5)
-                    st2.SetY2NDC(0.65)
-                    st2.SetX1NDC(0.2)
-                    st2.SetX2NDC(0.5)
-                    
-                    st2.SetTextColor(kRed+2)
-
-
             #prelim = TLatex(0.15,0.95, "CMS Preliminary %s #it{L_{int}} = %0.1f fb^{-1}" % (8, 19.6))
             #prelim.SetNDC();
             #prelim.SetTextSize(0.03);
@@ -283,7 +271,7 @@ def drawAllInFile(f1, name1, f2, name2, f3, name3, dir,path, N, howToScale="none
 
             c1.SetLogy(int(isLog))
 
-        c1.SaveAs(path+h1.GetName()+".png")
+            c1.SaveAs(path+"/"+h1.GetName()+".png")
         c1.SetLogy(0)
         
 def yieldsTable(yi, sel):

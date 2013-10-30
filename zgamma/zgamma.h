@@ -17,6 +17,8 @@
 #include <vector>
 #include <algorithm>
 #include <fstream>
+#include <cstring>
+#include <string>
 
 #include <TROOT.h>
 #include <TChain.h>

@@ -94,8 +94,8 @@ if period =="2012":
         data.extend([
             cfg('DoublePhoton_Run2012A', dCache+'/andreypz/nuTuples_v8_8TeV/Photon/Run2012A-22Jan2013',         10, 'DATA electron 2012'),
             cfg('DoublePhoton_Run2012B', dCache+'/andreypz/nuTuples_v8_8TeV/DoublePhoton/Run2012B-22Jan2013',   15, 'DATA electron 2012'),
-            cfg('DoublePhoton_Run2012C', dCache+'/andreypz/nuTuples_v8_8TeV/DoublePhoton/Run2012C-22Jan2013-v2',  20, 'DATA electron 2012'),
-            cfg('DoublePhoton_Run2012D', dCache+'/andreypz/nuTuples_v8_8TeV/DoublePhoton/Run2012D-22Jan2013-v3',  30, 'DATA electron 2012'),
+            cfg('DoublePhoton_Run2012C', dCache+'/andreypz/nuTuples_v8_8TeV/DoublePhoton/Run2012C-22Jan2013-v2',20, 'DATA electron 2012'),
+            cfg('DoublePhoton_Run2012D', dCache+'/andreypz/nuTuples_v8_8TeV/DoublePhoton/Run2012D-22Jan2013-v3',30, 'DATA electron 2012'),
             ])
         
         
@@ -149,7 +149,8 @@ if doSignal:
     inputSamples.extend(signal)
 
 if len(inputSamples) is not 0:
-    batcher = b.BatchMaster(inputSamples, outputPath, shortQueue = False, stageDir = '../StageBatch', executable = executable, selection = version + '/' + selection +"_"+ period)
+    batcher = b.BatchMaster(inputSamples, outputPath, shortQueue = False, stageDir = '../StageBatch',
+                            executable = executable, selection = version + '/' + selection +"_"+ period)
     print "Submitting to batch?"
     batcher.submit_to_batch()
             

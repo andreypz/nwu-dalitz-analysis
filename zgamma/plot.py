@@ -22,8 +22,14 @@ conf.read('config.cfg')
 lumi2012 = float(conf.get("lumi","lumi2012A")) + float(conf.get("lumi","lumi2012B"))+\
            float(conf.get("lumi","lumi2012C")) + float(conf.get("lumi","lumi2012D"))
 lumi = lumi2012
-sel = ["electron"]
-#sel = ["mugamma"]
+cs = {}
+for sample, c in conf.items("cs"):
+    print sample,c
+    cs[sample] = float(c)
+cs["h"]=2*cs["h"]
+
+#sel = ["electron"]
+sel = ["mugamma"]
 #sel = ["mugamma","electron"]
 #sel = []
 
@@ -134,8 +140,8 @@ if __name__ == "__main__":
     
     
     pathBase = "/uscms_data/d2/andreypz/html/zgamma/dalitz/"+ver+"_cut"+cut
-    hPath = "/eos/uscms/store/user/andreypz/batch_output/zgamma/8TeV/"+ver
-    hPath = "/uscms_data/d2/andreypz/zgamma/"+ver
+    hPath    = "/eos/uscms/store/user/andreypz/batch_output/zgamma/8TeV/"+ver
+    #hPath  = "/uscms_data/d2/andreypz/zgamma/"+ver
 
 
     if doMerge:
@@ -146,9 +152,10 @@ if __name__ == "__main__":
 
     tri_hists = {}
     dataFile  = {}
-    bkgFile  = {}
+    bkgFile   = {}
 
 
+    '''
     #bkgFile = TFile("hhhh_dy.root", "OPEN")
     bkgFile1 = TFile("~/nobackup/v13_DY_electron_2012.root","OPEN")
     sigFile  = TFile("~/nobackup/v13_dalitz_electron_2012.root","OPEN")
@@ -156,6 +163,7 @@ if __name__ == "__main__":
     #effPlots(sigFile, pathBase+"/eff/")
 
 
+    u.createDir(pathBase+"/eff")
     prof = sigFile.Get("eff/gen_Mll_vs_dR")
     prof.Draw("")
     c1.SaveAs(pathBase+"/eff/gen_Mll_vs_dR.png")
@@ -181,47 +189,50 @@ if __name__ == "__main__":
     h1.GetXaxis().SetBinLabel(4,"ele and gamma");
     h1.GetXaxis().SetBinLabel(5,"ele or gamma");
     c1.SaveAs(pathBase+"/eff/reco_egamma.png")
+
+    '''
     
-    #u.createDir(pathBase+"/eff")
-    #u.createDir(pathBase+"/Muons")
 
 
     for thissel in sel:
         if doMerge:
             os.system("hadd "+hPath+"/m_Data_"    +thissel+"_"+period+".root "+hPath+"/"+thissel+"_"+period+"/hhhh_*Run20*.root")
-            os.system("hadd "+hPath+"/m_DY_"    +thissel+"_"+period+".root "+hPath+"/"+thissel+"_"+period+"/hhhh_DYjets*.root")
-            os.system("hadd "+hPath+"/m_ZG_"    +thissel+"_"+period+".root "
-                      +hPath+"/"+thissel+"_"+period+"/hhhh_ZG_*.root ")
+            #os.system("hadd "+hPath+"/m_DY_"    +thissel+"_"+period+".root "+hPath+"/"+thissel+"_"+period+"/hhhh_DYjets*.root")
+            #os.system("hadd "+hPath+"/m_ZG_"    +thissel+"_"+period+".root "
+            #         +hPath+"/"+thissel+"_"+period+"/hhhh_ZG_*.root ")
 
         subdir = thissel
-        path = pathBase+"/"+subdir+"/"
+        path = pathBase+"/"+subdir
         if doBkg:
-            path = pathBase+"/bkg_"+subdir+"/"
-        u.createDir(path)
+            path = pathBase+"/bkg_"+subdir
+            u.createDir(path)
 
         sigFile = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_h-dalitz_1.root", "OPEN")
         dataFile[thissel] = TFile(hPath+"/m_Data_"+thissel+"_"+period+".root","OPEN")
-        bkgFile[thissel]  = TFile(hPath+"/m_DY_"+thissel+"_"+period+".root","OPEN")
+        #bkgFile[thissel]  = TFile(hPath+"/m_DY_"+thissel+"_"+period+".root","OPEN")
 
         yields_data[thissel] = u.getYields(dataFile[thissel])
         yields_sig[thissel]  = u.getYields(sigFile,True)
-        yields_bkg[thissel]  = u.getYields(bkgFile[thissel])
+        #yields_bkg[thissel]  = u.getYields(bkgFile[thissel])
 
         #if int(cut) >2:
         #tri_hists[thissel]   = dataFile[thissel].Get("tri_mass_cut"+cut).Clone()
         
 
-        u.drawAllInFile(dataFile[thissel], "data", bkgFile[thissel], "bkg", sigFile,"100x  H ll#gamma",  "",path, cut, "lumi")
+        u.drawAllInFile(dataFile[thissel], "data", None, "", sigFile,"10xSignal",  "",path, cut, "lumi")
+        u.drawAllInFile(dataFile[thissel], "data", None, "", sigFile,"10xSignal","EB",pathBase+"/EB", cut, "lumi")
+        u.drawAllInFile(dataFile[thissel], "data", None, "", sigFile,"10xSignal","EE",pathBase+"/EE", cut, "lumi")
         if thissel =="mugamma":
-            u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",  "Muons", pathBase+"/Muons/", None,"norm")
-            u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",  "Photon",pathBase+"/Photon/", None,"norm")
+            u.drawAllInFile(dataFile[thissel], "data",None, "",sigFile,"signal",  "Muons", pathBase+"/Muons", None,"norm")
+            #u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",  "Muons", pathBase+"/Muons/", None,"norm")
+            #u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",  "Photon",pathBase+"/Photon/", None,"norm")
         elif thissel =="electron":
-            u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",  "Photon",   pathBase+"/Photon/", None,"norm")
-            u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",  "DalitzEle",pathBase+"/DalitzEle/",   None,"norm")
-            u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",  "DalitzEleEB",pathBase+"/DalitzEleEB/",   None,"norm")
-            u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",  "DalitzEleEE",pathBase+"/DalitzEleEE/",   None,"norm")
-            u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",  "NewEle-1",pathBase+"/NewEle-1/",   None,"norm")
-            u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",  "NewEle-2",pathBase+"/NewEle-2/",   None,"norm")
+            u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",  "Photon",     pathBase+"/Photon/",     None,"norm")
+            u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",  "DalitzEle",  pathBase+"/DalitzEle/",  None,"norm")
+            u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",  "DalitzEleEB",pathBase+"/DalitzEleEB/",None,"norm")
+            u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",  "DalitzEleEE",pathBase+"/DalitzEleEE/",None,"norm")
+            u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",  "NewEle-1",   pathBase+"/NewEle-1/",   None,"norm")
+            u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",  "NewEle-2",   pathBase+"/NewEle-2/",   None,"norm")
 
             
         #dataFile.Close()
@@ -230,42 +241,76 @@ if __name__ == "__main__":
 
     #u.drawAllInFile(bkgFile[thissel], "DY electrons", sigFile, "Dalitz 2el",  "NewEle-1", pathBase+"/NewEle-1/", None,"norm", isLog=1, )
 
+    c1 = TCanvas("c3","small canvas",600,600);
+    c1.cd()
+    Nev = sigFile.Get("Counts/evt_byCut").GetBinContent(2)
+    cro = cs["h"]
+    scale = float(1000*lumi*cro)/Nev
 
-            
+    m1 = 120.
+    m2 = 130.
+    for r in ["","EB","EE"]:
+        if int(cut)<7: break
+        pre = r
+        if r!="":
+            pre=r+"/"
+        hda = dataFile[thissel].Get(pre+"tri_mass_"+r+"_cut"+cut).Clone()
+        hsi = sigFile.Get(pre+"tri_mass_"+r+"_cut"+cut).Clone()
+        yda = hda.Integral()
+        ysi = hsi.Integral()/10
+        print r, yda,ysi, ysi*scale
+        print "significance=", ysi/sqrt(ysi+yda)
 
+        bin1 = hda.FindBin(m1)
+        bin2 = hda.FindBin(m2)
+        yda_zoom = hda.Integral(bin1,bin2)
+        ysi_zoom = hsi.Integral(bin1,bin2)/10
+        
+        print "in [",m1,", ",m2,"]", "  bins:", bin1, bin2
+        print r, "data=", yda_zoom, "sig=", ysi_zoom
+        print "  ==> zoomed sign = ", ysi_zoom/sqrt(ysi_zoom + yda_zoom)
+
+
+    h2da = dataFile[thissel].Get("h2D_dalitzPlot_rotation__cut"+cut).ProjectionX("hda_prx")
+    h2si = sigFile.Get("h2D_dalitzPlot_rotation__cut"+cut).ProjectionX("hsi_prx")
+
+    h2da.Draw("hist")
+    h2si.Draw("same hist")
+    h2si.SetLineColor(kRed+1)
+    h2si.Scale(10*scale)
+    h2da.SetTitle(";projectionX;Events")
+    c1.SaveAs("h2da_dalitz.png")
+
+    
+    '''
+    nx = h2da.GetNbinsX()
+    ny = h2da.GetNbinsY()
+    h2da_rot = TH2D("h2da_rot","", nx, )
+    h2si_rot = TH2D("h2si_rot","")
+    for a in nx:
+        for b in ny:
+            fda = h2da.GetBinContent(a,b)
+            fsi = h2si.GetBinContent(a,b)
+
+            h2da_rot.SetBinContent(a,b, fda)
+            h2si_rot.SetBinContent(a,b,fda)
+    '''
+                        
     plot_types =[]
     list = os.listdir(pathBase)
     for d in list:
         if os.path.isdir(pathBase+"/"+d):
             plot_types.append(d)
 
-    '''
-    if int(cut) >2:
-        print tri_hists
-        tri_hists["mugamma"].Draw("hist")
-        tri_hists["muon"].Draw("same hist")
-        #tri_hists["single-mu"].Draw("same hist")
-        tri_hists["mugamma"].SetLineColor(kRed+3)
-        #tri_hists["single-mu"].SetLineColor(kGreen+2)
-        leg = TLegend(0.60,0.73,0.90,0.90);
-        leg.AddEntry(tri_hists["mugamma"], "Mu22_Pho22","f")
-        leg.AddEntry(tri_hists["muon"],    "Mu17_Mu8",  "f")
-        #leg.AddEntry(tri_hists["single-mu"],"IsoMu24",  "f")
-        leg.SetTextSize(0.04)
-        leg.SetFillColor(kWhite)
-        leg.Draw()
-    
-        c1.SaveAs("tri_plot.png")
-    '''
-
-
+    #plot_types
     table_sig  = u.yieldsTable(yields_sig, sel)
     table_data = u.yieldsTable(yields_data, sel)
 
-    #u.makeTable(table_data,"html")
-    #u.makeTable(table_sig,"html")
+
+    u.makeTable(table_data,"html")
+    u.makeTable(table_sig,"html")
     u.makeTable(table_data,"twiki")
-    u.makeTable(table_sig,"twiki")
+    u.makeTable(table_sig, "twiki")
 
     comments = ["These plots are made for ...",
                 "Blah"]
