@@ -1,6 +1,11 @@
 The log of changes:
 ==================
 
+2013-Oct-30
+  * Dalitz plots added
+  * EB/EE categories introduced
+  * Plotting scripts improved: significance and yields added
+
 2013-Oct-18
   * Mva Tree is saved for further electron training
   * Options in TSelector class are used (instead of templete files)
