@@ -247,8 +247,8 @@ if __name__ == "__main__":
     cro = cs["h"]
     scale = float(1000*lumi*cro)/Nev
 
-    m1 = 120.
-    m2 = 130.
+    m1 = 121.
+    m2 = 129.
     for r in ["","EB","EE"]:
         if int(cut)<7: break
         pre = r

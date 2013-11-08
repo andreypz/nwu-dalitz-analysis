@@ -1,0 +1,24 @@
+# Simple counting experiment, with one signal and a few background processes
+imax 1  number of channels
+jmax 1  number of backgrounds
+kmax 4  number of nuisance parameters (sources of systematical uncertainties)
+------------
+# we have one channel
+bin tot
+observation 72
+
+# now we list the expected events for signal and all backgrounds in that bin
+# the second 'process' line must have a positive number for backgrounds, and 0 for signal
+# then we list the independent sources of uncertainties, and give their effect (syst. error)
+# on each process and bin
+bin             tot    tot
+process         ggH   Bkg1
+process         0     1
+rate           2.36  72
+
+------------
+lumi         lnN     1.022        1.022
+pdf_gg       lnN     0.923/1.079  - 
+QCDscale_ggH lnN     0.918/1.125  - 
+#unc_Bkg1     lnN     -           1.10
+unc_Bkg1  gmN 72      -           1.00
