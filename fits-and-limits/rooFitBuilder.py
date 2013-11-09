@@ -460,13 +460,13 @@ def BuildCrystalBallGauss(year,lepton,cat,sig,mass,piece,mzg, mean = 125,meanLow
 def SignalNameParamFixer(year,lepton,cat,sig,mass,ws):
   fitName    = '_'.join(['CBG',year,lepton,'cat'+cat,sig,mass,'Interp'])
   newFitName = '_'.join(['sig',sig,lepton,year,'cat'+cat])
-  mean       = '_'.join(['meanCBG',year,lepton,'cat'+cat,sig,mass,'Interp'])
-  sigmaCB    = '_'.join(['sigmaCBCBG',year,lepton,'cat'+cat,sig,mass,'Interp'])
-  sigmaG     = '_'.join(['sigmaGCBG',year,lepton,'cat'+cat,sig,mass,'Interp'])
-  meanNew    = '_'.join(['sig',sig,'mean',lepton,year,'cat'+cat])
+  mean       = '_'.join(['meanCBG',   year,lepton,'cat'+cat,sig,mass, 'Interp'])
+  sigmaCB    = '_'.join(['sigmaCBCBG',year,lepton,'cat'+cat,sig,mass, 'Interp'])
+  sigmaG     = '_'.join(['sigmaGCBG', year,lepton,'cat'+cat,sig,mass, 'Interp'])
+  meanNew    = '_'.join(['sig',sig,'mean',   lepton,year,'cat'+cat])
   sigmaCBNew = '_'.join(['sig',sig,'sigmaCB',lepton,year,'cat'+cat])
-  sigmaGNew  = '_'.join(['sig',sig,'sigmaG',lepton,year,'cat'+cat])
-  mShift     = '_'.join(['sig',sig,'mShift',lepton,year,'cat'+cat])
+  sigmaGNew  = '_'.join(['sig',sig,'sigmaG', lepton,year,'cat'+cat])
+  mShift     = '_'.join(['sig',sig,'mShift', lepton,year,'cat'+cat])
   sigmaShift = '_'.join(['sig',sig,'sigmaShift',lepton,year,'cat'+cat])
   ws.factory(mShift+'[1]')
   ws.factory(sigmaShift+'[1]')
@@ -476,11 +476,32 @@ def SignalNameParamFixer(year,lepton,cat,sig,mass,ws):
   ws.factory('EDIT::'+newFitName+'('+fitName+','+mean+'='+meanNew+','+sigmaCB+'='+sigmaCBNew+','+sigmaG+'='+sigmaGNew+')')
 
 def BackgroundNameFixer(year,lepton,cat,ws):
-  dataName      = '_'.join(['data',lepton,year,'cat'+cat])
+  dataName      = '_'.join(['data',      lepton,year,'cat'+cat])
   dataNameNew   = '_'.join(['data','obs',lepton,year,'cat'+cat])
-  fitExtName    = '_'.join(['bkgTmp',lepton,year,'cat'+cat])
-  fitExtNameNew = '_'.join(['bkg',lepton,year,'cat'+cat])
+  fitExtName    = '_'.join(['bkgTmp',    lepton,year,'cat'+cat])
+  fitExtNameNew = '_'.join(['bkg',       lepton,year,'cat'+cat])
 
+  suffix = '_'.join([year,lepton,'cat'+cat])
+  normName  = 'normGaussExp_' +suffix
+  meanName  = 'meanGaussExp_' +suffix
+  sigmaName = 'sigmaGaussExp_'+suffix
+  tauName   = 'tauGaussExp_'  +suffix
+
+  normNameNew  = '_'.join(['bkg',lepton,year,'cat'+cat,'norm'])
+  meanNameNew  = '_'.join(['bkg','mean', lepton,year,'cat'+cat])
+  sigmaNameNew = '_'.join(['bkg','sigma',lepton,year,'cat'+cat])
+  tauNameNew   = '_'.join(['bkg','tau',  lepton,year,'cat'+cat])
+
+  ws.factory(normNameNew +'[{0},{1},{2}]'.format(ws.function(normName).getVal(),
+                                                 ws.function(normName).getMin(), ws.function(normName).getMax()))
+  ws.factory(meanNameNew +'[{0}]'.format(ws.function(meanName).getVal()))
+  ws.factory(sigmaNameNew+'[{0},{1},{2}]'.format(ws.function(sigmaName).getVal(),
+                                                 ws.function(sigmaName).getMin(),ws.function(sigmaName).getMax()))
+  ws.factory(tauNameNew  +'[{0},{1},{2}]'.format(ws.function(tauName).getVal(),
+                                                 ws.function(tauName).getMin(),ws.function(tauName).getMax()))
+  ws.factory('EDIT::'+fitExtNameNew+'('+fitExtName+','+meanName+'='+meanNameNew+','+sigmaName+'='+sigmaNameNew+','+tauName+'='+tauNameNew+','+normName+'='+normNameNew+')')
+
+  """
   if cat is '1' and (lepton is 'el' or (lepton is 'mu' and year is '2011')):
     suffix = '_'.join([year,lepton,'cat'+cat])
     normName  = 'normGaussBern4_'+suffix
@@ -515,22 +536,6 @@ def BackgroundNameFixer(year,lepton,cat,ws):
     ws.factory('EDIT::'+fitExtNameNew+'('+fitExtName+','+meanName+'='+meanNameNew+','+sigmaName+'='+sigmaNameNew+','+stepName+'='+stepNameNew+','+normName+'='+normNameNew+','
         +p0Name+'='+p0NameNew+','+p1Name+'='+p1NameNew+','+p2Name+'='+p2NameNew+','+p3Name+'='+p3NameNew+','+p4Name+'='+p4NameNew+')')
     
-  elif cat is '0':
-    suffix = '_'.join([year,lepton,'cat'+cat])
-    normName  = 'normGaussExp_'+suffix
-    meanName  = 'meanGaussExp_'+suffix
-    sigmaName = 'sigmaGaussExp_'+suffix
-    tauName   = 'tauGaussExp_'+suffix
-
-    normNameNew  = '_'.join(['bkg',lepton,year,'cat'+cat,'norm'])
-    meanNameNew  = '_'.join(['bkg','mean', lepton,year,'cat'+cat])
-    sigmaNameNew = '_'.join(['bkg','sigma',lepton,year,'cat'+cat])
-    tauNameNew   = '_'.join(['bkg','tau',  lepton,year,'cat'+cat])
-
-    ws.factory(normNameNew +'[{0},{1},{2}]'.format(ws.function(normName).getVal(),ws.function(normName).getMin(), ws.function(normName).getMax()))
-    ws.factory(meanNameNew +'[{0}]'.format(ws.function(meanName).getVal()))
-    ws.factory(sigmaNameNew+'[{0},{1},{2}]'.format(ws.function(sigmaName).getVal(),ws.function(sigmaName).getMin(),ws.function(sigmaName).getMax()))
-    ws.factory(tauNameNew  +'[{0},{1},{2}]'.format(ws.function(tauName).getVal(),ws.function(tauName).getMin(),ws.function(tauName).getMax()))
 
   elif cat is '33':
     suffix = '_'.join([year,lepton,'cat'+cat])
@@ -632,7 +637,4 @@ def BackgroundNameFixer(year,lepton,cat,ws):
         +p0Name+'='+p0NameNew+','+p1Name+'='+p1NameNew+','+p2Name+'='+p2NameNew+','+p3Name+'='+p3NameNew+','+p4Name+'='+p4NameNew+','+p5Name+'='+p5NameNew+')')
     print ('EDIT::'+fitExtNameNew+'('+fitExtName+','+meanName+'='+meanNameNew+','+sigmaName+'='+sigmaNameNew+','+stepName+'='+stepNameNew+','+normName+'='+normNameNew+','
         +p0Name+'='+p0NameNew+','+p1Name+'='+p1NameNew+','+p2Name+'='+p2NameNew+','+p3Name+'='+p3NameNew+','+p4Name+'='+p4NameNew+','+p5Name+'='+p5NameNew+')')
-
-
-
-
+  """

@@ -8,7 +8,8 @@ from rooFitBuilder import *
 gROOT.ProcessLine(".L ~/tdrstyle.C")
 setTDRStyle()
 TH1.SetDefaultSumw2(kTRUE)
-            
+plotBase = "/uscms_data/d2/andreypz/html/zgamma/dalitz/fits/"
+
 # rounding function for interpolation
 def roundTo5(x, base=5):
   return int(base * round(float(x)/base))
@@ -149,8 +150,8 @@ def SignalFitMaker(lep, year, cat):
     for signal in dsList:
       signal.plotOn(testFrame)
     testFrame.Draw()
-    c.Print("p5.png")
-    #c.Print('debugPlots/'+'_'.join(['test','sig','fit',prod,lep,year,'cat'+cat])+'.pdf')
+    #c.Print("p5.png")
+    c.Print(plotBase+'_'.join(['test','sig','fit',prod,lep,year,'cat'+cat])+'.png')
 
   for prod in sigNameList:
     for mass in massList:

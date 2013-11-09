@@ -20,7 +20,8 @@ def makeCards(METest = False):
 
   leptonList = ['mu']
   yearList   = ['2012']
-  catList    = ['0']
+  #catList    = ['0']
+  catList    = ['EB','EE']
 
   massList = ['125.0']
 
@@ -38,8 +39,7 @@ def makeCards(METest = False):
         else: phoGeom = 'EE'
         channel = '_'.join([lepton,year,'cat'+cat])
 
-        if cat is "0":
-          bkgParams = ['sigma','mean','tau','norm']
+        bkgParams = ['sigma','mean','tau','norm']
           
         if cat is "33":
           bkgParams = ['p0','p1','p2','p3','p4','p5','p6','sigma','step','norm']

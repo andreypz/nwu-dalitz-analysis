@@ -9,8 +9,11 @@ setTDRStyle()
 
 leptonList = ['mu']
 yearList   = ['2012']
-catList    = ['0']
+catList    = ['0','EB','EE']
+#catList    = ['0']
 
+plotBase = "/uscms_data/d2/andreypz/html/zgamma/dalitz/fits/"
+  
 rooWsFile = TFile('testRooFitOut_Dalitz.root')
 myWs    = rooWsFile.Get('ws')
 card_ws = RooWorkspace('ws_card')
@@ -21,6 +24,7 @@ c.cd()
 mzg = myWs.var('CMS_hzg_mass')
 mzg.setRange('signal',120,130)
 
+
 # #######################################
 # prep the background and data card    #
 # we're going to the extend the bg pdf #
@@ -28,7 +32,7 @@ mzg.setRange('signal',120,130)
 # with the higgs combination tool      #
 # #######################################
 
-myWs.Print()
+#myWs.Print()
 
 for year in yearList:
   for lepton in leptonList:
@@ -37,15 +41,14 @@ for year in yearList:
       suffix   = '_'.join([year,lepton,'cat'+cat])
       print dataName, suffix
 
-      if cat is '0':
-        fitName  = '_'.join(['GaussExp',year,lepton,'cat'+cat])
-        normName = 'normGaussExp_'+suffix
-      elif cat is '0':
+      fitName  = '_'.join(['GaussExp',year,lepton,'cat'+cat])
+      normName = 'normGaussExp_'+suffix
+
+      # possibly have different fits for separate categories
+      if cat is 'a':
         fitName  = '_'.join(['GaussBern6',year,lepton,'cat'+cat])
         normName = 'normGaussBern6_'+suffix
-      else:
-        fitName  = '_'.join(['GaussBern5',year,lepton,'cat'+cat])
-        normName = 'normGaussBern5_'+suffix
+
 
       print fitName, dataName
       data = myWs.data(dataName)
@@ -63,7 +66,7 @@ for year in yearList:
       dataYield     = RooRealVar(dataYieldName,dataYieldName,sumEntries)
       norm          = RooRealVar(normName,normName,sumEntries,sumEntries*0.25,sumEntries*1.75)
 
-      fitExtName    = '_'.join(['bkg',lepton,year,'cat'+cat])
+      fitExtName    = '_'.join(['bkgTmp',lepton,year,'cat'+cat])
       fit_ext       = RooExtendPdf(fitExtName,fitExtName, fit,norm)
 
 
@@ -73,9 +76,8 @@ for year in yearList:
       data.plotOn(testFrame, RooFit.Binning(50))
       fit_ext.plotOn(testFrame)
       testFrame.Draw()
-      c.Print("p6.png")
-      #c.Print('debugPlots/'+'_'.join(['test','data','fit',lepton,year,'cat'+cat])+'.pdf')
-
+      c.Print(plotBase+'_'.join(['best_fit',year,lepton,'cat'+cat])+'.png')
+    
       ###### Import the fit and data, and rename them to the card convention
       dataNameNew = '_'.join(['data','obs',lepton,year,'cat'+cat])
 
@@ -84,15 +86,10 @@ for year in yearList:
       getattr(card_ws,'import')(dataYield)
       card_ws.commitTransaction()
       fit_ext.Print()
+      card_ws.Print()
+      
       BackgroundNameFixer(year,lepton,cat,card_ws)
 
-      card_ws.Print()
       print "\n * The end * \n"
 
 card_ws.writeToFile('testCardBackground_Dalitz.root')
-
-
-
-
-
-

@@ -34,6 +34,7 @@ def LumiXSWeighter(lumi):
 def doInitialFits():
   print 'loading up the files'
     
+  plotBase = '/uscms_data/d2/andreypz/html/zgamma/dalitz/fits/'
   basePath = '/eos/uscms/store/user/andreypz/batch_output/zgamma/8TeV/v22/'
   dataDict   = {'mu2012':TFile(basePath+'m_Data_mugamma_2012.root','r')}
   signalDict = {'mu2012':TFile(basePath+'mugamma_2012/hhhh_h-dalitz_1.root','r')}
@@ -42,7 +43,7 @@ def doInitialFits():
 
   leptonList  = ['mu']
   yearList    = ['2012']
-  catList     = ['0']
+  catList     = ['0',"EB","EE"]
   massList    = ['125']
   sigNameList = ['gg']
 
@@ -149,7 +150,7 @@ def doInitialFits():
 
               mzg_argL = RooArgList(mzg)
               mzg_argS = RooArgSet(mzg)
-              signalListDH.append(RooDataHist('dh_'+histName,'dh_'+histName,mzg_argL,signalList[-1]))
+              signalListDH.append(RooDataHist('dh_'+histName, 'dh_' +histName,mzg_argL,signalList[-1]))
               signalListPDF.append(RooHistPdf('pdf_'+histName,'pdf_'+histName,mzg_argS,signalListDH[-1],2))
               getattr(ws,'import')(signalListPDF[-1])
               if verbose: print 'finshed one mass', mass
@@ -160,15 +161,14 @@ def doInitialFits():
                 signalListDH[i].plotOn(testFrame)
                 signal.plotOn(testFrame)
               testFrame.Draw()
-              c.Print("p1.png")
-              #c.Print('debugPlots/'+'_'.join(['test','signals',year,lepton,'cat'+cat])+'.pdf')
+              c.Print(plotBase+'_'.join(['signals',prod,year,lepton,'cat'+cat])+'.png')
+              
             if debugPlots:
               testFrame = mzg.frame()
               for signal in signalListDS:
                 signal.plotOn(testFrame, RooFit.DrawOption('pl'))
               testFrame.Draw()
-              c.Print("p2.png")
-              #c.Print('debugPlots/'+'_'.join(['test','ds','sig',prod,year,lepton,'cat'+cat])+'.pdf')
+              c.Print(plotBase+'_'.join(['ds','sig',prod,year,lepton,'cat'+cat])+'.png')
             del signalTree
 
 
@@ -205,8 +205,8 @@ def doInitialFits():
           testFrame = mzg.frame()
           data_ds.plotOn(testFrame,RooFit.Binning(50))
           testFrame.Draw()
-          c.Print("p3.png")
-          #c.Print('debugPlots/'+'_'.join(['test','data',year,lepton,'cat'+cat])+'.pdf')
+          c.Print(plotBase+'_'.join(['data',year,lepton,'cat'+cat])+'.png')
+          
         getattr(ws,'import')(data_ds)
 
 
@@ -314,8 +314,8 @@ def doInitialFits():
             leg.AddEntry(testFrame.findObject('GaussBern3'),'GaussBern3','l')
             leg.AddEntry(testFrame.findObject('GaussBern6'),'GaussBern6','l')
             leg.Draw()
-            c.Print("p4.png")
-            #c.Print('debugPlots/'+'_'.join(['test','fits',year,lepton,'cat'+cat])+'.pdf')
+            c.Print(plotBase+'_'.join(['fits',year,lepton,'cat'+cat])+'.png')
+ 
 
           #raw_input()
           getattr(ws,'import')(GaussExp)
