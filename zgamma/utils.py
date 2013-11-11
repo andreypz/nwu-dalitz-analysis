@@ -193,7 +193,7 @@ def drawAllInFile(f1, name1, f2, name2, f3, name3, dir,path, N, howToScale="none
             #    c1.SetLogy()
                 
         else:
-            handleOverflowBins(h1)
+            #handleOverflowBins(h1)
             h1.Draw("hist")
             #h1.SetMarkerStyle(20)
             h1.SetLineColor(kBlack)

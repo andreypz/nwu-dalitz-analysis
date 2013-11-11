@@ -101,10 +101,11 @@ if period =="2012":
         
     bg = []
     bg.extend([
-        cfg('DYjets50', dCache+'/bpollack/V08_01_8TeV/DYJetsToLL_M-50', 20, 'DY '+selection+' '+period),
+	#cfg('DYjets50', dCache+'/bpollack/V08_01_8TeV/DYJetsToLL_M-50', 20, 'DY '+selection+' '+period),
+        cfg('DYdalitz', dCache+'/andreypz/nuTuples_v8_8TeV/DYMuMuGammaDalitz', 1, 'DY '+selection+' '+period),
+        
         #cfg('ZG',       dCache+'/bpollack/V08_01_8TeV/ZGToLLG',         5, 'ZG '      +selection+' '+period)
         ])
-    
     """
     cfg('WZJetsTo3LNu',  dCache+'/andreypz/nuTuples_v5_8TeV/WZJetsTo3LNu',  1, 'WZ '+selection+' '+period),
     cfg('WWJetsTo2L2Nu', dCache+'/andreypz/nuTuples_v5_8TeV/WWJetsTo2L2Nu', 1, 'WW '+selection+' '+period),
@@ -128,6 +129,7 @@ if period =="2012":
     if selection in ["muon","mugamma","single-mu"]:
         signal.extend([
             cfg('h-dalitz', dCache+'/andreypz/nuTuples_v8_8TeV/MCFM_dalitz_v2', 1, 'dalitz '+selection+' '+period),
+            cfg('mad', dCache+'/andreypz/nuTuples_v8_8TeV/Higgs_To_MuMuGamma',  1, 'dalitz '+selection+' '+period),
             ])
     elif selection=="electron":
         signal.extend([

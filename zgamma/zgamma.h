@@ -128,11 +128,14 @@ class zgamma : public TSelector {
   Float_t mva_fabsEPDiff, mva_EoP, mva_fbrem, mva_SCdPhi, mva_SCdEta;
   Float_t mva_SCEta, mva_R9, mva_HadOverEm, mva_ome1x5oe5x5;
 
+  TTree* _fitTree;
+  Double_t fit_m_llg, fit_m_llg_EB ,fit_m_llg_EE, fit_weight;
+
   string period;
   string sample;
   string selection;
   string trigger;
-  string  gen;
+  string gen;
   bool   makeGen;
 
 
@@ -245,6 +248,7 @@ class zgamma : public TSelector {
    virtual void FillElecronMVATree(TCElectron el);
 
    virtual void MuonDump(TCMuon mu, TVector3 *pv);
+   virtual void PhotonDump(TCPhoton pho,  phIdAndIsoCuts c);
 
    TCGenParticle * GetPrimaryAncestor(TCGenParticle *p);
 

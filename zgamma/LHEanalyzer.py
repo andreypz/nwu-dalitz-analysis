@@ -16,9 +16,9 @@ files={}
 files["mcfm"] = ['/uscms_data/d2/andreypz/lhe_mcfm_hzg_dalitz_lord_fixed_unweighted.lhe.root']
 #files["mad"] = ['/uscms_data/d2/andreypz/lhe_mad_hzg_dalitz_unweighted.root']
 #files["mad"] = ['/uscms_data/d2/andreypz/lhe_mad_hzg_dalitz_unweighted_Mmu.root']
-files["mad"] = ['/uscms_data/d2/andreypz/lhe_mad_LO_HiggsToMuMuGamma.root']
-#files["mad"] = ['/uscms_data/d2/andreypz/lhe_mad_hzg4.root']
-#files["mad"] = ['pp_hzg_signal.root']
+#files["mad"] = ['/uscms_data/d2/andreypz/lhe_mad_LO_HiggsToMuMuGamma.root']
+files["mad"] = ['/uscms_data/d2/andreypz/lhe_mad_hzg5.root']
+#files["mad"] = ['/uscms/home/andreypz/lhe_higgs_eegamma_dalitz/heeg_m120.root']
 
 print files
 #gSystem.Load("/home/andreypz/workspace/MadGraph5/ExRootAnalysis/lib/libExRootAnalysis.so")

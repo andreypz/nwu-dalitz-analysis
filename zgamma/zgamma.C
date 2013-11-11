@@ -41,9 +41,10 @@ Float_t global_Mll = 0;
 
 Int_t dal=0;
 Int_t nodal=0;
-Bool_t makeMvaTree = 1;
-//const UInt_t hisEVTS[] = {36009,38020,38045,38046,38173};
-//Int_t evSize = sizeof(hisEVTS)/sizeof(int);
+Bool_t makeMvaTree = 0;
+Bool_t makeFitTree = 1;
+const UInt_t hisEVTS[] = {35769,35875,35991,38125};
+Int_t evSize = sizeof(hisEVTS)/sizeof(int);
 
 bool P4SortCondition(const TLorentzVector& p1, const TLorentzVector& p2) {return (p1.Pt() > p2.Pt());}
 
@@ -105,6 +106,7 @@ void zgamma::Begin(TTree * tree)
   histoFile->mkdir("EB",    "EB");
 
   histoFile->mkdir("mvaTree", "mvaTree");
+  histoFile->mkdir("fitTree", "fitTree");
 
   hists = new HistManager(histoFile);
 
@@ -221,8 +223,7 @@ void zgamma::Begin(TTree * tree)
 
   histoFile->cd("mvaTree");
   if (makeMvaTree){
-    TString mvaTreeName = "mvaTree";
-    _mvaTree = new TTree(mvaTreeName, "Tree with kinematic info");
+    _mvaTree = new TTree("mvaTree", "Supercluster variables");
     _mvaTree->Branch("SCPhiWidth",    &mva_SCPhiWidth,    "SCPhiWidth/F");
     _mvaTree->Branch("SCPhiWidth",    &mva_SCPhiWidth,    "SCPhiWidth/F");
     _mvaTree->Branch("SCEtaWidth",    &mva_SCEtaWidth,    "SCEtaWidth/F");
@@ -240,6 +241,15 @@ void zgamma::Begin(TTree * tree)
     //_mvaTree->Branch("", &mva_, "/F");
 
   }
+
+  histoFile->cd("fitTree");
+  if (makeFitTree){
+    _fitTree = new TTree("fitTree", "Mllg tree for fitting");
+    _fitTree->Branch("m_llg",    &fit_m_llg,   "m_llg/D");
+    _fitTree->Branch("m_llg_EB", &fit_m_llg_EB,"m_llg_EB/D");
+    _fitTree->Branch("m_llg_EE", &fit_m_llg_EE,"m_llg_EE/D");
+    _fitTree->Branch("weight",   &fit_weight,  "weight/D");
+  }
   histoFile->cd();
 
 }
@@ -252,7 +262,8 @@ Bool_t zgamma::Process(Long64_t entry)
   GetEntry(entry);
   CountEvents(0);
   FillHistoCounts(0, 1);
-  if (nEvents[0] % (int)5e4 == 0) cout<<nEvents[3]<<" events passed of "<<nEvents[0]<<" checked!"<<endl;
+  if (nEvents[0] % (int)5e4 == 0) cout<<nEvents[8]<<" events passed of "<<nEvents[0]<<" checked!"<<endl;
+
 
   //if (nEvents[0]>20) Abort("enough is enosugh!");
 
@@ -543,15 +554,12 @@ Bool_t zgamma::Process(Long64_t entry)
   FillHistoCounts(2, eventWeight);
   CountEvents(2);
 
-  /*
-  for(Int_t ev=0; ev<evSize;ev++)
-    {
-      if (eventNumber==hisEVTS[ev]){
-        cout<<eventNumber<<" Found an event after cut 1"<<endl;
-        break;
-      }
-    }
-  */
+
+  /*for(Int_t ev=0; ev<evSize;ev++){
+    if (eventNumber==hisEVTS[ev]){cout<<eventNumber<<" Found an event after cut 2"<<endl;
+    break;}}*/
+
+  
   // --- Primary vertex ---//
 
   if (primaryVtx->GetSize()<1) return kTRUE;
@@ -562,6 +570,11 @@ Bool_t zgamma::Process(Long64_t entry)
   TVector3* pvPosition;// = new TVector3();
 
   pvPosition = mainPrimaryVertex;
+
+  for(Int_t ev=0; ev<evSize;ev++){
+    if (eventNumber==hisEVTS[ev]){cout<<eventNumber<<" Found an event after PV cut"<<endl;
+      break;}}
+
 
 
   vector<TCElectron> electrons0, electrons, electrons_dalitz, fake_electrons0;
@@ -577,10 +590,19 @@ Bool_t zgamma::Process(Long64_t entry)
     //cout<<"event = "<<eventNumber
     //  <<"\n pt="<<thisPhoton->Pt()<<" eta="<<thisPhoton->Eta()<<" phi="<<thisPhoton->Phi()<<" px="<<thisPhoton->Px()<<endl;
 
+    for(Int_t ev=0; ev<evSize;ev++){
+      if (eventNumber==hisEVTS[ev]){cout<<eventNumber<<" Found an event after cut 3"<<endl;
+        PhotonDump(*thisPhoton, phIdAndIsoCutsHZG);
+        break;}}
+
+
+
     if (isRealData || !makeGen || (makeGen &&gen_lPt1.DeltaR(*thisPhoton) < 0.1 && thisPhoton->Pt()>20))
       fake_photons.push_back(*thisPhoton);
 
-    if (!(fabs(thisPhoton->Eta()) < 2.5)) continue;
+    if (!(fabs(thisPhoton->SCEta()) < 2.5)) continue;
+
+
 
     if(thisPhoton->Pt() > 15){
       if (isRealData || !makeGen || (sample=="dalitz" && makeGen && gen_gamma.DeltaR(*thisPhoton) < 0.1) )
@@ -706,6 +728,7 @@ Bool_t zgamma::Process(Long64_t entry)
     hists->fill1DHist(gendR,   "gen_dR_reco_gamma",   ";gen_dR", 50,0,0.3,1,"eff");
   }
 
+
   if (photonsHZG.size()<1) return kTRUE;
   gamma = photonsHZG[0];
   if (gamma.Pt() < cut_gammapt) return kTRUE;
@@ -722,6 +745,7 @@ Bool_t zgamma::Process(Long64_t entry)
 
   FillHistoCounts(3, eventWeight);
   CountEvents(3);
+
 
 
 
@@ -941,7 +965,6 @@ Bool_t zgamma::Process(Long64_t entry)
     FillHistosFull(7, eventWeight, l1, l2, lPt1, lPt2, gamma, "EB", isDalitzEle);
   else
     FillHistosFull(7, eventWeight, l1, l2, lPt1, lPt2, gamma, "EE", isDalitzEle);
- 
 
   global_Mll = Mll;
 
@@ -958,23 +981,38 @@ Bool_t zgamma::Process(Long64_t entry)
   }
   
 
-  if ((l1+l2).Pt()+gamma.Pt() < 180  && (l1+l2).Pt()>45 && gamma.Pt()>45){
-    FillHistosFull(8, eventWeight, l1, l2, lPt1, lPt2, gamma, "", isDalitzEle);
-    FillHistoCounts(8, eventWeight);
-    CountEvents(8);
-    
-    if (fabs(gamma.Eta())<1.444)
-      FillHistosFull(8, eventWeight, l1, l2, lPt1, lPt2, gamma, "EB", isDalitzEle);
-    else
-      FillHistosFull(8, eventWeight, l1, l2, lPt1, lPt2, gamma, "EE", isDalitzEle);
- 
-  }
-
   Float_t Mllg = 0;
   if(selection=="el")
     Mllg = (l1+gamma).M();
   else
     Mllg = (l1+l2+gamma).M();
+
+
+
+
+  //  if ((l1+l2).Pt()+gamma.Pt() < 180  && (l1+l2).Pt()>45 && gamma.Pt()>45){
+  if ((l1+l2).Pt()>45 && gamma.Pt()>45){
+    FillHistosFull(8, eventWeight, l1, l2, lPt1, lPt2, gamma, "", isDalitzEle);
+    FillHistoCounts(8, eventWeight);
+    CountEvents(8);
+    
+    fit_m_llg  = Mllg;
+    fit_weight = eventWeight;
+
+    if (fabs(gamma.Eta())<1.444){
+      FillHistosFull(8, eventWeight, l1, l2, lPt1, lPt2, gamma, "EB", isDalitzEle);
+      fit_m_llg_EB = Mllg;
+      fit_m_llg_EE = -1;
+    }
+    else{
+      FillHistosFull(8, eventWeight, l1, l2, lPt1, lPt2, gamma, "EE", isDalitzEle);
+      fit_m_llg_EB = -1;
+      fit_m_llg_EE = Mllg;
+    }
+
+    _fitTree->Fill();
+
+  }
 
   if (Mllg>100 && Mllg<150){
     FillHistosFull(9, eventWeight, l1, l2, lPt1, lPt2, gamma, "", isDalitzEle);
@@ -1365,10 +1403,10 @@ void zgamma::CalculatePhotonIso(TCPhoton *ph, float& chIsoCor, float& nhIsoCor, 
     nhEA = EAPho[6][1];
     phEA = EAPho[6][2];
   }
-
   chIsoCor = ph->IsoMap("chIso03")-rhoFactor*chEA;
   nhIsoCor = ph->IsoMap("nhIso03")-rhoFactor*nhEA;
   phIsoCor = ph->IsoMap("phIso03")-rhoFactor*phEA;
+  //cout<<chIsoCor<<"  "<<nhIsoCor<<"  "<<phIsoCor<<endl;
 
 }
 
@@ -1378,7 +1416,7 @@ bool zgamma::PassPhotonIdAndIso(TCPhoton *ph, phIdAndIsoCuts cuts, TVector3 *pv)
   //Float_t phoISO = 0;
   float tmpEta = ph->SCEta();
 
-  float chIsoCor,nhIsoCor,phIsoCor;
+  float chIsoCor=0, nhIsoCor=0, phIsoCor=0;
   CalculatePhotonIso(ph, chIsoCor,nhIsoCor,phIsoCor);
   if(
      (fabs(tmpEta)  < 1.442
@@ -1665,6 +1703,29 @@ void zgamma::MuonDump(TCMuon mu, TVector3 *pv)
         << "\n " << mu.NormalizedChi2() << " " << mu.NumberOfValidMuonHits() << " " << mu.NumberOfMatchedStations()
         << " " << mu.NumberOfValidPixelHits() << " " << mu.TrackLayersWithMeasurement()
         << endl;
+}
+
+
+void zgamma::PhotonDump(TCPhoton pho, phIdAndIsoCuts cuts)
+{
+  Float_t phoISO = 0;
+  float chIsoCor,nhIsoCor,phIsoCor;
+  float tmpEta = pho.SCEta();
+
+  CalculatePhotonIso(&pho, chIsoCor,nhIsoCor,phIsoCor);
+
+  cout  << runNumber << " " << eventNumber << " " << pho.Pt() << " " << pho.Eta() << " " << pho.SCEta() <<endl;
+  cout<<"conv:"<<pho.ConversionVeto()<<"  hoem:"<< pho.HadOverEm() <<"  sieie:"<<pho.SigmaIEtaIEta()<<endl;
+  cout  <<"\n iso: ch:" << chIsoCor<< "  nh:" << nhIsoCor <<  " ph:"<<phIsoCor<<endl;
+  if (fabs(tmpEta)  < 1.442){
+    cout<<"\n cuts: "<<cuts.chIso03[0] <<"  "<<cuts.nhIso03[0] + 0.040*pho.Pt()<<"  "<<cuts.phIso03[0] + 0.005*pho.Pt()<<endl;
+    cout<<"conv:"<<cuts.PassedEleSafeVeto[0]<<"  hoem:"<< cuts.HadOverEm[0]<<"  sieie:"<<cuts.sigmaIetaIeta[0]<<endl;
+  }
+  else if (fabs(tmpEta)  > 1.566){
+    cout<<"\n cuts: "<<cuts.chIso03[1] <<"  "<<cuts.nhIso03[1] + 0.040*pho.Pt()<<"  "<<cuts.phIso03[1] + 0.005*pho.Pt()<<endl;
+    cout<<"conv:"<<cuts.PassedEleSafeVeto[1]<<"  hoem:"<< cuts.HadOverEm[1]<<"  sieie:"<<cuts.sigmaIetaIeta[1]<<endl;
+  }
+    
 }
 
 void zgamma::FillElecronMVATree(TCElectron el){
