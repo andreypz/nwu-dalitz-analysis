@@ -1,0 +1,18 @@
+# Simple counting experiment, with one signal and a few background processes
+imax 1  number of channels
+jmax 1  number of backgrounds
+kmax 4  number of nuisance parameters (sources of systematical uncertainties)
+------------
+bin EB
+observation 58
+
+bin             EB    EB
+process         ggH   Bkg1
+process         0     1
+rate           2.08   58
+
+------------
+lumi         lnN     1.022        1.022
+pdf_gg       lnN     0.923/1.079  - 
+QCDscale_ggH lnN     0.918/1.125  - 
+unc_Bkg1_EB  gmN 58     -           1.00
