@@ -32,18 +32,18 @@ float EAPho[7][3] = {
   {0.020,  0.039,   0.260}, // 2.3   < eta < 2.4
   {0.012,  0.072,   0.266}  // 2.4   < eta
 };
-string myTrigger = "";
+string myTrigger  = "";
 Float_t cut_l1pt  = 23;
-Float_t cut_l2pt  = 7;
+Float_t cut_l2pt  = 7, cut_l2pt_low = 4;
 Float_t cut_gammapt = 25;
 
 Float_t global_Mll = 0;
 
-Int_t dal=0;
-Int_t nodal=0;
-Bool_t makeMvaTree = 1;
-//const UInt_t hisEVTS[] = {36009,38020,38045,38046,38173};
-//Int_t evSize = sizeof(hisEVTS)/sizeof(int);
+Int_t dal=0, nodal=0;
+Bool_t makeMvaTree = 0;
+Bool_t makeFitTree = 1;
+const UInt_t hisEVTS[] = {14803,24688,44236,48883};//38590,22337, 22415, 22463};
+Int_t evSize = sizeof(hisEVTS)/sizeof(int);
 
 bool P4SortCondition(const TLorentzVector& p1, const TLorentzVector& p2) {return (p1.Pt() > p2.Pt());}
 
@@ -105,6 +105,7 @@ void zgamma::Begin(TTree * tree)
   histoFile->mkdir("EB",    "EB");
 
   histoFile->mkdir("mvaTree", "mvaTree");
+  histoFile->mkdir("fitTree", "fitTree");
 
   hists = new HistManager(histoFile);
 
@@ -162,7 +163,7 @@ void zgamma::Begin(TTree * tree)
 
   //muon id cuts
   muIdAndIsoCutsTight.ptErrorOverPt            = 9999.;
-  muIdAndIsoCutsTight.TrackLayersWithMeasurement =5;
+  muIdAndIsoCutsTight.TrackLayersWithMeasurement = 5;
   muIdAndIsoCutsTight.NumberOfValidMuonHits    = 0;
   muIdAndIsoCutsTight.NumberOfValidTrackerHits = 10;
   muIdAndIsoCutsTight.NumberOfValidPixelHits   = 0;
@@ -174,7 +175,8 @@ void zgamma::Begin(TTree * tree)
   muIdAndIsoCutsTight.pfIso04         = 0.4;
 
   //Soft muon id (specific for dalitz)
-  //muIdAndIsoCutsSoft.NormalizedChi2_tracker = 10;
+  muIdAndIsoCutsSoft.TrackLayersWithMeasurement = 5;
+  muIdAndIsoCutsSoft.PixelLayersWithMeasurement = 1;
   muIdAndIsoCutsSoft.NormalizedChi2_tracker = 1.8;
   muIdAndIsoCutsSoft.dxy             = 0.2; //3
   muIdAndIsoCutsSoft.dz              = 0.5; //30
@@ -221,8 +223,7 @@ void zgamma::Begin(TTree * tree)
 
   histoFile->cd("mvaTree");
   if (makeMvaTree){
-    TString mvaTreeName = "mvaTree";
-    _mvaTree = new TTree(mvaTreeName, "Tree with kinematic info");
+    _mvaTree = new TTree("mvaTree", "Supercluster variables");
     _mvaTree->Branch("SCPhiWidth",    &mva_SCPhiWidth,    "SCPhiWidth/F");
     _mvaTree->Branch("SCPhiWidth",    &mva_SCPhiWidth,    "SCPhiWidth/F");
     _mvaTree->Branch("SCEtaWidth",    &mva_SCEtaWidth,    "SCEtaWidth/F");
@@ -240,6 +241,14 @@ void zgamma::Begin(TTree * tree)
     //_mvaTree->Branch("", &mva_, "/F");
 
   }
+
+  histoFile->cd("fitTree");
+  if (makeFitTree){
+    _fitTree = new TTree("fitTree", "Mllg tree for fitting");
+    _fitTree->Branch("m_llg",  &fit_m_llg, "m_llg/D");
+    _fitTree->Branch("type",   &fit_type,  "type/I");
+    _fitTree->Branch("weight", &fit_weight,"weight/D");
+  }
   histoFile->cd();
 
 }
@@ -252,7 +261,8 @@ Bool_t zgamma::Process(Long64_t entry)
   GetEntry(entry);
   CountEvents(0);
   FillHistoCounts(0, 1);
-  if (nEvents[0] % (int)5e4 == 0) cout<<nEvents[3]<<" events passed of "<<nEvents[0]<<" checked!"<<endl;
+  if (nEvents[0] % (int)5e4 == 0) cout<<nEvents[8]<<" events passed of "<<nEvents[0]<<" checked!"<<endl;
+
 
   //if (nEvents[0]>20) Abort("enough is enosugh!");
 
@@ -543,15 +553,12 @@ Bool_t zgamma::Process(Long64_t entry)
   FillHistoCounts(2, eventWeight);
   CountEvents(2);
 
-  /*
-  for(Int_t ev=0; ev<evSize;ev++)
-    {
-      if (eventNumber==hisEVTS[ev]){
-        cout<<eventNumber<<" Found an event after cut 1"<<endl;
-        break;
-      }
-    }
-  */
+
+  /*for(Int_t ev=0; ev<evSize;ev++){
+    if (eventNumber==hisEVTS[ev]){cout<<eventNumber<<" Found an event after cut 2"<<endl;
+    break;}}*/
+
+  
   // --- Primary vertex ---//
 
   if (primaryVtx->GetSize()<1) return kTRUE;
@@ -562,7 +569,6 @@ Bool_t zgamma::Process(Long64_t entry)
   TVector3* pvPosition;// = new TVector3();
 
   pvPosition = mainPrimaryVertex;
-
 
   vector<TCElectron> electrons0, electrons, electrons_dalitz, fake_electrons0;
   vector<TCMuon> muons0, muons;
@@ -581,6 +587,9 @@ Bool_t zgamma::Process(Long64_t entry)
       fake_photons.push_back(*thisPhoton);
 
     if (!(fabs(thisPhoton->Eta()) < 2.5)) continue;
+    //if (!(fabs(thisPhoton->SCEta()) < 2.5)) continue;
+
+
 
     if(thisPhoton->Pt() > 15){
       if (isRealData || !makeGen || (sample=="dalitz" && makeGen && gen_gamma.DeltaR(*thisPhoton) < 0.1) )
@@ -673,10 +682,20 @@ Bool_t zgamma::Process(Long64_t entry)
 
     if (!(fabs(thisMuon->Eta()) < 2.4)) continue;
 
-    if(thisMuon->Pt() > 7
+    /*    
+    if(thisMuon->Pt() > 4)
+      for(Int_t ev=0; ev<evSize;ev++){
+        if (eventNumber==hisEVTS[ev]){cout<<"   ---> "<<eventNumber<<" <--- Found an event after cut "<<endl;
+          MuonDump(*thisMuon, pvPosition);
+          break;}}
+    */
+
+    if(thisMuon->Pt() > 4
        //&& PassMuonIdAndIso(thisMuon, muIdAndIsoCutsTight, pvPosition)
        && PassMuonIdAndIso(thisMuon, muIdAndIsoCutsSoft, pvPosition)
        ) {
+
+
       muons.push_back(*thisMuon);
     }
   }
@@ -706,6 +725,7 @@ Bool_t zgamma::Process(Long64_t entry)
     hists->fill1DHist(gendR,   "gen_dR_reco_gamma",   ";gen_dR", 50,0,0.3,1,"eff");
   }
 
+
   if (photonsHZG.size()<1) return kTRUE;
   gamma = photonsHZG[0];
   if (gamma.Pt() < cut_gammapt) return kTRUE;
@@ -718,29 +738,8 @@ Bool_t zgamma::Process(Long64_t entry)
   }
 
 
-  fout<<" nEvt = "<<nEvents[0]<<" : Run/lumi/event = "<<runNumber<<"/"<<lumiSection<<"/"<<eventNumber<<endl;
-
   FillHistoCounts(3, eventWeight);
   CountEvents(3);
-
-
-
-  /*
-  for(Int_t ev=0; ev<evSize;ev++)
-    {
-      if (eventNumber==hisEVTS[ev]){
-        cout<<eventNumber<<" Found an event after cut 2"<<endl;
-
-        for (Int_t i = 0; i < recoMuons->GetSize(); ++ i) {
-          //TCMuon* thisMuon = (TCMuon*) recoMuons->At(i);
-
-          zgamma::MuonDump(*(TCMuon*)recoMuons->At(i), pvPosition);
-        }
-
-        break;
-      }
-    }
-  */
 
 
   bool isDalitzEle = false;
@@ -858,7 +857,9 @@ Bool_t zgamma::Process(Long64_t entry)
   MakePhotonPlots(gamma);
 
 
-  if (lPt1.Pt() < cut_l1pt || lPt2.Pt() < cut_l2pt)   return kTRUE;
+
+  if (lPt1.Pt() < cut_l1pt || lPt2.Pt() < cut_l2pt_low)   return kTRUE;
+  //if (lPt1.Pt() < cut_l1pt || lPt2.Pt() < cut_l2pt)   return kTRUE;
   if (selection=="el" && isDalitzEle && lPt1.Pt()<30) return kTRUE;
 
   if(!isRealData && makeGen){
@@ -872,16 +873,7 @@ Bool_t zgamma::Process(Long64_t entry)
   FillHistoCounts(4, eventWeight);
   CountEvents(4);
 
-  /*
-  for(Int_t ev=0; ev<evSize;ev++)
-    {
-      if (eventNumber==hisEVTS[ev]){
-        cout<<eventNumber<<" Found an event after cut 3"<<endl;
-        break;
-      }
-    }
-  */
-
+  fout<<" nEvt = "<<nEvents[0]<<" : Run/lumi/event = "<<runNumber<<"/"<<lumiSection<<"/"<<eventNumber<<endl;
 
 
   if (Mll > 20) return kTRUE;
@@ -891,15 +883,46 @@ Bool_t zgamma::Process(Long64_t entry)
   FillHistoCounts(5, eventWeight);
   CountEvents(5);
 
-  /*
-  for(Int_t ev=0; ev<evSize;ev++)
-    {
-      if (eventNumber==hisEVTS[ev]){
-        cout<<eventNumber<<" Found an event after cut 4"<<endl;
-        break;
-      }
-    }
-  */
+
+  if (lPt1.DeltaR(gamma)<1.0 || lPt2.DeltaR(gamma)<1.0) return kTRUE;
+  FillHistosFull(6, eventWeight, l1, l2, lPt1, lPt2, gamma, "", isDalitzEle);
+  FillHistoCounts(6, eventWeight);
+  CountEvents(6);
+  if (fabs(gamma.Eta())<1.444)
+    FillHistosFull(6, eventWeight, l1, l2, lPt1, lPt2, gamma, "EB", isDalitzEle);
+  else
+    FillHistosFull(6, eventWeight, l1, l2, lPt1, lPt2, gamma, "EE", isDalitzEle);
+
+  global_Mll = Mll;
+
+  if (selection=="mu"){
+    MakeMuonPlots(muons[0], pvPosition);
+    MakeMuonPlots(muons[1], pvPosition);
+  }
+  
+  if (selection=="el"){
+    if (electrons0.size()>=1)
+      MakeElectronPlots(electrons0[0]);
+    if (electrons0.size()>1)
+      MakeElectronPlots(electrons0[1]);
+  }
+  
+
+  Float_t Mllg = 0;
+  if(selection=="el")
+    Mllg = (l1+gamma).M();
+  else
+    Mllg = (l1+l2+gamma).M();
+
+
+
+  if (Mll>3.0 && Mll<3.2){ //jpsi window
+    FillHistosFull(12, eventWeight, l1, l2, lPt1, lPt2, gamma, "jpsi", isDalitzEle);
+    FillHistoCounts(12, eventWeight);
+    CountEvents(12);
+    return kTRUE;
+  }
+
 
   for (UInt_t i =0; i<ntrig; i++){
     triggerSelector->SelectTrigger(myTriggers[i], triggerStatus, hltPrescale, isFound, triggerPass, prescale);
@@ -917,9 +940,9 @@ Bool_t zgamma::Process(Long64_t entry)
 
   }
 
-  FillHistosFull(6, eventWeight, l1, l2, lPt1, lPt2, gamma, "", isDalitzEle);
-  FillHistoCounts(6, eventWeight);
-  CountEvents(6);
+  FillHistosFull(7, eventWeight, l1, l2, lPt1, lPt2, gamma, "", isDalitzEle);
+  FillHistoCounts(7, eventWeight);
+  CountEvents(7);
 
 
   if(!isRealData && makeGen && sample=="dalitz"){
@@ -933,53 +956,45 @@ Bool_t zgamma::Process(Long64_t entry)
   }
 
 
-  if (lPt1.DeltaR(gamma)<1.0 || lPt2.DeltaR(gamma)<1.0) return kTRUE;
-  FillHistosFull(7, eventWeight, l1, l2, lPt1, lPt2, gamma, "", isDalitzEle);
-  FillHistoCounts(7, eventWeight);
-  CountEvents(7);
-  if (fabs(gamma.Eta())<1.444)
-    FillHistosFull(7, eventWeight, l1, l2, lPt1, lPt2, gamma, "EB", isDalitzEle);
-  else
-    FillHistosFull(7, eventWeight, l1, l2, lPt1, lPt2, gamma, "EE", isDalitzEle);
- 
-
-  global_Mll = Mll;
-
-  if (selection=="mu"){
-    MakeMuonPlots(muons[0], pvPosition);
-    MakeMuonPlots(muons[1], pvPosition);
-  }
   
-  if (selection=="el"){
-    if (electrons0.size()>=1)
-      MakeElectronPlots(electrons0[0]);
-    if (electrons0.size()>1)
-      MakeElectronPlots(electrons0[1]);
-  }
+    //if ((l1+l2).Pt()+gamma.Pt() < 180  && (l1+l2).Pt()>45 && gamma.Pt()>45){
+  if ((l1+l2).Pt()>45 && gamma.Pt()>45){
   
+    fit_m_llg  = Mllg;
+    fit_weight = eventWeight;
+    fit_type = 0;
 
-  if ((l1+l2).Pt()+gamma.Pt() < 180  && (l1+l2).Pt()>45 && gamma.Pt()>45){
-    FillHistosFull(8, eventWeight, l1, l2, lPt1, lPt2, gamma, "", isDalitzEle);
-    FillHistoCounts(8, eventWeight);
-    CountEvents(8);
-    
-    if (fabs(gamma.Eta())<1.444)
-      FillHistosFull(8, eventWeight, l1, l2, lPt1, lPt2, gamma, "EB", isDalitzEle);
-    else
-      FillHistosFull(8, eventWeight, l1, l2, lPt1, lPt2, gamma, "EE", isDalitzEle);
- 
+    if (lPt2.Pt() > cut_l2pt){
+      FillHistosFull(8, eventWeight, l1, l2, lPt1, lPt2, gamma, "", isDalitzEle);
+      FillHistoCounts(8, eventWeight);
+      CountEvents(8);
+
+      if (fabs(gamma.Eta())<1.444){
+        FillHistosFull(8, eventWeight, l1, l2, lPt1, lPt2, gamma, "EB", isDalitzEle);
+        fit_type = 1;
+      }
+      else{
+        FillHistosFull(8, eventWeight, l1, l2, lPt1, lPt2, gamma, "EE", isDalitzEle);
+        fit_type = 2;
+      }
+    }
+    else {
+      FillHistosFull(9, eventWeight, l1, l2, lPt1, lPt2, gamma, "", isDalitzEle);
+      FillHistoCounts(9, eventWeight);
+      CountEvents(9);
+      fit_type = 3;    
+
+
+    }
+
+    _fitTree->Fill();
+
   }
-
-  Float_t Mllg = 0;
-  if(selection=="el")
-    Mllg = (l1+gamma).M();
-  else
-    Mllg = (l1+l2+gamma).M();
 
   if (Mllg>100 && Mllg<150){
-    FillHistosFull(9, eventWeight, l1, l2, lPt1, lPt2, gamma, "", isDalitzEle);
-    FillHistoCounts(9, eventWeight);
-    CountEvents(9);
+    FillHistosFull(10, eventWeight, l1, l2, lPt1, lPt2, gamma, "", isDalitzEle);
+    FillHistoCounts(10, eventWeight);
+    CountEvents(10);
 
     if (selection=="el"){
       if (electrons.size()>=1)
@@ -1004,13 +1019,6 @@ Bool_t zgamma::Process(Long64_t entry)
   }
 
 
-  if (Mll>2.7 && Mllg<3.5){ //jpsi window
-    FillHistosFull(10, eventWeight, l1, l2, lPt1, lPt2, gamma, "jpsi", isDalitzEle);
-    FillHistoCounts(10, eventWeight);
-    CountEvents(10);
-
-  }
-
 
   /*
 
@@ -1019,15 +1027,12 @@ Bool_t zgamma::Process(Long64_t entry)
     if(triggerPass) nEventsTrig[3][i]++;
   }
 
-
   if (Mll < 20){
     for (UInt_t i=0; i<ntrig; i++){
       triggerSelector->SelectTrigger(myTriggers[i], triggerStatus, hltPrescale, isFound, triggerPass, prescale);
       if(triggerPass) nEventsTrig[4][i]++;
     }
-
   }
-
 
   for (UInt_t i =0; i<ntrig; i++){
     triggerSelector->SelectTrigger(myTriggers[i], triggerStatus, hltPrescale, isFound, triggerPass, prescale);
@@ -1040,14 +1045,7 @@ Bool_t zgamma::Process(Long64_t entry)
 
     if(triggerPass || pa) nEventsTrig[6][i]++;
   }
-
   */
-
-
-
-  //if (Mll>2 && Mll<5){ //jpsi window
-  //}
-
 
   /* single ele trigger study
   for (UInt_t i =0; i<ntrig; i++)
@@ -1067,14 +1065,11 @@ Bool_t zgamma::Process(Long64_t entry)
     }
   */
 
-
   /*
   for (UInt_t i =0; i<ntrig; i++) {
       triggerSelector->SelectTrigger(myTriggers[i], triggerStatus, hltPrescale, isFound, triggerPass, prescale);
       if(triggerPass) nEventsTrig[3][i]++;
     }
-
-  if (fabs(gamma.Eta()) > 2.5) return kTRUE;
 
   */
 
@@ -1094,10 +1089,13 @@ void zgamma::Terminate()
   cout<<"| 3: reco gamma iso   |\t"<< nEvents[3]  <<"\t|"<<float(nEvents[3])/nEvents[2]<<"\t|"<<endl;
   cout<<"| 4: reco lep         |\t"<< nEvents[4]  <<"\t|"<<float(nEvents[4])/nEvents[3]<<"\t|"<<endl;
   cout<<"| 5: mll <20          |\t"<< nEvents[5]  <<"\t|"<<float(nEvents[5])/nEvents[4]<<"\t|"<<endl;
-  cout<<"| 6: trigger          |\t"<< nEvents[6]  <<"\t|"<<float(nEvents[6])/nEvents[5]<<"\t|"<<endl;
-  cout<<"| 7:  dR              |\t"<< nEvents[7]  <<"\t|"<<float(nEvents[7])/nEvents[6]<<"\t|"<<endl;
+  cout<<"| 6: dR               |\t"<< nEvents[6]  <<"\t|"<<float(nEvents[6])/nEvents[5]<<"\t|"<<endl;
+  cout<<"| 7: trigger          |\t"<< nEvents[7]  <<"\t|"<<float(nEvents[7])/nEvents[6]<<"\t|"<<endl;
   cout<<"| 8: triangle         |\t"<< nEvents[8]  <<"\t|"<<float(nEvents[8])/nEvents[7]<<"\t|"<<endl;
-  cout<<"| 9: mH     |\t"<< nEvents[9]  <<"\t|"<<float(nEvents[9])/nEvents[7]<<"\t|"<<endl;
+  cout<<"| 9: l pt2 < 4        |\t"<< nEvents[9]  <<"\t|"<<float(nEvents[9])/nEvents[7]<<"\t|"<<endl;
+  cout<<"| 10: mH              |\t"<< nEvents[10] <<"\t|"<<float(nEvents[10])/nEvents[7]<<"\t|"<<endl;
+  cout<<"| 11: n/a             |\t"<< nEvents[11] <<"\t|"<<float(nEvents[11])/nEvents[7]<<"\t|"<<endl;
+  cout<<"| 12: jpsi            |\t"<< nEvents[12] <<"\t|"<<float(nEvents[12])/nEvents[7]<<"\t|"<<endl;
 
   cout<<"dal = "<<dal<<"   nodal = "<<nodal<<"   tot="<<dal+nodal<<endl;
   /*
@@ -1307,15 +1305,18 @@ bool zgamma::PassMuonIdAndIso(TCMuon *lep, muIdAndIsoCuts cuts, TVector3 *pv)
   Float_t muISO = (lep->IsoMap("pfChargedHadronPt_R04") +
                    TMath::Max(0.0, lep->IsoMap("pfNeutralHadronEt_R04") + lep->IsoMap("pfPhotonEt_R04") - 0.5*lep->IsoMap("pfPUPt_R04")))/lep->Pt();
 
-  if(lep->IsPF() && lep->IsTRK()
+  if(1
+     //&&lep->IsPF() && lep->IsTRK()
      //&& lep->PtError()/lep->Pt() < cuts.ptErrorOverPt
      //&& lep->NumberOfValidMuonHits()    > cuts.NumberOfValidMuonHits
      //&& lep->NumberOfValidTrackerHits() > cuts.NumberOfValidTrackerHits
-     //&& lep->TrackLayersWithMeasurement() > cuts.TrackLayersWithMeasurement
      //&& lep->NumberOfValidPixelHits()   > cuts.NumberOfValidPixelHits
      //&& lep->NumberOfMatchedStations() > cuts.NumberOfMatchedStations
      //&& lep->NumberOfMatches() > cuts.NumberOfMatches
      //&& lep->NormalizedChi2()  < cuts.NormalizedChi2
+     && lep->IsGood()
+     && lep->TrackLayersWithMeasurement() > cuts.TrackLayersWithMeasurement
+     && lep->PixelLayersWithMeasurement() > cuts.PixelLayersWithMeasurement
      && lep->NormalizedChi2_tracker()  < cuts.NormalizedChi2_tracker
      && fabs(lep->Dxy(pv))     < cuts.dxy
      && fabs(lep->Dz(pv))      < cuts.dz
@@ -1365,10 +1366,10 @@ void zgamma::CalculatePhotonIso(TCPhoton *ph, float& chIsoCor, float& nhIsoCor, 
     nhEA = EAPho[6][1];
     phEA = EAPho[6][2];
   }
-
   chIsoCor = ph->IsoMap("chIso03")-rhoFactor*chEA;
   nhIsoCor = ph->IsoMap("nhIso03")-rhoFactor*nhEA;
   phIsoCor = ph->IsoMap("phIso03")-rhoFactor*phEA;
+  //cout<<chIsoCor<<"  "<<nhIsoCor<<"  "<<phIsoCor<<endl;
 
 }
 
@@ -1378,7 +1379,7 @@ bool zgamma::PassPhotonIdAndIso(TCPhoton *ph, phIdAndIsoCuts cuts, TVector3 *pv)
   //Float_t phoISO = 0;
   float tmpEta = ph->SCEta();
 
-  float chIsoCor,nhIsoCor,phIsoCor;
+  float chIsoCor=0, nhIsoCor=0, phIsoCor=0;
   CalculatePhotonIso(ph, chIsoCor,nhIsoCor,phIsoCor);
   if(
      (fabs(tmpEta)  < 1.442
@@ -1660,11 +1661,37 @@ void zgamma::MuonDump(TCMuon mu, TVector3 *pv)
   Float_t muISO = (mu.IsoMap("pfChargedHadronPt_R04") + mu.IsoMap("pfNeutralHadronEt_R04") + mu.IsoMap("pfPhotonEt_R04"))/mu.Pt();
 
   cout  << runNumber << " " << eventNumber << " " << mu.Pt()
-        << " " << mu.Eta() << " " << mu.IsGLB() << " " << mu.IsPF() << ""<<mu.IsTRK()<<endl;
+        << " " << mu.Eta() << " " << mu.IsGLB() << " " << mu.IsPF() << " "<<mu.IsTRK()<<endl;
   cout  << mu.NormalizedChi2_tracker() << "  " << muISO <<  " " << mu.Dxy(pv) << " " << mu.Dz(pv)
+        << "\n  good =" << mu.IsGood()
+        << "\n  trk =" << mu.TrackLayersWithMeasurement() << "  pix=" <<mu.PixelLayersWithMeasurement()
         << "\n " << mu.NormalizedChi2() << " " << mu.NumberOfValidMuonHits() << " " << mu.NumberOfMatchedStations()
+
         << " " << mu.NumberOfValidPixelHits() << " " << mu.TrackLayersWithMeasurement()
         << endl;
+}
+
+
+void zgamma::PhotonDump(TCPhoton pho, phIdAndIsoCuts cuts)
+{
+  //Float_t phoISO = 0;
+  float chIsoCor,nhIsoCor,phIsoCor;
+  float tmpEta = pho.SCEta();
+
+  CalculatePhotonIso(&pho, chIsoCor,nhIsoCor,phIsoCor);
+
+  cout  << runNumber << " " << eventNumber << " " << pho.Pt() << " " << pho.Eta() << " " << pho.SCEta() <<endl;
+  cout<<"conv:"<<pho.ConversionVeto()<<"  hoem:"<< pho.HadOverEm() <<"  sieie:"<<pho.SigmaIEtaIEta()<<endl;
+  cout  <<"\n iso: ch:" << chIsoCor<< "  nh:" << nhIsoCor <<  " ph:"<<phIsoCor<<endl;
+  if (fabs(tmpEta)  < 1.442){
+    cout<<"\n cuts: "<<cuts.chIso03[0] <<"  "<<cuts.nhIso03[0] + 0.040*pho.Pt()<<"  "<<cuts.phIso03[0] + 0.005*pho.Pt()<<endl;
+    cout<<"conv:"<<cuts.PassedEleSafeVeto[0]<<"  hoem:"<< cuts.HadOverEm[0]<<"  sieie:"<<cuts.sigmaIetaIeta[0]<<endl;
+  }
+  else if (fabs(tmpEta)  > 1.566){
+    cout<<"\n cuts: "<<cuts.chIso03[1] <<"  "<<cuts.nhIso03[1] + 0.040*pho.Pt()<<"  "<<cuts.phIso03[1] + 0.005*pho.Pt()<<endl;
+    cout<<"conv:"<<cuts.PassedEleSafeVeto[1]<<"  hoem:"<< cuts.HadOverEm[1]<<"  sieie:"<<cuts.sigmaIetaIeta[1]<<endl;
+  }
+    
 }
 
 void zgamma::FillElecronMVATree(TCElectron el){

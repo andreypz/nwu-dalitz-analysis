@@ -21,7 +21,18 @@ cs = {}
 for sample, c in conf.items("cs"):
     print sample,c
     cs[sample] = float(c)
-cs["h"]=2*cs["h"]
+
+def getLumi(period):
+    if period=="2012":
+        return lumi2012
+    else:
+        print "Sorry only 2012 is considered"
+        return 0
+
+def getCS(useMCFM=False):
+    if useMCFM:
+        cs["h"]=2*cs["h"]
+    return cs
 
 def handleOverflowBins(hist):
     if hist == None:
@@ -144,6 +155,7 @@ def drawAllInFile(f1, name1, f2, name2, f3, name3, dir,path, N, howToScale="none
     if f3!=None and howToScale=="lumi": # only assume signal MC for now
         Nev = f3.Get("Counts/evt_byCut_raw").GetBinContent(1)
         cro = cs["h"]
+       
         scale3 = float(1000*lumi*cro)/Nev
         print Nev, lumi, cro, scale3
 
@@ -193,7 +205,7 @@ def drawAllInFile(f1, name1, f2, name2, f3, name3, dir,path, N, howToScale="none
             #    c1.SetLogy()
                 
         else:
-            handleOverflowBins(h1)
+            #handleOverflowBins(h1)
             h1.Draw("hist")
             #h1.SetMarkerStyle(20)
             h1.SetLineColor(kBlack)
@@ -274,14 +286,18 @@ def drawAllInFile(f1, name1, f2, name2, f3, name3, dir,path, N, howToScale="none
             c1.SaveAs(path+"/"+h1.GetName()+".png")
         c1.SetLogy(0)
         
-def yieldsTable(yi, sel):
+def yieldsTable(yi, sel, num=True):
     t = []
     l1 = ["Cut/trigger"]
+    if num:
+        l1.insert(0,"")
     l1.extend([a for a in sel])
     print l1
     t.append(l1)
     for line in xrange(len(cuts)):
         l=[]
+        if num:
+            l.append(str((line-1)))
         l.append(cuts[line])
         for thissel in sel:
             l.append(yi[thissel][line])
@@ -290,7 +306,7 @@ def yieldsTable(yi, sel):
         
     return t
                                                         
-def makeTable(table, opt="tex"):
+def makeTable(table, name, opt="tex"):
     print "Making sure that the list is alright"
     n_row = len(table)
     n_col = len(table[0])
@@ -342,7 +358,7 @@ def makeTable(table, opt="tex"):
 
     myTable +=endTable
     
-    ifile = open("yields."+opt,"w")
+    ifile = open("yields_"+name+"."+opt,"w")
     ifile.write(myTable)
     ifile.close()
     

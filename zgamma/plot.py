@@ -8,25 +8,17 @@ import utils as u
 gROOT.SetBatch()
 
 parser = OptionParser(usage="usage: %prog ver [options -c, -e, -p, -m]")
-parser.add_option("-c","--cut",    dest="cut", type="int", default=4,    help="Plots after a certain cut")
-parser.add_option("-m", "--merge", dest="merge",action="store_true", default=False, help="Do merging?")
-parser.add_option("-e", "--ele",   dest="ele",  action="store_true", default=False, help="Use electron selection")
+parser.add_option("-c","--cut",   dest="cut", type="int", default=4,    help="Plots after a certain cut")
+parser.add_option("-m","--merge", dest="merge",action="store_true", default=False, help="Do merging?")
+
 parser.add_option("-p", "--period",dest="period", default="2012",  help="Year period; 2011 or 2012")
 parser.add_option("--bkg", dest="bkg",  action="store_true", default=False, help="Make plots from bkg sample")
+parser.add_option("--mcfm",dest="mcfm", action="store_true", default=False, help="Use MCFM  as a signal")
 
 (options, args) = parser.parse_args()
 
-import ConfigParser as cp
-conf = cp.ConfigParser()
-conf.read('config.cfg')
-lumi2012 = float(conf.get("lumi","lumi2012A")) + float(conf.get("lumi","lumi2012B"))+\
-           float(conf.get("lumi","lumi2012C")) + float(conf.get("lumi","lumi2012D"))
-lumi = lumi2012
-cs = {}
-for sample, c in conf.items("cs"):
-    print sample,c
-    cs[sample] = float(c)
-cs["h"]=2*cs["h"]
+lumi = u.getLumi(options.period)
+cs   = u.getCS(options.mcfm)
 
 #sel = ["electron"]
 sel = ["mugamma"]
@@ -207,7 +199,11 @@ if __name__ == "__main__":
             path = pathBase+"/bkg_"+subdir
             u.createDir(path)
 
-        sigFile = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_h-dalitz_1.root", "OPEN")
+        if options.mcfm:
+            sigFile = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_h-dalitz_1.root", "OPEN")
+        else:
+            sigFile = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_mad_1.root", "OPEN")
+        
         dataFile[thissel] = TFile(hPath+"/m_Data_"+thissel+"_"+period+".root","OPEN")
         #bkgFile[thissel]  = TFile(hPath+"/m_DY_"+thissel+"_"+period+".root","OPEN")
 
@@ -227,12 +223,18 @@ if __name__ == "__main__":
             #u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",  "Muons", pathBase+"/Muons/", None,"norm")
             #u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",  "Photon",pathBase+"/Photon/", None,"norm")
         elif thissel =="electron":
-            u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",  "Photon",     pathBase+"/Photon/",     None,"norm")
-            u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",  "DalitzEle",  pathBase+"/DalitzEle/",  None,"norm")
-            u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",  "DalitzEleEB",pathBase+"/DalitzEleEB/",None,"norm")
-            u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",  "DalitzEleEE",pathBase+"/DalitzEleEE/",None,"norm")
-            u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",  "NewEle-1",   pathBase+"/NewEle-1/",   None,"norm")
-            u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",  "NewEle-2",   pathBase+"/NewEle-2/",   None,"norm")
+            u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",
+                            "Photon",     pathBase+"/Photon/",     None,"norm")
+            u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",
+                            "DalitzEle",  pathBase+"/DalitzEle/",  None,"norm")
+            u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",
+                            "DalitzEleEB",pathBase+"/DalitzEleEB/",None,"norm")
+            u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",
+                            "DalitzEleEE",pathBase+"/DalitzEleEE/",None,"norm")
+            u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",
+                            "NewEle-1",   pathBase+"/NewEle-1/",   None,"norm")
+            u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",
+                            "NewEle-2",   pathBase+"/NewEle-2/",   None,"norm")
 
             
         #dataFile.Close()
@@ -241,7 +243,7 @@ if __name__ == "__main__":
 
     #u.drawAllInFile(bkgFile[thissel], "DY electrons", sigFile, "Dalitz 2el",  "NewEle-1", pathBase+"/NewEle-1/", None,"norm", isLog=1, )
 
-    c1 = TCanvas("c3","small canvas",600,600);
+    c1 = TCanvas("c4","small canvas",600,600);
     c1.cd()
     Nev = sigFile.Get("Counts/evt_byCut").GetBinContent(2)
     cro = cs["h"]
@@ -250,7 +252,7 @@ if __name__ == "__main__":
     m1 = 121.
     m2 = 129.
     for r in ["","EB","EE"]:
-        if int(cut)<7: break
+        if int(cut)!=8: break
         pre = r
         if r!="":
             pre=r+"/"
@@ -271,16 +273,20 @@ if __name__ == "__main__":
         print "  ==> zoomed sign = ", ysi_zoom/sqrt(ysi_zoom + yda_zoom)
 
 
+    '''
     h2da = dataFile[thissel].Get("h2D_dalitzPlot_rotation__cut"+cut).ProjectionX("hda_prx")
     h2si = sigFile.Get("h2D_dalitzPlot_rotation__cut"+cut).ProjectionX("hsi_prx")
 
+    #u.handleOverflowBins(h2da)
+    #u.handleOverflowBins(h2si)
+        
     h2da.Draw("hist")
     h2si.Draw("same hist")
     h2si.SetLineColor(kRed+1)
     h2si.Scale(10*scale)
     h2da.SetTitle(";projectionX;Events")
     c1.SaveAs("h2da_dalitz.png")
-
+    '''
     
     '''
     nx = h2da.GetNbinsX()
@@ -307,10 +313,12 @@ if __name__ == "__main__":
     table_data = u.yieldsTable(yields_data, sel)
 
 
-    u.makeTable(table_data,"html")
-    u.makeTable(table_sig,"html")
-    u.makeTable(table_data,"twiki")
-    u.makeTable(table_sig, "twiki")
+    u.makeTable(table_data,"data", "html")
+    u.makeTable(table_sig, "sig",  "html")
+    u.makeTable(table_data,"data", "twiki")
+    u.makeTable(table_sig, "sig",  "twiki")
+
+    os.system("cat yields_data.html yields_sig.html > yields.html")
 
     comments = ["These plots are made for ...",
                 "Blah"]

@@ -60,17 +60,18 @@
 #include <TVector3.h>
 
 
-#define nC 10 
+#define nC 14
 struct muIdAndIsoCuts{
   Bool_t IsPF;
   Bool_t IsGLB;
   Float_t ptErrorOverPt;
-  Float_t TrackLayersWithMeasurement;
-  Float_t NumberOfValidMuonHits;
-  Float_t NumberOfValidTrackerHits;
-  Float_t NumberOfValidPixelHits;
-  Float_t NumberOfMatches;
-  Float_t NumberOfMatchedStations;
+  Int_t TrackLayersWithMeasurement;
+  Int_t PixelLayersWithMeasurement;
+  Int_t NumberOfValidMuonHits;
+  Int_t NumberOfValidTrackerHits;
+  Int_t NumberOfValidPixelHits;
+  Int_t NumberOfMatches;
+  Int_t NumberOfMatchedStations;
   Float_t NormalizedChi2;
   Float_t NormalizedChi2_tracker;
   Float_t dxy;
@@ -91,14 +92,14 @@ struct elIdAndIsoCuts{
   Float_t dxy[2];
   Float_t dz[2];
   Float_t fabsEPDiff[2];
-  Float_t ConversionMissHits[2];
-  Float_t PassedConversionProb[2];
+  Int_t ConversionMissHits[2];
+  Int_t PassedConversionProb[2];
   Float_t pfIso04[2];
 };
 
 struct phIdAndIsoCuts{
   //broken into [0] barrel and [1] endcap
-  Float_t PassedEleSafeVeto[2];
+  Int_t PassedEleSafeVeto[2];
   Float_t sigmaIetaIeta[2];
   Float_t HadOverEm[2];
   float chIso03[2];
@@ -128,11 +129,15 @@ class zgamma : public TSelector {
   Float_t mva_fabsEPDiff, mva_EoP, mva_fbrem, mva_SCdPhi, mva_SCdEta;
   Float_t mva_SCEta, mva_R9, mva_HadOverEm, mva_ome1x5oe5x5;
 
+  TTree* _fitTree;
+  Double_t fit_m_llg,fit_weight;
+  Int_t fit_type;
+
   string period;
   string sample;
   string selection;
   string trigger;
-  string  gen;
+  string gen;
   bool   makeGen;
 
 
@@ -245,6 +250,7 @@ class zgamma : public TSelector {
    virtual void FillElecronMVATree(TCElectron el);
 
    virtual void MuonDump(TCMuon mu, TVector3 *pv);
+   virtual void PhotonDump(TCPhoton pho,  phIdAndIsoCuts c);
 
    TCGenParticle * GetPrimaryAncestor(TCGenParticle *p);
 
