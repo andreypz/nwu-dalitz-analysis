@@ -128,8 +128,8 @@ if period =="2012":
 
     if selection in ["muon","mugamma","single-mu"]:
         signal.extend([
-            cfg('h-dalitz', dCache+'/andreypz/nuTuples_v8_8TeV/MCFM_dalitz_v2', 1, 'dalitz '+selection+' '+period),
-            cfg('mad', dCache+'/andreypz/nuTuples_v8_8TeV/Higgs_To_MuMuGamma',  1, 'dalitz '+selection+' '+period),
+            cfg('h-dalitz', dCache+'/andreypz/nuTuples_v8_8TeV/MCFM_dalitz_v2',    1, 'dalitz '+selection+' '+period),
+            cfg('mad', dCache+'/andreypz/nuTuples_v8_8TeV/Higgs_To_MuMuGamma_8TeV',1, 'dalitz '+selection+' '+period),
             ])
     elif selection=="electron":
         signal.extend([

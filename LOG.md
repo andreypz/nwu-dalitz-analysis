@@ -1,6 +1,12 @@
 The log of changes:
 ==================
 
+2013-Nov-13
+  * Muon soft + (tight vertex) ID is synchronized with Stoyan (almost)
+  * Low-pt muon category introduces
+  * A tree for fitting input is optimized
+  * An option to use MCFM or MAdgraph signal sample
+
 2013-Oct-30
   * Dalitz plots added
   * EB/EE categories introduced
@@ -243,6 +249,3 @@ The log of changes:
 V00-04 - synchronized with Nate's code
 
 V00-03 - latest version based on old code.
-
-
- LocalWords:  VBF soucefiles sourcefiles
