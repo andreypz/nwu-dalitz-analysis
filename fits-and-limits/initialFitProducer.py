@@ -24,8 +24,13 @@ TH1.SetDefaultSumw2(kTRUE)
 if rootrace: RooTrace.active(kTRUE)
 
 def LumiXSWeighter(lumi):
-  cro = 2*0.000887
-  Nev = 93992
+  #Mad:
+  cro = 0.000655
+  Nev = 199988
+  
+  #mcfm:
+  #cro = 2*0.000887
+  #Nev = 93992
   sc = float(1000*lumi*cro)/Nev
   #print "Signal scale due to cs/lumi", sc
   return sc
@@ -35,17 +40,20 @@ def doInitialFits():
   print 'loading up the files'
     
   plotBase = '/uscms_data/d2/andreypz/html/zgamma/dalitz/fits/'
-  basePath = '/eos/uscms/store/user/andreypz/batch_output/zgamma/8TeV/v22/'
+  basePath = '/eos/uscms/store/user/andreypz/batch_output/zgamma/8TeV/v24/'
   dataDict   = {'mu2012':TFile(basePath+'m_Data_mugamma_2012.root','r')}
-  signalDict = {'mu2012':TFile(basePath+'mugamma_2012/hhhh_h-dalitz_1.root','r')}
+  #signalDict = {'mu2012':TFile(basePath+'mugamma_2012/hhhh_h-dalitz_1.root','r')}
+  signalDict = {'mu2012':TFile(basePath+'mugamma_2012/hhhh_mad_1.root','r')}
 
   treeName = 'fitTree/fitTree'
 
   leptonList  = ['mu']
   yearList    = ['2012']
-  catList     = ['0',"EB","EE"]
+  catList     = ['0',"EB","EE","Low"]
+  category    = {"0":0,"EB":1,"EE":2,"Low":3}
   massList    = ['125']
   sigNameList = ['gg']
+
 
   weight  = RooRealVar('Weight','Weight',0,100)
   mzg  = RooRealVar('CMS_hzg_mass','CMS_hzg_mass',90,190)
@@ -67,8 +75,10 @@ def doInitialFits():
     for lepton in leptonList:
       for cat in catList:
         if rootrace:
+          print "rootrace"
           RooTrace.dump()
           raw_input()
+          
         signalList = []
         signalListDH = []
         signalListPDF = []
@@ -86,31 +96,30 @@ def doInitialFits():
             #signalTree.Print()
             sigName = '_'.join(['ds_sig',prod,lepton,year,'cat'+cat,'M'+mass])
             tmpSigMass   = np.zeros(1,dtype = 'd')
+            tmpType      = np.zeros(1,dtype = 'i')
             tmpSigWeight = np.zeros(1,dtype = 'd')
             tmpSigLumiXS = np.zeros(1,dtype = 'd')
-            if cat is '0':
-              signalTree.SetBranchAddress('m_llg',tmpSigMass)
-            else:
-              signalTree.SetBranchAddress('m_llg_'+cat,tmpSigMass)
+
+            signalTree.SetBranchAddress('m_llg', tmpSigMass)
+            signalTree.SetBranchAddress('type',  tmpType)
             signalTree.SetBranchAddress('weight',tmpSigWeight)
             #signalTree.SetBranchAddress('unBinnedLumiXS_Signal'+year+prod+'M'+mass,tmpSigLumiXS)
             sig_argSW = RooArgSet(mzg,weight)
             sig_ds    = RooDataSet(sigName,sigName,sig_argSW,'Weight')
-            for i in range(0,signalTree.GetEntries()):
-              #print i, "loop in signal tree"
-              signalTree.GetEntry(i)
+            for i in signalTree:
+              if category[cat]!=0 and tmpType[0] != category[cat]: continue
+              #print "loop in signal tree", cat, category[cat], tmpType, "mass =", tmpSigMass[0] 
+
 
               if tmpSigMass[0]> 90 and tmpSigMass[0]<190:
-                if year is '2012' and mass is '160' and prod is 'gg':
-                  mzg.setVal(tmpSigMass[0]+5)
-                else:
-                  mzg.setVal(tmpSigMass[0])
+                mzg.setVal(tmpSigMass[0])
                   
                 sigWeight = LumiXSWeighter(19.6)
                 sigWeight = sigWeight*tmpSigWeight[0]
                 sig_ds.add(sig_argSW, sigWeight)
                 #sig_argSW.Print()
 
+            #raw_input()
             signalListDS.append(sig_ds)
             getattr(ws,'import')(signalListDS[-1])
             signalTree.ResetBranchAddresses()
@@ -134,10 +143,10 @@ def doInitialFits():
                 signalTree.Print()
                 print
 
-              if cat is '0':
+              if cat=="0":
                 signalTree.Draw('m_llg>>'+histName,'weight')
               else:
-                signalTree.Draw('m_llg_'+cat+'>>'+histName,'weight')
+                signalTree.Draw('m_llg>>'+histName,'(type=='+str(category[cat])+')*weight')
 
               if signalList[-1].Integral()!=0:
                 signalList[-1].Scale(1/signalList[-1].Integral())
@@ -153,7 +162,7 @@ def doInitialFits():
               signalListDH.append(RooDataHist('dh_'+histName, 'dh_' +histName,mzg_argL,signalList[-1]))
               signalListPDF.append(RooHistPdf('pdf_'+histName,'pdf_'+histName,mzg_argS,signalListDH[-1],2))
               getattr(ws,'import')(signalListPDF[-1])
-              if verbose: print 'finshed one mass', mass
+              if verbose: print '\n\n ** finshed one mass -->>', mass
 
             if debugPlots and prod is 'gg':
               testFrame = mzg.frame()
@@ -182,15 +191,16 @@ def doInitialFits():
         dataTree = dataDict[lepton+year].Get(treeName)
         #tmpMassEventOld = np.zeros(1,dtype = 'f')
         tmpMassEventOld = np.zeros(1,dtype = 'd')
-        if cat is '0':
-          dataTree.SetBranchAddress('m_llg',tmpMassEventOld)
-        else:
-          dataTree.SetBranchAddress('m_llg_'+cat,tmpMassEventOld)
+        tmpType = np.zeros(1,dtype = 'i')
+
+        dataTree.SetBranchAddress('m_llg',tmpMassEventOld)
+        dataTree.SetBranchAddress('type',tmpType)
+
         data_argS = RooArgSet(mzg)
         data_ds   = RooDataSet(dataName,dataName,data_argS)
-        for i in range(0,dataTree.GetEntries()):
-          dataTree.GetEntry(i)
-          #print i, "mass = ", tmpMassEventOld[0]
+
+        for i in dataTree:
+          if category[cat]!=0 and tmpType[0] != category[cat]: continue
           
           if tmpMassEventOld[0]> 90 and tmpMassEventOld[0]<190:
             mzg.setVal(tmpMassEventOld[0])
@@ -222,12 +232,12 @@ def doInitialFits():
           SechExp  = BuildSechExp(year, lepton, cat, mzg)
           SechPow  = BuildSechPow(year, lepton, cat, mzg)
           #GaussBern3  = BuildGaussStepBern3(year, lepton, cat, mzg)
-          #GaussBern4 = BuildGaussStepBern4(year, lepton, cat, mzg)
+          GaussBern4 = BuildGaussStepBern4(year, lepton, cat, mzg)
           #GaussBern5 = BuildGaussStepBern5(year, lepton, cat, mzg)
           #GaussBern6 = BuildGaussStepBern6(year, lepton, cat, mzg)
           #GaussBern4  = BuildGaussStepBern4(year, lepton, cat, mzg, step = 105, stepLow = 100, stepHigh = 150, sigma = 2.5)
           #GaussBern5  = BuildGaussStepBern5(year, lepton, cat, mzg, step = 105, stepLow = 100, stepHigh = 150, sigma = 2.5)
-          GaussBern6  = BuildGaussStepBern6(year, lepton, cat, mzg, step = 105, stepLow = 90, stepHigh = 190, sigma = 2.5)
+          #GaussBern6  = BuildGaussStepBern6(year, lepton, cat, mzg, step = 105, stepLow = 90, stepHigh = 190, sigma = 2.5)
           #SechBern3   = BuildSechStepBern3(year,  lepton, cat, mzg)
           #if lepton == 'mu' and cat == '3': SechBern4 = BuildSechStepBern4(year, lepton, cat, mzg,sigma=2)
           ##else: SechBern4 = BuildSechStepBern4(year, lepton, cat, mzg)
@@ -247,9 +257,9 @@ def doInitialFits():
             SechExp.Print()
             SechPow.Print()
             #GaussBern3.Print()
-            #GaussBern4.Print()
+            GaussBern4.Print()
             #GaussBern5.Print()
-            GaussBern6.Print()
+            #GaussBern6.Print()
             #SechBern3.Print()
             #SechBern4.Print()
             #SechBern5.Print()
@@ -261,12 +271,12 @@ def doInitialFits():
           SechExp.fitTo(data_ds,RooFit.Range('DalitzRegion'))
           SechPow.fitTo(data_ds,RooFit.Range('DalitzRegion'))
           #GaussBern3.fitTo(data_ds,RooFit.Range('DalitzRegion'))
-          #GaussBern4.fitTo(data_ds,RooFit.Range('DalitzRegion'))
+          GaussBern4.fitTo(data_ds,RooFit.Range('DalitzRegion'))
           #GaussBern5.fitTo(data_ds,RooFit.Range('DalitzRegion'))
           #GaussBern4.fitTo(data_ds,RooFit.Range('DalitzRegion'), RooFit.Strategy(1))
           #GaussBern5.fitTo(data_ds,RooFit.Range('DalitzRegion'), RooFit.Strategy(1))
           #GaussBern6.fitTo(data_ds,RooFit.Range('DalitzRegion'), RooFit.Strategy(1))
-          GaussBern6.fitTo(data_ds,RooFit.Range('DalitzRegion'))
+          #GaussBern6.fitTo(data_ds,RooFit.Range('DalitzRegion'))
           #SechBern3.fitTo(data_ds,RooFit.Range('DalitzRegion'))
           #SechBern4.fitTo(data_ds,RooFit.Range('DalitzRegion'))
           #SechBern5.fitTo(data_ds,RooFit.Range('DalitzRegion'))
@@ -290,9 +300,9 @@ def doInitialFits():
             SechExp.plotOn(testFrame,RooFit.LineColor(kRed),    RooFit.Name('SechExp'))
             SechPow.plotOn(testFrame,RooFit.LineColor(kOrange), RooFit.Name('SechPow'))
             #GaussBern3.plotOn(testFrame,RooFit.LineColor(kViolet))
-            #GaussBern4.plotOn(testFrame,RooFit.LineColor(kPink))
+            GaussBern4.plotOn(testFrame,RooFit.LineColor(kPink), RooFit.Name('GaussBern4'))
             #GaussBern5.plotOn(testFrame,RooFit.LineColor(kGray))
-            GaussBern6.plotOn(testFrame,RooFit.LineColor(kGreen+2), RooFit.Name('GaussBern6'))
+            #GaussBern6.plotOn(testFrame,RooFit.LineColor(kGreen+2), RooFit.Name('GaussBern6'))
             #SechBern3.plotOn(testFrame,RooFit.LineColor(kMagenta))
             #SechBern4.plotOn(testFrame,RooFit.LineColor(kBlack))
             #SechBern5.plotOn(testFrame,RooFit.LineColor(kGreen))
@@ -312,7 +322,8 @@ def doInitialFits():
             leg.AddEntry(testFrame.findObject('SechExp'), 'SechExp', 'l')
             leg.AddEntry(testFrame.findObject('SechPow'), 'SechPow', 'l')
             leg.AddEntry(testFrame.findObject('GaussBern3'),'GaussBern3','l')
-            leg.AddEntry(testFrame.findObject('GaussBern6'),'GaussBern6','l')
+            leg.AddEntry(testFrame.findObject('GaussBern4'),'GaussBern4','l')
+            #leg.AddEntry(testFrame.findObject('GaussBern6'),'GaussBern6','l')
             leg.Draw()
             c.Print(plotBase+'_'.join(['fits',year,lepton,'cat'+cat])+'.png')
  
@@ -324,9 +335,9 @@ def doInitialFits():
           getattr(ws,'import')(SechExp)
           getattr(ws,'import')(SechPow)
           #getattr(ws,'import')(GaussBern3)
-          #getattr(ws,'import')(GaussBern4)
+          getattr(ws,'import')(GaussBern4)
           #getattr(ws,'import')(GaussBern5)
-          getattr(ws,'import')(GaussBern6)
+          #getattr(ws,'import')(GaussBern6)
           #getattr(ws,'import')(SechBern3)
           #getattr(ws,'import')(SechBern4)
           #getattr(ws,'import')(SechBern5)

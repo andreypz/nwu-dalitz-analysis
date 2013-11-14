@@ -171,8 +171,10 @@ def SignalFitMaker(lep, year, cat):
 if __name__=="__main__":
   print len(sys.argv)
   print sys.argv
-  if len(sys.argv) != 6:
-    print 'usage: ./signalCBFits lepton year cat'
-  else:
-    SignalFitMaker(str(sys.argv[1]), str(sys.argv[2]), str(sys.argv[3]))
+  #if len(sys.argv) != 6:
+  #  print 'usage: ./signalCBFits lepton year cat'
+  #else:
+  #  SignalFitMaker(str(sys.argv[1]), str(sys.argv[2]), str(sys.argv[3]))
 
+  for cat in ["0","EB","EE","Low"]:
+    SignalFitMaker("mu","2012",cat)

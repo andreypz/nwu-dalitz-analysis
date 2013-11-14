@@ -15,13 +15,12 @@ from rooFitBuilder import *
 
 makeSys = 1
 
-def makeCards(METest = False):
-  MESigScale = 0.887
+def makeCards():
 
   leptonList = ['mu']
   yearList   = ['2012']
   #catList    = ['0']
-  catList    = ['EB','EE']
+  catList    = ['0','EB','EE','Low']
 
   massList = ['125.0']
 
@@ -33,16 +32,9 @@ def makeCards(METest = False):
         bgFileName = 'testCardBackground_Dalitz.root'
        
         sigNameList = ['gg']
-
-        
-        if cat in ['1','4']: phoGeom = 'EB'
-        else: phoGeom = 'EE'
         channel = '_'.join([lepton,year,'cat'+cat])
-
         bkgParams = ['sigma','mean','tau','norm']
           
-        if cat is "33":
-          bkgParams = ['p0','p1','p2','p3','p4','p5','p6','sigma','step','norm']
 
         for mass in massList:
           sigFileName = '_'.join(['SignalOutput',lepton,year,'cat'+cat,mass])+'.root'

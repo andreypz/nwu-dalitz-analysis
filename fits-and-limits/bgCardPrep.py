@@ -9,7 +9,7 @@ setTDRStyle()
 
 leptonList = ['mu']
 yearList   = ['2012']
-catList    = ['0','EB','EE']
+catList    = ['0','EB','EE','Low']
 #catList    = ['0']
 
 plotBase = "/uscms_data/d2/andreypz/html/zgamma/dalitz/fits/"

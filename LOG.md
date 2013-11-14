@@ -6,6 +6,11 @@ The log of changes:
   * Low-pt muon category introduces
   * A tree for fitting input is optimized
   * An option to use MCFM or MAdgraph signal sample
+  
+  * Also, improved fits-and-limits: 
+    * loop over tree python way
+    * introduced 'Low' category
+    * GaussBern3 used instead of GaussBern6
 
 2013-Oct-30
   * Dalitz plots added
