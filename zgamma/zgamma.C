@@ -42,7 +42,7 @@ Float_t global_Mll = 0;
 Int_t dal=0, nodal=0;
 Bool_t makeMvaTree = 0;
 Bool_t makeFitTree = 1;
-const UInt_t hisEVTS[] = {14803,24688,44236,48883};//38590,22337, 22415, 22463};
+const UInt_t hisEVTS[] = {14803};
 Int_t evSize = sizeof(hisEVTS)/sizeof(int);
 
 bool P4SortCondition(const TLorentzVector& p1, const TLorentzVector& p2) {return (p1.Pt() > p2.Pt());}
@@ -338,10 +338,10 @@ Bool_t zgamma::Process(Long64_t entry)
       A=23;
 
     Int_t fsr_mu_count = 0, fsr_el_count=0;
-    Int_t ph=0;
+    Int_t ph=0, h=0;
+
     for (int i = 0; i < genParticles->GetSize(); ++i) {
       TCGenParticle* thisParticle = (TCGenParticle*) genParticles->At(i);
-
       //GEN MUONS
       //This GEN selection is only valid for a sample with LHE from MCFM
       if (abs(thisParticle->GetPDGId()) == 13 && thisParticle->GetStatus()==1) {
@@ -409,26 +409,53 @@ Bool_t zgamma::Process(Long64_t entry)
       }
 
       //PHOTON
+      if (thisParticle->GetPDGId()==22 //&& thisParticle->GetStatus()==1
+          && thisParticle->Pt() > 2
+          //&& zgamma::GetPrimaryAncestor(thisParticle)->GetPDGId()==A
+          && thisParticle->Mother() &&  abs(thisParticle->Mother()->GetPDGId())==13)
+        {
+          gen_gamma = *thisParticle;
+          //if (zgamma::GetPrimaryAncestor(thisParticle)->GetPDGId()!=A)
+          zgamma::DiscoverGeneology(thisParticle, eventNumber);
+
+          for (int j = 0; j < genParticles->GetSize(); ++j) {
+            TCGenParticle* fsr = (TCGenParticle*) genParticles->At(j);
+            if(fsr->GetPDGId() == thisParticle->Mother()->GetPDGId() )
+              zgamma::DiscoverGeneology(fsr, eventNumber);
+
+
+            if (fsr->GetPDGId()==25 && fsr->GetStatus()==2){
+              zgamma::DiscoverGeneology(fsr, eventNumber);
+            }
+          }
+
+
+        }
+
+      //PHOTON
       if (thisParticle->GetPDGId()==22 && thisParticle->GetStatus()==1
-          && zgamma::GetPrimaryAncestor(thisParticle)->GetPDGId()==A
+          //&& zgamma::GetPrimaryAncestor(thisParticle)->GetPDGId()==A
           && thisParticle->Mother() &&  abs(thisParticle->Mother()->GetPDGId())!=13 &&  abs(thisParticle->Mother()->GetPDGId())!=11)
-         {
-           gen_gamma = *thisParticle;
-           //zgamma::DiscoverGeneology(thisParticle, eventNumber);
-           ph++;
-         }
+        {
+          gen_gamma = *thisParticle;
+          ph++;
+        }
       else if (sample=="DY" &&
                thisParticle->GetPDGId()==22 && thisParticle->GetStatus()==1 && zgamma::GetPrimaryAncestor(thisParticle)->GetPDGId()==23)
         gen_gamma = *thisParticle;
 
       //Higgs
-      if (thisParticle->GetPDGId()==25)
+      if (thisParticle->GetPDGId()==25 && thisParticle->GetStatus()==2){
         gen_higgs = *thisParticle;
-
+        //zgamma::DiscoverGeneology(thisParticle, eventNumber);
+        h++;
+      }
     }
 
     if (ph!=1 && sample=="dalitz")
-      Abort(" NONONO There has to be exactly one photon from the Higgs!");
+      Abort(Form(" NONONO There has to be exactly one photon from the Higgs! \n \t\t but there is %i", ph));
+    if (h!=1 && sample=="dalitz")
+      Abort(Form(" NONONO There has to be exactly one Higgs! \n \t\t but there is %i", h));
 
     sort(gen_el.begin(), gen_el.end(), P4SortCondition);
     sort(gen_mu.begin(), gen_mu.end(), P4SortCondition);
@@ -458,6 +485,9 @@ Bool_t zgamma::Process(Long64_t entry)
 
     if(selection=="mu"){//mumugamma
       if (gen_mu.size()!=2)  return kTRUE;
+        //Abort(Form(" NONONO There has to be exactly 2 muons from the Higgs! \n \t\t but there are %i", gen_mu.size()));
+
+
 
       gen_lPt1 = gen_mu[0];
       gen_lPt2 = gen_mu[1];
@@ -682,13 +712,11 @@ Bool_t zgamma::Process(Long64_t entry)
 
     if (!(fabs(thisMuon->Eta()) < 2.4)) continue;
 
-    /*    
     if(thisMuon->Pt() > 4)
       for(Int_t ev=0; ev<evSize;ev++){
         if (eventNumber==hisEVTS[ev]){cout<<"   ---> "<<eventNumber<<" <--- Found an event after cut "<<endl;
           MuonDump(*thisMuon, pvPosition);
           break;}}
-    */
 
     if(thisMuon->Pt() > 4
        //&& PassMuonIdAndIso(thisMuon, muIdAndIsoCutsTight, pvPosition)
@@ -857,7 +885,7 @@ Bool_t zgamma::Process(Long64_t entry)
   MakePhotonPlots(gamma);
 
 
-
+  
   if (lPt1.Pt() < cut_l1pt || lPt2.Pt() < cut_l2pt_low)   return kTRUE;
   //if (lPt1.Pt() < cut_l1pt || lPt2.Pt() < cut_l2pt)   return kTRUE;
   if (selection=="el" && isDalitzEle && lPt1.Pt()<30) return kTRUE;
@@ -1629,7 +1657,7 @@ void zgamma::DiscoverGeneology(TCGenParticle *p, ULong64_t ev)
 {
   if(p->Mother()){
     cout<<"---->> event = "<<ev<<"   "<<p->GetPDGId()<<"  st = "<<p->GetStatus()
-        <<"\n pt="<<p->Pt()<<" eta="<<p->Eta()<<" phi="<<p->Phi()<<" pt="<<p->Pt()<<endl;
+        <<"\n pt="<<p->Pt()<<" eta="<<p->Eta()<<" phi="<<p->Phi()<<" M="<<p->M()<<endl;
     TCGenParticle *m = p->Mother();
     cout<<"    mother = "<<m->GetPDGId()<<"  st="<<m->GetStatus()<<"\n pt="<<m->Pt()<<endl;
     if(m->Mother()){
@@ -1658,7 +1686,8 @@ void zgamma::DiscoverGeneology(TCGenParticle *p, ULong64_t ev)
 
 void zgamma::MuonDump(TCMuon mu, TVector3 *pv)
 {
-  Float_t muISO = (mu.IsoMap("pfChargedHadronPt_R04") + mu.IsoMap("pfNeutralHadronEt_R04") + mu.IsoMap("pfPhotonEt_R04"))/mu.Pt();
+  Float_t muISO = (mu.IsoMap("pfChargedHadronPt_R04") +
+                   TMath::Max(0.0, mu.IsoMap("pfNeutralHadronEt_R04") + mu.IsoMap("pfPhotonEt_R04") - 0.5*mu.IsoMap("pfPUPt_R04")))/mu.Pt();
 
   cout  << runNumber << " " << eventNumber << " " << mu.Pt()
         << " " << mu.Eta() << " " << mu.IsGLB() << " " << mu.IsPF() << " "<<mu.IsTRK()<<endl;
