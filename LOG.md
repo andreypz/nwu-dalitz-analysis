@@ -1,6 +1,12 @@
 The log of changes:
 ==================
 
+2013-Nov-18
+  * FSR at gen level
+  * Issues with Madgraph signal sample reviealed:
+    * No Z
+    * No Higgs in 2% of events
+
 2013-Nov-13
   * Muon soft + (tight vertex) ID is synchronized with Stoyan (almost)
   * Low-pt muon category introduces

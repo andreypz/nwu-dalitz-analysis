@@ -12,10 +12,7 @@ subdir = sys.argv[1]
 
 outpath = '/uscms_data/d2/andreypz/html/zgamma/lhe/'
 files={}
-#files["mad"] = ['/uscms/home/andreypz/work/MadGraph5/PROC_ANO_HEFT_JGF_v2_1/Events/run_01/unweighted_events.root']
 files["mcfm"] = ['/uscms_data/d2/andreypz/lhe_mcfm_hzg_dalitz_lord_fixed_unweighted.lhe.root']
-#files["mad"] = ['/uscms_data/d2/andreypz/lhe_mad_hzg_dalitz_unweighted.root']
-#files["mad"] = ['/uscms_data/d2/andreypz/lhe_mad_hzg_dalitz_unweighted_Mmu.root']
 #files["mad"] = ['/uscms_data/d2/andreypz/lhe_mad_LO_HiggsToMuMuGamma.root']
 files["mad"] = ['/uscms_data/d2/andreypz/lhe_mad_hzg5.root']
 #files["mad"] = ['/uscms/home/andreypz/lhe_higgs_eegamma_dalitz/heeg_m120.root']
@@ -46,12 +43,15 @@ if not os.path.exists(newDir):
 
 def FillAllHists(files, h):
     # h is a hist manager instance here
+    
     fChain = TChain("LHEF");
     for f in files:
         fChain.Add(f)
         #fChain.Print()
-
+        print f
+        
     dcount = 0
+    LEPID = 13
     for evt in fChain:
 
         g1 = TLorentzVector(0)
@@ -61,11 +61,12 @@ def FillAllHists(files, h):
         l2 = TLorentzVector(0)
         gamma = TLorentzVector(0)
         diLep = TLorentzVector(0)
-
+        trueHiggs = TLorentzVector(0)
+        
         hasZ = 0
         hasGlu3=0
         hasGamma=0
-
+        hi = 0
         for p in evt.Particle:
             px = p.Px
             py = p.Py
@@ -73,15 +74,17 @@ def FillAllHists(files, h):
             E  = p.E
             M  = p.M
         
+            if (p.PID == 25):
+                trueHiggs.SetPxPyPzE(px,py,pz,E)
+                hi+=1
+                
             if (p.PID == 22 and p.Status==1):
                 gamma.SetPxPyPzE(px,py,pz,E)
                 hasGamma=1
                 
-            if (p.PID == 13  or p.PID == 13):
-            #if (p.PID == 13 or p.PID == 11):
+            if (p.PID == LEPID  or p.PID == LEPID):
                 l1.SetPxPyPzE(px,py,pz,E)
-            if (p.PID == -13 or p.PID ==-13):
-            #if (p.PID == -13 or p.PID ==-11):
+            if (p.PID == -LEPID or p.PID ==-LEPID):
                 l2.SetPxPyPzE(px,py,pz,E)
 
             if p.PID==23:
@@ -107,6 +110,7 @@ def FillAllHists(files, h):
     
         diLep = l1+l2
         if diLep.Pt()==0:
+            #print "dLep.Pt = 0"
             continue
 
         dcount += 1
@@ -114,9 +118,16 @@ def FillAllHists(files, h):
         #    continue
 
         #if not hasGamma: continue
-    
+            
         tri = diLep + gamma
         
+        if hi==0:
+            #print dcount,"No higgs??? what's up with that??"
+            h.fill1DHist(tri.M(),   "h_mass_noHiggs",";M(ll#gamma)",   200, 80,180,1, "")            
+            h.fill1DHist(diLep.M(), "h_mumu_noHiggs",";M(ll)",   200, 80,180,1, "")            
+            h.fill1DHist(gamma.Pt(),"gamma_pt_noHiggs","; pt_#gamma",   200, 00,180,1, "")            
+            #exit(0)
+
         gammaCM = TLorentzVector(gamma)
         diLepCM = TLorentzVector(diLep)
         b1  = TVector3(-tri.BoostVector())
@@ -130,6 +141,7 @@ def FillAllHists(files, h):
         c2 = ang.GetCos2()
         c3 = ang.GetCosTheta()
         phi = ang.GetPhi()
+        
         #print dcount, c1, c2, phi, c3
         #if dcount>20: break
         
@@ -239,8 +251,8 @@ if __name__ == "__main__":
         os.makedirs(path)
 
 
-    FillAllHists(files["mcfm"], h1)
     FillAllHists(files["mad"],  h2)
+    #FillAllHists(files["mcfm"], h1)
 
     mcfmFile.cd()
     mcfmFile.Write()

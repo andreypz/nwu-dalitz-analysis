@@ -21,9 +21,9 @@ lumi = u.getLumi(options.period)
 cs   = u.getCS(options.mcfm)
 
 #sel = ["electron"]
-sel = ["mugamma"]
+#sel = ["mugamma"]
 #sel = ["mugamma","electron"]
-#sel = []
+sel = []
 
 
 def effPlots(f1, path):
@@ -135,6 +135,9 @@ if __name__ == "__main__":
     hPath    = "/eos/uscms/store/user/andreypz/batch_output/zgamma/8TeV/"+ver
     #hPath  = "/uscms_data/d2/andreypz/zgamma/"+ver
 
+    u.createDir(pathBase)
+
+
 
     if doMerge:
         os.system("rm "+hPath+"/m_*.root") #removing the old merged files
@@ -199,10 +202,11 @@ if __name__ == "__main__":
             path = pathBase+"/bkg_"+subdir
             u.createDir(path)
 
-        if options.mcfm:
-            sigFile = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_h-dalitz_1.root", "OPEN")
-        else:
-            sigFile = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_mad_1.root", "OPEN")
+        
+            sigFileMCFM = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_h-dalitz_1.root", "OPEN")
+            sigFileMAD  = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_mad_1.root", "OPEN")
+        if options.mcfm: sigFile = sigFileMCFM
+        else:            sigFile = sigFileMCFM
         
         dataFile[thissel] = TFile(hPath+"/m_Data_"+thissel+"_"+period+".root","OPEN")
         #bkgFile[thissel]  = TFile(hPath+"/m_DY_"+thissel+"_"+period+".root","OPEN")
@@ -220,6 +224,7 @@ if __name__ == "__main__":
         u.drawAllInFile(dataFile[thissel], "data", None, "", sigFile,"10xSignal","EE",pathBase+"/EE", cut, "lumi")
         if thissel =="mugamma":
             u.drawAllInFile(dataFile[thissel], "data",None, "",sigFile,"signal",  "Muons", pathBase+"/Muons", None,"norm")
+
             #u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",  "Muons", pathBase+"/Muons/", None,"norm")
             #u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",  "Photon",pathBase+"/Photon/", None,"norm")
         elif thissel =="electron":
@@ -243,6 +248,13 @@ if __name__ == "__main__":
 
     #u.drawAllInFile(bkgFile[thissel], "DY electrons", sigFile, "Dalitz 2el",  "NewEle-1", pathBase+"/NewEle-1/", None,"norm", isLog=1, )
 
+    sigFileMCFM = TFile(hPath+"/mugamma_"+period+"/hhhh_h-dalitz_1.root", "OPEN")
+    sigFileMAD  = TFile(hPath+"/mugamma_"+period+"/hhhh_mad_1.root", "OPEN")
+
+    u.drawAllInFile(sigFileMCFM, "MCFM",None, "",sigFileMAD,"Madgraph",  "Muons", pathBase+"/MC", None,"norm")
+
+
+    '''
     c1 = TCanvas("c4","small canvas",600,600);
     c1.cd()
     Nev = sigFile.Get("Counts/evt_byCut").GetBinContent(2)
@@ -271,7 +283,7 @@ if __name__ == "__main__":
         print "in [",m1,", ",m2,"]", "  bins:", bin1, bin2
         print r, "data=", yda_zoom, "sig=", ysi_zoom
         print "  ==> zoomed sign = ", ysi_zoom/sqrt(ysi_zoom + yda_zoom)
-
+    '''
 
     '''
     h2da = dataFile[thissel].Get("h2D_dalitzPlot_rotation__cut"+cut).ProjectionX("hda_prx")
