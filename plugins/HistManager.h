@@ -24,6 +24,7 @@ class HistManager : public TObject {
   // write histograms the theFile
   //void writeHists(TFile* theFile);
 
+  void makeDirectory(std::string f);
   // fill 1D histogram 
   void fill1DHist(float x, std::string name, std::string title,
                   int bins, float xmin, float xmax, float weight, std::string folder);

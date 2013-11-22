@@ -251,7 +251,8 @@ if __name__ == "__main__":
     sigFileMCFM = TFile(hPath+"/mugamma_"+period+"/hhhh_h-dalitz_1.root", "OPEN")
     sigFileMAD  = TFile(hPath+"/mugamma_"+period+"/hhhh_mad_1.root", "OPEN")
 
-    u.drawAllInFile(sigFileMCFM, "MCFM",None, "",sigFileMAD,"Madgraph",  "Muons", pathBase+"/MC", None,"norm")
+    
+    u.drawAllInFile(sigFileMCFM, "MCFM",None, "",sigFileMAD,"Madgraph",  "GEN", pathBase+"/GEN", None,"norm", isLog=True)
 
 
     '''

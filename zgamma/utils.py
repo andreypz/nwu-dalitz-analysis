@@ -175,14 +175,18 @@ def drawAllInFile(f1, name1, f2, name2, f3, name3, dir,path, N, howToScale="none
                 h2 = f2.Get(dir+"/"+k1.GetName()) #assumes that the histograms in signal file have the same names  
             else:
                 print k1.GetName()
-                h2 = f2.Get(k1.GetName()).Clone()
+                h2 = f2.Get(k1.GetName())
+            if h2==None: continue
+            
             h2.Scale(float(scale2))
 
         if f3!=None:
             if dir!="":
                 h3 = f3.Get(dir+"/"+k1.GetName())
             else:
-                h3 = f3.Get(k1.GetName()).Clone()
+                h3 = f3.Get(k1.GetName())
+            if h3==None: continue
+            
             h3.Scale(float(scale3))
 
 

@@ -1,6 +1,10 @@
 The log of changes:
 ==================
 
+2013-Nov-22
+  * Improved Histmanage: don't need to create directories beforehand:
+    if the directory doesn't exist it will be created by the plugin.
+
 2013-Nov-18
   * FSR at gen level
   * Issues with Madgraph signal sample reviealed:

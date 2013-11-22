@@ -85,24 +85,6 @@ void zgamma::Begin(TTree * tree)
   triggerSelector = new TriggerSelector("", period, *triggerNames);
 
   histoFile = new TFile(Form("a_%s_higgsHistograms.root", selection.c_str()), "RECREATE");
-  histoFile->mkdir("Counts",       "Counts");
-  histoFile->mkdir("Angles",       "Angles");
-  histoFile->mkdir("Electrons",    "Electrons");
-  histoFile->mkdir("NewEle-1",     "NewEle-1");
-  histoFile->mkdir("NewEle-2",     "NewEle-2");
-  histoFile->mkdir("DalitzEleEB",  "DalitzEleEB");
-  histoFile->mkdir("DalitzEleEE",  "DalitzEleEE");
-  histoFile->mkdir("NewEle-1-mH",  "NewEle-1-mH");
-  histoFile->mkdir("NewEle-2-mH",  "NewEle-2-mH");
-  histoFile->mkdir("DalitzEleEB-mH", "DalitzEleEB-mH");
-  histoFile->mkdir("DalitzEleEE-mH", "DalitzEleEE-mH");
-  histoFile->mkdir("DalitzEle", "DalitzEle");
-  histoFile->mkdir("Muons",  "Muons");
-  histoFile->mkdir("Photon", "Photon");
-  histoFile->mkdir("jpsi",   "jpsi");
-  histoFile->mkdir("eff",    "eff");
-  histoFile->mkdir("EE",    "EE");
-  histoFile->mkdir("EB",    "EB");
 
   histoFile->mkdir("mvaTree", "mvaTree");
   histoFile->mkdir("fitTree", "fitTree");
@@ -346,6 +328,7 @@ Bool_t zgamma::Process(Long64_t entry)
       //Higgs himself:
       if (thisParticle->GetPDGId()==25 && thisParticle->GetStatus()==3){
         gen_higgs = *thisParticle;
+        hists->fill1DHist(thisParticle->M(), "gen_h_mass",";gen mu mass",  200, 124,126, 1,"GEN");
         h++;
       }
       
@@ -354,7 +337,7 @@ Bool_t zgamma::Process(Long64_t entry)
       if (abs(thisParticle->GetPDGId()) == 13 && thisParticle->GetStatus()==1) {
         if (zgamma::GetPrimaryAncestor(thisParticle)->GetPDGId()==A)
           {
-            hists->fill1DHist(thisParticle->M(), "gen_mu_mass",";gen mu mass",  200, -1,1, 1,"Muons");
+            hists->fill1DHist(thisParticle->M(), "gen_mu_mass",";gen mu mass",  200, -1,1, 1,"GEN");
             gen_mu.push_back(*thisParticle);
           }
         //this is for the Madgraph case, where there are events with no Higgs in LHE file
@@ -365,7 +348,7 @@ Bool_t zgamma::Process(Long64_t entry)
             //cout<<"   --- this one --->>>"<<endl;
             //zgamma::DiscoverGeneology(thisParticle, eventNumber);
             //cout<<"   <<--- this one"<<endl;
-            hists->fill1DHist(thisParticle->M(), "gen_mu_mass",";gen mu mass",  200, -1,1, 1,"Muons");
+            hists->fill1DHist(thisParticle->M(), "gen_mu_mass",";gen mu mass",  200, -1,1, 1,"GEN");
             gen_mu.push_back(*thisParticle);
           }
       }
@@ -401,24 +384,26 @@ Bool_t zgamma::Process(Long64_t entry)
           && thisParticle->Mother()
           //&& zgamma::GetPrimaryAncestor(thisParticle)->GetPDGId()==A
           && selection=="mu" && abs(thisParticle->Mother()->GetPDGId())==13
-          && thisParticle->Pt() > 1
           )
         {
-          hists->fill1DHist(thisParticle->Pt(), "gen_fsr_pho_pt",";gen fsr photon pt",  200, 0,50, 1,"Muons");
+          hists->fill1DHist(thisParticle->Pt(), "gen_fsr_pho_pt",";gen fsr photon pt",  200, 0,50, 1,"GEN");
           // if (zgamma::GetPrimaryAncestor(thisParticle)->GetPDGId()!=A)
           //zgamma::DiscoverGeneology(thisParticle, eventNumber);
          
-          Float_t nofsr_pt = thisParticle->Mother()->Pt();
+          Float_t preFSR_pt = thisParticle->Mother()->Pt();
           for (int j = 0; j < genParticles->GetSize(); ++j) {
             TCGenParticle* fsr = (TCGenParticle*) genParticles->At(j);
-            if(fsr->GetPDGId() == thisParticle->Mother()->GetPDGId() 
+            if(fsr->GetPDGId()  == thisParticle->Mother()->GetPDGId()
                && fsr->Mother() == thisParticle->Mother()){
               
               //cout<<"   0--- this one --->>>"<<endl;
               //zgamma::DiscoverGeneology(fsr, eventNumber);
               //cout<<"   <<---0 this one"<<endl;
               
-              hists->fill1DHist((nofsr_pt - thisParticle->Pt())/nofsr_pt, "gen_fsr_mu_dPt",";gen mu (Pt_noFSR - Pt_afterFSR)/pt",  200, -1,1, 1,"Muons");
+              hists->fill1DHist((preFSR_pt - fsr->Pt())/preFSR_pt, "gen_fsr_mu_dPt",";gen mu (Pt_preFSR - Pt_afterFSR)/pt",  200, -1,1, 1,"GEN");
+
+              if(thisParticle->Pt() > 1)
+                hists->fill1DHist((preFSR_pt - fsr->Pt())/preFSR_pt, "gen_fsr_mu_dPt_photonPt1",";gen mu (Pt_preFSR - Pt_afterFSR)/pt",  200, -1,1, 1,"GEN");
               fsr_mu_count++;
             }
           }
@@ -435,8 +420,8 @@ Bool_t zgamma::Process(Long64_t entry)
     sort(gen_el.begin(), gen_el.end(), P4SortCondition);
     sort(gen_mu.begin(), gen_mu.end(), P4SortCondition);
 
-    hists->fill1DHist(fsr_mu_count, "gen_mu_fsrcount",";gen mu FSR",  4, 0,4, 1,"Muons");
-    hists->fill1DHist(fsr_el_count, "gen_el_fsrcount",";gen el FSR",  4, 0,4, 1,"Electrons");
+    hists->fill1DHist(fsr_mu_count, "gen_mu_fsrcount",";gen mu FSR",  4, 0,4, 1,"GEN");
+    hists->fill1DHist(fsr_el_count, "gen_el_fsrcount",";gen el FSR",  4, 0,4, 1,"GEN");
 
 
     if(selection=="el"){ //eegamma
@@ -921,7 +906,7 @@ Bool_t zgamma::Process(Long64_t entry)
 
 
 
-  if (Mll>3.0 && Mll<3.2){ //jpsi window
+  if (Mll>2.9 && Mll<3.3){ //jpsi window
     FillHistosFull(12, eventWeight, l1, l2, lPt1, lPt2, gamma, "jpsi", isDalitzEle);
     FillHistoCounts(12, eventWeight);
     CountEvents(12);
@@ -963,34 +948,41 @@ Bool_t zgamma::Process(Long64_t entry)
 
 
     //if ((l1+l2).Pt()+gamma.Pt() < 180  && (l1+l2).Pt()>45 && gamma.Pt()>45){
-  if ((l1+l2).Pt()>45 && gamma.Pt()>45){
+  if ((l1+l2).Pt()>45 && gamma.Pt()>45
+      && (l1+l2).Pt()+gamma.Pt() > 100
+      ){
+
+    FillHistosFull(8, eventWeight, l1, l2, lPt1, lPt2, gamma, "", isDalitzEle);
+    FillHistoCounts(8, eventWeight);
+    CountEvents(8);
+    if (fabs(gamma.Eta())<1.444)
+      FillHistosFull(8, eventWeight, l1, l2, lPt1, lPt2, gamma, "EB", isDalitzEle);
+    else
+      FillHistosFull(8, eventWeight, l1, l2, lPt1, lPt2, gamma, "EE", isDalitzEle);
+
+    if (Mll < 2)     
+      FillHistosFull(8, eventWeight, l1, l2, lPt1, lPt2, gamma, "Low-Mll", isDalitzEle);
+
 
     fit_m_llg  = Mllg;
     fit_weight = eventWeight;
     fit_type = 0;
 
     if (lPt2.Pt() > cut_l2pt){
-      FillHistosFull(8, eventWeight, l1, l2, lPt1, lPt2, gamma, "", isDalitzEle);
-      FillHistoCounts(8, eventWeight);
-      CountEvents(8);
-
-      if (fabs(gamma.Eta())<1.444){
-        FillHistosFull(8, eventWeight, l1, l2, lPt1, lPt2, gamma, "EB", isDalitzEle);
-        fit_type = 1;
-      }
-      else{
-        FillHistosFull(8, eventWeight, l1, l2, lPt1, lPt2, gamma, "EE", isDalitzEle);
-        fit_type = 2;
-      }
-    }
-    else {
       FillHistosFull(9, eventWeight, l1, l2, lPt1, lPt2, gamma, "", isDalitzEle);
       FillHistoCounts(9, eventWeight);
       CountEvents(9);
-      fit_type = 3;
 
-
+      if (fabs(gamma.Eta())<1.444) fit_type = 1;      
+      else                         fit_type = 2;      
     }
+    else       fit_type = 3;
+    
+
+    if (Mll < 2) fit_type = 4;
+    else         fit_type = 5;
+
+
 
     _fitTree->Fill();
 
@@ -1097,7 +1089,7 @@ void zgamma::Terminate()
   cout<<"| 6: dR               |\t"<< nEvents[6]  <<"\t|"<<float(nEvents[6])/nEvents[5]<<"\t|"<<endl;
   cout<<"| 7: trigger          |\t"<< nEvents[7]  <<"\t|"<<float(nEvents[7])/nEvents[6]<<"\t|"<<endl;
   cout<<"| 8: triangle         |\t"<< nEvents[8]  <<"\t|"<<float(nEvents[8])/nEvents[7]<<"\t|"<<endl;
-  cout<<"| 9: l pt2 < 4        |\t"<< nEvents[9]  <<"\t|"<<float(nEvents[9])/nEvents[7]<<"\t|"<<endl;
+  cout<<"| 9: l pt2 > 7        |\t"<< nEvents[9]  <<"\t|"<<float(nEvents[9])/nEvents[7]<<"\t|"<<endl;
   cout<<"| 10: mH              |\t"<< nEvents[10] <<"\t|"<<float(nEvents[10])/nEvents[7]<<"\t|"<<endl;
   cout<<"| 11: n/a             |\t"<< nEvents[11] <<"\t|"<<float(nEvents[11])/nEvents[7]<<"\t|"<<endl;
   cout<<"| 12: jpsi            |\t"<< nEvents[12] <<"\t|"<<float(nEvents[12])/nEvents[7]<<"\t|"<<endl;

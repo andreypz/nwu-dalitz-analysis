@@ -35,7 +35,7 @@ if ( $selection == "electron" ) then
     ./run.py ${suffix} ${dataName} -e -t pho -p ${period}  -b
 else if ( $selection == "mugamma" ) then
     echo "Mu+photon trigger will be used"
-    ./run.py ${suffix} ${dataName} -t mugamma -p ${period} -b
+    ./run.py ${suffix} ${dataName} -t mugamma -p ${period} --gen -b
 else if ( $selection == "single-mu" ) then
     echo "Single - IsoMu trigger will be used"
     ./run.py ${suffix} ${dataName} -t single-mu -p ${period} -b

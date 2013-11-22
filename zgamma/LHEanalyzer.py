@@ -123,9 +123,13 @@ def FillAllHists(files, h):
         
         if hi==0:
             #print dcount,"No higgs??? what's up with that??"
-            h.fill1DHist(tri.M(),   "h_mass_noHiggs",";M(ll#gamma)",   200, 80,180,1, "")            
-            h.fill1DHist(diLep.M(), "h_mumu_noHiggs",";M(ll)",   200, 80,180,1, "")            
-            h.fill1DHist(gamma.Pt(),"gamma_pt_noHiggs","; pt_#gamma",   200, 00,180,1, "")            
+            h.fill1DHist(tri.M(),   "h_mass_noHiggs",";M(ll#gamma)",  200, 80,180,1, "")            
+            h.fill1DHist(tri.M(),   "h_mass_zoom_noHiggs",";M(ll#gamma)",  200, 124,126,1, "")            
+            h.fill1DHist(diLep.M(), "h_mumu_noHiggs",";M(ll)",        200, 80,180,1, "")            
+            h.fill1DHist(gamma.Pt(),"gamma_pt_noHiggs","; pt_#gamma", 200, 00,180,1, "")            
+        else:
+            h.fill1DHist(trueHiggs.M(),   "h_mass_trueHiggs",";mH",   200, 124,126,1, "")            
+
             #exit(0)
 
         gammaCM = TLorentzVector(gamma)
@@ -252,7 +256,7 @@ if __name__ == "__main__":
 
 
     FillAllHists(files["mad"],  h2)
-    #FillAllHists(files["mcfm"], h1)
+    FillAllHists(files["mcfm"], h1)
 
     mcfmFile.cd()
     mcfmFile.Write()
@@ -262,7 +266,8 @@ if __name__ == "__main__":
 
 
     blah = []
-    u.drawAllInFile(madFile, "madgra",mcfmFile,"mcfm",None,"","", path, None,"norm")
+    #u.drawAllInFile(mcfmFile,"mcfm", madFile, "madgra",None,"","", path, None,"norm", isLog=True)
+    u.drawAllInFile(madFile, "madgra",None,"", None,"","", path, None,"norm", isLog=True)
 
     plot_types =["mcfm","mad"]
     if subdir not in plot_types:
