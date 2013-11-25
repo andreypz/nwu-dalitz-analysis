@@ -20,7 +20,8 @@ def makeCards():
   leptonList = ['mu']
   yearList   = ['2012']
   #catList    = ['0']
-  catList    = ['0','EB','EE','Low']
+  #catList    = ['0','EB','EE','LowPt']
+  catList    = ['0','LowMll','HighMll']
 
   massList = ['125.0']
 
@@ -33,8 +34,8 @@ def makeCards():
        
         sigNameList = ['gg']
         channel = '_'.join([lepton,year,'cat'+cat])
-        bkgParams = ['sigma','mean','tau','norm']
-          
+        #bkgParams = ['sigma','mean','tau','norm']
+        bkgParams = ['p0','p1','p2','p3','p4','sigma','step','mean','norm']
 
         for mass in massList:
           sigFileName = '_'.join(['SignalOutput',lepton,year,'cat'+cat,mass])+'.root'
@@ -57,6 +58,8 @@ def makeCards():
             card.write('shapes {0:<8} * {1:<20} ws_card:{2}_$CHANNEL\n'.format(sig,sigFileName,sig))
           card.write('---------------\n')
           bgYield = bgWs.var('data_yield_'+channel).getVal()
+          print cat, "bg yield:", bgYield
+          
           card.write('{0:<12} {1}\n'.format('bin',channel))
           card.write('{0:<12} {1}\n'.format('observation',int(bgYield)))
           card.write('------------------------------\n')

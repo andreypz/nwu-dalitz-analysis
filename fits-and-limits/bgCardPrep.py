@@ -9,7 +9,8 @@ setTDRStyle()
 
 leptonList = ['mu']
 yearList   = ['2012']
-catList    = ['0','EB','EE','Low']
+#catList    = ['0','EB','EE','Low']
+catList    = ['0','LowMll','HighMll']
 #catList    = ['0']
 
 plotBase = "/uscms_data/d2/andreypz/html/zgamma/dalitz/fits/"
@@ -41,8 +42,11 @@ for year in yearList:
       suffix   = '_'.join([year,lepton,'cat'+cat])
       print dataName, suffix
 
-      fitName  = '_'.join(['GaussExp',year,lepton,'cat'+cat])
-      normName = 'normGaussExp_'+suffix
+      #fitName  = '_'.join(['GaussExp',year,lepton,'cat'+cat])
+      #normName = 'normGaussExp_'+suffix
+
+      fitName  = '_'.join(['GaussBern4',year,lepton,'cat'+cat])
+      normName = 'normGaussBern4_'+suffix
 
       # possibly have different fits for separate categories
       if cat is 'a':
@@ -56,21 +60,21 @@ for year in yearList:
 
       ###### Extend the fit (give it a normalization parameter)
       print dataName
-      sumEntries  = data.sumEntries()
-      sumEntriesS = data.sumEntries('1','signal')
-      print sumEntries, sumEntriesS
+      sumEntriesBkg = data.sumEntries()
+      sumEntriesSig = data.sumEntries('1','signal')
+      print sumEntriesBkg, sumEntriesSig
 
       raw_input()
       
       dataYieldName = '_'.join(['data','yield',lepton,year,'cat'+cat])
-      dataYield     = RooRealVar(dataYieldName,dataYieldName,sumEntries)
-      norm          = RooRealVar(normName,normName,sumEntries,sumEntries*0.25,sumEntries*1.75)
+      dataYield     = RooRealVar(dataYieldName,dataYieldName,sumEntriesBkg)
+      norm          = RooRealVar(normName,normName,sumEntriesBkg,sumEntriesBkg*0.25,sumEntriesBkg*1.75)
 
       fitExtName    = '_'.join(['bkgTmp',lepton,year,'cat'+cat])
       fit_ext       = RooExtendPdf(fitExtName,fitExtName, fit,norm)
 
 
-      fit_ext.fitTo(data,RooFit.Range('fullRegion'))
+      fit_ext.fitTo(data,RooFit.Range('dalitzRegion'))
 
       testFrame = mzg.frame()
       data.plotOn(testFrame, RooFit.Binning(50))

@@ -25,7 +25,8 @@ if rootrace: RooTrace.active(kTRUE)
 
 def LumiXSWeighter(lumi):
   #Mad:
-  cro = 0.000655
+  cro = 0.00079
+  #cro = 0.000655
   Nev = 199988
   
   #mcfm:
@@ -40,7 +41,7 @@ def doInitialFits():
   print 'loading up the files'
     
   plotBase = '/uscms_data/d2/andreypz/html/zgamma/dalitz/fits/'
-  basePath = '/eos/uscms/store/user/andreypz/batch_output/zgamma/8TeV/v24/'
+  basePath = '/eos/uscms/store/user/andreypz/batch_output/zgamma/8TeV/v27/'
   dataDict   = {'mu2012':TFile(basePath+'m_Data_mugamma_2012.root','r')}
   #signalDict = {'mu2012':TFile(basePath+'mugamma_2012/hhhh_h-dalitz_1.root','r')}
   signalDict = {'mu2012':TFile(basePath+'mugamma_2012/hhhh_mad_1.root','r')}
@@ -49,8 +50,9 @@ def doInitialFits():
 
   leptonList  = ['mu']
   yearList    = ['2012']
-  catList     = ['0',"EB","EE","Low"]
-  category    = {"0":0,"EB":1,"EE":2,"Low":3}
+  #catList     = ['0',"EB","EE","LowPt"]
+  catList     = ['0',"LowMll","HighMll"]
+  category    = {"0":0,"EB":1,"EE":2,"Low":3,"LowMll":4,"HighMll":5}
   massList    = ['125']
   sigNameList = ['gg']
 
