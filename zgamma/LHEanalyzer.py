@@ -221,7 +221,7 @@ def FillAllHists(files, h):
         h.fill1DHist(lPt2.Eta(),   "lPt2_eta", ";Trailing lepton  eta",  50, -3.5,3.5, 1, "")
         h.fill1DHist(lPt2.Phi(),   "lPt2_phi", ";Trailing lepton  phi",  50, -TMath.Pi(),TMath.Pi(), 1, "")
         
-        h.fill2DHist(lPt1.Pt(), lPt2.Pt(), "h2D_Pt1_vs_Pt2", ";Leading lepton pt; Trailing lepton pt",    50, 0,100, 50,0,100, 1, "")
+        h.fill2DHist(lPt1.Pt(), lPt2.Pt(), "h2D_Pt1_vs_Pt2", ";Leading lepton pt; Trailing lepton pt",    100, 0,80, 100,0,50, 1, "")
         h.fill2DHist(l1.Pt(),   l2.Pt(),   "h2D_l1_vs_l2",   ";l+ pt; l- pt",    50, 0,100, 50,0,100, 1, "")
         h.fill2DHist(diLep.Pt(),  gamma.Pt(),"h2D_diLep_vs_gamma",     ";Pt of ll system; pt of gamma",   50, 0,100, 50,0,100, 1, "")
         h.fill2DHist(gammaCM.E(), gamma.Pt(),"h2D_gamma_Ecom_vs_Pt",   ";E_{#gamma} in CoM; Photon Pt",   50, 0,100, 50,0,100, 1, "")
@@ -250,13 +250,13 @@ if __name__ == "__main__":
     gStyle.SetOptStat(1)
     
     pathBase = outpath
-    path = pathBase+subdir+"/"
+    path = pathBase+subdir
     if not os.path.exists(path):
         os.makedirs(path)
 
 
     FillAllHists(files["mad"],  h2)
-    FillAllHists(files["mcfm"], h1)
+    #FillAllHists(files["mcfm"], h1)
 
     mcfmFile.cd()
     mcfmFile.Write()
@@ -267,11 +267,14 @@ if __name__ == "__main__":
 
     blah = []
     #u.drawAllInFile(mcfmFile,"mcfm", madFile, "madgra",None,"","", path, None,"norm", isLog=True)
-    u.drawAllInFile(madFile, "madgra",None,"", None,"","", path, None,"norm", isLog=True)
+    u.drawAllInFile(madFile, "madgra",None,"", None,"","", path, None,"norm")
 
-    plot_types =["mcfm","mad"]
-    if subdir not in plot_types:
-        plot_types.append(subdir)
+    plot_types =[]
+    list = os.listdir(pathBase)
+    for d in list:
+        if os.path.isdir(pathBase+"/"+d):
+            plot_types.append(d)
+
     ht.makeHTML("Plots from an lhe file",pathBase, plot_types, blah, "mad")
 
     mcfmFile.Close()

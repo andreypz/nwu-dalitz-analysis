@@ -906,17 +906,9 @@ Bool_t zgamma::Process(Long64_t entry)
 
 
 
-  if (Mll>2.9 && Mll<3.3){ //jpsi window
-    FillHistosFull(12, eventWeight, l1, l2, lPt1, lPt2, gamma, "jpsi", isDalitzEle);
-    FillHistoCounts(12, eventWeight);
-    CountEvents(12);
-    return kTRUE;
-  }
-
-
   for (UInt_t i =0; i<ntrig; i++){
     triggerSelector->SelectTrigger(myTriggers[i], triggerStatus, hltPrescale, isFound, triggerPass, prescale);
-    if(triggerPass) nEventsTrig[1][i]++;
+    if(triggerPass) nEventsTrig[7][i]++;
 
     if (!isFound)
       cout<<"TRG **** Warning ***\n The trigger name "<<myTriggers[i]<<" is not in the list of trigger names"<<endl;
@@ -948,6 +940,14 @@ Bool_t zgamma::Process(Long64_t entry)
 
 
     //if ((l1+l2).Pt()+gamma.Pt() < 180  && (l1+l2).Pt()>45 && gamma.Pt()>45){
+  if (Mll>2.9 && Mll<3.3){ //jpsi window
+    FillHistosFull(12, eventWeight, l1, l2, lPt1, lPt2, gamma, "jpsi", isDalitzEle);
+    FillHistoCounts(12, eventWeight);
+    CountEvents(12);
+    return kTRUE;
+  }
+
+
   if ((l1+l2).Pt()>45 && gamma.Pt()>45
       && (l1+l2).Pt()+gamma.Pt() > 100
       ){
@@ -1016,13 +1016,12 @@ Bool_t zgamma::Process(Long64_t entry)
   }
 
 
-
   /*
-
   for (UInt_t i =0; i<ntrig; i++){
     triggerSelector->SelectTrigger(myTriggers[i], triggerStatus, hltPrescale, isFound, triggerPass, prescale);
     if(triggerPass) nEventsTrig[3][i]++;
   }
+
 
   if (Mll < 20){
     for (UInt_t i=0; i<ntrig; i++){
@@ -1043,7 +1042,6 @@ Bool_t zgamma::Process(Long64_t entry)
     if(triggerPass || pa) nEventsTrig[6][i]++;
   }
   */
-
   /* single ele trigger study
   for (UInt_t i =0; i<ntrig; i++)
     {
@@ -1095,6 +1093,7 @@ void zgamma::Terminate()
   cout<<"| 12: jpsi            |\t"<< nEvents[12] <<"\t|"<<float(nEvents[12])/nEvents[7]<<"\t|"<<endl;
 
   cout<<"dal = "<<dal<<"   nodal = "<<nodal<<"   tot="<<dal+nodal<<endl;
+
   /*
   cout<<"\n\n | Trigger efficiency 2              |\t"<<endl;
   for(UInt_t n=0; n<ntrig; n++){
@@ -1113,11 +1112,11 @@ void zgamma::Terminate()
   }
   */
 
-  //cout<<"\n\n | Trigger efficiency 3              |\t"<<endl;
-  //for(UInt_t n=0; n<ntrig; n++){
-  //UInt_t N=3;
-  //cout<<n<<"  "<<float(nEventsTrig[N][n])/nEvents[N]<<"   "<<myTriggers[n]<<endl;;
-  //}
+  cout<<"\n\n | Trigger efficiency 3              |\t"<<endl;
+  for(UInt_t n=0; n<ntrig; n++){
+    UInt_t N=7;
+    cout<<n<<"  "<<float(nEventsTrig[N][n])/nEvents[N]<<"   "<<myTriggers[n]<<endl;;
+  }
 
   hists->fill1DHist(-1, "evt_byCut",";cut #;weighted events", nC+1,-1,nC, totEvents, "Counts");
   hists->fill1DHist(-1, "evt_byCut_raw", ";cut #;events",     nC+1,-1,nC, totEvents, "Counts");

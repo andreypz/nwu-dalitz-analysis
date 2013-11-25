@@ -6,7 +6,7 @@ from optparse import OptionParser
 parser = OptionParser(usage="usage: %prog [options -e], -m], -p 2011] sample sourcefile")
 parser.add_option("-e", "--ele", dest="electron", action="store_true", default=False,
                   help="Use electron selection (by default it will run muon selection)")
-parser.add_option("-t","--trigger", dest="trigger", type="string", default="none",
+parser.add_option("-t","--trigger", dest="trigger", type="string", default="mugamma",
                   help="Select a trigger to run. options are: double-mu, single-mu, mu-pho, pho, single-el")
 parser.add_option("-p", "--period", dest="period", default="2012", help="Set data period (2011/2012)")
 parser.add_option("-b", "--batch", dest="batch", action="store_true", default=False,

@@ -1,8 +1,14 @@
 The log of changes:
 ==================
 
+2013-Nov-25
+  * Version used for the results presented at Hgg group meeting
+    * cs=0.79 fb
+    * Two categories: Mll<2 and Mll>2
+    * Limits using gaussBern4 fit function
+      
 2013-Nov-22
-  * Improved Histmanage: don't need to create directories beforehand:
+  * Improved Histmanager: don't need to create directories beforehand:
     if the directory doesn't exist it will be created by the plugin.
 
 2013-Nov-18

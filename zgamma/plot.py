@@ -21,9 +21,9 @@ lumi = u.getLumi(options.period)
 cs   = u.getCS(options.mcfm)
 
 #sel = ["electron"]
-#sel = ["mugamma"]
+sel = ["mugamma"]
 #sel = ["mugamma","electron"]
-sel = []
+#sel = []
 
 
 def effPlots(f1, path):
@@ -203,10 +203,11 @@ if __name__ == "__main__":
             u.createDir(path)
 
         
-            sigFileMCFM = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_h-dalitz_1.root", "OPEN")
-            sigFileMAD  = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_mad_1.root", "OPEN")
+        sigFileMCFM = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_h-dalitz_1.root", "OPEN")
+        sigFileMAD  = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_mad_1.root", "OPEN")
+
         if options.mcfm: sigFile = sigFileMCFM
-        else:            sigFile = sigFileMCFM
+        else:            sigFile = sigFileMAD
         
         dataFile[thissel] = TFile(hPath+"/m_Data_"+thissel+"_"+period+".root","OPEN")
         #bkgFile[thissel]  = TFile(hPath+"/m_DY_"+thissel+"_"+period+".root","OPEN")
@@ -219,7 +220,8 @@ if __name__ == "__main__":
         #tri_hists[thissel]   = dataFile[thissel].Get("tri_mass_cut"+cut).Clone()
         
 
-        u.drawAllInFile(dataFile[thissel], "data", None, "", sigFile,"10xSignal",  "",path, cut, "lumi")
+        u.drawAllInFile(dataFile[thissel], "data", None, "", sigFile,"signal",  "",path, cut, "norm")
+        #u.drawAllInFile(dataFile[thissel], "data", None, "", sigFile,"10xSignal",  "",path, cut, "lumi")
         u.drawAllInFile(dataFile[thissel], "data", None, "", sigFile,"10xSignal","EB",pathBase+"/EB", cut, "lumi")
         u.drawAllInFile(dataFile[thissel], "data", None, "", sigFile,"10xSignal","EE",pathBase+"/EE", cut, "lumi")
         if thissel =="mugamma":
@@ -252,39 +254,32 @@ if __name__ == "__main__":
     sigFileMAD  = TFile(hPath+"/mugamma_"+period+"/hhhh_mad_1.root", "OPEN")
 
     
-    u.drawAllInFile(sigFileMCFM, "MCFM",None, "",sigFileMAD,"Madgraph",  "GEN", pathBase+"/GEN", None,"norm", isLog=True)
+    #u.drawAllInFile(sigFileMCFM, "MCFM",None, "",sigFileMAD,"Madgraph",  "GEN", pathBase+"/GEN", None,"norm", isLog=True)
 
 
-    '''
+
     c1 = TCanvas("c4","small canvas",600,600);
     c1.cd()
     Nev = sigFile.Get("Counts/evt_byCut").GetBinContent(2)
     cro = cs["h"]
     scale = float(1000*lumi*cro)/Nev
 
-    m1 = 121.
-    m2 = 129.
-    for r in ["","EB","EE"]:
-        if int(cut)!=8: break
-        pre = r
-        if r!="":
-            pre=r+"/"
-        hda = dataFile[thissel].Get(pre+"tri_mass_"+r+"_cut"+cut).Clone()
-        hsi = sigFile.Get(pre+"tri_mass_"+r+"_cut"+cut).Clone()
-        yda = hda.Integral()
-        ysi = hsi.Integral()/10
-        print r, yda,ysi, ysi*scale
-        print "significance=", ysi/sqrt(ysi+yda)
+    m1 = 122.
+    m2 = 128.
 
-        bin1 = hda.FindBin(m1)
-        bin2 = hda.FindBin(m2)
-        yda_zoom = hda.Integral(bin1,bin2)
-        ysi_zoom = hsi.Integral(bin1,bin2)/10
+    for r in [4,5]:
         
-        print "in [",m1,", ",m2,"]", "  bins:", bin1, bin2
-        print r, "data=", yda_zoom, "sig=", ysi_zoom
-        print "  ==> zoomed sign = ", ysi_zoom/sqrt(ysi_zoom + yda_zoom)
-    '''
+        treeda = dataFile[thissel].Get("fitTree/fitTree")
+        treeda.Draw("m_llg>>hda","type=="+str(r)+"&&m_llg>"+str(m1)+"&&m_llg<"+str(m2))
+        
+        treesi = sigFile.Get("fitTree/fitTree")
+        treesi.Draw("m_llg>>hsi","type=="+str(r)+"&&m_llg>"+str(m1)+"&&m_llg<"+str(m2))
+        
+        yda = hda.Integral()
+        ysi = hsi.Integral()
+        ysi_sc = ysi*scale
+        print r, yda,ysi_sc
+        print "significance=", ysi_sc/sqrt(ysi_sc+yda)
 
     '''
     h2da = dataFile[thissel].Get("h2D_dalitzPlot_rotation__cut"+cut).ProjectionX("hda_prx")

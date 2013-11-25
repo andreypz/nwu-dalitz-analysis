@@ -8,7 +8,8 @@ from optparse import OptionParser
 parser = OptionParser(usage="usage: %prog [options -e], -m, --data, --bg, --mc], -p 2011] version")
 parser.add_option("-c", "--clean", dest="clean",  action="store_true", default=False, help="Clean the directory with histogram output.")
 parser.add_option("-e", "--ele", dest="electron", action="store_true", default=False, help="Use electron selection (by default it will run muon selection)")
-parser.add_option("--mugamma",   dest="mugamma",  action="store_true", default=False, help="Use Mu+Photon trigger (for running on MuEG path)")
+parser.add_option("--mugamma",   dest="mugamma",  action="store_true", default=True,  help="Use Mu+Photon trigger (for running on MuEG path)")
+parser.add_option("--mumu",      dest="mumu",     action="store_true", default=False, help="Use Double-Mu trigger")
 parser.add_option("--singlemu",  dest="singlemu", action="store_true", default=False, help="Use Iso-mu trigger")
 parser.add_option("--data", dest="data", action="store_true", default=False, help="Run over the data sample")
 parser.add_option("--sig",  dest="sig",  action="store_true", default=False, help="Run over the signal sample")
@@ -29,11 +30,12 @@ EOS         = '/eos/uscms/store/user'
 outputPath  = EOS+'/andreypz/batch_output/zgamma/8TeV'
 executable  = 'batchJob.csh'
 
-selection = 'muon'
 if options.electron:
     selection="electron"
 if options.mugamma:
     selection="mugamma"
+if options.mumu:
+    selection="muon"
 if options.singlemu:
     selection="single-mu"
                                             

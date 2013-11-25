@@ -366,7 +366,8 @@ def makeTable(table, name, opt="tex"):
     ifile.write(myTable)
     ifile.close()
     
-    print myTable
+    if opt in ["twiki","tex"]:
+        print myTable
 
 def getYields(f, doLumiScale=False):
     ev = f.Get("Counts/evt_byCut")
