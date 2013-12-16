@@ -12,10 +12,14 @@ subdir = sys.argv[1]
 
 outpath = '/uscms_data/d2/andreypz/html/zgamma/lhe/'
 files={}
-files["mcfm"] = ['/uscms_data/d2/andreypz/lhe_mcfm_hzg_dalitz_lord_fixed_unweighted.lhe.root']
+#files["mcfm"] = ['/uscms_data/d2/andreypz/lhe_mcfm_hzg_dalitz_lord_fixed_unweighted.lhe.root']
 #files["mad"] = ['/uscms_data/d2/andreypz/lhe_mad_LO_HiggsToMuMuGamma.root']
-files["mad"] = ['/uscms_data/d2/andreypz/lhe_mad_hzg5.root']
+#files["mad"] = ['/uscms_data/d2/andreypz/lhe_mad_hzg5.root']
 #files["mad"] = ['/uscms/home/andreypz/lhe_higgs_eegamma_dalitz/heeg_m120.root']
+files["mad"] = ['/uscms/home/andreypz/lhe_higgs_mumugamma_dalitz/hmumug_m120.root']
+files["test"] = ['/uscms/home/andreypz/lhe_higgs_mumugamma_dalitz/hmumug_m120_test.root']
+
+MH = 120
 
 print files
 #gSystem.Load("/home/andreypz/workspace/MadGraph5/ExRootAnalysis/lib/libExRootAnalysis.so")
@@ -33,6 +37,11 @@ madFile = TFile(outpath+"out_mad_"+subdir+".root","RECREATE")
 madFile.mkdir("eff")
 madFile.cd()
 h2 = HistManager(madFile)
+
+testFile = TFile(outpath+"out_mcfm_"+subdir+".root","RECREATE")
+testFile.mkdir("eff")
+testFile.cd()
+h3 = HistManager(testFile)
 
 ang = ZGAngles()
 
@@ -82,9 +91,9 @@ def FillAllHists(files, h):
                 gamma.SetPxPyPzE(px,py,pz,E)
                 hasGamma=1
                 
-            if (p.PID == LEPID  or p.PID == LEPID):
+            if (p.PID == LEPID):
                 l1.SetPxPyPzE(px,py,pz,E)
-            if (p.PID == -LEPID or p.PID ==-LEPID):
+            if (p.PID == -LEPID): 
                 l2.SetPxPyPzE(px,py,pz,E)
 
             if p.PID==23:
@@ -149,7 +158,7 @@ def FillAllHists(files, h):
         #print dcount, c1, c2, phi, c3
         #if dcount>20: break
         
-        h.fill1DHist(c1,  "ang_co1",";gen cos_lp",100,-1,1, 1,"");
+        h.fill1DHist(c1,  "ang_co1",";gen cos_lp",  100,-1,1, 1,"");
         h.fill1DHist(c2,  "ang_co2",";gen cos_lm,", 100,-1,1, 1,"");
         h.fill1DHist(c3,  "ang_co3",";gen cosTheta",100,-1,1, 1,"");
         h.fill1DHist(phi, "ang_phi",";gen phi lp",  100, -TMath.Pi(), TMath.Pi(), 1,"");
@@ -166,8 +175,7 @@ def FillAllHists(files, h):
         if lPt1.Pt()>23 and lPt2.Pt()>7 and fabs(lPt1.Eta())<2.4 and  fabs(lPt2.Eta())<2.4 \
                and gamma.Pt()>23 and fabs(gamma.Eta())<2.5:
             h.fill1DHist(diLep.M(),     "gen_Mll_1",";gen_Mll",100,0,50, 1,"");
-            h.fill1DHist(diLep.M(),     "gen_Mll_2",";gen_Mll",100,0,50, 1,"");
-            
+            h.fill1DHist(diLep.M(),     "gen_Mll_2",";gen_Mll",100,0,50, 1,"");            
             h.fill1DHist(diLep.M(),     "gen_Mll_3",";gen_Mll",100,0,50, 1,"");
 
         h.fill1DHist(gamma.M(),"gamma_mass",  ";gamma mass",    200, -2,2, 1, "")
@@ -189,8 +197,8 @@ def FillAllHists(files, h):
         h.fill1DHist(diLep.M(),   "diLep_mass_full",";M(ll)", 200, 0,130, 1, "")
         h.fill1DHist(diLep.M(),   "diLep_mass_low", ";M(ll)", 200, 0,1,   1, "")
         h.fill1DHist(tri.M(),     "h_mass",";M(ll#gamma)",    200, 80,180,1, "")
-        h.fill1DHist(tri.M(),     "h_mass_zoom",";M(ll#gamma)",  200, 124,126,  1, "")
-        h.fill1DHist(tri.M(),     "h_mass_zoom2",";M(ll#gamma)", 200, 124.9,125.1,  1, "")
+        h.fill1DHist(tri.M(),     "h_mass_zoom",";M(ll#gamma)",  200, MH-1,MH+1,  1, "")
+        h.fill1DHist(tri.M(),     "h_mass_zoom2",";M(ll#gamma)", 200, MH-0.1,MH+0.1,  1, "")
 
         if not hasGlu3:
             h.fill1DHist(tri.Pt(),    "h_pt",";Pt of the Higgs",  200, 0,200,  1, "")
@@ -255,19 +263,23 @@ if __name__ == "__main__":
         os.makedirs(path)
 
 
-    FillAllHists(files["mad"],  h2)
     #FillAllHists(files["mcfm"], h1)
+    FillAllHists(files["mad"],  h2)
+    FillAllHists(files["test"],  h3)
 
     mcfmFile.cd()
     mcfmFile.Write()
     madFile.cd()
     madFile.Write()
-    print "Saved files: \n",mcfmFile.GetName(), "\n", madFile.GetName()
+    testFile.cd()
+    testFile.Write()
+    print "Saved files: \n",mcfmFile.GetName(), "\n", madFile.GetName(), "\n", testFile.GetName()
 
 
     blah = []
     #u.drawAllInFile(mcfmFile,"mcfm", madFile, "madgra",None,"","", path, None,"norm", isLog=True)
-    u.drawAllInFile(madFile, "madgra",None,"", None,"","", path, None,"norm")
+    u.drawAllInFile(testFile,"test", madFile, "madgra",None,"","", path, None,"norm", isLog=True)
+    #u.drawAllInFile(madFile, "madgra",None,"", None,"","", path, None,"norm")
 
     plot_types =[]
     list = os.listdir(pathBase)

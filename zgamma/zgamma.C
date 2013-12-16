@@ -34,7 +34,7 @@ float EAPho[7][3] = {
 };
 string  myTrigger = "";
 Float_t cut_l1pt  = 23;
-Float_t cut_l2pt  = 7, cut_l2pt_low = 4;
+Float_t cut_l2pt  = 7, cut_l2pt_low = 7;
 Float_t cut_gammapt = 25;
 
 Float_t global_Mll = 0;
@@ -849,7 +849,6 @@ Bool_t zgamma::Process(Long64_t entry)
 
 
   if (lPt1.Pt() < cut_l1pt || lPt2.Pt() < cut_l2pt_low)   return kTRUE;
-  //if (lPt1.Pt() < cut_l1pt || lPt2.Pt() < cut_l2pt)   return kTRUE;
   if (selection=="el" && isDalitzEle && lPt1.Pt()<30) return kTRUE;
 
   if(!isRealData && makeGen){
@@ -873,6 +872,14 @@ Bool_t zgamma::Process(Long64_t entry)
   FillHistoCounts(5, eventWeight);
   CountEvents(5);
 
+
+  //if ((l1+l2).Pt()+gamma.Pt() < 180  && (l1+l2).Pt()>45 && gamma.Pt()>45){
+  if (Mll>2.9 && Mll<3.3){ //jpsi window
+    FillHistosFull(12, eventWeight, l1, l2, lPt1, lPt2, gamma, "jpsi", isDalitzEle);
+    FillHistoCounts(12, eventWeight);
+    CountEvents(12);
+    return kTRUE;
+  }
 
   if (lPt1.DeltaR(gamma)<1.0 || lPt2.DeltaR(gamma)<1.0) return kTRUE;
   FillHistosFull(6, eventWeight, l1, l2, lPt1, lPt2, gamma, "", isDalitzEle);
@@ -939,17 +946,9 @@ Bool_t zgamma::Process(Long64_t entry)
 
 
 
-    //if ((l1+l2).Pt()+gamma.Pt() < 180  && (l1+l2).Pt()>45 && gamma.Pt()>45){
-  if (Mll>2.9 && Mll<3.3){ //jpsi window
-    FillHistosFull(12, eventWeight, l1, l2, lPt1, lPt2, gamma, "jpsi", isDalitzEle);
-    FillHistoCounts(12, eventWeight);
-    CountEvents(12);
-    return kTRUE;
-  }
 
-
-  if ((l1+l2).Pt()>45 && gamma.Pt()>45
-      && (l1+l2).Pt()+gamma.Pt() > 100
+  if ((l1+l2).Pt()>40 && gamma.Pt()>40
+      && (l1+l2).Pt()+gamma.Pt() > 95
       ){
 
     FillHistosFull(8, eventWeight, l1, l2, lPt1, lPt2, gamma, "", isDalitzEle);
@@ -973,10 +972,11 @@ Bool_t zgamma::Process(Long64_t entry)
       FillHistoCounts(9, eventWeight);
       CountEvents(9);
 
-      if (fabs(gamma.Eta())<1.444) fit_type = 1;      
-      else                         fit_type = 2;      
     }
-    else       fit_type = 3;
+
+    if (fabs(gamma.Eta())<1.) fit_type = 1;      
+    else                         fit_type = 2;      
+    //else       fit_type = 3;
     
 
     if (Mll < 2) fit_type = 4;
@@ -1084,7 +1084,7 @@ void zgamma::Terminate()
   cout<<"| 3: reco gamma iso   |\t"<< nEvents[3]  <<"\t|"<<float(nEvents[3])/nEvents[2]<<"\t|"<<endl;
   cout<<"| 4: reco lep         |\t"<< nEvents[4]  <<"\t|"<<float(nEvents[4])/nEvents[3]<<"\t|"<<endl;
   cout<<"| 5: mll <20          |\t"<< nEvents[5]  <<"\t|"<<float(nEvents[5])/nEvents[4]<<"\t|"<<endl;
-  cout<<"| 6: dR               |\t"<< nEvents[6]  <<"\t|"<<float(nEvents[6])/nEvents[5]<<"\t|"<<endl;
+  cout<<"| 6: dR, no jpsi      |\t"<< nEvents[6]  <<"\t|"<<float(nEvents[6])/nEvents[5]<<"\t|"<<endl;
   cout<<"| 7: trigger          |\t"<< nEvents[7]  <<"\t|"<<float(nEvents[7])/nEvents[6]<<"\t|"<<endl;
   cout<<"| 8: triangle         |\t"<< nEvents[8]  <<"\t|"<<float(nEvents[8])/nEvents[7]<<"\t|"<<endl;
   cout<<"| 9: l pt2 > 7        |\t"<< nEvents[9]  <<"\t|"<<float(nEvents[9])/nEvents[7]<<"\t|"<<endl;
@@ -1302,7 +1302,7 @@ bool zgamma::PassMuonIdAndIso(TCMuon *lep, muIdAndIsoCuts cuts, TVector3 *pv)
                    TMath::Max(0.0, lep->IsoMap("pfNeutralHadronEt_R04") + lep->IsoMap("pfPhotonEt_R04") - 0.5*lep->IsoMap("pfPUPt_R04")))/lep->Pt();
 
   if(1
-     //&&lep->IsPF() && lep->IsTRK()
+     && lep->IsPF() && lep->IsTRK()
      //&& lep->PtError()/lep->Pt() < cuts.ptErrorOverPt
      //&& lep->NumberOfValidMuonHits()    > cuts.NumberOfValidMuonHits
      //&& lep->NumberOfValidTrackerHits() > cuts.NumberOfValidTrackerHits
@@ -1310,9 +1310,9 @@ bool zgamma::PassMuonIdAndIso(TCMuon *lep, muIdAndIsoCuts cuts, TVector3 *pv)
      //&& lep->NumberOfMatchedStations() > cuts.NumberOfMatchedStations
      //&& lep->NumberOfMatches() > cuts.NumberOfMatches
      //&& lep->NormalizedChi2()  < cuts.NormalizedChi2
-     && lep->IsGood()
-     && lep->TrackLayersWithMeasurement() > cuts.TrackLayersWithMeasurement
-     && lep->PixelLayersWithMeasurement() > cuts.PixelLayersWithMeasurement
+     //&& lep->IsGood()
+     //&& lep->TrackLayersWithMeasurement() > cuts.TrackLayersWithMeasurement
+     //&& lep->PixelLayersWithMeasurement() > cuts.PixelLayersWithMeasurement
      && lep->NormalizedChi2_tracker()  < cuts.NormalizedChi2_tracker
      && fabs(lep->Dxy(pv))     < cuts.dxy
      && fabs(lep->Dz(pv))      < cuts.dz

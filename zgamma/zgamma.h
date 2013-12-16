@@ -24,7 +24,6 @@
 #include <TChain.h>
 #include <TFile.h>
 #include <TSelector.h>
-#include <TH1.h>
 #include <TH2.h>
 #include <TStyle.h>
 #include <TString.h>
