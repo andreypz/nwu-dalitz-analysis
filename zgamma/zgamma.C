@@ -211,8 +211,8 @@ void zgamma::Begin(TTree * tree)
     _mvaTree->Branch("SigmaIEtaIEta", &mva_SigmaIEtaIEta, "SigmaIEtaIEta/F");
     _mvaTree->Branch("SigmaIPhiIPhi", &mva_SigmaIPhiIPhi, "SigmaIPhiIPhi/F");
     _mvaTree->Branch("HadOverEm",     &mva_HadOverEm,     "HadOverEm/F");
-    _mvaTree->Branch("fabsEPDiff",    &mva_fabsEPDiff,    "fabsEPDiff/F");
-    _mvaTree->Branch("ome1x5oe5x5",   &mva_ome1x5oe5x5,   "ome1x5oe5x5/F");
+    //_mvaTree->Branch("fabsEPDiff",    &mva_fabsEPDiff,    "fabsEPDiff/F");
+    //_mvaTree->Branch("ome1x5oe5x5",   &mva_ome1x5oe5x5,   "ome1x5oe5x5/F");
     _mvaTree->Branch("R9",     &mva_R9,     "R9/F");
     _mvaTree->Branch("fbrem",  &mva_fbrem,  "fbrem/F");
     _mvaTree->Branch("SCdPhi", &mva_SCdPhi, "SCdPhi/F");
@@ -1148,11 +1148,13 @@ void zgamma::CountEvents(Int_t num)
 float zgamma::CalculateElectronIso(TCElectron *lep)
 {
   float eleISO = 0;
-  if(period=="2012")
+  /*
+if(period=="2012")
     eleISO = (lep->IsoMap("pfChIso_R04") + TMath::Max(0.0, (Double_t)(lep->IsoMap("pfPhoIso_R04") + lep->IsoMap("pfNeuIso_R04") - rho25Factor*lep->IsoMap("EffArea_R04"))))/lep->Pt();
   else if(period=="2011")
     eleISO = (lep->IsoMap("SumPt_R04") + TMath::Max(0.0, (Double_t)(lep->IsoMap("EmIso_R04") + lep->IsoMap("HadIso_R04") - rhoFactor*TMath::Pi()*0.09)))/lep->Pt();
   else cout<<"Ele iso - Period is not defined!"<<period<<endl;
+  */
 
   return eleISO;
 }
@@ -1168,10 +1170,9 @@ bool zgamma::PassElectronIdAndIso(TCElectron *lep, elIdAndIsoCuts cuts, TVector3
   if(((fabs(lep->Eta()) < 1.442
        && lep->PtError()/lep->Pt()       < cuts.ptErrorOverPt[0]
        && lep->SigmaIEtaIEta()           < cuts.sigmaIetaIeta[0]
-       && fabs(lep->DphiSuperCluster())  < cuts.dPhiIn[0]
-       && fabs(lep->DetaSuperCluster())  < cuts.dEtaIn[0]
+       && fabs(lep->SCDeltaPhi())  < cuts.dPhiIn[0]
+       && fabs(lep->SCDeltaEta())  < cuts.dEtaIn[0]
        && lep->HadOverEm()               < cuts.HadOverEm[0]
-       //&& lep->IsoMap("fabsEPDiff")      < cuts.fabsEPDiff[0]
        && fabs(lep->Dxy(pv))             < cuts.dxy[0]
        && fabs(lep->Dz(pv))              < cuts.dz[0]
        //&& eleISO                         < cuts.pfIso04[0]
@@ -1179,10 +1180,9 @@ bool zgamma::PassElectronIdAndIso(TCElectron *lep, elIdAndIsoCuts cuts, TVector3
       (fabs(lep->Eta()) >  1.556
        && lep->PtError()/lep->Pt()       < cuts.ptErrorOverPt[1]
        && lep->SigmaIEtaIEta()           < cuts.sigmaIetaIeta[1]
-       && fabs(lep->DphiSuperCluster())  < cuts.dPhiIn[1]
-       && fabs(lep->DetaSuperCluster())  < cuts.dEtaIn[1]
+       && fabs(lep->SCDeltaPhi())  < cuts.dPhiIn[1]
+       && fabs(lep->SCDeltaEta())  < cuts.dEtaIn[1]
        && lep->HadOverEm()               < cuts.HadOverEm[1]
-       //&& lep->IsoMap("fabsEPDiff")      < cuts.fabsEPDiff[1]
        && fabs(lep->Dxy(pv))             < cuts.dxy[1]
        && fabs(lep->Dz(pv))              < cuts.dz[1]
        //&& eleISO                         < cuts.pfIso04[1]
@@ -1204,18 +1204,18 @@ bool zgamma::PassElectronIdAndIsoDalitz(TCElectron *lep)
   //Float_t eleISO = CalculateElectronIso(lep);
 
   if(((fabs(lep->Eta()) < 1.442
-       && fabs(lep->DphiSuperCluster())  > 0.015
-       && lep->IdMap("SCPhiWidth") > 0.02
-       && lep->IdMap("EoP") > 1.0
+       && fabs(lep->SCDeltaPhi())  > 0.015
+       && lep->SCPhiWidth() > 0.02
+       && lep->EoP() > 1.0
        && lep->R9()  <  0.85 && lep->R9()  >  0.2
        && lep->MvaID() > -0.20
        && lep->IdMap("kfNLayers") >0
        //&& eleISO                         < 0.0
        )||
       (fabs(lep->Eta()) >  1.556
-       && fabs(lep->DphiSuperCluster())  > 0.015
-       && lep->IdMap("SCPhiWidth") > 0.02
-       && lep->IdMap("EoP") > 1.0
+       && fabs(lep->SCDeltaPhi())  > 0.015
+       && lep->SCPhiWidth() > 0.02
+       && lep->EoP() > 1.0
        && lep->R9()  <  0.9 && lep->R9()  >  0.2
        && lep->MvaID() > -0.20
        && lep->IdMap("kfNLayers") >0
@@ -1242,7 +1242,7 @@ bool zgamma::PassElectronIdAndIsoMVA(TCElectron *lep)
   if(
      eleISO < 0.15
      && lep->ConversionMissHits()==0
-     && lep->ConversionVeto() == true
+     && lep->PassConversionVeto() == true
      &&
      (
       (lep->Pt()>10 && lep->Pt()<20 &&
@@ -1283,9 +1283,9 @@ float zgamma::CalculateMuonIso(TCMuon *lep)
   //Double_t area = EffAreaMuon(lep, "2012",0,0);
   float muISO = 0;
   if (period=="2012")
-    muISO = (lep->IsoMap("pfChargedHadronPt_R04") + TMath::Max(0.0, lep->IsoMap("pfPhotonEt_R04") + lep->IsoMap("pfNeutralHadronEt_R04")  - TMath::Max(0.0, (Double_t)rho25Factor*area)))/lep->Pt();
-  else if(period=="2011")
-    muISO = (lep->IsoMap("pfChargedHadronPt_R04") + TMath::Max(0.0, lep->IsoMap("pfPhotonEt_R04") + lep->IsoMap("pfNeutralEt_R04")  - TMath::Max(0.0, (Double_t)rhoFactor*TMath::Pi()*0.09)))/lep->Pt();
+    muISO = (lep->PfIsoCharged() + TMath::Max(0.0, lep->PfIsoPhoton() + lep->PfIsoNeutral()  - TMath::Max(0.0, (Double_t)rho25Factor*area)))/lep->Pt();
+  //else if(period=="2011")
+  //muISO = (lep->IsoMap("pfChargedHadronPt_R04") + TMath::Max(0.0, lep->IsoMap("pfPhotonEt_R04") + lep->IsoMap("pfNeutralEt_R04")  - TMath::Max(0.0, (Double_t)rhoFactor*TMath::Pi()*0.09)))/lep->Pt();
   else cout<<"Muon iso - Period is not defined!"<<period<<endl;
 
   return muISO;
@@ -1298,8 +1298,7 @@ bool zgamma::PassMuonIdAndIso(TCMuon *lep, muIdAndIsoCuts cuts, TVector3 *pv)
 
   //Float_t muISO =  CalculateMuonIso(lep);
   //Float_t muISO = (lep->IsoMap("pfChargedHadronPt_R04") + lep->IsoMap("pfNeutralHadronEt_R04") + lep->IsoMap("pfPhotonEt_R04"))/lep->Pt();
-  Float_t muISO = (lep->IsoMap("pfChargedHadronPt_R04") +
-                   TMath::Max(0.0, lep->IsoMap("pfNeutralHadronEt_R04") + lep->IsoMap("pfPhotonEt_R04") - 0.5*lep->IsoMap("pfPUPt_R04")))/lep->Pt();
+  Float_t muISO = (lep->PfIsoCharged() + TMath::Max(0.0, lep->PfIsoPhoton() + lep->PfIsoNeutral()  - 0.5*lep->IsoMap("pfPUPt_R04")))/lep->Pt();
 
   if(1
      && lep->IsPF() && lep->IsTRK()
@@ -1362,9 +1361,9 @@ void zgamma::CalculatePhotonIso(TCPhoton *ph, float& chIsoCor, float& nhIsoCor, 
     nhEA = EAPho[6][1];
     phEA = EAPho[6][2];
   }
-  chIsoCor = ph->IsoMap("chIso03")-rhoFactor*chEA;
-  nhIsoCor = ph->IsoMap("nhIso03")-rhoFactor*nhEA;
-  phIsoCor = ph->IsoMap("phIso03")-rhoFactor*phEA;
+  chIsoCor = ph->PfIsoCharged()-rhoFactor*chEA;
+  nhIsoCor = ph->PfIsoNeutral()-rhoFactor*nhEA;
+  phIsoCor = ph->PfIsoPhoton() -rhoFactor*phEA;
   //cout<<chIsoCor<<"  "<<nhIsoCor<<"  "<<phIsoCor<<endl;
 
 }
@@ -1540,7 +1539,7 @@ void zgamma::MakeMuonPlots(TCMuon mu, TVector3 *pv)
 
   Float_t muIso = CalculateMuonIso(&mu);
   hists->fill1DHist(muIso, "mu_iso", ";rel isolation, rho corr", 50, 0,0.7, 1, "Muons");
-  Float_t iso2 = (mu.IsoMap("pfChargedHadronPt_R04") + mu.IsoMap("pfNeutralHadronEt_R04") + mu.IsoMap("pfPhotonEt_R04"))/mu.Pt();
+  Float_t iso2 = (mu.PfIsoCharged() + mu.PfIsoNeutral() + mu.PfIsoPhoton())/mu.Pt();
   hists->fill1DHist(iso2, "mu_iso_official", ";pfIsolationR04", 50, 0,0.7, 1, "Muons");
 
   hists->fill2DHist(iso2, global_Mll,     "mu_iso_vs_Mll",    ";pfIsolationR04;M(l_{1},l_{2})", 50, 0,0.7, 50, 0,20, 1, "Muons");
@@ -1550,12 +1549,12 @@ void zgamma::MakeMuonPlots(TCMuon mu, TVector3 *pv)
 void zgamma::MakePhotonPlots(TCPhoton ph)
 {
   hists->fill1DHist(ph.R9(),        "ph_R9",       ";R9",        100,    0, 1,    1,"Photon");
-  hists->fill1DHist(ph.E2OverE9(),  "ph_E2OverE9", ";E2OverE9",  100,    0, 0.5,  1,"Photon");
+  hists->fill1DHist(ph.E2OverE5(),  "ph_E2OverE5", ";E2OverE5",  100,    0, 0.5,  1,"Photon");
   hists->fill1DHist(ph.TrackVeto(), "ph_trackVeto",";track veto",  3,    0, 3,    1,"Photon");
   hists->fill1DHist(ph.HadOverEm(), "ph_HadOverEm",";HadOverEm", 100,    0, 0.05, 1,"Photon");
-  hists->fill1DHist(ph.NormChi2(),  "ph_NormChi2", ";NormChi2",  100,    0, 0.01, 1,"Photon");
-  hists->fill1DHist(ph.SCDPhi(),    "ph_SCDPhi",   ";SCDPhi",    100, -0.2, 0.2,  1,"Photon");
-  hists->fill1DHist(ph.SCDEta(),    "ph_SCDEta",   ";SCDEta",    100,-0.02, 0.02, 1,"Photon");
+  //hists->fill1DHist(ph.NormChi2(),  "ph_NormChi2", ";NormChi2",  100,    0, 0.01, 1,"Photon");
+  hists->fill1DHist(ph.SCDeltaPhi(),    "ph_SCDeltaPhi",   ";SCDeltaPhi",    100, -0.2, 0.2,  1,"Photon");
+  hists->fill1DHist(ph.SCDeltaEta(),    "ph_SCDeltaEta",   ";SCDeltaEta",    100,-0.02, 0.02, 1,"Photon");
   hists->fill1DHist(ph.GetNCrystals(),  "ph_nCrystals",    ";nCrystals",     160, 0, 160, 1,"Photon");
   hists->fill1DHist(ph.SigmaIEtaIEta(), "ph_SigmaIEtaIEta",";SigmaIEtaIEta", 100, 0, 0.1, 1,"Photon");
   hists->fill1DHist(ph.SigmaIPhiIPhi(), "ph_SigmaIPhiIPhi",";SigmaIPhiIPhi", 100, 0, 0.1, 1,"Photon");
@@ -1575,36 +1574,36 @@ void zgamma::MakeElectronPlots(TCElectron el, string dir)
   hists->fill1DHist(el.R9(),    dir+"_el_R9",   ";R9",     100, 0, 1, 1,dir);
   hists->fill1DHist(el.MvaID(), dir+"_el_mvaID",";mva ID", 100, -1,1, 1,dir);
   hists->fill1DHist(el.FBrem(), dir+"_el_fbrem","; fbrem", 100, 0, 1, 1,dir);
-  hists->fill1DHist(el.HadOverEm(),        dir+"_el_HadOverEm",       ";HadOverEm",        100, 0, 0.1, 1,dir);
-  hists->fill1DHist(el.PtError()/el.Pt(),  dir+"_el_ptErrorOverPt",   ";ptErrorOverPt",    100, 0, 1,   1,dir);
-  hists->fill1DHist(el.DphiSuperCluster(), dir+"_el_DphiSuperCluster",";DphiSuperCluster", 100, -0.2, 0.2,  1,dir);
-  hists->fill1DHist(el.DetaSuperCluster(), dir+"_el_DetaSuperCluster",";DetaSuperCluster", 100, -0.02, 0.02,1,dir);
+  hists->fill1DHist(el.HadOverEm(),  dir+"_el_HadOverEm", ";HadOverEm",  100, 0, 0.1,     1,dir);
+  hists->fill1DHist(el.SCDeltaPhi(), dir+"_el_SCDeltaPhi",";SCDeltaPhi", 100, -0.2, 0.2,  1,dir);
+  hists->fill1DHist(el.SCDeltaEta(), dir+"_el_SCDeltaEta",";SCDeltaEta", 100, -0.02, 0.02,1,dir);
 
+  hists->fill1DHist(el.PtError()/el.Pt(),     dir+"_el_ptErrorOverPt",";ptErrorOverPt", 100, 0, 1,   1,dir);
   hists->fill1DHist(el.SigmaIEtaIEta(),       dir+"_el_SigmaIEtaIEta",";SigmaIEtaIEta", 100, 0, 0.1, 1,dir);
-  hists->fill1DHist(el.IdMap("SigmaIPhiIPhi"),dir+"_el_SigmaIPhiIPhi",";SigmaIPhiIPhi", 100, 0, 0.1, 1,dir);
-  hists->fill1DHist(el.IdMap("gsfChi2"),      dir+"_el_gsfChi2",      ";gsfChi2",       100, 0, 3,   1,dir);
-  hists->fill1DHist(el.IdMap("kfChi2"),       dir+"_el_kfChi2",       ";kfChi2",        100, 0, 3,   1,dir);
+  hists->fill1DHist(el.SigmaIPhiIPhi(),       dir+"_el_SigmaIPhiIPhi",";SigmaIPhiIPhi", 100, 0, 0.1, 1,dir);
+  hists->fill1DHist(el.NormalizedChi2(),      dir+"_el_gsfChi2",      ";gsfChi2",       100, 0, 3,   1,dir);
+  hists->fill1DHist(el.NormalizedChi2Kf(),    dir+"_el_kfChi2",       ";kfChi2",        100, 0, 3,   1,dir);
   hists->fill1DHist(el.IdMap("kfNLayers"),    dir+"_el_kfNLayers",    ";kfNLayers",      20, 0,20,   1,dir);
   hists->fill1DHist(el.IdMap("dEtaAtCalo"),   dir+"_el_dEtaAtCalo",   ";dEtaAtCalo",    100, -0.05, 0.05, 1,dir);
-  hists->fill1DHist(el.IdMap("preShowerORaw"),dir+"_el_preShowerORaw",";preShowerORaw", 100, 0, 0.3, 1,dir);
+  hists->fill1DHist(el.PreShowerOverRaw(),    dir+"_el_preShowerOverRaw",";preShowerOverRaw", 100, 0, 0.3, 1,dir);
   hists->fill1DHist(el.IdMap("kfNLayersAll"), dir+"_el_kfNLayersAll", ";kfNLayersAll",   25, 0,25,   1,dir);
-  hists->fill1DHist(el.IdMap("SCEtaWidth"),   dir+"_el_SCEtaWidth",   ";SCEtaWidth",    100, 0, 0.04,1,dir);
-  hists->fill1DHist(el.IdMap("SCPhiWidth"),   dir+"_el_SCPhiWidth",   ";SCPhiWidth",  100, 0, 0.1,   1,dir);
+  hists->fill1DHist(el.SCEtaWidth(),          dir+"_el_SCEtaWidth",   ";SCEtaWidth",    100, 0, 0.04,1,dir);
+  hists->fill1DHist(el.SCPhiWidth(),          dir+"_el_SCPhiWidth",   ";SCPhiWidth",  100, 0, 0.1,   1,dir);
   hists->fill1DHist(el.IdMap("ome1x5oe5x5"),  dir+"_el_ome1x5oe5x5",  ";1 - e1x5/e5x5", 100, 0, 1,   1,dir);
-  hists->fill1DHist(el.IdMap("EoP"),          dir+"_el_EoP",    ";EoP",     100, 0, 6,   1,dir);
+  hists->fill1DHist(el.EoP(),                 dir+"_el_EoP",    ";EoP",     100, 0, 6,   1,dir);
   hists->fill1DHist(el.IdMap("eopOut"),       dir+"_el_eopOut", ";eopOut",  100, 0, 6,   1,dir);
-  hists->fill1DHist(el.IdMap("ip3d"),         dir+"_el_ip3d",   ";ip3d",    100, 0, 0.04,1,dir);
-  hists->fill1DHist(el.IdMap("ip3dSig"),      dir+"_el_ip3dSig",";ip3dSig", 100, 0, 3,   1,dir);
+  hists->fill1DHist(el.IP3d(),                dir+"_el_ip3d",   ";ip3d",    100, 0, 0.04,1,dir);
+  hists->fill1DHist(el.IP3dSig(),             dir+"_el_ip3dSig",";ip3dSig", 100, 0, 3,   1,dir);
   //hists->fill1DHist(el.IdMap("preSelPassV1"), dir+"_el_preSelPassV1",";preSelPassV1", 2, 0, 2, 1, dir);
   //hists->fill1DHist(el.IdMap("preSelPassV2"), dir+"_el_preSelPassV2",";preSelPassV2", 2, 0, 2, 1, dir);
   //hists->fill1DHist(el.IdMap("preSelPassV3"), dir+"_el_preSelPassV3",";preSelPassV3", 2, 0, 2, 1, dir);
 
 
-  Double_t eleISO = (el.IsoMap("pfChIso_R04") + TMath::Max(0.0, (Double_t)(el.IsoMap("pfPhoIso_R04") + el.IsoMap("pfNeuIso_R04") - rho25Factor*el.IsoMap("EffArea_R04"))))/el.Pt();
+  Double_t eleISO = (el.PfIsoCharged() + TMath::Max(0.0, (Double_t)(el.PfIsoPhoton() + el.PfIsoNeutral() - rho25Factor*el.EffArea())))/el.Pt();
 
-  hists->fill1DHist(el.IsoMap("pfChIso_R04"),  dir+"_el_iso_pfChIso_R04",";pfChIso_R04",   100, 0, 30, 1, dir);
-  hists->fill1DHist(el.IsoMap("pfPhoIso_R04"), dir+"_el_iso_pfPhoIso_R04",";pfPhoIso_R04", 100, 0, 20, 1, dir);
-  hists->fill1DHist(el.IsoMap("pfNeuIso_R04"), dir+"_el_iso_pfNeuIso_R04",";pfNeuIso_R04", 100, 0, 50, 1, dir);
+  hists->fill1DHist(el.PfIsoCharged(), dir+"_el_iso_Charged",";pfChIso_R04",  100, 0, 30, 1, dir);
+  hists->fill1DHist(el.PfIsoPhoton(),  dir+"_el_iso_Photon", ";pfPhoIso_R04", 100, 0, 20, 1, dir);
+  hists->fill1DHist(el.PfIsoNeutral(), dir+"_el_iso_Neutral",";pfNeuIso_R04", 100, 0, 50, 1, dir);
   hists->fill1DHist(eleISO, dir+"_el_iso",";iso", 100, 0, 1, 1, dir);
   //hists->fill1DHist(el.IdMap(""), dir+"_el_",";", 3, 0, 3, 1, dir);
   //hists->fill1DHist(el., dir+"_el_",";", 3, 0, 3, 1, dir);
@@ -1654,8 +1653,7 @@ void zgamma::DiscoverGeneology(TCGenParticle *p, ULong64_t ev)
 
 void zgamma::MuonDump(TCMuon mu, TVector3 *pv)
 {
-  Float_t muISO = (mu.IsoMap("pfChargedHadronPt_R04") +
-                   TMath::Max(0.0, mu.IsoMap("pfNeutralHadronEt_R04") + mu.IsoMap("pfPhotonEt_R04") - 0.5*mu.IsoMap("pfPUPt_R04")))/mu.Pt();
+  Float_t muISO = (mu.PfIsoCharged() + TMath::Max(0.0, mu.PfIsoPhoton() + mu.PfIsoNeutral()  - 0.5*mu.IsoMap("pfPUPt_R04")))/mu.Pt();
 
   cout  << runNumber << " " << eventNumber << " " << mu.Pt()
         << " " << mu.Eta() << " " << mu.IsGLB() << " " << mu.IsPF() << " "<<mu.IsTRK()<<endl;
@@ -1693,21 +1691,19 @@ void zgamma::PhotonDump(TCPhoton pho, phIdAndIsoCuts cuts)
 
 void zgamma::FillElecronMVATree(TCElectron el){
 
-  mva_SCPhiWidth    = el.IdMap("SCPhiWidth");
-  mva_SCEtaWidth    = el.IdMap("SCEtaWidth");
+  mva_SCPhiWidth    = el.SCPhiWidth();
+  mva_SCEtaWidth    = el.SCEtaWidth();
   mva_SigmaIEtaIEta = el.SigmaIEtaIEta();
-  mva_SigmaIPhiIPhi = el.IdMap("SigmaIPhiIPhi");
+  mva_SigmaIPhiIPhi = el.SigmaIPhiIPhi();
 
   mva_SCEta     = el.SCEta();
   mva_R9        = el.R9();
   mva_fbrem     = el.FBrem();
-  mva_SCdPhi    = el.DphiSuperCluster();
-  mva_SCdEta    = el.DetaSuperCluster();
+  mva_SCdPhi    = el.SCDeltaPhi();
+  mva_SCdEta    = el.SCDeltaEta();
   mva_HadOverEm = el.HadOverEm();
 
-  mva_fabsEPDiff  = el.IdMap("fabsEPDiff");
-  mva_EoP         = el.IdMap("EoP");
-  mva_ome1x5oe5x5 = el.IdMap("ome1x5oe5x5");
+  mva_EoP         = el.EoP();
 
   _mvaTree->Fill();
 }

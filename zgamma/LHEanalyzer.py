@@ -16,10 +16,10 @@ files={}
 #files["mad"] = ['/uscms_data/d2/andreypz/lhe_mad_LO_HiggsToMuMuGamma.root']
 #files["mad"] = ['/uscms_data/d2/andreypz/lhe_mad_hzg5.root']
 #files["mad"] = ['/uscms/home/andreypz/lhe_higgs_eegamma_dalitz/heeg_m120.root']
-files["mad"] = ['/uscms/home/andreypz/lhe_higgs_mumugamma_dalitz/hmumug_m120.root']
-files["test"] = ['/uscms/home/andreypz/lhe_higgs_mumugamma_dalitz/hmumug_m120_test.root']
+files["mad"] = ['/uscms/home/andreypz/lhe_higgs_mumugamma_dalitz/hmumug_m123.root']
+files["test"] = ['/uscms/home/andreypz/lhe_higgs_mumugamma_dalitz/hmumug_m127.root']
 
-MH = 120
+MH = 123
 
 print files
 #gSystem.Load("/home/andreypz/workspace/MadGraph5/ExRootAnalysis/lib/libExRootAnalysis.so")

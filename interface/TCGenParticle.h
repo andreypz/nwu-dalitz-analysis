@@ -1,19 +1,14 @@
 #ifndef _TGENPARTICLE_H
 #define _TGENPARTICLE_H
 
-#include "TObject.h"
 #include "TCPhysObject.h"
-#include "TLorentzVector.h"
-#include "TVector2.h"
-#include "TVector3.h"
-#include <vector>
 
 class TCGenParticle : public TCPhysObject {
     private:
-        TCGenParticle* mother;
-        int PDGID;
-        unsigned status;
-        bool isParton_;
+        TCGenParticle* _mother;
+        int _PDGID;
+        unsigned _status;
+        bool _isParton;
 
 
     public:
@@ -21,6 +16,7 @@ class TCGenParticle : public TCPhysObject {
         virtual ~TCGenParticle();
 
         TCGenParticle* Mother();
+        //TCGenParticle* PrimaryAncestor();
         int GetPDGId();
         unsigned GetStatus();
 
