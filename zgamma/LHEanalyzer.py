@@ -16,10 +16,11 @@ files={}
 #files["mad"] = ['/uscms_data/d2/andreypz/lhe_mad_LO_HiggsToMuMuGamma.root']
 #files["mad"] = ['/uscms_data/d2/andreypz/lhe_mad_hzg5.root']
 #files["mad"] = ['/uscms/home/andreypz/lhe_higgs_eegamma_dalitz/heeg_m120.root']
-files["mad"] = ['/uscms/home/andreypz/lhe_higgs_mumugamma_dalitz/hmumug_m123.root']
-files["test"] = ['/uscms/home/andreypz/lhe_higgs_mumugamma_dalitz/hmumug_m127.root']
+files["mad1"] = ['/uscms_data/d2/andreypz/lhe_higgs_eegamma_dalitz/m150.root']
+files["mad2"] = ['/uscms_data/d2/andreypz/lhe_higgs_eegamma_dalitz/m135.root']
 
-MH = 123
+MH = 135
+LEPID = 11
 
 print files
 #gSystem.Load("/home/andreypz/workspace/MadGraph5/ExRootAnalysis/lib/libExRootAnalysis.so")
@@ -38,7 +39,7 @@ madFile.mkdir("eff")
 madFile.cd()
 h2 = HistManager(madFile)
 
-testFile = TFile(outpath+"out_mcfm_"+subdir+".root","RECREATE")
+testFile = TFile(outpath+"out_test_"+subdir+".root","RECREATE")
 testFile.mkdir("eff")
 testFile.cd()
 h3 = HistManager(testFile)
@@ -60,7 +61,6 @@ def FillAllHists(files, h):
         print f
         
     dcount = 0
-    LEPID = 13
     for evt in fChain:
 
         g1 = TLorentzVector(0)
@@ -264,8 +264,8 @@ if __name__ == "__main__":
 
 
     #FillAllHists(files["mcfm"], h1)
-    FillAllHists(files["mad"],  h2)
-    FillAllHists(files["test"],  h3)
+    FillAllHists(files["mad1"],  h2)
+    FillAllHists(files["mad2"],  h3)
 
     mcfmFile.cd()
     mcfmFile.Write()

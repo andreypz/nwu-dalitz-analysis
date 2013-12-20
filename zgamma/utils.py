@@ -154,7 +154,7 @@ def drawAllInFile(f1, name1, f2, name2, f3, name3, dir,path, N, howToScale="none
         
     if f3!=None and howToScale=="lumi": # only assume signal MC for now
         Nev = f3.Get("Counts/evt_byCut_raw").GetBinContent(1)
-        cro = cs["h"]
+        cro = cs["dal-el"]
        
         scale3 = float(1000*lumi*cro)/Nev
         print Nev, lumi, cro, scale3
@@ -209,7 +209,7 @@ def drawAllInFile(f1, name1, f2, name2, f3, name3, dir,path, N, howToScale="none
             #    c1.SetLogy()
                 
         else:
-            #handleOverflowBins(h1)
+            handleOverflowBins(h1)
             h1.Draw("hist")
             #h1.SetMarkerStyle(20)
             h1.SetLineColor(kBlack)
@@ -249,7 +249,7 @@ def drawAllInFile(f1, name1, f2, name2, f3, name3, dir,path, N, howToScale="none
                 handleOverflowBins(h3)
                 h3.Draw("sames hist")
                 h3.SetLineColor(kRed+1)
-                h3.Scale(10)
+                h3.Scale(1000)
                 norm3 = h3.Integral()
                 if howToScale =="norm" and  norm3!=0:
                     h3.Scale(1./norm3)
@@ -376,7 +376,7 @@ def getYields(f, doLumiScale=False):
     scale=1
     if doLumiScale: # only assume signal MC for now
         Nev = ev.GetBinContent(1)
-        cro = cs["h"]
+        cro = cs["dal-el"]
         scale = float(1000*lumi*cro)/Nev
 
     for a in xrange(len(cuts)):

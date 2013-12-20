@@ -147,7 +147,7 @@ class zgamma : public TSelector {
 
    // Declaration of leaf types
    TClonesArray    *recoJets;
-   TClonesArray    *recoJPT;
+   //TClonesArray    *recoJPT;
    TClonesArray    *recoElectrons;
    TClonesArray    *recoMuons;
    TClonesArray    *recoPhotons;
@@ -187,7 +187,7 @@ class zgamma : public TSelector {
 
    // List of branches
    TBranch        *b_recoJets;   //!
-   TBranch        *b_recoJPT;   //!
+   //TBranch        *b_recoJPT;   //!
    TBranch        *b_recoElectrons;   //!
    TBranch        *b_recoMuons;   //!
    TBranch        *b_recoPhotons;   //!
@@ -238,7 +238,7 @@ class zgamma : public TSelector {
    virtual bool PassMuonIdAndIso(TCMuon *l, muIdAndIsoCuts c, TVector3 *pv);
    virtual bool PassElectronIdAndIso(TCElectron *l, elIdAndIsoCuts c, TVector3 *pv);
    virtual bool PassElectronIdAndIsoMVA(TCElectron *l);
-   virtual bool PassElectronIdAndIsoDalitz(TCElectron *l);
+   virtual bool PassElectronIdAndIsoDalitz(TCElectron *l, bool);
    virtual bool PassPhotonIdAndIso(TCPhoton *p, phIdAndIsoCuts c, TVector3 *pv);
    
    virtual void CalculatePhotonIso(TCPhoton *p, float& chIsoCor, float& nhIsoCor, float& phIsoCor);
@@ -275,7 +275,7 @@ void zgamma::Init(TTree *tree)
 
    // Set object pointer
    recoJets = 0;
-   recoJPT = 0;
+   //recoJPT = 0;
    recoElectrons = 0;
    recoMuons = 0;
    recoPhotons = 0;
@@ -293,7 +293,7 @@ void zgamma::Init(TTree *tree)
    fChain->SetMakeClass(1);
 
    fChain->SetBranchAddress("recoJets", &recoJets, &b_recoJets);
-   fChain->SetBranchAddress("recoJPT", &recoJPT, &b_recoJPT);
+   //fChain->SetBranchAddress("recoJPT", &recoJPT, &b_recoJPT);
    fChain->SetBranchAddress("recoElectrons", &recoElectrons, &b_recoElectrons);
    fChain->SetBranchAddress("recoMuons", &recoMuons, &b_recoMuons);
    fChain->SetBranchAddress("recoPhotons", &recoPhotons, &b_recoPhotons);

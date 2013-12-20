@@ -29,12 +29,13 @@ sample    = args[0]
 sourcefilename = args[1] 
 
 period    = options.period
+trigger = options.trigger
 selection = "mu"
 if options.electron:
     print "options.electorn", options.electron
     selection="el"
-trigger = options.trigger
-
+    trigger="pho"
+    
 isbatch   = options.batch    
 if(isbatch):
     sourceFiles = "./input.txt"
@@ -86,14 +87,13 @@ for l in f.readlines():
 print nfiles, " files added!"
 
 
+timer = TStopwatch()
+timer.Start()
 
 fChain.Process("zgamma.C+", "%s %s %s %s" % (sample,selection,trigger,str(options.gen).lower()))
 
-
 os.system('mv a_'+selection+'_higgsHistograms.root hhhh_'+sourcefilename+'.root')
 
-timer = TStopwatch()
-timer.Start()
 print "Done!", "CPU Time: ", timer.CpuTime(), "RealTime : ", timer.RealTime()
 
 print "End runninng"
