@@ -1,7 +1,8 @@
 #define zgamma_cxx
 #include "zgamma.h"
 
-const UInt_t ntrig = 16;
+const UInt_t ntrig = 22;
+
 string myTriggers[ntrig] = {
   "HLT_IsoMu24_v",
   "HLT_IsoMu24_eta2p1_v",
@@ -16,11 +17,26 @@ string myTriggers[ntrig] = {
   "HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_v",
   "HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v",
 
+  "HLT_Photon26_CaloId10_Iso50_Photon18_CaloId10_Iso50_Mass60_v",
+  "HLT_Photon26_CaloId10_Iso50_Photon18_R9Id85_Mass60_v",
+  "HLT_Photon26_R9Id85_Photon18_CaloId10_Iso50_Mass60_v",
+  "HLT_Photon26_R9Id85_Photon18_R9Id85_Mass60_v",
+  "HLT_Photon26_R9Id85_OR_CaloId10_Iso50_Photon18_R9Id85_OR_CaloId10_Iso50_Mass70_v",
+  "HLT_Photon26_R9Id85_OR_CaloId10_Iso50_Photon18_R9Id85_OR_CaloId10_Iso50_Mass60_v",
+  
   "HLT_Photon36_CaloId10_Iso50_Photon22_CaloId10_Iso50_v",
   "HLT_Photon36_CaloId10_Iso50_Photon22_R9Id85_v",
   "HLT_Photon36_R9Id85_OR_CaloId10_Iso50_Photon22_R9Id85_OR_CaloId10_Iso50_v",
   "HLT_Photon36_R9Id85_Photon22_CaloId10_Iso50_v",
   "HLT_Photon36_R9Id85_Photon22_R9Id85_v"};
+
+const string pho26OR[6] = {
+  "HLT_Photon26_CaloId10_Iso50_Photon18_CaloId10_Iso50_Mass60_v",
+  "HLT_Photon26_CaloId10_Iso50_Photon18_R9Id85_Mass60_v",
+  "HLT_Photon26_R9Id85_Photon18_CaloId10_Iso50_Mass60_v",
+  "HLT_Photon26_R9Id85_Photon18_R9Id85_Mass60_v",
+  "HLT_Photon26_R9Id85_OR_CaloId10_Iso50_Photon18_R9Id85_OR_CaloId10_Iso50_Mass70_v",
+  "HLT_Photon26_R9Id85_OR_CaloId10_Iso50_Photon18_R9Id85_OR_CaloId10_Iso50_Mass60_v"};
 
 UInt_t nEventsTrig[nC][ntrig];
 float EAPho[7][3] = {
@@ -295,6 +311,13 @@ Bool_t zgamma::Process(Long64_t entry)
       cut_l2pt = 1;
       cut_gammapt = 38;
     }
+  else if (trigger=="pho26")
+    {
+      myTrigger = "HLT_Photon26_R9Id85_OR_CaloId10_Iso50_Photon18_R9Id85_OR_CaloId10_Iso50_Mass60_v";
+      cut_l1pt = 20;
+      cut_l2pt = 1;
+      cut_gammapt = 25;
+    }
   else
     checkTrigger = kFALSE;
   //cout<<"Other options are not supported!"<<endl;
@@ -495,7 +518,6 @@ Bool_t zgamma::Process(Long64_t entry)
     hists->fill1DHist(co3, "gen_co3",";gen cosTheta",100,-1,1, 1,"");
     hists->fill1DHist(phi, "gen_phi",";gen phi lp",  100, -TMath::Pi(), TMath::Pi(), 1,"");
 
-
     FillHistoCounts(1, eventWeight);
     CountEvents(1);
 
@@ -545,7 +567,16 @@ Bool_t zgamma::Process(Long64_t entry)
 
   }
 
-
+  if (checkTrigger){
+    Bool_t pass = false; 
+    for (Int_t i=0; i<6; i++){
+      triggerSelector->SelectTrigger(pho26OR[i], triggerStatus, hltPrescale, isFound, triggerPass, prescale);
+      if (triggerPass) {pass = true; break;}
+    }
+    if (!pass) return kTRUE;
+    //  else Abort("Event trigger should mu or el");
+  }
+  
   FillHistoCounts(2, eventWeight);
   CountEvents(2);
 
@@ -769,8 +800,19 @@ Bool_t zgamma::Process(Long64_t entry)
 
   if (photonsHZG.size()<1) return kTRUE;
   gamma = photonsHZG[0];
-  if (gamma.Pt() < cut_gammapt) return kTRUE;
-
+  if (gamma.Pt() < cut_gammapt || fabs(gamma.SCEta())>1.4442) 
+    return kTRUE;
+  /*
+    if (photonsHZG.size()==1){
+    if (gamma.Pt() < cut_gammapt || fabs(gamma.SCEta())>1.4442) 
+    return kTRUE;
+    }
+    else if (photonsHZG.size()==2){
+    if ((photonsHZG[0].Pt() < cut_gammapt || fabs(photonsHZG[0].SCEta()) > 1.442) &&
+    (photonsHZG[1].Pt() < cut_gammapt || fabs(photonsHZG[1].SCEta()) > 1.442)) 
+    return kTRUE;
+    }
+  */
 
   if(!isRealData && makeGen){
     hists->fill1DHist(genMll,  "gen_Mll_reco_gamma_iso",  ";gen_Mll",50,0,15, 1,"eff");
