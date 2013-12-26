@@ -20,8 +20,8 @@ def makeCards():
   leptonList = ['mu']
   yearList   = ['2012']
   #catList    = ['0']
-  #catList    = ['0','EB','EE','LowPt']
-  catList    = ['0','LowMll','HighMll']
+  catList    = ['0','EB','EE']
+  #catList    = ['0','LowMll','HighMll']
 
   massList = ['125.0']
 

@@ -10,7 +10,8 @@ gSystem.SetIncludePath( "-I$ROOFITSYS/include/" );
 gROOT.ProcessLine(".L ~/tdrstyle.C")
 setTDRStyle()
 TH1.SetDefaultSumw2(kTRUE)
-            
+gStyle.SetOptTitle(0)
+
 debugPlots = True
 verbose    = 0
 rootrace   = False
@@ -25,8 +26,8 @@ if rootrace: RooTrace.active(kTRUE)
 
 def LumiXSWeighter(lumi):
   #Mad:
+  #cro = 0.00091
   cro = 0.00079
-  #cro = 0.000655
   Nev = 199988
   
   #mcfm:
@@ -40,18 +41,22 @@ def LumiXSWeighter(lumi):
 def doInitialFits():
   print 'loading up the files'
     
-  plotBase = '/uscms_data/d2/andreypz/html/zgamma/dalitz/fits/'
-  basePath = '/eos/uscms/store/user/andreypz/batch_output/zgamma/8TeV/v27/'
-  dataDict   = {'mu2012':TFile(basePath+'m_Data_mugamma_2012.root','r')}
-  #signalDict = {'mu2012':TFile(basePath+'mugamma_2012/hhhh_h-dalitz_1.root','r')}
-  signalDict = {'mu2012':TFile(basePath+'mugamma_2012/hhhh_mad_1.root','r')}
+  plotBase = '/uscms_data/d2/andreypz/html/zgamma/dalitz/fits/init/'
+  basePath1 = '/eos/uscms/store/user/andreypz/batch_output/zgamma/8TeV/v32/'
+  basePath2 = '/eos/uscms/store/user/andreypz/batch_output/zgamma/8TeV/v30/'
+  dataDict   = {'mu2012':TFile(basePath1+'m_Data_mugamma_2012.root','r'),
+                'el2012':TFile(basePath2+'m_Data_electron_2012.root','r')}
+
+  signalDict = {'mu2012':TFile(basePath1+'mugamma_2012/hhhh_dal-mad125_1.root','r'),
+                'el2012':TFile(basePath2+'electron_2012/hhhh_dal-mad125_1.root','r')}
 
   treeName = 'fitTree/fitTree'
 
   leptonList  = ['mu']
   yearList    = ['2012']
   #catList     = ['0',"EB","EE","LowPt"]
-  catList     = ['0',"LowMll","HighMll"]
+  catList     = ['0',"EB","EE"]
+  EBetaCut = 1.0 
   category    = {"0":0,"EB":1,"EE":2,"Low":3,"LowMll":4,"HighMll":5}
   massList    = ['125']
   sigNameList = ['gg']
@@ -98,20 +103,20 @@ def doInitialFits():
             #signalTree.Print()
             sigName = '_'.join(['ds_sig',prod,lepton,year,'cat'+cat,'M'+mass])
             tmpSigMass   = np.zeros(1,dtype = 'd')
-            tmpType      = np.zeros(1,dtype = 'i')
+            tmpSigPhEta  = np.zeros(1,dtype = 'd')
             tmpSigWeight = np.zeros(1,dtype = 'd')
             tmpSigLumiXS = np.zeros(1,dtype = 'd')
 
             signalTree.SetBranchAddress('m_llg', tmpSigMass)
-            signalTree.SetBranchAddress('type',  tmpType)
+            signalTree.SetBranchAddress('ph_eta', tmpSigPhEta)
             signalTree.SetBranchAddress('weight',tmpSigWeight)
             #signalTree.SetBranchAddress('unBinnedLumiXS_Signal'+year+prod+'M'+mass,tmpSigLumiXS)
             sig_argSW = RooArgSet(mzg,weight)
             sig_ds    = RooDataSet(sigName,sigName,sig_argSW,'Weight')
             for i in signalTree:
-              if category[cat]!=0 and tmpType[0] != category[cat]: continue
+              if cat=="EB" and fabs(tmpSigPhEta)>EBetaCut: continue
+              elif cat=="EE" and fabs(tmpSigPhEta)<EBetaCut: continue
               #print "loop in signal tree", cat, category[cat], tmpType, "mass =", tmpSigMass[0] 
-
 
               if tmpSigMass[0]> 90 and tmpSigMass[0]<190:
                 mzg.setVal(tmpSigMass[0])
@@ -147,8 +152,10 @@ def doInitialFits():
 
               if cat=="0":
                 signalTree.Draw('m_llg>>'+histName,'weight')
-              else:
-                signalTree.Draw('m_llg>>'+histName,'(type=='+str(category[cat])+')*weight')
+              elif cat=="EB":
+                signalTree.Draw('m_llg>>'+histName,"weight*(fabs(ph_eta)<"+str(EBetaCut)+")")
+              elif cat=="EE":
+                signalTree.Draw('m_llg>>'+histName,"weight*(fabs(ph_eta)>"+str(EBetaCut)+")")
 
               if signalList[-1].Integral()!=0:
                 signalList[-1].Scale(1/signalList[-1].Integral())
@@ -193,16 +200,17 @@ def doInitialFits():
         dataTree = dataDict[lepton+year].Get(treeName)
         #tmpMassEventOld = np.zeros(1,dtype = 'f')
         tmpMassEventOld = np.zeros(1,dtype = 'd')
-        tmpType = np.zeros(1,dtype = 'i')
+        tmpPhEta = np.zeros(1,dtype = 'd')
 
         dataTree.SetBranchAddress('m_llg',tmpMassEventOld)
-        dataTree.SetBranchAddress('type',tmpType)
+        dataTree.SetBranchAddress('ph_eta',tmpPhEta)
 
         data_argS = RooArgSet(mzg)
         data_ds   = RooDataSet(dataName,dataName,data_argS)
 
         for i in dataTree:
-          if category[cat]!=0 and tmpType[0] != category[cat]: continue
+          if cat=="EB" and fabs(tmpPhEta)>EBetaCut: continue
+          elif cat=="EE" and fabs(tmpPhEta)<EBetaCut: continue
           
           if tmpMassEventOld[0]> 90 and tmpMassEventOld[0]<190:
             mzg.setVal(tmpMassEventOld[0])

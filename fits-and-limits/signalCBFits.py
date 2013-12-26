@@ -8,7 +8,7 @@ from rooFitBuilder import *
 gROOT.ProcessLine(".L ~/tdrstyle.C")
 setTDRStyle()
 TH1.SetDefaultSumw2(kTRUE)
-plotBase = "/uscms_data/d2/andreypz/html/zgamma/dalitz/fits/"
+plotBase = "/uscms_data/d2/andreypz/html/zgamma/dalitz/fits/sigCBFits/"
 
 # rounding function for interpolation
 def roundTo5(x, base=5):
@@ -176,6 +176,8 @@ if __name__=="__main__":
   #else:
   #  SignalFitMaker(str(sys.argv[1]), str(sys.argv[2]), str(sys.argv[3]))
 
-  for cat in ["0","LowMll","HighMll"]:
+  for cat in ["0","EB","EE"]:
     #for cat in ["0","EB","EE","LowPt"]:
     SignalFitMaker("mu","2012",cat)
+
+  print "\n \t\t All finished! \n"
