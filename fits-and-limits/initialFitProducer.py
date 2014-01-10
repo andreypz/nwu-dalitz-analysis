@@ -24,12 +24,33 @@ rootrace   = False
 TH1.SetDefaultSumw2(kTRUE)
 if rootrace: RooTrace.active(kTRUE)
 
-def LumiXSWeighter(lumi):
+def LumiXSWeighter(lumi, mH):
   #Mad:
   #cro = 0.00091
-  cro = 0.00079
-  Nev = 199988
-  
+  if mH==120:
+    cro =  0.686*1.17*0.001
+    Nev = 199985
+  elif mH==125:
+    cro =  0.654*1.17*0.001
+    Nev = 199988
+  elif mH==130:
+    cro =  0.600*1.17*0.001
+    Nev = 85835
+  elif mH==135:
+    cro =  0.528*1.17*0.001
+    Nev = 64805
+  elif mH==140:
+    cro =  0.450*1.17*0.001
+    Nev = 85570
+  elif mH==145:
+    cro =  0.366*1.17*0.001
+    Nev = 82585
+  elif mH==150:
+    cro =  0.281*1.17*0.001
+    Nev = 99587
+  else:
+    print "No XS for that mass", mH
+    sys.exit(0)
   #mcfm:
   #cro = 2*0.000887
   #Nev = 93992
@@ -42,13 +63,21 @@ def doInitialFits():
   print 'loading up the files'
     
   plotBase = '/uscms_data/d2/andreypz/html/zgamma/dalitz/fits/init/'
-  basePath1 = '/eos/uscms/store/user/andreypz/batch_output/zgamma/8TeV/v32/'
+  #basePath1 = '/uscms_data/d2/andreypz/zgamma/v33-mu/'
+  basePath1 = '/uscms_data/d2/andreypz/zgamma/v33-mu-iso/'
+  #basePath1 = '/eos/uscms/store/user/andreypz/batch_output/zgamma/8TeV/v32/'
   basePath2 = '/eos/uscms/store/user/andreypz/batch_output/zgamma/8TeV/v30/'
   dataDict   = {'mu2012':TFile(basePath1+'m_Data_mugamma_2012.root','r'),
                 'el2012':TFile(basePath2+'m_Data_electron_2012.root','r')}
 
-  signalDict = {'mu2012':TFile(basePath1+'mugamma_2012/hhhh_dal-mad125_1.root','r'),
-                'el2012':TFile(basePath2+'electron_2012/hhhh_dal-mad125_1.root','r')}
+  signalDict = {'mu2012_M120':TFile(basePath1+'mugamma_2012/hhhh_dal-mad120_1.root','r'),
+                'mu2012_M125':TFile(basePath1+'mugamma_2012/hhhh_dal-mad125_1.root','r'),
+                'mu2012_M130':TFile(basePath1+'mugamma_2012/hhhh_dal-mad130_1.root','r'),
+                'mu2012_M135':TFile(basePath1+'mugamma_2012/hhhh_dal-mad135_1.root','r'),
+                'mu2012_M140':TFile(basePath1+'mugamma_2012/hhhh_dal-mad140_1.root','r'),
+                'mu2012_M145':TFile(basePath1+'mugamma_2012/hhhh_dal-mad145_1.root','r'),
+                'mu2012_M150':TFile(basePath1+'mugamma_2012/hhhh_dal-mad150_1.root','r'),
+                'el2012_M125':TFile(basePath2+'electron_2012/hhhh_dal-mad125_1.root','r')}
 
   treeName = 'fitTree/fitTree'
 
@@ -58,7 +87,7 @@ def doInitialFits():
   catList     = ['0',"EB","EE"]
   EBetaCut = 1.0 
   category    = {"0":0,"EB":1,"EE":2,"Low":3,"LowMll":4,"HighMll":5}
-  massList    = ['125']
+  massList    = ['120','125','130','135','140','145','150']
   sigNameList = ['gg']
 
 
@@ -99,7 +128,7 @@ def doInitialFits():
           signalListDS = []
           for mass in massList:
             # store the unbinned signals for CB fitting
-            signalTree = signalDict[lepton+year].Get(treeName)
+            signalTree = signalDict[lepton+year+"_M"+mass].Get(treeName)
             #signalTree.Print()
             sigName = '_'.join(['ds_sig',prod,lepton,year,'cat'+cat,'M'+mass])
             tmpSigMass   = np.zeros(1,dtype = 'd')
@@ -121,7 +150,7 @@ def doInitialFits():
               if tmpSigMass[0]> 90 and tmpSigMass[0]<190:
                 mzg.setVal(tmpSigMass[0])
                   
-                sigWeight = LumiXSWeighter(19.6)
+                sigWeight = LumiXSWeighter(19.6, int(mass))
                 sigWeight = sigWeight*tmpSigWeight[0]
                 sig_ds.add(sig_argSW, sigWeight)
                 #sig_argSW.Print()
@@ -142,9 +171,8 @@ def doInitialFits():
 
               signalList.append(TH1F(histName, histName, 100, 90, 190))
               signalList[-1].SetLineColor(kRed)
-              signalTree = signalDict[lepton+year].Get(treeName)
-              #signalTree = signalDict[lepton+year+'_4cat'].Get('m_llg_Signal'+year+'ggM'+mass)
-
+              signalTree = signalDict[lepton+year+"_M"+mass].Get(treeName)
+              
               if verbose:
                 print histName
                 signalTree.Print()
@@ -179,14 +207,14 @@ def doInitialFits():
                 signalListDH[i].plotOn(testFrame)
                 signal.plotOn(testFrame)
               testFrame.Draw()
-              c.Print(plotBase+'_'.join(['signals',prod,year,lepton,'cat'+cat])+'.png')
+              c.Print(plotBase+'_'.join(['signals',prod,year,lepton,'cat'+cat,'M'+mass])+'.png')
               
             if debugPlots:
               testFrame = mzg.frame()
               for signal in signalListDS:
                 signal.plotOn(testFrame, RooFit.DrawOption('pl'))
               testFrame.Draw()
-              c.Print(plotBase+'_'.join(['ds','sig',prod,year,lepton,'cat'+cat])+'.png')
+              c.Print(plotBase+'_'.join(['ds','sig',prod,year,lepton,'cat'+cat,'M'+mass])+'.png')
             del signalTree
 
 
@@ -225,7 +253,7 @@ def doInitialFits():
           testFrame = mzg.frame()
           data_ds.plotOn(testFrame,RooFit.Binning(50))
           testFrame.Draw()
-          c.Print(plotBase+'_'.join(['data',year,lepton,'cat'+cat])+'.png')
+          c.Print(plotBase+'_'.join(['data',year,lepton,'cat'+cat,'M'+mass])+'.png')
           
         getattr(ws,'import')(data_ds)
 
@@ -359,7 +387,9 @@ def doInitialFits():
         ws.commitTransaction()
   ws.writeToFile('testRooFitOut_Dalitz.root')
 
-  print 'we did it!'
+  ws.Print()
+
+  print '\n \t we did it!\t'
 
 
 

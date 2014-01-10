@@ -23,7 +23,7 @@ def makeCards():
   catList    = ['0','EB','EE']
   #catList    = ['0','LowMll','HighMll']
 
-  massList = ['125.0']
+  massList = ['120.0','125.0','130.0','135.0','140.0','145.0','150.0']
 
   for year in yearList:
     for lepton in leptonList:
@@ -43,7 +43,7 @@ def makeCards():
           sigWs = sigFile.Get('ws_card')
           prefixSigList = ['sig_'+sig for sig in sigNameList]
 
-          card = open('_'.join(['hzg',lepton,year,'cat'+cat,'M'+mass,'Dalitz'])+'.txt','w')
+          card = open('output_cards/'+'_'.join(['hzg',lepton,year,'cat'+cat,'M'+mass,'Dalitz'])+'.txt','w')
           
           card.write('#some bullshit\n')
           card.write('#more comments\n')
@@ -85,6 +85,7 @@ def makeCards():
 
             if makeSys:
               card.write('lumi         lnN     1.022        1.022 \n')
+              #card.write('brLLG        lnN     1.10         -     \n')
               card.write('pdf_gg       lnN     0.923/1.079  -     \n')
               card.write('QCDscale_ggH lnN     0.918/1.125  -     \n')
               # card.write('unc_Bkg1  gmN 72      -           1.00  \n')

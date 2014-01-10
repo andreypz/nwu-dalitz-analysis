@@ -25,8 +25,9 @@ class AutoVivification(dict):
       return value
     
 def SignalFitMaker(lep, year, cat):
-  #  massList = ['120.0','120.5','121.0','121.5','122.0','122.5','123.0','123.5','124.0','124.5','125.0']
-  massList = ['125.0']
+  #massList = ['120.0','125.0','130.0','135.0']
+  massList = ['120.0','125.0','130.0','135.0','140.0','145.0','150.0']
+  #massList = ['125.0']
   #sigNameList = ['gg','vbf','tth','wh','zh']
   sigNameList = ['gg']
 
@@ -43,7 +44,8 @@ def SignalFitMaker(lep, year, cat):
   for mass in massList:
     cardDict[lep][year][cat][mass] = RooWorkspace('ws_card')
 
-
+    print cardDict[lep][year][cat][mass]
+    
     # we need crystal ball + gaussian fits for all mass points, and for all production methods.
     # we also need to interpolate the distributions for 0.5 mass bins, so we use some tricks
     # in order to create new fits out of the existing 5GeV steps
@@ -137,6 +139,9 @@ def SignalFitMaker(lep, year, cat):
       for param in paramList:
         param.setConstant(True)
       fitList.append(CBG_Interp)
+
+      print lep,year,cat,mass, cardDict[lep][year][cat][str(mass)]
+
       getattr(cardDict[lep][year][cat][str(mass)],'import')(CBG_Interp)
       getattr(cardDict[lep][year][cat][str(mass)],'import')(yieldVar)
       cardDict[lep][year][cat][str(mass)].commitTransaction()
