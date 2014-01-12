@@ -28,25 +28,25 @@ def LumiXSWeighter(lumi, mH):
   #Mad:
   #cro = 0.00091
   if mH==120:
-    cro =  0.686*1.17*0.001
+    cro =  0.778*0.001
     Nev = 199985
   elif mH==125:
-    cro =  0.654*1.17*0.001
+    cro =  0.750*0.001
     Nev = 199988
   elif mH==130:
-    cro =  0.600*1.17*0.001
+    cro =  0.688*0.001
     Nev = 85835
   elif mH==135:
-    cro =  0.528*1.17*0.001
+    cro =  0.606*0.001
     Nev = 64805
   elif mH==140:
-    cro =  0.450*1.17*0.001
+    cro =  0.516*0.001
     Nev = 85570
   elif mH==145:
-    cro =  0.366*1.17*0.001
+    cro =  0.420*0.001
     Nev = 82585
   elif mH==150:
-    cro =  0.281*1.17*0.001
+    cro =  0.322*0.001
     Nev = 99587
   else:
     print "No XS for that mass", mH
@@ -55,7 +55,7 @@ def LumiXSWeighter(lumi, mH):
   #cro = 2*0.000887
   #Nev = 93992
   sc = float(1000*lumi*cro)/Nev
-  #print "Signal scale due to cs/lumi", sc
+  print 'M=',mH, 'cs=',cro, 'Nev=', Nev, 'lumi=',lumi, "scale", sc
   return sc
 
 
@@ -90,7 +90,7 @@ def doInitialFits():
   massList    = ['120','125','130','135','140','145','150']
   sigNameList = ['gg']
 
-
+  
   weight  = RooRealVar('Weight','Weight',0,100)
   mzg  = RooRealVar('CMS_hzg_mass','CMS_hzg_mass',90,190)
   mzg.setRange('fullRegion', 80,200)
@@ -131,34 +131,28 @@ def doInitialFits():
             signalTree = signalDict[lepton+year+"_M"+mass].Get(treeName)
             #signalTree.Print()
             sigName = '_'.join(['ds_sig',prod,lepton,year,'cat'+cat,'M'+mass])
-            tmpSigMass   = np.zeros(1,dtype = 'd')
-            tmpSigPhEta  = np.zeros(1,dtype = 'd')
-            tmpSigWeight = np.zeros(1,dtype = 'd')
-            tmpSigLumiXS = np.zeros(1,dtype = 'd')
 
-            signalTree.SetBranchAddress('m_llg', tmpSigMass)
-            signalTree.SetBranchAddress('ph_eta', tmpSigPhEta)
-            signalTree.SetBranchAddress('weight',tmpSigWeight)
-            #signalTree.SetBranchAddress('unBinnedLumiXS_Signal'+year+prod+'M'+mass,tmpSigLumiXS)
             sig_argSW = RooArgSet(mzg,weight)
             sig_ds    = RooDataSet(sigName,sigName,sig_argSW,'Weight')
+
+            lumiWeight = LumiXSWeighter(19.62, int(mass))
             for i in signalTree:
-              if cat=="EB" and fabs(tmpSigPhEta)>EBetaCut: continue
-              elif cat=="EE" and fabs(tmpSigPhEta)<EBetaCut: continue
+              if cat=="EB" and fabs(i.ph_eta)>EBetaCut: continue
+              elif cat=="EE" and fabs(i.ph_eta)<EBetaCut: continue
               #print "loop in signal tree", cat, category[cat], tmpType, "mass =", tmpSigMass[0] 
 
-              if tmpSigMass[0]> 90 and tmpSigMass[0]<190:
-                mzg.setVal(tmpSigMass[0])
+              if i.m_llg> 90 and i.m_llg<190:
+                mzg.setVal(i.m_llg)
                   
-                sigWeight = LumiXSWeighter(19.6, int(mass))
-                sigWeight = sigWeight*tmpSigWeight[0]
+                sigWeight = lumiWeight*i.weight
+                #sigWeight = lumiWeight
                 sig_ds.add(sig_argSW, sigWeight)
                 #sig_argSW.Print()
 
             #raw_input()
             signalListDS.append(sig_ds)
             getattr(ws,'import')(signalListDS[-1])
-            signalTree.ResetBranchAddresses()
+            #signalTree.ResetBranchAddresses()
 
             # do some histogramming for gg signal for bias study
             # we don't need or use unbinned signal or complicated fits
@@ -223,27 +217,21 @@ def doInitialFits():
         # ###############
         if verbose: print 'starting data section'
 
-
         dataName = '_'.join(['data',lepton,year,'cat'+cat])
         dataTree = dataDict[lepton+year].Get(treeName)
-        #tmpMassEventOld = np.zeros(1,dtype = 'f')
-        tmpMassEventOld = np.zeros(1,dtype = 'd')
-        tmpPhEta = np.zeros(1,dtype = 'd')
-
-        dataTree.SetBranchAddress('m_llg',tmpMassEventOld)
-        dataTree.SetBranchAddress('ph_eta',tmpPhEta)
 
         data_argS = RooArgSet(mzg)
         data_ds   = RooDataSet(dataName,dataName,data_argS)
 
         for i in dataTree:
-          if cat=="EB" and fabs(tmpPhEta)>EBetaCut: continue
-          elif cat=="EE" and fabs(tmpPhEta)<EBetaCut: continue
+          if cat=="EB" and fabs(i.ph_eta)>EBetaCut: continue
+          elif cat=="EE" and fabs(i.ph_eta)<EBetaCut: continue
           
-          if tmpMassEventOld[0]> 90 and tmpMassEventOld[0]<190:
-            mzg.setVal(tmpMassEventOld[0])
+          if i.m_llg> 90 and i.m_llg<190:
+            mzg.setVal(i.m_llg)
             data_ds.add(data_argS)
-        dataTree.ResetBranchAddresses()
+
+        #dataTree.ResetBranchAddresses()
 
         if verbose:
           print dataName
