@@ -136,14 +136,6 @@ def drawAllInFile(f1, name1, f2, name2, f3, name3, dir,path, N, howToScale="none
     c1.SetLogy(isLog)
     c1.cd()
     
-    if doRatio:
-        pad1 = TPad("pad1","pad1",0,0.3,1,1);
-        pad1.SetBottomMargin(0);
-        pad1.Draw();
-        pad1.cd();
-        pad1.SetLogy(isLog)
-
-
 
     if f2!=None and howToScale=="lumi": # only assume signal MC for now
         Nev = f2.Get("Counts/evt_byCut_raw").GetBinContent(1)
@@ -209,8 +201,17 @@ def drawAllInFile(f1, name1, f2, name2, f3, name3, dir,path, N, howToScale="none
             #    c1.SetLogy()
                 
         else:
+            pad1 = TPad("pad1","pad1",0,0.3,1,1);
+            pad2 = TPad("pad2","pad2",0,0,1,0.3);
+            if doRatio:
+                pad1.SetBottomMargin(0);
+                pad1.Draw();
+                pad1.cd();
+                pad1.SetLogy(isLog)
+                
             #handleOverflowBins(h1)
             h1.Draw("hist")
+            #h1.GetRange
             #h1.SetMarkerStyle(20)
             h1.SetLineColor(kBlack)
             h1.UseCurrentStyle()
@@ -257,7 +258,6 @@ def drawAllInFile(f1, name1, f2, name2, f3, name3, dir,path, N, howToScale="none
                 
                 if doRatio:
                     c1.cd()
-                    pad2 = TPad("pad2","pad2",0,0,1,0.3);
                     pad2.SetBottomMargin(0.25);
                     pad2.SetTopMargin(0);
                     pad2.Draw();
@@ -266,7 +266,7 @@ def drawAllInFile(f1, name1, f2, name2, f3, name3, dir,path, N, howToScale="none
                     r = h1.Clone("")                                        
                     r.Divide(h3);
                     r.GetYaxis().SetTitle("Data/MC");
-                    r.SetMaximum(10);
+                    r.SetMaximum(2);
                     r.SetMinimum(0);
                     r.GetYaxis().SetNdivisions(206);
                     r.GetYaxis().SetTitleOffset(0.4);
@@ -276,12 +276,12 @@ def drawAllInFile(f1, name1, f2, name2, f3, name3, dir,path, N, howToScale="none
                     r.Draw("e1p");
                     
                     pad1.cd();
-
+            
             #prelim = TLatex(0.15,0.95, "CMS Preliminary %s #it{L_{int}} = %0.1f fb^{-1}" % (8, 19.6))
             #prelim.SetNDC();
             #prelim.SetTextSize(0.03);
             #prelim.Draw();
-            
+            c1.cd()
             leg.SetFillColor(kWhite)
             leg.Draw()
 

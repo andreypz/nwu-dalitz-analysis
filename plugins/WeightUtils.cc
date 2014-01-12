@@ -87,18 +87,20 @@ float WeightUtils::GetTotalWeight(float nPV, int nJets, TLorentzVector l1, TLore
     Initialize();
     float weight = 1.;
 
+    weight *= PUWeight(nPV);
     if (!_isRealData) {
-        weight *= PUWeight(nPV);
-        weight *= RecoWeight(l1, l2);
-        //if (_sampleName.compare(0,2,"ZZ") == 0 && _dataPeriod!="2012") weight *= ZZWeight(l1, l2);
+      weight *= RecoWeight(l1, l2);
+      //if (_sampleName.compare(0,2,"ZZ") == 0 && _dataPeriod!="2012") weight *= ZZWeight(l1, l2);
     } else {
-        weight *= GammaWeight(nPV, nJets, l1);
+      weight *= GammaWeight(nPV, nJets, l1);
     }
     return weight;
 }
 
 float WeightUtils::PUWeight(float nPUtrue)
 {
+  if (_isRealData) return 1;
+
   if (nPUtrue < 60 && (_dataPeriod == "2011" || _dataPeriod == "2011A" || _dataPeriod == "2011B"))
     {
       Int_t myBin = h1_puReweight2011->FindBin(nPUtrue);
@@ -139,8 +141,11 @@ float WeightUtils::ZZWeight(TLorentzVector l1, TLorentzVector l2)
     return _zzWeight;
 }
 
+
 float WeightUtils::HiggsMassLineShapeWeight(float mass, float m_gen) 
 {
+  double _w;
+  /*
   double mh, gh, mt, m, _w;
   double decay_width;
   int BWflag;
@@ -172,6 +177,7 @@ float WeightUtils::HiggsMassLineShapeWeight(float mass, float m_gen)
 
 
   pwhg_cphto_reweight_(&mh, &gh, &mt, &BWflag, &m, &_w);
+*/
 
 /* Usage of  pwhg_cphto_reweight_() function:
 c     INPUT
@@ -187,9 +193,10 @@ c     w : the reweighting factor
 */
 
 //  cout <<"mass= "<<mh<< "  w = " << _w << endl;
-
+  _w=-1;
   return _w;
 }
+
 
 float WeightUtils::GluGluHiggsWeight(float higgsPt, int higgsMass) 
 {

@@ -34,7 +34,8 @@ float EAPho[7][3] = {
 };
 string  myTrigger = "";
 Float_t cut_l1pt  = 23;
-Float_t cut_l2pt  = 7, cut_l2pt_low = 7;
+Float_t cut_l2pt  = 7, cut_l2pt_low = 4;
+const Float_t cut_iso_mu1 = 0.4, cut_iso_mu2=0;
 Float_t cut_gammapt = 25;
 
 Float_t global_Mll = 0;
@@ -42,7 +43,7 @@ Float_t global_Mll = 0;
 Int_t  dal=0, nodal=0;
 Bool_t makeMvaTree = 0;
 Bool_t makeFitTree = 1;
-const UInt_t hisEVTS[] = {14803};
+const UInt_t hisEVTS[] = {152918,92217,32834,74613,4978,100848,76214,88598,114206};
 Int_t evSize = sizeof(hisEVTS)/sizeof(int);
 
 bool P4SortCondition(const TLorentzVector& p1, const TLorentzVector& p2) {return (p1.Pt() > p2.Pt());}
@@ -83,6 +84,7 @@ void zgamma::Begin(TTree * tree)
   //myRandom = new TRandom3();
 
   triggerSelector = new TriggerSelector("", period, *triggerNames);
+  weighter = new WeightUtils(sample, period, selection, 0);
 
   histoFile = new TFile(Form("a_%s_higgsHistograms.root", selection.c_str()), "RECREATE");
 
@@ -227,7 +229,9 @@ void zgamma::Begin(TTree * tree)
   if (makeFitTree){
     _fitTree = new TTree("fitTree", "Mllg tree for fitting");
     _fitTree->Branch("m_llg",  &fit_m_llg, "m_llg/D");
-    _fitTree->Branch("type",   &fit_type,  "type/I");
+    _fitTree->Branch("m_ll",   &fit_m_ll,  "m_ll/D");
+    _fitTree->Branch("ph_eta", &fit_phEta, "m_phEta/D");
+    _fitTree->Branch("isLowPt",&fit_isLowPt,"isLowPt/O");
     _fitTree->Branch("weight", &fit_weight,"weight/D");
   }
   histoFile->cd();
@@ -244,6 +248,7 @@ Bool_t zgamma::Process(Long64_t entry)
   FillHistoCounts(0, 1);
   if (nEvents[0] % (int)5e4 == 0) cout<<nEvents[8]<<" events passed of "<<nEvents[0]<<" checked!"<<endl;
 
+  if (nEvents[0] == 1) weighter->SetDataBit(isRealData);
 
   //if (nEvents[0]>20) Abort("enough is enosugh!");
 
@@ -260,6 +265,8 @@ Bool_t zgamma::Process(Long64_t entry)
       if(triggerPass) nEventsTrig[0][i]++;
     }
 
+  eventWeight = weighter->PUWeight(nPUVerticesTrue);
+  //cout<<" weight="<<eventWeight<<endl;
 
   //----------------------//
   // Selecting triggers   //
@@ -546,20 +553,19 @@ Bool_t zgamma::Process(Long64_t entry)
   CountEvents(2);
 
 
-  /*for(Int_t ev=0; ev<evSize;ev++){
-    if (eventNumber==hisEVTS[ev]){cout<<eventNumber<<" Found an event after cut 2"<<endl;
-    break;}}*/
-
-
+  nVtx = primaryVtx->GetSize();
   // --- Primary vertex ---//
 
   if (primaryVtx->GetSize()<1) return kTRUE;
-  TCPrimaryVtx *mainPrimaryVertex = 0;//, *secondPrimaryVertex = 0;
+  TCPrimaryVtx *mainPrimaryVertex = 0, *secondPrimaryVertex = 0;
   mainPrimaryVertex   = (TCPrimaryVtx*)(primaryVtx->At(0));
-
-  //secondPrimaryVertex = (TCPrimaryVtx*)(primaryVtx->At(1));
   TVector3* pvPosition;// = new TVector3();
 
+  nDofVtx1 = mainPrimaryVertex->NDof();
+  if(primaryVtx->GetSize() >1){
+    secondPrimaryVertex = (TCPrimaryVtx*)(primaryVtx->At(1));
+    nDofVtx2 = secondPrimaryVertex->NDof();
+  }
   pvPosition = mainPrimaryVertex;
 
   vector<TCElectron> electrons0, electrons, electrons_dalitz, fake_electrons0;
@@ -674,9 +680,9 @@ Bool_t zgamma::Process(Long64_t entry)
 
     if (!(fabs(thisMuon->Eta()) < 2.4)) continue;
 
-    if(thisMuon->Pt() > 4)
+    if(thisMuon->Pt() > 7)
       for(Int_t ev=0; ev<evSize;ev++){
-        if (eventNumber==hisEVTS[ev]){cout<<"   ---> "<<eventNumber<<" <--- Found an event after cut "<<endl;
+        if (eventNumber==hisEVTS[ev]){cout<<"   mu>7 cut ---> "<<eventNumber<<" <--- Found an event after cut "<<endl;
           MuonDump(*thisMuon, pvPosition);
           break;}}
 
@@ -699,12 +705,14 @@ Bool_t zgamma::Process(Long64_t entry)
   hists->fill1DHist(photons.size(),   Form("size_ph_cut%i",  1),";Number of photons",  5,0,5, 1, "Photon");
   hists->fill1DHist(photons0.size(),  Form("size_ph0_cut%i", 1),";Number of photons",  5,0,5, 1, "Photon");
 
+  /*
   if (selection=="el"){
     if (electrons.size()>=1)
       MakeElectronPlots(electrons[0], "NewEle-1");
     if (electrons.size()>=2)
       MakeElectronPlots(electrons[1], "NewEle-2");
   }
+  */
 
   //if (photons0.size()<1) return kTRUE;
   //gamma0 = photons0[0];
@@ -724,7 +732,6 @@ Bool_t zgamma::Process(Long64_t entry)
   if(!isRealData && makeGen){
     hists->fill1DHist(genMll,  "gen_Mll_reco_gamma_iso",  ";gen_Mll",50,0,15, 1,"eff");
     hists->fill1DHist(gendR,   "gen_dR_reco_gamma_iso",   ";gen_dR", 50,0,0.3,1,"eff");
-
   }
 
 
@@ -779,8 +786,6 @@ Bool_t zgamma::Process(Long64_t entry)
         lPt2 = lPt1;
         isDalitzEle = true;
       }
-
-
     else if (electrons.size()==2)
       {
         lPt1 = electrons[0];
@@ -808,8 +813,27 @@ Bool_t zgamma::Process(Long64_t entry)
 
   if(selection=="mu"){//mumugamma
     if (muons.size()<2) return kTRUE;
+
+    /*
+    if (muons[1].Pt() < 7 &&
+        (zgamma::CalculateMuonIso(&muons[0]) > 0.2 || zgamma::CalculateMuonIso(&muons[1]) > 1.0)
+        )
+      return kTRUE;
+    else if(zgamma::CalculateMuonIso(&muons[0]) > 0.4 || zgamma::CalculateMuonIso(&muons[1]) > 0.4) 
+      return kTRUE;
+    */
+
+    if ((muons[0].Pt() > 20 && zgamma::CalculateMuonIso(&muons[0]) > 0.4) ||
+        (muons[1].Pt() > 20 && zgamma::CalculateMuonIso(&muons[1]) > 0.4)
+        )
+      return kTRUE;
+    else if(zgamma::CalculateMuonIso(&muons[0]) > 0.4 || zgamma::CalculateMuonIso(&muons[1]) > 0.4) 
+      return kTRUE;
+
     lPt1 = muons[0];
     lPt2 = muons[1];
+
+
     if (muons[0].Charge()==1 && muons[1].Charge()==-1){
       l1 = muons[0];
       l2 = muons[1];
@@ -847,6 +871,11 @@ Bool_t zgamma::Process(Long64_t entry)
   MakePhotonPlots(gamma);
 
 
+  for(Int_t ev=0; ev<evSize;ev++){
+    if (eventNumber==hisEVTS[ev]){cout<<eventNumber<<" Found an event after cut 3"<<endl;
+      break;}
+  }
+
 
   if (lPt1.Pt() < cut_l1pt || lPt2.Pt() < cut_l2pt_low)   return kTRUE;
   if (selection=="el" && isDalitzEle && lPt1.Pt()<30) return kTRUE;
@@ -862,11 +891,10 @@ Bool_t zgamma::Process(Long64_t entry)
   FillHistoCounts(4, eventWeight);
   CountEvents(4);
 
-  fout<<" nEvt = "<<nEvents[0]<<" : Run/lumi/event = "<<runNumber<<"/"<<lumiSection<<"/"<<eventNumber<<endl;
-
 
   if (Mll > 20) return kTRUE;
 
+  fout<<" nEvt = "<<nEvents[0]<<" : Run/lumi/event = "<<runNumber<<"/"<<lumiSection<<"/"<<eventNumber<<endl;
 
   FillHistosFull(5, eventWeight, l1, l2, lPt1, lPt2, gamma, "", isDalitzEle);
   FillHistoCounts(5, eventWeight);
@@ -964,25 +992,19 @@ Bool_t zgamma::Process(Long64_t entry)
 
 
     fit_m_llg  = Mllg;
+    fit_m_ll   = Mll;
     fit_weight = eventWeight;
-    fit_type = 0;
-
+    fit_phEta = gamma.SCEta();
+    fit_isLowPt = false;
+    if (lPt2.Pt() < cut_l2pt)
+      fit_isLowPt = true;
+      
     if (lPt2.Pt() > cut_l2pt){
       FillHistosFull(9, eventWeight, l1, l2, lPt1, lPt2, gamma, "", isDalitzEle);
       FillHistoCounts(9, eventWeight);
       CountEvents(9);
 
     }
-
-    if (fabs(gamma.Eta())<1.) fit_type = 1;      
-    else                         fit_type = 2;      
-    //else       fit_type = 3;
-    
-
-    if (Mll < 2) fit_type = 4;
-    else         fit_type = 5;
-
-
 
     _fitTree->Fill();
 
@@ -993,6 +1015,7 @@ Bool_t zgamma::Process(Long64_t entry)
     FillHistoCounts(10, eventWeight);
     CountEvents(10);
 
+    /*
     if (selection=="el"){
       if (electrons.size()>=1)
         MakeElectronPlots(electrons[0], "NewEle-1-mH");
@@ -1006,6 +1029,8 @@ Bool_t zgamma::Process(Long64_t entry)
           MakeElectronPlots(electrons_dalitz[0], "DalitzEleEE-mH");
       }
     }
+    */
+
 
   }
 
@@ -1279,14 +1304,17 @@ bool zgamma::PassElectronIdAndIsoMVA(TCElectron *lep)
 
 float zgamma::CalculateMuonIso(TCMuon *lep)
 {
-  Double_t area = 0.09;
+  //Double_t area = 0.09;
   //Double_t area = EffAreaMuon(lep, "2012",0,0);
-  float muISO = 0;
-  if (period=="2012")
-    muISO = (lep->IsoMap("pfChargedHadronPt_R04") + TMath::Max(0.0, lep->IsoMap("pfPhotonEt_R04") + lep->IsoMap("pfNeutralHadronEt_R04")  - TMath::Max(0.0, (Double_t)rho25Factor*area)))/lep->Pt();
-  else if(period=="2011")
-    muISO = (lep->IsoMap("pfChargedHadronPt_R04") + TMath::Max(0.0, lep->IsoMap("pfPhotonEt_R04") + lep->IsoMap("pfNeutralEt_R04")  - TMath::Max(0.0, (Double_t)rhoFactor*TMath::Pi()*0.09)))/lep->Pt();
-  else cout<<"Muon iso - Period is not defined!"<<period<<endl;
+  //float muISO = 0;
+  //if (period=="2012")
+  //muISO = (lep->IsoMap("pfChargedHadronPt_R04") + TMath::Max(0.0, lep->IsoMap("pfPhotonEt_R04") + lep->IsoMap("pfNeutralHadronEt_R04")  - TMath::Max(0.0, (Double_t)rho25Factor*area)))/lep->Pt();
+  //else if(period=="2011")
+  //muISO = (lep->IsoMap("pfChargedHadronPt_R04") + TMath::Max(0.0, lep->IsoMap("pfPhotonEt_R04") + lep->IsoMap("pfNeutralEt_R04")  - TMath::Max(0.0, (Double_t)rhoFactor*TMath::Pi()*0.09)))/lep->Pt();
+  //  else cout<<"Muon iso - Period is not defined!"<<period<<endl;
+
+  Float_t muISO = (lep->IsoMap("pfChargedHadronPt_R04") +
+                   TMath::Max(0.0, lep->IsoMap("pfNeutralHadronEt_R04") + lep->IsoMap("pfPhotonEt_R04") - 0.5*lep->IsoMap("pfPUPt_R04")))/lep->Pt();
 
   return muISO;
 }
@@ -1298,8 +1326,8 @@ bool zgamma::PassMuonIdAndIso(TCMuon *lep, muIdAndIsoCuts cuts, TVector3 *pv)
 
   //Float_t muISO =  CalculateMuonIso(lep);
   //Float_t muISO = (lep->IsoMap("pfChargedHadronPt_R04") + lep->IsoMap("pfNeutralHadronEt_R04") + lep->IsoMap("pfPhotonEt_R04"))/lep->Pt();
-  Float_t muISO = (lep->IsoMap("pfChargedHadronPt_R04") +
-                   TMath::Max(0.0, lep->IsoMap("pfNeutralHadronEt_R04") + lep->IsoMap("pfPhotonEt_R04") - 0.5*lep->IsoMap("pfPUPt_R04")))/lep->Pt();
+  //Float_t muISO = (lep->IsoMap("pfChargedHadronPt_R04") +
+  //TMath::Max(0.0, lep->IsoMap("pfNeutralHadronEt_R04") + lep->IsoMap("pfPhotonEt_R04") - 0.5*lep->IsoMap("pfPUPt_R04")))/lep->Pt();
 
   if(1
      && lep->IsPF() && lep->IsTRK()
@@ -1316,7 +1344,7 @@ bool zgamma::PassMuonIdAndIso(TCMuon *lep, muIdAndIsoCuts cuts, TVector3 *pv)
      && lep->NormalizedChi2_tracker()  < cuts.NormalizedChi2_tracker
      && fabs(lep->Dxy(pv))     < cuts.dxy
      && fabs(lep->Dz(pv))      < cuts.dz
-     && muISO                  < cuts.pfIso04
+     //&& muISO                  < cuts.pfIso04
      )
     pass = true;
   //cout<<"muon pass? "<<pass<<endl;
@@ -1429,7 +1457,10 @@ void zgamma::FillHistosFull(Int_t num, Double_t weight,
   diLepCM.Boost(b1);
 
 
+  hists->fill1DHist(weight,     Form("weight_%s_cut%i",         d, num),";M(ll#gamma)",  200, 0,3, 1, dir);
+
   hists->fill1DHist(tri.M(),     Form("tri_mass_%s_cut%i",         d, num),";M(ll#gamma)",  100, 0,200,  weight, dir);
+  hists->fill1DHist(tri.M(),     Form("tri_mass80_%s_cut%i",       d, num),";M(ll#gamma)",  100,80,200,  weight, dir);
   hists->fill1DHist(tri.M(),     Form("tri_mass_longTail_%s_cut%i",d, num),";M(ll#gamma)",  100, 0,400,  weight, dir);
 
   hists->fill1DHist(lPt1Gamma.M(), Form("lPt1Gamma_%s_cut%i",d, num),";M(l1#gamma)",  100, 0,400,  weight, dir);
@@ -1522,6 +1553,13 @@ void zgamma::FillHistosFull(Int_t num, Double_t weight,
     hists->fill1DHist(phi, Form("phi_cut%i", num), "; phi lp",  100, -TMath::Pi(), TMath::Pi(), 1,"Angles");
   }
 
+  //hists->fill1DHist(nVtxTotal, Form("vtx_nPV_tot_%s_cut%i",   d, num), "vtx_nPV_tot",    40, 0,40, weight, dir);
+  hists->fill1DHist(nVtx,      Form("vtx_nPV_raw_%s_cut%i",   d, num), "vtx_nPV_raw",    40, 0,40,      1, dir);
+  hists->fill1DHist(nVtx,      Form("vtx_nPV_weight_%s_cut%i",d, num), "vtx_nPV_weight", 40, 0,40, weight, dir);
+
+  hists->fill1DHist(nDofVtx1, Form("vtx_ndof1_%s_cut%i",  d, num), "vtx_ndof1", 50, 0,200, weight, dir);
+  hists->fill1DHist(nDofVtx1, Form("vtx_ndof2_%s_cut%i",  d, num), "vtx_ndof2", 50, 0,200, weight, dir);
+
 
 }
 
@@ -1537,14 +1575,15 @@ void zgamma::MakeMuonPlots(TCMuon mu, TVector3 *pv)
   hists->fill1DHist(mu.NormalizedChi2_tracker(),    "mu_NormalizedChi2_tracker",    ";NormalizedChi2_tracker", 100, 0,6,   1, "Muons");
   hists->fill1DHist(mu.Dxy(pv), "mu_dxy", ";dxy", 50, 0,0.1, 1, "Muons");
   hists->fill1DHist(mu.Dz(pv),  "mu_dxz", ";dz",  50, 0,0.3, 1, "Muons");
+  hists->fill1DHist(mu.PtError()/mu.Pt(), "mu_ptErrorOverPt", ";ptErrorOverPt", 50, 0,0.2, 1, "Muons");
 
   Float_t muIso = CalculateMuonIso(&mu);
-  hists->fill1DHist(muIso, "mu_iso", ";rel isolation, rho corr", 50, 0,0.7, 1, "Muons");
-  Float_t iso2 = (mu.IsoMap("pfChargedHadronPt_R04") + mu.IsoMap("pfNeutralHadronEt_R04") + mu.IsoMap("pfPhotonEt_R04"))/mu.Pt();
-  hists->fill1DHist(iso2, "mu_iso_official", ";pfIsolationR04", 50, 0,0.7, 1, "Muons");
+  hists->fill1DHist(muIso, "mu_iso", ";rel isolation, pu corr", 50, 0,0.7, 1, "Muons");
+  hists->fill2DHist(muIso, global_Mll, "mu_iso_vs_Mll", ";pfIsolationR04;M(l_{1},l_{2})", 50, 0,0.7, 50, 0,20, 1, "Muons");
+  //Float_t iso2 = (mu.IsoMap("pfChargedHadronPt_R04") + mu.IsoMap("pfNeutralHadronEt_R04") + mu.IsoMap("pfPhotonEt_R04"))/mu.Pt();
+  //hists->fill1DHist(iso2, "mu_iso_official", ";pfIsolationR04", 50, 0,0.7, 1, "Muons");
 
-  hists->fill2DHist(iso2, global_Mll,     "mu_iso_vs_Mll",    ";pfIsolationR04;M(l_{1},l_{2})", 50, 0,0.7, 50, 0,20, 1, "Muons");
-  hists->fill1DHist(mu.PtError()/mu.Pt(), "mu_ptErrorOverPt", ";ptErrorOverPt", 50, 0,0.2, 1, "Muons");
+
 }
 
 void zgamma::MakePhotonPlots(TCPhoton ph)
@@ -1657,14 +1696,14 @@ void zgamma::MuonDump(TCMuon mu, TVector3 *pv)
   Float_t muISO = (mu.IsoMap("pfChargedHadronPt_R04") +
                    TMath::Max(0.0, mu.IsoMap("pfNeutralHadronEt_R04") + mu.IsoMap("pfPhotonEt_R04") - 0.5*mu.IsoMap("pfPUPt_R04")))/mu.Pt();
 
-  cout  << runNumber << " " << eventNumber << " " << mu.Pt()
-        << " " << mu.Eta() << " " << mu.IsGLB() << " " << mu.IsPF() << " "<<mu.IsTRK()<<endl;
-  cout  << mu.NormalizedChi2_tracker() << "  " << muISO <<  " " << mu.Dxy(pv) << " " << mu.Dz(pv)
-        << "\n  good =" << mu.IsGood()
-        << "\n  trk =" << mu.TrackLayersWithMeasurement() << "  pix=" <<mu.PixelLayersWithMeasurement()
-        << "\n " << mu.NormalizedChi2() << " " << mu.NumberOfValidMuonHits() << " " << mu.NumberOfMatchedStations()
 
-        << " " << mu.NumberOfValidPixelHits() << " " << mu.TrackLayersWithMeasurement()
+  cout  << runNumber << " " << eventNumber << "  pt =" << mu.Pt()
+        << " eta=" << mu.Eta() << " GLB=" << mu.IsGLB() << "  isPF=" << mu.IsPF() << " isTRK="<<mu.IsTRK()<<endl;
+  cout  << "chi2_tr="<< mu.NormalizedChi2_tracker() << "  iso=" << muISO <<  "  dxy=" << mu.Dxy(pv) << " dz=" << mu.Dz(pv)
+        << "\n  good =" << mu.IsGood()
+    //<< "\n  trk =" << mu.TrackLayersWithMeasurement() << "  pix=" <<mu.PixelLayersWithMeasurement()
+    //   << "\n " << mu.NormalizedChi2() << " " << mu.NumberOfValidMuonHits() << " " << mu.NumberOfMatchedStations()
+    //  << " " << mu.NumberOfValidPixelHits() << " " << mu.TrackLayersWithMeasurement()
         << endl;
 }
 

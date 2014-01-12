@@ -12,14 +12,13 @@ subdir = sys.argv[1]
 
 outpath = '/uscms_data/d2/andreypz/html/zgamma/lhe/'
 files={}
-#files["mcfm"] = ['/uscms_data/d2/andreypz/lhe_mcfm_hzg_dalitz_lord_fixed_unweighted.lhe.root']
-#files["mad"] = ['/uscms_data/d2/andreypz/lhe_mad_LO_HiggsToMuMuGamma.root']
-#files["mad"] = ['/uscms_data/d2/andreypz/lhe_mad_hzg5.root']
-#files["mad"] = ['/uscms/home/andreypz/lhe_higgs_eegamma_dalitz/heeg_m120.root']
-files["mad"] = ['/uscms/home/andreypz/lhe_higgs_mumugamma_dalitz/hmumug_m120.root']
-files["test"] = ['/uscms/home/andreypz/lhe_higgs_mumugamma_dalitz/hmumug_m120_test.root']
+#files["one"] = ['/uscms_data/d2/andreypz/lhe_higgs_mumugamma_dalitz/hmumug_m125.root']
+files["one"] = ['/uscms_data/d2/andreypz/lhe_vbf_higgs/vbfh_eeg_m125.root']
+files["two"] = ['/uscms_data/d2/andreypz/lhe_vbf_higgs/vbfh_mumug_m125.root']
 
-MH = 120
+MH = 125
+LEPID1 = 13
+LEPID2 = 11
 
 print files
 #gSystem.Load("/home/andreypz/workspace/MadGraph5/ExRootAnalysis/lib/libExRootAnalysis.so")
@@ -28,20 +27,18 @@ gSystem.Load("/uscms/home/andreypz/work/MadGraph5/ExRootAnalysis/lib/libExRootAn
 gROOT.LoadMacro("../plugins/HistManager.cc+");
 gROOT.LoadMacro("../plugins/ZGAngles.cc+");
 
+oneFile = TFile(outpath+"out_one_"+subdir+".root","RECREATE")
+oneFile.cd()
+h1 = HistManager(oneFile)
+
+twoFile = TFile(outpath+"out_two_"+subdir+".root","RECREATE")
+twoFile.cd()
+h2 = HistManager(twoFile)
+
 mcfmFile = TFile(outpath+"out_mcfm_"+subdir+".root","RECREATE")
-mcfmFile.mkdir("eff")
-mcfmFile.cd()
-h1 = HistManager(mcfmFile)
+#mcfmFile.cd()
+#h1 = HistManager(mcfmFile)
 
-madFile = TFile(outpath+"out_mad_"+subdir+".root","RECREATE")
-madFile.mkdir("eff")
-madFile.cd()
-h2 = HistManager(madFile)
-
-testFile = TFile(outpath+"out_mcfm_"+subdir+".root","RECREATE")
-testFile.mkdir("eff")
-testFile.cd()
-h3 = HistManager(testFile)
 
 ang = ZGAngles()
 
@@ -60,7 +57,6 @@ def FillAllHists(files, h):
         print f
         
     dcount = 0
-    LEPID = 13
     for evt in fChain:
 
         g1 = TLorentzVector(0)
@@ -68,14 +64,19 @@ def FillAllHists(files, h):
         g3 = TLorentzVector(0)
         l1 = TLorentzVector(0)
         l2 = TLorentzVector(0)
+        j1 = TLorentzVector(0)
+        j2 = TLorentzVector(0)
         gamma = TLorentzVector(0)
         diLep = TLorentzVector(0)
         trueHiggs = TLorentzVector(0)
         
         hasZ = 0
+        hasWp = 0
+        hasWm = 0
         hasGlu3=0
         hasGamma=0
         hi = 0
+        qq = 0
         for p in evt.Particle:
             px = p.Px
             py = p.Py
@@ -86,18 +87,33 @@ def FillAllHists(files, h):
             if (p.PID == 25):
                 trueHiggs.SetPxPyPzE(px,py,pz,E)
                 hi+=1
+
+            if abs(p.PID) < 6 and p.Status==1:
+                qq+=1
+                if qq==1:
+                    j1.SetPxPyPzE(px,py,pz,E)
+                if qq==2:
+                    j2.SetPxPyPzE(px,py,pz,E)
                 
             if (p.PID == 22 and p.Status==1):
                 gamma.SetPxPyPzE(px,py,pz,E)
                 hasGamma=1
+
+            if (p.PID == 22 and p.Status==1):
+                gamma.SetPxPyPzE(px,py,pz,E)
+                hasGamma=1
                 
-            if (p.PID == LEPID):
+            if (p.PID == LEPID1 or p.PID==LEPID2):
                 l1.SetPxPyPzE(px,py,pz,E)
-            if (p.PID == -LEPID): 
+            if (p.PID == -LEPID1 or p.PID==-LEPID2): 
                 l2.SetPxPyPzE(px,py,pz,E)
 
             if p.PID==23:
                 hasZ=1
+            if p.PID==24:
+                hasWp=1
+            if p.PID==-24:
+                hasWm=1
 
             if (p.PID==21 and p.Status==-1):
                 g1.SetPxPyPzE(px,py,pz,E)
@@ -122,11 +138,17 @@ def FillAllHists(files, h):
             #print "dLep.Pt = 0"
             continue
 
+        # if qq!=2:
+        #     print "Nope, there has to be two of them", qq
+        #     sys.exit(0)
+        
+        #if not hasWm and not hasWp and not hasZ: continue
+        #if not hasGamma: continue
+
         dcount += 1
         #if dcount >10000:
         #    continue
 
-        #if not hasGamma: continue
             
         tri = diLep + gamma
         
@@ -159,7 +181,7 @@ def FillAllHists(files, h):
         #if dcount>20: break
         
         h.fill1DHist(c1,  "ang_co1",";gen cos_lp",  100,-1,1, 1,"");
-        h.fill1DHist(c2,  "ang_co2",";gen cos_lm,", 100,-1,1, 1,"");
+        h.fill1DHist(c2,  "ang_co2",";gen cos_lm",  100,-1,1, 1,"");
         h.fill1DHist(c3,  "ang_co3",";gen cosTheta",100,-1,1, 1,"");
         h.fill1DHist(phi, "ang_phi",";gen phi lp",  100, -TMath.Pi(), TMath.Pi(), 1,"");
 
@@ -181,10 +203,6 @@ def FillAllHists(files, h):
         h.fill1DHist(gamma.M(),"gamma_mass",  ";gamma mass",    200, -2,2, 1, "")
         #h.fill1DHist(g1.Pt(),    "g1_pt",  ";g1 pt",    50, 0,100, 1, "")
         #h.fill1DHist(g2.Pt(),    "g2_pt",  ";g2 pt",    50, 0,100, 1, "")
-        if hasGlu3:
-            h.fill1DHist(g3.Pt(),   "g3_pt",  ";glu3 pt",   50, 0,100, 1, "")
-            h.fill1DHist(g3.Eta(),  "g3_eta", ";glu3 eta",  50, -5,5, 1, "")
-            h.fill1DHist(g3.Phi(),  "g3_phi", ";glu3 phi",  50, -4,4, 1, "")
         
         #h.fill1DHist(l1.Pt(),    "l1_pt",  ";l+ pt",    50, 0,100, 1, "")    
         #h.fill1DHist(l1.Eta(),   "l1_eta", ";l+ eta",   50, -3.5,3.5, 1, "")
@@ -200,16 +218,26 @@ def FillAllHists(files, h):
         h.fill1DHist(tri.M(),     "h_mass_zoom",";M(ll#gamma)",  200, MH-1,MH+1,  1, "")
         h.fill1DHist(tri.M(),     "h_mass_zoom2",";M(ll#gamma)", 200, MH-0.1,MH+0.1,  1, "")
 
+        ## VBF Plots:
+        if qq==2:
+            h.fill1DHist((j1+j2).M(),   "diJet_mass",     ";M(j1,j2)", 200, 0,600,  1, "")
+            h.fill1DHist(fabs(j1.Eta()+j2.Eta()), "diJet_dEta",";|dEta(j1,j2)", 200, 0,6,  1, "")
+
+        '''
         if not hasGlu3:
             h.fill1DHist(tri.Pt(),    "h_pt",";Pt of the Higgs",  200, 0,200,  1, "")
             h.fill1DHist(tri.Pz(),    "h_z", ";Pz of the Higgs",  200, -300,300,  1, "")
         else:
+        h.fill1DHist(g3.Pt(),   "g3_pt",  ";glu3 pt",   50, 0,100, 1, "")
+        h.fill1DHist(g3.Eta(),  "g3_eta", ";glu3 eta",  50, -5,5, 1, "")
+        h.fill1DHist(g3.Phi(),  "g3_phi", ";glu3 phi",  50, -4,4, 1, "")
+
             h.fill1DHist(tri.Pt(),    "h_pt_2","Extra ISR glu;Pt of the Higgs",  200, 0,200,  1, "")
             h.fill1DHist(tri.Pz(),    "h_pz_2","Extra ISR glu;Pz of the Higgs",  200, -300,300,  1, "")
             h.fill1DHist((tri+g3).Pt(),    "h_pt_glu3","Extra ISR glu;Pt of the Higgs+gluon",  200, 0,200,  1, "")
             h.fill1DHist((tri+g3).Pz(),    "h_pz_glu3","Extra ISR glu;Pz of the Higgs+gluon",  200, -300,300,  1, "")
-    
-
+        '''
+        
         h.fill1DHist(gammaCM.E(), "gamma_Ecom",";E_{#gamma} in CoM",  50, 0,200,  1, "")
         h.fill1DHist(diLepCM.E(), "diLep_Ecom",";Ecom(ll)", 50, 0,100,  1, "")
 
@@ -255,7 +283,7 @@ if __name__ == "__main__":
     gROOT.ProcessLine(".L ~/tdrstyle.C")
     setTDRStyle()
     TH1.SetDefaultSumw2(kTRUE)
-    gStyle.SetOptStat(1)
+    #gStyle.SetOptStat(1)
     
     pathBase = outpath
     path = pathBase+subdir
@@ -264,22 +292,22 @@ if __name__ == "__main__":
 
 
     #FillAllHists(files["mcfm"], h1)
-    FillAllHists(files["mad"],  h2)
-    FillAllHists(files["test"],  h3)
+    FillAllHists(files["one"],  h1)
+    FillAllHists(files["two"],  h2)
 
     mcfmFile.cd()
     mcfmFile.Write()
-    madFile.cd()
-    madFile.Write()
-    testFile.cd()
-    testFile.Write()
-    print "Saved files: \n",mcfmFile.GetName(), "\n", madFile.GetName(), "\n", testFile.GetName()
+    oneFile.cd()
+    oneFile.Write()
+    twoFile.cd()
+    twoFile.Write()
+    print "Saved files: \n",mcfmFile.GetName(), "\n", oneFile.GetName(), "\n", twoFile.GetName()
 
 
     blah = []
-    #u.drawAllInFile(mcfmFile,"mcfm", madFile, "madgra",None,"","", path, None,"norm", isLog=True)
-    u.drawAllInFile(testFile,"test", madFile, "madgra",None,"","", path, None,"norm", isLog=True)
-    #u.drawAllInFile(madFile, "madgra",None,"", None,"","", path, None,"norm")
+    #u.drawAllInFile(mcfmFile,"mcfm", oneFile, "madgra",None,"","", path, None,"norm", isLog=True)
+    u.drawAllInFile(oneFile, "vbf ele", twoFile, "vbf mu",None,"","", path, None,"norm", isLog=True)
+    #u.drawAllInFile(twoFile, "vbf",None,"", None,"","", path, None,"norm")
 
     plot_types =[]
     list = os.listdir(pathBase)
@@ -290,7 +318,8 @@ if __name__ == "__main__":
     ht.makeHTML("Plots from an lhe file",pathBase, plot_types, blah, "mad")
 
     mcfmFile.Close()
-    madFile.Close()
+    oneFile.Close()
+    twoFile.Close()
 
 
     print "\n\t\t finita la comedia \n"

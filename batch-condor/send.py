@@ -16,7 +16,7 @@ parser.add_option("--sig",  dest="sig",  action="store_true", default=False, hel
 parser.add_option("--bkg",  dest="bkg",  action="store_true", default=False, help="Run over the background samples")
 parser.add_option("--test", dest="test", action="store_true", default=False, help="Run over the test sample")
 parser.add_option("--all",  dest="all",  action="store_true", default=False, help="Run over all the samples!")
-
+    
 (options, args) = parser.parse_args()
 
 if len(args) < 1:
@@ -130,12 +130,14 @@ if period =="2012":
 
     if selection in ["muon","mugamma","single-mu"]:
         signal.extend([
-            cfg('h-dalitz', dCache+'/andreypz/nuTuples_v8_8TeV/MCFM_dalitz_v2',    1, 'dalitz '+selection+' '+period),
-            cfg('mad', dCache+'/andreypz/nuTuples_v8_8TeV/Higgs_To_MuMuGamma_8TeV',1, 'dalitz '+selection+' '+period),
-            ])
-    elif selection=="electron":
-        signal.extend([
-            cfg('h-dalitz', dCache+'/andreypz/nuTuples_v8_8TeV/MCFM_dalitz_v2', 1, 'dalitz '+selection+' '+period),
+            cfg('dal-MCFM', dCache+'/andreypz/nuTuples_v8_8TeV/MCFM_dalitz_v2',    1, 'dalitz '+selection+' '+period),
+            cfg('dal-mad125', dCache+'/andreypz/nuTuples_v8_8TeV/Higgs_To_MuMuGamma_8TeV',1, 'dalitz '+selection+' '+period),
+            cfg('dal-mad120', dCache+'/andreypz/nuTuples_v8_8TeV/Higgs_To_MuMuGamma_MH120',1, 'dalitz '+selection+' '+period),
+            cfg('dal-mad130', dCache+'/andreypz/nuTuples_v8_8TeV/Higgs_To_MuMuGamma_MH130',1, 'dalitz '+selection+' '+period),
+            cfg('dal-mad135', dCache+'/andreypz/nuTuples_v8_8TeV/Higgs_To_MuMuGamma_MH135',1, 'dalitz '+selection+' '+period),
+            cfg('dal-mad140', dCache+'/andreypz/nuTuples_v8_8TeV/Higgs_To_MuMuGamma_MH140',1, 'dalitz '+selection+' '+period),
+            cfg('dal-mad145', dCache+'/andreypz/nuTuples_v8_8TeV/Higgs_To_MuMuGamma_MH145',1, 'dalitz '+selection+' '+period),
+            cfg('dal-mad150', dCache+'/andreypz/nuTuples_v8_8TeV/Higgs_To_MuMuGamma_MH150',1, 'dalitz '+selection+' '+period),
             ])
         
 else:
@@ -153,7 +155,7 @@ if doSignal:
     inputSamples.extend(signal)
 
 if len(inputSamples) is not 0:
-    batcher = b.BatchMaster(inputSamples, outputPath, shortQueue = False, stageDir = '../StageBatch',
+    batcher = b.BatchMaster(inputSamples, outputPath, shortQueue = False, stageDir = '../StageBatch_'+version,
                             executable = executable, selection = version + '/' + selection +"_"+ period)
     print "Submitting to batch?"
     batcher.submit_to_batch()

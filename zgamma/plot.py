@@ -132,8 +132,8 @@ if __name__ == "__main__":
     
     
     pathBase = "/uscms_data/d2/andreypz/html/zgamma/dalitz/"+ver+"_cut"+cut
-    hPath    = "/eos/uscms/store/user/andreypz/batch_output/zgamma/8TeV/"+ver
-    #hPath  = "/uscms_data/d2/andreypz/zgamma/"+ver
+    #hPath    = "/eos/uscms/store/user/andreypz/batch_output/zgamma/8TeV/"+ver
+    hPath  = "/uscms_data/d2/andreypz/zgamma/"+ver
 
     u.createDir(pathBase)
 
@@ -203,8 +203,8 @@ if __name__ == "__main__":
             u.createDir(path)
 
         
-        sigFileMCFM = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_h-dalitz_1.root", "OPEN")
-        sigFileMAD  = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_mad_1.root", "OPEN")
+        sigFileMCFM = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_dal-MCFM_1.root", "OPEN")
+        sigFileMAD  = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_dal-mad125_1.root", "OPEN")
 
         if options.mcfm: sigFile = sigFileMCFM
         else:            sigFile = sigFileMAD
@@ -213,14 +213,16 @@ if __name__ == "__main__":
         #bkgFile[thissel]  = TFile(hPath+"/m_DY_"+thissel+"_"+period+".root","OPEN")
 
         yields_data[thissel] = u.getYields(dataFile[thissel])
-        yields_sig[thissel]  = u.getYields(sigFile,True)
+        #yields_sig[thissel]  = u.getYields(sigFile,True)
+        yields_sig[thissel]  = u.getYields(sigFile,False)
         #yields_bkg[thissel]  = u.getYields(bkgFile[thissel])
 
         #if int(cut) >2:
         #tri_hists[thissel]   = dataFile[thissel].Get("tri_mass_cut"+cut).Clone()
         
 
-        u.drawAllInFile(dataFile[thissel], "data", None, "", sigFile,"signal",  "",path, cut, "norm")
+        #u.drawAllInFile(dataFile[thissel], "data", None, "", sigFile,"signal",  "",path, cut, "norm")
+        u.drawAllInFile(dataFile[thissel], "data", None, "", sigFile,"signal",  "",path, cut, "norm", doRatio=1)
         #u.drawAllInFile(dataFile[thissel], "data", None, "", sigFile,"10xSignal",  "",path, cut, "lumi")
         u.drawAllInFile(dataFile[thissel], "data", None, "", sigFile,"10xSignal","EB",pathBase+"/EB", cut, "lumi")
         u.drawAllInFile(dataFile[thissel], "data", None, "", sigFile,"10xSignal","EE",pathBase+"/EE", cut, "lumi")
@@ -236,12 +238,12 @@ if __name__ == "__main__":
                             "DalitzEle",  pathBase+"/DalitzEle/",  None,"norm")
             u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",
                             "DalitzEleEB",pathBase+"/DalitzEleEB/",None,"norm")
-            u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",
-                            "DalitzEleEE",pathBase+"/DalitzEleEE/",None,"norm")
-            u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",
-                            "NewEle-1",   pathBase+"/NewEle-1/",   None,"norm")
-            u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",
-                            "NewEle-2",   pathBase+"/NewEle-2/",   None,"norm")
+            #u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",
+            #                "DalitzEleEE",pathBase+"/DalitzEleEE/",None,"norm")
+            #u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",
+            #                "NewEle-1",   pathBase+"/NewEle-1/",   None,"norm")
+            #u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",
+            #                "NewEle-2",   pathBase+"/NewEle-2/",   None,"norm")
 
             
         #dataFile.Close()
@@ -250,9 +252,8 @@ if __name__ == "__main__":
 
     #u.drawAllInFile(bkgFile[thissel], "DY electrons", sigFile, "Dalitz 2el",  "NewEle-1", pathBase+"/NewEle-1/", None,"norm", isLog=1, )
 
-    sigFileMCFM = TFile(hPath+"/mugamma_"+period+"/hhhh_h-dalitz_1.root", "OPEN")
-    sigFileMAD  = TFile(hPath+"/mugamma_"+period+"/hhhh_mad_1.root", "OPEN")
-
+    sigFileMCFM = TFile(hPath+"/mugamma_"+period+"/hhhh_dal-MCFM_1.root", "OPEN")
+    sigFileMAD  = TFile(hPath+"/mugamma_"+period+"/hhhh_dal-mad125_1.root", "OPEN")
     
     #u.drawAllInFile(sigFileMCFM, "MCFM",None, "",sigFileMAD,"Madgraph",  "GEN", pathBase+"/GEN", None,"norm", isLog=True)
 
@@ -260,27 +261,37 @@ if __name__ == "__main__":
 
     c1 = TCanvas("c4","small canvas",600,600);
     c1.cd()
-    Nev = sigFile.Get("Counts/evt_byCut").GetBinContent(2)
+    Nev = sigFileMAD.Get("Counts/evt_byCut").GetBinContent(2)
     cro = cs["h"]
     scale = float(1000*lumi*cro)/Nev
 
     m1 = 122.
     m2 = 128.
 
-    for r in [4,5]:
-        
+    
+    for r in ["0","EB","EE"]:
+        etaCut = TCut("")
+        if r=="EB":
+            etaCut = "fabs(ph_eta)<1"
+        elif r=="EE":
+            etaCut = "fabs(ph_eta)>1"
+
+            
+        cut = TCut("m_llg>"+str(m1)+"&&m_llg<"+str(m2))
+        cut += etaCut
         treeda = dataFile[thissel].Get("fitTree/fitTree")
-        treeda.Draw("m_llg>>hda","type=="+str(r)+"&&m_llg>"+str(m1)+"&&m_llg<"+str(m2))
+        treeda.Draw("m_llg>>hda", cut)
         
         treesi = sigFile.Get("fitTree/fitTree")
-        treesi.Draw("m_llg>>hsi","type=="+str(r)+"&&m_llg>"+str(m1)+"&&m_llg<"+str(m2))
+        treesi.Draw("m_llg>>hsi", cut)
         
         yda = hda.Integral()
         ysi = hsi.Integral()
         ysi_sc = ysi*scale
         print r, yda,ysi_sc
         print "significance=", ysi_sc/sqrt(ysi_sc+yda)
-
+    
+    
     '''
     h2da = dataFile[thissel].Get("h2D_dalitzPlot_rotation__cut"+cut).ProjectionX("hda_prx")
     h2si = sigFile.Get("h2D_dalitzPlot_rotation__cut"+cut).ProjectionX("hsi_prx")

@@ -48,7 +48,7 @@
 #include "../interface/TCPrimaryVtx.h"
 #include "../interface/TCTriggerObject.h"
 
-//#include "../plugins/WeightUtils.h"
+#include "../plugins/WeightUtils.h"
 #include "../plugins/TriggerSelector.h"
 //#include "../plugins/rochcor.h"
 #include "../plugins/ZGAngles.h"
@@ -118,6 +118,8 @@ class zgamma : public TSelector {
   ZGAngles *ang;
   TriggerSelector *triggerSelector;
   HistManager *hists;
+  WeightUtils *weighter;
+
   UInt_t nEvents[nC];
   UInt_t totEvents;  
 
@@ -127,10 +129,12 @@ class zgamma : public TSelector {
   Float_t mva_SCPhiWidth, mva_SCEtaWidth, mva_SigmaIEtaIEta, mva_SigmaIPhiIPhi;
   Float_t mva_fabsEPDiff, mva_EoP, mva_fbrem, mva_SCdPhi, mva_SCdEta;
   Float_t mva_SCEta, mva_R9, mva_HadOverEm, mva_ome1x5oe5x5;
+  Int_t nVtx, nVtxTotal;
+  Float_t nDofVtx1, nDofVtx2;
 
   TTree* _fitTree;
-  Double_t fit_m_llg,fit_weight;
-  Int_t fit_type;
+  Double_t fit_m_llg, fit_m_ll, fit_phEta, fit_weight;
+  Bool_t fit_isLowPt;
 
   string period;
   string sample;

@@ -52,7 +52,7 @@ from ROOT import *
 gROOT.SetMacroPath(".:../src/:../plugins/:../interface/");
 gROOT.LoadMacro("HistManager.cc+");
 gROOT.LoadMacro("ZGAngles.cc+");
-#gROOT.LoadMacro("WeightUtils.cc+");
+gROOT.LoadMacro("WeightUtils.cc+");
 gROOT.LoadMacro("TriggerSelector.cc+");
 
 #gSystem.Load("lib/libShapeLine.so");
