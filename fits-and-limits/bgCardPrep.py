@@ -9,11 +9,10 @@ setTDRStyle()
 
 leptonList = ['mu']
 yearList   = ['2012']
-#catList    = ['0','EB','EE','Low']
-catList    = ['0','LowMll','HighMll']
-#catList    = ['0']
+catList    = ['0','EB','EE']
 
-plotBase = "/uscms_data/d2/andreypz/html/zgamma/dalitz/fits/"
+
+plotBase = "/uscms_data/d2/andreypz/html/zgamma/dalitz/fits/bgCardPrep/"
   
 rooWsFile = TFile('testRooFitOut_Dalitz.root')
 myWs    = rooWsFile.Get('ws')
