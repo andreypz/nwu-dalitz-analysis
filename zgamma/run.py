@@ -34,7 +34,6 @@ selection = "mu"
 if options.electron:
     print "options.electorn", options.electron
     selection="el"
-    trigger="pho"
     
 isbatch   = options.batch    
 if(isbatch):

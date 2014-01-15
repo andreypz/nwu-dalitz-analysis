@@ -94,10 +94,10 @@ if period =="2012":
     
     if selection == 'electron':
         data.extend([
-            cfg('DoublePhoton_Run2012A', dCache+'/andreypz/nutuples_v9_8TeV/Photon/Run2012A-22Jan2013',         10, 'DATA electron 2012'),
-            cfg('DoublePhoton_Run2012B', dCache+'/andreypz/nutuples_v9_8TeV/DoublePhoton/Run2012B-22Jan2013',   15, 'DATA electron 2012'),
-            cfg('DoublePhoton_Run2012C', dCache+'/andreypz/nutuples_v9_8TeV/DoublePhoton/Run2012C-22Jan2013',   20, 'DATA electron 2012'),
-            cfg('DoublePhoton_Run2012D', dCache+'/andreypz/nutuples_v9_8TeV/DoublePhoton/Run2012D-22Jan2013',   30, 'DATA electron 2012'),
+            cfg('DoublePhoton_Run2012A', dCache+'/andreypz/nuTuples_v9_8TeV/Photon/Run2012A-22Jan2013',         10, 'DATA electron 2012'),
+            cfg('DoublePhoton_Run2012B', dCache+'/andreypz/nuTuples_v9_8TeV/DoublePhoton/Run2012B-22Jan2013',   15, 'DATA electron 2012'),
+            cfg('DoublePhoton_Run2012C', dCache+'/andreypz/nuTuples_v9_8TeV/DoublePhoton/Run2012C-22Jan2013',   20, 'DATA electron 2012'),
+            cfg('DoublePhoton_Run2012D', dCache+'/andreypz/nuTuples_v9_8TeV/DoublePhoton/Run2012D-22Jan2013',   30, 'DATA electron 2012'),
             ])
         
         
