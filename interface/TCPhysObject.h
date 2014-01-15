@@ -18,26 +18,21 @@ class TCPhysObject : public TLorentzVector {
         map<string, float> _IdMap;
         map<string, float> _IsoMap;
         int _charge;
-        string _type;
         bool _isPF;
-        bool _isReco;
 
     public:
         TCPhysObject();
         TCPhysObject(TLorentzVector p4, int charge);
-        TCPhysObject(TLorentzVector p4, int charge, string type);
         virtual ~TCPhysObject();
 
         // "get" methods -----------
 
-        float IdMap(string key);
-        float IsoMap(string key);
+        float IdMap(string key) const;
+        float IsoMap(string key) const;
         TVector2 P2() const;
         TVector3 Vtx() const;
         int Charge() const;  
-        string Type() const;
         bool IsPF() const;
-        bool IsReco() const;
 
         float Dxy(TVector3 *primVtx) const;
         float Dz(TVector3 *primVtx) const;
@@ -48,8 +43,6 @@ class TCPhysObject : public TLorentzVector {
         void SetIsoMap(string s, float v);
         void SetVtx(float vx, float vy, float vz);
         void SetCharge(int c);  
-        void SetType(string s);
-        void SetReco(bool);
         void SetPF(bool);
 
         ClassDef(TCPhysObject, 1);

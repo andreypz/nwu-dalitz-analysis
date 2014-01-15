@@ -5,8 +5,8 @@
 // found on file: /uscms/home/andreypz/nobackup/nuTuple_ZG_hack.root
 //////////////////////////////////////////////////////////
 
-#ifndef zgamma_h
-#define zgamma_h
+#ifndef egamma_h
+#define egamma_h
 
 #include <TROOT.h>
 #include <TChain.h>
@@ -50,7 +50,7 @@
 #include "../interface/TCPrimaryVtx.h"
 #include "../interface/TCTriggerObject.h"
 
-#include "../plugins/WeightUtils.h"
+//#include "../plugins/WeightUtils.h"
 #include "../plugins/TriggerSelector.h"
 //#include "../plugins/rochcor.h"
 #include "../plugins/ZGAngles.h"
@@ -112,7 +112,7 @@ muIdAndIsoCuts muIdAndIsoCutsTight, muIdAndIsoCutsLoose, muIdAndIsoCutsSoft;
 elIdAndIsoCuts elIdAndIsoCutsTight, elIdAndIsoCutsLoose;
 phIdAndIsoCuts phIdAndIsoCutsHZG,   phIdAndIsoCutsTight, phIdAndIsoCutsLoose;
 
-class zgamma : public TSelector {
+class egamma : public TSelector {
  private:
   TFile* histoFile;  
   TTree* thisTree;
@@ -120,8 +120,6 @@ class zgamma : public TSelector {
   ZGAngles *ang;
   TriggerSelector *triggerSelector;
   HistManager *hists;
-  WeightUtils *weighter;
-
   UInt_t nEvents[nC];
   UInt_t totEvents;  
 
@@ -131,12 +129,10 @@ class zgamma : public TSelector {
   Float_t mva_SCPhiWidth, mva_SCEtaWidth, mva_SigmaIEtaIEta, mva_SigmaIPhiIPhi;
   Float_t mva_fabsEPDiff, mva_EoP, mva_fbrem, mva_SCdPhi, mva_SCdEta;
   Float_t mva_SCEta, mva_R9, mva_HadOverEm, mva_ome1x5oe5x5;
-  Int_t nVtx, nVtxTotal;
-  Float_t nDofVtx1, nDofVtx2;
 
   TTree* _fitTree;
-  Double_t fit_m_llg, fit_m_ll, fit_phEta, fit_weight;
-  Bool_t fit_isLowPt;
+  Double_t fit_m_llg,fit_weight;
+  Int_t fit_type;
 
   string period;
   string sample;
@@ -218,8 +214,8 @@ class zgamma : public TSelector {
    TBranch        *b_hltPrescale;   //!
    TBranch        *b_NoiseFilters;   //!
 
-   zgamma(TTree * /*tree*/ =0) : fChain(0) { }
-   virtual ~zgamma() { }
+   egamma(TTree * /*tree*/ =0) : fChain(0) { }
+   virtual ~egamma() { }
    virtual Int_t   Version() const { return 2; }
    virtual void    Begin(TTree *tree);
    virtual void    SlaveBegin(TTree *tree);
@@ -261,13 +257,13 @@ class zgamma : public TSelector {
 
    virtual void DiscoverGeneology(TCGenParticle *p, ULong64_t ev);
    
-   ClassDef(zgamma,0);
+   ClassDef(egamma,0);
 };
 
 #endif
 
-#ifdef zgamma_cxx
-void zgamma::Init(TTree *tree)
+#ifdef egamma_cxx
+void egamma::Init(TTree *tree)
 {
    // The Init() function is called when the selector needs to initialize
    // a new tree or chain. Typically here the branch addresses and branch
@@ -325,7 +321,7 @@ void zgamma::Init(TTree *tree)
    fChain->SetBranchAddress("NoiseFilters", &NoiseFilters_isScraping, &b_NoiseFilters);
 }
 
-Bool_t zgamma::Notify()
+Bool_t egamma::Notify()
 {
    // The Notify() function is called when a new file is opened. This
    // can be either for a new TTree in a TChain or when when a new TTree
@@ -351,4 +347,4 @@ Bool_t zgamma::Notify()
    return kTRUE;
 }
 
-#endif // #ifdef zgamma_cxx
+#endif // #ifdef egamma_cxx

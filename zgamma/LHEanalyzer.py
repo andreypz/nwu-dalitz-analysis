@@ -12,6 +12,7 @@ subdir = sys.argv[1]
 
 outpath = '/uscms_data/d2/andreypz/html/zgamma/lhe/'
 files={}
+
 #files["one"] = ['/uscms_data/d2/andreypz/lhe_higgs_mumugamma_dalitz/hmumug_m125.root']
 files["one"] = ['/uscms_data/d2/andreypz/lhe_vbf_higgs/vbfh_eeg_m125.root']
 files["two"] = ['/uscms_data/d2/andreypz/lhe_vbf_higgs/vbfh_mumug_m125.root']
@@ -19,6 +20,14 @@ files["two"] = ['/uscms_data/d2/andreypz/lhe_vbf_higgs/vbfh_mumug_m125.root']
 MH = 125
 LEPID1 = 13
 LEPID2 = 11
+
+#files["mcfm"] = ['/uscms_data/d2/andreypz/lhe_mcfm_hzg_dalitz_lord_fixed_unweighted.lhe.root']
+#files["mad"] = ['/uscms_data/d2/andreypz/lhe_mad_LO_HiggsToMuMuGamma.root']
+#files["mad"] = ['/uscms_data/d2/andreypz/lhe_mad_hzg5.root']
+#files["mad"] = ['/uscms/home/andreypz/lhe_higgs_eegamma_dalitz/heeg_m120.root']
+files["mad1"] = ['/uscms_data/d2/andreypz/lhe_higgs_eegamma_dalitz/m150.root']
+files["mad2"] = ['/uscms_data/d2/andreypz/lhe_higgs_eegamma_dalitz/m135.root']
+
 
 print files
 #gSystem.Load("/home/andreypz/workspace/MadGraph5/ExRootAnalysis/lib/libExRootAnalysis.so")
@@ -35,10 +44,10 @@ twoFile = TFile(outpath+"out_two_"+subdir+".root","RECREATE")
 twoFile.cd()
 h2 = HistManager(twoFile)
 
-mcfmFile = TFile(outpath+"out_mcfm_"+subdir+".root","RECREATE")
-#mcfmFile.cd()
-#h1 = HistManager(mcfmFile)
-
+testFile = TFile(outpath+"out_test_"+subdir+".root","RECREATE")
+testFile.mkdir("eff")
+testFile.cd()
+h3 = HistManager(testFile)
 
 ang = ZGAngles()
 
@@ -294,6 +303,7 @@ if __name__ == "__main__":
     #FillAllHists(files["mcfm"], h1)
     FillAllHists(files["one"],  h1)
     FillAllHists(files["two"],  h2)
+
 
     mcfmFile.cd()
     mcfmFile.Write()

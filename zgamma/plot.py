@@ -20,8 +20,8 @@ parser.add_option("--mcfm",dest="mcfm", action="store_true", default=False, help
 lumi = u.getLumi(options.period)
 cs   = u.getCS(options.mcfm)
 
-#sel = ["electron"]
-sel = ["mugamma"]
+sel = ["electron"]
+#sel = ["mugamma"]
 #sel = ["mugamma","electron"]
 #sel = []
 
@@ -192,7 +192,7 @@ if __name__ == "__main__":
     for thissel in sel:
         if doMerge:
             os.system("hadd "+hPath+"/m_Data_"    +thissel+"_"+period+".root "+hPath+"/"+thissel+"_"+period+"/hhhh_*Run20*.root")
-            #os.system("hadd "+hPath+"/m_DY_"    +thissel+"_"+period+".root "+hPath+"/"+thissel+"_"+period+"/hhhh_DYjets*.root")
+            os.system("hadd "+hPath+"/m_DY_"    +thissel+"_"+period+".root "+hPath+"/"+thissel+"_"+period+"/hhhh_DYjets*.root")
             #os.system("hadd "+hPath+"/m_ZG_"    +thissel+"_"+period+".root "
             #         +hPath+"/"+thissel+"_"+period+"/hhhh_ZG_*.root ")
 
@@ -201,21 +201,29 @@ if __name__ == "__main__":
         if doBkg:
             path = pathBase+"/bkg_"+subdir
             u.createDir(path)
-
+        path = pathBase+"/"+subdir
+                
         
         sigFileMCFM = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_dal-MCFM_1.root", "OPEN")
+        #sigFileMCFM = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_dal-mcfm_1.root", "OPEN")
         sigFileMAD  = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_dal-mad125_1.root", "OPEN")
 
         if options.mcfm: sigFile = sigFileMCFM
         else:            sigFile = sigFileMAD
         
         dataFile[thissel] = TFile(hPath+"/m_Data_"+thissel+"_"+period+".root","OPEN")
-        #bkgFile[thissel]  = TFile(hPath+"/m_DY_"+thissel+"_"+period+".root","OPEN")
+        if doBkg:
+            bkgFile[thissel]  = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_DYjets0_1.root", "OPEN")
+            #bkgFile[thissel]  = TFile(hPath+"/m_DY_"+thissel+"_"+period+".root","OPEN")
 
         yields_data[thissel] = u.getYields(dataFile[thissel])
         #yields_sig[thissel]  = u.getYields(sigFile,True)
         yields_sig[thissel]  = u.getYields(sigFile,False)
         #yields_bkg[thissel]  = u.getYields(bkgFile[thissel])
+
+        yields_sig[thissel]  = u.getYields(sigFile,True)
+        if doBkg:
+            yields_bkg[thissel]  = u.getYields(bkgFile[thissel])
 
         #if int(cut) >2:
         #tri_hists[thissel]   = dataFile[thissel].Get("tri_mass_cut"+cut).Clone()
@@ -226,31 +234,40 @@ if __name__ == "__main__":
         #u.drawAllInFile(dataFile[thissel], "data", None, "", sigFile,"10xSignal",  "",path, cut, "lumi")
         u.drawAllInFile(dataFile[thissel], "data", None, "", sigFile,"10xSignal","EB",pathBase+"/EB", cut, "lumi")
         u.drawAllInFile(dataFile[thissel], "data", None, "", sigFile,"10xSignal","EE",pathBase+"/EE", cut, "lumi")
+
         if thissel =="mugamma":
             u.drawAllInFile(dataFile[thissel], "data",None, "",sigFile,"signal",  "Muons", pathBase+"/Muons", None,"norm")
 
             #u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",  "Muons", pathBase+"/Muons/", None,"norm")
             #u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",  "Photon",pathBase+"/Photon/", None,"norm")
         elif thissel =="electron":
+            if not doBkg:
+                bkgFile[thissel]=None
+                
+                u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",
+                            "Photon",     pathBase+"/Photon",     None,"norm")
             u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",
-                            "Photon",     pathBase+"/Photon/",     None,"norm")
+                            "DalitzEle",  pathBase+"/DalitzEle",  None,"norm")
             u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",
-                            "DalitzEle",  pathBase+"/DalitzEle/",  None,"norm")
+                            "DalitzEleEB",pathBase+"/DalitzEleEB",None,"norm")
             u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",
-                            "DalitzEleEB",pathBase+"/DalitzEleEB/",None,"norm")
-            #u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",
-            #                "DalitzEleEE",pathBase+"/DalitzEleEE/",None,"norm")
-            #u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",
-            #                "NewEle-1",   pathBase+"/NewEle-1/",   None,"norm")
-            #u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",
-            #                "NewEle-2",   pathBase+"/NewEle-2/",   None,"norm")
+                            "DalitzEleEE",pathBase+"/DalitzEleEE/",None,"norm")
+
+            u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",
+                            "DalitzEleEB_tracks",pathBase+"/DalitzEleEB_tracks",None,"norm")
+            u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",
+                            "DalitzEleEE_tracks",pathBase+"/DalitzEleEE_tracks",None,"norm")
 
             
         #dataFile.Close()
     #print yields_data
 
 
+    sigFileMAD  = TFile("hhhh_dal-mad125_1.root", "OPEN")
+    u.drawAllInFile(sigFileMAD, "signal", None, "", None,"","GEN-RECO",pathBase+"/GEN-RECO", None, "lumi")
+    
     #u.drawAllInFile(bkgFile[thissel], "DY electrons", sigFile, "Dalitz 2el",  "NewEle-1", pathBase+"/NewEle-1/", None,"norm", isLog=1, )
+    '''
 
     sigFileMCFM = TFile(hPath+"/mugamma_"+period+"/hhhh_dal-MCFM_1.root", "OPEN")
     sigFileMAD  = TFile(hPath+"/mugamma_"+period+"/hhhh_dal-mad125_1.root", "OPEN")
@@ -293,6 +310,7 @@ if __name__ == "__main__":
     
     
     '''
+    '''
     h2da = dataFile[thissel].Get("h2D_dalitzPlot_rotation__cut"+cut).ProjectionX("hda_prx")
     h2si = sigFile.Get("h2D_dalitzPlot_rotation__cut"+cut).ProjectionX("hsi_prx")
 
@@ -330,12 +348,16 @@ if __name__ == "__main__":
     #plot_types
     table_sig  = u.yieldsTable(yields_sig, sel)
     table_data = u.yieldsTable(yields_data, sel)
+    if doBkg:
+        table_bkg = u.yieldsTable(yields_bkg, sel)
 
 
     u.makeTable(table_data,"data", "html")
     u.makeTable(table_sig, "sig",  "html")
     u.makeTable(table_data,"data", "twiki")
     u.makeTable(table_sig, "sig",  "twiki")
+    if doBkg:
+        u.makeTable(table_bkg, "bkg",  "twiki")
 
     os.system("cat yields_data.html yields_sig.html > yields.html")
 

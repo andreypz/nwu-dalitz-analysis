@@ -5,10 +5,10 @@ import sys
 cfg = b.JobConfig
 
 from optparse import OptionParser
-parser = OptionParser(usage="usage: %prog [options -e], -m, --data, --bg, --mc], -p 2011] version")
+parser = OptionParser(usage="usage: %prog [options -e], --data, --bkg, --sig], -p 2011] version")
 parser.add_option("-c", "--clean", dest="clean",  action="store_true", default=False, help="Clean the directory with histogram output.")
 parser.add_option("-e", "--ele", dest="electron", action="store_true", default=False, help="Use electron selection (by default it will run muon selection)")
-parser.add_option("--mugamma",   dest="mugamma",  action="store_true", default=True,  help="Use Mu+Photon trigger (for running on MuEG path)")
+parser.add_option("--mugamma",   dest="mugamma",  action="store_true", default=False,  help="Use Mu+Photon trigger (for running on MuEG path)")
 parser.add_option("--mumu",      dest="mumu",     action="store_true", default=False, help="Use Double-Mu trigger")
 parser.add_option("--singlemu",  dest="singlemu", action="store_true", default=False, help="Use Iso-mu trigger")
 parser.add_option("--data", dest="data", action="store_true", default=False, help="Run over the data sample")
@@ -94,20 +94,25 @@ if period =="2012":
     
     if selection == 'electron':
         data.extend([
-            cfg('DoublePhoton_Run2012A', dCache+'/andreypz/nuTuples_v8_8TeV/Photon/Run2012A-22Jan2013',         10, 'DATA electron 2012'),
-            cfg('DoublePhoton_Run2012B', dCache+'/andreypz/nuTuples_v8_8TeV/DoublePhoton/Run2012B-22Jan2013',   15, 'DATA electron 2012'),
-            cfg('DoublePhoton_Run2012C', dCache+'/andreypz/nuTuples_v8_8TeV/DoublePhoton/Run2012C-22Jan2013-v2',20, 'DATA electron 2012'),
-            cfg('DoublePhoton_Run2012D', dCache+'/andreypz/nuTuples_v8_8TeV/DoublePhoton/Run2012D-22Jan2013-v3',30, 'DATA electron 2012'),
+            cfg('DoublePhoton_Run2012A', dCache+'/andreypz/nuTuples_v9_8TeV/Photon/Run2012A-22Jan2013',         10, 'DATA electron 2012'),
+            cfg('DoublePhoton_Run2012B', dCache+'/andreypz/nuTuples_v9_8TeV/DoublePhoton/Run2012B-22Jan2013',   15, 'DATA electron 2012'),
+            cfg('DoublePhoton_Run2012C', dCache+'/andreypz/nuTuples_v9_8TeV/DoublePhoton/Run2012C-22Jan2013',   20, 'DATA electron 2012'),
+            cfg('DoublePhoton_Run2012D', dCache+'/andreypz/nuTuples_v9_8TeV/DoublePhoton/Run2012D-22Jan2013',   30, 'DATA electron 2012'),
             ])
         
         
     bg = []
-    bg.extend([
-	#cfg('DYjets50', dCache+'/bpollack/V08_01_8TeV/DYJetsToLL_M-50', 20, 'DY '+selection+' '+period),
-        cfg('DYdalitz', dCache+'/andreypz/nuTuples_v8_8TeV/DYMuMuGammaDalitz', 1, 'DY '+selection+' '+period),
-        
-        #cfg('ZG',       dCache+'/bpollack/V08_01_8TeV/ZGToLLG',         5, 'ZG '      +selection+' '+period)
-        ])
+    
+    if selection == 'electron':
+        bg.extend([
+            #cfg('DYjets10', dCache+'/andreypz/nuTuples_v9_8TeV/DYJets_M10To50', 20, 'DYjets10 '+selection+' '+period),
+            cfg('DYjets0',  dCache+'/andreypz/nuTuples_v9_8TeV/DYJets_M0To50',  1, 'DYjets0 ' +selection+' '+period),
+            ])
+
+    if selection == 'mugamma':
+        bg.extend([
+            cfg('DYdalitz', dCache+'/andreypz/nuTuples_v8_8TeV/DYMuMuGammaDalitz', 1, 'DY '+selection+' '+period),
+            ])
     """
     cfg('WZJetsTo3LNu',  dCache+'/andreypz/nuTuples_v5_8TeV/WZJetsTo3LNu',  1, 'WZ '+selection+' '+period),
     cfg('WWJetsTo2L2Nu', dCache+'/andreypz/nuTuples_v5_8TeV/WWJetsTo2L2Nu', 1, 'WW '+selection+' '+period),
@@ -130,6 +135,7 @@ if period =="2012":
 
     if selection in ["muon","mugamma","single-mu"]:
         signal.extend([
+
             cfg('dal-MCFM', dCache+'/andreypz/nuTuples_v8_8TeV/MCFM_dalitz_v2',    1, 'dalitz '+selection+' '+period),
             cfg('dal-mad125', dCache+'/andreypz/nuTuples_v8_8TeV/Higgs_To_MuMuGamma_8TeV',1, 'dalitz '+selection+' '+period),
             cfg('dal-mad120', dCache+'/andreypz/nuTuples_v8_8TeV/Higgs_To_MuMuGamma_MH120',1, 'dalitz '+selection+' '+period),
@@ -138,6 +144,11 @@ if period =="2012":
             cfg('dal-mad140', dCache+'/andreypz/nuTuples_v8_8TeV/Higgs_To_MuMuGamma_MH140',1, 'dalitz '+selection+' '+period),
             cfg('dal-mad145', dCache+'/andreypz/nuTuples_v8_8TeV/Higgs_To_MuMuGamma_MH145',1, 'dalitz '+selection+' '+period),
             cfg('dal-mad150', dCache+'/andreypz/nuTuples_v8_8TeV/Higgs_To_MuMuGamma_MH150',1, 'dalitz '+selection+' '+period),
+
+            ])
+    elif selection=="electron":
+        signal.extend([
+            cfg('dal-mad125', dCache+'/andreypz/nuTuples_v9_8TeV/Higgs_To_EEGamma', 1, 'dalitz '+selection+' '+period),
             ])
         
 else:
