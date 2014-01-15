@@ -17,7 +17,7 @@ parser.add_option("-g", "--gen", dest="gen", action="store_true", default=False,
 (options, args) = parser.parse_args()
 
 if options.clean:
-    os.system("rm ../src/*.so ../src/*.d ../plugins/*.so ../plugins/*.d")
+    os.system("rm ../src/*.so ../src/*.d ../plugins/*.so ../plugins/*.d ./*.so")
     print "All cleaned"
     exit(0)
     
@@ -29,11 +29,14 @@ sample    = args[0]
 sourcefilename = args[1] 
 
 period    = options.period
-trigger = options.trigger
+trigger   = options.trigger
 selection = "mu"
+ana = "zgamma"
+
 if options.electron:
     print "options.electorn", options.electron
     selection="el"
+    ana="egamma"
     
 isbatch   = options.batch    
 if(isbatch):
@@ -89,7 +92,7 @@ print nfiles, " files added!"
 timer = TStopwatch()
 timer.Start()
 
-fChain.Process("zgamma.C+", "%s %s %s %s" % (sample,selection,trigger,str(options.gen).lower()))
+fChain.Process(ana+".C+", "%s %s %s %s" % (sample,selection,trigger,str(options.gen).lower()))
 
 os.system('mv a_'+selection+'_higgsHistograms.root hhhh_'+sourcefilename+'.root')
 

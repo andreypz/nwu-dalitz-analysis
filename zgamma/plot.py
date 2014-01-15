@@ -132,8 +132,8 @@ if __name__ == "__main__":
     
     
     pathBase = "/uscms_data/d2/andreypz/html/zgamma/dalitz/"+ver+"_cut"+cut
-    hPath    = "/eos/uscms/store/user/andreypz/batch_output/zgamma/8TeV/"+ver
-    #hPath  = "/uscms_data/d2/andreypz/zgamma/"+ver
+    #hPath    = "/eos/uscms/store/user/andreypz/batch_output/zgamma/8TeV/"+ver
+    hPath  = "/uscms_data/d2/andreypz/zgamma/"+ver
 
     u.createDir(pathBase)
 
