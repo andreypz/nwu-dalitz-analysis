@@ -35,7 +35,6 @@
 #include <TProfile.h>
 #include <TRandom3.h>
 
-
 #include "../interface/TCPhysObject.h"
 #include "../interface/TCJet.h"
 #include "../interface/TCMET.h"
@@ -242,18 +241,14 @@ class zgamma : public TSelector {
    virtual bool PassMuonIdAndIso(TCMuon *l, muIdAndIsoCuts c, TVector3 *pv);
    virtual bool PassElectronIdAndIso(TCElectron *l, elIdAndIsoCuts c, TVector3 *pv);
    virtual bool PassElectronIdAndIsoMVA(TCElectron *l);
-   virtual bool PassElectronIdAndIsoDalitz(TCElectron *l, bool);
    virtual bool PassPhotonIdAndIso(TCPhoton *p, phIdAndIsoCuts c, TVector3 *pv);
    
    virtual void CalculatePhotonIso(TCPhoton *p, float& chIsoCor, float& nhIsoCor, float& phIsoCor);
-   virtual void FillHistosFull(Int_t n, Double_t w, TCPhysObject , TCPhysObject , TCPhysObject , TCPhysObject , TCPhysObject, string s="", bool isMergedEle=false);
+   virtual void FillHistosFull(Int_t n, Double_t w, TCPhysObject , TCPhysObject , TCPhysObject , TCPhysObject , TCPhysObject, string s="");
    virtual void FillHistoCounts(Int_t n, Double_t w);
    virtual void MakeMuonPlots(TCMuon mu, TVector3 *pv);
    virtual void MakePhotonPlots(TCPhoton ph);
-   //virtual void MakeElectronPlots(TCElectron el);
-   virtual void MakeElectronPlots(TCElectron el, string d="Electrons");
-   virtual void FillElecronMVATree(TCElectron el);
-
+ 
    virtual void MuonDump(TCMuon mu, TVector3 *pv);
    virtual void PhotonDump(TCPhoton pho,  phIdAndIsoCuts c);
 

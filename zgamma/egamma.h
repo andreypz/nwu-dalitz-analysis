@@ -55,6 +55,7 @@
 //#include "../plugins/rochcor.h"
 #include "../plugins/ZGAngles.h"
 #include "../plugins/HistManager.h"
+//#include "../zgamma.h"
 
 // Header file for the classes stored in the TTree if any.
 #include <TClonesArray.h>
@@ -131,8 +132,8 @@ class egamma : public TSelector {
   Float_t mva_SCEta, mva_R9, mva_HadOverEm, mva_ome1x5oe5x5;
 
   TTree* _fitTree;
-  Double_t fit_m_llg,fit_weight;
-  Int_t fit_type;
+  Double_t fit_m_llg, fit_m_ll, fit_phEta, fit_weight;
+  Bool_t fit_isLowPt;
 
   string period;
   string sample;
