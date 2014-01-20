@@ -55,13 +55,13 @@
 //#include "../plugins/rochcor.h"
 #include "../plugins/ZGAngles.h"
 #include "../plugins/HistManager.h"
-//#include "../zgamma.h"
+#include "zgamma.h"
 
 // Header file for the classes stored in the TTree if any.
 #include <TClonesArray.h>
 #include <TVector3.h>
 
-
+/*
 #define nC 14
 struct muIdAndIsoCuts{
   Bool_t IsPF;
@@ -109,14 +109,17 @@ struct phIdAndIsoCuts{
   float phIso03[2];
 };
 
-muIdAndIsoCuts muIdAndIsoCutsTight, muIdAndIsoCutsLoose, muIdAndIsoCutsSoft;
-elIdAndIsoCuts elIdAndIsoCutsTight, elIdAndIsoCutsLoose;
-phIdAndIsoCuts phIdAndIsoCutsHZG,   phIdAndIsoCutsTight, phIdAndIsoCutsLoose;
+*/
 
 class egamma : public TSelector {
  private:
   TFile* histoFile;  
   TTree* thisTree;
+
+  muIdAndIsoCuts muIdAndIsoCutsTight, muIdAndIsoCutsLoose, muIdAndIsoCutsSoft;
+  elIdAndIsoCuts elIdAndIsoCutsTight, elIdAndIsoCutsLoose;
+  phIdAndIsoCuts phIdAndIsoCutsHZG,   phIdAndIsoCutsTight, phIdAndIsoCutsLoose;
+
 
   ZGAngles *ang;
   TriggerSelector *triggerSelector;

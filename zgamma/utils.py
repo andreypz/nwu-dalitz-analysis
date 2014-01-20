@@ -13,7 +13,7 @@ lumi2012 = float(conf.get("lumi","lumi2012A")) + float(conf.get("lumi","lumi2012
 lumi = lumi2012
 
 cuts = []
-for key, cut in sorted(conf.items("cuts")):
+for key, cut in sorted(conf.items("cuts-mu")):
     cuts.append(cut)
     #print key, cut
 
@@ -201,6 +201,16 @@ def drawAllInFile(f1, name1, f2, name2, f3, name3, dir,path, N, howToScale="none
             #    c1.SetLogy()
                 
         else:
+            pad1 = TPad("pad1","pad1",0,0.3,1,1);
+            pad2 = TPad("pad2","pad2",0,0,1,0.3);
+
+            if doRatio:
+                pad1.SetBottomMargin(0);
+                pad1.Draw();
+                pad1.cd();
+                pad1.SetLogy(isLog)
+                
+                
             handleOverflowBins(h1)
 
             h1.Draw("hist")
