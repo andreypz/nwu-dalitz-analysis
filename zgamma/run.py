@@ -74,7 +74,6 @@ gROOT.LoadMacro("TCGenParticle.cc+");
 gROOT.LoadMacro("TCPrimaryVtx.cc+");
 gROOT.LoadMacro("TCTriggerObject.cc+");
 
-
 fChain = TChain("ntupleProducer/eventTree");
 
 f = open(sourceFiles,"r")
