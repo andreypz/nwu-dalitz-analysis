@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 import sys
-sys.argv.append('-b')
 from ROOT import *
 from rooFitBuilder import *
-
+gROOT.SetBatch()
 #gSystem.SetIncludePath( "-I$ROOFITSYS/include/" );
+sys.path.append("../zgamma")
+import utils as u
+
 gROOT.ProcessLine(".L ~/tdrstyle.C")
 setTDRStyle()
-TH1.SetDefaultSumw2(kTRUE)
-plotBase = "/uscms_data/d2/andreypz/html/zgamma/dalitz/fits/sigCBFits/"
 
 # rounding function for interpolation
 def roundTo5(x, base=5):
@@ -24,14 +24,16 @@ class AutoVivification(dict):
       value = self[item] = type(self)()
       return value
     
-def SignalFitMaker(lep, year, cat):
+def SignalFitMaker(lep, year, cat, subdir):
   #massList = ['120.0','125.0','130.0','135.0']
   massList = ['120.0','125.0','130.0','135.0','140.0','145.0','150.0']
   #massList = ['125.0']
   #sigNameList = ['gg','vbf','tth','wh','zh']
   sigNameList = ['gg']
-
-  rooWsFile = TFile('testRooFitOut_Dalitz.root')
+  
+  plotBase = "/uscms_data/d2/andreypz/html/zgamma/dalitz/fits-"+subdir+"/sigCBFits/"
+  u.createDir(plotBase)
+  rooWsFile = TFile(subdir+'/testRooFitOut_Dalitz.root')
   myWs = rooWsFile.Get('ws')
   #myWs.Print()
 
@@ -155,15 +157,16 @@ def SignalFitMaker(lep, year, cat):
     for signal in dsList:
       signal.plotOn(testFrame)
     testFrame.Draw()
+    testFrame.SetTitle(";m_{H};fit pdf")
     #c.Print("p5.png")
-    c.Print(plotBase+'_'.join(['test','sig','fit',prod,lep,year,'cat'+cat])+'.png')
+    c.SaveAs(plotBase+'_'.join(['test','sig','fit',prod,lep,year,'cat'+cat])+'.png')
 
   for prod in sigNameList:
     for mass in massList:
       SignalNameParamFixer(year,lep,cat,prod,mass,cardDict[lep][year][cat][mass])
 
   for mass in massList:
-    fileName = '_'.join(['SignalOutput',lep,year,'cat'+cat,mass])
+    fileName = subdir+'/'+'_'.join(['SignalOutput',lep,year,'cat'+cat,mass])
     cardDict[lep][year][cat][mass].writeToFile(fileName+'.root')
     #cardDict[lep][year][cat][mass].writeToFile('testCards/'+fileName+'.root')
 
@@ -174,15 +177,17 @@ def SignalFitMaker(lep, year, cat):
 #CBG.fitTo(signal, RooFit.SumW2Error(kTRUE), RooFit.PrintLevel(-1))
 
 if __name__=="__main__":
-  print len(sys.argv)
-  print sys.argv
-  #if len(sys.argv) != 6:
-  #  print 'usage: ./signalCBFits lepton year cat'
-  #else:
-  #  SignalFitMaker(str(sys.argv[1]), str(sys.argv[2]), str(sys.argv[3]))
+  print len(sys.argv), sys.argv
 
-  for cat in ["0","EB","EE"]:
+  
+  if len(sys.argv) != 3:
+    sys.exit(0)
+
+  s = sys.argv[1]
+ 
+  for cat in ["0"]:
     #for cat in ["0","EB","EE","LowPt"]:
-    SignalFitMaker("mu","2012",cat)
+    #SignalFitMaker("el","2012",cat)
+    SignalFitMaker("mu","2012",cat, s)
 
   print "\n \t\t All finished! \n"

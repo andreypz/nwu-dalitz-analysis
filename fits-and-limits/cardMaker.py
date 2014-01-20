@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 import sys
-sys.argv.append('-b')
 from ROOT import *
+gROOT.SetBatch()
 #from systematics import *
 from rooFitBuilder import *
+sys.path.append("../zgamma")
+import utils as u
 #from collections import defaultdict
-
 
 #################################################
 # We're finally ready to make the datacards     #
@@ -15,22 +16,23 @@ from rooFitBuilder import *
 
 makeSys = 1
 
-def makeCards():
+def makeCards(subdir):
 
   leptonList = ['mu']
   yearList   = ['2012']
-  #catList    = ['0']
-  catList    = ['0','EB','EE']
+  catList    = ['0']
+  #catList    = ['0','EB','EE']
   #catList    = ['0','LowMll','HighMll']
 
+  #massList = ['125.0']
   massList = ['120.0','125.0','130.0','135.0','140.0','145.0','150.0']
 
   for year in yearList:
     for lepton in leptonList:
       for cat in catList:
-        bgFile = TFile('testCardBackground_Dalitz.root')
+        bgFileName = subdir+'/testCardBackground_Dalitz.root'
+        bgFile = TFile(bgFileName)
         bgWs = bgFile.Get('ws_card')
-        bgFileName = 'testCardBackground_Dalitz.root'
        
         sigNameList = ['gg']
         channel = '_'.join([lepton,year,'cat'+cat])
@@ -38,13 +40,14 @@ def makeCards():
         bkgParams = ['p0','p1','p2','p3','p4','sigma','step','mean','norm']
 
         for mass in massList:
-          sigFileName = '_'.join(['SignalOutput',lepton,year,'cat'+cat,mass])+'.root'
+          sigFileName = subdir+'/'+'_'.join(['SignalOutput',lepton,year,'cat'+cat,mass])+'.root'
           sigFile = TFile(sigFileName)
           sigWs = sigFile.Get('ws_card')
           prefixSigList = ['sig_'+sig for sig in sigNameList]
 
-          card = open('output_cards/'+'_'.join(['hzg',lepton,year,'cat'+cat,'M'+mass,'Dalitz'])+'.txt','w')
-          
+          u.createDir(subdir+'/output_cards/')
+          card = open(subdir+'/output_cards/'+'_'.join(['hzg',lepton,year,'cat'+cat,'M'+mass,'Dalitz'])+'.txt','w')
+
           card.write('#some bullshit\n')
           card.write('#more comments\n')
           
@@ -106,6 +109,11 @@ def makeCards():
 
 
 if __name__=="__main__":
-  makeCards()
-
-
+  
+  print len(sys.argv), sys.argv
+  
+  if len(sys.argv) != 3:
+    sys.exit(0)
+  s = sys.argv[1]
+    
+  makeCards(s)

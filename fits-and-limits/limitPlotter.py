@@ -1,17 +1,29 @@
 #!/usr/bin/env python
-import os
+import os,sys
 
 import numpy as np
 from ROOT import *
 gROOT.SetBatch()
+sys.path.append("../zgamma")
+import utils as u
 
-#gROOT.ProcessLine('.L ./CMSStyle.C')
-#CMSStyle()
-plotBase = '/uscms_data/d2/andreypz/html/zgamma/dalitz/fits/limit/'
+gROOT.ProcessLine(".L ~/tdrstyle.C")
+setTDRStyle()
+gStyle.SetOptTitle(0)
+
+print len(sys.argv), sys.argv
+if len(sys.argv) != 2:
+  sys.exit()
+s = sys.argv[1]
   
+          
+plotBase = '/uscms_data/d2/andreypz/html/zgamma/dalitz/fits-'+s+'/limit/'
+u.createDir(plotBase)
+
 fullCombo = True
 byParts = False
 
+#massList = [125.0]
 massList = [120.0,125.0,130.0,135.0,140.0,145.0,150.0]
 
 c = TCanvas("c","c",0,0,500,400)
@@ -27,10 +39,10 @@ if fullCombo:
   exp2SigLow = []
   fileListTmp = os.listdir('./')
   fileList = filter(lambda fileName: 'higgsCombineTest.Asymptotic' in fileName,fileListTmp)
-  #print fileList
+  print fileList
   for mass in massList:
     thisFile = filter(lambda fileName: str(int(mass)) in fileName,fileList)[0]
-
+    print thisFile
     xAxis.append(mass)
     f = TFile(thisFile,"open")
     #f.Print()
@@ -102,6 +114,31 @@ if fullCombo:
   mg.GetXaxis().SetTitle('m_{H} (GeV)')
   mg.GetYaxis().SetTitle('95% CL limit on #sigma/#sigma_{SM}')
   mg.GetXaxis().SetLimits(massList[0],massList[-1]);
+  gPad.RedrawAxis()
+
+  prelim = TLatex(0.15,0.95, "CMS Preliminary")
+  prelim.SetNDC();
+  prelim.SetTextSize(0.05);
+  prelim.Draw();
+
+  sqrt = TLatex(0.25,0.85, "#sqrt{s} = 8 Tev; #it{L_{int}} = 19.7 fb^{-1}")
+  sqrt.SetNDC();
+  sqrt.SetTextSize(0.04);
+  sqrt.Draw();
+  
+  
+  selection = TLatex()
+  if "mu" in s:
+    selection = TLatex(0.70,0.95, "#mu#mu selection");
+    selection.SetTextColor(kBlue-3);
+  elif "el" in s:
+    selection = TLatex(0.70,0.95, "#font[32]{ee} selection");
+    selection.SetTextColor(kGreen-3);
+
+  selection.Draw()
+  selection.SetNDC();
+  prelim.SetTextSize(0.03);
+  selection.Draw();            
 
   c.SaveAs(plotBase+'Limits.png')
 
