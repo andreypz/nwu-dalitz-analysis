@@ -1,20 +1,27 @@
 #!/usr/bin/env python
 import sys
-sys.argv.append('-b')
 from ROOT import *
+gROOT.SetBatch()
 from rooFitBuilder import *
+sys.path.append("../zgamma")
+import utils as u
 
 gROOT.ProcessLine(".L ~/tdrstyle.C")
 setTDRStyle()
 
+print len(sys.argv), sys.argv
+if len(sys.argv) != 3:
+  sys.exit(0)
+subdir = sys.argv[1]
+
 leptonList = ['mu']
 yearList   = ['2012']
-catList    = ['0','EB','EE']
+catList    = ['0']
 
 
-plotBase = "/uscms_data/d2/andreypz/html/zgamma/dalitz/fits/bgCardPrep/"
-  
-rooWsFile = TFile('testRooFitOut_Dalitz.root')
+plotBase = "/uscms_data/d2/andreypz/html/zgamma/dalitz/fits-"+subdir+"/bgCardPrep/"
+u.createDir(plotBase)
+rooWsFile = TFile(subdir+'/testRooFitOut_Dalitz.root')
 myWs    = rooWsFile.Get('ws')
 card_ws = RooWorkspace('ws_card')
 card_ws.autoImportClassCode(True)
@@ -64,7 +71,7 @@ for year in yearList:
       print sumEntriesBkg, sumEntriesSig
 
       raw_input()
-      
+
       dataYieldName = '_'.join(['data','yield',lepton,year,'cat'+cat])
       dataYield     = RooRealVar(dataYieldName,dataYieldName,sumEntriesBkg)
       norm          = RooRealVar(normName,normName,sumEntriesBkg,sumEntriesBkg*0.25,sumEntriesBkg*1.75)
@@ -79,8 +86,9 @@ for year in yearList:
       data.plotOn(testFrame, RooFit.Binning(50))
       fit_ext.plotOn(testFrame)
       testFrame.Draw()
-      c.Print(plotBase+'_'.join(['best_fit',year,lepton,'cat'+cat])+'.png')
-    
+      testFrame.SetTitle(";m_{H};unbinned fit pdf")
+      c.SaveAs(plotBase+'_'.join(['best_fit',year,lepton,'cat'+cat])+'.png')
+
       ###### Import the fit and data, and rename them to the card convention
       dataNameNew = '_'.join(['data','obs',lepton,year,'cat'+cat])
 
@@ -90,9 +98,9 @@ for year in yearList:
       card_ws.commitTransaction()
       fit_ext.Print()
       card_ws.Print()
-      
+
       BackgroundNameFixer(year,lepton,cat,card_ws)
 
       print "\n * The end * \n"
 
-card_ws.writeToFile('testCardBackground_Dalitz.root')
+card_ws.writeToFile(subdir+'/testCardBackground_Dalitz.root')

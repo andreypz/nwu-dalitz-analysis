@@ -1,6 +1,11 @@
 The log of changes:
 ==================
 
+2014-Jan-19
+  * Diverged zgamma (mumugamma) and egamma (e-dalitz) analyses.
+  * Improved fitting and limits calculation scripts
+  * Config files restructured for many mass points (cs and Nev)
+
 2013-Nov-25
   * Version used for the results presented at Hgg group meeting
     * cs=0.79 fb

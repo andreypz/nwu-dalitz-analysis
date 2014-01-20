@@ -7,7 +7,7 @@ gROOT.SetBatch()
 
 import ConfigParser as cp
 conf = cp.ConfigParser()
-conf.read('config.cfg')
+conf.read('../zgamma/config.cfg')
 lumi2012 = float(conf.get("lumi","lumi2012A")) + float(conf.get("lumi","lumi2012B"))+\
            float(conf.get("lumi","lumi2012C")) + float(conf.get("lumi","lumi2012D"))
 lumi = lumi2012
