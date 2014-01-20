@@ -655,19 +655,19 @@ Bool_t zgamma::Process(Long64_t entry)
 
   if (muons.size()<2) return kTRUE;
 
-  /*
+ 
   if (muons[1].Pt() < 7 &&
       (zgamma::CalculateMuonIso(&muons[0]) > 0.2 || zgamma::CalculateMuonIso(&muons[1]) > 1.0)
       )
     return kTRUE;
   else if(zgamma::CalculateMuonIso(&muons[0]) > 0.4 || zgamma::CalculateMuonIso(&muons[1]) > 0.4) 
     return kTRUE;
-  */
+  
     
     
-  if ((muons[0].Pt() > 20 && zgamma::CalculateMuonIso(&muons[0]) > 0.4) ||
-      (muons[1].Pt() > 20 && zgamma::CalculateMuonIso(&muons[1]) > 0.4))
-    return kTRUE;
+  //if ((muons[0].Pt() > 20 && zgamma::CalculateMuonIso(&muons[0]) > 0.4) ||
+  //  (muons[1].Pt() > 20 && zgamma::CalculateMuonIso(&muons[1]) > 0.4))
+  //return kTRUE;
     
   lPt1 = muons[0];
   lPt2 = muons[1];

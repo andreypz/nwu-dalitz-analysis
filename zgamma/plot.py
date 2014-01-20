@@ -15,16 +15,19 @@ parser.add_option("-p", "--period",dest="period", default="2012",  help="Year pe
 parser.add_option("--bkg", dest="bkg",  action="store_true", default=False, help="Make plots from bkg sample")
 parser.add_option("--mcfm",dest="mcfm", action="store_true", default=False, help="Use MCFM  as a signal")
 
+parser.add_option("--mugamma",dest="mugamma", action="store_true", default=False, help="MuMuGamma selection")
+parser.add_option("--egamma", dest="egamma",  action="store_true", default=False, help="EEGamma selection")
+
 (options, args) = parser.parse_args()
 
 lumi = u.getLumi(options.period)
 cs   = u.getCS(options.mcfm)
 
-sel = ["electron"]
-#sel = ["mugamma"]
-#sel = ["mugamma","electron"]
-#sel = []
-
+sel = []
+if options.mugamma:
+    sel.append("mugamma")
+if options.egamma:
+    sel.append("electron")
 
 def effPlots(f1, path):
     print "Now making efficiency plots"
@@ -132,8 +135,8 @@ if __name__ == "__main__":
     
     
     pathBase = "/uscms_data/d2/andreypz/html/zgamma/dalitz/"+ver+"_cut"+cut
-    #hPath    = "/eos/uscms/store/user/andreypz/batch_output/zgamma/8TeV/"+ver
-    hPath  = "/uscms_data/d2/andreypz/zgamma/"+ver
+    hPath    = "/eos/uscms/store/user/andreypz/batch_output/zgamma/8TeV/"+ver
+    #hPath  = "/uscms_data/d2/andreypz/zgamma/"+ver
 
     u.createDir(pathBase)
 
@@ -148,45 +151,6 @@ if __name__ == "__main__":
     tri_hists = {}
     dataFile  = {}
     bkgFile   = {}
-
-
-    '''
-    #bkgFile = TFile("hhhh_dy.root", "OPEN")
-    bkgFile1 = TFile("~/nobackup/v13_DY_electron_2012.root","OPEN")
-    sigFile  = TFile("~/nobackup/v13_dalitz_electron_2012.root","OPEN")
-    #sigFile = TFile("hhhh_sig.root", "OPEN")
-    #effPlots(sigFile, pathBase+"/eff/")
-
-
-    u.createDir(pathBase+"/eff")
-    prof = sigFile.Get("eff/gen_Mll_vs_dR")
-    prof.Draw("")
-    c1.SaveAs(pathBase+"/eff/gen_Mll_vs_dR.png")
-
-    h1 = sigFile.Get("Electrons/egamma_reco").Clone()
-    h2 = bkgFile1.Get("Electrons/egamma_reco").Clone()
-
-
-    #Nev1 = sigFile.Get("Counts/evt_byCut").GetBinContent(3)
-    #Nev2 = bkgFile.Get("Counts/evt_byCut").GetBinContent(3)
-    Nev1 = sigFile.Get("Muons/size_mu_cut1").Integral()
-    Nev2 = bkgFile1.Get("Muons/size_mu_cut1").Integral()
-    print Nev1, Nev2
-
-    h1.Scale(1./Nev1)    
-    h2.Scale(1./Nev2)
-    h1.SetLineColor(kRed+1)
-    h1.Draw("hist")
-    h2.Draw("hist same")
-    h1.GetXaxis().SetBinLabel(1,"no eele, no gamma");
-    h1.GetXaxis().SetBinLabel(2,"electron");
-    h1.GetXaxis().SetBinLabel(3,"gamma");
-    h1.GetXaxis().SetBinLabel(4,"ele and gamma");
-    h1.GetXaxis().SetBinLabel(5,"ele or gamma");
-    c1.SaveAs(pathBase+"/eff/reco_egamma.png")
-
-    '''
-    
 
 
     for thissel in sel:
@@ -263,8 +227,8 @@ if __name__ == "__main__":
     #print yields_data
 
 
-    sigFileMAD  = TFile("hhhh_dal-mad125_1.root", "OPEN")
-    u.drawAllInFile(sigFileMAD, "signal", None, "", None,"","GEN-RECO",pathBase+"/GEN-RECO", None, "lumi")
+    #sigFileMAD  = TFile("hhhh_dal-mad125_1.root", "OPEN")
+    #u.drawAllInFile(sigFileMAD, "signal", None, "", None,"","GEN-RECO",pathBase+"/GEN-RECO", None, "lumi")
     
     #u.drawAllInFile(bkgFile[thissel], "DY electrons", sigFile, "Dalitz 2el",  "NewEle-1", pathBase+"/NewEle-1/", None,"norm", isLog=1, )
     '''
