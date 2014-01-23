@@ -31,7 +31,7 @@ def SignalFitMaker(lep, year, cat, subdir):
   #sigNameList = ['gg','vbf','tth','wh','zh']
   sigNameList = ['gg']
   
-  plotBase = "/uscms_data/d2/andreypz/html/zgamma/dalitz/fits-"+subdir+"/sigCBFits/"
+  plotBase = "/uscms_data/d2/andreypz/html/zgamma/dalitz/fits-"+subdir
   u.createDir(plotBase)
   rooWsFile = TFile(subdir+'/testRooFitOut_Dalitz.root')
   myWs = rooWsFile.Get('ws')
@@ -159,7 +159,7 @@ def SignalFitMaker(lep, year, cat, subdir):
     testFrame.Draw()
     testFrame.SetTitle(";m_{H};fit pdf")
     #c.Print("p5.png")
-    c.SaveAs(plotBase+'_'.join(['test','sig','fit',prod,lep,year,'cat'+cat])+'.png')
+    c.SaveAs(plotBase+'_'.join(['sig','fit',prod,lep,year,'cat'+cat])+'.png')
 
   for prod in sigNameList:
     for mass in massList:

@@ -2,7 +2,7 @@
 import sys
 from ROOT import *
 gROOT.SetBatch()
-#from systematics import *
+from systematics import *
 from rooFitBuilder import *
 sys.path.append("../zgamma")
 import utils as u
@@ -40,6 +40,7 @@ def makeCards(subdir):
         bkgParams = ['p0','p1','p2','p3','p4','sigma','step','mean','norm']
 
         for mass in massList:
+          
           sigFileName = subdir+'/'+'_'.join(['SignalOutput',lepton,year,'cat'+cat,mass])+'.root'
           sigFile = TFile(sigFileName)
           sigWs = sigFile.Get('ws_card')
@@ -67,40 +68,40 @@ def makeCards(subdir):
           card.write('{0:<12} {1}\n'.format('observation',int(bgYield)))
           card.write('------------------------------\n')
 
-          if cat is not '5':
-            print channel, prefixSigList[::-1]
-            
-            card.write('{0:<25} {1:^15} {2:^15} \n'.format(*(['bin']+[channel]*2)))
-            card.write('{0:<25} {1:^15} {2:^15} \n'.format(*(['process']+prefixSigList[::-1]+['bkg'])))
-            card.write('{0:<25} {1:^15} {2:^15} \n'.format(*(['process', 0,1])))
+
+          print channel, prefixSigList[::-1]
+          
+          card.write('{0:<25} {1:^15} {2:^15} \n'.format(*(['bin']+[channel]*2)))
+          card.write('{0:<25} {1:^15} {2:^15} \n'.format(*(['process']+prefixSigList[::-1]+['bkg'])))
+          card.write('{0:<25} {1:^15} {2:^15} \n'.format(*(['process', 0,1])))
           
           card.write('--------------------------------------------------------------\n')
           sigYields = []
           for sig in prefixSigList[::-1]:
             sigYields.append(sigWs.var(sig+'_yield_'+channel).getVal())
-          if cat is not '5':
 
-            print sigYields
-            card.write('{0:<25} {1:^15.5} {2:^15}\n'.format(*(['rate']+sigYields+[1])))
+          print sigYields
+          card.write('{0:<25} {1:^15.5} {2:^15}\n'.format(*(['rate']+sigYields+[1])))
 
-            card.write('-------------------------------------------------------------\n')
-            card.write(' \n')
-
-            if makeSys:
-              card.write('lumi         lnN     1.022        1.022 \n')
-              #card.write('brLLG        lnN     1.10         -     \n')
-              card.write('pdf_gg       lnN     0.923/1.079  -     \n')
-              card.write('QCDscale_ggH lnN     0.918/1.125  -     \n')
-              # card.write('unc_Bkg1  gmN 72      -           1.00  \n')
+          card.write('-------------------------------------------------------------\n')
+          card.write(' \n')
+          
+          if makeSys:
+            
+            card.write('lumi         lnN     1.042        1.042 \n')
+            card.write('brLLG        lnN     1.10         -     \n')
+            card.write('pdf_gg       lnN     '+pdf_gg[year][mass]+'  -     \n')
+            card.write('QCDscale_ggH lnN     '+qcd_gg[year][mass]+'  -     \n')
+            # card.write('unc_Bkg1  gmN 72      -           1.00  \n')
             
             
-              for sig in prefixSigList:
-                card.write('{0:<40} {1:<10} {2:^10} {3:^10}\n'.format(sig+'_mShift_'+channel,'param', 1, 0.01))
-                card.write('{0:<40} {1:<10} {2:^10} {3:^10}\n'.format(sig+'_sigmaShift_'+channel,'param', 1, 0.05))
-
-              for param in bkgParams[:-1]:
-                card.write('{0:<45} {1:<15}\n'.format('bkg_'+param+'_'+channel,'flatParam'))
-              card.write('{0:<45} {1:<15}\n'.format('bkg_'+channel+'_'+bkgParams[-1],'flatParam'))
+            for sig in prefixSigList:
+              card.write('{0:<40} {1:<10} {2:^10} {3:^10}\n'.format(sig+'_mShift_'+channel,'param', 1, 0.01))
+              card.write('{0:<40} {1:<10} {2:^10} {3:^10}\n'.format(sig+'_sigmaShift_'+channel,'param', 1, 0.05))
+              
+            for param in bkgParams[:-1]:
+              card.write('{0:<45} {1:<15}\n'.format('bkg_'+param+'_'+channel,'flatParam'))
+            card.write('{0:<45} {1:<15}\n'.format('bkg_'+channel+'_'+bkgParams[-1],'flatParam'))
 
 
           card.close()
