@@ -47,8 +47,8 @@ else:
     print "Run locally, source files: \n", sourceFiles
 
     
-print "Running on sample", sample, "with selection", selection, "and trigger", trigger,\
-      "in source ", sourcefilename, ", period =", period, " batch =",  isbatch, " and gen selection = ", options.gen
+print "Running on sample", sample, "with selection=", selection, ", trigger=", trigger,\
+      "in source=", sourcefilename, ", period=", period, " batch=",  isbatch, " and gen selection=", options.gen
 
 from ROOT import *
 

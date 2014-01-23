@@ -55,13 +55,13 @@
 //#include "../plugins/rochcor.h"
 #include "../plugins/ZGAngles.h"
 #include "../plugins/HistManager.h"
-#include "zgamma.h"
+//#include "zgamma.h"
 
 // Header file for the classes stored in the TTree if any.
 #include <TClonesArray.h>
 #include <TVector3.h>
 
-/*
+
 #define nC 14
 struct muIdAndIsoCuts{
   Bool_t IsPF;
@@ -109,7 +109,6 @@ struct phIdAndIsoCuts{
   float phIso03[2];
 };
 
-*/
 
 class egamma : public TSelector {
  private:
@@ -242,7 +241,7 @@ class egamma : public TSelector {
    virtual bool PassMuonIdAndIso(TCMuon *l, muIdAndIsoCuts c, TVector3 *pv);
    virtual bool PassElectronIdAndIso(TCElectron *l, elIdAndIsoCuts c, TVector3 *pv);
    virtual bool PassElectronIdAndIsoMVA(TCElectron *l);
-   virtual bool PassElectronIdAndIsoDalitz(TCElectron *l, bool);
+   virtual bool PassElectronIdAndIsoDalitz(TCElectron *l, TVector3 *pv, bool);
    virtual bool PassPhotonIdAndIso(TCPhoton *p, phIdAndIsoCuts c, TVector3 *pv);
    
    virtual void CalculatePhotonIso(TCPhoton *p, float& chIsoCor, float& nhIsoCor, float& phIsoCor);

@@ -16,6 +16,7 @@ parser.add_option("--sig",  dest="sig",  action="store_true", default=False, hel
 parser.add_option("--bkg",  dest="bkg",  action="store_true", default=False, help="Run over the background samples")
 parser.add_option("--test", dest="test", action="store_true", default=False, help="Run over the test sample")
 parser.add_option("--all",  dest="all",  action="store_true", default=False, help="Run over all the samples!")
+parser.add_option("--gen",  dest="gen",  action="store_true", default=False, help="Do gen-level analysis.")
     
 (options, args) = parser.parse_args()
 
@@ -35,7 +36,7 @@ if options.electron:
 if options.mugamma:
     selection="mugamma"
 if options.mumu:
-    selection="muon"
+    selection="mumu"
 if options.singlemu:
     selection="single-mu"
                                             
@@ -46,10 +47,17 @@ doTest    = options.test
 doData    = options.data
 doBG      = options.bkg
 doSignal  = options.sig
+if options.gen and not options.sig:
+    print "We only will do gen level analysis on Signal MC sample for now"
+    sys.exit(0)
+gen=" "
+if options.gen:
+    gen=" gen"
 if options.all:
     doData = 1
     doBG   = 1
     doSignal = 1
+
 ''' 
     Set job configurations.  The order of arguments is:
     (Dataset, path to data, number of jobs, arguments to pass to executable, output directory name)
@@ -66,12 +74,12 @@ test.extend([
 
 if period =="2012":
     
-    if selection == 'muon':
+    if selection == 'mumu':
         data.extend([
-            cfg('DoubleMu_Run2012A',  dCache+'/andreypz/nuTuples_v6_8TeV/DoubleMuParked/Run2012A-22Jan2013',  5, 'DATA muon 2012'),
-            cfg('DoubleMu_Run2012B',  dCache+'/andreypz/nuTuples_v6_8TeV/DoubleMuParked/Run2012B-22Jan2013', 10, 'DATA muon 2012'),
-            cfg('DoubleMu_Run2012C',  dCache+'/andreypz/nuTuples_v6_8TeV/DoubleMuParked/Run2012C-22Jan2013', 10, 'DATA muon 2012'),
-            cfg('DoubleMu_Run2012D',  dCache+'/andreypz/nuTuples_v6_8TeV/DoubleMuParked/Run2012D-22Jan2013', 10, 'DATA muon 2012'),
+            cfg('DoubleMu_Run2012A',  EOS+'/bpollack/V09_04_8TeV/DoubleMu/Run2012A',  5, 'DATA '+selection+' 2012'),
+            cfg('DoubleMu_Run2012B',  EOS+'/bpollack/V09_04_8TeV/DoubleMu/Run2012B',  8, 'DATA '+selection+' 2012'),
+            cfg('DoubleMu_Run2012C',  EOS+'/bpollack/V09_04_8TeV/DoubleMu/Run2012C', 10, 'DATA '+selection+' 2012'),
+            cfg('DoubleMu_Run2012D',  EOS+'/bpollack/V09_04_8TeV/DoubleMu/Run2012D', 10, 'DATA '+selection+' 2012'),
             ])
 
     if selection == 'single-mu':
@@ -85,33 +93,37 @@ if period =="2012":
     if selection == 'mugamma':
     
         data.extend([
-            cfg('MuEG_Run2012A',  dCache+'/andreypz/nutuples_v9.3_8TeV/MuEG/Run2012A-22Jan2013',  5, 'DATA mugamma 2012'),
-            cfg('MuEG_Run2012B',  dCache+'/andreypz/nutuples_v9.3_8TeV/MuEG/Run2012B-22Jan2013',  8, 'DATA mugamma 2012'),
-            cfg('MuEG_Run2012C',  dCache+'/andreypz/nutuples_v9.3_8TeV/MuEG/Run2012C-22Jan2013',  8, 'DATA mugamma 2012'),
-            cfg('MuEG_Run2012D',  dCache+'/andreypz/nutuples_v9.3_8TeV/MuEG/Run2012D-22Jan2013',  15,'DATA mugamma 2012'),
+            cfg('MuEG_Run2012A',  dCache+'/andreypz/nutuples_v9.3_8TeV/MuEG/Run2012A-22Jan2013',  5, 'DATA '+selection+' 2012'),
+            cfg('MuEG_Run2012B',  dCache+'/andreypz/nutuples_v9.3_8TeV/MuEG/Run2012B-22Jan2013',  8, 'DATA '+selection+' 2012'),
+            cfg('MuEG_Run2012C',  dCache+'/andreypz/nutuples_v9.3_8TeV/MuEG/Run2012C-22Jan2013',  8, 'DATA '+selection+' 2012'),
+            cfg('MuEG_Run2012D',  dCache+'/andreypz/nutuples_v9.3_8TeV/MuEG/Run2012D-22Jan2013',  15,'DATA '+selection+' 2012'),
 
             ])
     
     if selection == 'electron':
         data.extend([
-            cfg('DoublePhoton_Run2012A', dCache+'/andreypz/nuTuples_v9_8TeV/Photon/Run2012A-22Jan2013',         10, 'DATA electron 2012'),
-            cfg('DoublePhoton_Run2012B', dCache+'/andreypz/nuTuples_v9_8TeV/DoublePhoton/Run2012B-22Jan2013',   15, 'DATA electron 2012'),
-            cfg('DoublePhoton_Run2012C', dCache+'/andreypz/nuTuples_v9_8TeV/DoublePhoton/Run2012C-22Jan2013',   20, 'DATA electron 2012'),
-            cfg('DoublePhoton_Run2012D', dCache+'/andreypz/nuTuples_v9_8TeV/DoublePhoton/Run2012D-22Jan2013',   30, 'DATA electron 2012'),
+            cfg('DoublePhoton_Run2012A', dCache+'/andreypz/nuTuples_v9_8TeV/Photon/Run2012A-22Jan2013',         10, 'DATA '+selection+' 2012'),
+            cfg('DoublePhoton_Run2012B', dCache+'/andreypz/nuTuples_v9_8TeV/DoublePhoton/Run2012B-22Jan2013',   15, 'DATA '+selection+' 2012'),
+            cfg('DoublePhoton_Run2012C', dCache+'/andreypz/nuTuples_v9_8TeV/DoublePhoton/Run2012C-22Jan2013',   20, 'DATA '+selection+' 2012'),
+            cfg('DoublePhoton_Run2012D', dCache+'/andreypz/nuTuples_v9_8TeV/DoublePhoton/Run2012D-22Jan2013',   30, 'DATA '+selection+' 2012'),
             ])
         
         
     bg = []
     
+    bg.extend([
+        cfg('DYjets50',  EOS+'/bpollack/V09_04_8TeV/MC/DYJetsToLL_M-50',  1, 'DYjets50 ' +selection+' '+period),
+        ])
+
     if selection == 'electron':
         bg.extend([
             #cfg('DYjets10', dCache+'/andreypz/nuTuples_v9_8TeV/DYJets_M10To50', 20, 'DYjets10 '+selection+' '+period),
-            cfg('DYjets0',  dCache+'/andreypz/nuTuples_v9_8TeV/DYJets_M0To50',  1, 'DYjets0 ' +selection+' '+period),
+            #cfg('DYjets50',  dCache+'/andreypz/nuTuples_v9_8TeV/DYJets_M0To50',  1, 'DYjets0 ' +selection+' '+period),
             ])
 
     if selection == 'mugamma':
         bg.extend([
-            cfg('DYdalitz', dCache+'/andreypz/nutuples_v9.4_8TeV/DYMuMuGammaDalitz', 1, 'DY '+selection+' '+period),
+            #cfg('DYdalitz', dCache+'/andreypz/nutuples_v9.4_8TeV/DYMuMuGammaDalitz', 1, 'DY '+selection+' '+period),
             ])
     """
     cfg('WZJetsTo3LNu',  dCache+'/andreypz/nuTuples_v5_8TeV/WZJetsTo3LNu',  1, 'WZ '+selection+' '+period),
@@ -133,22 +145,32 @@ if period =="2012":
 
     signal = []
 
-    if selection in ["muon","mugamma","single-mu"]:
+    signal.extend([
+        cfg('ggHZG-125', EOS+'/bpollack/V09_04_8TeV/MC/ggHZG_M125_S10',1, 'HZG '+selection+' '+period+gen),
+        ])
+    
+    if selection in ["mumu","mugamma","single-mu"]:
         signal.extend([
 
             #cfg('dal-MCFM125',dCache+'/andreypz/nuTuples_v9.4_8TeV/MCFM_dalitz_v2',    1, 'dalitz '+selection+' '+period),
-            cfg('dal-mad120', dCache+'/andreypz/nuTuples_v9.4_8TeV/HiggsToMuMuGamma_MH120',1, 'dalitz '+selection+' '+period),
-            cfg('dal-mad125', dCache+'/andreypz/nuTuples_v9.4_8TeV/HiggsToMuMuGamma_MH125',1, 'dalitz '+selection+' '+period),
-            cfg('dal-mad130', dCache+'/andreypz/nuTuples_v9.4_8TeV/HiggsToMuMuGamma_MH130',1, 'dalitz '+selection+' '+period),
-            cfg('dal-mad135', dCache+'/andreypz/nuTuples_v9.4_8TeV/HiggsToMuMuGamma_MH135',1, 'dalitz '+selection+' '+period),
-            cfg('dal-mad140', dCache+'/andreypz/nuTuples_v9.4_8TeV/HiggsToMuMuGamma_MH140',1, 'dalitz '+selection+' '+period),
-            cfg('dal-mad145', dCache+'/andreypz/nuTuples_v9.4_8TeV/HiggsToMuMuGamma_MH145',1, 'dalitz '+selection+' '+period),
-            cfg('dal-mad150', dCache+'/andreypz/nuTuples_v9.4_8TeV/HiggsToMuMuGamma_MH150',1, 'dalitz '+selection+' '+period),
+            cfg('dal-mad120', dCache+'/andreypz/nuTuples_v9.4_8TeV/HiggsToMuMuGamma_MH120',1, 'dalitz '+selection+' '+period+gen),
+            cfg('dal-mad125', dCache+'/andreypz/nuTuples_v9.4_8TeV/HiggsToMuMuGamma_MH125',1, 'dalitz '+selection+' '+period+gen),
+            cfg('dal-mad130', dCache+'/andreypz/nuTuples_v9.4_8TeV/HiggsToMuMuGamma_MH130',1, 'dalitz '+selection+' '+period+gen),
+            cfg('dal-mad135', dCache+'/andreypz/nuTuples_v9.4_8TeV/HiggsToMuMuGamma_MH135',1, 'dalitz '+selection+' '+period+gen),
+            cfg('dal-mad140', dCache+'/andreypz/nuTuples_v9.4_8TeV/HiggsToMuMuGamma_MH140',1, 'dalitz '+selection+' '+period+gen),
+            cfg('dal-mad145', dCache+'/andreypz/nuTuples_v9.4_8TeV/HiggsToMuMuGamma_MH145',1, 'dalitz '+selection+' '+period+gen),
+            cfg('dal-mad150', dCache+'/andreypz/nuTuples_v9.4_8TeV/HiggsToMuMuGamma_MH150',1, 'dalitz '+selection+' '+period+gen),
 
             ])
     elif selection=="electron":
         signal.extend([
-            cfg('dal-mad125', dCache+'/andreypz/nuTuples_v9_8TeV/Higgs_To_EEGamma', 1, 'dalitz '+selection+' '+period),
+            cfg('dal-mad120', dCache+'/andreypz/nuTuples_v9.4_8TeV/HiggsToEEGamma_MH120', 1, 'dalitz '+selection+' '+period+gen),
+            cfg('dal-mad125', dCache+'/andreypz/nuTuples_v9.4_8TeV/HiggsToEEGamma_MH125', 1, 'dalitz '+selection+' '+period+gen),
+            cfg('dal-mad130', dCache+'/andreypz/nuTuples_v9.4_8TeV/HiggsToEEGamma_MH130', 1, 'dalitz '+selection+' '+period+gen),
+            cfg('dal-mad135', dCache+'/andreypz/nuTuples_v9.4_8TeV/HiggsToEEGamma_MH135', 1, 'dalitz '+selection+' '+period+gen),
+            cfg('dal-mad140', dCache+'/andreypz/nuTuples_v9.4_8TeV/HiggsToEEGamma_MH140', 1, 'dalitz '+selection+' '+period+gen),
+            cfg('dal-mad145', dCache+'/andreypz/nuTuples_v9.4_8TeV/HiggsToEEGamma_MH145', 1, 'dalitz '+selection+' '+period+gen),
+            cfg('dal-mad150', dCache+'/andreypz/nuTuples_v9.4_8TeV/HiggsToEEGamma_MH150', 1, 'dalitz '+selection+' '+period+gen),
             ])
         
 else:

@@ -12,15 +12,17 @@ lumi2012 = float(conf.get("lumi","lumi2012A")) + float(conf.get("lumi","lumi2012
            float(conf.get("lumi","lumi2012C")) + float(conf.get("lumi","lumi2012D"))
 lumi = lumi2012
 
-cuts = []
-for key, cut in sorted(conf.items("cuts-mu")):
-    cuts.append(cut)
-    #print key, cut
+def setSelection(sel):
+    conf.set("selection","sel", sel)
+def sgetSelection(sel):
+    conf.get("selection","sel")
 
-cs = {}
-for sample, c in conf.items("cs"):
-    print sample,c
-    cs[sample] = float(c)
+def getCuts(cp, name="cuts-mu"):
+    cuts = []
+    for key, cut in sorted(cp.items(name)):
+        cuts.append(cut)
+    return cuts
+    #print key, cut
 
 def getLumi(period):
     if period=="2012":
@@ -29,9 +31,15 @@ def getLumi(period):
         print "Sorry only 2012 is considered"
         return 0
 
-def getCS(useMCFM=False):
-    if useMCFM:
-        cs["h"]=2*cs["h"]
+def getCS(sample, useMCFM=False):
+    sel = conf.get("selection", "sel")[0:2]
+    if "ggH" in sample:
+        cs = float(conf.get(sample, "cs-"+sel))      
+        if useMCFM:
+            cs = cs*2
+    else:
+        cs = float(conf.get(sample, "cs"))      
+
     return cs
 
 def handleOverflowBins(hist):
@@ -139,16 +147,15 @@ def drawAllInFile(f1, name1, f2, name2, f3, name3, dir,path, N, howToScale="none
 
     if f2!=None and howToScale=="lumi": # only assume signal MC for now
         Nev = f2.Get("Counts/evt_byCut_raw").GetBinContent(1)
-        cro = cs["dy"]
+        cro = getCS("dy")
         scale2 = float(1000*lumi*cro)/Nev
         print Nev, lumi, cro, scale2
         
         
     if f3!=None and howToScale=="lumi": # only assume signal MC for now
         Nev = f3.Get("Counts/evt_byCut_raw").GetBinContent(1)
-        cro = cs["dal-el"]
-       
-        scale3 = float(1000*lumi*cro)/Nev
+        cro = getCS("ggH-125")
+        scale3 = float(lumi*cro)/Nev
         print Nev, lumi, cro, scale3
 
 
@@ -294,7 +301,14 @@ def drawAllInFile(f1, name1, f2, name2, f3, name3, dir,path, N, howToScale="none
         c1.SetLogy(0)
         
 def yieldsTable(yi, sel, num=True):
+    print sel
     t = []
+    if len(sel)==0:
+        return t
+    
+    cuts =  getCuts(conf, "cuts-"+sel[0][0:2])
+
+
     l1 = ["Cut/trigger"]
     if num:
         l1.insert(0,"")
@@ -316,6 +330,7 @@ def yieldsTable(yi, sel, num=True):
 def makeTable(table, name, opt="tex"):
     print "Making sure that the list is alright"
     n_row = len(table)
+    if n_row==0: return
     n_col = len(table[0])
     for l in table:
         if len(l)!=n_col:
@@ -328,7 +343,7 @@ def makeTable(table, name, opt="tex"):
         endTable   = '\\end{tabular} \n'
 
         beginLine  = ''
-        endLine    = '\\\\\\hline \n'
+        endLine    = ' \\\\ \\hline \n'
         separator  = ' & '
 
 
@@ -372,15 +387,17 @@ def makeTable(table, name, opt="tex"):
     if opt in ["twiki","tex"]:
         print myTable
 
-def getYields(f, doLumiScale=False):
+def getYields(f, sel, doLumiScale=False):
     ev = f.Get("Counts/evt_byCut")
+    cuts =  getCuts(conf, "cuts-"+sel)
 
     y = []
     scale=1
     if doLumiScale: # only assume signal MC for now
         Nev = ev.GetBinContent(1)
-        cro = cs["dal-el"]
-        scale = float(1000*lumi*cro)/Nev
+        cro = getCS("ggH-125")
+        scale = float(lumi*cro)/Nev
+        print "Lumi scale for sel=",sel, "Nev=",Nev, "cro=",cro, "scale=",scale
 
     for a in xrange(len(cuts)):
         y.append(scale*ev.GetBinContent(a+1)) # well, that's how the histogram is set up

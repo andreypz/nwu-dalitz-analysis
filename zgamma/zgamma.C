@@ -390,30 +390,10 @@ Bool_t zgamma::Process(Long64_t entry)
     hists->fill1DHist(fsr_el_count, "gen_el_fsrcount",";gen el FSR",  4, 0,4, 1,"GEN");
 
 
-    if(selection=="el"){ //eegamma
-      if (gen_el.size()!=2)
-        return kTRUE;
-
-      gen_lPt1 = gen_el[0];
-      gen_lPt2 = gen_el[1];
-
-      if (gen_el[0].Charge()==1 && gen_el[1].Charge()==-1){
-        gen_l1 = gen_el[0];
-        gen_l2 = gen_el[1];
-      }
-      else if (gen_el[0].Charge()==-1 && gen_el[1].Charge()==1){
-        gen_l1 = gen_el[1];
-        gen_l2 = gen_el[0];
-      }
-      else
-        Abort("They are the same charge!");
-    }
-
-    if(selection=="mu"){//mumugamma
+    if(selection=="mu"){
       if (gen_mu.size()!=2) return kTRUE;
       //Abort(Form("ev #%i NONONO There has to be exactly 2 muons from the Higgs! \n \t\t but there are %i", eventNumber, (int)gen_mu.size()));
       
-
 
       gen_lPt1 = gen_mu[0];
       gen_lPt2 = gen_mu[1];
@@ -471,15 +451,15 @@ Bool_t zgamma::Process(Long64_t entry)
     hists->fill1DHist(gendR, "gen_dR_0", ";gen_dR", 50,0,0.3,1,"eff");
     hists->fillProfile(gendR, genMll, "gen_Mll_vs_dR", ";dR(l1,l2);M(l1,l2)", 100, 0, 0.5, 0, 20, 1,"eff");
 
-    /*
-      Acceptance study (do not erase!)
+    
+    //Acceptance study (do not erase!)
     if (sample =="dalitz" && gen_gamma.Pt()>cut_gammapt && fabs(gen_gamma.Eta())<2.5){
       hists->fill1DHist(genMll, "gen_Mll_acc_gamma",";gen_Mll",50,0,15, 1,"eff");
       hists->fill1DHist(gendR,  "gen_dR_acc_gamma", ";gen_dR", 50,0,0.3,1,"eff");
-
+      
       if(sample=="dalitz" &&
          gen_lPt1.Pt()>cut_l1pt && fabs(gen_lPt1.Eta())<2.4 &&
-         gen_lPt2.Pt()>cut_l2pt && fabs(gen_lPt2.Eta())<2.4
+         gen_lPt2.Pt()>cut_l2pt_low && fabs(gen_lPt2.Eta())<2.4
          ){
         hists->fill1DHist(genMll,  "gen_Mll_acc_lept",  ";gen_Mll",50,0,15, 1,"eff");
         hists->fill1DHist(gendR,   "gen_dR_acc_lept",   ";gen_dR", 50,0,0.3,1,"eff");
@@ -490,7 +470,6 @@ Bool_t zgamma::Process(Long64_t entry)
     }
     else if (sample=="dalitz")
       return kTRUE;
-    */
 
     if (sample == "dalitz"){
       hists->fill1DHist(gen_l1.DeltaR(gen_gamma),"gen_l1gamma_deltaR","gen_l1gamma_deltaR",100,0,5, 1,"");
@@ -506,7 +485,6 @@ Bool_t zgamma::Process(Long64_t entry)
     }
 
   }
-
 
   FillHistoCounts(2, eventWeight);
   CountEvents(2);
@@ -656,18 +634,19 @@ Bool_t zgamma::Process(Long64_t entry)
   if (muons.size()<2) return kTRUE;
 
  
-  if (muons[1].Pt() < 7 &&
+  /*
+if (muons[1].Pt() < 7 &&
       (zgamma::CalculateMuonIso(&muons[0]) > 0.2 || zgamma::CalculateMuonIso(&muons[1]) > 1.0)
       )
     return kTRUE;
   else if(zgamma::CalculateMuonIso(&muons[0]) > 0.4 || zgamma::CalculateMuonIso(&muons[1]) > 0.4) 
     return kTRUE;
+  */  
+    
   
-    
-    
-  //if ((muons[0].Pt() > 20 && zgamma::CalculateMuonIso(&muons[0]) > 0.4) ||
-  //  (muons[1].Pt() > 20 && zgamma::CalculateMuonIso(&muons[1]) > 0.4))
-  //return kTRUE;
+  if ((muons[0].Pt() > 20 && zgamma::CalculateMuonIso(&muons[0]) > 0.4) ||
+      (muons[1].Pt() > 20 && zgamma::CalculateMuonIso(&muons[1]) > 0.4))
+    return kTRUE;
     
   lPt1 = muons[0];
   lPt2 = muons[1];
@@ -700,10 +679,9 @@ Bool_t zgamma::Process(Long64_t entry)
   if (lPt1.Pt() < cut_l1pt || lPt2.Pt() < cut_l2pt_low)   return kTRUE;
 
   if(!isRealData && makeGen){
-    hists->fill1DHist(genMll,  "gen_Mll_two_ele_reco_crosscheck", ";gen_Mll",50,0,15, 1,"eff");
-    hists->fill1DHist(gendR,   "gen_dR_two_ele_reco_crosscheck",  ";gen_dR", 50,0,0.3,1,"eff");
+    hists->fill1DHist(genMll,  "gen_Mll_two_lep_reco", ";gen_Mll",50,0,15, 1,"eff");
+    hists->fill1DHist(gendR,   "gen_dR_two_lep_reco",  ";gen_dR", 50,0,0.3,1,"eff");
   }
-
 
   FillHistosFull(4, eventWeight, l1, l2, lPt1, lPt2, gamma, "");
   FillHistoCounts(4, eventWeight);

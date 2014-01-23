@@ -13,6 +13,7 @@ set dataName  = $3  #e.g. Photon_Aug05, Run2011B , May10
 set suffix    = $4  #e.g. DATA. WZ, ZZ etc
 set selection = $5
 set period    = $6
+set gen       = $7
 
 echo "Copy the tarball with the source code from Condor scratch directory"
 
@@ -27,7 +28,7 @@ cp ../../input_${dataName}_${count}.txt input.txt
 
 chmod 755 run.py
 
-./run --clean
+./run.py --clean
 
 echo $selection
 if ( $selection == "electron" ) then
@@ -35,13 +36,20 @@ if ( $selection == "electron" ) then
     ./run.py ${suffix} ${dataName} -e -t pho26 -p ${period}  -b
 else if ( $selection == "mugamma" ) then
     echo "Mu+photon trigger will be used"
-    ./run.py ${suffix} ${dataName} -t mugamma -p ${period}  -b
+    if ( $gen == "gen" ) then
+        ./run.py ${suffix} ${dataName} -t mugamma -p ${period} --gen -b
+    else
+        ./run.py ${suffix} ${dataName} -t mugamma -p ${period}  -b
+    endif
 else if ( $selection == "single-mu" ) then
     echo "Single - IsoMu trigger will be used"
     ./run.py ${suffix} ${dataName} -t single-mu -p ${period} -b
-else 
-    echo "Muons"
+else if ( $selection == "mumu" ) then
+    echo "Mu-mu selections"
     ./run.py ${suffix} ${dataName} -t double-mu -p ${period} -b
+else
+    echo "No selection provided!"
+    exit(0)
 endif
 
 echo 'ls in analysis directory'

@@ -3,8 +3,8 @@ from optparse import OptionParser
 import sys,os,datetime
 from array import *
 from ROOT import *
-import makeHTML as ht
 import utils as u
+import makeHTML as ht
 gROOT.SetBatch()
 
 parser = OptionParser(usage="usage: %prog ver [options -c, -e, -p, -m]")
@@ -12,20 +12,23 @@ parser.add_option("-c","--cut",   dest="cut", type="int", default=4,    help="Pl
 parser.add_option("-m","--merge", dest="merge",action="store_true", default=False, help="Do merging?")
 
 parser.add_option("-p", "--period",dest="period", default="2012",  help="Year period; 2011 or 2012")
-parser.add_option("--bkg", dest="bkg",  action="store_true", default=False, help="Make plots from bkg sample")
-parser.add_option("--mcfm",dest="mcfm", action="store_true", default=False, help="Use MCFM  as a signal")
+parser.add_option("--bkg",  dest="bkg",  action="store_true", default=False, help="Make plots from bkg sample")
+parser.add_option("--mcfm", dest="mcfm", action="store_true", default=False, help="Use MCFM  as a signal")
+parser.add_option("--noeos",dest="noeos",action="store_true", default=False, help="Don't use EOS. pick up the files from nobackup area")
 
-parser.add_option("--mugamma",dest="mugamma", action="store_true", default=False, help="MuMuGamma selection")
+parser.add_option("--mumu",   dest="mumu",    action="store_true", default=False, help="MuMuGamma selection with Double-Mu trigger")
+parser.add_option("--mugamma",dest="mugamma", action="store_true", default=False, help="MuMuGamma selection with Mu-Pho trigger")
 parser.add_option("--egamma", dest="egamma",  action="store_true", default=False, help="EEGamma selection")
 
 (options, args) = parser.parse_args()
 
-lumi = u.getLumi(options.period)
-cs   = u.getCS(options.mcfm)
+
 
 sel = []
 if options.mugamma:
     sel.append("mugamma")
+if options.mumu:
+    sel.append("mumu")
 if options.egamma:
     sel.append("electron")
 
@@ -38,11 +41,9 @@ def effPlots(f1, path):
         h0 = f1.Get("eff/gen_"+var+"_0")
         h1 = f1.Get("eff/gen_"+var+"_acc_gamma")
         h2 = f1.Get("eff/gen_"+var+"_acc_lept")
+
         h3 = f1.Get("eff/gen_"+var+"_reco_gamma_iso")
-        h4 = f1.Get("eff/gen_"+var+"_one_ele_reco_ID")
-        h5 = f1.Get("eff/gen_"+var+"_two_ele_reco")
-        h6 = f1.Get("eff/gen_"+var+"_two_ele_reco_ID")
-        h7 = f1.Get("eff/gen_"+var+"_one_ele_reco")
+        h4 = f1.Get("eff/gen_"+var+"_two_lep_reco")
         
 
         h0.Draw("hist")
@@ -61,12 +62,12 @@ def effPlots(f1, path):
         r3.Divide(h2)
         r4 = h4.Clone()
         r4.Divide(h2)
-        r5 = h5.Clone()
-        r5.Divide(h2)
-        r6 = h6.Clone()
-        r6.Divide(h2)
-        r7 = h7.Clone()
-        r7.Divide(h2)
+        #r5 = h5.Clone()
+        #r5.Divide(h2)
+        #r6 = h6.Clone()
+        #r6.Divide(h2)
+        #r7 = h7.Clone()
+        #r7.Divide(h2)
 
         
         if var=="Mll":
@@ -82,8 +83,8 @@ def effPlots(f1, path):
         r1.SetLineColor(kRed+1)
         r2.SetLineColor(kGreen+1)
         leg = TLegend(0.20,0.2,0.90,0.30);
-        leg.AddEntry(r1,"photon pt>38, eta<2.5", "l")
-        leg.AddEntry(r2,"photon pt>38 and  pt(e1,e2) > (23,7)", "l")
+        leg.AddEntry(r1,"photon pt>25, eta<2.5", "l")
+        leg.AddEntry(r2,"photon pt>25 and p_{T}(l1)>23, p_{T}(l2)>4", "l")
         leg.SetTextSize(0.04)
         leg.SetFillColor(kWhite)
         leg.Draw()
@@ -94,25 +95,25 @@ def effPlots(f1, path):
         r3.SetMaximum(1)
         r3.SetTitle(xname+" gen; reco eff")    
         r4.Draw("hist same")
-        r5.Draw("hist same")
-        r6.Draw("hist same")
-        r7.Draw("hist same")
+        #r5.Draw("hist same")
+        #r6.Draw("hist same")
+        #r7.Draw("hist same")
     
         r3.SetLineColor(kBlack)
         r4.SetLineColor(kOrange+1)
-        r5.SetLineColor(kGreen+1)
-        r6.SetLineColor(kRed+1)
+        #r5.SetLineColor(kGreen+1)
+        #r6.SetLineColor(kRed+1)
         leg = TLegend(0.35,0.15,0.98,0.30);
-        leg.AddEntry(r3,"Reco photon pt>38, tight ID", "l")
-        leg.AddEntry(r5,"Photon + 2 electrons NO ID pt(e1,e2) > (23,7)", "l")
-        leg.AddEntry(r6,"Photon + 2 electrons ELE ID pt(e1,e2) > (23,7)", "l")
-        leg.AddEntry(r7,"Photon + ONE electron pt(e) > 30, No ID", "l")
-        leg.AddEntry(r4,"Photon + ONE electron pt(e) > 30, ID", "l")
+        leg.AddEntry(r3,"Reco photon pt>25, Medium WP ID ", "l")
+        leg.AddEntry(r4,"Photon and two reco-muons (OUR ID/ISO)", "l")
+        #leg.AddEntry(r5,"Photon + 2 electrons NO ID pt(e1,e2) > (23,7)", "l")
+        #leg.AddEntry(r6,"Photon + 2 electrons ELE ID pt(e1,e2) > (23,7)", "l")
+        #leg.AddEntry(r7,"Photon + ONE electron pt(e) > 30, No ID", "l")
         leg.SetTextSize(0.025)
         leg.SetFillColor(kWhite)
         leg.Draw()
         c1.SaveAs(path+"eff_"+var+".png")
-    
+        
 
 if __name__ == "__main__":
     timer = TStopwatch()
@@ -136,7 +137,8 @@ if __name__ == "__main__":
     
     pathBase = "/uscms_data/d2/andreypz/html/zgamma/dalitz/"+ver+"_cut"+cut
     hPath    = "/eos/uscms/store/user/andreypz/batch_output/zgamma/8TeV/"+ver
-    #hPath  = "/uscms_data/d2/andreypz/zgamma/"+ver
+    if options.noeos:
+        hPath  = "/uscms_data/d2/andreypz/zgamma/"+ver
 
     u.createDir(pathBase)
 
@@ -154,9 +156,12 @@ if __name__ == "__main__":
 
 
     for thissel in sel:
+        u.setSelection(thissel)
+        
         if doMerge:
-            os.system("hadd "+hPath+"/m_Data_"    +thissel+"_"+period+".root "+hPath+"/"+thissel+"_"+period+"/hhhh_*Run20*.root")
-            os.system("hadd "+hPath+"/m_DY_"    +thissel+"_"+period+".root "+hPath+"/"+thissel+"_"+period+"/hhhh_DYjets*.root")
+            os.system("hadd "+hPath+"/m_Data_" +thissel+"_"+period+".root "+hPath+"/"+thissel+"_"+period+"/hhhh_*Run20*.root")
+            if doBkg:
+                os.system("hadd "+hPath+"/m_DY_"   +thissel+"_"+period+".root "+hPath+"/"+thissel+"_"+period+"/hhhh_DYjets*.root")
             #os.system("hadd "+hPath+"/m_ZG_"    +thissel+"_"+period+".root "
             #         +hPath+"/"+thissel+"_"+period+"/hhhh_ZG_*.root ")
 
@@ -168,7 +173,7 @@ if __name__ == "__main__":
         path = pathBase+"/"+subdir
                 
         
-        sigFileMCFM = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_dal-MCFM_1.root", "OPEN")
+        #sigFileMCFM = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_dal-MCFM_1.root", "OPEN")
         #sigFileMCFM = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_dal-mcfm_1.root", "OPEN")
         sigFileMAD  = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_dal-mad125_1.root", "OPEN")
 
@@ -180,12 +185,11 @@ if __name__ == "__main__":
             bkgFile[thissel]  = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_DYjets0_1.root", "OPEN")
             #bkgFile[thissel]  = TFile(hPath+"/m_DY_"+thissel+"_"+period+".root","OPEN")
 
-        yields_data[thissel] = u.getYields(dataFile[thissel])
-        #yields_sig[thissel]  = u.getYields(sigFile,True)
-        yields_sig[thissel]  = u.getYields(sigFile,False)
+        yields_data[thissel] = u.getYields(dataFile[thissel], thissel[0:2])
+        yields_sig[thissel]  = u.getYields(sigFile,thissel[0:2], True) 
+        #yields_sig[thissel]  = u.getYields(sigFile,thissel[0:2],False)
         #yields_bkg[thissel]  = u.getYields(bkgFile[thissel])
 
-        yields_sig[thissel]  = u.getYields(sigFile,True)
         if doBkg:
             yields_bkg[thissel]  = u.getYields(bkgFile[thissel])
 
@@ -194,8 +198,8 @@ if __name__ == "__main__":
         
 
         #u.drawAllInFile(dataFile[thissel], "data", None, "", sigFile,"signal",  "",path, cut, "norm")
-        u.drawAllInFile(dataFile[thissel], "data", None, "", sigFile,"signal",  "",path, cut, "norm", doRatio=1)
-        #u.drawAllInFile(dataFile[thissel], "data", None, "", sigFile,"10xSignal",  "",path, cut, "lumi")
+        #u.drawAllInFile(dataFile[thissel], "data", None, "", sigFile,"signal",  "",path, cut, "norm", doRatio=1)
+        u.drawAllInFile(dataFile[thissel], "data", None, "", sigFile,"10xSignal",  "",path, cut, "lumi")
         u.drawAllInFile(dataFile[thissel], "data", None, "", sigFile,"10xSignal","EB",pathBase+"/EB", cut, "lumi")
         u.drawAllInFile(dataFile[thissel], "data", None, "", sigFile,"10xSignal","EE",pathBase+"/EE", cut, "lumi")
 
@@ -207,11 +211,24 @@ if __name__ == "__main__":
         elif thissel =="electron":
             if not doBkg:
                 bkgFile[thissel]=None
-                
-                u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",
+
+
+            u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",
                             "Photon",     pathBase+"/Photon",     None,"norm")
+            
+            u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",
+                            "DalitzEle-Before",  pathBase+"/DalitzEle-Before",  None,"norm")
+            u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",
+                            "DalitzEle-AfterAll",  pathBase+"/DalitzEle-AfterAll",  None,"norm")
+            u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",
+                            "DalitzEle-Before_tracks",  pathBase+"/DalitzEle-Before_tracks",  None,"norm")
+            u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",
+                            "DalitzEle-AfterAll_tracks",  pathBase+"/DalitzEle-AfterAll_tracks",  None,"norm")
+            
+            
             u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",
                             "DalitzEle",  pathBase+"/DalitzEle",  None,"norm")
+
             u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",
                             "DalitzEleEB",pathBase+"/DalitzEleEB",None,"norm")
             u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",
@@ -231,10 +248,16 @@ if __name__ == "__main__":
     #u.drawAllInFile(sigFileMAD, "signal", None, "", None,"","GEN-RECO",pathBase+"/GEN-RECO", None, "lumi")
     
     #u.drawAllInFile(bkgFile[thissel], "DY electrons", sigFile, "Dalitz 2el",  "NewEle-1", pathBase+"/NewEle-1/", None,"norm", isLog=1, )
+
+
+    #sigFileMAD  = TFile(hPath+"/mugamma_"+period+"/hhhh_dal-mad125_1.root", "OPEN")
+
+    #u.createDir(pathBase+"/eff")
+    #effPlots(sigFileMAD, pathBase+"/eff/")
+
     '''
 
     sigFileMCFM = TFile(hPath+"/mugamma_"+period+"/hhhh_dal-MCFM_1.root", "OPEN")
-    sigFileMAD  = TFile(hPath+"/mugamma_"+period+"/hhhh_dal-mad125_1.root", "OPEN")
     
     #u.drawAllInFile(sigFileMCFM, "MCFM",None, "",sigFileMAD,"Madgraph",  "GEN", pathBase+"/GEN", None,"norm", isLog=True)
 
@@ -310,16 +333,20 @@ if __name__ == "__main__":
             plot_types.append(d)
 
     #plot_types
+    print yields_sig
     table_sig  = u.yieldsTable(yields_sig, sel)
     table_data = u.yieldsTable(yields_data, sel)
+
     if doBkg:
         table_bkg = u.yieldsTable(yields_bkg, sel)
-
+        
 
     u.makeTable(table_data,"data", "html")
     u.makeTable(table_sig, "sig",  "html")
     u.makeTable(table_data,"data", "twiki")
     u.makeTable(table_sig, "sig",  "twiki")
+    #u.makeTable(table_data,"data", "tex")
+    #u.makeTable(table_sig, "sig",  "tex")
     if doBkg:
         u.makeTable(table_bkg, "bkg",  "twiki")
 

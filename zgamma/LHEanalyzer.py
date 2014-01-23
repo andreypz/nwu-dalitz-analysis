@@ -13,21 +13,14 @@ subdir = sys.argv[1]
 outpath = '/uscms_data/d2/andreypz/html/zgamma/lhe/'
 files={}
 
-#files["one"] = ['/uscms_data/d2/andreypz/lhe_higgs_mumugamma_dalitz/hmumug_m125.root']
-files["one"] = ['/uscms_data/d2/andreypz/lhe_vbf_higgs/vbfh_eeg_m125.root']
-files["two"] = ['/uscms_data/d2/andreypz/lhe_vbf_higgs/vbfh_mumug_m125.root']
+#files["one"] = ['/uscms_data/d2/andreypz/lhe_vbf_higgs/vbfh_eeg_m125.root']
+#files["two"] = ['/uscms_data/d2/andreypz/lhe_vbf_higgs/vbfh_mumug_m125.root']
+files["two"] = ['/uscms_data/d2/andreypz/lhe_higgs_mumugamma_dalitz/hmumug_m125.root']
+files["one"] = ['/uscms_data/d2/andreypz/lhe_mcfm/lhe_mcfm_hzg_dalitz_lord_fixed_unweighted.lhe.root']
 
 MH = 125
 LEPID1 = 13
-LEPID2 = 11
-
-#files["mcfm"] = ['/uscms_data/d2/andreypz/lhe_mcfm_hzg_dalitz_lord_fixed_unweighted.lhe.root']
-#files["mad"] = ['/uscms_data/d2/andreypz/lhe_mad_LO_HiggsToMuMuGamma.root']
-#files["mad"] = ['/uscms_data/d2/andreypz/lhe_mad_hzg5.root']
-#files["mad"] = ['/uscms/home/andreypz/lhe_higgs_eegamma_dalitz/heeg_m120.root']
-files["mad1"] = ['/uscms_data/d2/andreypz/lhe_higgs_eegamma_dalitz/m150.root']
-files["mad2"] = ['/uscms_data/d2/andreypz/lhe_higgs_eegamma_dalitz/m135.root']
-
+LEPID2 = 13
 
 print files
 #gSystem.Load("/home/andreypz/workspace/MadGraph5/ExRootAnalysis/lib/libExRootAnalysis.so")
@@ -201,13 +194,13 @@ def FillAllHists(files, h):
         #h.fill1DHist(g1.M(),    "g1_M",  ";g1 M",    200, -2,2, 1, "")
         #h.fill1DHist(g2.M(),    "g2_M",  ";g2 M",    200, -2,2, 1, "")
         
-        h.fill1DHist(diLep.M(),     "gen_Mll_0",";gen_Mll",100,0,50, 1,"");
-        #h.fill1DHist(diLep.M(),     "gen_Mll_0",";gen_Mll",100,0,50, 1,"eff");
-        if lPt1.Pt()>23 and lPt2.Pt()>7 and fabs(lPt1.Eta())<2.4 and  fabs(lPt2.Eta())<2.4 \
-               and gamma.Pt()>23 and fabs(gamma.Eta())<2.5:
-            h.fill1DHist(diLep.M(),     "gen_Mll_1",";gen_Mll",100,0,50, 1,"");
-            h.fill1DHist(diLep.M(),     "gen_Mll_2",";gen_Mll",100,0,50, 1,"");            
-            h.fill1DHist(diLep.M(),     "gen_Mll_3",";gen_Mll",100,0,50, 1,"");
+        h.fill1DHist(diLep.M(),     "gen_Mll_0",";gen_Mll",100,0,15, 1,"");
+        if gamma.Pt()>25 and fabs(gamma.Eta())<2.5:
+            h.fill1DHist(diLep.M(),     "gen_Mll_1",";gen_Mll",100,0,15, 1,"")
+
+            if lPt1.Pt()>23 and lPt2.Pt()>4 and fabs(lPt1.Eta())<2.4 and  fabs(lPt2.Eta())<2.4:
+                h.fill1DHist(diLep.M(),     "gen_Mll_2",";gen_Mll",100,0,15, 1,"");            
+                h.fill1DHist(diLep.M(),     "gen_Mll_3",";gen_Mll",100,0,15, 1,"");
 
         h.fill1DHist(gamma.M(),"gamma_mass",  ";gamma mass",    200, -2,2, 1, "")
         #h.fill1DHist(g1.Pt(),    "g1_pt",  ";g1 pt",    50, 0,100, 1, "")
@@ -299,26 +292,51 @@ if __name__ == "__main__":
     if not os.path.exists(path):
         os.makedirs(path)
 
-
-    #FillAllHists(files["mcfm"], h1)
     FillAllHists(files["one"],  h1)
-    FillAllHists(files["two"],  h2)
+    #FillAllHists(files["two"],  h2)
 
 
-    mcfmFile.cd()
-    mcfmFile.Write()
     oneFile.cd()
     oneFile.Write()
     twoFile.cd()
     twoFile.Write()
-    print "Saved files: \n",mcfmFile.GetName(), "\n", oneFile.GetName(), "\n", twoFile.GetName()
+    testFile.cd()
+    testFile.Write()
+    print "Saved files: \n",testFile.GetName(), "\n", oneFile.GetName(), "\n", twoFile.GetName()
 
 
     blah = []
-    #u.drawAllInFile(mcfmFile,"mcfm", oneFile, "madgra",None,"","", path, None,"norm", isLog=True)
-    u.drawAllInFile(oneFile, "vbf ele", twoFile, "vbf mu",None,"","", path, None,"norm", isLog=True)
-    #u.drawAllInFile(twoFile, "vbf",None,"", None,"","", path, None,"norm")
 
+    #u.drawAllInFile(oneFile, "MCFM ele", twoFile, "Madgraph mu",None,"","", path, None,"norm")
+    #u.drawAllInFile(oneFile, "vbf ele", twoFile, "vbf mu",None,"","", path, None,"norm", isLog=True)
+    u.drawAllInFile(twoFile, "MAD-125",None,"", None,"","", path, None,"norm")
+
+    u.createDir(path+"/eff")
+
+    h0 = oneFile.Get("gen_Mll_0")
+    h1 = oneFile.Get("gen_Mll_1")
+    h2 = oneFile.Get("gen_Mll_2")
+    r1 = h1.Clone()
+    r1.Divide(h0)
+    r2 = h2.Clone()
+    r2.Divide(h0)
+
+    r1.Draw("hist")
+    r2.Draw("hist same")
+    r1.SetMinimum(0)
+    r1.SetMaximum(1)
+    r1.SetTitle(";Mll gen at LHE; acc")
+    r1.SetLineColor(kRed+1)
+    r2.SetLineColor(kGreen+1)
+    leg = TLegend(0.20,0.2,0.90,0.30);
+    leg.AddEntry(r1,"photon pt>25, eta<2.5", "l")
+    leg.AddEntry(r2,"photon pt>25 and p_{T}(l1)>23, p_{T}(l2)>4", "l")
+    leg.SetTextSize(0.04)
+    leg.SetFillColor(kWhite)
+    leg.Draw()
+    c1.SaveAs(path+"/eff/acceptance_Mll_LHE.png")
+
+            
     plot_types =[]
     list = os.listdir(pathBase)
     for d in list:
@@ -327,7 +345,7 @@ if __name__ == "__main__":
 
     ht.makeHTML("Plots from an lhe file",pathBase, plot_types, blah, "mad")
 
-    mcfmFile.Close()
+    testFile.Close()
     oneFile.Close()
     twoFile.Close()
 
