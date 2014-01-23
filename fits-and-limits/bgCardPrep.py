@@ -19,7 +19,7 @@ yearList   = ['2012']
 catList    = ['0']
 
 
-plotBase = "/uscms_data/d2/andreypz/html/zgamma/dalitz/fits-"+subdir+"/bgCardPrep/"
+plotBase = "/uscms_data/d2/andreypz/html/zgamma/dalitz/fits-"+subdir
 u.createDir(plotBase)
 rooWsFile = TFile(subdir+'/testRooFitOut_Dalitz.root')
 myWs    = rooWsFile.Get('ws')

@@ -52,17 +52,20 @@ def doInitialFits(subdir):
   if not os.path.exists(basePath1):
     print basePath2, "does not exist!"
     sys.exit(0)
+
+  #musel = "mumu"
+  musel = "mugamma"
     
-  dataDict   = {'mu2012':TFile(basePath1+'m_Data_mugamma_2012.root','r'),
+  dataDict   = {'mu2012':TFile(basePath1+'m_Data_'+musel+'_2012.root','r'),
                 'el2012':TFile(basePath2+'m_Data_electron_2012.root','r')}
 
-  signalDict = {'mu2012_M120':TFile(basePath1+'mugamma_2012/hhhh_dal-mad120_1.root','r'),
-                'mu2012_M125':TFile(basePath1+'mugamma_2012/hhhh_dal-mad125_1.root','r'),
-                'mu2012_M130':TFile(basePath1+'mugamma_2012/hhhh_dal-mad130_1.root','r'),
-                'mu2012_M135':TFile(basePath1+'mugamma_2012/hhhh_dal-mad135_1.root','r'),
-                'mu2012_M140':TFile(basePath1+'mugamma_2012/hhhh_dal-mad140_1.root','r'),
-                'mu2012_M145':TFile(basePath1+'mugamma_2012/hhhh_dal-mad145_1.root','r'),
-                'mu2012_M150':TFile(basePath1+'mugamma_2012/hhhh_dal-mad150_1.root','r'),
+  signalDict = {'mu2012_M120':TFile(basePath1+musel+'_2012/hhhh_dal-mad120_1.root','r'),
+                'mu2012_M125':TFile(basePath1+musel+'_2012/hhhh_dal-mad125_1.root','r'),
+                'mu2012_M130':TFile(basePath1+musel+'_2012/hhhh_dal-mad130_1.root','r'),
+                'mu2012_M135':TFile(basePath1+musel+'_2012/hhhh_dal-mad135_1.root','r'),
+                'mu2012_M140':TFile(basePath1+musel+'_2012/hhhh_dal-mad140_1.root','r'),
+                'mu2012_M145':TFile(basePath1+musel+'_2012/hhhh_dal-mad145_1.root','r'),
+                'mu2012_M150':TFile(basePath1+musel+'_2012/hhhh_dal-mad150_1.root','r'),
 
                 'el2012_M125':TFile(basePath2+'electron_2012/hhhh_dal-mad125_1.root','r')}
 

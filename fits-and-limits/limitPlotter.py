@@ -16,8 +16,9 @@ if len(sys.argv) != 2:
   sys.exit()
 s = sys.argv[1]
   
-          
-plotBase = '/uscms_data/d2/andreypz/html/zgamma/dalitz/fits-'+s+'/limit/'
+out = TFile(s+"/limit-data.root","recreate")
+
+plotBase = '/uscms_data/d2/andreypz/html/zgamma/dalitz/fits-'+s
 u.createDir(plotBase)
 
 fullCombo = True
@@ -37,14 +38,14 @@ if fullCombo:
   exp1SigLow = []
   exp2SigHi = []
   exp2SigLow = []
-  fileListTmp = os.listdir('./')
+  fileListTmp = os.listdir(s)
   fileList = filter(lambda fileName: 'higgsCombineTest.Asymptotic' in fileName,fileListTmp)
   print fileList
   for mass in massList:
     thisFile = filter(lambda fileName: str(int(mass)) in fileName,fileList)[0]
     print thisFile
     xAxis.append(mass)
-    f = TFile(thisFile,"open")
+    f = TFile(s+"/"+thisFile,"open")
     #f.Print()
     tree = f.Get("limit")
     for i,l in enumerate(tree):
@@ -142,3 +143,8 @@ if fullCombo:
 
   c.SaveAs(plotBase+'Limits.png')
 
+
+  out.cd()
+  observed.Write("observed")
+  expected.Write("expected")
+  oneSigma.Write("oneSigma")
