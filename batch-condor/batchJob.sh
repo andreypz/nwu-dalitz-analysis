@@ -1,19 +1,20 @@
-#!/bin/csh
-source /uscmst1/prod/sw/cms/cshrc prod
+#!/bin/bash
+
+source /uscmst1/prod/sw/cms/bashrc prod
 # this is needed just to set-up root:
 cd /uscmst1/prod/sw/cmssw/slc5_amd64_gcc472/cms/cmssw/CMSSW_6_2_0
-cmsenv 
+eval `scramv1 runtime -sh`
 cd -
 
-set outDir    = $1
-set count     = $2
-set dataName  = $3  #e.g. Photon_Aug05, Run2011B , May10
+outDir=$1
+count=$2
+dataName=$3  #e.g. Photon_Aug05, Run2011B , May10
 
 ### Specify addtional arguments here ####
-set suffix    = $4  #e.g. DATA. WZ, ZZ etc
-set selection = $5
-set period    = $6
-set gen       = $7
+suffix=$4  #e.g. DATA. WZ, ZZ etc
+selection=$5
+period=$6
+gen=$7
 
 echo "Copy the tarball with the source code from Condor scratch directory"
 
@@ -25,32 +26,38 @@ tar -xzf source.tar.gz
 cd zgamma
 
 cp ../../input_${dataName}_${count}.txt input.txt
+ls -l
 
 chmod 755 run.py
 
 ./run.py --clean
 
 echo $selection
-if ( $selection == "electron" ) then
+if [ $selection == "electron" ]
+    then
     echo "Electrons,  double-photon trigger is used"
     ./run.py ${suffix} ${dataName} -e -t pho26 -p ${period}  -b
-else if ( $selection == "mugamma" ) then
+elif [ $selection == "mugamma" ] 
+    then
     echo "Mu+photon trigger will be used"
-    if ( $gen == "gen" ) then
+    if [ $gen == "gen" ] 
+        then
         ./run.py ${suffix} ${dataName} -t mugamma -p ${period} --gen -b
     else
         ./run.py ${suffix} ${dataName} -t mugamma -p ${period}  -b
-    endif
-else if ( $selection == "single-mu" ) then
+    fi
+elif [ $selection == "single-mu" ] 
+    then
     echo "Single - IsoMu trigger will be used"
     ./run.py ${suffix} ${dataName} -t single-mu -p ${period} -b
-else if ( $selection == "mumu" ) then
+elif [ $selection == "mumu" }
+    then
     echo "Mu-mu selections"
     ./run.py ${suffix} ${dataName} -t double-mu -p ${period} -b
 else
     echo "No selection provided!"
-    exit(0)
-endif
+    exit
+fi
 
 echo 'ls in analysis directory'
 ls -l

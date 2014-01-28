@@ -9,6 +9,7 @@ gROOT.SetBatch()
 
 parser = OptionParser(usage="usage: %prog ver [options -c, -e, -p, -m]")
 parser.add_option("-c","--cut",   dest="cut", type="int", default=4,    help="Plots after a certain cut")
+parser.add_option("--mass", dest="mass", type="int", default=125,    help="Signal sample (mass)")
 parser.add_option("-m","--merge", dest="merge",action="store_true", default=False, help="Do merging?")
 
 parser.add_option("-p", "--period",dest="period", default="2012",  help="Year period; 2011 or 2012")
@@ -22,7 +23,7 @@ parser.add_option("--egamma", dest="egamma",  action="store_true", default=False
 
 (options, args) = parser.parse_args()
 
-
+mass = options.mass
 
 sel = []
 if options.mugamma:
@@ -149,6 +150,7 @@ if __name__ == "__main__":
     yields_data = {}
     yields_bkg  = {}
     yields_sig  = {}
+    yields_vbf  = {}
 
     tri_hists = {}
     dataFile  = {}
@@ -175,7 +177,8 @@ if __name__ == "__main__":
         
         #sigFileMCFM = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_dal-MCFM_1.root", "OPEN")
         #sigFileMCFM = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_dal-mcfm_1.root", "OPEN")
-        sigFileMAD  = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_dal-mad125_1.root", "OPEN")
+        sigFileMAD  = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_dal-mad"+str(mass)+"_1.root", "OPEN")
+        sigFileVBF  = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_vbf-mad"+str(mass)+"_1.root", "OPEN")
 
         if options.mcfm: sigFile = sigFileMCFM
         else:            sigFile = sigFileMAD
@@ -187,6 +190,7 @@ if __name__ == "__main__":
 
         yields_data[thissel] = u.getYields(dataFile[thissel], thissel[0:2])
         yields_sig[thissel]  = u.getYields(sigFile,thissel[0:2], True) 
+        yields_vbf[thissel]  = u.getYields(sigFileVBF,thissel[0:2], True) 
         #yields_sig[thissel]  = u.getYields(sigFile,thissel[0:2],False)
         #yields_bkg[thissel]  = u.getYields(bkgFile[thissel])
 
@@ -197,11 +201,11 @@ if __name__ == "__main__":
         #tri_hists[thissel]   = dataFile[thissel].Get("tri_mass_cut"+cut).Clone()
         
 
-        #u.drawAllInFile(dataFile[thissel], "data", None, "", sigFile,"signal",  "",path, cut, "norm")
+        u.drawAllInFile(dataFile[thissel], "data", None, "", sigFile,"signal",  "",path, cut, "norm")
         #u.drawAllInFile(dataFile[thissel], "data", None, "", sigFile,"signal",  "",path, cut, "norm", doRatio=1)
-        u.drawAllInFile(dataFile[thissel], "data", None, "", sigFile,"10xSignal",  "",path, cut, "lumi")
-        u.drawAllInFile(dataFile[thissel], "data", None, "", sigFile,"10xSignal","EB",pathBase+"/EB", cut, "lumi")
-        u.drawAllInFile(dataFile[thissel], "data", None, "", sigFile,"10xSignal","EE",pathBase+"/EE", cut, "lumi")
+        #u.drawAllInFile(dataFile[thissel], "data", None, "", sigFile,"50xSignal",  "",path, cut, "lumi")
+        u.drawAllInFile(dataFile[thissel], "data", None, "", sigFile,"50xSignal","EB",pathBase+"/EB", cut, "lumi")
+        u.drawAllInFile(dataFile[thissel], "data", None, "", sigFile,"50xSignal","EE",pathBase+"/EE", cut, "lumi")
 
         if thissel =="mugamma":
             u.drawAllInFile(dataFile[thissel], "data",None, "",sigFile,"signal",  "Muons", pathBase+"/Muons", None,"norm")
@@ -335,6 +339,7 @@ if __name__ == "__main__":
     #plot_types
     print yields_sig
     table_sig  = u.yieldsTable(yields_sig, sel)
+    table_vbf  = u.yieldsTable(yields_vbf, sel)
     table_data = u.yieldsTable(yields_data, sel)
 
     if doBkg:
@@ -345,6 +350,7 @@ if __name__ == "__main__":
     u.makeTable(table_sig, "sig",  "html")
     u.makeTable(table_data,"data", "twiki")
     u.makeTable(table_sig, "sig",  "twiki")
+    u.makeTable(table_vbf, "sig-vbf",  "twiki")
     #u.makeTable(table_data,"data", "tex")
     #u.makeTable(table_sig, "sig",  "tex")
     if doBkg:

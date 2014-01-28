@@ -15,11 +15,12 @@ files={}
 
 #files["one"] = ['/uscms_data/d2/andreypz/lhe_vbf_higgs/vbfh_eeg_m125.root']
 #files["two"] = ['/uscms_data/d2/andreypz/lhe_vbf_higgs/vbfh_mumug_m125.root']
-files["two"] = ['/uscms_data/d2/andreypz/lhe_higgs_mumugamma_dalitz/hmumug_m125.root']
-files["one"] = ['/uscms_data/d2/andreypz/lhe_mcfm/lhe_mcfm_hzg_dalitz_lord_fixed_unweighted.lhe.root']
+files["one"] = ['/uscms_data/d2/andreypz/lhe_higgs_eegamma_dalitz/heeg_m120.root']
+files["two"] = ['/uscms_data/d2/andreypz/lhe_higgs_mumugamma_dalitz/hmumug_m120.root']
+#files["one"] = ['/uscms_data/d2/andreypz/lhe_mcfm/lhe_mcfm_hzg_dalitz_lord_fixed_unweighted.lhe.root']
 
-MH = 125
-LEPID1 = 13
+MH = 120
+LEPID1 = 11
 LEPID2 = 13
 
 print files
@@ -194,13 +195,13 @@ def FillAllHists(files, h):
         #h.fill1DHist(g1.M(),    "g1_M",  ";g1 M",    200, -2,2, 1, "")
         #h.fill1DHist(g2.M(),    "g2_M",  ";g2 M",    200, -2,2, 1, "")
         
-        h.fill1DHist(diLep.M(),     "gen_Mll_0",";gen_Mll",100,0,15, 1,"");
+        h.fill1DHist(diLep.M(),     "gen_Mll_0",";gen_Mll, GeV",100,0,15, 1,"");
         if gamma.Pt()>25 and fabs(gamma.Eta())<2.5:
-            h.fill1DHist(diLep.M(),     "gen_Mll_1",";gen_Mll",100,0,15, 1,"")
+            h.fill1DHist(diLep.M(),     "gen_Mll_1",";gen_Mll, GeV",100,0,15, 1,"")
 
             if lPt1.Pt()>23 and lPt2.Pt()>4 and fabs(lPt1.Eta())<2.4 and  fabs(lPt2.Eta())<2.4:
-                h.fill1DHist(diLep.M(),     "gen_Mll_2",";gen_Mll",100,0,15, 1,"");            
-                h.fill1DHist(diLep.M(),     "gen_Mll_3",";gen_Mll",100,0,15, 1,"");
+                h.fill1DHist(diLep.M(),     "gen_Mll_2",";gen_Mll, GeV",100,0,15, 1,"");            
+                h.fill1DHist(diLep.M(),     "gen_Mll_3",";gen_Mll, GeV",100,0,15, 1,"");
 
         h.fill1DHist(gamma.M(),"gamma_mass",  ";gamma mass",    200, -2,2, 1, "")
         #h.fill1DHist(g1.Pt(),    "g1_pt",  ";g1 pt",    50, 0,100, 1, "")
@@ -213,16 +214,16 @@ def FillAllHists(files, h):
         #h.fill1DHist(l2.Eta(),   "l2_eta", ";l- eta",   50, -3.5,3.5, 1, "")
         #h.fill1DHist(l2.Phi(),   "l2_phi", ";l- phi",   50, -TMath.Pi(),TMath.Pi(), 1, "")
         
-        h.fill1DHist(diLep.M(),   "diLep_mass",     ";M(ll)", 200, 0,60,  1, "")
-        h.fill1DHist(diLep.M(),   "diLep_mass_full",";M(ll)", 200, 0,130, 1, "")
-        h.fill1DHist(diLep.M(),   "diLep_mass_low", ";M(ll)", 200, 0,1,   1, "")
-        h.fill1DHist(tri.M(),     "h_mass",";M(ll#gamma)",    200, 80,180,1, "")
-        h.fill1DHist(tri.M(),     "h_mass_zoom",";M(ll#gamma)",  200, MH-1,MH+1,  1, "")
-        h.fill1DHist(tri.M(),     "h_mass_zoom2",";M(ll#gamma)", 200, MH-0.1,MH+0.1,  1, "")
+        h.fill1DHist(diLep.M(),   "diLep_mass",     ";M(ll), GeV", 200, 0,60,  1, "")
+        h.fill1DHist(diLep.M(),   "diLep_mass_full",";M(ll), GeV", 200, 0,130, 1, "")
+        h.fill1DHist(diLep.M(),   "diLep_mass_low", ";M(ll), GeV", 200, 0,1,   1, "")
+        h.fill1DHist(tri.M(),     "h_mass",";M(ll#gamma), GeV",    200, 80,180,1, "")
+        h.fill1DHist(tri.M(),     "h_mass_zoom",";M(ll#gamma), GeV",  200, MH-1,MH+1,  1, "")
+        h.fill1DHist(tri.M(),     "h_mass_zoom2",";M(ll#gamma), GeV", 200, MH-0.1,MH+0.1,  1, "")
 
         ## VBF Plots:
         if qq==2:
-            h.fill1DHist((j1+j2).M(),   "diJet_mass",     ";M(j1,j2)", 200, 0,600,  1, "")
+            h.fill1DHist((j1+j2).M(),   "diJet_mass",     ";M(j1,j2), GeV", 200, 0,600,  1, "")
             h.fill1DHist(fabs(j1.Eta()+j2.Eta()), "diJet_dEta",";|dEta(j1,j2)", 200, 0,6,  1, "")
 
         '''
@@ -240,14 +241,14 @@ def FillAllHists(files, h):
             h.fill1DHist((tri+g3).Pz(),    "h_pz_glu3","Extra ISR glu;Pz of the Higgs+gluon",  200, -300,300,  1, "")
         '''
         
-        h.fill1DHist(gammaCM.E(), "gamma_Ecom",";E_{#gamma} in CoM",  50, 0,200,  1, "")
-        h.fill1DHist(diLepCM.E(), "diLep_Ecom",";Ecom(ll)", 50, 0,100,  1, "")
+        h.fill1DHist(gammaCM.E(), "gamma_Ecom",";E_{#gamma} in CoM, GeV",  50, 0,200,  1, "")
+        h.fill1DHist(diLepCM.E(), "diLep_Ecom",";Ecom(ll), GeV", 50, 0,100,  1, "")
 
 
-        h.fill1DHist(diLep.Pt(),    "diLep_pt",  ";diLep_pt",    50, 0,100, 1, "")
+        h.fill1DHist(diLep.Pt(),    "diLep_pt",  ";diLep_pt, GeV",    50, 0,100, 1, "")
         h.fill1DHist(diLep.Eta(),   "diLep_eta", ";diLep_eta",   50, -3.5,3.5, 1, "")
         h.fill1DHist(diLep.Phi(),   "diLep_phi", ";diLep_phi",   50, -TMath.Pi(),TMath.Pi(), 1, "")
-        h.fill1DHist(gamma.E(),  "gamma_E",  ";gamma_E",   50, 0,200, 1, "")
+        h.fill1DHist(gamma.E(),  "gamma_E",  ";gamma_E, GeV",   50, 0,200, 1, "")
         h.fill1DHist(gamma.Pt(), "gamma_pt", ";gamma_pt",  50, 0,100, 1, "")
         h.fill1DHist(gamma.Eta(),"gamma_eta",";gamma_eta", 50, -3.5,3.5, 1, "")
         h.fill1DHist(gamma.Phi(),"gamma_phi",";gamma_phi", 50, -TMath.Pi(),TMath.Pi(), 1, "")
@@ -293,7 +294,7 @@ if __name__ == "__main__":
         os.makedirs(path)
 
     FillAllHists(files["one"],  h1)
-    #FillAllHists(files["two"],  h2)
+    FillAllHists(files["two"],  h2)
 
 
     oneFile.cd()
@@ -307,9 +308,10 @@ if __name__ == "__main__":
 
     blah = []
 
+    u.drawAllInFile(oneFile, "MAD ele", twoFile, "MAD mu",None,"","", path, None,"norm", isLog=True)
     #u.drawAllInFile(oneFile, "MCFM ele", twoFile, "Madgraph mu",None,"","", path, None,"norm")
     #u.drawAllInFile(oneFile, "vbf ele", twoFile, "vbf mu",None,"","", path, None,"norm", isLog=True)
-    u.drawAllInFile(twoFile, "MAD-125",None,"", None,"","", path, None,"norm")
+    #u.drawAllInFile(twoFile, "MAD-125",None,"", None,"","", path, None,"norm")
 
     u.createDir(path+"/eff")
 
@@ -334,7 +336,7 @@ if __name__ == "__main__":
     leg.SetTextSize(0.04)
     leg.SetFillColor(kWhite)
     leg.Draw()
-    c1.SaveAs(path+"/eff/acceptance_Mll_LHE.png")
+    #c1.SaveAs(path+"/eff/acceptance_Mll_LHE.png")
 
             
     plot_types =[]
@@ -343,7 +345,7 @@ if __name__ == "__main__":
         if os.path.isdir(pathBase+"/"+d):
             plot_types.append(d)
 
-    ht.makeHTML("Plots from an lhe file",pathBase, plot_types, blah, "mad")
+    ht.makeHTML("Plots from an lhe file",pathBase, plot_types, blah, subdir)
 
     testFile.Close()
     oneFile.Close()

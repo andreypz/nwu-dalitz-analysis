@@ -507,7 +507,7 @@ Bool_t zgamma::Process(Long64_t entry)
 
   vector<TCElectron> electrons0, electrons, electrons_dalitz, fake_electrons0;
   vector<TCMuon> muons0, muons;
-  vector<TCPhoton> photons0, photons, photonsHZG, fake_photons;
+  vector<TCPhoton> photons0, photonsTight, photonsHZG, fake_photons;
   TCPhysObject l1,l2, lPt1, lPt2;
   TCPhoton gamma0, gamma, ufoton, ufelectron;
 
@@ -537,12 +537,12 @@ Bool_t zgamma::Process(Long64_t entry)
       if(PassPhotonIdAndIso(thisPhoton, phIdAndIsoCutsTight, pvPosition)
          //&& (isRealData || !makeGen || (sample=="dalitz" && makeGen && gen_gamma.DeltaR(*thisPhoton) < 0.2) )
          )
-        photons.push_back(*thisPhoton);
+        photonsTight.push_back(*thisPhoton);
     }
   }
 
-  sort(photons0.begin(), photons0.end(), P4SortCondition);
-  sort(photons.begin(),  photons.end(),  P4SortCondition);
+  sort(photons0.begin(),     photons0.end(),     P4SortCondition);
+  sort(photonsTight.begin(), photonsTight.end(), P4SortCondition);
   sort(photonsHZG.begin(),   photonsHZG.end(),   P4SortCondition);
   sort(fake_photons.begin(), fake_photons.end(), P4SortCondition);
 
@@ -552,12 +552,16 @@ Bool_t zgamma::Process(Long64_t entry)
     ufoton = fake_photons[0];
 
 
-  //if (photons.size()>0)
-  //gamma = photons[0];
+  //if (photonsTight.size()<1) return kTRUE; 
+  //gamma = photonsTight[0];
 
-  if (photonsHZG.size()>0)
-    gamma = photonsHZG[0];
+  if (photonsHZG.size()<1) return kTRUE;
+  gamma = photonsHZG[0];
 
+  //if (photons0.size()<1) return kTRUE;
+  //gamma0 = photons0[0];
+  //if (gamma0.Pt() < cut_gammapt) return kTRUE;
+ 
   for (Int_t i = 0; i <  recoElectrons->GetSize(); ++i) {
     TCElectron* thisElec = (TCElectron*) recoElectrons->At(i);
     if (!(fabs(thisElec->Eta()) < 2.5)) continue;
@@ -605,22 +609,17 @@ Bool_t zgamma::Process(Long64_t entry)
 
 
   hists->fill1DHist(muons.size(),     Form("size_mu_cut%i",  1),";Number of muons",    5,0,5, 1, "Muons");
-  hists->fill1DHist(electrons.size(), Form("size_el_cut%i",  1),";Number of electrons",5,0,5, 1, "Electrons");
-  hists->fill1DHist(electrons0.size(),Form("size_el0_cut%i", 1),";Number of electrons",5,0,5, 1, "Electrons");
-  hists->fill1DHist(photons.size(),   Form("size_ph_cut%i",  1),";Number of photons",  5,0,5, 1, "Photon");
-  hists->fill1DHist(photons0.size(),  Form("size_ph0_cut%i", 1),";Number of photons",  5,0,5, 1, "Photon");
+  //hists->fill1DHist(electrons.size(), Form("size_el_cut%i",  1),";Number of electrons",5,0,5, 1, "Electrons");
+  //hists->fill1DHist(electrons0.size(),Form("size_el0_cut%i", 1),";Number of electrons",5,0,5, 1, "Electrons");
+  //hists->fill1DHist(photons.size(),   Form("size_ph_cut%i",  1),";Number of photons",  5,0,5, 1, "Photon");
+  //hists->fill1DHist(photons0.size(),  Form("size_ph0_cut%i", 1),";Number of photons",  5,0,5, 1, "Photon");
 
-  //if (photons0.size()<1) return kTRUE;
-  //gamma0 = photons0[0];
-  //if (gamma0.Pt() < cut_gammapt) return kTRUE;
 
   if(!isRealData && makeGen){
     hists->fill1DHist(genMll,  "gen_Mll_reco_gamma",  ";gen_Mll",50,0,15, 1,"eff");
     hists->fill1DHist(gendR,   "gen_dR_reco_gamma",   ";gen_dR", 50,0,0.3,1,"eff");
   }
 
-  if (photonsHZG.size()<1) return kTRUE;
-  gamma = photonsHZG[0];
   if (gamma.Pt() < cut_gammapt) return kTRUE;
 
   if(!isRealData && makeGen){
@@ -1174,7 +1173,7 @@ void zgamma::FillHistosFull(Int_t num, Double_t weight,
   diLepCM.Boost(b1);
 
 
-  hists->fill1DHist(weight,     Form("weight_%s_cut%i",         d, num),";M(ll#gamma)",  200, 0,3, 1, dir);
+  hists->fill1DHist(weight,     Form("weight_%s_cut%i",         d, num),";weight",  200, 0,3, 1, dir);
 
   hists->fill1DHist(tri.M(),     Form("tri_mass_%s_cut%i",         d, num),";M(ll#gamma)",  100, 0,200,  weight, dir);
   hists->fill1DHist(tri.M(),     Form("tri_mass80_%s_cut%i",       d, num),";M(ll#gamma)",  100,80,200,  weight, dir);
@@ -1366,8 +1365,9 @@ void zgamma::DiscoverGeneology(TCGenParticle *p, ULong64_t ev)
 
 void zgamma::MuonDump(TCMuon mu, TVector3 *pv)
 {
-  Float_t muISO = (mu.IsoMap("pfChargedHadronPt_R04") +
-                   TMath::Max(0.0, mu.IsoMap("pfNeutralHadronEt_R04") + mu.IsoMap("pfPhotonEt_R04") - 0.5*mu.IsoMap("pfPUPt_R04")))/mu.Pt();
+  Float_t muISO = zgamma::CalculateMuonIso(&mu);
+  //Float_t muISO = (mu.IsoMap("pfChargedHadronPt_R04") +
+  //               TMath::Max(0.0, mu.IsoMap("pfNeutralHadronEt_R04") + mu.IsoMap("pfPhotonEt_R04") - 0.5*mu.IsoMap("pfPUPt_R04")))/mu.Pt();
 
 
   cout  << runNumber << " " << eventNumber << "  pt =" << mu.Pt()

@@ -10,7 +10,7 @@ class JobConfig():
 
 class BatchMaster():
     '''A tool for submitting batch jobs'''
-    def __init__(self, configList, outDir = '.', shortQueue = False, stageDir = 'outputBatch', executable = 'execBatch.csh', selection = 'test'):
+    def __init__(self, configList, outDir = '.', shortQueue = False, stageDir = 'outputBatch', executable = 'execBatch.sh', selection = 'test'):
         self._selection  = selection
         self._current    = os.path.abspath('.')
         self._stageDir   = stageDir

@@ -29,7 +29,8 @@ dCache      = '/pnfs/cms/WAX/11/store/user'
 EOS         = '/eos/uscms/store/user'
 #outputPath  = dCache+'/andreypz/batch_output/zgamma/8TeV'
 outputPath  = EOS+'/andreypz/batch_output/zgamma/8TeV'
-executable  = 'batchJob.csh'
+executable  = 'batchJob.sh'
+selection = "mugamma"
 
 if options.electron:
     selection="electron"
@@ -67,8 +68,10 @@ test = []
 data = []
 
 test.extend([
-    cfg('SingleMu_Run2012A',        dCache+'/andreypz/nuTuples_v6_8TeV/SingleMu/Run2012A-22Jan2013',         5, 'DATA '+selection+' 2012'),
+    #cfg('SingleMu_Run2012A',        dCache+'/andreypz/nuTuples_v6_8TeV/SingleMu/Run2012A-22Jan2013',         5, 'DATA '+selection+' 2012'),
     #cfg('MuEG_Run2012A',        dCache+'/andreypz/nuTuples_v6_8TeV/MuEG/Run2012A-22Jan2013',         5, 'DATA mugamma 2012'),
+    cfg('dal-mad120', dCache+'/andreypz/nuTuples_v9.4_8TeV/HiggsToMuMuGamma_MH120',1, 'dalitz mugamma '+period+gen),
+
 ])
 
 
@@ -151,7 +154,7 @@ if period =="2012":
     
     if selection in ["mumu","mugamma","single-mu"]:
         signal.extend([
-
+            
             #cfg('dal-MCFM125',dCache+'/andreypz/nuTuples_v9.4_8TeV/MCFM_dalitz_v2',    1, 'dalitz '+selection+' '+period),
             cfg('dal-mad120', dCache+'/andreypz/nuTuples_v9.4_8TeV/HiggsToMuMuGamma_MH120',1, 'dalitz '+selection+' '+period+gen),
             cfg('dal-mad125', dCache+'/andreypz/nuTuples_v9.4_8TeV/HiggsToMuMuGamma_MH125',1, 'dalitz '+selection+' '+period+gen),
@@ -160,6 +163,14 @@ if period =="2012":
             cfg('dal-mad140', dCache+'/andreypz/nuTuples_v9.4_8TeV/HiggsToMuMuGamma_MH140',1, 'dalitz '+selection+' '+period+gen),
             cfg('dal-mad145', dCache+'/andreypz/nuTuples_v9.4_8TeV/HiggsToMuMuGamma_MH145',1, 'dalitz '+selection+' '+period+gen),
             cfg('dal-mad150', dCache+'/andreypz/nuTuples_v9.4_8TeV/HiggsToMuMuGamma_MH150',1, 'dalitz '+selection+' '+period+gen),
+
+            cfg('vbf-mad120', dCache+'/andreypz/nuTuples_v9.4_8TeV/vbfHiggsToMuMuGamma_MH120',1, 'dalitz '+selection+' '+period+gen),
+            cfg('vbf-mad125', dCache+'/andreypz/nuTuples_v9.4_8TeV/vbfHiggsToMuMuGamma_MH125',1, 'dalitz '+selection+' '+period+gen),
+            cfg('vbf-mad130', dCache+'/andreypz/nuTuples_v9.4_8TeV/vbfHiggsToMuMuGamma_MH130',1, 'dalitz '+selection+' '+period+gen),
+            cfg('vbf-mad135', dCache+'/andreypz/nuTuples_v9.4_8TeV/vbfHiggsToMuMuGamma_MH135',1, 'dalitz '+selection+' '+period+gen),
+            cfg('vbf-mad140', dCache+'/andreypz/nuTuples_v9.4_8TeV/vbfHiggsToMuMuGamma_MH140',1, 'dalitz '+selection+' '+period+gen),
+            cfg('vbf-mad145', dCache+'/andreypz/nuTuples_v9.4_8TeV/vbfHiggsToMuMuGamma_MH145',1, 'dalitz '+selection+' '+period+gen),
+            cfg('vbf-mad120', dCache+'/andreypz/nuTuples_v9.4_8TeV/vbfHiggsToMuMuGamma_MH120',1, 'dalitz '+selection+' '+period+gen),
 
             ])
     elif selection=="electron":

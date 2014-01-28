@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 from optparse import OptionParser
-import sys,os,datetime
+import sys,os,datetime,re
 from array import *
 from ROOT import *
 gROOT.SetBatch()
@@ -37,6 +37,8 @@ def getCS(sample, useMCFM=False):
         cs = float(conf.get(sample, "cs-"+sel))      
         if useMCFM:
             cs = cs*2
+    elif "vbfH" in sample:
+        cs = float(conf.get(sample, "cs-"+sel))      
     else:
         cs = float(conf.get(sample, "cs"))      
 
@@ -136,14 +138,14 @@ def drawAllInFile(f1, name1, f2, name2, f3, name3, dir,path, N, howToScale="none
     scale2 = scale3 = 1
     split = os.path.split(path)
     print "Split lit lit", split[0], split[1]
-    
+
+    doOverflow = 0
     if doRatio:
         c1 = TCanvas("c2","big canvas",600,700);
     else:
         c1 = TCanvas("c3","small canvas",600,600);
     c1.SetLogy(isLog)
     c1.cd()
-    
 
     if f2!=None and howToScale=="lumi": # only assume signal MC for now
         Nev = f2.Get("Counts/evt_byCut_raw").GetBinContent(1)
@@ -167,6 +169,8 @@ def drawAllInFile(f1, name1, f2, name2, f3, name3, dir,path, N, howToScale="none
 
         h2 = TH1F()
         h3 = TH1F()
+
+        hmaxs = []
         
         if f2!=None:
             #f2.Print()
@@ -217,8 +221,9 @@ def drawAllInFile(f1, name1, f2, name2, f3, name3, dir,path, N, howToScale="none
                 pad1.cd();
                 pad1.SetLogy(isLog)
                 
-                
-            handleOverflowBins(h1)
+            
+            if doOverflow:
+                handleOverflowBins(h1)
 
             h1.Draw("hist")
             #h1.GetRange
@@ -244,26 +249,34 @@ def drawAllInFile(f1, name1, f2, name2, f3, name3, dir,path, N, howToScale="none
             norm1 = h1.Integral()
             if howToScale =="norm" and  norm1!=0:
                 h1.Scale(1./norm1)
+                hmaxs.append(h1.GetMaximum())
                          
             if f2!=None and h2!=None:
-                handleOverflowBins(h2)
+                if doOverflow:
+                    handleOverflowBins(h2)
                 h2.Draw("same hist")
                 h2.SetLineColor(kBlue+1)
                 norm2 = h2.Integral()
                 if howToScale =="norm" and  norm2!=0:
                     h2.Scale(1./norm2)
+                    hmaxs.append(h2.GetMaximum())
 
                 leg.AddEntry(h2,name2, "l")
                 
 
             if f3!=None and h3!=None:
-                handleOverflowBins(h3)
+                if doOverflow:
+                    handleOverflowBins(h3)
                 h3.Draw("sames hist")
                 h3.SetLineColor(kRed+1)
-                h3.Scale(1000)
+                extract_from_name = re.findall(r'\d+', name3)
+                #print extract_from_name
+                if len(extract_from_name) == 1:
+                    h3.Scale(int(extract_from_name[0]))
                 norm3 = h3.Integral()
                 if howToScale =="norm" and  norm3!=0:
                     h3.Scale(1./norm3)
+                    hmaxs.append(h3.GetMaximum())
                 leg.AddEntry(h3,name3, "l")
                 
                 if doRatio:
@@ -291,6 +304,22 @@ def drawAllInFile(f1, name1, f2, name2, f3, name3, dir,path, N, howToScale="none
             #prelim.SetNDC();
             #prelim.SetTextSize(0.03);
             #prelim.Draw();
+            if howToScale =="norm":
+                print hmaxs
+                if len(hmaxs)>0:
+                    m = max(hmaxs)
+                    h1.SetMaximum(1.1*m)
+                h1.GetYaxis().SetTitle("a.u.")
+
+            # Here we consider particular cases (histograms) that need special care
+            if "tri_mass_longTail" in h1.GetName() and howToScale=="lumi":
+                h1.SetMaximum(750)
+
+            if "diLep_mass_low" in h1.GetName() and howToScale=="norm" and f2!=None:
+                s1 = h1.Integral(90,200)
+                s2 = h2.Integral(90,200)
+                h2.Scale(float(s1)/s2)
+                
             c1.cd()
             leg.SetFillColor(kWhite)
             leg.Draw()
@@ -395,7 +424,8 @@ def getYields(f, sel, doLumiScale=False):
     scale=1
     if doLumiScale: # only assume signal MC for now
         Nev = ev.GetBinContent(1)
-        cro = getCS("ggH-125")
+        #cro = getCS("ggH-125")
+        cro = getCS("vbfH-125")
         scale = float(lumi*cro)/Nev
         print "Lumi scale for sel=",sel, "Nev=",Nev, "cro=",cro, "scale=",scale
 
