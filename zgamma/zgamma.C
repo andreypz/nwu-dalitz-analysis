@@ -149,7 +149,7 @@ void zgamma::Begin(TTree * tree)
   //Soft muon id (specific for dalitz)
   muIdAndIsoCutsSoft.TrackLayersWithMeasurement = 5;
   muIdAndIsoCutsSoft.PixelLayersWithMeasurement = 1;
-  muIdAndIsoCutsSoft.NormalizedChi2_tracker = 1.8;
+  muIdAndIsoCutsSoft.NormalizedChi2_tracker = 3;
   muIdAndIsoCutsSoft.dxy             = 0.2; //3
   muIdAndIsoCutsSoft.dz              = 0.5; //30
   muIdAndIsoCutsSoft.pfIso04         = 0.4;
@@ -757,46 +757,52 @@ if (muons[1].Pt() < 7 &&
 
 
 
-  if ((l1+l2).Pt()>40 && gamma.Pt()>40
-      && (l1+l2).Pt()+gamma.Pt() > 95
-      ){
+  if ((l1+l2).Pt()<40 || gamma.Pt()<40)
+    return kTRUE;
 
-    FillHistosFull(8, eventWeight, l1, l2, lPt1, lPt2, gamma, "");
-    FillHistoCounts(8, eventWeight);
-    CountEvents(8);
-    if (fabs(gamma.Eta())<1.444)
-      FillHistosFull(8, eventWeight, l1, l2, lPt1, lPt2, gamma, "EB");
-    else
-      FillHistosFull(8, eventWeight, l1, l2, lPt1, lPt2, gamma, "EE");
-
-    if (Mll < 2)     
-      FillHistosFull(8, eventWeight, l1, l2, lPt1, lPt2, gamma, "Low-Mll");
-
-
-    fit_m_llg   = Mllg;
-    fit_m_ll    = Mll;
-    fit_weight  = eventWeight;
-    fit_phEta   = gamma.SCEta();
-    fit_isLowPt = false;
-
-    if (lPt2.Pt() < cut_l2pt)
-      fit_isLowPt = true;
-      
-    _fitTree->Fill();
-
-
-    if (lPt2.Pt() > cut_l2pt){
+  FillHistosFull(8, eventWeight, l1, l2, lPt1, lPt2, gamma, "");
+  FillHistoCounts(8, eventWeight);
+  CountEvents(8);
+  
+  if( (l1+l2).Pt()+gamma.Pt() > 95)
+    {
       FillHistosFull(9, eventWeight, l1, l2, lPt1, lPt2, gamma, "");
       FillHistoCounts(9, eventWeight);
       CountEvents(9);
+      
+      if (fabs(gamma.Eta())<1.444)
+        FillHistosFull(9, eventWeight, l1, l2, lPt1, lPt2, gamma, "EB");
+      else
+        FillHistosFull(9, eventWeight, l1, l2, lPt1, lPt2, gamma, "EE");
+      
+      if (Mll < 2)     
+        FillHistosFull(9, eventWeight, l1, l2, lPt1, lPt2, gamma, "Low-Mll");
+      
+      
+      fit_m_llg   = Mllg;
+      fit_m_ll    = Mll;
+      fit_weight  = eventWeight;
+      fit_phEta   = gamma.SCEta();
+      fit_isLowPt = false;
+      
+      if (lPt2.Pt() < cut_l2pt)
+        fit_isLowPt = true;
+      
+      _fitTree->Fill();
+
+
+    if (lPt2.Pt() > cut_l2pt){
+      FillHistosFull(10, eventWeight, l1, l2, lPt1, lPt2, gamma, "");
+      FillHistoCounts(10, eventWeight);
+      CountEvents(10);
       
     }
   }
 
   if (Mllg>100 && Mllg<150){
-    FillHistosFull(10, eventWeight, l1, l2, lPt1, lPt2, gamma, "");
-    FillHistoCounts(10, eventWeight);
-    CountEvents(10);
+    FillHistosFull(11, eventWeight, l1, l2, lPt1, lPt2, gamma, "");
+    FillHistoCounts(11, eventWeight);
+    CountEvents(11);
 
   }
 
@@ -877,10 +883,10 @@ void zgamma::Terminate()
   cout<<"| 5: mll <20          |\t"<< nEvents[5]  <<"\t|"<<float(nEvents[5])/nEvents[4]<<"\t|"<<endl;
   cout<<"| 6: dR, no jpsi      |\t"<< nEvents[6]  <<"\t|"<<float(nEvents[6])/nEvents[5]<<"\t|"<<endl;
   cout<<"| 7: trigger          |\t"<< nEvents[7]  <<"\t|"<<float(nEvents[7])/nEvents[6]<<"\t|"<<endl;
-  cout<<"| 8: triangle         |\t"<< nEvents[8]  <<"\t|"<<float(nEvents[8])/nEvents[7]<<"\t|"<<endl;
-  cout<<"| 9: l pt2 > 7        |\t"<< nEvents[9]  <<"\t|"<<float(nEvents[9])/nEvents[7]<<"\t|"<<endl;
-  cout<<"| 10: mH              |\t"<< nEvents[10] <<"\t|"<<float(nEvents[10])/nEvents[7]<<"\t|"<<endl;
-  cout<<"| 11: n/a             |\t"<< nEvents[11] <<"\t|"<<float(nEvents[11])/nEvents[7]<<"\t|"<<endl;
+  cout<<"| 8: ptll>40, ptg>40  |\t"<< nEvents[8]  <<"\t|"<<float(nEvents[8])/nEvents[7]<<"\t|"<<endl;
+  cout<<"| 9:  ptll+ptg>95     |\t"<< nEvents[9]  <<"\t|"<<float(nEvents[9])/nEvents[7]<<"\t|"<<endl;
+  cout<<"| 10: ptl2>7          |\t"<< nEvents[10] <<"\t|"<<float(nEvents[10])/nEvents[7]<<"\t|"<<endl;
+  cout<<"| 11: mH              |\t"<< nEvents[11] <<"\t|"<<float(nEvents[11])/nEvents[7]<<"\t|"<<endl;
   cout<<"| 12: jpsi            |\t"<< nEvents[12] <<"\t|"<<float(nEvents[12])/nEvents[7]<<"\t|"<<endl;
 
   cout<<"dal = "<<dal<<"   nodal = "<<nodal<<"   tot="<<dal+nodal<<endl;

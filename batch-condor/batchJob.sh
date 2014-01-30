@@ -33,7 +33,7 @@ chmod 755 run.py
 ./run.py --clean
 
 echo $selection
-if [ $selection == "electron" ]
+if [ $selection == "egamma" ]
     then
     echo "Electrons,  double-photon trigger is used"
     ./run.py ${suffix} ${dataName} -e -t pho26 -p ${period}  -b

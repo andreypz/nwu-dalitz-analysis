@@ -6,9 +6,12 @@ cfg = b.JobConfig
 
 from optparse import OptionParser
 parser = OptionParser(usage="usage: %prog [options -e], --data, --bkg, --sig], -p 2011] version")
-parser.add_option("-c", "--clean", dest="clean",  action="store_true", default=False, help="Clean the directory with histogram output.")
-parser.add_option("-e", "--ele", dest="electron", action="store_true", default=False, help="Use electron selection (by default it will run muon selection)")
-parser.add_option("--mugamma",   dest="mugamma",  action="store_true", default=False,  help="Use Mu+Photon trigger (for running on MuEG path)")
+parser.add_option("-c", "--clean", dest="clean",  action="store_true", default=False,
+                  help="Clean the directory with histogram output.")
+parser.add_option("-e", "--elgamma", dest="elgamma", action="store_true", default=False,
+                  help="Use electron selection (by default it will run muon selection)")
+parser.add_option("--mugamma",   dest="mugamma",  action="store_true", default=False,
+                  help="Use Mu+Photon trigger (for running on MuEG path)")
 parser.add_option("--mumu",      dest="mumu",     action="store_true", default=False, help="Use Double-Mu trigger")
 parser.add_option("--singlemu",  dest="singlemu", action="store_true", default=False, help="Use Iso-mu trigger")
 parser.add_option("--data", dest="data", action="store_true", default=False, help="Run over the data sample")
@@ -32,8 +35,8 @@ outputPath  = EOS+'/andreypz/batch_output/zgamma/8TeV'
 executable  = 'batchJob.sh'
 selection = "mugamma"
 
-if options.electron:
-    selection="electron"
+if options.elgamma:
+    selection="elgamma"
 if options.mugamma:
     selection="mugamma"
 if options.mumu:
@@ -103,7 +106,7 @@ if period =="2012":
 
             ])
     
-    if selection == 'electron':
+    if selection == 'elgamma':
         data.extend([
             cfg('DoublePhoton_Run2012A', dCache+'/andreypz/nuTuples_v9_8TeV/Photon/Run2012A-22Jan2013',         10, 'DATA '+selection+' 2012'),
             cfg('DoublePhoton_Run2012B', dCache+'/andreypz/nuTuples_v9_8TeV/DoublePhoton/Run2012B-22Jan2013',   15, 'DATA '+selection+' 2012'),
@@ -118,7 +121,7 @@ if period =="2012":
         cfg('DYjets50',  EOS+'/bpollack/V09_04_8TeV/MC/DYJetsToLL_M-50',  1, 'DYjets50 ' +selection+' '+period),
         ])
 
-    if selection == 'electron':
+    if selection == 'elgamma':
         bg.extend([
             #cfg('DYjets10', dCache+'/andreypz/nuTuples_v9_8TeV/DYJets_M10To50', 20, 'DYjets10 '+selection+' '+period),
             #cfg('DYjets50',  dCache+'/andreypz/nuTuples_v9_8TeV/DYJets_M0To50',  1, 'DYjets0 ' +selection+' '+period),
@@ -170,10 +173,10 @@ if period =="2012":
             cfg('vbf-mad135', dCache+'/andreypz/nuTuples_v9.4_8TeV/vbfHiggsToMuMuGamma_MH135',1, 'dalitz '+selection+' '+period+gen),
             cfg('vbf-mad140', dCache+'/andreypz/nuTuples_v9.4_8TeV/vbfHiggsToMuMuGamma_MH140',1, 'dalitz '+selection+' '+period+gen),
             cfg('vbf-mad145', dCache+'/andreypz/nuTuples_v9.4_8TeV/vbfHiggsToMuMuGamma_MH145',1, 'dalitz '+selection+' '+period+gen),
-            cfg('vbf-mad120', dCache+'/andreypz/nuTuples_v9.4_8TeV/vbfHiggsToMuMuGamma_MH120',1, 'dalitz '+selection+' '+period+gen),
+            cfg('vbf-mad150', dCache+'/andreypz/nuTuples_v9.4_8TeV/vbfHiggsToMuMuGamma_MH150',1, 'dalitz '+selection+' '+period+gen),
 
             ])
-    elif selection=="electron":
+    elif selection=="elgamma":
         signal.extend([
             cfg('dal-mad120', dCache+'/andreypz/nuTuples_v9.4_8TeV/HiggsToEEGamma_MH120', 1, 'dalitz '+selection+' '+period+gen),
             cfg('dal-mad125', dCache+'/andreypz/nuTuples_v9.4_8TeV/HiggsToEEGamma_MH125', 1, 'dalitz '+selection+' '+period+gen),

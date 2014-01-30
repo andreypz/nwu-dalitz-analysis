@@ -14,7 +14,7 @@ lumi = lumi2012
 
 def setSelection(sel):
     conf.set("selection","sel", sel)
-def sgetSelection(sel):
+def getSelection():
     conf.get("selection","sel")
 
 def getCuts(cp, name="cuts-mu"):
@@ -305,7 +305,7 @@ def drawAllInFile(f1, name1, f2, name2, f3, name3, dir,path, N, howToScale="none
             #prelim.SetTextSize(0.03);
             #prelim.Draw();
             if howToScale =="norm":
-                print hmaxs
+                #print "HMAXS=",hmaxs
                 if len(hmaxs)>0:
                     m = max(hmaxs)
                     h1.SetMaximum(1.1*m)
@@ -416,16 +416,16 @@ def makeTable(table, name, opt="tex"):
     if opt in ["twiki","tex"]:
         print myTable
 
-def getYields(f, sel, doLumiScale=False):
+def getYields(f, doLumiScale=False):
     ev = f.Get("Counts/evt_byCut")
+    sel = conf.get("selection", "sel")[0:2]
     cuts =  getCuts(conf, "cuts-"+sel)
-
     y = []
     scale=1
     if doLumiScale: # only assume signal MC for now
         Nev = ev.GetBinContent(1)
-        #cro = getCS("ggH-125")
-        cro = getCS("vbfH-125")
+        cro = getCS("ggH-125")
+        #cro = getCS("vbfH-125")
         scale = float(lumi*cro)/Nev
         print "Lumi scale for sel=",sel, "Nev=",Nev, "cro=",cro, "scale=",scale
 

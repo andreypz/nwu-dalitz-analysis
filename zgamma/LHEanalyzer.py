@@ -15,12 +15,13 @@ files={}
 
 #files["one"] = ['/uscms_data/d2/andreypz/lhe_vbf_higgs/vbfh_eeg_m125.root']
 #files["two"] = ['/uscms_data/d2/andreypz/lhe_vbf_higgs/vbfh_mumug_m125.root']
-files["one"] = ['/uscms_data/d2/andreypz/lhe_higgs_eegamma_dalitz/heeg_m120.root']
-files["two"] = ['/uscms_data/d2/andreypz/lhe_higgs_mumugamma_dalitz/hmumug_m120.root']
+#files["one"] = ['/uscms_data/d2/andreypz/lhe_higgs_eegamma_dalitz/heeg_m120.root']
+files["one"] = ['/uscms_data/d2/andreypz/lhe_vh_mumugamma/hmumug_m125.root']
+files["two"] = ['/uscms_data/d2/andreypz/lhe_higgs_mumugamma_dalitz/hmumug_m125.root']
 #files["one"] = ['/uscms_data/d2/andreypz/lhe_mcfm/lhe_mcfm_hzg_dalitz_lord_fixed_unweighted.lhe.root']
 
-MH = 120
-LEPID1 = 11
+MH = 125
+LEPID1 = 13
 LEPID2 = 13
 
 print files
