@@ -1,6 +1,6 @@
 ## Fits,  Limit calculation and  Bias study
 These codes are meant for Higgs to l+l-gamma Dalitz mode analyzis.
-Most of it was orriginally taken from Brover Clevelend [brover][BiasAndLimits code].
+Most of it was orriginally taken from Brover Clevelend [BiasAndLimits code][brover].
 Debugged and improved.
 
 ### How to run it. 
@@ -14,4 +14,4 @@ Debugged and improved.
  1. ```biasStudy_toyMaker.py``` makes the toys from a given PDF and performes the fits with various test function.
  2. ```plotPulls.py``` make the pull plots framm all the toys
  
-brover: https://github.com/brovercleveland/BiasAndLimits
+[brover]: https://github.com/brovercleveland/BiasAndLimits
