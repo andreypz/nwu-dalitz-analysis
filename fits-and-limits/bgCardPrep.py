@@ -5,20 +5,19 @@ gROOT.SetBatch()
 from rooFitBuilder import *
 sys.path.append("../zgamma")
 import utils as u
-
+import ConfigParser as cp
 gROOT.ProcessLine(".L ~/tdrstyle.C")
 setTDRStyle()
 
 print len(sys.argv), sys.argv
-if len(sys.argv) != 3:
-  sys.exit(0)
-subdir = sys.argv[1]
 
-leptonList = ['mu']
-yearList   = ['2012']
-catList    = ['0']
-
-
+cf = cp.ConfigParser()
+cf.read('config.cfg')
+subdir = cf.get("fits","ver")  
+yearList   = [a.strip() for a in (cf.get("fits","yearList")).split(',')]
+leptonList = [a.strip() for a in (cf.get("fits","leptonList")).split(',')]
+catList    = [a.strip() for a in (cf.get("fits","catList")).split(',')]
+      
 plotBase = "/uscms_data/d2/andreypz/html/zgamma/dalitz/fits-"+subdir
 u.createDir(plotBase)
 rooWsFile = TFile(subdir+'/testRooFitOut_Dalitz.root')
@@ -51,8 +50,11 @@ for year in yearList:
       #fitName  = '_'.join(['GaussExp',year,lepton,'cat'+cat])
       #normName = 'normGaussExp_'+suffix
 
-      fitName  = '_'.join(['GaussBern4',year,lepton,'cat'+cat])
-      normName = 'normGaussBern4_'+suffix
+      fitName  = '_'.join(['GaussBern5',year,lepton,'cat'+cat])
+      normName = 'normGaussBern5_'+suffix
+
+      #fitName  = '_'.join(['GaussBern4',year,lepton,'cat'+cat])
+      #normName = 'normGaussBern4_'+suffix
 
       # possibly have different fits for separate categories
       if cat is 'a':
@@ -86,8 +88,8 @@ for year in yearList:
       data.plotOn(testFrame, RooFit.Binning(50))
       fit_ext.plotOn(testFrame)
       testFrame.Draw()
-      testFrame.SetTitle(";m_{H};unbinned fit pdf")
-      c.SaveAs(plotBase+'_'.join(['best_fit',year,lepton,'cat'+cat])+'.png')
+      testFrame.SetTitle(";m_{H} (GeV);unbinned fit pdf")
+      c.SaveAs(plotBase+'/'+'_'.join(['best_fit',year,lepton,'cat'+cat])+'.png')
 
       ###### Import the fit and data, and rename them to the card convention
       dataNameNew = '_'.join(['data','obs',lepton,year,'cat'+cat])
@@ -99,7 +101,7 @@ for year in yearList:
       fit_ext.Print()
       card_ws.Print()
 
-      BackgroundNameFixer(year,lepton,cat,card_ws)
+      BackgroundNameFixer(fitName, year,lepton,cat,card_ws)
 
       print "\n * The end * \n"
 

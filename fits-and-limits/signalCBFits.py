@@ -6,6 +6,9 @@ gROOT.SetBatch()
 #gSystem.SetIncludePath( "-I$ROOFITSYS/include/" );
 sys.path.append("../zgamma")
 import utils as u
+import ConfigParser as cp
+cf = cp.ConfigParser()
+cf.read('config.cfg')
 
 gROOT.ProcessLine(".L ~/tdrstyle.C")
 setTDRStyle()
@@ -25,11 +28,9 @@ class AutoVivification(dict):
       return value
     
 def SignalFitMaker(lep, year, cat, subdir):
-  #massList = ['120.0','125.0','130.0','135.0']
-  massList = ['120.0','125.0','130.0','135.0','140.0','145.0','150.0']
-  #massList = ['125.0']
-  #sigNameList = ['gg','vbf','tth','wh','zh']
-  sigNameList = ['gg']
+  # reasd these from a config file:
+  massList        = [a.strip() for a in (cf.get("fits","massList")).split(',')]
+  sigNameList     = [a.strip() for a in (cf.get("fits","sigNameList")).split(',')]
   
   plotBase = "/uscms_data/d2/andreypz/html/zgamma/dalitz/fits-"+subdir
   u.createDir(plotBase)
@@ -157,9 +158,9 @@ def SignalFitMaker(lep, year, cat, subdir):
     for signal in dsList:
       signal.plotOn(testFrame)
     testFrame.Draw()
-    testFrame.SetTitle(";m_{H};fit pdf")
+    testFrame.SetTitle(";m_{H} (GeV);fit pdf")
     #c.Print("p5.png")
-    c.SaveAs(plotBase+'_'.join(['sig','fit',prod,lep,year,'cat'+cat])+'.png')
+    c.SaveAs(plotBase+"/"+'_'.join(['sig','fit',prod,lep,year,'cat'+cat])+'.png')
 
   for prod in sigNameList:
     for mass in massList:
@@ -179,15 +180,15 @@ def SignalFitMaker(lep, year, cat, subdir):
 if __name__=="__main__":
   print len(sys.argv), sys.argv
 
-  
-  if len(sys.argv) != 3:
-    sys.exit(0)
+  yearList        = [a.strip() for a in (cf.get("fits","yearList")).split(',')]
+  leptonList      = [a.strip() for a in (cf.get("fits","leptonList")).split(',')]
+  catList         = [a.strip() for a in (cf.get("fits","catList")).split(',')]
 
-  s = sys.argv[1]
- 
-  for cat in ["0"]:
-    #for cat in ["0","EB","EE","LowPt"]:
-    #SignalFitMaker("el","2012",cat)
-    SignalFitMaker("mu","2012",cat, s)
+  ver = cf.get("fits","ver")
+
+  for y in yearList:
+    for c in catList:
+      for l in leptonList:
+        SignalFitMaker(l,y,c, ver)
 
   print "\n \t\t All finished! \n"

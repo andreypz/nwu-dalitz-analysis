@@ -475,55 +475,73 @@ def SignalNameParamFixer(year,lepton,cat,sig,mass,ws):
   ws.factory('prod::'+sigmaGNew+'('+sigmaG+','+sigmaShift+')')
   ws.factory('EDIT::'+newFitName+'('+fitName+','+mean+'='+meanNew+','+sigmaCB+'='+sigmaCBNew+','+sigmaG+'='+sigmaGNew+')')
 
-def BackgroundNameFixer(year,lepton,cat,ws):
+def BackgroundNameFixer(fitName, year,lepton,cat,ws):
   dataName      = '_'.join(['data',      lepton,year,'cat'+cat])
   dataNameNew   = '_'.join(['data','obs',lepton,year,'cat'+cat])
   fitExtName    = '_'.join(['bkgTmp',    lepton,year,'cat'+cat])
   fitExtNameNew = '_'.join(['bkg',       lepton,year,'cat'+cat])
 
-  suffix = '_'.join([year,lepton,'cat'+cat])
-  normName  = 'normGaussBern4_'+suffix
-  meanName  = 'meanGaussBern4_'+suffix
-  sigmaName = 'sigmaGaussBern4_'+suffix
-  stepName  = 'stepGaussBern4_'+suffix
-  p0Name = 'p0GaussBern4_'+suffix
-  p1Name = 'p1GaussBern4_'+suffix
-  p2Name = 'p2GaussBern4_'+suffix
-  p3Name = 'p3GaussBern4_'+suffix
-  p4Name = 'p4GaussBern4_'+suffix
-
-  normNameNew  = '_'.join(['bkg',lepton,year,'cat'+cat,'norm'])
-  meanNameNew  = '_'.join(['bkg','mean', lepton,year,'cat'+cat])
-  sigmaNameNew = '_'.join(['bkg','sigma',lepton,year,'cat'+cat])
-  stepNameNew  = '_'.join(['bkg','step', lepton,year,'cat'+cat])
-  p0NameNew = '_'.join(['bkg','p0',lepton,year,'cat'+cat])
-  p1NameNew = '_'.join(['bkg','p1',lepton,year,'cat'+cat])
-  p2NameNew = '_'.join(['bkg','p2',lepton,year,'cat'+cat])
-  p3NameNew = '_'.join(['bkg','p3',lepton,year,'cat'+cat])
-  p4NameNew = '_'.join(['bkg','p4',lepton,year,'cat'+cat])
-
-  ws.factory(normNameNew+'[{0},{1},{2}]'.format(ws.function(normName).getVal(),
-                                                ws.function(normName).getMin(), ws.function(normName).getMax()))
-  ws.factory(meanNameNew+'[{0}]'.format(ws.function(meanName).getVal()))
-  ws.factory(sigmaNameNew+'[{0},{1},{2}]'.format(ws.function(sigmaName).getVal(),
-                                                 ws.function(sigmaName).getMin(),ws.function(sigmaName).getMax()))
-  ws.factory(stepNameNew+'[{0},{1},{2}]'.format(ws.function(stepName).getVal(),
-                                                ws.function(stepName).getMin(),ws.function(stepName).getMax()))
-  ws.factory(p0NameNew+'[{0}]'.format(ws.function(p0Name).getVal()))
-  ws.factory(p1NameNew+'[{0},{1},{2}]'.format(ws.function(p1Name).getVal(),
-                                              ws.function(p1Name).getMin(),ws.function(p1Name).getMax()))
-  ws.factory(p2NameNew+'[{0},{1},{2}]'.format(ws.function(p2Name).getVal(),
-                                              ws.function(p2Name).getMin(),ws.function(p2Name).getMax()))
-  ws.factory(p3NameNew+'[{0},{1},{2}]'.format(ws.function(p3Name).getVal(),
-                                              ws.function(p3Name).getMin(),ws.function(p3Name).getMax()))
-  ws.factory(p4NameNew+'[{0},{1},{2}]'.format(ws.function(p4Name).getVal(),
-                                              ws.function(p4Name).getMin(),ws.function(p4Name).getMax()))
-  ws.factory('EDIT::'+fitExtNameNew+'('+fitExtName+','+meanName+'='+meanNameNew+','
-             +sigmaName+'='+sigmaNameNew+','+stepName+'='+stepNameNew+','+normName+'='+normNameNew+','
-             +p0Name+'='+p0NameNew+','+p1Name+'='+p1NameNew+','+p2Name+'='+p2NameNew+','
-             +p3Name+'='+p3NameNew+','+p4Name+'='+p4NameNew+')')
+  BernNames = ['GaussBern4','GaussBern5']
+  for n in BernNames:
+    if n in fitName:
+      suffix = '_'.join([year,lepton,'cat'+cat])
+      normName  = 'norm'+n+'_'+suffix
+      meanName  = 'mean'+n+'_'+suffix
+      sigmaName = 'sigma'+n+'_'+suffix
+      stepName  = 'step'+n+'_'+suffix
+      p0Name = 'p0'+n+'_'+suffix
+      p1Name = 'p1'+n+'_'+suffix
+      p2Name = 'p2'+n+'_'+suffix
+      p3Name = 'p3'+n+'_'+suffix
+      p4Name = 'p4'+n+'_'+suffix
+      if n=="GaussBern5":
+        p5Name = 'p5'+n+'_'+suffix
+              
   
-  """
+      normNameNew  = '_'.join(['bkg',lepton,year,'cat'+cat,'norm'])
+      meanNameNew  = '_'.join(['bkg','mean', lepton,year,'cat'+cat])
+      sigmaNameNew = '_'.join(['bkg','sigma',lepton,year,'cat'+cat])
+      stepNameNew  = '_'.join(['bkg','step', lepton,year,'cat'+cat])
+      p0NameNew = '_'.join(['bkg','p0',lepton,year,'cat'+cat])
+      p1NameNew = '_'.join(['bkg','p1',lepton,year,'cat'+cat])
+      p2NameNew = '_'.join(['bkg','p2',lepton,year,'cat'+cat])
+      p3NameNew = '_'.join(['bkg','p3',lepton,year,'cat'+cat])
+      p4NameNew = '_'.join(['bkg','p4',lepton,year,'cat'+cat])
+      if n=="GaussBern5":
+        p5NameNew = '_'.join(['bkg','p5',lepton,year,'cat'+cat])
+      
+      ws.factory(normNameNew+'[{0},{1},{2}]'.format(ws.function(normName).getVal(),
+                                                    ws.function(normName).getMin(), ws.function(normName).getMax()))
+      ws.factory(meanNameNew+'[{0}]'.format(ws.function(meanName).getVal()))
+      ws.factory(sigmaNameNew+'[{0},{1},{2}]'.format(ws.function(sigmaName).getVal(),
+                                                     ws.function(sigmaName).getMin(),ws.function(sigmaName).getMax()))
+      ws.factory(stepNameNew+'[{0},{1},{2}]'.format(ws.function(stepName).getVal(),
+                                                    ws.function(stepName).getMin(),ws.function(stepName).getMax()))
+      ws.factory(p0NameNew+'[{0}]'.format(ws.function(p0Name).getVal()))
+      ws.factory(p1NameNew+'[{0},{1},{2}]'.format(ws.function(p1Name).getVal(),
+                                                  ws.function(p1Name).getMin(),ws.function(p1Name).getMax()))
+      ws.factory(p2NameNew+'[{0},{1},{2}]'.format(ws.function(p2Name).getVal(),
+                                                  ws.function(p2Name).getMin(),ws.function(p2Name).getMax()))
+      ws.factory(p3NameNew+'[{0},{1},{2}]'.format(ws.function(p3Name).getVal(),
+                                                  ws.function(p3Name).getMin(),ws.function(p3Name).getMax()))
+      ws.factory(p4NameNew+'[{0},{1},{2}]'.format(ws.function(p4Name).getVal(),
+                                                  ws.function(p4Name).getMin(),ws.function(p4Name).getMax()))
+      if n=="GaussBern5":
+        ws.factory(p5NameNew+'[{0},{1},{2}]'.format(ws.function(p5Name).getVal(),
+                                                    ws.function(p5Name).getMin(),ws.function(p4Name).getMax()))
+        
+        ws.factory('EDIT::'+fitExtNameNew+'('+fitExtName+','+meanName+'='+meanNameNew+','
+                   +sigmaName+'='+sigmaNameNew+','+stepName+'='+stepNameNew+','+normName+'='+normNameNew+','
+                   +p0Name+'='+p0NameNew+','+p1Name+'='+p1NameNew+','+p2Name+'='+p2NameNew+','
+                   +p3Name+'='+p3NameNew+','+p4Name+'='+p4NameNew+','+p5Name+'='+p5NameNew+')')
+      elif n=="GaussBern4":
+        ws.factory('EDIT::'+fitExtNameNew+'('+fitExtName+','+meanName+'='+meanNameNew+','
+                   +sigmaName+'='+sigmaNameNew+','+stepName+'='+stepNameNew+','+normName+'='+normNameNew+','
+                   +p0Name+'='+p0NameNew+','+p1Name+'='+p1NameNew+','+p2Name+'='+p2NameNew+','
+                   +p3Name+'='+p3NameNew+','+p4Name+'='+p4NameNew+')')
+        
+
+      """
   suffix = '_'.join([year,lepton,'cat'+cat])
   normName  = 'normGaussExp_' +suffix
   meanName  = 'meanGaussExp_' +suffix
