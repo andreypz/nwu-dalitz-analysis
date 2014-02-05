@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from optparse import OptionParser
-import sys,os
+import sys,os,re
 import ConfigParser as cp
 cf = cp.ConfigParser()
 cf.read('config.cfg')
@@ -15,11 +15,11 @@ gROOT.ProcessLine('.x RooGaussStepBernstein.cxx+')
 
 gROOT.SetBatch()
 
-parser = OptionParser(usage="usage: %prog job [options -v version]")
+parser = OptionParser(usage="usage: %prog [options -v version]")
 parser.add_option("-v", "--ver",dest="ver", default="none", help="version - a subdir name where the input files are stored.")
 parser.add_option("-b", dest="bullshit", action="store_true",default=False, help="Ys it is true")
-parser.add_option("-j", dest="job",    default=0, help="Job number")
-parser.add_option("-t", dest="trials", default=5, help="Number of trials")
+parser.add_option("-j", dest="job",    default=0,     help="Job number")
+parser.add_option("-t", dest="trials", default=5,     help="Number of trials")
 parser.add_option("-m", dest="mass",   default='125', help="Number of trials")
 
 (options, args) = parser.parse_args()
@@ -38,15 +38,17 @@ else:
 
 testFuncs = ['Bern4','Bern5','Bern6']
 
-def doBiasStudy(year = '2012', lepton = 'mu', cat = '0', genFunc = 'Exp', mass = '125', trials = 5, job = 0, plotEvery = 5):
+def doBiasStudy(year = '2012', lepton = 'mu', cat = '0', genFunc = 'Exp', mass = '125', trials = 5, job = 0, plotEvery = 50):
   #get all the starting objects
   c = TCanvas("c","c",0,0,500,400)
   c.cd()
 
   if not os.path.isdir(plotBase):
     os.makedirs(plotBase)
-
-  rooWsFile = TFile(fileBase+'/testRooFitOut_Dalitz.root','r')
+    print 'bias.py: making directory',plotBase
+  print 'DBG bias ', fileBase
+  
+  rooWsFile = TFile(fileBase.replace('/','')+'-testRooFitOut_Dalitz.root','r')
   myWs = rooWsFile.Get('ws')
   sigRangeName = '_'.join(['range',lepton,year,'cat'+cat,'M'+mass])
 
@@ -324,4 +326,6 @@ if __name__=="__main__":
   job = int(options.job)
   trials = int(options.trials)
   mass = str(options.mass)
-  doBiasStudy(trials = trials, job=job, mass=mass)
+  
+  for genFunc in ['Exp','Pow']:
+    doBiasStudy(trials = trials, genFunc=genFunc, job=job, mass=mass)

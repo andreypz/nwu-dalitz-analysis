@@ -24,7 +24,7 @@ echo "lsing in fits-and-limits"
 ls
 
 echo "$outDir $jobNumber $nTrials"
-./biasStudy_toyMaker.py -v $outDir -j $jobNumber -t $nTrials -m $mass
+./biasStudy_toyMaker.py -v ${outDir} -j $jobNumber -t $nTrials -m $mass
 
 
 echo "Done. Will copy the files to " $outDir

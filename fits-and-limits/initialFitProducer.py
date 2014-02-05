@@ -145,11 +145,10 @@ def doInitialFits(subdir):
             sig_ds    = RooDataSet(sigName,sigName,sig_argSW,'Weight')
 
             lumiWeight = LumiXSWeighter(int(mass), prod,lepton)
-            print signalTree
+            print signalTree, "A signal tree", prod, '  categ=',cat, "mass =", mass
             for i in signalTree:
               if   cat=="EB" and fabs(i.ph_eta)>EBetaCut: continue
               elif cat=="EE" and fabs(i.ph_eta)<EBetaCut: continue
-              #print "loop in signal tree", cat, category[cat], tmpType, "mass =", tmpSigMass[0] 
 
               if i.m_llg> lowCutOff and i.m_llg<highCutOff:
                 mzg.setVal(i.m_llg)
@@ -276,6 +275,9 @@ def doInitialFits(subdir):
           #GaussBern5 = BuildGaussStepBern5(year, lepton, cat, mzg)
           #GaussBern6 = BuildGaussStepBern6(year, lepton, cat, mzg)
           Exp        = BuildExp(year, lepton, cat, mzg)
+          Pow        = BuildPow(year, lepton, cat, mzg)
+          Bern2      = BuildBern3(year, lepton, cat, mzg)
+          Bern3      = BuildBern3(year, lepton, cat, mzg)
           Bern4      = BuildBern4(year, lepton, cat, mzg)
           Bern5      = BuildBern5(year, lepton, cat, mzg)
           Bern6      = BuildBern6(year, lepton, cat, mzg)
@@ -299,7 +301,8 @@ def doInitialFits(subdir):
           #GB = BuildGaussAndBern(year, lepton, cat, mzg, 'DalitzRegion')
 
           if verbose:
-            GaussExp.Print()
+            Exp.Print()
+            #GaussExp.Print()
             #GaussPow.Print()
             #SechExp.Print()
             #SechPow.Print()
@@ -307,12 +310,7 @@ def doInitialFits(subdir):
             #GaussBern4.Print()
             #GaussBern5.Print()
             #GaussBern6.Print()
-            #SechBern3.Print()
-            #SechBern4.Print()
-            #SechBern5.Print()
-            #BB.Print()
-            #GB.Print()
-            
+                        
           #GaussExp.fitTo(data_ds,RooFit.Range('FullRegion'))
           #SechExp.fitTo(data_ds,RooFit.Range('FullRegion'))
           #GaussBern3.fitTo(data_ds,RooFit.Range('FullRegion'))
@@ -320,6 +318,9 @@ def doInitialFits(subdir):
           #GaussBern5.fitTo(data_ds,RooFit.Range('FullRegion'))
           #GaussBern6.fitTo(data_ds,RooFit.Range('FullRegion'))
           Exp.fitTo(data_ds,RooFit.Range('DalitzRegion'))
+          Pow.fitTo(data_ds,RooFit.Range('DalitzRegion'))
+          Bern2.fitTo(data_ds,RooFit.Range('DalitzRegion'))
+          Bern3.fitTo(data_ds,RooFit.Range('DalitzRegion'))
           Bern4.fitTo(data_ds,RooFit.Range('DalitzRegion'))
           Bern5.fitTo(data_ds,RooFit.Range('DalitzRegion'))
           Bern6.fitTo(data_ds,RooFit.Range('DalitzRegion'))
@@ -353,6 +354,9 @@ def doInitialFits(subdir):
             #GaussBern5.plotOn(testFrame,RooFit.LineColor(kOrange), RooFit.Name('GaussBern5'))
             #GaussBern6.plotOn(testFrame,RooFit.LineColor(kPink),   RooFit.Name('GaussBern6'))
             Exp.plotOn(testFrame,RooFit.LineColor(colors['exp']), RooFit.Name('Exp'))
+            Exp.plotOn(testFrame,RooFit.LineColor(colors['pow']), RooFit.Name('Pow'))
+            Bern2.plotOn(testFrame,RooFit.LineColor(colors['bern2']), RooFit.Name('Bern2'))
+            Bern3.plotOn(testFrame,RooFit.LineColor(colors['bern3']), RooFit.Name('Bern3'))
             Bern4.plotOn(testFrame,RooFit.LineColor(colors['bern4']), RooFit.Name('Bern4'))
             Bern5.plotOn(testFrame,RooFit.LineColor(colors['bern5']), RooFit.Name('Bern5'))
             Bern6.plotOn(testFrame,RooFit.LineColor(colors['bern6']), RooFit.Name('Bern6'))
@@ -371,6 +375,9 @@ def doInitialFits(subdir):
             testFrame.Draw()
             testFrame.SetTitle(";m_{H} (GeV);Events/2 GeV")
             leg.AddEntry(testFrame.findObject('Exp'),'Exp','l')
+            leg.AddEntry(testFrame.findObject('Pow'),'Pow','l')
+            leg.AddEntry(testFrame.findObject('Bern2'),'Bern2','l')
+            leg.AddEntry(testFrame.findObject('Bern3'),'Bern3','l')
             leg.AddEntry(testFrame.findObject('Bern4'),'Bern4','l')
             leg.AddEntry(testFrame.findObject('Bern5'),'Bern5','l')
             leg.AddEntry(testFrame.findObject('Bern6'),'Bern6','l')
@@ -397,6 +404,9 @@ def doInitialFits(subdir):
           #getattr(ws,'import')(SechExp)
 
           getattr(ws,'import')(Exp)
+          getattr(ws,'import')(Pow)
+          getattr(ws,'import')(Bern2)
+          getattr(ws,'import')(Bern3)
           getattr(ws,'import')(Bern4)
           getattr(ws,'import')(Bern5)
           getattr(ws,'import')(Bern6)
@@ -437,6 +447,8 @@ if __name__=="__main__":
   s = sys.argv[1]
   print s
   cf.set("fits","ver", s)
+  cf.set("colors","bern2",kCyan+1)
+  cf.set("colors","bern3",kOrange)
   cf.set("colors","bern4",kGreen+1)
   cf.set("colors","bern5",kBlue+1)
   cf.set("colors","bern6",kRed+1)

@@ -1,18 +1,17 @@
 #!/usr/bin/env python
-import sys
-import os
+import sys,os
 from ROOT import *
 from collections import defaultdict
 gROOT.SetBatch()
 import ConfigParser as cp
 cf = cp.ConfigParser()
 cf.read('config.cfg')
-
 s = cf.get("fits","ver")
 
 gROOT.ProcessLine(".L ~/tdrstyle.C")
 setTDRStyle()
 plotBase = '/uscms_data/d2/andreypz/html/zgamma/dalitz/fits-'+s+'/toyFits/'
+
 
 def loopThruPulls():
   massList     = [a.strip()[0:3] for a in (cf.get("fits","massList")).split(',')]
@@ -21,7 +20,7 @@ def loopThruPulls():
   leptonList   = [a.strip() for a in (cf.get("fits","leptonList")).split(',')] 
   catList = ['0']
 
-  genFuncList = ['GaussExp']
+  genFuncList = ['Exp']
   #genFuncList = ['GaussPow','GaussExp','SechPow','SechExp']
   for year in yearList:
     for lepton in leptonList:
@@ -30,15 +29,11 @@ def loopThruPulls():
           for mass in massList:
             makePullPlots(year,lepton,genFunc,cat,mass)
 
-def makePullPlots(year, lepton, genFunc, cat, mass):
+def makePullPlots(year='2012', lepton='mu', genFunc='Exp', cat='0', mass='125'):
 
   #get the toy file and tree
 
-
-  #preName = s+'/biasToys/biasToys_'+year+'_'+lepton+'_cat'+ cat+'_'+genFunc+'_'+mass+''
-  #toyFileName = preName+'_hadd.root'
-  # os.system('hadd '+toyFileName+' '+preName+'*.root')
-  toyFileName = 'toys.root'
+  toyFileName = '../biasToys_m'+mass+'_hadd.root'
   print toyFileName
   toyFile = TFile(toyFileName)
   toyTree = toyFile.Get('toys')
@@ -187,14 +182,10 @@ def makePullPlots(year, lepton, genFunc, cat, mass):
 
 
 if __name__=="__main__":
-  if len(sys.argv) == 2:
-    loopThruPulls()
-  elif len(sys.argv) != 6:
-    print 'args: year, lepton, genfunc, cat, mass'
-  else:
-    a,b,c,d,e = sys.argv[1:6]
-    makePullPlots(a,b,c,d,e)
-
+  #mass = options.mass
+  #makePullPlots(mass=mass)
+  loopThruPulls()
+  
 
 
 

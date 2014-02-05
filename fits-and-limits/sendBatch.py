@@ -21,11 +21,11 @@ if len(args) < 1:
 executable  = 'batchJob.sh'
 
 version    = args[0]
-outputPath = version
+outputPath = version+'-bias'
 
 inputSamples = []
 inputSamples.append(cfg('None', 'None', int(options.jobs), str(options.trials) +' 120'))
-#inputSamples.append(cfg('None', 'None', int(options.jobs), str(options.trials) +' 125'))
+inputSamples.append(cfg('None', 'None', int(options.jobs), str(options.trials) +' 125'))
 inputSamples.append(cfg('None', 'None', int(options.jobs), str(options.trials) +' 130'))
 inputSamples.append(cfg('None', 'None', int(options.jobs), str(options.trials) +' 135'))
 inputSamples.append(cfg('None', 'None', int(options.jobs), str(options.trials) +' 140'))
