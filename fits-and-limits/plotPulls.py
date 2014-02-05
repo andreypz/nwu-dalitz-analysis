@@ -35,10 +35,10 @@ def makePullPlots(year, lepton, genFunc, cat, mass):
   #get the toy file and tree
 
 
-  preName = s+'/biasToys/biasToys_'+year+'_'+lepton+'_cat'+ cat+'_'+genFunc+'_'+mass+''
-  toyFileName = preName+'_hadd.root'
-
-  os.system('hadd '+toyFileName+' '+preName+'*.root')
+  #preName = s+'/biasToys/biasToys_'+year+'_'+lepton+'_cat'+ cat+'_'+genFunc+'_'+mass+''
+  #toyFileName = preName+'_hadd.root'
+  # os.system('hadd '+toyFileName+' '+preName+'*.root')
+  toyFileName = 'toys.root'
   print toyFileName
   toyFile = TFile(toyFileName)
   toyTree = toyFile.Get('toys')
@@ -55,11 +55,10 @@ def makePullPlots(year, lepton, genFunc, cat, mass):
   #define the fit functions we'll be using today (and their associated plot colors)
 
   #turnOnList = ['Sech','Gauss']
-  turnOnList = ['Gauss']
+  turnOnList = ['']
   tailList = ['Bern4','Bern5','Bern6']
-  colorDict = {'SechBern3':kCyan,'SechBern4':kCyan+1,'SechBern5':kCyan+2,'SechBern6':kCyan+3,
-               'GaussBern3':kBlue+2,'GaussBern4':kRed+2,'GaussBern5':kGreen+2,'GaussBern6':kRed+3,
-               'GaussExp':kGray}
+  colors ={}
+  for f,col in cf.items("colors"): colors[f] = int(col)
 
   #make a TCanvas and TLegend for each type of distribution
 
@@ -102,7 +101,7 @@ def makePullPlots(year, lepton, genFunc, cat, mass):
           tmpHist = TH1F(dist+'_'+fitFunc, dist+'_'+fitFunc, 100, -10, 10)
 
         tmpHist.SetLineWidth(2)
-        tmpHist.SetLineColor(colorDict[fitFunc])
+        tmpHist.SetLineColor(colors[fitFunc.lower()])
         tmpHist.SetTitle(dist)
         canList[i].cd()
 

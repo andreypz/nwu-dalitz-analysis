@@ -12,6 +12,6 @@ Debugged and improved.
 
 #### Bias study
  1. ```biasStudy_toyMaker.py``` makes the toys from a given PDF and performes the fits with various test function.
- 2. ```plotPulls.py``` make the pull plots framm all the toys
+ 2. ```plotPulls.py``` makes the pull plots from all the fits
  
 [brover]: https://github.com/brovercleveland/BiasAndLimits

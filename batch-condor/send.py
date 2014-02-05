@@ -2,7 +2,7 @@
 
 import BatchMaster as b
 import sys
-cfg = b.JobConfig
+cfg = b.JobConfig()
 
 from optparse import OptionParser
 parser = OptionParser(usage="usage: %prog [options -e], --data, --bkg, --sig], -p 2011] version")
@@ -203,7 +203,7 @@ if doSignal:
 
 if len(inputSamples) is not 0:
     batcher = b.BatchMaster(inputSamples, outputPath, shortQueue = False, stageDir = '../StageBatch_'+version,
-                            executable = executable, selection = version + '/' + selection +"_"+ period)
+                            executable = executable, prefix = version + '/' + selection +"_"+ period)
     print "Submitting to batch?"
     batcher.submit_to_batch()
             

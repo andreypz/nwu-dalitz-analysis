@@ -1,32 +1,52 @@
 #!/usr/bin/env python
-import sys
-from ROOT import *
-gROOT.SetBatch()
-from toyStructs import makeToyStucts
-sys.path.append("../zgamma")
-import utils as u
+from optparse import OptionParser
+import sys,os
 import ConfigParser as cp
 cf = cp.ConfigParser()
 cf.read('config.cfg')
 s = cf.get("fits","ver")
+verbose = 0
 
+from ROOT import *
+from toyStructs import makeToyStucts
 gSystem.SetIncludePath( "-I$ROOFITSYS/include/" );
 gROOT.ProcessLine('.x RooStepBernstein.cxx+')
 gROOT.ProcessLine('.x RooGaussStepBernstein.cxx+')
 
-verbose = 0
-testFuncs = ['GaussBern4', 'GaussBern5', 'GaussBern6']
-colors = [kRed, kOrange, kGreen]
-plotBase = '/uscms_data/d2/andreypz/html/zgamma/dalitz/fits-'+s+'/toyFits/'
-u.createDir(plotBase)
-u.createDir(s+'/biasToys/')
-  
-def doBiasStudy(year = '2012', lepton = 'mu', cat = '0', genFunc = 'GaussExp', mass = '125', trials = 100, job = 0, plotEvery = 5):
+gROOT.SetBatch()
+
+parser = OptionParser(usage="usage: %prog job [options -v version]")
+parser.add_option("-v", "--ver",dest="ver", default="none", help="version - a subdir name where the input files are stored.")
+parser.add_option("-b", dest="bullshit", action="store_true",default=False, help="Ys it is true")
+parser.add_option("-j", dest="job",    default=0, help="Job number")
+parser.add_option("-t", dest="trials", default=5, help="Number of trials")
+parser.add_option("-m", dest="mass",   default='125', help="Number of trials")
+
+(options, args) = parser.parse_args()
+
+colors = {}
+for f,col in cf.items("colors"): colors[f] = int(col)
+
+fileBase = './'
+plotBase = './'
+if options.ver=='none':
+  fileBase = s
+  plotBase = '/uscms_data/d2/andreypz/html/zgamma/dalitz/fits-'+s
+else:
+  fileBase = options.ver
+  plotBase = options.ver
+
+testFuncs = ['Bern4','Bern5','Bern6']
+
+def doBiasStudy(year = '2012', lepton = 'mu', cat = '0', genFunc = 'Exp', mass = '125', trials = 5, job = 0, plotEvery = 5):
   #get all the starting objects
   c = TCanvas("c","c",0,0,500,400)
   c.cd()
 
-  rooWsFile = TFile(s+'/testRooFitOut_Dalitz.root','r')
+  if not os.path.isdir(plotBase):
+    os.makedirs(plotBase)
+
+  rooWsFile = TFile(fileBase+'/testRooFitOut_Dalitz.root','r')
   myWs = rooWsFile.Get('ws')
   sigRangeName = '_'.join(['range',lepton,year,'cat'+cat,'M'+mass])
 
@@ -106,11 +126,9 @@ def doBiasStudy(year = '2012', lepton = 'mu', cat = '0', genFunc = 'GaussExp', m
   testModelsDict   = dict(zip(testFuncs,testModels))
   testBkgNormsDict = dict(zip(testFuncs,testBkgNorms))
   testSigNormsDict = dict(zip(testFuncs,testSigNorms))
-  ColorDict = dict(zip(testFuncs,colors))
-
 
   # prep the outputs
-  outName = s+'/biasToys/'+'_'.join(['biasToys',year,lepton,'cat'+cat,genFunc,mass,'job'+str(job)])+'.root'
+  outName = fileBase+'/'+'_'.join(['biasToys',year,lepton,'cat'+cat,genFunc,mass,'job'+str(job)])+'.root'
   outFile = TFile(outName, 'RECREATE')
   tree = TTree('toys','toys')
   makeToyStucts()
@@ -130,28 +148,41 @@ def doBiasStudy(year = '2012', lepton = 'mu', cat = '0', genFunc = 'GaussExp', m
   for func in testFuncs:
     print func
     
-    if func=='GaussBern3':
+    if func=='Bern4':
+      from ROOT import BERN4
+      Bern4Struct = BERN4()
+      tree.Branch('Bern4',Bern4Struct,'yieldBkg/D:yieldBkgErr:yieldSig:yieldSigErr:paramP1:paramP1Err:paramP2:paramP2Err:paramP3:paramP3Err:paramP4:paramP4Err:edm:minNll:statusAll/I:statusMIGRAD:statusHESSE:covQual:numInvalidNLL')
+    elif func=='Bern5':
+      from ROOT import BERN5
+      Bern5Struct = BERN5()
+      tree.Branch('Bern5',Bern5Struct,'yieldBkg/D:yieldBkgErr:yieldSig:yieldSigErr:paramP1:paramP1Err:paramP2:paramP2Err:paramP3:paramP3Err:paramP4:paramP4Err:paramP5:paramP5Err:edm:minNll:statusAll/I:statusMIGRAD:statusHESSE:covQual:numInvalidNLL')
+    elif func=='Bern6':
+      from ROOT import BERN6
+      Bern6Struct = BERN6()
+      tree.Branch('Bern6',Bern6Struct,'yieldBkg/D:yieldBkgErr:yieldSig:yieldSigErr:paramP1:paramP1Err:paramP2:paramP2Err:paramP3:paramP3Err:paramP4:paramP4Err:paramP5:paramP5Err:paramP6:paramP6Err:edm:minNll:statusAll/I:statusMIGRAD:statusHESSE:covQual:numInvalidNLL')
+
+    elif func=='GaussBern3':
       from ROOT import GAUSSBERN3
       GaussBern3Struct = GAUSSBERN3()
       tree.Branch('GaussBern3',GaussBern3Struct,'yieldBkg/D:yieldBkgErr:yieldSig:yieldSigErr:paramSigma:paramSigmaErr:paramStep:paramStepErr:paramP1:paramP1Err:paramP2:paramP2Err:paramP3:paramP3Err:edm:minNll:statusAll/I:statusMIGRAD:statusHESSE:covQual:numInvalidNLL')
-    if func=='GaussBern4':
+    elif func=='GaussBern4':
       from ROOT import GAUSSBERN4
       GaussBern4Struct = GAUSSBERN4()
       tree.Branch('GaussBern4',GaussBern4Struct,'yieldBkg/D:yieldBkgErr:yieldSig:yieldSigErr:paramSigma:paramSigmaErr:paramStep:paramStepErr:paramP1:paramP1Err:paramP2:paramP2Err:paramP3:paramP3Err:paramP4:paramP4Err:edm:minNll:statusAll/I:statusMIGRAD:statusHESSE:covQual:numInvalidNLL')
-    if func=='GaussBern5':
+    elif func=='GaussBern5':
       from ROOT import GAUSSBERN5
       GaussBern5Struct = GAUSSBERN5()
       tree.Branch('GaussBern5',GaussBern5Struct,'yieldBkg/D:yieldBkgErr:yieldSig:yieldSigErr:paramSigma:paramSigmaErr:paramStep:paramStepErr:paramP1:paramP1Err:paramP2:paramP2Err:paramP3:paramP3Err:paramP4:paramP4Err:paramP5:paramP5Err:edm:minNll:statusAll/I:statusMIGRAD:statusHESSE:covQual:numInvalidNLL')
-
-      
-    if func=='GaussBern6':
+    elif func=='GaussBern6':
       # for now just use the same as Bern5, fix it later
       from ROOT import GAUSSBERN5
       GaussBern6Struct = GAUSSBERN5()
       tree.Branch('GaussBern6',GaussBern6Struct,'yieldBkg/D:yieldBkgErr:yieldSig:yieldSigErr:paramSigma:paramSigmaErr:paramStep:paramStepErr:paramP1:paramP1Err:paramP2:paramP2Err:paramP3:paramP3Err:paramP4:paramP4Err:paramP5:paramP5Err:edm:minNll:statusAll/I:statusMIGRAD:statusHESSE:covQual:numInvalidNLL')
-      
+    else:
+      print "No struct exists for ", func
 
-  structDict = dict(zip(testFuncs,[GaussBern4Struct,GaussBern5Struct,GaussBern6Struct]))
+  structDict = dict(zip(testFuncs,[Bern4Struct,Bern5Struct,Bern6Struct]))
+  #structDict = dict(zip(testFuncs,[GaussBern4Struct,GaussBern5Struct,GaussBern6Struct]))
   print structDict
   #print "  RAW INPUT HERE "
   #raw_input()
@@ -220,25 +251,29 @@ def doBiasStudy(year = '2012', lepton = 'mu', cat = '0', genFunc = 'GaussExp', m
       structDict[func].yieldBkgErr = testBkgNormsDict[func].getError()
       structDict[func].yieldSig    = testSigNormsDict[func].getVal()
       structDict[func].yieldSigErr = testSigNormsDict[func].getError()
-      if func in ['GaussBern3','GaussBern4','GaussBern5','GaussBern6']:
-        structDict[func].paramSigma    = testModelsDict[func].getParameters(toyData)['sigma'+suffix].getVal()
-        structDict[func].paramSigmaErr = testModelsDict[func].getParameters(toyData)['sigma'+suffix].getError()
-        structDict[func].paramStep     = testModelsDict[func].getParameters(toyData)['step'+suffix].getVal()
-        structDict[func].paramStepErr  = testModelsDict[func].getParameters(toyData)['step'+suffix].getError()
+      if func in ['Bern3','Bern4','Bern5','Bern6','GaussBern3','GaussBern4','GaussBern5','GaussBern6']:
         structDict[func].paramP1       = testModelsDict[func].getParameters(toyData)['p1'+suffix].getVal()
         structDict[func].paramP1Err    = testModelsDict[func].getParameters(toyData)['p1'+suffix].getError()
         structDict[func].paramP2       = testModelsDict[func].getParameters(toyData)['p2'+suffix].getVal()
         structDict[func].paramP2Err    = testModelsDict[func].getParameters(toyData)['p2'+suffix].getError()
         structDict[func].paramP3       = testModelsDict[func].getParameters(toyData)['p3'+suffix].getVal()
         structDict[func].paramP3Err    = testModelsDict[func].getParameters(toyData)['p3'+suffix].getError()
-      if func in ['GaussBern4','GaussBern5','GaussBern6']:
+      if func in ['GaussBern3','GaussBern4','GaussBern5','GaussBern6']:
+          structDict[func].paramSigma    = testModelsDict[func].getParameters(toyData)['sigma'+suffix].getVal()
+          structDict[func].paramSigmaErr = testModelsDict[func].getParameters(toyData)['sigma'+suffix].getError()
+          structDict[func].paramStep     = testModelsDict[func].getParameters(toyData)['step'+suffix].getVal()
+          structDict[func].paramStepErr  = testModelsDict[func].getParameters(toyData)['step'+suffix].getError()
+      if func in ['Bern4','Bern5','Bern6','GaussBern4','GaussBern5','GaussBern6']:
         structDict[func].paramP4    = testModelsDict[func].getParameters(toyData)['p4'+suffix].getVal()
         structDict[func].paramP4Err = testModelsDict[func].getParameters(toyData)['p4'+suffix].getError()
-      if func in ['GaussBern5','GaussBern6']:
+      if func in ['Bern5','Bern6','GaussBern5','GaussBern6']:
         structDict[func].paramP5    = testModelsDict[func].getParameters(toyData)['p5'+suffix].getVal()
         structDict[func].paramP5Err = testModelsDict[func].getParameters(toyData)['p5'+suffix].getError()
-      if func in ['GaussBern6']:
-        print "Do nothing else, add later"
+      if func in ['Bern6','GaussBern6']:
+        print "do nothing for now"
+        #structDict[func].paramP6    = testModelsDict[func].getParameters(toyData)['p6'+suffix].getVal()
+        #structDict[func].paramP6Err = testModelsDict[func].getParameters(toyData)['p6'+suffix].getError()
+
 
       structDict[func].statusAll     = statusAll
       structDict[func].statusMIGRAD  = statusMIGRAD
@@ -266,13 +301,13 @@ def doBiasStudy(year = '2012', lepton = 'mu', cat = '0', genFunc = 'GaussExp', m
 
       legendTmp.AddEntry(testFrame.findObject(genFunc), genFunc+': used for GEN toys' ,'l')
       for func in testFuncs:
-        testModelsDict[func].plotOn(testFrame, RooFit.LineColor(ColorDict[func]), RooFit.Range('fullRange'), RooFit.Name(func))
+        testModelsDict[func].plotOn(testFrame, RooFit.LineColor(colors[func.lower()]), RooFit.Range('fullRange'), RooFit.Name(func))
         legendTmp.AddEntry(testFrame.findObject(func), func ,'l')  # trick to get the colors on the legend
         
       testFrame.Draw()
       legendTmp.Draw()
 
-      c.SaveAs(plotBase+'_'.join(['toyFits',lepton,year,'cat'+cat,genFunc,'M'+mass,'job'+str(job),'trial'+str(i)])+'.png')
+      c.SaveAs(plotBase+'/'+'_'.join(['toyFits',lepton,year,'cat'+cat,genFunc,'M'+mass,'job'+str(job),'trial'+str(i)])+'.png')
 
     tree.Fill()
 
@@ -284,13 +319,9 @@ def doBiasStudy(year = '2012', lepton = 'mu', cat = '0', genFunc = 'GaussExp', m
 
   
 if __name__=="__main__":
-  print len(sys.argv)
-  print sys.argv
-  if len(sys.argv) != 3:
-    sys.exit()
-    
-  n = sys.argv[1]
-              
-  doBiasStudy(job=int(n))
-
-
+  print len(sys.argv), sys.argv
+  
+  job = int(options.job)
+  trials = int(options.trials)
+  mass = str(options.mass)
+  doBiasStudy(trials = trials, job=job, mass=mass)

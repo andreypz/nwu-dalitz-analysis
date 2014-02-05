@@ -37,8 +37,9 @@ def makeCards(subdir):
         sigNameList = ['gg','vbf']
         channel = '_'.join([lepton,year,'cat'+cat])
         #bkgParams = ['sigma','mean','tau','norm']
-        bkgParams = ['p0','p1','p2','p3','p4','sigma','step','mean','norm']
-
+        bkgParams = ['p0','p1','p2','p3','p4','norm']
+        #bkgParams = ['p0','p1','p2','p3','p4','sigma','step','mean','norm']
+        
         for mass in massList:
           
           sigFileName = subdir+'/'+'_'.join(['SignalOutput',lepton,year,'cat'+cat,mass])+'.root'
@@ -67,8 +68,8 @@ def makeCards(subdir):
           card.write('{0:<12} {1}\n'.format('observation',int(bgYield)))
           card.write('------------------------------\n')
 
-          print "WTF is [::-1] ??? ->"
-          print channel, prefixSigList, prefixSigList[::-1]
+          #print "WTF is [::-1] ??? ->"
+          #print channel, prefixSigList, prefixSigList[::-1]
           
           card.write('{0:<25} {1:^15} {2:^15} {3:^15}\n'.format(*(['bin']+[channel]*3)))
           card.write('{0:<25} {1:^15} {2:^15} {3:^15}\n'.format(*(['process']+prefixSigList[::-1]+['bkg'])))
