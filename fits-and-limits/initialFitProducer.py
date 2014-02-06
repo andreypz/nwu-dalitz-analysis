@@ -276,7 +276,7 @@ def doInitialFits(subdir):
           #GaussBern6 = BuildGaussStepBern6(year, lepton, cat, mzg)
           Exp        = BuildExp(year, lepton, cat, mzg)
           Pow        = BuildPow(year, lepton, cat, mzg)
-          Bern2      = BuildBern3(year, lepton, cat, mzg)
+          Bern2      = BuildBern2(year, lepton, cat, mzg)
           Bern3      = BuildBern3(year, lepton, cat, mzg)
           Bern4      = BuildBern4(year, lepton, cat, mzg)
           Bern5      = BuildBern5(year, lepton, cat, mzg)

@@ -20,7 +20,7 @@ def loopThruPulls():
   leptonList   = [a.strip() for a in (cf.get("fits","leptonList")).split(',')] 
   catList = ['0']
 
-  genFuncList = ['Exp']
+  genFuncList = ['Exp','Pow']
   #genFuncList = ['GaussPow','GaussExp','SechPow','SechExp']
   for year in yearList:
     for lepton in leptonList:
@@ -33,7 +33,8 @@ def makePullPlots(year='2012', lepton='mu', genFunc='Exp', cat='0', mass='125'):
 
   #get the toy file and tree
 
-  toyFileName = '../biasToys_m'+mass+'_hadd.root'
+  toyFileName = '../biasToys-Bern456-big/biasToys_'+genFunc+'_m'+mass+'.root'
+  #toyFileName = '../biasToys-Bern23456/biasToys_'+genFunc+'_m'+mass+'.root'
   print toyFileName
   toyFile = TFile(toyFileName)
   toyTree = toyFile.Get('toys')
