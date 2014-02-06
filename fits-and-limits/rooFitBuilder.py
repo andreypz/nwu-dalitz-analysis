@@ -426,7 +426,7 @@ def BuildBern6(year,lepton,cat,mzg,p0 = 1 ,p1 = 5, p1Low = -1e-6, p1High = 30, p
   p3Var = RooRealVar('p3Bern6_'+suffix, 'p3Bern6_'+suffix,p3,p3Low,p3High)
   p4Var = RooRealVar('p4Bern6_'+suffix, 'p4Bern6_'+suffix,p4,p4Low,p4High)
   p5Var = RooRealVar('p5Bern6_'+suffix, 'p5Bern6_'+suffix,p5,p5Low,p5High)
-  p6Var = RooRealVar('p5Bern6_'+suffix, 'p5Bern6_'+suffix,p6,p6Low,p5High)
+  p6Var = RooRealVar('p6Bern6_'+suffix, 'p6Bern6_'+suffix,p6,p6Low,p5High)
   Bern6 = RooBernstein('Bern6_'+suffix,'Bern6_'+suffix,mzg,RooArgList(p0Var,p1Var,p2Var, p3Var, p4Var, p5Var, p6Var))
   SetOwnership(p0Var,0)
   SetOwnership(p1Var,0)
