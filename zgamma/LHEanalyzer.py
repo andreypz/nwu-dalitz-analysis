@@ -61,6 +61,10 @@ def FillAllHists(files, h):
         print f
         
     dcount = 0
+    wpcount = 0
+    wmcount = 0
+    zcount = 0
+    
     for evt in fChain:
 
         g1 = TLorentzVector(0)
@@ -126,9 +130,7 @@ def FillAllHists(files, h):
             if (p.PID==21 and p.Status==1):
                 hasGlu3=1
                 g3.SetPxPyPzE(px,py,pz,E)
-
     
-
         if l1.Pt()>l2.Pt():
             lPt1 = l1
             lPt2 = l2
@@ -146,13 +148,19 @@ def FillAllHists(files, h):
         #     print "Nope, there has to be two of them", qq
         #     sys.exit(0)
         
-        #if not hasWm and not hasWp and not hasZ: continue
-        #if not hasGamma: continue
+        if hasWm:
+            wmcount += 1
+        if hasWp:
+            wpcount += 1
+        if hasZ:
+            zcount +=1
+        
+        #f not hasGamma: continue
 
         dcount += 1
         #if dcount >10000:
         #    continue
-
+        
             
         tri = diLep + gamma
         
@@ -282,7 +290,7 @@ def FillAllHists(files, h):
 
         
     print "Total events = ", dcount
-    
+    print "Has Z:", zcount, "  haswp", wpcount, "  hasWm:", wmcount 
 if __name__ == "__main__":
     gROOT.ProcessLine(".L ~/tdrstyle.C")
     setTDRStyle()

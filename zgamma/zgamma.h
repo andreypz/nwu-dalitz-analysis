@@ -135,6 +135,7 @@ class zgamma : public TSelector {
 
   TTree* _fitTree;
   Double_t fit_m_llg, fit_m_ll, fit_phEta, fit_weight;
+  Double_t fit_phPt, fit_diPt;
   Bool_t fit_isLowPt;
 
   string period;

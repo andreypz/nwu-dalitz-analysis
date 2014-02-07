@@ -118,7 +118,7 @@ if period =="2012":
     bg = []
     
     bg.extend([
-        cfg('DYjets50',  EOS+'/bpollack/V09_04_8TeV/MC/DYJetsToLL_M-50',  1, 'DYjets50 ' +selection+' '+period),
+        cfg('DYjets50',  EOS+'/bpollack/V09_05_8TeV/MC/DYJetsToLL_M-50',  1, 'DYjets50 ' +selection+' '+period),
         ])
 
     if selection == 'elgamma':
@@ -152,7 +152,9 @@ if period =="2012":
     signal = []
 
     signal.extend([
-        cfg('ggHZG-125', EOS+'/bpollack/V09_04_8TeV/MC/ggHZG_M125_S10',1, 'HZG '+selection+' '+period+gen),
+        cfg('ggHZG-125', EOS+'/bpollack/V09_05_8TeV/MC/ggHZG_M125_RD1',1, 'HZG '+selection+' '+period+gen),
+        cfg('ggHZG-135', EOS+'/bpollack/V09_05_8TeV/MC/ggHZG_M135_RD1',1, 'HZG '+selection+' '+period+gen),
+        cfg('ggHZG-140', EOS+'/bpollack/V09_05_8TeV/MC/ggHZG_M140_RD1',1, 'HZG '+selection+' '+period+gen),
         ])
     
     if selection in ["mumu","mugamma","single-mu"]:

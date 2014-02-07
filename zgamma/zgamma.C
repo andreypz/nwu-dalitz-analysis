@@ -197,6 +197,8 @@ void zgamma::Begin(TTree * tree)
     _fitTree->Branch("m_llg",  &fit_m_llg, "m_llg/D");
     _fitTree->Branch("m_ll",   &fit_m_ll,  "m_ll/D");
     _fitTree->Branch("ph_eta", &fit_phEta, "m_phEta/D");
+    _fitTree->Branch("ph_pt",  &fit_phPt,  "m_phPt/D");
+    _fitTree->Branch("di_pt",  &fit_diPt,  "m_diPt/D");
     _fitTree->Branch("isLowPt",&fit_isLowPt,"isLowPt/O");
     _fitTree->Branch("weight", &fit_weight,"weight/D");
   }
@@ -633,15 +635,14 @@ Bool_t zgamma::Process(Long64_t entry)
   if (muons.size()<2) return kTRUE;
 
  
-  /*
-if (muons[1].Pt() < 7 &&
-      (zgamma::CalculateMuonIso(&muons[0]) > 0.2 || zgamma::CalculateMuonIso(&muons[1]) > 1.0)
-      )
-    return kTRUE;
-  else if(zgamma::CalculateMuonIso(&muons[0]) > 0.4 || zgamma::CalculateMuonIso(&muons[1]) > 0.4) 
-    return kTRUE;
-  */  
-    
+  
+  //if (muons[1].Pt() < 7 &&
+  //   (zgamma::CalculateMuonIso(&muons[0]) > 0.2 || zgamma::CalculateMuonIso(&muons[1]) > 1.0)
+  //    )
+  //return kTRUE;
+  //else if(zgamma::CalculateMuonIso(&muons[0]) > 0.4 || zgamma::CalculateMuonIso(&muons[1]) > 0.4) 
+  //return kTRUE;
+      
   
   if ((muons[0].Pt() > 20 && zgamma::CalculateMuonIso(&muons[0]) > 0.4) ||
       (muons[1].Pt() > 20 && zgamma::CalculateMuonIso(&muons[1]) > 0.4))
@@ -764,6 +765,22 @@ if (muons[1].Pt() < 7 &&
   FillHistoCounts(8, eventWeight);
   CountEvents(8);
   
+
+  fit_m_llg   = Mllg;
+  fit_m_ll    = Mll;
+  fit_weight  = eventWeight;
+  fit_phEta   = gamma.SCEta();
+  fit_phPt   = gamma.Pt();
+  fit_diPt   = (l1+l2).Pt();
+  fit_isLowPt = false;
+      
+  if (lPt2.Pt() < cut_l2pt)
+    fit_isLowPt = true;
+  
+  _fitTree->Fill();
+
+
+
   if( (l1+l2).Pt()+gamma.Pt() > 95)
     {
       FillHistosFull(9, eventWeight, l1, l2, lPt1, lPt2, gamma, "");
@@ -779,18 +796,6 @@ if (muons[1].Pt() < 7 &&
         FillHistosFull(9, eventWeight, l1, l2, lPt1, lPt2, gamma, "Low-Mll");
       
       
-      fit_m_llg   = Mllg;
-      fit_m_ll    = Mll;
-      fit_weight  = eventWeight;
-      fit_phEta   = gamma.SCEta();
-      fit_isLowPt = false;
-      
-      if (lPt2.Pt() < cut_l2pt)
-        fit_isLowPt = true;
-      
-      _fitTree->Fill();
-
-
     if (lPt2.Pt() > cut_l2pt){
       FillHistosFull(10, eventWeight, l1, l2, lPt1, lPt2, gamma, "");
       FillHistoCounts(10, eventWeight);
