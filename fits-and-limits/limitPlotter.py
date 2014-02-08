@@ -6,16 +6,16 @@ from ROOT import *
 gROOT.SetBatch()
 sys.path.append("../zgamma")
 import utils as u
+import ConfigParser as cp
+cf = cp.ConfigParser()
+cf.read('config.cfg')
 
 gROOT.ProcessLine(".L ~/tdrstyle.C")
 setTDRStyle()
 gStyle.SetOptTitle(0)
 
-print len(sys.argv), sys.argv
-if len(sys.argv) != 2:
-  sys.exit()
-s = sys.argv[1]
-  
+s = cf.get("fits","ver")
+      
 out = TFile(s+"/limit-data.root","recreate")
 
 plotBase = '/uscms_data/d2/andreypz/html/zgamma/dalitz/fits-'+s
@@ -24,8 +24,7 @@ u.createDir(plotBase)
 fullCombo = True
 byParts = False
 
-#massList = [125.0]
-massList = [120.0,125.0,130.0,135.0,140.0,145.0,150.0]
+massList   = [float(a.strip()) for a in (cf.get("fits","massList")).split(',')]
 
 c = TCanvas("c","c",0,0,500,400)
 c.cd()
@@ -119,14 +118,24 @@ if fullCombo:
 
   prelim = TLatex(0.15,0.95, "CMS Preliminary")
   prelim.SetNDC();
-  prelim.SetTextSize(0.05);
-  prelim.Draw();
+  prelim.SetTextSize(0.03)
+  prelim.Draw()
 
-  sqrt = TLatex(0.25,0.85, "#sqrt{s} = 8 Tev; #it{L_{int}} = 19.7 fb^{-1}")
+  mg.SetMinimum(0)
+  mg.SetMaximum(26)
+
+
+  sqrt = TLatex(0.20,0.85, "#sqrt{s} = 8 Tev; #it{L_{int}} = 19.7 fb^{-1}")
   sqrt.SetNDC();
   sqrt.SetTextSize(0.04);
   sqrt.Draw();
-  
+
+  leg = TLegend(0.25,0.65,0.50,0.83)
+  leg.AddEntry(expected,"Expected", "l")
+  leg.AddEntry(oneSigma,"Expected #pm 1#sigma", "f")
+  leg.AddEntry(twoSigma,"Expected #pm 1#sigma", "f")
+
+
   
   selection = TLatex()
   if "mu" in s:
@@ -136,11 +145,13 @@ if fullCombo:
     selection = TLatex(0.70,0.95, "#font[32]{ee} selection");
     selection.SetTextColor(kGreen-3);
 
-  selection.Draw()
-  selection.SetNDC();
-  prelim.SetTextSize(0.03);
-  selection.Draw();            
+  #selection.SetNDC();
+  #selection.Draw();            
 
+  leg.SetTextSize(0.04)
+  leg.SetFillColor(kWhite)
+  leg.Draw()
+  
   c.SaveAs(plotBase+'Limits.png')
 
 

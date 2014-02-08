@@ -5,20 +5,19 @@ gROOT.SetBatch()
 from rooFitBuilder import *
 sys.path.append("../zgamma")
 import utils as u
-
+import ConfigParser as cp
 gROOT.ProcessLine(".L ~/tdrstyle.C")
 setTDRStyle()
 
 print len(sys.argv), sys.argv
-if len(sys.argv) != 3:
-  sys.exit(0)
-subdir = sys.argv[1]
 
-leptonList = ['mu']
-yearList   = ['2012']
-catList    = ['0']
-
-
+cf = cp.ConfigParser()
+cf.read('config.cfg')
+subdir = cf.get("fits","ver")  
+yearList   = [a.strip() for a in (cf.get("fits","yearList")).split(',')]
+leptonList = [a.strip() for a in (cf.get("fits","leptonList")).split(',')]
+catList    = [a.strip() for a in (cf.get("fits","catList")).split(',')]
+    
 plotBase = "/uscms_data/d2/andreypz/html/zgamma/dalitz/fits-"+subdir
 u.createDir(plotBase)
 rooWsFile = TFile(subdir+'/testRooFitOut_Dalitz.root')
@@ -31,6 +30,7 @@ c.cd()
 mzg = myWs.var('CMS_hzg_mass')
 mzg.setRange('signal',120,130)
 
+bkgModel = 'Bern5'
 
 # #######################################
 # prep the background and data card    #
@@ -48,18 +48,9 @@ for year in yearList:
       suffix   = '_'.join([year,lepton,'cat'+cat])
       print dataName, suffix
 
-      #fitName  = '_'.join(['GaussExp',year,lepton,'cat'+cat])
-      #normName = 'normGaussExp_'+suffix
-
-      fitName  = '_'.join(['GaussBern4',year,lepton,'cat'+cat])
-      normName = 'normGaussBern4_'+suffix
-
-      # possibly have different fits for separate categories
-      if cat is 'a':
-        fitName  = '_'.join(['GaussBern6',year,lepton,'cat'+cat])
-        normName = 'normGaussBern6_'+suffix
-
-
+      fitName  = '_'.join([bkgModel,year,lepton,'cat'+cat])
+      normName = 'norm'+bkgModel+'_'+suffix      
+    
       print fitName, dataName
       data = myWs.data(dataName)
       fit  = myWs.pdf(fitName)
@@ -79,15 +70,34 @@ for year in yearList:
       fitExtName    = '_'.join(['bkgTmp',lepton,year,'cat'+cat])
       fit_ext       = RooExtendPdf(fitExtName,fitExtName, fit,norm)
 
-
       fit_ext.fitTo(data,RooFit.Range('dalitzRegion'))
 
-      testFrame = mzg.frame()
+      testFrame = mzg.frame(RooFit.Range('dalitzRegion'))
       data.plotOn(testFrame, RooFit.Binning(50))
-      fit_ext.plotOn(testFrame)
+      fit_ext.plotOn(testFrame, RooFit.Name(bkgModel),  RooFit.LineColor(kBlue))
+
+      #sigName = '_'.join(['ds_sig','gg',lepton,year,'cat'+cat,'M125'])
+      sigName = 'pdf_sig_mu_2012_cat0_M125'
+      myWs.Print()
+      #sigP  = myWs.data(sigName)
+      sigP  = myWs.pdf(sigName)
+      #sigHist = sigP.createHistogram()
+      #sigHist.Scale(50)
+      #sigP  = myWs.pdf(sigName)
+      #sigP.plotOn(testFrame, RooFit.LineColor(kRed+2),RooFit.Normalization(0.0))
+      sigP.plotOn(testFrame,  RooFit.Name('signal'), RooFit.LineColor(kRed+2), RooFit.Normalization(3.4 *50*7.4e-05))
+
+      leg  = TLegend(0.65,0.7,0.87,0.87)
+      leg.SetFillColor(0)
+      leg.SetShadowColor(0)
+      leg.SetBorderSize(1)
+      leg.AddEntry(testFrame.findObject(bkgModel),bkgModel,'l')
+      leg.AddEntry(testFrame.findObject('signal'),'50x ggH','l')
+      
+      testFrame.SetTitle(";m_{H} (GeV);Events/2 GeV")
       testFrame.Draw()
-      testFrame.SetTitle(";m_{H};unbinned fit pdf")
-      c.SaveAs(plotBase+'_'.join(['best_fit',year,lepton,'cat'+cat])+'.png')
+      leg.Draw()
+      c.SaveAs(plotBase+'/'+'_'.join(['best_fit',year,lepton,'cat'+cat])+'.png')
 
       ###### Import the fit and data, and rename them to the card convention
       dataNameNew = '_'.join(['data','obs',lepton,year,'cat'+cat])
@@ -99,8 +109,9 @@ for year in yearList:
       fit_ext.Print()
       card_ws.Print()
 
-      BackgroundNameFixer(year,lepton,cat,card_ws)
-
+      print normName
+      BackgroundNameFixer(fitName, year,lepton,cat,card_ws)
+            
       print "\n * The end * \n"
 
 card_ws.writeToFile(subdir+'/testCardBackground_Dalitz.root')

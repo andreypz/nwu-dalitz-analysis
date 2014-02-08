@@ -34,7 +34,7 @@ mg.Add(g0)
 mg.Add(g1)
 
 
-leg = TLegend(0.40,0.7,0.70,0.90);
+leg = TLegend(0.30,0.7,0.64,0.90);
 leg.AddEntry(g0,"Nominal", "l")
 leg.AddEntry(g1,"No sytematics", "l")
 
@@ -46,7 +46,6 @@ for i,s in enumerate(sys.argv[1:]):
     f[s] = TFile(s+"/limit-data.root") 
     g[s] = f[s].Get("expected")
     g[s].UseCurrentStyle()
-    g[s].SetLineColor(3+i)
     g[s].SetLineWidth(2)
     g[s].SetLineStyle(2)
 
@@ -55,7 +54,10 @@ for i,s in enumerate(sys.argv[1:]):
         leg.AddEntry(g[s],"DoubleMu data","l")
     elif "v35-mu-oldiso" in s:
         leg.AddEntry(g[s],"Muon isolation","l")
-
+        g[s].SetLineColor(4)
+    elif "v38-mugamma-tight" in s:
+        leg.AddEntry(g[s],"Tight Photon ID","l")
+        g[s].SetLineColor(7)
         
 mg.Draw('AL3')
 mg.SetMinimum(0)

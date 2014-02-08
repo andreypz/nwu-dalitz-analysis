@@ -8,9 +8,27 @@ gROOT.SetBatch()
 sys.path.append("../zgamma")
 import utils as u
 
-gSystem.SetIncludePath( "-I$ROOFITSYS/include/" );
-gROOT.ProcessLine(".L ~/tdrstyle.C")
-setTDRStyle()
+import ConfigParser as cp
+cf = cp.ConfigParser()
+cf.read('config.cfg')
+massList        = [a.strip()[0:3] for a in (cf.get("fits","massList")).split(',')]
+yearList        = [a.strip() for a in (cf.get("fits","yearList")).split(',')]
+leptonList      = [a.strip() for a in (cf.get("fits","leptonList")).split(',')]
+catList         = [a.strip() for a in (cf.get("fits","catList")).split(',')]
+sigNameList     = [a.strip() for a in (cf.get("fits","sigNameList")).split(',')]
+
+colors = {}
+for f,col in cf.items("colors"):
+  colors[f] = int(col)
+
+print colors
+print yearList, leptonList, catList, massList, sigNameList  
+#print "Begin, INPUT"
+#raw_input()
+
+#gSystem.SetIncludePath( "-I$ROOFITSYS/include/" );
+#gROOT.ProcessLine(".L ~/tdrstyle.C")
+#setTDRStyle()
 TH1.SetDefaultSumw2(kTRUE)
 gStyle.SetOptTitle(0)
 
@@ -26,11 +44,11 @@ rootrace   = False
 TH1.SetDefaultSumw2(kTRUE)
 if rootrace: RooTrace.active(kTRUE)
 
-def LumiXSWeighter(mH, sel):
+def LumiXSWeighter(mH, prod,sel):
   #Mad:
   #cro = 0.00091
-  cro = float(u.conf.get("ggH-"+str(mH), "cs-"+sel))
-  Nev = int(u.conf.get("ggH-"+str(mH), "Nev-"+sel))
+  cro = float(u.conf.get(prod+"H-"+str(mH), "cs-"+sel))
+  Nev = int(u.conf.get(prod+"H-"+str(mH), "Nev-"+sel))
   
   sc = float(u.lumi*cro)/Nev
   print 'M=',mH, 'cs=',cro, 'Nev=', Nev, 'lumi=',u.lumi, "scale", sc
@@ -55,37 +73,39 @@ def doInitialFits(subdir):
 
   #musel = "mumu"
   musel = "mugamma"
-    
+  EBetaCut = 1.0
+  
   dataDict   = {'mu2012':TFile(basePath1+'m_Data_'+musel+'_2012.root','r'),
                 'el2012':TFile(basePath2+'m_Data_electron_2012.root','r')}
 
-  signalDict = {'mu2012_M120':TFile(basePath1+musel+'_2012/hhhh_dal-mad120_1.root','r'),
-                'mu2012_M125':TFile(basePath1+musel+'_2012/hhhh_dal-mad125_1.root','r'),
-                'mu2012_M130':TFile(basePath1+musel+'_2012/hhhh_dal-mad130_1.root','r'),
-                'mu2012_M135':TFile(basePath1+musel+'_2012/hhhh_dal-mad135_1.root','r'),
-                'mu2012_M140':TFile(basePath1+musel+'_2012/hhhh_dal-mad140_1.root','r'),
-                'mu2012_M145':TFile(basePath1+musel+'_2012/hhhh_dal-mad145_1.root','r'),
-                'mu2012_M150':TFile(basePath1+musel+'_2012/hhhh_dal-mad150_1.root','r'),
+  signalDict = {'gg_mu2012_M120':TFile(basePath1+musel+'_2012/hhhh_dal-mad120_1.root','r'),
+                'gg_mu2012_M125':TFile(basePath1+musel+'_2012/hhhh_dal-mad125_1.root','r'),
+                'gg_mu2012_M130':TFile(basePath1+musel+'_2012/hhhh_dal-mad130_1.root','r'),
+                'gg_mu2012_M135':TFile(basePath1+musel+'_2012/hhhh_dal-mad135_1.root','r'),
+                'gg_mu2012_M140':TFile(basePath1+musel+'_2012/hhhh_dal-mad140_1.root','r'),
+                'gg_mu2012_M145':TFile(basePath1+musel+'_2012/hhhh_dal-mad145_1.root','r'),
+                'gg_mu2012_M150':TFile(basePath1+musel+'_2012/hhhh_dal-mad150_1.root','r'),
 
-                'el2012_M125':TFile(basePath2+'electron_2012/hhhh_dal-mad125_1.root','r')}
+                'vbf_mu2012_M120':TFile(basePath1+musel+'_2012/hhhh_vbf-mad120_1.root','r'),
+                'vbf_mu2012_M125':TFile(basePath1+musel+'_2012/hhhh_vbf-mad125_1.root','r'),
+                'vbf_mu2012_M130':TFile(basePath1+musel+'_2012/hhhh_vbf-mad130_1.root','r'),
+                'vbf_mu2012_M135':TFile(basePath1+musel+'_2012/hhhh_vbf-mad135_1.root','r'),
+                'vbf_mu2012_M140':TFile(basePath1+musel+'_2012/hhhh_vbf-mad140_1.root','r'),
+                'vbf_mu2012_M145':TFile(basePath1+musel+'_2012/hhhh_vbf-mad145_1.root','r'),
+                'vbf_mu2012_M150':TFile(basePath1+musel+'_2012/hhhh_vbf-mad150_1.root','r'),
+
+                'gg_el2012_M125':TFile(basePath2+'electron_2012/hhhh_dal-mad125_1.root','r')}
 
   treeName = 'fitTree/fitTree'
 
-  leptonList  = ['mu']
-  yearList    = ['2012']
-  #catList     = ['0',"EB","EE","LowPt"]
-  catList     = ['0']
-  EBetaCut = 1.0 
-  category    = {"0":0,"EB":1,"EE":2,"Low":3,"LowMll":4,"HighMll":5}
-  #massList    = ['125']
-  massList    = ['120','125','130','135','140','145','150']
-  sigNameList = ['gg']
-
-  
   weight  = RooRealVar('Weight','Weight',0,100)
-  mzg  = RooRealVar('CMS_hzg_mass','CMS_hzg_mass',90,190)
-  mzg.setRange('fullRegion', 80,200)
-  mzg.setRange('DalitzRegion',  90,190)
+
+  lowCutOff  = 100
+  highCutOff = 200
+
+  mzg  = RooRealVar('CMS_hzg_mass','CMS_hzg_mass', lowCutOff,highCutOff)
+  mzg.setRange('FullRegion',   lowCutOff, highCutOff)
+  mzg.setRange('DalitzRegion', 100,200)
   mzg.setBins(50000,'cache')
 
   c = TCanvas("c","c",0,0,500,400)
@@ -117,20 +137,20 @@ def doInitialFits(subdir):
           signalListDS = []
           for mass in massList:
             # store the unbinned signals for CB fitting
-            signalTree = signalDict[lepton+year+"_M"+mass].Get(treeName)
+            signalTree = signalDict[prod+"_"+lepton+year+"_M"+mass].Get(treeName)
             #signalTree.Print()
             sigName = '_'.join(['ds_sig',prod,lepton,year,'cat'+cat,'M'+mass])
 
             sig_argSW = RooArgSet(mzg,weight)
             sig_ds    = RooDataSet(sigName,sigName,sig_argSW,'Weight')
 
-            lumiWeight = LumiXSWeighter(int(mass), lepton)
+            lumiWeight = LumiXSWeighter(int(mass), prod,lepton)
+            print signalTree, "A signal tree", prod, '  categ=',cat, "mass =", mass
             for i in signalTree:
-              if cat=="EB" and fabs(i.ph_eta)>EBetaCut: continue
+              if   cat=="EB" and fabs(i.ph_eta)>EBetaCut: continue
               elif cat=="EE" and fabs(i.ph_eta)<EBetaCut: continue
-              #print "loop in signal tree", cat, category[cat], tmpType, "mass =", tmpSigMass[0] 
 
-              if i.m_llg> 90 and i.m_llg<190:
+              if i.m_llg> lowCutOff and i.m_llg<highCutOff:
                 mzg.setVal(i.m_llg)
                   
                 sigWeight = lumiWeight*i.weight
@@ -147,14 +167,19 @@ def doInitialFits(subdir):
             # we don't need or use unbinned signal or complicated fits
             # but this is mostly for compatibility, we may change to unbinned
             # during a future iteration
-            if prod is 'gg':
+
+            if prod=='gg':
+              
               if verbose: print 'signal mass loop', mass
+              print 'in gg   INPUT ', cat, prod,mass
+              #raw_input()
+                    
               histName  = '_'.join(['sig',lepton,year,'cat'+cat,'M'+mass])
               rangeName = '_'.join(['range',lepton,year,'cat'+cat,'M'+mass])
 
-              signalList.append(TH1F(histName, histName, 100, 90, 190))
+              signalList.append(TH1F(histName, histName, 100, lowCutOff, highCutOff))
               signalList[-1].SetLineColor(kRed)
-              signalTree = signalDict[lepton+year+"_M"+mass].Get(treeName)
+              signalTree = signalDict[prod+"_"+lepton+year+"_M"+mass].Get(treeName)
               
               if verbose:
                 print histName
@@ -184,7 +209,7 @@ def doInitialFits(subdir):
               getattr(ws,'import')(signalListPDF[-1])
               if verbose: print '\n\n ** finshed one mass -->>', mass
 
-            if debugPlots and prod is 'gg':
+            if debugPlots and prod=='gg':
               testFrame = mzg.frame()
               for i,signal in enumerate(signalListPDF):
                 signalListDH[i].plotOn(testFrame)
@@ -216,7 +241,7 @@ def doInitialFits(subdir):
           if cat=="EB" and fabs(i.ph_eta)>EBetaCut: continue
           elif cat=="EE" and fabs(i.ph_eta)<EBetaCut: continue
           
-          if i.m_llg> 90 and i.m_llg<190:
+          if i.m_llg> lowCutOff and i.m_llg<highCutOff:
             mzg.setVal(i.m_llg)
             data_ds.add(data_argS)
 
@@ -229,6 +254,7 @@ def doInitialFits(subdir):
         if debugPlots:
           testFrame = mzg.frame()
           data_ds.plotOn(testFrame,RooFit.Binning(50))
+              
           testFrame.Draw()
           c.SaveAs(plotBase+'_'.join(['data',year,lepton,'cat'+cat,'M'+mass])+'.png')
           
@@ -241,15 +267,24 @@ def doInitialFits(subdir):
         # ############
         if verbose: 'starting fits'
         
-        if cat is not '5':
-          GaussExp = BuildGaussExp(year, lepton, cat, mzg)
-          GaussPow = BuildGaussPow(year, lepton, cat, mzg)
-          SechExp  = BuildSechExp(year, lepton, cat, mzg)
-          SechPow  = BuildSechPow(year, lepton, cat, mzg)
-          #GaussBern3  = BuildGaussStepBern3(year, lepton, cat, mzg)
-          GaussBern4 = BuildGaussStepBern4(year, lepton, cat, mzg)
+        if cat!='5':
+          #GaussExp = BuildGaussExp(year, lepton, cat, mzg)
+          #SechExp  = BuildSechExp(year, lepton, cat, mzg)
+          #GaussBern3 = BuildGaussStepBern3(year, lepton, cat, mzg)
+          #GaussBern4 = BuildGaussStepBern4(year, lepton, cat, mzg)
           #GaussBern5 = BuildGaussStepBern5(year, lepton, cat, mzg)
           #GaussBern6 = BuildGaussStepBern6(year, lepton, cat, mzg)
+          Exp        = BuildExp(year, lepton, cat, mzg)
+          Pow        = BuildPow(year, lepton, cat, mzg)
+          Bern2      = BuildBern2(year, lepton, cat, mzg)
+          Bern3      = BuildBern3(year, lepton, cat, mzg)
+          Bern4      = BuildBern4(year, lepton, cat, mzg)
+          Bern5      = BuildBern5(year, lepton, cat, mzg)
+          Bern6      = BuildBern6(year, lepton, cat, mzg)
+
+          #SechPow  = BuildSechPow(year, lepton, cat, mzg)
+          #GaussPow = BuildGaussPow(year, lepton, cat, mzg)
+
           #GaussBern4  = BuildGaussStepBern4(year, lepton, cat, mzg, step = 105, stepLow = 100, stepHigh = 150, sigma = 2.5)
           #GaussBern5  = BuildGaussStepBern5(year, lepton, cat, mzg, step = 105, stepLow = 100, stepHigh = 150, sigma = 2.5)
           #GaussBern6  = BuildGaussStepBern6(year, lepton, cat, mzg, step = 105, stepLow = 90, stepHigh = 190, sigma = 2.5)
@@ -262,45 +297,47 @@ def doInitialFits(subdir):
           #gauss = BuildRooGaussian(year, lepton, cat, mzg)
           #BetaFunc = BuildBetaFunc(year, lepton, cat, mzg, 'DalitzRegion')
           #Kumaraswamy = BuildKumaraswamy(year, lepton, cat, mzg, 'DalitzRegion')
-          #Bern5 = BuildBern5(year, lepton, cat, mzg)
-          #BB = BuildBetaAndBern(year, lepton, cat, mzg, 'DalitzRegion')
-          GB = BuildGaussAndBern(year, lepton, cat, mzg, 'DalitzRegion')
+                    #BB = BuildBetaAndBern(year, lepton, cat, mzg, 'DalitzRegion')
+          #GB = BuildGaussAndBern(year, lepton, cat, mzg, 'DalitzRegion')
 
           if verbose:
-            GaussExp.Print()
-            GaussPow.Print()
-            SechExp.Print()
-            SechPow.Print()
+            Exp.Print()
+            #GaussExp.Print()
+            #GaussPow.Print()
+            #SechExp.Print()
+            #SechPow.Print()
             #GaussBern3.Print()
-            GaussBern4.Print()
+            #GaussBern4.Print()
             #GaussBern5.Print()
             #GaussBern6.Print()
-            #SechBern3.Print()
-            #SechBern4.Print()
-            #SechBern5.Print()
-            #BB.Print()
-            GB.Print()
-            
-          GaussExp.fitTo(data_ds,RooFit.Range('DalitzRegion'))
-          GaussPow.fitTo(data_ds,RooFit.Range('DalitzRegion'))
-          SechExp.fitTo(data_ds,RooFit.Range('DalitzRegion'))
-          SechPow.fitTo(data_ds,RooFit.Range('DalitzRegion'))
-          #GaussBern3.fitTo(data_ds,RooFit.Range('DalitzRegion'))
-          GaussBern4.fitTo(data_ds,RooFit.Range('DalitzRegion'))
-          #GaussBern5.fitTo(data_ds,RooFit.Range('DalitzRegion'))
-          #GaussBern4.fitTo(data_ds,RooFit.Range('DalitzRegion'), RooFit.Strategy(1))
-          #GaussBern5.fitTo(data_ds,RooFit.Range('DalitzRegion'), RooFit.Strategy(1))
-          #GaussBern6.fitTo(data_ds,RooFit.Range('DalitzRegion'), RooFit.Strategy(1))
-          #GaussBern6.fitTo(data_ds,RooFit.Range('DalitzRegion'))
-          #SechBern3.fitTo(data_ds,RooFit.Range('DalitzRegion'))
-          #SechBern4.fitTo(data_ds,RooFit.Range('DalitzRegion'))
-          #SechBern5.fitTo(data_ds,RooFit.Range('DalitzRegion'))
+                        
+          #GaussExp.fitTo(data_ds,RooFit.Range('FullRegion'))
+          #SechExp.fitTo(data_ds,RooFit.Range('FullRegion'))
+          #GaussBern3.fitTo(data_ds,RooFit.Range('FullRegion'))
+          #GaussBern4.fitTo(data_ds,RooFit.Range('FullRegion'))
+          #GaussBern5.fitTo(data_ds,RooFit.Range('FullRegion'))
+          #GaussBern6.fitTo(data_ds,RooFit.Range('FullRegion'))
+          Exp.fitTo(data_ds,RooFit.Range('DalitzRegion'))
+          Pow.fitTo(data_ds,RooFit.Range('DalitzRegion'))
+          Bern2.fitTo(data_ds,RooFit.Range('DalitzRegion'))
+          Bern3.fitTo(data_ds,RooFit.Range('DalitzRegion'))
+          Bern4.fitTo(data_ds,RooFit.Range('DalitzRegion'))
+          Bern5.fitTo(data_ds,RooFit.Range('DalitzRegion'))
+          Bern6.fitTo(data_ds,RooFit.Range('DalitzRegion'))
+
+          #GaussPow.fitTo(data_ds,RooFit.Range('FullRegion'))
+          #SechPow.fitTo(data_ds,RooFit.Range('FullRegion'))
+
+
+          #SechBern3.fitTo(data_ds,RooFit.Range('FullRegion'))
+          #SechBern4.fitTo(data_ds,RooFit.Range('FullRegion'))
+          #SechBern5.fitTo(data_ds,RooFit.Range('FullRegion'))
           #gauss.fitTo(data_ds,RooFit.Range('DalitzRegion'))
-          #BetaFunc.fitTo(data_ds,RooFit.Range('DalitzRegion'))
-          #Kumaraswamy.fitTo(data_ds,RooFit.Range('DalitzRegion'))
-          #Bern5.fitTo(data_ds,RooFit.Range('DalitzRegion'))
-          #BB.fitTo(data_ds,RooFit.Range('DalitzRegion'))
-          GB.fitTo(data_ds,RooFit.Range('DalitzRegion'))
+          #BetaFunc.fitTo(data_ds,RooFit.Range('FullRegion'))
+          #Kumaraswamy.fitTo(data_ds,RooFit.Range('FullRegion'))
+          
+          #BB.fitTo(data_ds,RooFit.Range('FullRegion'))
+          #GB.fitTo(data_ds,RooFit.Range('FullRegion'))
 
           if debugPlots:
             leg  = TLegend(0.7,0.7,1.0,1.0)
@@ -308,61 +345,89 @@ def doInitialFits(subdir):
             leg.SetShadowColor(0)
             leg.SetBorderSize(1)
             leg.SetHeader('_'.join(['test','fits',year,lepton,'cat'+cat]))
-            testFrame = mzg.frame(90,190)
-            data_ds.plotOn(testFrame,RooFit.Binning(50))
-            GaussExp.plotOn(testFrame,RooFit.Name('GaussExp'))
-            GaussPow.plotOn(testFrame,RooFit.LineColor(kCyan),  RooFit.Name('GaussPow'))
-            SechExp.plotOn(testFrame,RooFit.LineColor(kRed),    RooFit.Name('SechExp'))
-            SechPow.plotOn(testFrame,RooFit.LineColor(kOrange), RooFit.Name('SechPow'))
-            #GaussBern3.plotOn(testFrame,RooFit.LineColor(kViolet))
-            GaussBern4.plotOn(testFrame,RooFit.LineColor(kPink), RooFit.Name('GaussBern4'))
-            #GaussBern5.plotOn(testFrame,RooFit.LineColor(kGray))
-            #GaussBern6.plotOn(testFrame,RooFit.LineColor(kGreen+2), RooFit.Name('GaussBern6'))
+            testFrame = mzg.frame(RooFit.Range('DalitzRegion'))
+            data_ds.plotOn(testFrame, RooFit.Binning(50))
+            #GaussExp.plotOn(testFrame,RooFit.Name('GaussExp'))
+            #SechExp.plotOn(testFrame,RooFit.LineColor(kRed),     RooFit.Name('SechExp'))
+            #GaussBern3.plotOn(testFrame,RooFit.LineColor(kGreen),  RooFit.Name('GaussBern3'))
+            #GaussBern4.plotOn(testFrame,RooFit.LineColor(kPink),   RooFit.Name('GaussBern4'))
+            #GaussBern5.plotOn(testFrame,RooFit.LineColor(kOrange), RooFit.Name('GaussBern5'))
+            #GaussBern6.plotOn(testFrame,RooFit.LineColor(kPink),   RooFit.Name('GaussBern6'))
+            Exp.plotOn(testFrame,RooFit.LineColor(colors['exp']), RooFit.Name('Exp'))
+            Exp.plotOn(testFrame,RooFit.LineColor(colors['pow']), RooFit.Name('Pow'))
+            Bern2.plotOn(testFrame,RooFit.LineColor(colors['bern2']), RooFit.Name('Bern2'))
+            Bern3.plotOn(testFrame,RooFit.LineColor(colors['bern3']), RooFit.Name('Bern3'))
+            Bern4.plotOn(testFrame,RooFit.LineColor(colors['bern4']), RooFit.Name('Bern4'))
+            Bern5.plotOn(testFrame,RooFit.LineColor(colors['bern5']), RooFit.Name('Bern5'))
+            Bern6.plotOn(testFrame,RooFit.LineColor(colors['bern6']), RooFit.Name('Bern6'))
+            
+            #GaussPow.plotOn(testFrame,RooFit.LineColor(kCyan),  RooFit.Name('GaussPow'))
+            #SechPow.plotOn(testFrame,RooFit.LineColor(kOrange),  RooFit.Name('SechPow'))
             #SechBern3.plotOn(testFrame,RooFit.LineColor(kMagenta))
             #SechBern4.plotOn(testFrame,RooFit.LineColor(kBlack))
             #SechBern5.plotOn(testFrame,RooFit.LineColor(kGreen))
             #gauss.plotOn(testFrame,RooFit.LineColor(kBlue), RooFit.Name('Gauss'))
             #BetaFunc.plotOn(testFrame,RooFit.LineColor(kBlack), RooFit.Name('Beta'))
             #Kumaraswamy.plotOn(testFrame,RooFit.LineColor(kCyan), RooFit.Name('Kumaraswamy'))
-            #Bern5.plotOn(testFrame,RooFit.LineColor(kRed), RooFit.Name('Bern5'))
+            
             #BB.plotOn(testFrame,RooFit.LineColor(kViolet), RooFit.Name('Beta+Bern4'))
-            GB.plotOn(testFrame,RooFit.LineColor(kGreen), RooFit.Name('GaussBern3'))
+            #GB.plotOn(testFrame,RooFit.LineColor(kGreen), RooFit.Name('GaussBern3'))
             testFrame.Draw()
+            testFrame.SetTitle(";m_{H} (GeV);Events/2 GeV")
+            leg.AddEntry(testFrame.findObject('Exp'),'Exp','l')
+            leg.AddEntry(testFrame.findObject('Pow'),'Pow','l')
+            leg.AddEntry(testFrame.findObject('Bern2'),'Bern2','l')
+            leg.AddEntry(testFrame.findObject('Bern3'),'Bern3','l')
+            leg.AddEntry(testFrame.findObject('Bern4'),'Bern4','l')
+            leg.AddEntry(testFrame.findObject('Bern5'),'Bern5','l')
+            leg.AddEntry(testFrame.findObject('Bern6'),'Bern6','l')
+
             #leg.AddEntry(testFrame.findObject('Beta'),'Beta','l')
             #leg.AddEntry(testFrame.findObject('Kumaraswamy'),'Kumaraswamy','l')
-            ##leg.AddEntry(testFrame.findObject('Bern5'),'Bern5','l')
             #leg.AddEntry(testFrame.findObject('Beta+Bern4'),'Beta+Bern4','l')
-            leg.AddEntry(testFrame.findObject('GaussExp'),'GaussExp','l')
-            leg.AddEntry(testFrame.findObject('GaussPow'),'GaussPow','l')
-            leg.AddEntry(testFrame.findObject('SechExp'), 'SechExp', 'l')
-            leg.AddEntry(testFrame.findObject('SechPow'), 'SechPow', 'l')
-            leg.AddEntry(testFrame.findObject('GaussBern3'),'GaussBern3','l')
-            leg.AddEntry(testFrame.findObject('GaussBern4'),'GaussBern4','l')
+            
+            #leg.AddEntry(testFrame.findObject('GaussPow'),'GaussPow','l')
+            #leg.AddEntry(testFrame.findObject('SechPow'), 'SechPow', 'l')
+
+            #leg.AddEntry(testFrame.findObject('GaussExp'),'GaussExp','l')
+            #leg.AddEntry(testFrame.findObject('SechExp'), 'SechExp', 'l')
+            #leg.AddEntry(testFrame.findObject('GaussBern3'),'GaussBern3','l')
+            #leg.AddEntry(testFrame.findObject('GaussBern4'),'GaussBern4','l')
+            #leg.AddEntry(testFrame.findObject('GaussBern5'),'GaussBern5','l')
             #leg.AddEntry(testFrame.findObject('GaussBern6'),'GaussBern6','l')
             leg.Draw()
             c.Print(plotBase+'_'.join(['fits',year,lepton,'cat'+cat])+'.png')
  
 
           #raw_input()
-          getattr(ws,'import')(GaussExp)
-          getattr(ws,'import')(GB)
-          getattr(ws,'import')(GaussPow)
-          getattr(ws,'import')(SechExp)
-          getattr(ws,'import')(SechPow)
+          #getattr(ws,'import')(GaussExp)
+          #getattr(ws,'import')(SechExp)
+
+          getattr(ws,'import')(Exp)
+          getattr(ws,'import')(Pow)
+          getattr(ws,'import')(Bern2)
+          getattr(ws,'import')(Bern3)
+          getattr(ws,'import')(Bern4)
+          getattr(ws,'import')(Bern5)
+          getattr(ws,'import')(Bern6)
           #getattr(ws,'import')(GaussBern3)
-          getattr(ws,'import')(GaussBern4)
+          #getattr(ws,'import')(GaussBern4)
           #getattr(ws,'import')(GaussBern5)
           #getattr(ws,'import')(GaussBern6)
+
           #getattr(ws,'import')(SechBern3)
           #getattr(ws,'import')(SechBern4)
           #getattr(ws,'import')(SechBern5)
+          #getattr(ws,'import')(GB)
+          #getattr(ws,'import')(GaussPow)
+          #getattr(ws,'import')(SechPow)
 
         else:
           print cat
           
 
         ws.commitTransaction()
-
+        
   u.createDir(subdir)
   ws.writeToFile(subdir+'/testRooFitOut_Dalitz.root')
 
@@ -381,5 +446,23 @@ if __name__=="__main__":
     
   s = sys.argv[1]
   print s
+  cf.set("fits","ver", s)
+  cf.set("colors","bern2",kCyan+1)
+  cf.set("colors","bern3",kOrange)
+  cf.set("colors","bern4",kGreen+1)
+  cf.set("colors","bern5",kBlue+1)
+  cf.set("colors","bern6",kRed+1)
+
+  cf.set("colors","gaussbern3",kSpring-1)
+  cf.set("colors","gaussbern4",kGreen-1)
+  cf.set("colors","gaussbern5",kBlue-1)
+  cf.set("colors","gaussbern6",kRed-1)
+
+  cf.set("colors","gaussexp",kGray)
+  cf.set("colors","gausspow",kGray+1)
+
+  with open(r'config.cfg', 'wb') as configfile:
+    cf.write(configfile)
+
   doInitialFits(s)
   print "done"
