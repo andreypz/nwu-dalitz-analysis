@@ -1,6 +1,11 @@
 The log of changes:
 ==================
 
+2014-Feb-08
+  * Complete bias study scripts and improves fits-and-limits
+  * BatchMaster is modified in order to run bias studies
+  * Condor scripts for bias study runs at NU tier3
+
 2014-Jan-19
   * Diverged zgamma (mumugamma) and egamma (e-dalitz) analyses.
   * Improved fitting and limits calculation scripts

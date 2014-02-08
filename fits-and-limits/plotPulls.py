@@ -10,7 +10,8 @@ s = cf.get("fits","ver")
 
 gROOT.ProcessLine(".L ~/tdrstyle.C")
 setTDRStyle()
-plotBase = '/uscms_data/d2/andreypz/html/zgamma/dalitz/fits-'+s+'/toyFits/'
+#plotBase = '/uscms_data/d2/andreypz/html/zgamma/dalitz/fits-'+s+'/toyFits/'
+plotBase = '/tthome/andrey/html/zgamma/'
 
 
 def loopThruPulls():
@@ -33,8 +34,8 @@ def makePullPlots(year='2012', lepton='mu', genFunc='Exp', cat='0', mass='125'):
 
   #get the toy file and tree
 
-  toyFileName = '../biasToys-Bern456-big/biasToys_'+genFunc+'_m'+mass+'.root'
-  #toyFileName = '../biasToys-Bern23456/biasToys_'+genFunc+'_m'+mass+'.root'
+  #toyFileName = '../biasToys-Bern456-big/biasToys_'+genFunc+'_m'+mass+'.root'
+  toyFileName = '../biasToys-Bern23456/toys_'+genFunc+'_m'+mass+'.root'
   print toyFileName
   toyFile = TFile(toyFileName)
   toyTree = toyFile.Get('toys')
@@ -52,7 +53,7 @@ def makePullPlots(year='2012', lepton='mu', genFunc='Exp', cat='0', mass='125'):
 
   #turnOnList = ['Sech','Gauss']
   turnOnList = ['']
-  tailList = ['Bern4','Bern5','Bern6']
+  tailList = ['Bern2','Bern3','Bern4','Bern5','Bern6']
   colors ={}
   for f,col in cf.items("colors"): colors[f] = int(col)
 

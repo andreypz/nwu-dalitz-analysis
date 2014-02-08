@@ -1,8 +1,19 @@
 #!/bin/bash
 
-source /uscmst1/prod/sw/cms/bashrc prod
-# this is needed just to set-up root:
-cd /uscmst1/prod/sw/cmssw/slc5_amd64_gcc472/cms/cmssw/CMSSW_6_2_0
+echo 'condor option=' ${5}
+
+if [ ${5}=="nwu" ]
+then
+  echo "NWU"
+  export OSG_APP=/software/tier3/osg
+  export SCRAM_ARCH=slc6_amd64_gcc462
+  source /software/tier3/osg/cmsset_default.sh
+  cd /software/tier3/osg/slc6_amd64_gcc462/cms/cmssw/CMSSW_6_0_1
+else
+  source /uscmst1/prod/sw/cms/bashrc prod
+  # this is needed just to set-up root:
+  cd /uscmst1/prod/sw/cmssw/slc5_amd64_gcc472/cms/cmssw/CMSSW_6_2_0
+fi
 eval `scramv1 runtime -sh`
 cd -
 

@@ -10,8 +10,8 @@ verbose = 0
 from ROOT import *
 from toyStructs import makeToyStucts
 gSystem.SetIncludePath( "-I$ROOFITSYS/include/" );
-gROOT.ProcessLine('.x RooStepBernstein.cxx+')
-gROOT.ProcessLine('.x RooGaussStepBernstein.cxx+')
+#gROOT.ProcessLine('.x RooStepBernstein.cxx+')
+#gROOT.ProcessLine('.x RooGaussStepBernstein.cxx+')
 
 gROOT.SetBatch()
 
@@ -36,7 +36,7 @@ else:
   fileBase = options.ver
   plotBase = options.ver
 
-testFuncs = ['Bern4','Bern5','Bern6']
+testFuncs = ['Bern2','Bern3','Bern4','Bern5','Bern6']
 
 def doBiasStudy(year = '2012', lepton = 'mu', cat = '0', genFunc = 'Exp', mass = '125', trials = 5, job = 0, plotEvery = 50):
   #get all the starting objects
@@ -96,6 +96,7 @@ def doBiasStudy(year = '2012', lepton = 'mu', cat = '0', genFunc = 'Exp', mass =
   print  testFuncs
 
   for func in testFuncs:
+    print 'Doing func =', func
     fitName = '_'.join([func,year,lepton,'cat'+cat])
     if func==genFunc:
       testPdfs.append(genFit)
@@ -150,7 +151,15 @@ def doBiasStudy(year = '2012', lepton = 'mu', cat = '0', genFunc = 'Exp', mass =
   for func in testFuncs:
     print func
     
-    if func=='Bern4':
+    if func=='Bern2':
+      from ROOT import BERN2
+      Bern2Struct = BERN2()
+      tree.Branch('Bern2',Bern2Struct,'yieldBkg/D:yieldBkgErr:yieldSig:yieldSigErr:paramP1:paramP1Err:paramP2:paramP2Err:edm:minNll:statusAll/I:statusMIGRAD:statusHESSE:covQual:numInvalidNLL')
+    elif func=='Bern3':
+      from ROOT import BERN3
+      Bern3Struct = BERN3()
+      tree.Branch('Bern3',Bern3Struct,'yieldBkg/D:yieldBkgErr:yieldSig:yieldSigErr:paramP1:paramP1Err:paramP2:paramP2Err:paramP3:paramP3Err:edm:minNll:statusAll/I:statusMIGRAD:statusHESSE:covQual:numInvalidNLL')
+    elif func=='Bern4':
       from ROOT import BERN4
       Bern4Struct = BERN4()
       tree.Branch('Bern4',Bern4Struct,'yieldBkg/D:yieldBkgErr:yieldSig:yieldSigErr:paramP1:paramP1Err:paramP2:paramP2Err:paramP3:paramP3Err:paramP4:paramP4Err:edm:minNll:statusAll/I:statusMIGRAD:statusHESSE:covQual:numInvalidNLL')
@@ -177,13 +186,13 @@ def doBiasStudy(year = '2012', lepton = 'mu', cat = '0', genFunc = 'Exp', mass =
       tree.Branch('GaussBern5',GaussBern5Struct,'yieldBkg/D:yieldBkgErr:yieldSig:yieldSigErr:paramSigma:paramSigmaErr:paramStep:paramStepErr:paramP1:paramP1Err:paramP2:paramP2Err:paramP3:paramP3Err:paramP4:paramP4Err:paramP5:paramP5Err:edm:minNll:statusAll/I:statusMIGRAD:statusHESSE:covQual:numInvalidNLL')
     elif func=='GaussBern6':
       # for now just use the same as Bern5, fix it later
-      from ROOT import GAUSSBERN5
-      GaussBern6Struct = GAUSSBERN5()
-      tree.Branch('GaussBern6',GaussBern6Struct,'yieldBkg/D:yieldBkgErr:yieldSig:yieldSigErr:paramSigma:paramSigmaErr:paramStep:paramStepErr:paramP1:paramP1Err:paramP2:paramP2Err:paramP3:paramP3Err:paramP4:paramP4Err:paramP5:paramP5Err:edm:minNll:statusAll/I:statusMIGRAD:statusHESSE:covQual:numInvalidNLL')
+      from ROOT import GAUSSBERN6
+      GaussBern6Struct = GAUSSBERN6()
+      tree.Branch('GaussBern6',GaussBern6Struct,'yieldBkg/D:yieldBkgErr:yieldSig:yieldSigErr:paramSigma:paramSigmaErr:paramStep:paramStepErr:paramP1:paramP1Err:paramP2:paramP2Err:paramP3:paramP3Err:paramP4:paramP4Err:paramP5:paramP5Err:paramP6:paramP6Err:edm:minNll:statusAll/I:statusMIGRAD:statusHESSE:covQual:numInvalidNLL')
     else:
       print "No struct exists for ", func
 
-  structDict = dict(zip(testFuncs,[Bern4Struct,Bern5Struct,Bern6Struct]))
+  structDict = dict(zip(testFuncs,[Bern2Struct,Bern3Struct,Bern4Struct,Bern5Struct,Bern6Struct]))
   #structDict = dict(zip(testFuncs,[GaussBern4Struct,GaussBern5Struct,GaussBern6Struct]))
   print structDict
   #print "  RAW INPUT HERE "
@@ -253,18 +262,14 @@ def doBiasStudy(year = '2012', lepton = 'mu', cat = '0', genFunc = 'Exp', mass =
       structDict[func].yieldBkgErr = testBkgNormsDict[func].getError()
       structDict[func].yieldSig    = testSigNormsDict[func].getVal()
       structDict[func].yieldSigErr = testSigNormsDict[func].getError()
-      if func in ['Bern3','Bern4','Bern5','Bern6','GaussBern3','GaussBern4','GaussBern5','GaussBern6']:
+      if func in ['Bern2','Bern3','Bern4','Bern5','Bern6','GaussBern3','GaussBern4','GaussBern5','GaussBern6']:
         structDict[func].paramP1       = testModelsDict[func].getParameters(toyData)['p1'+suffix].getVal()
         structDict[func].paramP1Err    = testModelsDict[func].getParameters(toyData)['p1'+suffix].getError()
         structDict[func].paramP2       = testModelsDict[func].getParameters(toyData)['p2'+suffix].getVal()
         structDict[func].paramP2Err    = testModelsDict[func].getParameters(toyData)['p2'+suffix].getError()
+      if func in ['Bern3','Bern4','Bern5','Bern6','GaussBern3','GaussBern4','GaussBern5','GaussBern6']:
         structDict[func].paramP3       = testModelsDict[func].getParameters(toyData)['p3'+suffix].getVal()
         structDict[func].paramP3Err    = testModelsDict[func].getParameters(toyData)['p3'+suffix].getError()
-      if func in ['GaussBern3','GaussBern4','GaussBern5','GaussBern6']:
-          structDict[func].paramSigma    = testModelsDict[func].getParameters(toyData)['sigma'+suffix].getVal()
-          structDict[func].paramSigmaErr = testModelsDict[func].getParameters(toyData)['sigma'+suffix].getError()
-          structDict[func].paramStep     = testModelsDict[func].getParameters(toyData)['step'+suffix].getVal()
-          structDict[func].paramStepErr  = testModelsDict[func].getParameters(toyData)['step'+suffix].getError()
       if func in ['Bern4','Bern5','Bern6','GaussBern4','GaussBern5','GaussBern6']:
         structDict[func].paramP4    = testModelsDict[func].getParameters(toyData)['p4'+suffix].getVal()
         structDict[func].paramP4Err = testModelsDict[func].getParameters(toyData)['p4'+suffix].getError()
@@ -272,9 +277,14 @@ def doBiasStudy(year = '2012', lepton = 'mu', cat = '0', genFunc = 'Exp', mass =
         structDict[func].paramP5    = testModelsDict[func].getParameters(toyData)['p5'+suffix].getVal()
         structDict[func].paramP5Err = testModelsDict[func].getParameters(toyData)['p5'+suffix].getError()
       if func in ['Bern6','GaussBern6']:
-        print "do nothing for now"
-        #structDict[func].paramP6    = testModelsDict[func].getParameters(toyData)['p6'+suffix].getVal()
-        #structDict[func].paramP6Err = testModelsDict[func].getParameters(toyData)['p6'+suffix].getError()
+        #print "do nothing for now"
+        structDict[func].paramP6    = testModelsDict[func].getParameters(toyData)['p6'+suffix].getVal()
+        structDict[func].paramP6Err = testModelsDict[func].getParameters(toyData)['p6'+suffix].getError()
+      if func in ['GaussBern3','GaussBern4','GaussBern5','GaussBern6']:
+          structDict[func].paramSigma    = testModelsDict[func].getParameters(toyData)['sigma'+suffix].getVal()
+          structDict[func].paramSigmaErr = testModelsDict[func].getParameters(toyData)['sigma'+suffix].getError()
+          structDict[func].paramStep     = testModelsDict[func].getParameters(toyData)['step'+suffix].getVal()
+          structDict[func].paramStepErr  = testModelsDict[func].getParameters(toyData)['step'+suffix].getError()
 
 
       structDict[func].statusAll     = statusAll
@@ -328,4 +338,5 @@ if __name__=="__main__":
   mass = str(options.mass)
   
   for genFunc in ['Exp','Pow']:
+    print 'Starting'
     doBiasStudy(trials = trials, genFunc=genFunc, job=job, mass=mass)
