@@ -2,7 +2,7 @@
 
 import BatchMaster as b
 import sys
-cfg = b.JobConfig()
+cfg = b.JobConfig
 
 from optparse import OptionParser
 parser = OptionParser(usage="usage: %prog [options -e], --data, --bkg, --sig], -p 2011] version")
@@ -30,7 +30,6 @@ if len(args) < 1:
 ''' Specify parameters '''
 dCache      = '/pnfs/cms/WAX/11/store/user' 
 EOS         = '/eos/uscms/store/user'
-#outputPath  = dCache+'/andreypz/batch_output/zgamma/8TeV'
 outputPath  = EOS+'/andreypz/batch_output/zgamma/8TeV'
 executable  = 'batchJob.sh'
 selection = "mugamma"
@@ -82,10 +81,10 @@ if period =="2012":
     
     if selection == 'mumu':
         data.extend([
-            cfg('DoubleMu_Run2012A',  EOS+'/bpollack/V09_04_8TeV/DoubleMu/Run2012A',  5, 'DATA '+selection+' 2012'),
-            cfg('DoubleMu_Run2012B',  EOS+'/bpollack/V09_04_8TeV/DoubleMu/Run2012B',  8, 'DATA '+selection+' 2012'),
-            cfg('DoubleMu_Run2012C',  EOS+'/bpollack/V09_04_8TeV/DoubleMu/Run2012C', 10, 'DATA '+selection+' 2012'),
-            cfg('DoubleMu_Run2012D',  EOS+'/bpollack/V09_04_8TeV/DoubleMu/Run2012D', 10, 'DATA '+selection+' 2012'),
+            cfg('DoubleMu_Run2012A',  EOS+'/bpollack/V09_05_8TeV/DoubleMu/Run2012A',  5, 'DATA '+selection+' 2012'),
+            cfg('DoubleMu_Run2012B',  EOS+'/bpollack/V09_05_8TeV/DoubleMu/Run2012B',  8, 'DATA '+selection+' 2012'),
+            cfg('DoubleMu_Run2012C',  EOS+'/bpollack/V09_05_8TeV/DoubleMu/Run2012C', 10, 'DATA '+selection+' 2012'),
+            cfg('DoubleMu_Run2012D',  EOS+'/bpollack/V09_05_8TeV/DoubleMu/Run2012D', 10, 'DATA '+selection+' 2012'),
             ])
 
     if selection == 'single-mu':
@@ -160,8 +159,9 @@ if period =="2012":
     if selection in ["mumu","mugamma","single-mu"]:
         signal.extend([
             
+            cfg('vh-mad125', EOS+'/andreypz/nuTuples_v9.4_8TeV/VHiggsToMuMuGamma_MH125',1, 'dalitz '+selection+' '+period+gen),
             #cfg('dal-MCFM125',dCache+'/andreypz/nuTuples_v9.4_8TeV/MCFM_dalitz_v2',    1, 'dalitz '+selection+' '+period),
-            """
+            
             cfg('dal-mad120', dCache+'/andreypz/nuTuples_v9.4_8TeV/HiggsToMuMuGamma_MH120',1, 'dalitz '+selection+' '+period+gen),
             cfg('dal-mad125', dCache+'/andreypz/nuTuples_v9.4_8TeV/HiggsToMuMuGamma_MH125',1, 'dalitz '+selection+' '+period+gen),
             cfg('dal-mad130', dCache+'/andreypz/nuTuples_v9.4_8TeV/HiggsToMuMuGamma_MH130',1, 'dalitz '+selection+' '+period+gen),
@@ -177,8 +177,7 @@ if period =="2012":
             cfg('vbf-mad140', dCache+'/andreypz/nuTuples_v9.4_8TeV/vbfHiggsToMuMuGamma_MH140',1, 'dalitz '+selection+' '+period+gen),
             cfg('vbf-mad145', dCache+'/andreypz/nuTuples_v9.4_8TeV/vbfHiggsToMuMuGamma_MH145',1, 'dalitz '+selection+' '+period+gen),
             cfg('vbf-mad150', dCache+'/andreypz/nuTuples_v9.4_8TeV/vbfHiggsToMuMuGamma_MH150',1, 'dalitz '+selection+' '+period+gen),
-            """
-            cfg('vh-mad125', dCache+'/andreypz/nuTuples_v9.4_8TeV/VHiggsToMuMuGamma_MH125',1, 'dalitz '+selection+' '+period+gen),
+            
 
             ])
     elif selection=="elgamma":

@@ -26,7 +26,7 @@ string  myTrigger = "";
 Float_t cut_l1pt  = 23;
 Float_t cut_l2pt  = 7, cut_l2pt_low = 4;
 const Float_t cut_iso_mu1 = 0.4, cut_iso_mu2=0;
-Float_t cut_gammapt = 40;
+Float_t cut_gammapt = 25;
 
 Float_t global_Mll = 0;
 
@@ -624,11 +624,10 @@ Bool_t zgamma::Process(Long64_t entry)
 
 
 
-  if (checkTrigger){
-    triggerSelector->SelectTrigger(myTrigger, triggerStatus, hltPrescale, isFound, triggerPass, prescale);
-    if (!triggerPass) return kTRUE;
-    //  else Abort("Event trigger should mu or el");
-  }
+  //if (checkTrigger){
+  //triggerSelector->SelectTrigger(myTrigger, triggerStatus, hltPrescale, isFound, triggerPass, prescale);
+  //if (!triggerPass) return kTRUE;
+  //}
 
   if (gamma.Pt() < cut_gammapt) return kTRUE;
 
@@ -693,18 +692,14 @@ Bool_t zgamma::Process(Long64_t entry)
   FillHistoCounts(4, eventWeight);
   CountEvents(4);
 
-  if (lPt1.DeltaR(gamma)<1.0 || lPt2.DeltaR(gamma)<1.0) return kTRUE;
-  if ( (Mll>2.9 && Mll<3.3) || (Mll>9.3 && Mll<9.7)) return kTRUE; //jpsi and upsilon removeal
+  if (Mll > 20) return kTRUE;
   
-  fout<<" nEvt = "<<nEvents[0]<<" : Run/lumi/event = "<<runNumber<<"/"<<lumiSection<<"/"<<eventNumber<<endl;
   
   FillHistosFull(5, eventWeight, l1, l2, lPt1, lPt2, gamma, "");
   FillHistoCounts(5, eventWeight);
   CountEvents(5);
   
-  
-  if (Mll > 20) return kTRUE;
-  if ((l1+l2).Pt() < 40) return kTRUE;
+  if (lPt1.DeltaR(gamma)<1.0 || lPt2.DeltaR(gamma)<1.0) return kTRUE;
     
   FillHistosFull(6, eventWeight, l1, l2, lPt1, lPt2, gamma, "");
   FillHistoCounts(6, eventWeight);
@@ -720,7 +715,7 @@ Bool_t zgamma::Process(Long64_t entry)
   MakeMuonPlots(muons[1], pvPosition);
   
 
-  //if ((l1+l2).Pt()+gamma.Pt() < 180  && (l1+l2).Pt()>45 && gamma.Pt()>45){
+
   if (Mll>2.9 && Mll<3.3){ //jpsi window
     FillHistosFull(12, eventWeight, l1, l2, lPt1, lPt2, gamma, "jpsi");
     FillHistoCounts(12, eventWeight);
@@ -740,14 +735,10 @@ Bool_t zgamma::Process(Long64_t entry)
   }
 
 
-  if (checkTrigger){
-    triggerSelector->SelectTrigger(myTrigger, triggerStatus, hltPrescale, isFound, triggerPass, prescale);
-    if (!triggerPass) return kTRUE;
-    //  else Abort("Event trigger should mu or el");
 
-  }
-
-  if (Mllg<122 || Mllg>128) return kTRUE;
+  //if ((l1+l2).Pt()/Mllg < 0.35 || gamma.Pt()/Mllg < 0.35)
+  if ((l1+l2).Pt() < 40 || gamma.Pt() < 40)
+    return kTRUE;
 
   FillHistosFull(7, eventWeight, l1, l2, lPt1, lPt2, gamma, "");
   FillHistoCounts(7, eventWeight);
@@ -766,14 +757,27 @@ Bool_t zgamma::Process(Long64_t entry)
 
 
 
-
-  if ((l1+l2).Pt()<40 || gamma.Pt()<40)
-    return kTRUE;
-
+  if ( (Mll>2.9 && Mll<3.3) || (Mll>9.3 && Mll<9.7)) return kTRUE; //jpsi and upsilon removeal
   FillHistosFull(8, eventWeight, l1, l2, lPt1, lPt2, gamma, "");
   FillHistoCounts(8, eventWeight);
   CountEvents(8);
   
+
+
+  if (checkTrigger){
+    triggerSelector->SelectTrigger(myTrigger, triggerStatus, hltPrescale, isFound, triggerPass, prescale);
+    if (!triggerPass) return kTRUE;
+    //  else Abort("Event trigger should mu or el");
+
+  }
+
+  FillHistosFull(9, eventWeight, l1, l2, lPt1, lPt2, gamma, "");
+  FillHistoCounts(9, eventWeight);
+  CountEvents(9);
+
+  fout<<runNumber<<" "<<eventNumber<<endl;
+  //fout<<" nEvt = "<<nEvents[0]<<" : Run/lumi/event = "<<runNumber<<"/"<<lumiSection<<"/"<<eventNumber<<endl;
+
 
   fit_m_llg   = Mllg;
   fit_m_ll    = Mll;
@@ -790,21 +794,9 @@ Bool_t zgamma::Process(Long64_t entry)
 
 
 
+
   if( (l1+l2).Pt()+gamma.Pt() > 95)
     {
-      FillHistosFull(9, eventWeight, l1, l2, lPt1, lPt2, gamma, "");
-      FillHistoCounts(9, eventWeight);
-      CountEvents(9);
-      
-      if (fabs(gamma.Eta())<1.444)
-        FillHistosFull(9, eventWeight, l1, l2, lPt1, lPt2, gamma, "EB");
-      else
-        FillHistosFull(9, eventWeight, l1, l2, lPt1, lPt2, gamma, "EE");
-      
-      if (Mll < 2)     
-        FillHistosFull(9, eventWeight, l1, l2, lPt1, lPt2, gamma, "Low-Mll");
-      
-      
     if (lPt2.Pt() > cut_l2pt){
       FillHistosFull(10, eventWeight, l1, l2, lPt1, lPt2, gamma, "");
       FillHistoCounts(10, eventWeight);
@@ -820,6 +812,7 @@ Bool_t zgamma::Process(Long64_t entry)
 
   }
 
+  if (Mllg<122 || Mllg>128) return kTRUE;
 
   if(!isRealData && makeGen){
     hists->fill1DHist(genMll,  "gen_Mll_3",";gen_Mll",50,0,15, 1,"eff");
@@ -888,6 +881,7 @@ void zgamma::SlaveTerminate() {}
 void zgamma::Terminate()
 {
 
+  /*
   cout<<"| CUT DESCRIPTION            |\t"<< "\t|"<<endl;
   cout<<"| 0: initial                 |\t"<< nEvents[0]  <<"\t|"<<float(nEvents[0])/nEvents[0]<<"\t|"<<endl;
   cout<<"| 1: n/a                     |\t"<< nEvents[1]  <<"\t|"<<float(nEvents[1])/nEvents[0]<<"\t|"<<endl;
@@ -902,8 +896,8 @@ void zgamma::Terminate()
   cout<<"| 10: n/a         |\t"<< nEvents[10] <<"\t|"<<float(nEvents[10])/nEvents[7]<<"\t|"<<endl;
   cout<<"| 11: n/a             |\t"<< nEvents[11] <<"\t|"<<float(nEvents[11])/nEvents[7]<<"\t|"<<endl;
   cout<<"| 12:             |\t"<< nEvents[12] <<"\t|"<<float(nEvents[12])/nEvents[7]<<"\t|"<<endl;
-
-  /*
+  */
+  
   cout<<"| CUT DESCRIPTION             |\t"<< "\t|"<<endl;
   cout<<"| 0: initial          |\t"<< nEvents[0]  <<"\t|"<<float(nEvents[0])/nEvents[0]<<"\t|"<<endl;
   cout<<"| 1: gen matching     |\t"<< nEvents[1]  <<"\t|"<<float(nEvents[1])/nEvents[0]<<"\t|"<<endl;
@@ -911,14 +905,14 @@ void zgamma::Terminate()
   cout<<"| 3: reco gamma iso   |\t"<< nEvents[3]  <<"\t|"<<float(nEvents[3])/nEvents[2]<<"\t|"<<endl;
   cout<<"| 4: reco lep         |\t"<< nEvents[4]  <<"\t|"<<float(nEvents[4])/nEvents[3]<<"\t|"<<endl;
   cout<<"| 5: mll <20          |\t"<< nEvents[5]  <<"\t|"<<float(nEvents[5])/nEvents[4]<<"\t|"<<endl;
-  cout<<"| 6: dR, no jpsi      |\t"<< nEvents[6]  <<"\t|"<<float(nEvents[6])/nEvents[5]<<"\t|"<<endl;
-  cout<<"| 7: trigger          |\t"<< nEvents[7]  <<"\t|"<<float(nEvents[7])/nEvents[6]<<"\t|"<<endl;
-  cout<<"| 8: ptll>40, ptg>40  |\t"<< nEvents[8]  <<"\t|"<<float(nEvents[8])/nEvents[7]<<"\t|"<<endl;
-  cout<<"| 9:  ptll+ptg>95     |\t"<< nEvents[9]  <<"\t|"<<float(nEvents[9])/nEvents[7]<<"\t|"<<endl;
+  cout<<"| 6: dR(l,g)>1        |\t"<< nEvents[6]  <<"\t|"<<float(nEvents[6])/nEvents[5]<<"\t|"<<endl;
+  cout<<"| 7: ptll>40, ptg>40  |\t"<< nEvents[7]  <<"\t|"<<float(nEvents[7])/nEvents[6]<<"\t|"<<endl;
+  cout<<"| 8: no jpsi/Ups      |\t"<< nEvents[8]  <<"\t|"<<float(nEvents[8])/nEvents[7]<<"\t|"<<endl;
+  cout<<"| 9:  trigger         |\t"<< nEvents[9]  <<"\t|"<<float(nEvents[9])/nEvents[7]<<"\t|"<<endl;
   cout<<"| 10: ptl2>7          |\t"<< nEvents[10] <<"\t|"<<float(nEvents[10])/nEvents[7]<<"\t|"<<endl;
   cout<<"| 11: mH              |\t"<< nEvents[11] <<"\t|"<<float(nEvents[11])/nEvents[7]<<"\t|"<<endl;
   cout<<"| 12: jpsi            |\t"<< nEvents[12] <<"\t|"<<float(nEvents[12])/nEvents[7]<<"\t|"<<endl;
-  */
+  
   cout<<"dal = "<<dal<<"   nodal = "<<nodal<<"   tot="<<dal+nodal<<endl;
 
   /*
@@ -1084,28 +1078,22 @@ bool zgamma::PassMuonIdAndIso(TCMuon *lep, muIdAndIsoCuts cuts, TVector3 *pv)
   //Float_t muISO =  CalculateMuonIso(lep);
  
   if(1
+     && lep->IsPF() 
+     && ((lep->IsTRK() && lep->NumberOfMatches() > 0) || lep->IsGLB())
+     && fabs(lep->Dxy(pv))     < cuts.dxy
+     && fabs(lep->Dz(pv))      < cuts.dz
+     )
+    pass = true;
+
+  /*
+  if(1
      && lep->IsPF() && lep->IsTRK()
-     //&& lep->PtError()/lep->Pt() < cuts.ptErrorOverPt
-     //&& lep->NumberOfValidMuonHits()    > cuts.NumberOfValidMuonHits
-     //&& lep->NumberOfValidTrackerHits() > cuts.NumberOfValidTrackerHits
-     //&& lep->NumberOfValidPixelHits()   > cuts.NumberOfValidPixelHits
-     //&& lep->NumberOfMatchedStations() > cuts.NumberOfMatchedStations
-     //&& lep->NumberOfMatches() > cuts.NumberOfMatches
-     //&& lep->NormalizedChi2()  < cuts.NormalizedChi2
-     //&& lep->IsGood()
-     //&& lep->TrackLayersWithMeasurement() > cuts.TrackLayersWithMeasurement
-     //&& lep->PixelLayersWithMeasurement() > cuts.PixelLayersWithMeasurement
      && lep->NormalizedChi2_tracker()  < cuts.NormalizedChi2_tracker
      && fabs(lep->Dxy(pv))     < cuts.dxy
      && fabs(lep->Dz(pv))      < cuts.dz
-     //&& muISO                  < cuts.pfIso04
      )
     pass = true;
-  //cout<<"muon pass? "<<pass<<endl;
-
-  //pass = false;
-  //if (muISO < cuts.pfIso04)
-  //  pass = true;
+  */
 
   return pass;
 }
@@ -1252,9 +1240,12 @@ void zgamma::FillHistosFull(Int_t num, Double_t weight,
   hists->fill1DHist(diLep.Phi(), Form("diLep_phi_%s_cut%i",  d, num),";di-Lepton phi",   50, -TMath::Pi(),TMath::Pi(), weight, dir);
   hists->fill1DHist(diLepCM.E(), Form("diLep_Ecom_%s_cut%i", d, num),";E(ll) in CoM",    50, 0,200,  weight, dir);
 
+  hists->fill1DHist(diLep.Pt()/tri.M(),  Form("diLep_ptOverMllg_%s_cut%i",   d, num),
+                    ";di-Lepton p_{T}/M_{ll#gamma}",100, 0,1, weight, dir);
+  hists->fill1DHist(gamma.Pt()/tri.M(), Form("gamma_ptOverMllg_%s_cut%i",   d, num),
+                    ";Photon p_{T}/M_{ll#gamma}",  100, 0,1, weight, dir);
   hists->fill1DHist(gammaCM.E(),Form("gamma_Ecom_%s_cut%i", d, num),";E_{#gamma} in CoM",  50, 0,120,  weight, dir);
   hists->fill1DHist(gamma.E(),  Form("gamma_E_%s_cut%i",    d, num),";Photon Energy", 50, 0,200, weight, dir);
-  hists->fill1DHist(gamma.Pt(), Form("gamma_pt_%s_cut%i",   d, num),";Photon p_{T}",  50, 0,100, weight, dir);
   hists->fill1DHist(gamma.Eta(),Form("gamma_eta_%s_cut%i",  d, num),";Photon eta", 50, -3.5,3.5, weight, dir);
   hists->fill1DHist(gamma.Phi(),Form("gamma_phi_%s_cut%i",  d, num),";Photon phi", 50, -TMath::Pi(),TMath::Pi(), weight, dir);
   /*
@@ -1278,7 +1269,10 @@ void zgamma::FillHistosFull(Int_t num, Double_t weight,
   hists->fill2DHist(lPt1.Pt(), lPt2.Pt(), Form("h2D_Pt2_vs_Pt1_%s_cut%i", d, num),
                     ";Leading lepton p_{T};Trailing lepton p_{T}",  50, 0,100, 50,0,100, weight, dir);
   hists->fill2DHist(diLep.Pt(),gamma.Pt(),Form("h2D_diLep_vs_gamma_%s_cut%i",d, num),
-                    ";p_{T} of ll system; p_{T} of gamma",          50, 0,100, 50,0,100, weight, dir);
+                    ";q_{T}^{ll} (GeV); E_{T}^{#gamma} (GeV)",      50, 0,100, 50,0,100, weight, dir);
+  
+  hists->fill2DHist(diLep.Pt()/tri.M(),gamma.Pt()/tri.M(),Form("h2D_diLep_vs_gamma_ptOverMllg_%s_cut%i",d, num),
+                    ";q_{T}^{ll}/M_{ll#gamma}; E_{T}^{#gamma}/M_{ll#gamma}",  100, 0,1, 100,0,1, weight, dir);
 
   hists->fill2DHist(gammaCM.E(), gamma.Pt(),Form("h2D_gamma_Ecom_vs_Pt_%s_cut%i",  d, num),
                     ";E_{#gamma} in CoM; p_{T}(#gamma)", 50, 0,100, 50,0,100, weight, dir);
