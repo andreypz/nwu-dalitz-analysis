@@ -285,8 +285,8 @@ if __name__ == "__main__":
     print "Yields in bins that supposed to correspond to [122,128] window:\n",hc7, hc8, hc9 
 
 
-    m1 = 100.
-    m2 = 200.
+    m1 = 122.
+    m2 = 128.
     
     for r in ["0"]:
         etaCut = TCut("")

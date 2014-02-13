@@ -54,7 +54,7 @@
 //#include "../plugins/rochcor.h"
 #include "../plugins/ZGAngles.h"
 #include "../plugins/HistManager.h"
-
+#include "../plugins/PhosphorCorrectorFunctor.hh"
 // Header file for the classes stored in the TTree if any.
 #include <TClonesArray.h>
 #include <TVector3.h>
@@ -125,6 +125,8 @@ class zgamma : public TSelector {
   UInt_t totEvents;  
 
   ofstream fout;
+
+  auto_ptr<ammagz::PhosphorCorrectionFunctor> phoCorrector;
 
   TTree* _mvaTree;
   Float_t mva_SCPhiWidth, mva_SCEtaWidth, mva_SigmaIEtaIEta, mva_SigmaIPhiIPhi;
@@ -252,6 +254,8 @@ class zgamma : public TSelector {
  
    virtual void MuonDump(TCMuon mu, TVector3 *pv);
    virtual void PhotonDump(TCPhoton pho,  phIdAndIsoCuts c);
+
+   virtual void PhotonR9Corrector(TCPhoton& ph);
 
    TCGenParticle * GetPrimaryAncestor(TCGenParticle *p);
 

@@ -73,6 +73,7 @@ gROOT.LoadMacro("TCGenJet.cc+");
 gROOT.LoadMacro("TCGenParticle.cc+");
 gROOT.LoadMacro("TCPrimaryVtx.cc+");
 gROOT.LoadMacro("TCTriggerObject.cc+");
+gROOT.LoadMacro("PhosphorCorrectorFunctor.cc+");
 
 fChain = TChain("ntupleProducer/eventTree");
 

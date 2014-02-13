@@ -81,6 +81,8 @@ void zgamma::Begin(TTree * tree)
 
   hists = new HistManager(histoFile);
 
+  phoCorrector.reset(new ammagz::PhosphorCorrectionFunctor("../data/PHOSPHOR_NUMBERS_EXPFIT_ERRORS.txt", true));
+
   for (Int_t n1=0; n1<nC; n1++){
     nEvents[n1]=0;
     for (UInt_t n2=0; n2<ntrig; n2++)
@@ -531,17 +533,46 @@ Bool_t zgamma::Process(Long64_t entry)
       if (isRealData || !makeGen || (sample=="dalitz" && makeGen && gen_gamma.DeltaR(*thisPhoton) < 0.1) )
         photons0.push_back(*thisPhoton);
 
+
+      PhotonR9Corrector(*thisPhoton);
       if(PassPhotonIdAndIso(thisPhoton, phIdAndIsoCutsHZG, pvPosition)
          //&& (isRealData || !makeGen || (sample=="dalitz" && makeGen && gen_gamma.DeltaR(*thisPhoton) < 0.2) )
          )
-        photonsHZG.push_back(*thisPhoton);
+        {    
+          Float_t corrPhoPt = thisPhoton->Pt();
 
+          if (isRealData)
+            corrPhoPt = phoCorrector->GetCorrEtData(thisPhoton->R9(), 2012, thisPhoton->Pt(), thisPhoton->Eta());
+          else
+            {
+              TCGenParticle goodGenPhoton;
+              Float_t testDr = 9999;
+
+              for (int j = 0; j < genParticles->GetSize(); ++j) {
+                TCGenParticle* thisParticle = (TCGenParticle*) genParticles->At(j);
+                if (thisParticle->Mother() &&  thisParticle->GetStatus()==1
+                    && (thisParticle->Mother()->GetPDGId()==25 || thisParticle->Mother()->GetPDGId()==22)){
+                  
+                  if(thisPhoton->DeltaR(*thisParticle)<testDr){
+                    goodGenPhoton = *thisParticle;
+                    testDr = thisPhoton->DeltaR(*thisParticle);
+                  }
+                }
+              }
+              if (testDr < 0.2)
+                corrPhoPt = phoCorrector->GetCorrEtMC(thisPhoton->R9(), 2012, thisPhoton->Pt(), thisPhoton->Eta(), goodGenPhoton.E());
+            }
+          thisPhoton->SetPtEtaPhiM(corrPhoPt,thisPhoton->Eta(),thisPhoton->Phi(),0.0);
+          photonsHZG.push_back(*thisPhoton);
+        }
+      
       if(PassPhotonIdAndIso(thisPhoton, phIdAndIsoCutsTight, pvPosition)
          //&& (isRealData || !makeGen || (sample=="dalitz" && makeGen && gen_gamma.DeltaR(*thisPhoton) < 0.2) )
          )
         photonsTight.push_back(*thisPhoton);
     }
   }
+
 
   sort(photons0.begin(),     photons0.end(),     P4SortCondition);
   sort(photonsTight.begin(), photonsTight.end(), P4SortCondition);
@@ -909,8 +940,8 @@ void zgamma::Terminate()
   cout<<"| 7: ptll>40, ptg>40  |\t"<< nEvents[7]  <<"\t|"<<float(nEvents[7])/nEvents[6]<<"\t|"<<endl;
   cout<<"| 8: no jpsi/Ups      |\t"<< nEvents[8]  <<"\t|"<<float(nEvents[8])/nEvents[7]<<"\t|"<<endl;
   cout<<"| 9:  trigger         |\t"<< nEvents[9]  <<"\t|"<<float(nEvents[9])/nEvents[7]<<"\t|"<<endl;
-  cout<<"| 10: ptl2>7          |\t"<< nEvents[10] <<"\t|"<<float(nEvents[10])/nEvents[7]<<"\t|"<<endl;
-  cout<<"| 11: mH              |\t"<< nEvents[11] <<"\t|"<<float(nEvents[11])/nEvents[7]<<"\t|"<<endl;
+  cout<<"| 10: pTll+pTg>95     |\t"<< nEvents[10] <<"\t|"<<float(nEvents[10])/nEvents[7]<<"\t|"<<endl;
+  cout<<"| 11: 100<mH<150      |\t"<< nEvents[11] <<"\t|"<<float(nEvents[11])/nEvents[7]<<"\t|"<<endl;
   cout<<"| 12: jpsi            |\t"<< nEvents[12] <<"\t|"<<float(nEvents[12])/nEvents[7]<<"\t|"<<endl;
   
   cout<<"dal = "<<dal<<"   nodal = "<<nodal<<"   tot="<<dal+nodal<<endl;
@@ -1076,7 +1107,7 @@ bool zgamma::PassMuonIdAndIso(TCMuon *lep, muIdAndIsoCuts cuts, TVector3 *pv)
   bool pass = false;
 
   //Float_t muISO =  CalculateMuonIso(lep);
- 
+
   if(1
      && lep->IsPF() 
      && ((lep->IsTRK() && lep->NumberOfMatches() > 0) || lep->IsGLB())
@@ -1084,8 +1115,7 @@ bool zgamma::PassMuonIdAndIso(TCMuon *lep, muIdAndIsoCuts cuts, TVector3 *pv)
      && fabs(lep->Dz(pv))      < cuts.dz
      )
     pass = true;
-
-  /*
+  /*  
   if(1
      && lep->IsPF() && lep->IsTRK()
      && lep->NormalizedChi2_tracker()  < cuts.NormalizedChi2_tracker
@@ -1432,3 +1462,17 @@ void zgamma::PhotonDump(TCPhoton pho, phIdAndIsoCuts cuts)
   }
 
 }
+
+void zgamma::PhotonR9Corrector(TCPhoton& ph){
+  //old R9 correction
+  float R9Cor;
+  R9Cor = ph.R9();
+  
+  if (fabs(ph.SCEta()) < 1.479)
+    R9Cor = ph.R9()*1.0045 + 0.0010;
+  else
+    R9Cor = ph.R9()*1.0086 - 0.0007;
+    
+  ph.SetR9(R9Cor);
+}
+
