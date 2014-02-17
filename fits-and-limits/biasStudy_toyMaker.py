@@ -36,17 +36,21 @@ else:
   fileBase = options.ver
   plotBase = options.ver
 
-testFuncs = ['Bern2','Bern3','Bern4','Bern5','Bern6']
 
-def doBiasStudy(year = '2012', lepton = 'mu', cat = '0', genFunc = 'Exp', mass = '125', trials = 5, job = 0, plotEvery = 50):
+def doBiasStudy(year = '2012', lepton = 'mu', cat = '0', genFunc = 'Bern3', mass = '125', trials = 5, job = 0, plotEvery = 50):
   #get all the starting objects
   c = TCanvas("c","c",0,0,500,400)
   c.cd()
+  testFuncs = ['Bern2','Bern3','Bern4','Bern5']
 
   if not os.path.isdir(plotBase):
     os.makedirs(plotBase)
     print 'bias.py: making directory',plotBase
-  print 'DBG bias ', fileBase
+
+  if verbose:
+    print 'DBG bias ', fileBase
+    print '  RAW INPUT HERE:'
+    raw_input()
   
   rooWsFile = TFile(fileBase.replace('/','')+'-testRooFitOut_Dalitz.root','r')
   myWs = rooWsFile.Get('ws')
@@ -92,23 +96,23 @@ def doBiasStudy(year = '2012', lepton = 'mu', cat = '0', genFunc = 'Exp', mass =
   testSig_ext  = []
   testModels   = []
 
-  #testFuncs.append(genFunc)
-  print  testFuncs
+  testFuncs.append('gen')
 
-  for func in testFuncs:
-    print 'Doing func =', func
+  for n,func in enumerate(testFuncs):
+    print n, 'Doing func =', func
     fitName = '_'.join([func,year,lepton,'cat'+cat])
-    if func==genFunc:
+    if func=='gen':  # the last one appended to testFuncs
       testPdfs.append(genFit)
+      print 'Found it !', func
     else:
       testPdfs.append(myWs.pdf(fitName))
     if verbose:
       print fitName
       testPdfs[-1].Print()
       
-    testBkgNorms.append(RooRealVar(   'norm'+fitName,'norm'   +fitName,bkgInSigWin,0,3*bkgInSigWin))
-    testPdfs_ext.append(RooExtendPdf(  'ext'+fitName,'ext'    +fitName,testPdfs[-1],testBkgNorms[-1],sigRangeName))
-    testSigNorms.append(RooRealVar('normSig'+fitName,'normSig'+fitName,0,-30,30))
+    testBkgNorms.append(RooRealVar(   'norm'+fitName,'norm'   +fitName,bkgInSigWin,0,5*bkgInSigWin))
+    testPdfs_ext.append(RooExtendPdf(  'ext'+fitName,'ext'    +fitName,testPdfs[-1],testBkgNorms[-1], sigRangeName))
+    testSigNorms.append(RooRealVar('normSig'+fitName,'normSig'+fitName,0,-80,80))
     testSig_ext.append(RooExtendPdf('extSig'+fitName,'ext'    +fitName,sig,testSigNorms[-1]))
 
     #testFrame = mzg.frame()
@@ -117,7 +121,7 @@ def doBiasStudy(year = '2012', lepton = 'mu', cat = '0', genFunc = 'Exp', mass =
     ##testFrame.Draw()
     #c.SaveAs(s+'/pdfs.png')
     
-    if func==genFunc:
+    if func=='gen':
       testModels.append(testPdfs_ext[-1])
     else:
       testModels.append(RooAddPdf('model'+fitName,'model'+fitName,RooArgList(testSig_ext[-1],testPdfs_ext[-1])))
@@ -141,17 +145,23 @@ def doBiasStudy(year = '2012', lepton = 'mu', cat = '0', genFunc = 'Exp', mass =
   from ROOT import TOYDATA
   toyDataStruct = TOYDATA()
   tree.Branch('toyData', toyDataStruct, 'totalData/I:sigWindowData')
-  from ROOT import GEN
-  genStruct = GEN()
-  tree.Branch('gen',genStruct, 'yieldBkg/D:yieldBkgErr:yieldSig:yieldSigErr:edm:minNll:statusAll/I:statusMIGRAD:statusHESSE:covQual:numInvalidNLL')
-
   truthStruct = TRUTH()
   tree.Branch('truth',truthStruct, 'yieldBkg/D:yieldBkgErr:yieldSig:yieldSigErr')
 
-  for func in testFuncs:
-    print func
-    
-    if func=='Bern2':
+
+  from ROOT import GEN
+  for n,func in enumerate(testFuncs):
+    print n,func
+
+    if verbose:
+      print "RAW INPUT"
+      raw_input()
+
+
+    if func=='gen':
+      genStruct = GEN()
+      tree.Branch('gen',genStruct, 'yieldBkg/D:yieldBkgErr:yieldSig:yieldSigErr:edm:minNll:statusAll/I:statusMIGRAD:statusHESSE:covQual:numInvalidNLL')
+    elif func=='Bern2':
       from ROOT import BERN2
       Bern2Struct = BERN2()
       tree.Branch('Bern2',Bern2Struct,'yieldBkg/D:yieldBkgErr:yieldSig:yieldSigErr:paramP1:paramP1Err:paramP2:paramP2Err:edm:minNll:statusAll/I:statusMIGRAD:statusHESSE:covQual:numInvalidNLL')
@@ -192,7 +202,7 @@ def doBiasStudy(year = '2012', lepton = 'mu', cat = '0', genFunc = 'Exp', mass =
     else:
       print "No struct exists for ", func
 
-  structDict = dict(zip(testFuncs,[Bern2Struct,Bern3Struct,Bern4Struct,Bern5Struct,Bern6Struct]))
+  structDict = dict(zip(testFuncs,[Bern2Struct,Bern3Struct,Bern4Struct,Bern5Struct, genStruct]))
   #structDict = dict(zip(testFuncs,[GaussBern4Struct,GaussBern5Struct,GaussBern6Struct]))
   print structDict
   #print "  RAW INPUT HERE "
@@ -211,6 +221,7 @@ def doBiasStudy(year = '2012', lepton = 'mu', cat = '0', genFunc = 'Exp', mass =
 
     genBkgYield = r.Poisson(data.numEntries())
     toyData = genFit.generate(RooArgSet(mzg),genBkgYield)
+    #toyData = genFit.generate(RooArgSet(mzg), RooFit.Extended(kTRUE))
     bkg_est = toyData.sumEntries('1',sigRangeName)
     if verbose: print 'bkg_est',bkg_est
     #print "RAW INPUT"
@@ -253,15 +264,13 @@ def doBiasStudy(year = '2012', lepton = 'mu', cat = '0', genFunc = 'Exp', mass =
         print 'yieldSig', testSigNormsDict[func].getVal()
         testModelsDict[func].getParameters(toyData).Print('v')
 
-        ##print "RAW INPUT"
-        #raw_input()
-
       suffix = '_'.join([func,year,lepton,'cat'+cat])
 
       structDict[func].yieldBkg    = testBkgNormsDict[func].getVal()
       structDict[func].yieldBkgErr = testBkgNormsDict[func].getError()
       structDict[func].yieldSig    = testSigNormsDict[func].getVal()
       structDict[func].yieldSigErr = testSigNormsDict[func].getError()
+
       if func in ['Bern2','Bern3','Bern4','Bern5','Bern6','GaussBern3','GaussBern4','GaussBern5','GaussBern6']:
         structDict[func].paramP1       = testModelsDict[func].getParameters(toyData)['p1'+suffix].getVal()
         structDict[func].paramP1Err    = testModelsDict[func].getParameters(toyData)['p1'+suffix].getError()
@@ -328,7 +337,7 @@ def doBiasStudy(year = '2012', lepton = 'mu', cat = '0', genFunc = 'Exp', mass =
   outFile.Close()
 
   print 'so many toys!'
-
+  
   
 if __name__=="__main__":
   print len(sys.argv), sys.argv
@@ -337,6 +346,6 @@ if __name__=="__main__":
   trials = int(options.trials)
   mass = str(options.mass)
   
-  for genFunc in ['Exp','Pow']:
+  for f in ['Exp','Pow','Bern3']:
     print 'Starting'
-    doBiasStudy(trials = trials, genFunc=genFunc, job=job, mass=mass)
+    doBiasStudy(trials = trials, genFunc=f, job=job, mass=mass)
