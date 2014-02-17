@@ -502,7 +502,7 @@ def BackgroundNameFixer(fitName, year,lepton,cat,ws):
   fitExtName    = '_'.join(['bkgTmp',    lepton,year,'cat'+cat])
   fitExtNameNew = '_'.join(['bkg',       lepton,year,'cat'+cat])
 
-  BernNames = ['Bern4','Bern5','Bern6']
+  BernNames = ['Bern3','Bern4','Bern5','Bern6']
   for n in BernNames:
     if n in fitName:
       print "renaming" + fitName + "as "+n
@@ -521,7 +521,6 @@ def BackgroundNameFixer(fitName, year,lepton,cat,ws):
       p1NameNew = '_'.join(['bkg','p1',lepton,year,'cat'+cat])
       p2NameNew = '_'.join(['bkg','p2',lepton,year,'cat'+cat])
       p3NameNew = '_'.join(['bkg','p3',lepton,year,'cat'+cat])
-      p4NameNew = '_'.join(['bkg','p4',lepton,year,'cat'+cat])
       
       ws.factory(normNameNew+'[{0},{1},{2}]'.format(ws.function(normName).getVal(),
                                                     ws.function(normName).getMin(), ws.function(normName).getMax()))
@@ -532,18 +531,25 @@ def BackgroundNameFixer(fitName, year,lepton,cat,ws):
                                                   ws.function(p2Name).getMin(),ws.function(p2Name).getMax()))
       ws.factory(p3NameNew+'[{0},{1},{2}]'.format(ws.function(p3Name).getVal(),
                                                   ws.function(p3Name).getMin(),ws.function(p3Name).getMax()))
-      ws.factory(p4NameNew+'[{0},{1},{2}]'.format(ws.function(p4Name).getVal(),
-                                                  ws.function(p4Name).getMin(),ws.function(p4Name).getMax()))
+      if n in ['Bern4','Bern5','Bern6']:
+        p4Name = 'p4'+n+'_'+suffix
+        p4NameNew = '_'.join(['bkg','p4',lepton,year,'cat'+cat])
+        ws.factory(p4NameNew+'[{0},{1},{2}]'.format(ws.function(p4Name).getVal(),
+                                                        ws.function(p4Name).getMin(),ws.function(p4Name).getMax()))
       if n in ['Bern5','Bern6']:
         p5Name = 'p5'+n+'_'+suffix
         p5NameNew = '_'.join(['bkg','p5',lepton,year,'cat'+cat])
         ws.factory(p5NameNew+'[{0},{1},{2}]'.format(ws.function(p5Name).getVal(),
                                                     ws.function(p5Name).getMin(),ws.function(p5Name).getMax()))
-        if n in ['Bern6']:
-          p6Name = 'p6'+n+'_'+suffix
-          p6NameNew = '_'.join(['bkg','p6',lepton,year,'cat'+cat])
-          ws.factory(p6NameNew+'[{0},{1},{2}]'.format(ws.function(p6Name).getVal(),
-                                                      ws.function(p6Name).getMin(),ws.function(p6Name).getMax()))
+      if n in ['Bern6']:
+        p6Name = 'p6'+n+'_'+suffix
+        p6NameNew = '_'.join(['bkg','p6',lepton,year,'cat'+cat])
+        ws.factory(p6NameNew+'[{0},{1},{2}]'.format(ws.function(p6Name).getVal(),
+                                                          ws.function(p6Name).getMin(),ws.function(p6Name).getMax()))
+      if n=='Bern3':
+        ws.factory('EDIT::'+fitExtNameNew+'('+fitExtName+','+normName+'='+normNameNew+','
+                   +p0Name+'='+p0NameNew+','+p1Name+'='+p1NameNew+','+p2Name+'='+p2NameNew+','
+                   +p3Name+'='+p3NameNew+')')
       if n=='Bern4':
         ws.factory('EDIT::'+fitExtNameNew+'('+fitExtName+','+normName+'='+normNameNew+','
                    +p0Name+'='+p0NameNew+','+p1Name+'='+p1NameNew+','+p2Name+'='+p2NameNew+','

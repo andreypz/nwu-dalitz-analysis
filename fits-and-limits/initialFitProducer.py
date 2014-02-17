@@ -45,8 +45,6 @@ TH1.SetDefaultSumw2(kTRUE)
 if rootrace: RooTrace.active(kTRUE)
 
 def LumiXSWeighter(mH, prod,sel):
-  #Mad:
-  #cro = 0.00091
   cro = float(u.conf.get(prod+"H-"+str(mH), "cs-"+sel))
   Nev = int(u.conf.get(prod+"H-"+str(mH), "Nev-"+sel))
   
@@ -94,18 +92,28 @@ def doInitialFits(subdir):
                 'vbf_mu2012_M145':TFile(basePath1+musel+'_2012/hhhh_vbf-mad145_1.root','r'),
                 'vbf_mu2012_M150':TFile(basePath1+musel+'_2012/hhhh_vbf-mad150_1.root','r'),
 
+                'v_mu2012_M120':TFile(basePath1+musel+'_2012/hhhh_vh-mad120_1.root','r'),
+                'v_mu2012_M125':TFile(basePath1+musel+'_2012/hhhh_vh-mad125_1.root','r'),
+                'v_mu2012_M130':TFile(basePath1+musel+'_2012/hhhh_vh-mad130_1.root','r'),
+                'v_mu2012_M135':TFile(basePath1+musel+'_2012/hhhh_vh-mad135_1.root','r'),
+                'v_mu2012_M140':TFile(basePath1+musel+'_2012/hhhh_vbf-mad140_1.root','r'),
+                'v_mu2012_M145':TFile(basePath1+musel+'_2012/hhhh_vbf-mad145_1.root','r'),
+                'v_mu2012_M150':TFile(basePath1+musel+'_2012/hhhh_vbf-mad150_1.root','r'),
+
                 'gg_el2012_M125':TFile(basePath2+'electron_2012/hhhh_dal-mad125_1.root','r')}
 
   treeName = 'fitTree/fitTree'
 
+
+  lowCutOff  = 110
+  highCutOff = 170
+  binning = 30
+  binWidth = 2
+  
   weight  = RooRealVar('Weight','Weight',0,100)
-
-  lowCutOff  = 100
-  highCutOff = 200
-
   mzg  = RooRealVar('CMS_hzg_mass','CMS_hzg_mass', lowCutOff,highCutOff)
   mzg.setRange('FullRegion',   lowCutOff, highCutOff)
-  mzg.setRange('DalitzRegion', 100,200)
+  mzg.setRange('DalitzRegion', lowCutOff, highCutOff)
   mzg.setBins(50000,'cache')
 
   c = TCanvas("c","c",0,0,500,400)
@@ -253,7 +261,7 @@ def doInitialFits(subdir):
           print
         if debugPlots:
           testFrame = mzg.frame()
-          data_ds.plotOn(testFrame,RooFit.Binning(50))
+          data_ds.plotOn(testFrame,RooFit.Binning(binning))
               
           testFrame.Draw()
           c.SaveAs(plotBase+'_'.join(['data',year,lepton,'cat'+cat,'M'+mass])+'.png')
@@ -346,7 +354,7 @@ def doInitialFits(subdir):
             leg.SetBorderSize(1)
             leg.SetHeader('_'.join(['test','fits',year,lepton,'cat'+cat]))
             testFrame = mzg.frame(RooFit.Range('DalitzRegion'))
-            data_ds.plotOn(testFrame, RooFit.Binning(50))
+            data_ds.plotOn(testFrame, RooFit.Binning(binning))
             #GaussExp.plotOn(testFrame,RooFit.Name('GaussExp'))
             #SechExp.plotOn(testFrame,RooFit.LineColor(kRed),     RooFit.Name('SechExp'))
             #GaussBern3.plotOn(testFrame,RooFit.LineColor(kGreen),  RooFit.Name('GaussBern3'))
@@ -373,7 +381,7 @@ def doInitialFits(subdir):
             #BB.plotOn(testFrame,RooFit.LineColor(kViolet), RooFit.Name('Beta+Bern4'))
             #GB.plotOn(testFrame,RooFit.LineColor(kGreen), RooFit.Name('GaussBern3'))
             testFrame.Draw()
-            testFrame.SetTitle(";m_{H} (GeV);Events/2 GeV")
+            testFrame.SetTitle(";m_{H} (GeV);Events/"+str(binWidth)+" GeV")
             leg.AddEntry(testFrame.findObject('Exp'),'Exp','l')
             leg.AddEntry(testFrame.findObject('Pow'),'Pow','l')
             leg.AddEntry(testFrame.findObject('Bern2'),'Bern2','l')

@@ -29,7 +29,7 @@ class AutoVivification(dict):
     
 def SignalFitMaker(lep, year, cat, subdir):
   # reasd these from a config file:
-  massList        = [a.strip() for a in (cf.get("fits","massList")).split(',')]
+  massList        = [a.strip() for a in (cf.get("fits","massList-more")).split(',')]
   sigNameList     = [a.strip() for a in (cf.get("fits","sigNameList")).split(',')]
   
   plotBase = "/uscms_data/d2/andreypz/html/zgamma/dalitz/fits-"+subdir
@@ -157,6 +157,8 @@ def SignalFitMaker(lep, year, cat, subdir):
       fit.plotOn(testFrame, RooFit.Normalization(normList[i],RooAbsReal.NumEvent))
     for signal in dsList:
       signal.plotOn(testFrame)
+
+    testFrame.SetMaximum(0.7)
     testFrame.Draw()
     testFrame.SetTitle(";m_{H} (GeV);fit pdf")
     #c.Print("p5.png")
