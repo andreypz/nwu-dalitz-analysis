@@ -98,10 +98,15 @@ if period =="2012":
     if selection == 'mugamma':
     
         data.extend([
-            cfg('MuEG_Run2012A',  dCache+'/andreypz/nutuples_v9.3_8TeV/MuEG/Run2012A-22Jan2013',  5, 'DATA '+selection+' 2012'),
-            cfg('MuEG_Run2012B',  dCache+'/andreypz/nutuples_v9.3_8TeV/MuEG/Run2012B-22Jan2013',  8, 'DATA '+selection+' 2012'),
-            cfg('MuEG_Run2012C',  dCache+'/andreypz/nutuples_v9.3_8TeV/MuEG/Run2012C-22Jan2013',  8, 'DATA '+selection+' 2012'),
-            cfg('MuEG_Run2012D',  dCache+'/andreypz/nutuples_v9.3_8TeV/MuEG/Run2012D-22Jan2013',  15,'DATA '+selection+' 2012'),
+            #cfg('MuEG_Run2012A',  dCache+'/andreypz/nutuples_v9.3_8TeV/MuEG/Run2012A-22Jan2013',  5, 'DATA '+selection+' 2012'),
+            #cfg('MuEG_Run2012B',  dCache+'/andreypz/nutuples_v9.3_8TeV/MuEG/Run2012B-22Jan2013',  8, 'DATA '+selection+' 2012'),
+            ##cfg('MuEG_Run2012C',  dCache+'/andreypz/nutuples_v9.3_8TeV/MuEG/Run2012C-22Jan2013',  8, 'DATA '+selection+' 2012'),
+            #cfg('MuEG_Run2012D',  dCache+'/andreypz/nutuples_v9.3_8TeV/MuEG/Run2012D-22Jan2013',  15,'DATA '+selection+' 2012'),
+            
+            cfg('MuEG_Run2012A',  EOS+'/lpchzg/nuTuples_v9.6_8TeV/Data/MuEG_Run2012A',  5, 'DATA '+selection+' 2012'),
+            cfg('MuEG_Run2012B',  EOS+'/lpchzg/nuTuples_v9.6_8TeV/Data/MuEG_Run2012B',  8, 'DATA '+selection+' 2012'),
+            cfg('MuEG_Run2012C',  EOS+'/lpchzg/nuTuples_v9.6_8TeV/Data/MuEG_Run2012C',  8, 'DATA '+selection+' 2012'),
+            cfg('MuEG_Run2012D',  EOS+'/lpchzg/nuTuples_v9.6_8TeV/Data/MuEG_Run2012D',  15,'DATA '+selection+' 2012'),
 
             ])
     

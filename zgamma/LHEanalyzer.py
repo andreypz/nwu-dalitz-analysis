@@ -16,8 +16,8 @@ files={}
 #files["one"] = ['/uscms_data/d2/andreypz/lhe_vbf_higgs/vbfh_eeg_m125.root']
 #files["two"] = ['/uscms_data/d2/andreypz/lhe_vbf_higgs/vbfh_mumug_m125.root']
 #files["one"] = ['/uscms_data/d2/andreypz/lhe_higgs_eegamma_dalitz/heeg_m120.root']
-files["one"] = ['/uscms_data/d2/andreypz/lhe_vh_mumugamma/hmumug_m125.root']
-files["two"] = ['/uscms_data/d2/andreypz/lhe_higgs_mumugamma_dalitz/hmumug_m125.root']
+#files["one"] = ['/uscms_data/d2/andreypz/lhe_vh_mumugamma/hmumug_m125.root']
+files["one"] = ['/uscms_data/d2/andreypz/lhe_higgs_mumugamma_dalitz/hmumug_m125.root']
 #files["one"] = ['/uscms_data/d2/andreypz/lhe_mcfm/lhe_mcfm_hzg_dalitz_lord_fixed_unweighted.lhe.root']
 
 MH = 125
@@ -284,6 +284,7 @@ def FillAllHists(files, h):
 
         h.fill1DHist(TVector2.Phi_mpi_pi(diLep.Phi()-gamma.Phi()), "dPhi_diLep_gamma", ";dPhi(ll, #gamma)",            50, -10,10, 1, "")
         
+        h.fill1DHist(lPt1.DeltaR(gamma),     "dR_lPt1_gamma",     ";dR(l1, #gamma)", 50, 0,5, 1, "")
         h.fill1DHist(l1.DeltaR(l2),     "dR_l1_l2",     ";dR(l+, l-)",      50, 0,5, 1, "")
         h.fill1DHist(diLep.DeltaR(l1),  "dR_diLep_l1",  ";dR(diLep, l+)",   50, 0,5, 1, "")
         h.fill1DHist(diLep.DeltaR(l2),  "dR_diLep_l2",  ";dR(diLep, l-)",   50, 0,5, 1, "")
@@ -303,7 +304,7 @@ if __name__ == "__main__":
         os.makedirs(path)
 
     FillAllHists(files["one"],  h1)
-    FillAllHists(files["two"],  h2)
+    #FillAllHists(files["two"],  h2)
 
 
     oneFile.cd()
@@ -317,10 +318,10 @@ if __name__ == "__main__":
 
     blah = []
 
-    u.drawAllInFile(oneFile, "MAD ele", twoFile, "MAD mu",None,"","", path, None,"norm", isLog=True)
+    #u.drawAllInFile(oneFile, "MAD ele", twoFile, "MAD mu",None,"","", path, None,"norm", isLog=True)
     #u.drawAllInFile(oneFile, "MCFM ele", twoFile, "Madgraph mu",None,"","", path, None,"norm")
     #u.drawAllInFile(oneFile, "vbf ele", twoFile, "vbf mu",None,"","", path, None,"norm", isLog=True)
-    #u.drawAllInFile(twoFile, "MAD-125",None,"", None,"","", path, None,"norm")
+    u.drawAllInFile(oneFile, "MAD-125",None,"", None,"","", path, None,"norm")
 
     u.createDir(path+"/eff")
 
