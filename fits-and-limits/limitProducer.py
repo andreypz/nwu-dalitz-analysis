@@ -15,7 +15,7 @@ def produceLimits(inputFolder = '', outPutFolder = 'limitOutputs/', mass = '125.
 
 if __name__ == "__main__":
   
-  massList   = [a.strip() for a in (cf.get("fits","massList")).split(',')]
+  massList   = [a.strip() for a in (cf.get("fits","massList-more")).split(',')]
   s = cf.get("fits","ver")
   dir = s
   if options.noSyst:

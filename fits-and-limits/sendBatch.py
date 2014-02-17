@@ -21,7 +21,8 @@ if len(args) < 1:
 executable  = 'batchJob.sh'
 
 version    = args[0]
-outputPath = version+'-bias'
+outputPath = version
+#outputPath = version+'-bias'
 
 inputSamples = []
 inputSamples.append(cfg('None', 'None', int(options.jobs), str(options.trials) +' 120 '+whereWeRun))

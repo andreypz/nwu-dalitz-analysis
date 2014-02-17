@@ -30,8 +30,8 @@ c.cd()
 mzg = myWs.var('CMS_hzg_mass')
 mzg.setRange('signal',120,130)
 
-bkgModel = 'Bern5'
-
+bkgModel = 'Bern3'
+verbose=0
 # #######################################
 # prep the background and data card    #
 # we're going to the extend the bg pdf #
@@ -59,9 +59,10 @@ for year in yearList:
       print dataName
       sumEntriesBkg = data.sumEntries()
       sumEntriesSig = data.sumEntries('1','signal')
-      print sumEntriesBkg, sumEntriesSig
 
-      raw_input()
+      if verbose:
+        print sumEntriesBkg, sumEntriesSig
+        raw_input()
 
       dataYieldName = '_'.join(['data','yield',lepton,year,'cat'+cat])
       dataYield     = RooRealVar(dataYieldName,dataYieldName,sumEntriesBkg)
@@ -70,33 +71,56 @@ for year in yearList:
       fitExtName    = '_'.join(['bkgTmp',lepton,year,'cat'+cat])
       fit_ext       = RooExtendPdf(fitExtName,fitExtName, fit,norm)
 
+      if verbose:
+        print norm.getVal(), norm.getError()
+        raw_input()
+      
+      
       fit_ext.fitTo(data,RooFit.Range('dalitzRegion'))
 
       testFrame = mzg.frame(RooFit.Range('dalitzRegion'))
-      data.plotOn(testFrame, RooFit.Binning(50))
+      data.plotOn(testFrame, RooFit.Binning(30), RooFit.Name('data'))
+      binWidth = 2
       fit_ext.plotOn(testFrame, RooFit.Name(bkgModel),  RooFit.LineColor(kBlue))
-
-      #sigName = '_'.join(['ds_sig','gg',lepton,year,'cat'+cat,'M125'])
+      
+      sigDSName = '_'.join(['ds_sig','gg',lepton,year,'cat'+cat,'M125'])
       sigName = 'pdf_sig_mu_2012_cat0_M125'
       myWs.Print()
-      #sigP  = myWs.data(sigName)
       sigP  = myWs.pdf(sigName)
-      #sigHist = sigP.createHistogram()
-      #sigHist.Scale(50)
-      #sigP  = myWs.pdf(sigName)
-      #sigP.plotOn(testFrame, RooFit.LineColor(kRed+2),RooFit.Normalization(0.0))
-      sigP.plotOn(testFrame,  RooFit.Name('signal'), RooFit.LineColor(kRed+2), RooFit.Normalization(3.4 *50*7.4e-05))
+      sigP.plotOn(testFrame,  RooFit.Name('signal'), RooFit.LineColor(kRed+2), RooFit.Range(115,135),
+                  RooFit.Normalization(6.e-02))
+
+      # sigDS = myWs.data(sigDSName)
+      # hist = TH1F("hh",'hh', 60, 110,170)
+      # hist = sigDS.createHistogram('sig-sig',RooFit.RooArgList('CMS_hzg_mass'),) 
+
+      # sigP.plotOn(testFrame,  RooFit.Name('signal'), RooFit.LineColor(kRed+2))
+      if verbose:
+        print 'have unit norm?? ', sigP.haveUnitNorm()
+        chi2 = testFrame.chiSquare(bkgModel,'data')
+        #chi2 = testFrame.chiSquare(3)
+        print ' chiSquare=', chi2
+        # print "Figuring out norms of PDFs",sigP.getVal(), sigP.analyticalIntegral()
+        raw_input()
+        
+      testFrame.SetMaximum(70)
+      testFrame.Draw()
+      testFrame.SetTitle(";m_{H} (GeV);Events/"+str(binWidth)+" GeV")
 
       leg  = TLegend(0.65,0.7,0.87,0.87)
       leg.SetFillColor(0)
       leg.SetShadowColor(0)
       leg.SetBorderSize(1)
       leg.AddEntry(testFrame.findObject(bkgModel),bkgModel,'l')
-      leg.AddEntry(testFrame.findObject('signal'),'50x ggH','l')
-      
-      testFrame.SetTitle(";m_{H} (GeV);Events/2 GeV")
-      testFrame.Draw()
+      leg.AddEntry(testFrame.findObject('signal'),'10x ggH','l')
       leg.Draw()
+
+      prelim = TLatex(0.15,0.95, "CMS Preliminary, #sqrt{s} = 8 TeV")
+      prelim.SetNDC();
+      prelim.SetTextSize(0.03)
+      prelim.Draw()
+        
+      
       c.SaveAs(plotBase+'/'+'_'.join(['best_fit',year,lepton,'cat'+cat])+'.png')
 
       ###### Import the fit and data, and rename them to the card convention
