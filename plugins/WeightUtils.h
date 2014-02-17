@@ -32,9 +32,12 @@ class WeightUtils: public TObject {
   void  SetSampleName(string sampleName);
   void  SetSelection(string selection);
   
+  //Used in zgamma
+  float PhotonSF(TLorentzVector ph);
   float PUWeight(float);
+
   float RecoWeight(TLorentzVector l1, TLorentzVector l2);
-  float GammaWeight(int nPV, int nJets, TLorentzVector p1);
+  //float GammaWeight(int nPV, int nJets, TLorentzVector p1);
   float ZZWeight(TLorentzVector l1, TLorentzVector l2);
   float GluGluHiggsWeight(float higgsPt, int higgsMass);
   //float VBFHiggsWeight(float genMass, int higgsMass);
@@ -58,20 +61,24 @@ class WeightUtils: public TObject {
   bool   _isRealData;
   
   //sources
-  TFile *_inFile;
+  TFile *_phFile;
   TFile *_puFile;
-  TH1D  *h1_eGammaPt;   
-  TH1D  *h1_muGammaPt;  
-  TH1D  *h1_eGammaPV;   
-  TH1D  *h1_muGammaPV;  
-  TH1D  *h1_eGammaMass; 
-  TH1D  *h1_muGammaMass;
+ 
+  TH2D * h2_photonIDSF;
+  TH2D * h2_photonCSEVSF;
+ //TH1D  *h1_eGammaPt;   
+  //TH1D  *h1_muGammaPt;  
+  //TH1D  *h1_eGammaPV;   
+  //TH1D  *h1_muGammaPV;  
+  //TH1D  *h1_eGammaMass; 
+  //TH1D  *h1_muGammaMass;
   TH1D  *h1_puReweight2011;
   TH1D  *h1_puReweight2012;
   
   TH1D  *h1_Higgs[8];
   
-        //weights
+  //weights
+  float _photonIDWeight;
   float _puWeight;
   float _zzWeight;
   float _glugluWeight;

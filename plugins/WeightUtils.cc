@@ -9,16 +9,26 @@ WeightUtils::WeightUtils(string sampleName, string dataPeriod, string selection,
 
     Initialize();
     rnGen   = new TRandom3();
-    _inFile = new TFile("../data/Reweight.root", "OPEN");
+    _phFile = new TFile("../data/Photon_ID_CSEV_SF_Jan22rereco_Full2012_RD1_MC_V01.root", "OPEN");
     _puFile = new TFile("../data/puReweight.root", "OPEN");
 
+    h2_photonIDSF   = (TH2D*)_phFile->Get("PhotonIDSF_MediumWP_Jan22rereco_Full2012_RD1_MC_V01");
+    h2_photonCSEVSF = (TH2D*)_phFile->Get("PhotonCSEVSF_MediumWP_Jan22rereco_Full2012_RD1_MC_V01");
+    //h2_photonIDSF->Print("all");
+    //for (Int_t i = 1; i < 9; i++)
+    //cout<<i<<" bin "<<h2_photonIDSF->GetYaxis()->GetBinLowEdge(i)<<endl;
+    //  Bin edges are:
+    // X(Pt): 0 - 10 - 15 - 20 - 30 - 50 - 1000
+    // Y(Eta): 0 - 0.8 - 1.444 - 1.566 - 2.0 - 2.5 - 3 - 3.5
+
+
     // Photon weights
-    h1_eGammaPt     = (TH1D*)_inFile->Get("h1_eGammaPtWeightCombined");
-    h1_muGammaPt    = (TH1D*)_inFile->Get("h1_muGammaPtWeightCombined");
-    h1_eGammaPV     = (TH1D*)_inFile->Get("h1_eGammaPVWeightCombined");
-    h1_muGammaPV    = (TH1D*)_inFile->Get("h1_muGammaPVWeightCombined");
-    h1_eGammaMass   = (TH1D*)_inFile->Get("h1_diElectronMassCombined");
-    h1_muGammaMass  = (TH1D*)_inFile->Get("h1_diMuonMassCombined");
+    //h1_eGammaPt     = (TH1D*)_inFile->Get("h1_eGammaPtWeightCombined");
+    //h1_muGammaPt    = (TH1D*)_inFile->Get("h1_muGammaPtWeightCombined");
+    //h1_eGammaPV     = (TH1D*)_inFile->Get("h1_eGammaPVWeightCombined");
+    //h1_muGammaPV    = (TH1D*)_inFile->Get("h1_muGammaPVWeightCombined");
+    //h1_eGammaMass   = (TH1D*)_inFile->Get("h1_diElectronMassCombined");
+    //h1_muGammaMass  = (TH1D*)_inFile->Get("h1_diMuonMassCombined");
 
     // PU weights
     h1_puReweight2011  = (TH1D*)_puFile->Get("h1_PU2011");
@@ -88,16 +98,36 @@ float WeightUtils::GetTotalWeight(float nPV, int nJets, TLorentzVector l1, TLore
     float weight = 1.;
 
     weight *= PUWeight(nPV);
+
     if (!_isRealData) {
       weight *= RecoWeight(l1, l2);
       //if (_sampleName.compare(0,2,"ZZ") == 0 && _dataPeriod!="2012") weight *= ZZWeight(l1, l2);
     } else {
-      weight *= GammaWeight(nPV, nJets, l1);
+      //weight *= GammaWeight(nPV, nJets, l1);
     }
     return weight;
 }
 
-float WeightUtils::PUWeight(float nPUtrue)
+
+float WeightUtils::PhotonSF(TLorentzVector ph)
+{
+  Float_t wID = 1;
+  Float_t wCS = 1;
+
+  //Int_t myBinPt  = h2_photonIDSF->FindFirstBinAbove(10,1);
+  Int_t myBinPt  = h2_photonIDSF->GetXaxis()->FindBin(ph.Pt());
+  Int_t myBinEta = h2_photonIDSF->GetYaxis()->FindBin(fabs(ph.Eta()));
+  //cout<<"xbin(pt) = "<<myBinPt<<"  ybin(eta)="<<myBinEta<<endl;
+  wID =  h2_photonIDSF->GetBinContent(myBinPt, myBinEta);
+  myBinPt  = h2_photonCSEVSF->GetXaxis()->FindBin(ph.Pt());
+  myBinEta = h2_photonCSEVSF->GetYaxis()->FindBin(fabs(ph.Eta()));
+  wCS =  h2_photonCSEVSF->GetBinContent(myBinPt, myBinEta);
+  
+  //cout<<"Photon pt = "<<ph.Pt()<<"  eta="<<ph.Eta()<<"   IDSF ="<<wID<<"  CSCF="<<wCS<<endl;
+  return wID*wCS;
+}
+
+  float WeightUtils::PUWeight(float nPUtrue)
 {
   if (_isRealData) return 1;
 
@@ -217,6 +247,7 @@ float WeightUtils::GluGluHiggsWeight(float higgsPt, int higgsMass)
 //    return _vbfWeight;
 //}
 
+/*
 float WeightUtils::GammaWeight(int nPV, int nJets, TLorentzVector p1)
 {
     if (_selection == "eGamma") {
@@ -241,6 +272,7 @@ float WeightUtils::GammaWeight(int nPV, int nJets, TLorentzVector p1)
     }
     return _gammaPtWeight*_gammaPVWeight*_gammaJetWeight;
 }
+*/
 
 float WeightUtils::GetMuTriggerEff(TLorentzVector l1) const
 {
@@ -311,12 +343,12 @@ float WeightUtils::GetElectronEff(TLorentzVector l1) const
 float WeightUtils::GetPhotonMass() const
 {
     float photonMass = 91.2;
-    if (_selection == "eGamma") {
-        photonMass = h1_eGammaMass->GetRandom();
-    }
-    if (_selection == "muGamma") {
-        photonMass = h1_muGammaMass->GetRandom();
-    }
+    //if (_selection == "eGamma") {
+      //photonMass = h1_eGammaMass->GetRandom();
+    //}
+    //if (_selection == "muGamma") {
+      //photonMass = h1_muGammaMass->GetRandom();
+    //}
     return photonMass;
 }
 

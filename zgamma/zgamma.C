@@ -29,10 +29,10 @@ const Float_t cut_iso_mu1 = 0.4, cut_iso_mu2=0;
 Float_t cut_gammapt = 25;
 
 Float_t global_Mll = 0;
-
+Bool_t applyPhosphor = 0;
 Int_t  dal=0, nodal=0;
 Bool_t makeFitTree = 1;
-const UInt_t hisEVTS[] = {152918,92217,32834,74613,4978,100848,76214,88598,114206};
+const UInt_t hisEVTS[] = {9331};
 Int_t evSize = sizeof(hisEVTS)/sizeof(int);
 
 bool P4SortCondition(const TLorentzVector& p1, const TLorentzVector& p2) {return (p1.Pt() > p2.Pt());}
@@ -534,35 +534,42 @@ Bool_t zgamma::Process(Long64_t entry)
         photons0.push_back(*thisPhoton);
 
 
-      PhotonR9Corrector(*thisPhoton);
       if(PassPhotonIdAndIso(thisPhoton, phIdAndIsoCutsHZG, pvPosition)
          //&& (isRealData || !makeGen || (sample=="dalitz" && makeGen && gen_gamma.DeltaR(*thisPhoton) < 0.2) )
          )
         {    
-          Float_t corrPhoPt = thisPhoton->Pt();
 
-          if (isRealData)
-            corrPhoPt = phoCorrector->GetCorrEtData(thisPhoton->R9(), 2012, thisPhoton->Pt(), thisPhoton->Eta());
-          else
+          if (applyPhosphor)
             {
-              TCGenParticle goodGenPhoton;
-              Float_t testDr = 9999;
-
-              for (int j = 0; j < genParticles->GetSize(); ++j) {
-                TCGenParticle* thisParticle = (TCGenParticle*) genParticles->At(j);
-                if (thisParticle->Mother() &&  thisParticle->GetStatus()==1
-                    && (thisParticle->Mother()->GetPDGId()==25 || thisParticle->Mother()->GetPDGId()==22)){
-                  
-                  if(thisPhoton->DeltaR(*thisParticle)<testDr){
-                    goodGenPhoton = *thisParticle;
-                    testDr = thisPhoton->DeltaR(*thisParticle);
-                  }
-                }
+              Float_t corrPhoPt = thisPhoton->Pt();
+              
+              if (isRealData){
+                corrPhoPt = phoCorrector->GetCorrEtData(thisPhoton->R9(), 2012, thisPhoton->Pt(), thisPhoton->Eta());
+                thisPhoton->SetPtEtaPhiM(corrPhoPt,thisPhoton->Eta(),thisPhoton->Phi(),0.0);
               }
-              if (testDr < 0.2)
-                corrPhoPt = phoCorrector->GetCorrEtMC(thisPhoton->R9(), 2012, thisPhoton->Pt(), thisPhoton->Eta(), goodGenPhoton.E());
+              else
+                {
+                  TCGenParticle goodGenPhoton;
+                  Float_t testDr = 9999;
+
+                  PhotonR9Corrector(*thisPhoton);
+                  
+                  for (int j = 0; j < genParticles->GetSize(); ++j) {
+                    TCGenParticle* thisParticle = (TCGenParticle*) genParticles->At(j);
+                    if (thisParticle->GetPDGId()==22 && thisParticle->Mother() &&  thisParticle->GetStatus()==1
+                        && (thisParticle->Mother()->GetPDGId()==25 || thisParticle->Mother()->GetPDGId()==22)){
+                      
+                      if(thisPhoton->DeltaR(*thisParticle)<testDr){
+                        goodGenPhoton = *thisParticle;
+                        testDr = thisPhoton->DeltaR(*thisParticle);
+                      }
+                    }
+                  }
+                  if (testDr < 0.2)
+                    corrPhoPt = phoCorrector->GetCorrEtMC(thisPhoton->R9(), 2012, thisPhoton->Pt(), thisPhoton->Eta(), goodGenPhoton.E());
+                  thisPhoton->SetPtEtaPhiM(corrPhoPt,thisPhoton->Eta(),thisPhoton->Phi(),0.0);
+                }
             }
-          thisPhoton->SetPtEtaPhiM(corrPhoPt,thisPhoton->Eta(),thisPhoton->Phi(),0.0);
           photonsHZG.push_back(*thisPhoton);
         }
       
@@ -590,6 +597,9 @@ Bool_t zgamma::Process(Long64_t entry)
 
   if (photonsHZG.size()<1) return kTRUE;
   gamma = photonsHZG[0];
+
+  if (!isRealData)
+    eventWeight *= weighter->PhotonSF(gamma);
 
   //if (photons0.size()<1) return kTRUE;
   //gamma0 = photons0[0];
@@ -624,9 +634,9 @@ Bool_t zgamma::Process(Long64_t entry)
 
     if (!(fabs(thisMuon->Eta()) < 2.4)) continue;
 
-    if(thisMuon->Pt() > 7)
+    if(thisMuon->Pt() > 4)
       for(Int_t ev=0; ev<evSize;ev++){
-        if (eventNumber==hisEVTS[ev]){cout<<"   mu>7 cut ---> "<<eventNumber<<" <--- Found an event after cut "<<endl;
+        if (eventNumber==hisEVTS[ev]){cout<<"   mu>4 cut ---> "<<eventNumber<<" <--- Found an event after cut "<<endl;
           MuonDump(*thisMuon, pvPosition);
           break;}}
 
@@ -677,26 +687,37 @@ Bool_t zgamma::Process(Long64_t entry)
   //    )
   //return kTRUE;
   //else if(zgamma::CalculateMuonIso(&muons[0]) > 0.4 || zgamma::CalculateMuonIso(&muons[1]) > 0.4) 
-  //return kTRUE;
-      
-  
-  if ((muons[0].Pt() > 20 && zgamma::CalculateMuonIso(&muons[0]) > 0.4) ||
-      (muons[1].Pt() > 20 && zgamma::CalculateMuonIso(&muons[1]) > 0.4))
-    return kTRUE;
-    
-  lPt1 = muons[0];
-  lPt2 = muons[1];
-  
-  if (muons[0].Charge()==1 && muons[1].Charge()==-1){
-    l1 = muons[0];
-    l2 = muons[1];
+  //return kTRUE;  
+
+  Float_t tmpMll = 99999;
+  if (muons.size()==2){
+    lPt1 = muons[0];
+    lPt2 = muons[1];
   }
-  else if (muons[0].Charge()==-1 && muons[1].Charge()==1){
-    l1 = muons[1];
-    l2 = muons[0];
+  else 
+    for (UInt_t m1=0; m1 < muons.size(); m1++){
+      for (UInt_t m2=m1; m2 < muons.size(); m2++){
+        if (muons[m1].Charge()*muons[m2].Charge()==1) continue; //same charge - don't care
+        
+        if( (muons[m1]+muons[m2]).M() < tmpMll)
+          {
+            lPt1 = muons[m1];
+            lPt2 = muons[m2];
+            tmpMll = (muons[m1]+muons[m2]).M();
+          }
+      }
+    }
+  
+  if (lPt1.Charge()==1 && lPt2.Charge()==-1){
+    l1 = lPt1;
+    l2 = lPt2;
+  }
+  else if (lPt1.Charge()==-1 && lPt2.Charge()==1){
+    l1 = lPt2;
+    l2 = lPt1;
   }
   else{
-    cout<<"ch1 = "<<muons[0].Charge()<<"  ch2 = "<<muons[1].Charge()<<endl;
+    //cout<<"ch1 = "<<muons[0].Charge()<<"  ch2 = "<<muons[1].Charge()<<endl;
     return kTRUE;//Abort("reco * They are the same charge!");
   }
     
@@ -707,12 +728,8 @@ Bool_t zgamma::Process(Long64_t entry)
 
   MakePhotonPlots(gamma);
 
-  for(Int_t ev=0; ev<evSize;ev++){
-    if (eventNumber==hisEVTS[ev]){cout<<eventNumber<<" Found an event after cut 3"<<endl;
-      break;}
-  }
-
   if (lPt1.Pt() < cut_l1pt || lPt2.Pt() < cut_l2pt_low)   return kTRUE;
+
 
   if(!isRealData && makeGen){
     hists->fill1DHist(genMll,  "gen_Mll_two_lep_reco", ";gen_Mll",50,0,15, 1,"eff");
@@ -723,15 +740,27 @@ Bool_t zgamma::Process(Long64_t entry)
   FillHistoCounts(4, eventWeight);
   CountEvents(4);
 
+
+  for(Int_t ev=0; ev<evSize;ev++){
+    if (eventNumber==hisEVTS[ev]){cout<<eventNumber<<" Found an event after lept selection "<<endl;
+      cout<<"Mll = "<<Mll<<endl;
+      break;}
+  }
   if (Mll > 20) return kTRUE;
+
+  fout<<runNumber<<" "<<eventNumber<<endl;
   
+  for(Int_t ev=0; ev<evSize;ev++){
+    if (eventNumber==hisEVTS[ev]){cout<<eventNumber<<" Found an event after mll cut"<<endl;
+      break;}
+  }
   
   FillHistosFull(5, eventWeight, l1, l2, lPt1, lPt2, gamma, "");
   FillHistoCounts(5, eventWeight);
   CountEvents(5);
   
   if (lPt1.DeltaR(gamma)<1.0 || lPt2.DeltaR(gamma)<1.0) return kTRUE;
-    
+
   FillHistosFull(6, eventWeight, l1, l2, lPt1, lPt2, gamma, "");
   FillHistoCounts(6, eventWeight);
   CountEvents(6);
@@ -751,11 +780,25 @@ Bool_t zgamma::Process(Long64_t entry)
     FillHistosFull(12, eventWeight, l1, l2, lPt1, lPt2, gamma, "jpsi");
     FillHistoCounts(12, eventWeight);
     CountEvents(12);
-    return kTRUE;
+    //return kTRUE;
   }
-  
+
   Float_t Mllg = (l1+l2+gamma).M();
 
+
+  if ((l1+l2).Pt()/Mllg < 0.35 || gamma.Pt()/Mllg < 0.35)
+  //if ((l1+l2).Pt() < 40 || gamma.Pt() < 40)
+    return kTRUE;
+
+  for(Int_t ev=0; ev<evSize;ev++){
+    if (eventNumber==hisEVTS[ev]){cout<<eventNumber<<" Found an event after pT cuts"<<endl;
+      break;}
+  }      
+  
+
+  FillHistosFull(7, eventWeight, l1, l2, lPt1, lPt2, gamma, "");
+  FillHistoCounts(7, eventWeight);
+  CountEvents(7);
 
   for (UInt_t i =0; i<ntrig; i++){
     triggerSelector->SelectTrigger(myTriggers[i], triggerStatus, hltPrescale, isFound, triggerPass, prescale);
@@ -764,16 +807,6 @@ Bool_t zgamma::Process(Long64_t entry)
     if (!isFound)
       cout<<"TRG **** Warning ***\n The trigger name "<<myTriggers[i]<<" is not in the list of trigger names"<<endl;
   }
-
-
-
-  //if ((l1+l2).Pt()/Mllg < 0.35 || gamma.Pt()/Mllg < 0.35)
-  if ((l1+l2).Pt() < 40 || gamma.Pt() < 40)
-    return kTRUE;
-
-  FillHistosFull(7, eventWeight, l1, l2, lPt1, lPt2, gamma, "");
-  FillHistoCounts(7, eventWeight);
-  CountEvents(7);
 
 
   if(!isRealData && makeGen && sample=="dalitz"){
@@ -806,7 +839,6 @@ Bool_t zgamma::Process(Long64_t entry)
   FillHistoCounts(9, eventWeight);
   CountEvents(9);
 
-  fout<<runNumber<<" "<<eventNumber<<endl;
   //fout<<" nEvt = "<<nEvents[0]<<" : Run/lumi/event = "<<runNumber<<"/"<<lumiSection<<"/"<<eventNumber<<endl;
 
 
@@ -937,7 +969,7 @@ void zgamma::Terminate()
   cout<<"| 4: reco lep         |\t"<< nEvents[4]  <<"\t|"<<float(nEvents[4])/nEvents[3]<<"\t|"<<endl;
   cout<<"| 5: mll <20          |\t"<< nEvents[5]  <<"\t|"<<float(nEvents[5])/nEvents[4]<<"\t|"<<endl;
   cout<<"| 6: dR(l,g)>1        |\t"<< nEvents[6]  <<"\t|"<<float(nEvents[6])/nEvents[5]<<"\t|"<<endl;
-  cout<<"| 7: ptll>40, ptg>40  |\t"<< nEvents[7]  <<"\t|"<<float(nEvents[7])/nEvents[6]<<"\t|"<<endl;
+  cout<<"| 7: pT/Mllg > 0.35   |\t"<< nEvents[7]  <<"\t|"<<float(nEvents[7])/nEvents[6]<<"\t|"<<endl;
   cout<<"| 8: no jpsi/Ups      |\t"<< nEvents[8]  <<"\t|"<<float(nEvents[8])/nEvents[7]<<"\t|"<<endl;
   cout<<"| 9:  trigger         |\t"<< nEvents[9]  <<"\t|"<<float(nEvents[9])/nEvents[7]<<"\t|"<<endl;
   cout<<"| 10: pTll+pTg>95     |\t"<< nEvents[10] <<"\t|"<<float(nEvents[10])/nEvents[7]<<"\t|"<<endl;
@@ -973,8 +1005,14 @@ void zgamma::Terminate()
   hists->fill1DHist(-1, "evt_byCut",";cut #;weighted events", nC+1,-1,nC, totEvents, "Counts");
   hists->fill1DHist(-1, "evt_byCut_raw", ";cut #;events",     nC+1,-1,nC, totEvents, "Counts");
 
-
+  //gDirectory->Print();
+  //gDirectory->FindObject("evt_byCut_raw")->Print();
   histoFile->cd();
+  //gDirectory->Print();
+  //cout<<"Raw events:       "<<((TH1F*)gDirectory->FindObject("evt_byCut_raw"))<<endl;
+  //cout<<"Weighted events:  "<<((TH1F*)histoFile->Get("evt_byCut"))->GetBinContent(1)<<endl;
+  //cout<<"weight integral = "<<((TH1F*)histoFile->Get("weight__cut5"))->Integral()<<endl;
+
   histoFile->Write();
   histoFile->Close();
   cout<<" ** End of Analyzer **"<<endl;
@@ -1113,6 +1151,7 @@ bool zgamma::PassMuonIdAndIso(TCMuon *lep, muIdAndIsoCuts cuts, TVector3 *pv)
      && ((lep->IsTRK() && lep->NumberOfMatches() > 0) || lep->IsGLB())
      && fabs(lep->Dxy(pv))     < cuts.dxy
      && fabs(lep->Dz(pv))      < cuts.dz
+     && (lep->Pt() < 20 || zgamma::CalculateMuonIso(lep) < 0.4)
      )
     pass = true;
   /*  
@@ -1276,6 +1315,7 @@ void zgamma::FillHistosFull(Int_t num, Double_t weight,
                     ";Photon p_{T}/M_{ll#gamma}",  100, 0,1, weight, dir);
   hists->fill1DHist(gammaCM.E(),Form("gamma_Ecom_%s_cut%i", d, num),";E_{#gamma} in CoM",  50, 0,120,  weight, dir);
   hists->fill1DHist(gamma.E(),  Form("gamma_E_%s_cut%i",    d, num),";Photon Energy", 50, 0,200, weight, dir);
+  hists->fill1DHist(gamma.Pt(), Form("gamma_pt_%s_cut%i",   d, num),";Photon Pt",  50, 0,120, weight, dir);
   hists->fill1DHist(gamma.Eta(),Form("gamma_eta_%s_cut%i",  d, num),";Photon eta", 50, -3.5,3.5, weight, dir);
   hists->fill1DHist(gamma.Phi(),Form("gamma_phi_%s_cut%i",  d, num),";Photon phi", 50, -TMath::Pi(),TMath::Pi(), weight, dir);
   /*

@@ -33,14 +33,9 @@ def getLumi(period):
 
 def getCS(sample, useMCFM=False):
     sel = conf.get("selection", "sel")[0:2]
-    if "ggH" in sample:
-        cs = float(conf.get(sample, "cs-"+sel))      
-        if useMCFM:
-            cs = cs*2
-    elif "vbfH" in sample:
-        cs = float(conf.get(sample, "cs-"+sel))      
-    else:
-        cs = float(conf.get(sample, "cs"))      
+    cs = float(conf.get(sample, "cs-"+sel))      
+
+    #cs = float(conf.get(sample, "cs"))      
 
     return cs
 
@@ -428,8 +423,9 @@ def getYields(f, doLumiScale=False):
     scale=1
     if doLumiScale: # only assume signal MC for now
         Nev = ev.GetBinContent(1)
-        cro = getCS("ggH-125")
+        #cro = getCS("ggH-125")
         #cro = getCS("vbfH-125")
+        cro = getCS("vH-125")
         scale = float(lumi*cro)/Nev
         print "Lumi scale for sel=",sel, "Nev=",Nev, "cro=",cro, "scale=",scale
 

@@ -159,7 +159,10 @@ if period =="2012":
     if selection in ["mumu","mugamma","single-mu"]:
         signal.extend([
             
+            cfg('vh-mad120', EOS+'/andreypz/nuTuples_v9.4_8TeV/VHiggsToMuMuGamma_MH120',1, 'dalitz '+selection+' '+period+gen),
             cfg('vh-mad125', EOS+'/andreypz/nuTuples_v9.4_8TeV/VHiggsToMuMuGamma_MH125',1, 'dalitz '+selection+' '+period+gen),
+            cfg('vh-mad130', EOS+'/andreypz/nuTuples_v9.4_8TeV/VHiggsToMuMuGamma_MH130',1, 'dalitz '+selection+' '+period+gen),
+            cfg('vh-mad135', EOS+'/andreypz/nuTuples_v9.4_8TeV/VHiggsToMuMuGamma_MH135',1, 'dalitz '+selection+' '+period+gen),
             #cfg('dal-MCFM125',dCache+'/andreypz/nuTuples_v9.4_8TeV/MCFM_dalitz_v2',    1, 'dalitz '+selection+' '+period),
             
             cfg('dal-mad120', dCache+'/andreypz/nuTuples_v9.4_8TeV/HiggsToMuMuGamma_MH120',1, 'dalitz '+selection+' '+period+gen),

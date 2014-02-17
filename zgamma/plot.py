@@ -151,6 +151,7 @@ if __name__ == "__main__":
     yields_bkg  = {}
     yields_sig  = {}
     yields_vbf  = {}
+    yields_vh   = {}
 
     tri_hists = {}
     dataFile  = {}
@@ -184,6 +185,7 @@ if __name__ == "__main__":
         #sigFileMCFM = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_dal-mcfm_1.root", "OPEN")
         sigFileMAD  = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_dal-mad"+str(mass)+"_1.root", "OPEN")
         sigFileVBF  = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_vbf-mad"+str(mass)+"_1.root", "OPEN")
+        sigFileVH   = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_vh-mad"+str(mass)+"_1.root", "OPEN")
 
         if options.mcfm: sigFile = sigFileMCFM
         else:            sigFile = sigFileMAD
@@ -197,6 +199,7 @@ if __name__ == "__main__":
         yields_data[thissel] = u.getYields(dataFile[thissel])
         yields_sig[thissel]  = u.getYields(sigFile, True) 
         yields_vbf[thissel]  = u.getYields(sigFileVBF, True) 
+        yields_vh[thissel]   = u.getYields(sigFileVH,  True) 
         #yields_sig[thissel]  = u.getYields(sigFile, False)
         #yields_bkg[thissel]  = u.getYields(bkgFile[thissel])
 
@@ -348,7 +351,8 @@ if __name__ == "__main__":
     #plot_types
     print yields_sig
     table_sig  = u.yieldsTable(yields_sig, sel)
-    #table_vbf  = u.yieldsTable(yields_vbf, sel)
+    table_vbf  = u.yieldsTable(yields_vbf, sel)
+    table_vh   = u.yieldsTable(yields_vh,  sel)
     table_data = u.yieldsTable(yields_data, sel)
 
     if doBkg:
@@ -359,7 +363,8 @@ if __name__ == "__main__":
     u.makeTable(table_sig, "sig",  "html")
     u.makeTable(table_data,"data", "twiki")
     u.makeTable(table_sig, "sig",  "twiki")
-    #u.makeTable(table_vbf, "sig-vbf",  "twiki")
+    u.makeTable(table_vbf, "sig-vbf",  "twiki")
+    u.makeTable(table_vh, "sig-vh",  "twiki")
     #u.makeTable(table_data,"data", "tex")
     #u.makeTable(table_sig, "sig",  "tex")
     if doBkg:
