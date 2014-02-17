@@ -237,9 +237,9 @@ def drawAllInFile(f1, name1, f2, name2, f3, name3, dir,path, N, howToScale="none
                 print "\n *** H-mass RMS:",  h1.GetRMS(), h2.GetRMS()
                 print "\n *** H-mass Mean:", h1.GetMean(),h2.GetMean()
                  
-            leg = TLegend(0.70,0.8,0.90,0.90);
+            leg = TLegend(0.67,0.75,0.92,0.90);
             leg.AddEntry(h1,name1, "l")
-            leg.SetTextSize(0.03)
+            leg.SetTextSize(0.05)
 
             #if "phi" in h1.GetName():
             #    h1.SetMinimum(0)
@@ -300,10 +300,12 @@ def drawAllInFile(f1, name1, f2, name2, f3, name3, dir,path, N, howToScale="none
                     
                     pad1.cd();
             
-            #prelim = TLatex(0.15,0.95, "CMS Preliminary %s #it{L_{int}} = %0.1f fb^{-1}" % (8, 19.6))
-            #prelim.SetNDC();
-            #prelim.SetTextSize(0.03);
-            #prelim.Draw();
+            # prelim = TLatex(0.15,0.95, "CMS Preliminary %s #it{L_{int}} = %0.1f fb^{-1}" % (8, lumi))
+            prelim = TLatex(0.15,0.95, "CMS Preliminary #sqrt{s} = 8TeV")
+            prelim.SetNDC();
+            prelim.SetTextSize(0.03);
+            prelim.Draw();
+            
             if howToScale =="norm":
                 #print "HMAXS=",hmaxs
                 if len(hmaxs)>0:
@@ -325,6 +327,8 @@ def drawAllInFile(f1, name1, f2, name2, f3, name3, dir,path, N, howToScale="none
             leg.Draw()
 
             c1.SetLogy(int(isLog))
+            #if "diLep_mass_low":
+            #    h1.
 
             c1.SaveAs(path+"/"+h1.GetName()+".png")
         c1.SetLogy(0)

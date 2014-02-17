@@ -207,9 +207,9 @@ if __name__ == "__main__":
         #tri_hists[thissel]   = dataFile[thissel].Get("tri_mass_cut"+cut).Clone()
         
 
-        #u.drawAllInFile(dataFile[thissel], "data", None, "", sigFile,"signal",  "",path, cut, "norm")
+        u.drawAllInFile(dataFile[thissel], "Data", None, "", sigFile,"Signal",  "",path, cut, "norm")
         #u.drawAllInFile(dataFile[thissel], "data", None, "", sigFile,"signal",  "",path, cut, "norm", doRatio=1)
-        u.drawAllInFile(dataFile[thissel], "data", None, "", sigFile,"50xSignal",  "",path, cut, "lumi")
+        #u.drawAllInFile(dataFile[thissel], "Data", None, "", sigFile,"50xSignal",  "",path, cut, "lumi")
         u.drawAllInFile(dataFile[thissel], "data", None, "", sigFile,"50xSignal","EB",pathBase+"/EB", cut, "lumi")
         u.drawAllInFile(dataFile[thissel], "data", None, "", sigFile,"50xSignal","EE",pathBase+"/EE", cut, "lumi")
 
@@ -266,12 +266,6 @@ if __name__ == "__main__":
     #effPlots(sigFileMAD, pathBase+"/eff/")
 
 
-    #sigFileMCFM = TFile(hPath+"/mugamma_"+period+"/hhhh_dal-MCFM_1.root", "OPEN")
-    
-    #u.drawAllInFile(sigFileMCFM, "MCFM",None, "",sigFileMAD,"Madgraph",  "GEN", pathBase+"/GEN", None,"norm", isLog=True)
-
-
-
     c1 = TCanvas("c4","small canvas",600,600);
     c1.cd()
     Nev = sigFileMAD.Get("Counts/evt_byCut").GetBinContent(2)
@@ -283,17 +277,16 @@ if __name__ == "__main__":
     hc7 = sigFileMAD.Get("tri_mass80__cut7").Integral(35,41)*scale
     hc8 = sigFileMAD.Get("tri_mass80__cut8").Integral(35,41)*scale
     hc9 = sigFileMAD.Get("tri_mass80__cut9").Integral(35,41)*scale
-    print "Yields in bins that supposed to correspond to [122,125] windo2:\n",hc7, hc8, hc9 
+    print "Yields in bins that supposed to correspond to [122,128] window:\n",hc7, hc8, hc9 
 
-    hc7 = dataFile[thissel].Get("tri_mass80__cut7").Integral(35,41)
-    hc8 = dataFile[thissel].Get("tri_mass80__cut8").Integral(35,41)
-    hc9 = dataFile[thissel].Get("tri_mass80__cut9").Integral(35,41)
-    print "Yields in bins that supposed to correspond to [122,125] windo2:\n",hc7, hc8, hc9 
+    hc7 = dataFile[thissel].Get("tri_mass80__cut7").Integral(36,40)
+    hc8 = dataFile[thissel].Get("tri_mass80__cut8").Integral(36,40)
+    hc9 = dataFile[thissel].Get("tri_mass80__cut9").Integral(36,40)
+    print "Yields in bins that supposed to correspond to [122,128] window:\n",hc7, hc8, hc9 
 
 
-    m1 = 120.
-    m2 = 130.
-
+    m1 = 100.
+    m2 = 200.
     
     for r in ["0"]:
         etaCut = TCut("")
@@ -301,7 +294,6 @@ if __name__ == "__main__":
             etaCut = "fabs(ph_eta)<1"
         elif r=="EE":
             etaCut = "fabs(ph_eta)>1"
-
             
         cut = TCut("m_llg>"+str(m1)+"&&m_llg<"+str(m2))
         cut += etaCut
@@ -314,7 +306,7 @@ if __name__ == "__main__":
         yda = hda.Integral()
         ysi = hsi.Integral()
         ysi_sc = ysi*scale
-        print r, yda,ysi_sc
+        print 'yields inside ', m1,m2, ' r=',r, 'data=', yda, 'signal=',ysi_sc
         print "significance=", ysi_sc/sqrt(ysi_sc+yda)
     
     

@@ -24,7 +24,7 @@ u.createDir(plotBase)
 fullCombo = True
 byParts = False
 
-massList   = [float(a.strip()) for a in (cf.get("fits","massList")).split(',')]
+massList   = [float(a.strip()) for a in (cf.get("fits","massList-more")).split(',')]
 
 c = TCanvas("c","c",0,0,500,400)
 c.cd()
@@ -133,7 +133,7 @@ if fullCombo:
   leg = TLegend(0.25,0.65,0.50,0.83)
   leg.AddEntry(expected,"Expected", "l")
   leg.AddEntry(oneSigma,"Expected #pm 1#sigma", "f")
-  leg.AddEntry(twoSigma,"Expected #pm 1#sigma", "f")
+  leg.AddEntry(twoSigma,"Expected #pm 2#sigma", "f")
 
 
   
@@ -152,7 +152,7 @@ if fullCombo:
   leg.SetFillColor(kWhite)
   leg.Draw()
   
-  c.SaveAs(plotBase+'Limits.png')
+  c.SaveAs(plotBase+'/Limits.png')
 
 
   out.cd()

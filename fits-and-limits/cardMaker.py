@@ -25,8 +25,9 @@ def makeCards(subdir):
   yearList   = [a.strip() for a in (cf.get("fits","yearList")).split(',')]
   leptonList = [a.strip() for a in (cf.get("fits","leptonList")).split(',')]
   catList    = [a.strip() for a in (cf.get("fits","catList")).split(',')]
-  massList   = [a.strip() for a in (cf.get("fits","massList")).split(',')]
-    
+  massList   = [a.strip() for a in (cf.get("fits","massList-more")).split(',')]
+  sigNameList= [a.strip() for a in (cf.get("fits","sigNameList")).split(',')]
+      
   for year in yearList:
     for lepton in leptonList:
       for cat in catList:
@@ -34,10 +35,10 @@ def makeCards(subdir):
         bgFile = TFile(bgFileName)
         bgWs = bgFile.Get('ws_card')
        
-        sigNameList = ['gg','vbf']
+        #sigNameList = ['gg','vbf','VH']
         channel = '_'.join([lepton,year,'cat'+cat])
         #bkgParams = ['sigma','mean','tau','norm']
-        bkgParams = ['p0','p1','p2','p3','p4','norm']
+        bkgParams = ['p0','p1','p2','p3','norm']
         #bkgParams = ['p0','p1','p2','p3','p4','sigma','step','mean','norm']
         
         for mass in massList:
@@ -71,41 +72,41 @@ def makeCards(subdir):
           #print "WTF is [::-1] ??? ->"
           #print channel, prefixSigList, prefixSigList[::-1]
           
-          card.write('{0:<25} {1:^15} {2:^15} {3:^15}\n'.format(*(['bin']+[channel]*3)))
-          card.write('{0:<25} {1:^15} {2:^15} {3:^15}\n'.format(*(['process']+prefixSigList[::-1]+['bkg'])))
-          card.write('{0:<25} {1:^15} {2:^15} {3:^15}\n'.format(*(['process', -1,0,1])))
+          card.write('{0:<25} {1:^15} {2:^15} {3:^15} {4:^15}\n'.format(*(['bin']+[channel]*4)))
+          card.write('{0:<25} {1:^15} {2:^15} {3:^15} {4:^15}\n'.format(*(['process']+prefixSigList[::-1]+['bkg'])))
+          card.write('{0:<25} {1:^15} {2:^15} {3:^15} {4:^15}\n'.format(*(['process', -2,-1,0,1])))
           
           card.write('--------------------------------------------------------------\n')
           sigYields = []
           for sig in prefixSigList[::-1]:
             sigYields.append(sigWs.var(sig+'_yield_'+channel).getVal())
 
-          print sigYields
-          card.write('{0:<25} {1:^15.5} {2:^15} {3:^15}\n'.format(*(['rate']+sigYields+[1])))
+          print 'mh=',mass, sigYields
+          card.write('{0:<25} {1:^15.5} {2:^15} {3:^15} {4:^15}\n'.format(*(['rate']+sigYields+[1])))
 
           card.write('-------------------------------------------------------------\n')
           card.write(' \n')
           
-          if makeSys:
-            
-            card.write('lumi         lnN     1.026        1.026   1.026\n')
-            card.write('brLLG        lnN     1.10         1.10  -     \n')
-            card.write('muonID       lnN     1.11         1.11  -     \n')
-            card.write('pdf_vbf       lnN   '+pdf_vbf[year][mass]+'  -   -  \n')
-            card.write('QCDscale_vbfH lnN   '+qcd_vbf[year][mass]+'  -   -  \n')
-            card.write('pdf_gg       lnN     -   '+pdf_gg[year][mass]+'  -     \n')
-            card.write('QCDscale_ggH lnN     -   '+qcd_gg[year][mass]+'  -     \n')
+          card.write('lumi          lnN     1.026        1.026   1.026  1.026 \n')
+          card.write('brLLG         lnN     1.10         1.10    1.10   -     \n')
+          card.write('muonID        lnN     1.11         1.11    1.11   -     \n')
+          card.write('pdf_CH        lnN     '+pdf_zh[year][mass]+'  -  -   -  \n')
+          card.write('QCDscale_VH   lnN     '+qcd_zh[year][mass]+'  -  -   -  \n')
+          card.write('pdf_vbfH      lnN     -   '+pdf_vbf[year][mass]+'  -  -   -  \n')
+          card.write('QCDscale_vbfH lnN     -   '+qcd_vbf[year][mass]+'  -  -   -  \n')
+          card.write('pdf_ggH       lnN     -   -  '+pdf_gg[year][mass]+'  -     \n')
+          card.write('QCDscale_ggH  lnN     -   -  '+qcd_gg[year][mass]+'  -     \n')
 
-            # card.write('unc_Bkg1  gmN 72      -           1.00  \n')
+          # card.write('unc_Bkg1  gmN 72      -           1.00  \n')
             
             
-            for sig in prefixSigList:
-              card.write('{0:<40} {1:<10} {2:^10} {3:^10}\n'.format(sig+'_mShift_'+channel,'param', 1, 0.01))
-              card.write('{0:<40} {1:<10} {2:^10} {3:^10}\n'.format(sig+'_sigmaShift_'+channel,'param', 1, 0.05))
+          for sig in prefixSigList:
+            card.write('{0:<40} {1:<10} {2:^10} {3:^10}\n'.format(sig+'_mShift_'+channel,'param', 1, 0.01))
+            card.write('{0:<40} {1:<10} {2:^10} {3:^10}\n'.format(sig+'_sigmaShift_'+channel,'param', 1, 0.05))
               
-            for param in bkgParams[:-1]:
-              card.write('{0:<45} {1:<15}\n'.format('bkg_'+param+'_'+channel,'flatParam'))
-            card.write('{0:<45} {1:<15}\n'.format('bkg_'+channel+'_'+bkgParams[-1],'flatParam'))
+          for param in bkgParams[:-1]:
+            card.write('{0:<45} {1:<15}\n'.format('bkg_'+param+'_'+channel,'flatParam'))
+          card.write('{0:<45} {1:<15}\n'.format('bkg_'+channel+'_'+bkgParams[-1],'flatParam'))
 
 
           card.close()
