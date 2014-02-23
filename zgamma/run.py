@@ -52,30 +52,31 @@ print "Running on sample", sample, "with selection=", selection, ", trigger=", t
 
 from ROOT import *
 
-gROOT.SetMacroPath(".:../src/:../plugins/:../interface/");
-gROOT.LoadMacro("HistManager.cc+");
-gROOT.LoadMacro("ZGAngles.cc+");
-gROOT.LoadMacro("WeightUtils.cc+");
-gROOT.LoadMacro("TriggerSelector.cc+");
+gROOT.SetMacroPath(".:../src/:../plugins/:../interface/")
 
-#gSystem.Load("lib/libShapeLine.so");
-#gROOT.LoadMacro("rochcor.cc+");
-gROOT.LoadMacro("TCPhysObject.cc+");
-gROOT.LoadMacro("TCJet.cc+");
-gROOT.LoadMacro("TCMET.cc+");
-gROOT.LoadMacro("TCEGamma.cc+");
-gROOT.LoadMacro("TCTrack.cc+");
-gROOT.LoadMacro("TCElectron.cc+");
-gROOT.LoadMacro("TCPhoton.cc+");
-gROOT.LoadMacro("TCMuon.cc+");
-gROOT.LoadMacro("TCTau.cc+");
-gROOT.LoadMacro("TCGenJet.cc+");
-gROOT.LoadMacro("TCGenParticle.cc+");
-gROOT.LoadMacro("TCPrimaryVtx.cc+");
-gROOT.LoadMacro("TCTriggerObject.cc+");
-gROOT.LoadMacro("PhosphorCorrectorFunctor.cc+");
+gROOT.LoadMacro("HistManager.cc+")
+gROOT.LoadMacro("ZGAngles.cc+")
+gROOT.LoadMacro("WeightUtils.cc+")
+gROOT.LoadMacro("TriggerSelector.cc+")
 
-fChain = TChain("ntupleProducer/eventTree");
+gROOT.LoadMacro("rochcor2012v2.C+")
+#gSystem.Load("lib/libShapeLine.so")
+gROOT.LoadMacro("TCPhysObject.cc+")
+gROOT.LoadMacro("TCJet.cc+")
+gROOT.LoadMacro("TCMET.cc+")
+gROOT.LoadMacro("TCEGamma.cc+")
+gROOT.LoadMacro("TCTrack.cc+")
+gROOT.LoadMacro("TCElectron.cc+")
+gROOT.LoadMacro("TCPhoton.cc+")
+gROOT.LoadMacro("TCMuon.cc+")
+gROOT.LoadMacro("TCTau.cc+")
+gROOT.LoadMacro("TCGenJet.cc+")
+gROOT.LoadMacro("TCGenParticle.cc+")
+gROOT.LoadMacro("TCPrimaryVtx.cc+")
+gROOT.LoadMacro("TCTriggerObject.cc+")
+#gROOT.LoadMacro("PhosphorCorrectorFunctor.cc+")
+
+fChain = TChain("ntupleProducer/eventTree")
 
 f = open(sourceFiles,"r")
 nfiles=0

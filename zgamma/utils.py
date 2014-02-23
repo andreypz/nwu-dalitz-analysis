@@ -328,7 +328,7 @@ def drawAllInFile(f1, name1, f2, name2, f3, name3, dir,path, N, howToScale="none
             c1.SaveAs(path+"/"+h1.GetName()+".png")
         c1.SetLogy(0)
         
-def yieldsTable(yi, sel, num=True):
+def yieldsTable(yieldList, sel, num=True):
     print sel
     t = []
     if len(sel)==0:
@@ -340,7 +340,7 @@ def yieldsTable(yi, sel, num=True):
     l1 = ["Cut/trigger"]
     if num:
         l1.insert(0,"")
-    l1.extend([a for a in sel])
+    l1.extend([ a+str(i) for a in sel  for i in range(0,len(yieldList))])
     print l1
     t.append(l1)
     for line in xrange(len(cuts)):
@@ -349,9 +349,10 @@ def yieldsTable(yi, sel, num=True):
             l.append(str((line-1)))
         l.append(cuts[line])
         for thissel in sel:
-            l.append(yi[thissel][line])
+            for yi in yieldList:
+                l.append(yi[thissel][line])
             #print l
-        t.append(l)
+            t.append(l)
         
     return t
                                                         
@@ -415,7 +416,7 @@ def makeTable(table, name, opt="tex"):
     if opt in ["twiki","tex"]:
         print myTable
 
-def getYields(f, doLumiScale=False):
+def getYields(f, sample='ggH-125', doLumiScale=False):
     ev = f.Get("Counts/evt_byCut")
     sel = conf.get("selection", "sel")[0:2]
     cuts =  getCuts(conf, "cuts-"+sel)
@@ -423,9 +424,7 @@ def getYields(f, doLumiScale=False):
     scale=1
     if doLumiScale: # only assume signal MC for now
         Nev = ev.GetBinContent(1)
-        #cro = getCS("ggH-125")
-        #cro = getCS("vbfH-125")
-        cro = getCS("vH-125")
+        cro = getCS(sample)
         scale = float(lumi*cro)/Nev
         print "Lumi scale for sel=",sel, "Nev=",Nev, "cro=",cro, "scale=",scale
 

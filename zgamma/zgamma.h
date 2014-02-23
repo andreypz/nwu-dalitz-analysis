@@ -51,10 +51,10 @@
 
 #include "../plugins/WeightUtils.h"
 #include "../plugins/TriggerSelector.h"
-//#include "../plugins/rochcor.h"
+#include "../plugins/rochcor2012v2.h"
 #include "../plugins/ZGAngles.h"
 #include "../plugins/HistManager.h"
-#include "../plugins/PhosphorCorrectorFunctor.hh"
+//#include "../plugins/PhosphorCorrectorFunctor.hh"
 // Header file for the classes stored in the TTree if any.
 #include <TClonesArray.h>
 #include <TVector3.h>
@@ -120,13 +120,13 @@ class zgamma : public TSelector {
   TriggerSelector *triggerSelector;
   HistManager *hists;
   WeightUtils *weighter;
-
+  rochcor2012 *roch;
   UInt_t nEvents[nC];
   UInt_t totEvents;  
 
   ofstream fout;
 
-  auto_ptr<ammagz::PhosphorCorrectionFunctor> phoCorrector;
+  //auto_ptr<ammagz::PhosphorCorrectionFunctor> phoCorrector;
 
   TTree* _mvaTree;
   Float_t mva_SCPhiWidth, mva_SCEtaWidth, mva_SigmaIEtaIEta, mva_SigmaIPhiIPhi;
