@@ -430,6 +430,7 @@ def getYields(f, sample='ggH-125', doLumiScale=False):
 
     for a in xrange(len(cuts)):
         y.append(scale*ev.GetBinContent(a+1)) # well, that's how the histogram is set up
+
     return y
 
 

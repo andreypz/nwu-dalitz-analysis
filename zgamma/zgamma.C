@@ -93,62 +93,26 @@ void zgamma::Begin(TTree * tree)
 
   //Cuts
 
-  //electrons are two types: Barrel/Endcap
-  //Loose
-  elIdAndIsoCutsLoose.ptErrorOverPt[0] = 99999;
-  elIdAndIsoCutsLoose.dPhiIn[0]        = 0.1;
-  elIdAndIsoCutsLoose.dEtaIn[0]        = 0.01;
-  elIdAndIsoCutsLoose.sigmaIetaIeta[0] = 0.02;
-  elIdAndIsoCutsLoose.HadOverEm[0]     = 0.3;
-  elIdAndIsoCutsLoose.fabsEPDiff[0]    = 99999;
-  elIdAndIsoCutsLoose.dxy[0]           = 0.1;
-  elIdAndIsoCutsLoose.dz[0]            = 0.2;
-  elIdAndIsoCutsLoose.pfIso04[0]       = 0.3;
-
-  elIdAndIsoCutsLoose.ptErrorOverPt[1] = 99999;
-  elIdAndIsoCutsLoose.dPhiIn[1]        = 0.1;
-  elIdAndIsoCutsLoose.dEtaIn[1]        = 0.03;
-  elIdAndIsoCutsLoose.sigmaIetaIeta[1] = 0.1;
-  elIdAndIsoCutsLoose.HadOverEm[1]     = 0.3;
-  elIdAndIsoCutsLoose.fabsEPDiff[1]    = 99999;
-  elIdAndIsoCutsLoose.dxy[1]           = 0.1;
-  elIdAndIsoCutsLoose.dz[1]            = 0.3;
-  elIdAndIsoCutsLoose.pfIso04[1]       = 0.3;
-
   //Tight
   elIdAndIsoCutsTight.ptErrorOverPt[0] = 9999.;
-  elIdAndIsoCutsTight.dPhiIn[0]        = 0.06;
-  elIdAndIsoCutsTight.dEtaIn[0]        = 0.004;
+  elIdAndIsoCutsTight.dPhiIn[0] = 0.06;
+  elIdAndIsoCutsTight.dEtaIn[0] = 0.004;
   elIdAndIsoCutsTight.sigmaIetaIeta[0] = 0.01;
-  elIdAndIsoCutsTight.HadOverEm[0]     = 0.12;
-  elIdAndIsoCutsTight.fabsEPDiff[0]    = 0.05;
-  elIdAndIsoCutsTight.dxy[0]           = 0.02;
-  elIdAndIsoCutsTight.dz[0]            = 0.1;
-  elIdAndIsoCutsTight.pfIso04[0]       = 0.15;
+  elIdAndIsoCutsTight.HadOverEm[0] = 0.12;
+  elIdAndIsoCutsTight.fabsEPDiff[0] = 0.05;
+  elIdAndIsoCutsTight.dxy[0] = 0.02;
+  elIdAndIsoCutsTight.dz[0] = 0.1;
+  elIdAndIsoCutsTight.pfIso04[0] = 0.15;
 
   elIdAndIsoCutsTight.ptErrorOverPt[1] = 9999.;
-  elIdAndIsoCutsTight.dPhiIn[1]        = 0.03;
-  elIdAndIsoCutsTight.dEtaIn[1]        = 0.007;
+  elIdAndIsoCutsTight.dPhiIn[1] = 0.03;
+  elIdAndIsoCutsTight.dEtaIn[1] = 0.007;
   elIdAndIsoCutsTight.sigmaIetaIeta[1] = 0.03;
-  elIdAndIsoCutsTight.HadOverEm[1]     = 0.10;
-  elIdAndIsoCutsTight.fabsEPDiff[1]    = 0.05;
-  elIdAndIsoCutsTight.dxy[1]           = 0.02;
-  elIdAndIsoCutsTight.dz[1]            = 0.1;
-  elIdAndIsoCutsTight.pfIso04[1]       = 0.15;
-
-
-  //muon id cuts
-  muIdAndIsoCutsTight.ptErrorOverPt            = 9999.;
-  muIdAndIsoCutsTight.TrackLayersWithMeasurement = 5;
-  muIdAndIsoCutsTight.NumberOfValidMuonHits    = 0;
-  muIdAndIsoCutsTight.NumberOfValidTrackerHits = 10;
-  muIdAndIsoCutsTight.NumberOfValidPixelHits   = 0;
-  muIdAndIsoCutsTight.NumberOfMatches          = 1;
-  muIdAndIsoCutsTight.NumberOfMatchedStations  = 1;
-  muIdAndIsoCutsTight.NormalizedChi2           = 10;
-  muIdAndIsoCutsTight.dxy             = 0.02;
-  muIdAndIsoCutsTight.dz              = 0.05;
-  muIdAndIsoCutsTight.pfIso04         = 0.4;
+  elIdAndIsoCutsTight.HadOverEm[1] = 0.10;
+  elIdAndIsoCutsTight.fabsEPDiff[1] = 0.05;
+  elIdAndIsoCutsTight.dxy[1] = 0.02;
+  elIdAndIsoCutsTight.dz[1] = 0.1;
+  elIdAndIsoCutsTight.pfIso04[1] = 0.15;
 
   //Soft muon id (specific for dalitz)
   muIdAndIsoCutsSoft.TrackLayersWithMeasurement = 5;
@@ -520,7 +484,7 @@ Bool_t zgamma::Process(Long64_t entry)
   for (Int_t i = 0; i < recoPhotons->GetSize(); ++i) {
     //cout<<"new photon!!!!!!!"<<endl;
     TCPhoton* thisPhoton = (TCPhoton*) recoPhotons->At(i);
-    //cout<<"event = "<<eventNumber
+    //cout<<"in photon loop event = "<<eventNumber
     //  <<"\n pt="<<thisPhoton->Pt()<<" eta="<<thisPhoton->Eta()<<" phi="<<thisPhoton->Phi()<<" px="<<thisPhoton->Px()<<endl;
 
     if (isRealData || !makeGen || (makeGen &&gen_lPt1.DeltaR(*thisPhoton) < 0.1 && thisPhoton->Pt()>20))
@@ -648,10 +612,13 @@ Bool_t zgamma::Process(Long64_t entry)
 
      
       Float_t qter = 1;
+      //cout<<"DBG before rochcor"<<endl;
       if (isRealData)
         roch->momcor_data(*thisMuon, thisMuon->Charge(), 0, qter); 
       else
         roch->momcor_mc(*thisMuon,  thisMuon->Charge(), 0, qter ); 
+
+      //cout<<"DBG after rochcor"<<endl;
       
       muons.push_back(*thisMuon);
     }
@@ -680,6 +647,7 @@ Bool_t zgamma::Process(Long64_t entry)
   }
 
   if (gamma.Pt() < cut_gammapt) return kTRUE;
+  if (fabs(gamma.Eta()) > 1.444) return kTRUE;
 
   if(!isRealData && makeGen){
     hists->fill1DHist(genMll,  "gen_Mll_reco_gamma_iso",  ";gen_Mll",100,0,mllMax, 1,"eff");
@@ -736,13 +704,20 @@ Bool_t zgamma::Process(Long64_t entry)
   hists->fill1DHist(Mll,  Form("diLep_mass_high_cut%i", 3),";M(ll)", 50, 0,120, 1, "");
 
   MakePhotonPlots(gamma);
-
-
+  
   if (lPt1.Pt() < cut_l1pt || lPt2.Pt() < cut_l2pt_low)   return kTRUE;
+
+  //if (!isfinite(eventWeight))
+  //cout<<"nan/inf "<<eventWeight<<endl;
+  //    if (fabs(eventWeight)>50 || fabs(eventWeight)<0.00001)
+
   if (!isRealData){
     eventWeight *= weighter->MuonSF(lPt1);
     eventWeight *= weighter->MuonSF(lPt2);
   }
+
+  if (!isfinite(eventWeight))
+    cout<<"nan after muon sf  "<<eventWeight<<endl;
 
   if(!isRealData && makeGen){
     hists->fill1DHist(genMll,  "gen_Mll_two_lep_reco", ";gen_Mll",100,0,mllMax, 1,"eff");

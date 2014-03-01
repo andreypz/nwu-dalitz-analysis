@@ -158,8 +158,6 @@ def effPlots(f1, path):
     print "Now making efficiency plots"
     #f1.cd(dir)
 
-
-
     for var in ["Mll","dR"]:
     
         h0 = f1.Get("eff/gen_"+var+"_0")
@@ -282,7 +280,7 @@ if __name__ == "__main__":
 
 
     for thissel in sel:
-        if sel=='none': continue
+        if thissel=='none': continue
         u.setSelection(thissel)
 
         
@@ -305,9 +303,9 @@ if __name__ == "__main__":
         path = pathBase+"/"+subdir
                 
         
-        #sigFileMCFM = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_dal-MCFM_1.root", "OPEN")
-        #sigFileMCFM = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_dal-mcfm_1.root", "OPEN")
-        sigFileMAD  = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_dal-mad"+str(mass)+"_1.root", "OPEN")
+        #sigFileMCFM = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_ggHMCFM_1.root", "OPEN")
+        #sigFileMCFM = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_ggH-mcfm_1.root", "OPEN")
+        sigFileMAD  = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_ggH-mad"+str(mass)+"_1.root", "OPEN")
         sigFileVBF  = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_vbf-mad"+str(mass)+"_1.root", "OPEN")
         sigFileVH   = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_vh-mad"+str(mass)+"_1.root", "OPEN")
 
@@ -386,12 +384,13 @@ if __name__ == "__main__":
     #u.drawAllInFile(bkgFile[thissel], "DY electrons", sigFile, "Dalitz 2el",  "NewEle-1", pathBase+"/NewEle-1/", None,"norm", isLog=1, )
 
     
-    #sigFileMAD  = TFile(hPath+"/mugamma_"+period+"/hhhh_dal-mad125_1.root", "OPEN")
-    sigFileMAD  = TFile("hhhh_dal-mad125_1.root", "OPEN")
+    #sigFileMAD  = TFile(hPath+"/mugamma_"+period+"/hhhh_ggH-mad125_1.root", "OPEN")
+    if sel[0]=='none':
+        sigFileMAD  = TFile("hhhh_ggH-mad125_1.root", "OPEN")
 
-    u.createDir(pathBase+"/eff")
-    effPlots(sigFileMAD, pathBase+"/eff/")
-    effPlots2(sigFileMAD, pathBase+"/eff/")
+        u.createDir(pathBase+"/eff")
+        effPlots(sigFileMAD, pathBase+"/eff/")
+        effPlots2(sigFileMAD, pathBase+"/eff/")
 
     '''
     c1 = TCanvas("c4","small canvas",600,600);
@@ -478,26 +477,12 @@ if __name__ == "__main__":
 
     table_all  = u.yieldsTable([yields_data,yields_sig, yields_vbf, yields_vh], sel)
 
-    # table_sig  = u.yieldsTable(yields_sig, sel)
-    #table_vbf  = u.yieldsTable(yields_vbf, sel)
-    ##table_vh   = u.yieldsTable(yields_vh,  sel)
-    #table_data = u.yieldsTable(yields_data, sel)
-
     if doBkg:
-        table_bkg = u.yieldsTable(yields_bkg, sel)
-        
+        table_bkg = u.yieldsTable(yields_bkg, sel)        
 
     u.makeTable(table_all,"all", "html")
     u.makeTable(table_all,"all", "twiki")
 
-    #u.makeTable(table_data,"data", "html")
-    #u.makeTable(table_sig, "sig",  "html")
-    #u.makeTable(table_data,"data", "twiki")
-    #u.makeTable(table_sig, "sig",  "twiki")
-    #u.makeTable(table_vbf, "sig-vbf",  "twiki")
-    #u.makeTable(table_vh, "sig-vh",  "twiki")
-    #u.makeTable(table_data,"data", "tex")
-    #u.makeTable(table_sig, "sig",  "tex")
     if doBkg:
         u.makeTable(table_bkg, "bkg",  "twiki")
 

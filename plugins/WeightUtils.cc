@@ -9,13 +9,14 @@ WeightUtils::WeightUtils(string sampleName, string dataPeriod, string selection,
 
     Initialize();
     rnGen   = new TRandom3();
-    _phFile = new TFile("../data/Photon_ID_CSEV_SF_Jan22rereco_Full2012_RD1_MC_V01.root", "OPEN");
     _puFile = new TFile("../data/puReweight.root", "OPEN");
-    _muFileID  = new TFile("../data/MuonEfficiencies_Run2012ReReco_53X.root", "OPEN");
+
+    _phFileID = new TFile("../data/Photon_ID_CSEV_SF_Jan22rereco_Full2012_RD1_MC_V01.root", "OPEN");
+    //_muFileID  = new TFile("../data/MuonEfficiencies_Run2012ReReco_53X.root", "OPEN");
     _muFileISO = new TFile("../data/MuonEfficiencies_ISO_Run_2012ReReco_53X.root", "OPEN");
 
-    h2_photonIDSF   = (TH2D*)_phFile->Get("PhotonIDSF_MediumWP_Jan22rereco_Full2012_RD1_MC_V01");
-    h2_photonCSEVSF = (TH2D*)_phFile->Get("PhotonCSEVSF_MediumWP_Jan22rereco_Full2012_RD1_MC_V01");
+    h2_photonIDSF   = (TH2D*)_phFileID->Get("PhotonIDSF_MediumWP_Jan22rereco_Full2012_RD1_MC_V01");
+    h2_photonCSEVSF = (TH2D*)_phFileID->Get("PhotonCSEVSF_MediumWP_Jan22rereco_Full2012_RD1_MC_V01");
     //h2_photonIDSF->Print("all");
     //for (Int_t i = 1; i < 9; i++)
     //cout<<i<<" bin "<<h2_photonIDSF->GetYaxis()->GetBinLowEdge(i)<<endl;
@@ -23,35 +24,39 @@ WeightUtils::WeightUtils(string sampleName, string dataPeriod, string selection,
     // X(Pt): 0 - 10 - 15 - 20 - 30 - 50 - 1000
     // Y(Eta): 0 - 0.8 - 1.444 - 1.566 - 2.0 - 2.5 - 3 - 3.5
 
-    gr_muonIDSF_eta09 = (TGraph*)_muFileID->Get("DATA_over_MC_Loose_pt_abseta<0.9");
-    gr_muonIDSF_eta12 = (TGraph*)_muFileID->Get("DATA_over_MC_Loose_pt_abseta0.9-1.2");
-    gr_muonIDSF_eta21 = (TGraph*)_muFileID->Get("DATA_over_MC_Loose_pt_abseta1.2-2.1");
-    gr_muonIDSF_eta24 = (TGraph*)_muFileID->Get("DATA_over_MC_Loose_pt_abseta2.1-2.4");
+    //gr_muonIDSF_eta09 = (TGraph*)_muFileID->Get("DATA_over_MC_Loose_pt_abseta<0.9");
+    //gr_muonIDSF_eta12 = (TGraph*)_muFileID->Get("DATA_over_MC_Loose_pt_abseta0.9-1.2");
+    //gr_muonIDSF_eta21 = (TGraph*)_muFileID->Get("DATA_over_MC_Loose_pt_abseta1.2-2.1");
+    //gr_muonIDSF_eta24 = (TGraph*)_muFileID->Get("DATA_over_MC_Loose_pt_abseta2.1-2.4");
     
     //Because the scale factors for muons are stupidly saved in TGraphs, we need to know 
     //the binning beforehand. And it is (for pt bins):
     //10-20-25-30-35-40-50-60-90-140-300
     // This works somehow:
-    _muonIDSF_eta09 = gr_muonIDSF_eta09->GetY();
-    _muonIDSF_eta12 = gr_muonIDSF_eta12->GetY();
-    _muonIDSF_eta21 = gr_muonIDSF_eta21->GetY();
-    _muonIDSF_eta24 = gr_muonIDSF_eta24->GetY();
+    //_muonIDSF_eta09 = gr_muonIDSF_eta09->GetY();
+    //_muonIDSF_eta12 = gr_muonIDSF_eta12->GetY();
+    //_muonIDSF_eta21 = gr_muonIDSF_eta21->GetY();
+    //_muonIDSF_eta24 = gr_muonIDSF_eta24->GetY();
 
+    //gr_muonIDSF_eta12->Print("all");
+    //for (Int_t i = 0; i < 10; i++)
+    // cout<<i<<" bin "<<_muonIDSF_eta12[i]<<endl;
+    
     /*
     gr_muonIDSF_eta09->Print("all");
     for (Int_t i = 0; i < 10; i++)
       cout<<i<<" bin "<<_muonIDSF_eta09[i]<<endl;
 
-    gr_muonIDSF_eta12->Print("all");
-    for (Int_t i = 0; i < 10; i++)
+      gr_muonIDSF_eta12->Print("all");
+      for (Int_t i = 0; i < 10; i++)
       cout<<i<<" bin "<<_muonIDSF_eta12[i]<<endl;
     
     gr_muonIDSF_eta21->Print("all");
     for (Int_t i = 0; i < 10; i++)
       cout<<i<<" bin "<<_muonIDSF_eta21[i]<<endl;
     
-    gr_muonIDSF_eta24->Print("all");
-    for (Int_t i = 0; i < 10; i++)
+      gr_muonIDSF_eta24->Print("all");
+      for (Int_t i = 0; i < 10; i++)
       cout<<i<<" bin "<<_muonIDSF_eta24[i]<<endl;
     */
 
@@ -59,11 +64,16 @@ WeightUtils::WeightUtils(string sampleName, string dataPeriod, string selection,
     gr_muonISOSF_eta12 = (TGraph*)_muFileISO->Get("DATA_over_MC_combRelIsoPF04dBeta<02_Loose_pt_abseta0.9-1.2");
     gr_muonISOSF_eta21 = (TGraph*)_muFileISO->Get("DATA_over_MC_combRelIsoPF04dBeta<02_Loose_pt_abseta1.2-2.1");
     gr_muonISOSF_eta24 = (TGraph*)_muFileISO->Get("DATA_over_MC_combRelIsoPF04dBeta<02_Loose_pt_abseta2.1-2.4");
-    
+
     _muonISOSF_eta09 = gr_muonISOSF_eta09->GetY();
     _muonISOSF_eta12 = gr_muonISOSF_eta12->GetY();
     _muonISOSF_eta21 = gr_muonISOSF_eta21->GetY();
     _muonISOSF_eta24 = gr_muonISOSF_eta24->GetY();
+
+    //gr_muonISOSF_eta24->Print("all");
+    //for (Int_t i = 0; i < 10; i++)
+    // cout<<i<<" bin "<<_muonISOSF_eta24[i]<<endl;
+
     
     // Photon weights
     //h1_eGammaPt     = (TH1D*)_inFile->Get("h1_eGammaPtWeightCombined");
@@ -157,7 +167,6 @@ float WeightUtils::PhotonSF(TLorentzVector ph)
   Float_t wID = 1;
   Float_t wCS = 1;
 
-  //Int_t myBinPt  = h2_photonIDSF->FindFirstBinAbove(10,1);
   Int_t myBinPt  = h2_photonIDSF->GetXaxis()->FindBin(ph.Pt());
   Int_t myBinEta = h2_photonIDSF->GetYaxis()->FindBin(fabs(ph.Eta()));
   //cout<<"xbin(pt) = "<<myBinPt<<"  ybin(eta)="<<myBinEta<<endl;
@@ -167,6 +176,8 @@ float WeightUtils::PhotonSF(TLorentzVector ph)
   wCS =  h2_photonCSEVSF->GetBinContent(myBinPt, myBinEta);
   
   //cout<<"Photon pt = "<<ph.Pt()<<"  eta="<<ph.Eta()<<"   IDSF ="<<wID<<"  CSCF="<<wCS<<endl;
+  if (!isfinite(wID*wCS))
+    cout<<"Photon pt = "<<ph.Pt()<<"  eta="<<ph.Eta()<<"   IDSF ="<<wID<<"  CSCF="<<wCS<<endl;
   return wID*wCS;
 }
 
@@ -175,77 +186,74 @@ float WeightUtils::MuonSF(TLorentzVector mu)
   Float_t wID  = 1;
   Float_t wISO = 1;
 
-  Double_t * mySFID;
+  //cout<<"mu pt="<<mu.Pt()<<"  eta="<<mu.Eta()<<"  wID="<<wID<<"  wISO="<<wISO<<endl;
+  //Double_t * mySFID;
   Double_t * mySFISO;
+  // ** We do not apply muID SF for dalitz analysis! **
   //10-20-25-30-35-40-50-60-90-140-300
   if (fabs(mu.Eta())<0.9){
-    mySFID  = _muonIDSF_eta09;
+    //mySFID  = _muonIDSF_eta09;
     mySFISO = _muonISOSF_eta09;
   } 
   else if (fabs(mu.Eta())<1.2){
-    mySFID  = _muonIDSF_eta12; 
+    //mySFID  = _muonIDSF_eta12; 
     mySFISO = _muonISOSF_eta12;
   }
   else if (fabs(mu.Eta())<2.1){
-    mySFID  = _muonIDSF_eta21;
+    //mySFID  = _muonIDSF_eta21;
     mySFISO = _muonISOSF_eta21;
   }
   else if (fabs(mu.Eta())<2.4){
-    mySFID  = _muonIDSF_eta24; 
+    //mySFID  = _muonIDSF_eta24; 
     mySFISO = _muonISOSF_eta24;
   }
-  else {
-    mySFID = 0;
-    mySFISO = 0;
-  }
+  else return 1.0;
 
-  if (mu.Pt() > 10){
-    wID  = mySFID[0];
-    wISO = mySFISO[0];
-  }
+  //if (mu.Pt() > 10){
+    //wID  = mySFID[0];
+    //wISO = mySFISO[0]; only apply to pt>20 muons
+  //}
   if (mu.Pt() > 20){
-    wID  = mySFID[1];
+    //wID  = mySFID[1];
     wISO = mySFISO[1];
   }
   if (mu.Pt() > 25){
-    wID  = mySFID[2];
+    //wID  = mySFID[2];
     wISO = mySFISO[2];
   }
   if (mu.Pt() > 30){
-    wID  = mySFID[3];
+    //wID  = mySFID[3];
     wISO = mySFISO[3];
   }
   if (mu.Pt() > 35){
-    wID  = mySFID[4];
+    //wID  = mySFID[4];
     wISO = mySFISO[4];
   }
   if (mu.Pt() > 40){
-    wID  = mySFID[5];
+    //wID  = mySFID[5];
     wISO = mySFISO[5];
   }
   if (mu.Pt() > 50){
-    wID  = mySFID[6];
+    //wID  = mySFID[6];
     wISO = mySFISO[6];
   }
   if (mu.Pt() > 60){
-    wID  = mySFID[7];
+    //wID  = mySFID[7];
     wISO = mySFISO[7];
   }
   if (mu.Pt() > 90){
-    wID  = mySFID[8];
+    //wID  = mySFID[8];
     wISO = mySFISO[8];
   }
   if (mu.Pt() > 140){
-    wID  = mySFID[9];
+    //wID  = mySFID[9];
     wISO = mySFISO[9];
   }
-  if (mu.Pt() > 300){
-    wID  = mySFID[10];
-    wISO = mySFISO[10];
-  }
 
-  // cout<<"mu pt"<<mu.Pt()<<"  eta="<<mu.Eta()<<"  SF="<<wID<<endl;
-   return wID*wISO;
+  //cout<<"mu pt="<<mu.Pt()<<"  eta="<<mu.Eta()<<"  wID="<<wID<<"  wISO="<<wISO<<endl;
+  if (!isfinite(wID*wISO))
+    cout<<"mu pt="<<mu.Pt()<<"  eta="<<mu.Eta()<<"  wID="<<wID<<"  wISO="<<wISO<<endl;
+  return wID*wISO;
 }
 
   float WeightUtils::PUWeight(float nPUtrue)

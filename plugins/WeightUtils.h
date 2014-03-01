@@ -64,22 +64,22 @@ class WeightUtils: public TObject {
   bool   _isRealData;
   
   //sources
-  TFile *_phFile;
-  TFile *_muFileID;
-  TFile *_muFileISO;
   TFile *_puFile;
+  TFile *_phFileID;
+  //TFile *_muFileID;
+  TFile *_muFileISO;
  
   TH2D * h2_photonIDSF;
   TH2D * h2_photonCSEVSF;
 
-  Double_t *_muonIDSF_eta09;
-  Double_t *_muonIDSF_eta12;
-  Double_t *_muonIDSF_eta21;
-  Double_t *_muonIDSF_eta24;
-  TGraph * gr_muonIDSF_eta09;
-  TGraph * gr_muonIDSF_eta12;
-  TGraph * gr_muonIDSF_eta21;
-  TGraph * gr_muonIDSF_eta24;
+  //Double_t *_muonIDSF_eta09;
+  //Double_t *_muonIDSF_eta12;
+  //Double_t *_muonIDSF_eta21;
+  //Double_t *_muonIDSF_eta24;
+  //TGraph * gr_muonIDSF_eta09;
+  //TGraph * gr_muonIDSF_eta12;
+  //TGraph * gr_muonIDSF_eta21;
+  //TGraph * gr_muonIDSF_eta24;
 
   Double_t *_muonISOSF_eta09;
   Double_t *_muonISOSF_eta12;
@@ -89,7 +89,7 @@ class WeightUtils: public TObject {
   TGraph * gr_muonISOSF_eta12;
   TGraph * gr_muonISOSF_eta21;
   TGraph * gr_muonISOSF_eta24;
-  //TGraph * gr_muonISOSF;
+
  //TH1D  *h1_eGammaPt;   
   //TH1D  *h1_muGammaPt;  
   //TH1D  *h1_eGammaPV;   
