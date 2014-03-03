@@ -163,7 +163,7 @@ if period =="2012":
         signal.extend([
             
             cfg('ggH-mad120', EOS+'/lpchzg/nuTuples_v9.6_8TeV/dalitz/ggHiggsToMuMuGamma_MH120',1, 'dalitz '+selection+' '+period+gen),
-            cfg('ggH-mad125', EOS+'/lpchzg/nuTuples_v9.6_8TeV/Dalitz6/ggHiggsToMuMuGamma_MH125',1, 'dalitz '+selection+' '+period+gen),
+            cfg('ggH-mad125', EOS+'/lpchzg/nuTuples_v9.6_8TeV/dalitz/ggHiggsToMuMuGamma_MH125',1, 'dalitz '+selection+' '+period+gen),
             cfg('ggH-mad130', EOS+'/lpchzg/nuTuples_v9.6_8TeV/dalitz/ggHiggsToMuMuGamma_MH130',1, 'dalitz '+selection+' '+period+gen),
             cfg('ggH-mad135', EOS+'/lpchzg/nuTuples_v9.6_8TeV/dalitz/ggHiggsToMuMuGamma_MH135',1, 'dalitz '+selection+' '+period+gen),
             cfg('ggH-mad140', EOS+'/lpchzg/nuTuples_v9.6_8TeV/dalitz/ggHiggsToMuMuGamma_MH140',1, 'dalitz '+selection+' '+period+gen),
@@ -173,9 +173,9 @@ if period =="2012":
             cfg('vbf-mad120', EOS+'/lpchzg/nuTuples_v9.6_8TeV/dalitz/vbfHiggsToMuMuGamma_MH120',1, 'dalitz '+selection+' '+period+gen),
             cfg('vbf-mad125', EOS+'/lpchzg/nuTuples_v9.6_8TeV/dalitz/vbfHiggsToMuMuGamma_MH125',1, 'dalitz '+selection+' '+period+gen),
             cfg('vbf-mad130', EOS+'/lpchzg/nuTuples_v9.6_8TeV/dalitz/vbfHiggsToMuMuGamma_MH130',1, 'dalitz '+selection+' '+period+gen),
-            cfg('vbf-mad135', EOS+'/lpchzg/nuTuples_v9.6_8TeV/Dalitz4/vbfHiggsToMuMuGamma_MH135',1, 'dalitz '+selection+' '+period+gen),
-            cfg('vbf-mad140', EOS+'/lpchzg/nuTuples_v9.6_8TeV/Dalitz4/vbfHiggsToMuMuGamma_MH140',1, 'dalitz '+selection+' '+period+gen),
-            cfg('vbf-mad145', EOS+'/lpchzg/nuTuples_v9.6_8TeV/Dalitz4/vbfHiggsToMuMuGamma_MH145',1, 'dalitz '+selection+' '+period+gen),
+            cfg('vbf-mad135', EOS+'/lpchzg/nuTuples_v9.6_8TeV/dalitz/vbfHiggsToMuMuGamma_MH135',1, 'dalitz '+selection+' '+period+gen),
+            cfg('vbf-mad140', EOS+'/lpchzg/nuTuples_v9.6_8TeV/dalitz/vbfHiggsToMuMuGamma_MH140',1, 'dalitz '+selection+' '+period+gen),
+            cfg('vbf-mad145', EOS+'/lpchzg/nuTuples_v9.6_8TeV/dalitz/vbfHiggsToMuMuGamma_MH145',1, 'dalitz '+selection+' '+period+gen),
             cfg('vbf-mad150', EOS+'/lpchzg/nuTuples_v9.6_8TeV/dalitz/vbfHiggsToMuMuGamma_MH150',1, 'dalitz '+selection+' '+period+gen),
             
             cfg('vh-mad120', EOS+'/lpchzg/nuTuples_v9.6_8TeV/dalitz/VHiggsToMuMuGamma_MH120',1, 'dalitz '+selection+' '+period+gen),

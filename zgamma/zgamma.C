@@ -640,7 +640,6 @@ Bool_t zgamma::Process(Long64_t entry)
   }
 
 
-
   if (checkTrigger){
     triggerSelector->SelectTrigger(myTrigger, triggerStatus, hltPrescale, isFound, triggerPass, prescale);
     if (!triggerPass) return kTRUE;
@@ -659,13 +658,6 @@ Bool_t zgamma::Process(Long64_t entry)
 
   if (muons.size()<2) return kTRUE;
   
-  //if (muons[1].Pt() < 7 &&
-  //   (zgamma::CalculateMuonIso(&muons[0]) > 0.2 || zgamma::CalculateMuonIso(&muons[1]) > 1.0)
-  //    )
-  //return kTRUE;
-  //else if(zgamma::CalculateMuonIso(&muons[0]) > 0.4 || zgamma::CalculateMuonIso(&muons[1]) > 0.4) 
-  //return kTRUE;  
-
   Float_t tmpMll = 99999;
   if (muons.size()==2){
     lPt1 = muons[0];
@@ -703,9 +695,14 @@ Bool_t zgamma::Process(Long64_t entry)
   hists->fill1DHist(Mll,  Form("diLep_mass_low_cut%i", 3), ";M(ll)", 50, 0,20,  1, "");
   hists->fill1DHist(Mll,  Form("diLep_mass_high_cut%i", 3),";M(ll)", 50, 0,120, 1, "");
 
+  
+  if (lPt1.Pt() > 20 && zgamma::CalculateMuonIso(&muons[0]) > 0.4)
+    return kTRUE;
+  
   MakePhotonPlots(gamma);
   
   if (lPt1.Pt() < cut_l1pt || lPt2.Pt() < cut_l2pt_low)   return kTRUE;
+
 
   //if (!isfinite(eventWeight))
   //cout<<"nan/inf "<<eventWeight<<endl;
@@ -729,19 +726,16 @@ Bool_t zgamma::Process(Long64_t entry)
   CountEvents(4);
 
 
-  for(Int_t ev=0; ev<evSize;ev++){
-    if (eventNumber==hisEVTS[ev]){cout<<eventNumber<<" Found an event after lept selection "<<endl;
-      cout<<"Mll = "<<Mll<<endl;
-      break;}
-  }
+  //for(Int_t ev=0; ev<evSize;ev++){
+  //if (eventNumber==hisEVTS[ev]){cout<<eventNumber<<" Found an event after lept selection "<<endl;
+  //  cout<<"Mll = "<<Mll<<endl;
+  //  break;}
+  //}
+
   if (Mll > 20) return kTRUE;
 
   fout<<runNumber<<" "<<eventNumber<<endl;
   
-  for(Int_t ev=0; ev<evSize;ev++){
-    if (eventNumber==hisEVTS[ev]){cout<<eventNumber<<" Found an event after mll cut"<<endl;
-      break;}
-  }
   
   FillHistosFull(5, eventWeight, l1, l2, lPt1, lPt2, gamma, "");
   FillHistoCounts(5, eventWeight);
@@ -752,12 +746,13 @@ Bool_t zgamma::Process(Long64_t entry)
   FillHistosFull(6, eventWeight, l1, l2, lPt1, lPt2, gamma, "");
   FillHistoCounts(6, eventWeight);
   CountEvents(6);
-  if (fabs(gamma.Eta())<1.444)
-    FillHistosFull(6, eventWeight, l1, l2, lPt1, lPt2, gamma, "EB");
-  else
-    FillHistosFull(6, eventWeight, l1, l2, lPt1, lPt2, gamma, "EE");
+  //if (fabs(gamma.Eta())<1.444)
+  //FillHistosFull(6, eventWeight, l1, l2, lPt1, lPt2, gamma, "EB");
+  //else
+  //FillHistosFull(6, eventWeight, l1, l2, lPt1, lPt2, gamma, "EE");
 
   global_Mll = Mll;
+  Float_t Mllg = (l1+l2+gamma).M();
 
   MakeMuonPlots(muons[0], pvPosition);
   MakeMuonPlots(muons[1], pvPosition);
@@ -770,8 +765,6 @@ Bool_t zgamma::Process(Long64_t entry)
     CountEvents(12);
     //return kTRUE;
   }
-
-  Float_t Mllg = (l1+l2+gamma).M();
 
 
   if ( (Mll>2.9 && Mll<3.3) || (Mll>9.3 && Mll<9.7)) return kTRUE; //jpsi and upsilon removeal
@@ -1144,7 +1137,7 @@ bool zgamma::PassMuonIdAndIso(TCMuon *lep, muIdAndIsoCuts cuts, TVector3 *pv)
      && ((lep->IsTRK() && lep->NumberOfMatches() > 0) || lep->IsGLB())
      && fabs(lep->Dxy(pv))     < cuts.dxy
      && fabs(lep->Dz(pv))      < cuts.dz
-     && (lep->Pt() < 20 || zgamma::CalculateMuonIso(lep) < 0.4)
+     //&& (lep->Pt() < 20 || zgamma::CalculateMuonIso(lep) < 0.4)
      )
     pass = true;
   /*  
