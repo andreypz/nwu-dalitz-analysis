@@ -9,14 +9,17 @@ setTDRStyle()
 gStyle.SetOptTitle(0)
 
 print len(sys.argv), sys.argv
-if len(sys.argv) < 2:
+if len(sys.argv) < 1:
     sys.exit()
 
+nominal = 'v42-pre-app'
  
-f0 = TFile("v35-mu-newiso/limit-data.root")
+f0 = TFile(nominal+"/limit-data.root")
 g0 = f0.Get("expected")
-f1 = TFile("v35-mu-newiso-noSyst/limit-data.root")
+f1 = TFile(nominal+"-noSyst/limit-data.root")
 g1 = f1.Get("expected")
+f2 = TFile(nominal+"-br/limit-data.root")
+g2 = f1.Get("expected")
 
 g0.UseCurrentStyle()
 g0.SetMarkerColor(kBlack)
@@ -28,15 +31,21 @@ g1.SetLineColor(kRed+1)
 g1.SetLineWidth(2)
 #g1.SetLineStyle(2)
 
+g2.UseCurrentStyle()
+g2.SetLineColor(kGreen+1)
+g2.SetLineWidth(2)
+
 mg = TMultiGraph()
 mg.SetTitle('')
 mg.Add(g0)
 mg.Add(g1)
+#mg.Add(g2)
 
 
 leg = TLegend(0.30,0.7,0.64,0.90);
 leg.AddEntry(g0,"Nominal", "l")
 leg.AddEntry(g1,"No sytematics", "l")
+leg.AddEntry(g2,"2x syst on BR", "l")
 
 f = {}
 g = {}

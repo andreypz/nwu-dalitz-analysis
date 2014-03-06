@@ -7,7 +7,15 @@ from ROOT import *
 gROOT.SetBatch()
 sys.path.append("../zgamma")
 import utils as u
-
+class AutoVivification(dict):
+  """Implementation of perl's autovivification feature."""
+  def __getitem__(self, item):
+    try:
+      return dict.__getitem__(self, item)
+    except KeyError:
+      value = self[item] = type(self)()
+      return value
+    
 import ConfigParser as cp
 cf = cp.ConfigParser()
 cf.read('config.cfg')
@@ -21,8 +29,8 @@ colors = {}
 for f,col in cf.items("colors"):
   colors[f] = int(col)
 
-print colors
-print yearList, leptonList, catList, massList, sigNameList  
+#print colors
+#print yearList, leptonList, catList, massList, sigNameList  
 #print "Begin, INPUT"
 #raw_input()
 
@@ -36,6 +44,9 @@ debugPlots = True
 verbose    = 0
 rootrace   = False
 
+EBetaCut = 1.444
+ptMllgCut = 0.30
+
 # OK listen, we're gunna need to do some bullshit just to get a uniform RooRealVar name for our data objects.
 # Because I named branches different than the trees, there's a lot of tree loops here
 # So we'll loop through the Branch, set mzg to the event value (if it's in range), and add that to our RooDataSet.
@@ -44,10 +55,10 @@ rootrace   = False
 TH1.SetDefaultSumw2(kTRUE)
 if rootrace: RooTrace.active(kTRUE)
 
-def LumiXSWeighter(mH, prod,sel):
+def LumiXSWeighter(mH, prod, sel, Nev=None):
   cro = float(u.conf.get(prod+"H-"+str(mH), "cs-"+sel))
-  Nev = int(u.conf.get(prod+"H-"+str(mH), "Nev-"+sel))
-  
+  if Nev==None:
+    Nev = int(u.conf.get(prod+"H-"+str(mH), "Nev-"+sel))  
   sc = float(u.lumi*cro)/Nev
   print 'M=',mH, 'cs=',cro, 'Nev=', Nev, 'lumi=',u.lumi, "scale", sc
   return sc
@@ -71,18 +82,17 @@ def doInitialFits(subdir):
 
   #musel = "mumu"
   musel = "mugamma"
-  EBetaCut = 1.0
   
   dataDict   = {'mu2012':TFile(basePath1+'m_Data_'+musel+'_2012.root','r'),
                 'el2012':TFile(basePath2+'m_Data_electron_2012.root','r')}
 
-  signalDict = {'gg_mu2012_M120':TFile(basePath1+musel+'_2012/hhhh_dal-mad120_1.root','r'),
-                'gg_mu2012_M125':TFile(basePath1+musel+'_2012/hhhh_dal-mad125_1.root','r'),
-                'gg_mu2012_M130':TFile(basePath1+musel+'_2012/hhhh_dal-mad130_1.root','r'),
-                'gg_mu2012_M135':TFile(basePath1+musel+'_2012/hhhh_dal-mad135_1.root','r'),
-                'gg_mu2012_M140':TFile(basePath1+musel+'_2012/hhhh_dal-mad140_1.root','r'),
-                'gg_mu2012_M145':TFile(basePath1+musel+'_2012/hhhh_dal-mad145_1.root','r'),
-                'gg_mu2012_M150':TFile(basePath1+musel+'_2012/hhhh_dal-mad150_1.root','r'),
+  signalDict = {'gg_mu2012_M120':TFile(basePath1+musel+'_2012/hhhh_ggH-mad120_1.root','r'),
+                'gg_mu2012_M125':TFile(basePath1+musel+'_2012/hhhh_ggH-mad125_1.root','r'),
+                'gg_mu2012_M130':TFile(basePath1+musel+'_2012/hhhh_ggH-mad130_1.root','r'),
+                'gg_mu2012_M135':TFile(basePath1+musel+'_2012/hhhh_ggH-mad135_1.root','r'),
+                'gg_mu2012_M140':TFile(basePath1+musel+'_2012/hhhh_ggH-mad140_1.root','r'),
+                'gg_mu2012_M145':TFile(basePath1+musel+'_2012/hhhh_ggH-mad145_1.root','r'),
+                'gg_mu2012_M150':TFile(basePath1+musel+'_2012/hhhh_ggH-mad150_1.root','r'),
 
                 'vbf_mu2012_M120':TFile(basePath1+musel+'_2012/hhhh_vbf-mad120_1.root','r'),
                 'vbf_mu2012_M125':TFile(basePath1+musel+'_2012/hhhh_vbf-mad125_1.root','r'),
@@ -114,13 +124,20 @@ def doInitialFits(subdir):
   mzg  = RooRealVar('CMS_hzg_mass','CMS_hzg_mass', lowCutOff,highCutOff)
   mzg.setRange('FullRegion',   lowCutOff, highCutOff)
   mzg.setRange('DalitzRegion', lowCutOff, highCutOff)
+  mzg.setRange('SignalRegion', 122, 128)
   mzg.setBins(50000,'cache')
 
   c = TCanvas("c","c",0,0,500,400)
   c.cd()
 
-  ws =RooWorkspace("ws")
+  ws = RooWorkspace("ws")
 
+  yi_da0 = AutoVivification()
+  yi_da1 = AutoVivification()
+  yi_gg0 = AutoVivification()
+  yi_gg1 = AutoVivification()
+  mean_gg0 = AutoVivification()
+  sigma_gg0 = AutoVivification()
   # ###################################
   # start loop over all year/lep/cat #
   # ###################################
@@ -132,8 +149,8 @@ def doInitialFits(subdir):
           RooTrace.dump()
           raw_input()
           
-        signalList = []
-        signalListDH = []
+        signalList    = []
+        signalListDH  = []
         signalListPDF = []
         if verbose: print 'top of loop',year,lepton,cat
         
@@ -152,11 +169,15 @@ def doInitialFits(subdir):
             sig_argSW = RooArgSet(mzg,weight)
             sig_ds    = RooDataSet(sigName,sigName,sig_argSW,'Weight')
 
-            lumiWeight = LumiXSWeighter(int(mass), prod,lepton)
+            Nev = u.getTotalEvents(signalDict[prod+"_"+lepton+year+"_M"+mass])
+            lumiWeight = LumiXSWeighter(int(mass), prod, lepton, Nev)
             print signalTree, "A signal tree", prod, '  categ=',cat, "mass =", mass
             for i in signalTree:
               if   cat=="EB" and fabs(i.ph_eta)>EBetaCut: continue
               elif cat=="EE" and fabs(i.ph_eta)<EBetaCut: continue
+
+              if fabs(i.ph_eta) > EBetaCut: continue
+              if i.ph_pt/i.m_llg < ptMllgCut or i.di_pt/i.m_llg < ptMllgCut: continue
 
               if i.m_llg> lowCutOff and i.m_llg<highCutOff:
                 mzg.setVal(i.m_llg)
@@ -215,6 +236,13 @@ def doInitialFits(subdir):
               signalListDH.append(RooDataHist('dh_'+histName, 'dh_' +histName,mzg_argL,signalList[-1]))
               signalListPDF.append(RooHistPdf('pdf_'+histName,'pdf_'+histName,mzg_argS,signalListDH[-1],2))
               getattr(ws,'import')(signalListPDF[-1])
+
+              yi_gg0[year][mass][lepton][cat] = sig_ds.sumEntries()
+              yi_gg1[year][mass][lepton][cat] = sig_ds.sumEntries('1','SignalRegion')
+
+              mean_gg0[year][mass][lepton][cat]  = [signalList[-1].GetMean(), signalList[-1].GetMeanError()]
+              sigma_gg0[year][mass][lepton][cat] = [signalList[-1].GetRMS(), signalList[-1].GetRMSError()]
+
               if verbose: print '\n\n ** finshed one mass -->>', mass
 
             if debugPlots and prod=='gg':
@@ -222,6 +250,10 @@ def doInitialFits(subdir):
               for i,signal in enumerate(signalListPDF):
                 signalListDH[i].plotOn(testFrame)
                 signal.plotOn(testFrame)
+                #signal.paramOn(testFrame)
+                #signal.statOn(testFrame)
+                #mzg_argS.writeToFile('myargset.txt')
+                
               testFrame.Draw()
               c.SaveAs(plotBase+'_'.join(['signals',prod,year,lepton,'cat'+cat,'M'+mass])+'.png')
               
@@ -248,6 +280,9 @@ def doInitialFits(subdir):
         for i in dataTree:
           if cat=="EB" and fabs(i.ph_eta)>EBetaCut: continue
           elif cat=="EE" and fabs(i.ph_eta)<EBetaCut: continue
+
+          if fabs(i.ph_eta)>EBetaCut: continue
+          if i.ph_pt/i.m_llg < ptMllgCut or i.di_pt/i.m_llg < ptMllgCut: continue
           
           if i.m_llg> lowCutOff and i.m_llg<highCutOff:
             mzg.setVal(i.m_llg)
@@ -435,12 +470,32 @@ def doInitialFits(subdir):
           
 
         ws.commitTransaction()
-        
+
+
+        yi_da0[year][lepton][cat] = data_ds.sumEntries()
+        yi_da1[year][lepton][cat] = data_ds.sumEntries('1','SignalRegion')
+
+
   u.createDir(subdir)
   ws.writeToFile(subdir+'/testRooFitOut_Dalitz.root')
 
   ws.Print()
+  
+  print '*** Some yields from data'
+  print 'Full range:', yi_da0
+  print 'in 122-128:', yi_da1
 
+  print '*** Some yields from ggH'
+  print 'Full range:', yi_gg0
+  print 'in 122-128:', yi_gg1
+
+
+  print "You should also notice that EBeta cut was", EBetaCut
+  print "And that the range was from ", lowCutOff, 'to', highCutOff
+    
+  print "\n Mean:", mean_gg0
+  print "\n Sigma:", sigma_gg0
+  
   print '\n \t we did it!\t'
 
 
@@ -471,6 +526,6 @@ if __name__=="__main__":
 
   with open(r'config.cfg', 'wb') as configfile:
     cf.write(configfile)
-
+    
   doInitialFits(s)
   print "done"
