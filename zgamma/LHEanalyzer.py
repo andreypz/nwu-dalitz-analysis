@@ -15,14 +15,13 @@ files={}
 
 #files["one"] = ['/uscms_data/d2/andreypz/lhe_vbf_higgs/vbfh_eeg_m125.root']
 #files["two"] = ['/uscms_data/d2/andreypz/lhe_vbf_higgs/vbfh_mumug_m125.root']
-#files["one"] = ['/uscms_data/d2/andreypz/lhe_higgs_eegamma_dalitz/heeg_m120.root']
-files["one"] = ['/uscms_data/d2/andreypz/lhe_vh_mumugamma/hmumug_m125.root']
-files["two"] = ['/uscms_data/d2/andreypz/lhe_higgs_mumugamma_dalitz/hmumug_m125.root']
-#files["one"] = ['/uscms_data/d2/andreypz/lhe_mcfm/lhe_mcfm_hzg_dalitz_lord_fixed_unweighted.lhe.root']
+#files["one"] = ['/uscms_data/d2/andreypz/lhe_vh_mumugamma/hmumug_m125.root']
+files["two"] = ['/uscms_data/d2/andreypz/lhe_higgs_mumugamma_dalitz/hmumug_m120.root']
+files["one"] = ['/uscms_data/d2/andreypz/lhe_higgs_eegamma_dalitz/heeg_m120.root']
 
-MH = 125
+MH = 120
 LEPID1 = 13
-LEPID2 = 13
+LEPID2 = 11
 
 print files
 #gSystem.Load("/home/andreypz/workspace/MadGraph5/ExRootAnalysis/lib/libExRootAnalysis.so")
@@ -156,10 +155,9 @@ def FillAllHists(files, h):
             zcount +=1
         
         #f not hasGamma: continue
-
+        
         dcount += 1
-        #if dcount >10000:
-        #    continue
+        #if dcount > 200: break
         
             
         tri = diLep + gamma
@@ -190,7 +188,6 @@ def FillAllHists(files, h):
         phi = ang.GetPhi()
         
         #print dcount, c1, c2, phi, c3
-        #if dcount>20: break
         
         h.fill1DHist(c1,  "ang_co1",";gen cos_lp",  100,-1,1, 1,"");
         h.fill1DHist(c2,  "ang_co2",";gen cos_lm",  100,-1,1, 1,"");
@@ -203,14 +200,35 @@ def FillAllHists(files, h):
 
         #h.fill1DHist(g1.M(),    "g1_M",  ";g1 M",    200, -2,2, 1, "")
         #h.fill1DHist(g2.M(),    "g2_M",  ";g2 M",    200, -2,2, 1, "")
-        
-        h.fill1DHist(diLep.M(),     "gen_Mll_0",";gen_Mll, GeV",100,0,15, 1,"");
+
+        Mll_max = 20
+        h.fill1DHist(diLep.M(),     "gen_Mll_0",";gen_Mll, GeV",100,0,Mll_max, 1,"");
         if gamma.Pt()>25 and fabs(gamma.Eta())<2.5:
-            h.fill1DHist(diLep.M(),     "gen_Mll_1",";gen_Mll, GeV",100,0,15, 1,"")
+            h.fill1DHist(diLep.M(),     "gen_Mll_1",";gen_Mll, GeV",100,0,Mll_max, 1,"")
 
             if lPt1.Pt()>23 and lPt2.Pt()>4 and fabs(lPt1.Eta())<2.4 and  fabs(lPt2.Eta())<2.4:
-                h.fill1DHist(diLep.M(),     "gen_Mll_2",";gen_Mll, GeV",100,0,15, 1,"");            
-                h.fill1DHist(diLep.M(),     "gen_Mll_3",";gen_Mll, GeV",100,0,15, 1,"");
+                h.fill1DHist(diLep.M(),     "gen_Mll_2",";gen_Mll, GeV",100,0,Mll_max, 1,"");            
+
+                for a in xrange(3,11):
+                    if (diLep.Pt()/tri.M() > 0.10+0.05*(a-3) and gamma.Pt()/tri.M() > 0.10 + +0.05*(a-3)): 
+                        h.fill1DHist(diLep.M(),     "gen_Mll_"+str(a),";gen_Mll, GeV",100,0,Mll_max, 1,"");
+
+                for a in xrange(11,17):
+                    if (diLep.Pt()> 25+5*(a-11)): 
+                        h.fill1DHist(diLep.M(),     "gen_Mll_"+str(a),";gen_Mll, GeV",100,0,Mll_max, 1,"");
+
+                for a in xrange(17,23):
+                    if (gamma.Pt()> 25+5*(a-17)): 
+                        h.fill1DHist(diLep.M(),     "gen_Mll_"+str(a),";gen_Mll, GeV",100,0,Mll_max, 1,"");
+
+                for a in xrange(23,31):
+                    if (diLep.Pt()/tri.M() > 0.10+0.05*(a-23)):
+                        h.fill1DHist(diLep.M(),     "gen_Mll_"+str(a),";gen_Mll, GeV",100,0,Mll_max, 1,"");
+
+                for a in xrange(31,39):
+                    if (gamma.Pt()/tri.M() > 0.10+0.05*(a-31)):
+                        h.fill1DHist(diLep.M(),     "gen_Mll_"+str(a),";gen_Mll, GeV",100,0,Mll_max, 1,"");
+
 
         h.fill1DHist(gamma.M(),"gamma_mass",  ";gamma mass",    200, -2,2, 1, "")
         #h.fill1DHist(g1.Pt(),    "g1_pt",  ";g1 pt",    50, 0,100, 1, "")
@@ -284,6 +302,7 @@ def FillAllHists(files, h):
 
         h.fill1DHist(TVector2.Phi_mpi_pi(diLep.Phi()-gamma.Phi()), "dPhi_diLep_gamma", ";dPhi(ll, #gamma)",            50, -10,10, 1, "")
         
+        h.fill1DHist(lPt1.DeltaR(gamma),     "dR_lPt1_gamma",     ";dR(l1, #gamma)", 50, 0,5, 1, "")
         h.fill1DHist(l1.DeltaR(l2),     "dR_l1_l2",     ";dR(l+, l-)",      50, 0,5, 1, "")
         h.fill1DHist(diLep.DeltaR(l1),  "dR_diLep_l1",  ";dR(diLep, l+)",   50, 0,5, 1, "")
         h.fill1DHist(diLep.DeltaR(l2),  "dR_diLep_l2",  ";dR(diLep, l-)",   50, 0,5, 1, "")
@@ -320,34 +339,111 @@ if __name__ == "__main__":
     u.drawAllInFile(oneFile, "MAD ele", twoFile, "MAD mu",None,"","", path, None,"norm", isLog=True)
     #u.drawAllInFile(oneFile, "MCFM ele", twoFile, "Madgraph mu",None,"","", path, None,"norm")
     #u.drawAllInFile(oneFile, "vbf ele", twoFile, "vbf mu",None,"","", path, None,"norm", isLog=True)
-    #u.drawAllInFile(twoFile, "MAD-125",None,"", None,"","", path, None,"norm")
+    #u.drawAllInFile(oneFile, "MAD-125",None,"", None,"","", path, None,"norm")
+
 
     u.createDir(path+"/eff")
+    c1 = TCanvas("c1","c1", 600,500)
+    c1.cd()
+    hh = []
+    ra = []
+    for n in xrange(0,39):
+        print n
+        hh.append(oneFile.Get("gen_Mll_"+str(n)))
+        ra.append(hh[-1].Clone())
+        ra[-1].Divide(hh[0])
+        
+    ra[3].Draw("hist")
+    ra[3].SetMinimum(0)
+    ra[3].SetMaximum(1)
+    ra[3].SetTitle(";Mll gen at LHE; acc")
+    ra[3].SetLineColor(29)
+    leg = TLegend(0.70,0.65,0.90,0.98);
+    leg.AddEntry(ra[3],"pT/Mllg > 0.10", "l")
+    for a in xrange(3,11):
+        ra[a].Draw('same hist')
+        ra[a].SetLineColor(30+a-3)
+        leg.AddEntry(ra[a],"pT/mllg > %.2f"%(0.15+0.05*(a-3)), "l")
 
-    h0 = oneFile.Get("gen_Mll_0")
-    h1 = oneFile.Get("gen_Mll_1")
-    h2 = oneFile.Get("gen_Mll_2")
-    r1 = h1.Clone()
-    r1.Divide(h0)
-    r2 = h2.Clone()
-    r2.Divide(h0)
-
-    r1.Draw("hist")
-    r2.Draw("hist same")
-    r1.SetMinimum(0)
-    r1.SetMaximum(1)
-    r1.SetTitle(";Mll gen at LHE; acc")
-    r1.SetLineColor(kRed+1)
-    r2.SetLineColor(kGreen+1)
-    leg = TLegend(0.20,0.2,0.90,0.30);
-    leg.AddEntry(r1,"photon pt>25, eta<2.5", "l")
-    leg.AddEntry(r2,"photon pt>25 and p_{T}(l1)>23, p_{T}(l2)>4", "l")
-    leg.SetTextSize(0.04)
+    leg.SetTextSize(0.03)
     leg.SetFillColor(kWhite)
     leg.Draw()
-    #c1.SaveAs(path+"/eff/acceptance_Mll_LHE.png")
+    c1.SaveAs(path+"/eff/acceptance_Mll_LHE_ptMlg.png")
 
-            
+
+
+    ra[11].Draw("hist")
+    ra[11].SetMinimum(0)
+    ra[11].SetMaximum(1)
+    ra[11].SetTitle(";Mll gen at LHE; acc")
+    ra[11].SetLineColor(29)
+    leg = TLegend(0.70,0.65,0.90,0.98);
+    leg.AddEntry(ra[11],"pT(ll) > 25 GeV", "l")
+    for a in xrange(12,17):
+        ra[a].Draw('same hist')
+        ra[a].SetLineColor(30+a-12)
+        leg.AddEntry(ra[a],"pT(ll)> %.0f GeV"%(30.+5*(a-12)), "l")
+
+    leg.SetTextSize(0.03)
+    leg.SetFillColor(kWhite)
+    leg.Draw()
+    c1.SaveAs(path+"/eff/acceptance_Mll_LHE_pTll.png")
+
+
+    ra[17].Draw("hist")
+    ra[17].SetMinimum(0)
+    ra[17].SetMaximum(1)
+    ra[17].SetTitle(";Mll gen at LHE; acc")
+    ra[17].SetLineColor(29)
+    leg = TLegend(0.70,0.65,0.90,0.98);
+    leg.AddEntry(ra[17],"pT(#gamma) > 25 GeV", "l")
+    for a in xrange(18,23):
+        ra[a].Draw('same hist')
+        ra[a].SetLineColor(30+a-18)
+        leg.AddEntry(ra[a],"pT(#gamma)> %.0f GeV"%(30.+5*(a-18)), "l")
+
+    leg.SetTextSize(0.03)
+    leg.SetFillColor(kWhite)
+    leg.Draw()
+    c1.SaveAs(path+"/eff/acceptance_Mll_LHE_pTgamma.png")
+
+
+
+    ra[23].Draw("hist")
+    ra[23].SetMinimum(0)
+    ra[23].SetMaximum(1)
+    ra[23].SetTitle(";Mll gen at LHE; acc")
+    ra[23].SetLineColor(29)
+    leg = TLegend(0.70,0.65,0.90,0.98);
+    leg.AddEntry(ra[23],"pT(ll)/Mllg > 0.10", "l")
+    for a in xrange(24,31):
+        ra[a].Draw('same hist')
+        ra[a].SetLineColor(30+a-24)
+        leg.AddEntry(ra[a],"pT(ll)/Mllg > %.2f"%(0.15 + 0.05*(a-24)), "l")
+
+    leg.SetTextSize(0.03)
+    leg.SetFillColor(kWhite)
+    leg.Draw()
+    c1.SaveAs(path+"/eff/acceptance_Mll_LHE_pTllMllg.png")
+
+    ra[31].Draw("hist")
+    ra[31].SetMinimum(0)
+    ra[31].SetMaximum(1)
+    ra[31].SetTitle(";Mll gen at LHE; acc")
+    ra[31].SetLineColor(29)
+    leg = TLegend(0.70,0.65,0.90,0.98);
+    leg.AddEntry(ra[31],"pT(#gamma)/Mllg > 0.10", "l")
+    for a in xrange(32,39):
+        ra[a].Draw('same hist')
+        ra[a].SetLineColor(30+a-32)
+        leg.AddEntry(ra[a],"pT(#gamma)/Mllg > %.2f"%(0.15 + 0.05*(a-31)), "l")
+
+    leg.SetTextSize(0.03)
+    leg.SetFillColor(kWhite)
+    leg.Draw()
+    c1.SaveAs(path+"/eff/acceptance_Mll_LHE_pTgammaMllg.png")
+
+
     plot_types =[]
     list = os.listdir(pathBase)
     for d in list:

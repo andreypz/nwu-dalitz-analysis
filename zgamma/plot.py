@@ -33,6 +33,127 @@ if options.mumu:
 if options.elgamma:
     sel.append("elgamma")
 
+
+def effPlots2(f1, path):
+    c1.cd()
+    hh = []
+    ra = []
+    for n in xrange(0,31):
+        print n
+        hh.append(f1.Get("eff/gen_Mll_"+str(n)))
+        ra.append(hh[-1].Clone())
+        ra[-1].Divide(hh[0])
+
+    ra[1].Draw("hist")
+    ra[1].SetMinimum(0)
+    ra[1].SetMaximum(1)
+    ra[1].SetTitle(";Mll; acc * eff")
+    bcol = 29
+    ra[1].SetLineColor(bcol)
+    ra[1].SetLineWidth(2)
+    leg = TLegend(0.70,0.65,0.95,0.98);
+    leg.AddEntry(ra[1],"pT(ll) > 25 GeV", "l")
+    for a in xrange(2,7):
+        ra[a].Draw('same hist')
+        ra[a].SetLineColor(bcol+2*(a-2))
+        ra[a].SetLineWidth(2)
+        leg.AddEntry(ra[a],"pT(ll) > %.0f GeV"%(25+5*(a-1)), "l")
+
+    leg.SetTextSize(0.03)
+    leg.SetFillColor(kWhite)
+    leg.Draw()
+    c1.SaveAs(path+"/acc_eff_Mll_ptll.png")
+
+    st = 7
+    ed = 12
+    ra[st].Draw("hist")
+    ra[st].SetMinimum(0)
+    ra[st].SetMaximum(1)
+    ra[st].SetTitle(";Mll; acc")
+    bcol = 33
+    ra[st].SetLineColor(bcol)
+    ra[st].SetLineWidth(2)
+    leg = TLegend(0.70,0.65,0.95,0.98);
+    leg.AddEntry(ra[st],"pT(#gamma) > 25 GeV", "l")
+    for a in xrange(st+1,ed+1):
+        ra[a].Draw('same hist')
+        ra[a].SetLineColor(bcol+2*(a-st))
+        ra[a].SetLineWidth(2)
+        leg.AddEntry(ra[a],"pT(#gamma) > %.0f GeV"%(25+5*(a-st)), "l")
+
+    leg.SetTextSize(0.03)
+    leg.SetFillColor(kWhite)
+    leg.Draw()
+    c1.SaveAs(path+"/acc_eff_Mll_ptgamma.png")
+
+    st = 13
+    ed = 18
+    ra[st].Draw("hist")
+    ra[st].SetMinimum(0)
+    ra[st].SetMaximum(1)
+    ra[st].SetTitle(";Mll; acc")
+    bcol = 38
+    ra[st].SetLineColor(bcol)
+    ra[st].SetLineWidth(2)
+    leg = TLegend(0.70,0.65,0.95,0.98);
+    leg.AddEntry(ra[st],"pT(#gamma)/Mllg > 0.20", "l")
+    for a in xrange(st+1,ed+1):
+        ra[a].Draw('same hist')
+        ra[a].SetLineColor(bcol+2*(a-st))
+        ra[a].SetLineWidth(2)
+        leg.AddEntry(ra[a],"pT(#gamma)/Mllg > %.2f"%(0.20+0.05*(a-st)), "l")
+
+    leg.SetTextSize(0.03)
+    leg.SetFillColor(kWhite)
+    leg.Draw()
+    c1.SaveAs(path+"/acc_eff_Mll_ptgammaMllg.png")
+
+    st = 19
+    ed = 24
+    ra[st].Draw("hist")
+    ra[st].SetMinimum(0)
+    ra[st].SetMaximum(1)
+    ra[st].SetTitle(";Mll; acc")
+    bcol = 41
+    ra[st].SetLineColor(bcol)
+    ra[st].SetLineWidth(2)
+    leg = TLegend(0.70,0.65,0.95,0.98);
+    leg.AddEntry(ra[st],"pT(ll)/Mllg > 0.20", "l")
+    for a in xrange(st+1,ed+1):
+        ra[a].Draw('same hist')
+        ra[a].SetLineColor(bcol+2*(a-st))
+        ra[a].SetLineWidth(2)
+        leg.AddEntry(ra[a],"pT(ll)/Mllg > %.2f"%(0.20+0.05*(a-st)), "l")
+
+    leg.SetTextSize(0.03)
+    leg.SetFillColor(kWhite)
+    leg.Draw()
+    c1.SaveAs(path+"/acc_eff_Mll_ptllMllg.png")
+
+
+    st = 25
+    ed = 30
+    ra[st].Draw("hist")
+    ra[st].SetMinimum(0)
+    ra[st].SetMaximum(1)
+    ra[st].SetTitle(";Mll; acc")
+    bcol = 43
+    ra[st].SetLineColor(bcol)
+    ra[st].SetLineWidth(2)
+    leg = TLegend(0.70,0.65,0.95,0.98);
+    leg.AddEntry(ra[st],"pT(both)/Mllg > 0.20", "l")
+    for a in xrange(st+1,ed+1):
+        ra[a].Draw('same hist')
+        ra[a].SetLineColor(bcol+2*(a-st))
+        ra[a].SetLineWidth(2)
+        leg.AddEntry(ra[a],"pT(both)/Mllg > %.2f"%(0.20+0.05*(a-st)), "l")
+
+    leg.SetTextSize(0.03)
+    leg.SetFillColor(kWhite)
+    leg.Draw()
+    c1.SaveAs(path+"/acc_eff_Mll_ptbothMllg.png")
+
+
 def effPlots(f1, path):
     print "Now making efficiency plots"
     #f1.cd(dir)
@@ -159,6 +280,7 @@ if __name__ == "__main__":
 
 
     for thissel in sel:
+        if thissel=='none': continue
         u.setSelection(thissel)
 
         
@@ -181,9 +303,9 @@ if __name__ == "__main__":
         path = pathBase+"/"+subdir
                 
         
-        #sigFileMCFM = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_dal-MCFM_1.root", "OPEN")
-        #sigFileMCFM = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_dal-mcfm_1.root", "OPEN")
-        sigFileMAD  = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_dal-mad"+str(mass)+"_1.root", "OPEN")
+        #sigFileMCFM = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_ggHMCFM_1.root", "OPEN")
+        #sigFileMCFM = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_ggH-mcfm_1.root", "OPEN")
+        sigFileMAD  = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_ggH-mad"+str(mass)+"_1.root", "OPEN")
         sigFileVBF  = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_vbf-mad"+str(mass)+"_1.root", "OPEN")
         sigFileVH   = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_vh-mad"+str(mass)+"_1.root", "OPEN")
 
@@ -197,9 +319,9 @@ if __name__ == "__main__":
 
 
         yields_data[thissel] = u.getYields(dataFile[thissel])
-        yields_sig[thissel]  = u.getYields(sigFile, True) 
-        yields_vbf[thissel]  = u.getYields(sigFileVBF, True) 
-        yields_vh[thissel]   = u.getYields(sigFileVH,  True) 
+        yields_sig[thissel]  = u.getYields(sigFile, 'ggH-125',True) 
+        yields_vbf[thissel]  = u.getYields(sigFileVBF, 'vbfH-125', True) 
+        yields_vh[thissel]   = u.getYields(sigFileVH,  'vH-125', True) 
         #yields_sig[thissel]  = u.getYields(sigFile, False)
         #yields_bkg[thissel]  = u.getYields(bkgFile[thissel])
 
@@ -257,18 +379,32 @@ if __name__ == "__main__":
     #print yields_data
 
 
-    #sigFileMAD  = TFile("hhhh_dal-mad125_1.root", "OPEN")
     #u.drawAllInFile(sigFileMAD, "signal", None, "", None,"","GEN-RECO",pathBase+"/GEN-RECO", None, "lumi")
     
     #u.drawAllInFile(bkgFile[thissel], "DY electrons", sigFile, "Dalitz 2el",  "NewEle-1", pathBase+"/NewEle-1/", None,"norm", isLog=1, )
 
+    
+    #sigFileMAD  = TFile(hPath+"/mugamma_"+period+"/hhhh_ggH-mad125_1.root", "OPEN")
+    if sel[0]=='none':
+        sigFileMAD  = TFile("hhhh_ggH-mad125_1.root", "OPEN")
 
-    sigFileMAD  = TFile(hPath+"/mugamma_"+period+"/hhhh_dal-mad125_1.root", "OPEN")
+        u.createDir(pathBase+"/eff")
+        effPlots(sigFileMAD, pathBase+"/eff/")
+        effPlots2(sigFileMAD, pathBase+"/eff/")
 
-    #u.createDir(pathBase+"/eff")
-    #effPlots(sigFileMAD, pathBase+"/eff/")
 
 
+    htmp = sigFileMAD.Get("lPt2_pt__cut10")
+    int1 = htmp.Integral()
+    int2 = htmp.Integral(0,10)
+    print '\n Fraction of event with trailing lepton pt<20: \n', float(int2)/int1
+
+    htmp = sigFileMAD.Get("ll_deltaR__cut10")
+    int1 = htmp.Integral()
+    int2 = htmp.Integral(0,10)
+    print '\n Fraction of event with dR(l1,l2)<0.4: \n', float(int2)/int1
+
+    '''
     c1 = TCanvas("c4","small canvas",600,600);
     c1.cd()
     Nev = sigFileMAD.Get("Counts/evt_byCut").GetBinContent(2)
@@ -288,8 +424,8 @@ if __name__ == "__main__":
     print "Yields in bins that supposed to correspond to [122,128] window:\n",hc7, hc8, hc9 
 
 
-    m1 = 122.
-    m2 = 128.
+    m1 = 110.
+    m2 = 170.
     
     for r in ["0"]:
         etaCut = TCut("")
@@ -312,7 +448,7 @@ if __name__ == "__main__":
         print 'yields inside ', m1,m2, ' r=',r, 'data=', yda, 'signal=',ysi_sc
         print "significance=", ysi_sc/sqrt(ysi_sc+yda)
     
-    
+    '''
     '''
     h2da = dataFile[thissel].Get("h2D_dalitzPlot_rotation__cut"+cut).ProjectionX("hda_prx")
     h2si = sigFile.Get("h2D_dalitzPlot_rotation__cut"+cut).ProjectionX("hsi_prx")
@@ -350,27 +486,19 @@ if __name__ == "__main__":
 
     #plot_types
     print yields_sig
-    table_sig  = u.yieldsTable(yields_sig, sel)
-    table_vbf  = u.yieldsTable(yields_vbf, sel)
-    table_vh   = u.yieldsTable(yields_vh,  sel)
-    table_data = u.yieldsTable(yields_data, sel)
+
+    table_all  = u.yieldsTable([yields_data,yields_sig, yields_vbf, yields_vh], sel)
 
     if doBkg:
-        table_bkg = u.yieldsTable(yields_bkg, sel)
-        
+        table_bkg = u.yieldsTable(yields_bkg, sel)        
 
-    u.makeTable(table_data,"data", "html")
-    u.makeTable(table_sig, "sig",  "html")
-    u.makeTable(table_data,"data", "twiki")
-    u.makeTable(table_sig, "sig",  "twiki")
-    u.makeTable(table_vbf, "sig-vbf",  "twiki")
-    u.makeTable(table_vh, "sig-vh",  "twiki")
-    #u.makeTable(table_data,"data", "tex")
-    #u.makeTable(table_sig, "sig",  "tex")
+    u.makeTable(table_all,"all", "html")
+    u.makeTable(table_all,"all", "twiki")
+
     if doBkg:
         u.makeTable(table_bkg, "bkg",  "twiki")
 
-    os.system("cat yields_data.html yields_sig.html > yields.html")
+    os.system("cat yields_all.html > yields.html")
 
     comments = ["These plots are made for ...",
                 "Blah"]

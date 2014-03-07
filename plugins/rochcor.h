@@ -14,18 +14,11 @@
 class rochcor {
  public:
   rochcor();
+  rochcor(int seed);
   ~rochcor();
   
-  void momcor_mc(TLorentzVector& , TLorentzVector& , int, float, int);
-  void momcor_data(TLorentzVector& , TLorentzVector& , int, float, int);
-  
-  void momcor_mc_muscle(TLorentzVector& , TLorentzVector& , int, float);
-  void momcor_data_muscle(TLorentzVector& , TLorentzVector& , int, float);
-  
-  void momcor_mc_sidra(TLorentzVector& , TLorentzVector& , int, float);
-  void momcor_data_sidra(TLorentzVector& , TLorentzVector& , int, float);
-  
-  void musclefit_data(TLorentzVector& , TLorentzVector&);
+  void momcor_mc(TLorentzVector&, float, float, int, float&);
+  void momcor_data(TLorentzVector&, float, float, int, float&);
   
   float zptcor(float);
   int etabin(float);
@@ -33,50 +26,47 @@ class rochcor {
   
  private:
   
-  TRandom3 eran1;
-  TRandom3 eran2;
-
-  TRandom3 sran1;
-  TRandom3 sran2;
+  TRandom3 eran;
+  TRandom3 sran;
   
   
   //  static float netabin[9] = {-2.4,-2.1,-1.4,-0.7,0.0,0.7,1.4,2.1,2.4};
   static const double pi = 3.14159265358979323846;
   static const float netabin[9];
-
+  
   static const float genm_smr = 9.09956e+01; //gen mass peak with eta dependent gaussian smearing => better match in Z mass profile vs. eta/phi
   static const float genm = 91.06; //gen mass peak without smearing => Z mass profile vs. eta/phi in CMS note
-
-  static const float recmA = 9.09971e+01; //rec mass peak in MC (2011A)
-  static const float drecmA = 9.09103e+01; //rec mass peak in data (2011A)
-  static const float recmB = 9.10028e+01; //rec mass peak in MC (2011B)
-  static const float drecmB = 9.09105e+01; //rec mass peak in data (2011B)
+  
+  static const float recmA = 9.10062e+01; //rec mass peak in MC (2011A)
+  static const float drecmA = 9.09285e+01; //rec mass peak in data (2011A)
+  static const float mgsclA_stat = 0.0001; //stat. error of global factor for mass peak in MC (2011A)  
+  static const float mgsclA_syst = 0.0006; //syst. error of global factor for mass peak in MC (2011A)  
+  static const float dgsclA_stat = 0.0001; //stat. error of global factor for mass peak in data (2011A)
+  static const float dgsclA_syst = 0.0008; //syst. error of global factor for mass peak in data (2011A)
+  static const float recmB = 9.10210e+01; //rec mass peak in MC (2011B)
+  static const float drecmB = 9.09469e+01; //rec mass peak in data (2011B)
+  static const float mgsclB_stat = 0.0001; //stat. error of global factor for mass peak in MC (2011B)  
+  static const float mgsclB_syst = 0.0006; //syst. error of global factor for mass peak in MC (2011B)  
+  static const float dgsclB_stat = 0.0001; //stat. error of global factor for mass peak in data (2011B)
+  static const float dgsclB_syst = 0.0008; //syst. error of global factor for mass peak in data (2011B)
   
   //iteration2 after FSR : after Z Pt correction
-  static const float deltaA = -3.04094e-06;
-  static const float deltaAer = 7.68168e-07;
+  static const float deltaA = -2.85242e-06;
+  static const float deltaA_stat = 7.74389e-07;
+  static const float deltaA_syst = 6.992e-07;
   
-  static const float sfA = 43.4069;
-  static const float sfAer = 1.50536;
+  static const float sfA = 44.6463;
+  static const float sfA_stat = 1.92224;
+  static const float sfA_syst = 9.29;
+  
+  static const float deltaB = -5.68463e-06;
+  static const float deltaB_stat = 8.21406e-07;
+  static const float deltaB_syst = 1.4268e-06;
+  
+  static const float sfB = 23.8652;
+  static const float sfB_stat = 0.941748;
+  static const float sfB_syst = 4.86;
 
-  static const float deltaB = -3.04094e-06;
-  static const float deltaBer = 7.68168e-07;
-  
-  static const float sfB = 43.4069;
-  static const float sfBer = 1.50536;
-
-  static const float delta_muscle = -2.89579e-06;
-  static const float deltaer_muscle = 7.86676e-07;
-  
-  static const float sf_muscle = 44.3096;
-  static const float sfer_muscle = 1.66431;
-  
-  static const float delta_sidra = -3.46001e-06;
-  static const float deltaer_sidra = 7.7276e-07;
-  
-  static const float sf_sidra = 40.2147;
-  static const float sfer_sidra = 1.34094;
- 
   static const float apar = 1.0; //+- 0.002
   static const float bpar = -5.03313e-06; //+- 1.57968e-06
   static const float cpar = -4.41463e-05; //+- 1.92775e-06
@@ -107,16 +97,6 @@ class rochcor {
   static const float mcor_bfBer[8][8];
   static const float mcor_maBer[8][8];
 
-  static const float dcor_bf_muscle[8][8];  
-  static const float dcor_ma_muscle[8][8];
-  static const float dcor_bfer_muscle[8][8];  
-  static const float dcor_maer_muscle[8][8];
-
-  static const float dcor_bf_sidra[8][8];  
-  static const float dcor_ma_sidra[8][8];
-  static const float dcor_bfer_sidra[8][8];  
-  static const float dcor_maer_sidra[8][8];
-
   //=======================================================================================================
   
   static const float dmavgA[8][8];  
@@ -129,11 +109,6 @@ class rochcor {
   static const float mmavgB[8][8];  
   static const float mpavgB[8][8];
   
-  static const float dmavg_muscle[8][8];  
-  static const float dpavg_muscle[8][8];  
-  static const float dmavg_sidra[8][8];  
-  static const float dpavg_sidra[8][8];  
-  
   //===============================================================================================
   //parameters for Z pt correction
   static const int nptbins=84;
@@ -142,5 +117,12 @@ class rochcor {
   static const float zptscl[84];
   static const float zptscler[84];
 
+  float mptsys_mc_dm[8][8];
+  float mptsys_mc_da[8][8];
+  float mptsys_da_dm[8][8];
+  float mptsys_da_da[8][8];
+
+  float gscler_mc_dev;
+  float gscler_da_dev;
 };
   

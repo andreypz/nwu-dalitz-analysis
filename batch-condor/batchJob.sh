@@ -2,7 +2,8 @@
 
 source /uscmst1/prod/sw/cms/bashrc prod
 # this is needed just to set-up root:
-cd /uscmst1/prod/sw/cmssw/slc5_amd64_gcc472/cms/cmssw/CMSSW_6_2_0
+cd /uscmst1/prod/sw/cmssw/slc5_amd64_gcc462/cms/cmssw/CMSSW_5_3_11
+#cd /uscmst1/prod/sw/cmssw/slc5_amd64_gcc472/cms/cmssw/CMSSW_6_2_0
 eval `scramv1 runtime -sh`
 cd -
 
