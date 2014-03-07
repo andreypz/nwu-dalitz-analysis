@@ -31,14 +31,25 @@ def getLumi(period):
         print "Sorry only 2012 is considered"
         return 0
 
-def getCS(sample, useMCFM=False):
-    sel = conf.get("selection", "sel")[0:2]
+def getCS(sample, useMCFM=False, mySel=None):
+    if mySel==None:
+        sel = conf.get("selection", "sel")[0:2]
+    else:
+        sel = mySel
     cs = float(conf.get(sample, "cs-"+sel))      
 
     #cs = float(conf.get(sample, "cs"))      
 
     return cs
 
+
+def drange(start, stop, step):
+    r = start
+    while r <= stop:
+        yield r
+        r += step
+        
+                  
 def handleOverflowBins(hist):
     if hist == None:
         return
@@ -415,6 +426,11 @@ def makeTable(table, name, opt="tex"):
     
     if opt in ["twiki","tex"]:
         print myTable
+
+def getTotalEvents(f):
+    ev = f.Get("Counts/evt_byCut")
+    Nev = ev.GetBinContent(1)
+    return Nev
 
 def getYields(f, sample='ggH-125', doLumiScale=False):
     ev = f.Get("Counts/evt_byCut")

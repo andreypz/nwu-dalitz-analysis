@@ -15,14 +15,13 @@ files={}
 
 #files["one"] = ['/uscms_data/d2/andreypz/lhe_vbf_higgs/vbfh_eeg_m125.root']
 #files["two"] = ['/uscms_data/d2/andreypz/lhe_vbf_higgs/vbfh_mumug_m125.root']
-#files["one"] = ['/uscms_data/d2/andreypz/lhe_higgs_eegamma_dalitz/heeg_m120.root']
 #files["one"] = ['/uscms_data/d2/andreypz/lhe_vh_mumugamma/hmumug_m125.root']
-files["one"] = ['/uscms_data/d2/andreypz/lhe_higgs_mumugamma_dalitz/hmumug_m125.root']
-#files["one"] = ['/uscms_data/d2/andreypz/lhe_mcfm/lhe_mcfm_hzg_dalitz_lord_fixed_unweighted.lhe.root']
+files["two"] = ['/uscms_data/d2/andreypz/lhe_higgs_mumugamma_dalitz/hmumug_m120.root']
+files["one"] = ['/uscms_data/d2/andreypz/lhe_higgs_eegamma_dalitz/heeg_m120.root']
 
-MH = 125
+MH = 120
 LEPID1 = 13
-LEPID2 = 13
+LEPID2 = 11
 
 print files
 #gSystem.Load("/home/andreypz/workspace/MadGraph5/ExRootAnalysis/lib/libExRootAnalysis.so")
@@ -323,7 +322,7 @@ if __name__ == "__main__":
         os.makedirs(path)
 
     FillAllHists(files["one"],  h1)
-    #FillAllHists(files["two"],  h2)
+    FillAllHists(files["two"],  h2)
 
 
     oneFile.cd()
@@ -337,10 +336,10 @@ if __name__ == "__main__":
 
     blah = []
 
-    #u.drawAllInFile(oneFile, "MAD ele", twoFile, "MAD mu",None,"","", path, None,"norm", isLog=True)
+    u.drawAllInFile(oneFile, "MAD ele", twoFile, "MAD mu",None,"","", path, None,"norm", isLog=True)
     #u.drawAllInFile(oneFile, "MCFM ele", twoFile, "Madgraph mu",None,"","", path, None,"norm")
     #u.drawAllInFile(oneFile, "vbf ele", twoFile, "vbf mu",None,"","", path, None,"norm", isLog=True)
-    u.drawAllInFile(oneFile, "MAD-125",None,"", None,"","", path, None,"norm")
+    #u.drawAllInFile(oneFile, "MAD-125",None,"", None,"","", path, None,"norm")
 
 
     u.createDir(path+"/eff")

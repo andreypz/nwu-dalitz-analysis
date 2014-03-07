@@ -14,18 +14,22 @@ gROOT.ProcessLine(".L ~/tdrstyle.C")
 setTDRStyle()
 gStyle.SetOptTitle(0)
 
+doObs = 1
+
 s = cf.get("fits","ver")
-      
+method = 'Asymptotic'
+#method = 'ProfileLikelihood'
 out = TFile(s+"/limit-data.root","recreate")
 
 plotBase = '/uscms_data/d2/andreypz/html/zgamma/dalitz/fits-'+s
 u.createDir(plotBase)
 
 fullCombo = True
-byParts = False
+#massList   = [float(a.strip()) for a in (cf.get("fits","massList-more")).split(',')]
+massList        = [float(a) for a in u.drange(120,150,0.5)]
 
-massList   = [float(a.strip()) for a in (cf.get("fits","massList-more")).split(',')]
-
+print massList
+  
 c = TCanvas("c","c",0,0,500,400)
 c.cd()
 
@@ -38,17 +42,31 @@ if fullCombo:
   exp2SigHi = []
   exp2SigLow = []
   fileListTmp = os.listdir(s)
-  fileList = filter(lambda fileName: 'higgsCombineTest.Asymptotic' in fileName,fileListTmp)
+  fileList = filter(lambda fileName: 'higgsCombineTest.'+method in fileName,fileListTmp)
   print fileList
   for mass in massList:
-    thisFile = filter(lambda fileName: str(int(mass)) in fileName,fileList)[0]
+    #print str(mass)
+    if str(mass)[4] == "0": # nasty trick
+      mass = int(mass)
+      #print 'we are her'
+    #print mass
+    thisFile = filter(lambda fileName: str(mass)+'.root' in fileName,fileList)[0]
     print thisFile
-    xAxis.append(mass)
+    xAxis.append(float(mass))
     f = TFile(s+"/"+thisFile,"open")
     #f.Print()
     tree = f.Get("limit")
     for i,l in enumerate(tree):
       #print i, l, l.limit
+      if method =='ProfileLikelihood' and i==0:
+        obs.append(float(l.limit))
+        exp2SigLow.append(float(l.limit))
+        exp1SigLow.append(float(l.limit))
+        exp.append(float(l.limit))
+        exp1SigHi.append(float(l.limit))
+        exp2SigHi.append(float(l.limit))
+        continue
+      
       if i==0: exp2SigLow.append(float(l.limit))
       if i==1: exp1SigLow.append(float(l.limit))
       if i==2: exp.append(float(l.limit))
@@ -57,8 +75,9 @@ if fullCombo:
       if i==5: obs.append(float(l.limit))    
 
   print 'masses:', xAxis
-  print 'obs:',obs
   print 'exp:',exp
+  if doObs:
+    print 'obs:',obs
   #print exp2SigLow
   #print exp1SigLow
   #print exp1SigHi
@@ -92,23 +111,26 @@ if fullCombo:
   twoSigma = TGraphAsymmErrors(nPoints,xAxis_Array,exp_Array,zeros_Array,zeros_Array,exp2SigLowErr_Array,exp2SigHiErr_Array)
   observed = TGraphAsymmErrors(nPoints,xAxis_Array,obs_Array,zeros_Array,zeros_Array,zeros_Array,zeros_Array)
 
+  #expected.Print("all")
+  
   oneSigma.SetFillColor(kGreen)
-
   twoSigma.SetFillColor(kYellow)
 
-  expected.SetMarkerColor(kBlack)
-  expected.SetMarkerStyle(kFullCircle)
-  expected.SetMarkerSize(1.5)
+  #expected.SetMarkerColor(kBlack)
+  #expected.SetMarkerStyle(kFullCircle)
+  #expected.SetMarkerSize(1.5)
   expected.SetLineColor(kBlack)
   expected.SetLineWidth(2)
   expected.SetLineStyle(2)
 
   observed.SetLineWidth(2)
+  observed.SetMarkerStyle(kFullCircle)
 
   mg.Add(twoSigma)
   mg.Add(oneSigma)
   mg.Add(expected)
-  #mg.Add(observed)
+  if doObs:
+    mg.Add(observed)
 
   mg.Draw('AL3')
   mg.GetXaxis().SetTitle('m_{H} (GeV)')
@@ -131,6 +153,8 @@ if fullCombo:
   sqrt.Draw();
 
   leg = TLegend(0.25,0.65,0.50,0.83)
+  if doObs:
+    leg.AddEntry(observed,"Observed", "l")
   leg.AddEntry(expected,"Expected", "l")
   leg.AddEntry(oneSigma,"Expected #pm 1#sigma", "f")
   leg.AddEntry(twoSigma,"Expected #pm 2#sigma", "f")

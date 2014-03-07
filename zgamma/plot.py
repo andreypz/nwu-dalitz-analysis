@@ -397,6 +397,18 @@ if __name__ == "__main__":
         effPlots(sigFileMAD, pathBase+"/eff/")
         effPlots2(sigFileMAD, pathBase+"/eff/")
 
+
+
+    htmp = sigFileMAD.Get("lPt2_pt__cut10")
+    int1 = htmp.Integral()
+    int2 = htmp.Integral(0,10)
+    print '\n Fraction of event with trailing lepton pt<20: \n', float(int2)/int1
+
+    htmp = sigFileMAD.Get("ll_deltaR__cut10")
+    int1 = htmp.Integral()
+    int2 = htmp.Integral(0,10)
+    print '\n Fraction of event with dR(l1,l2)<0.4: \n', float(int2)/int1
+
     '''
     c1 = TCanvas("c4","small canvas",600,600);
     c1.cd()
