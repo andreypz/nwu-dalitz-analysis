@@ -697,7 +697,10 @@ Bool_t zgamma::Process(Long64_t entry)
 
   
   if (lPt1.Pt() > 20 && zgamma::CalculateMuonIso(&muons[0]) > 0.4)
-    return kTRUE;
+  return kTRUE;
+
+  if (zgamma::CalculateMuonIso(&muons[1]) > 0.4)
+  return kTRUE;
   
   MakePhotonPlots(gamma);
   

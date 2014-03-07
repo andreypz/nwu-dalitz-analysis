@@ -53,7 +53,7 @@ def makePullPlots(year='2012', lepton='mu', genFunc='Exp', cat='0', mass='125'):
 
   #turnOnList = ['Sech','Gauss']
   turnOnList = ['']
-  tailList = ['Bern2','Bern3','Bern4','Bern5','gen']
+  tailList = ['Bern2','Bern3','Bern4','Bern5']
   #tailList.append('gen')
   colors ={}
   for f,col in cf.items("colors"): colors[f] = int(col)
@@ -172,6 +172,7 @@ def makePullPlots(year='2012', lepton='mu', genFunc='Exp', cat='0', mass='125'):
     #print  histListDict[dist][0]
     #raw_input()
     for j in range(1,len(histListDict[dist])):
+      #if dist in ['sigPull','typeA'] and j==len(histListDict[dist])-1: continue
       histListDict[dist][j].Draw('same')
     legList[i].Draw('same')
     canList[i].SaveAs(plotBase+'/biasPulls/'+lepton+'_'+year+'/'+genFunc+'/'+dist+'_'+lepton+'_'+year+'_'+genFunc+'_cat'+cat+'_mH'+mass+'.png')

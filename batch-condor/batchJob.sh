@@ -1,12 +1,5 @@
 #!/bin/bash
 
-source /uscmst1/prod/sw/cms/bashrc prod
-# this is needed just to set-up root:
-cd /uscmst1/prod/sw/cmssw/slc5_amd64_gcc462/cms/cmssw/CMSSW_5_3_11
-#cd /uscmst1/prod/sw/cmssw/slc5_amd64_gcc472/cms/cmssw/CMSSW_6_2_0
-eval `scramv1 runtime -sh`
-cd -
-
 outDir=$1
 count=$2
 dataName=$3  #e.g. Photon_Aug05, Run2011B , May10
@@ -16,6 +9,25 @@ suffix=$4  #e.g. DATA. WZ, ZZ etc
 selection=$5
 period=$6
 gen=$7
+nwu=$8
+
+echo ${7} and ${8}
+
+if [ $nwu == "nwu" ]
+then
+  echo "NWU"
+  export OSG_APP=/software/tier3/osg
+  export SCRAM_ARCH=slc6_amd64_gcc472
+  source /software/tier3/osg/cmsset_default.sh
+  cd /software/tier3/osg/slc6_amd64_gcc472/cms/cmssw/CMSSW_5_3_11
+else
+  source /uscmst1/prod/sw/cms/bashrc prod
+  # this is needed just to set-up root:
+  cd /uscmst1/prod/sw/cmssw/slc5_amd64_gcc472/cms/cmssw/CMSSW_6_2_0
+fi
+eval `scramv1 runtime -sh`
+cd -
+
 
 echo "Copy the tarball with the source code from Condor scratch directory"
 
@@ -41,7 +53,7 @@ if [ $selection == "egamma" ]
 elif [ $selection == "mugamma" ] 
     then
     echo "Mu+photon trigger will be used"
-    if [ $gen == "gen" ] 
+    if [ ${gen} == "gen" ] 
         then
         ./run.py ${suffix} ${dataName} -t mugamma -p ${period} --gen -b
     else

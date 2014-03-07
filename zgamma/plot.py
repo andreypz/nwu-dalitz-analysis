@@ -246,6 +246,7 @@ if __name__ == "__main__":
         exit(1)
         
     ver    = sys.argv[1]
+    if 'vv/' in ver: ver = ver[3:]
     #subdir = sys.argv[3]        
     cut=str(options.cut)
     doMerge = options.merge
@@ -261,6 +262,10 @@ if __name__ == "__main__":
     hPath    = "/eos/uscms/store/user/andreypz/batch_output/zgamma/8TeV/"+ver
     if options.noeos:
         hPath  = "/uscms_data/d2/andreypz/zgamma/"+ver
+
+    if '/tthome' in os.getcwd():
+      pathBase = "/tthome/andrey/html/zgamma/dalitz/"+ver+"_cut"+cut
+      hPath    = "/tthome/andrey/batch_output/zgamma/8TeV/"+ver
 
     u.createDir(pathBase)
 
