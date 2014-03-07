@@ -26,13 +26,13 @@ if __name__ == "__main__":
 
   massList   = ['%.1f'%(a) for a in u.drange(120,150,0.5)]
     
-  s = cf.get("fits","ver")
+  s = cf.get("path","ver")
   dir = s
   if options.noSyst:
     dir = s.replace("/","")+"-noSyst"
     print s, dir
     os.system("cp -r "+s+"  "+dir)
-    cf.set("fits","ver", dir)
+    cf.set("path","ver", dir)
     with open(r'config.cfg', 'wb') as configfile:
       cf.write(configfile)
       

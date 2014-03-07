@@ -15,7 +15,7 @@ class AutoVivification(dict):
     except KeyError:
       value = self[item] = type(self)()
       return value
-    
+
 import ConfigParser as cp
 cf = cp.ConfigParser()
 cf.read('config.cfg')
@@ -30,7 +30,7 @@ for f,col in cf.items("colors"):
   colors[f] = int(col)
 
 #print colors
-#print yearList, leptonList, catList, massList, sigNameList  
+#print yearList, leptonList, catList, massList, sigNameList
 #print "Begin, INPUT"
 #raw_input()
 
@@ -58,7 +58,7 @@ if rootrace: RooTrace.active(kTRUE)
 def LumiXSWeighter(mH, prod, sel, Nev=None):
   cro = float(u.conf.get(prod+"H-"+str(mH), "cs-"+sel))
   if Nev==None:
-    Nev = int(u.conf.get(prod+"H-"+str(mH), "Nev-"+sel))  
+    Nev = int(u.conf.get(prod+"H-"+str(mH), "Nev-"+sel))
   sc = float(u.lumi*cro)/Nev
   print 'M=',mH, 'cs=',cro, 'Nev=', Nev, 'lumi=',u.lumi, "scale", sc
   return sc
@@ -66,13 +66,12 @@ def LumiXSWeighter(mH, prod, sel, Nev=None):
 
 def doInitialFits(subdir):
   print 'loading up the files'
-    
-  plotBase = '/uscms_data/d2/andreypz/html/zgamma/dalitz/fits-'+subdir+'/init/'
+
+  plotBase = cf.get("path","htmlbase")+'/html/zgamma/dalitz/fits-'+subdir+'/init/'
   u.createDir(plotBase)
-  #basePath1 = '/uscms_data/d2/andreypz/zgamma/'+subdir+'/'
-  basePath1 = '/eos/uscms/store/user/andreypz/batch_output/zgamma/8TeV/'+subdir+'/'
-  #basePath2 = '/eos/uscms/store/user/andreypz/batch_output/zgamma/8TeV/v30/'
-  basePath2 = '/uscms_data/d2/andreypz/zgamma/v34-ele2/'
+  basePath1 = cf.get("path","base")+'/batch_output/zgamma/8TeV/'+subdir+'/'
+  basePath2 = cf.get("path","base")+'/zgamma/v34-ele2/'
+
   if not os.path.exists(basePath1):
     print basePath1, "does not exist!"
     sys.exit(0)
@@ -82,7 +81,7 @@ def doInitialFits(subdir):
 
   #musel = "mumu"
   musel = "mugamma"
-  
+
   dataDict   = {'mu2012':TFile(basePath1+'m_Data_'+musel+'_2012.root','r'),
                 'el2012':TFile(basePath2+'m_Data_electron_2012.root','r')}
 
@@ -108,9 +107,10 @@ def doInitialFits(subdir):
                 'v_mu2012_M135':TFile(basePath1+musel+'_2012/hhhh_vh-mad135_1.root','r'),
                 'v_mu2012_M140':TFile(basePath1+musel+'_2012/hhhh_vbf-mad140_1.root','r'),
                 'v_mu2012_M145':TFile(basePath1+musel+'_2012/hhhh_vbf-mad145_1.root','r'),
-                'v_mu2012_M150':TFile(basePath1+musel+'_2012/hhhh_vbf-mad150_1.root','r'),
+                'v_mu2012_M150':TFile(basePath1+musel+'_2012/hhhh_vbf-mad150_1.root','r')
 
-                'gg_el2012_M125':TFile(basePath2+'electron_2012/hhhh_dal-mad125_1.root','r')}
+                #'gg_el2012_M125':TFile(basePath2+'electron_2012/hhhh_dal-mad125_1.root','r')
+                }
 
   treeName = 'fitTree/fitTree'
 
@@ -119,7 +119,7 @@ def doInitialFits(subdir):
   highCutOff = 170
   binning = 30
   binWidth = 2
-  
+
   weight  = RooRealVar('Weight','Weight',0,100)
   mzg  = RooRealVar('CMS_hzg_mass','CMS_hzg_mass', lowCutOff,highCutOff)
   mzg.setRange('FullRegion',   lowCutOff, highCutOff)
@@ -148,12 +148,12 @@ def doInitialFits(subdir):
           print "rootrace"
           RooTrace.dump()
           raw_input()
-          
+
         signalList    = []
         signalListDH  = []
         signalListPDF = []
         if verbose: print 'top of loop',year,lepton,cat
-        
+
         # ##################################################
         # set up the signal histograms and the mzg ranges #
         # ##################################################
@@ -181,7 +181,7 @@ def doInitialFits(subdir):
 
               if i.m_llg> lowCutOff and i.m_llg<highCutOff:
                 mzg.setVal(i.m_llg)
-                  
+
                 sigWeight = lumiWeight*i.weight
                 #sigWeight = lumiWeight
                 sig_ds.add(sig_argSW, sigWeight)
@@ -198,18 +198,18 @@ def doInitialFits(subdir):
             # during a future iteration
 
             if prod=='gg':
-              
+
               if verbose: print 'signal mass loop', mass
               print 'in gg   INPUT ', cat, prod,mass
               #raw_input()
-                    
+
               histName  = '_'.join(['sig',lepton,year,'cat'+cat,'M'+mass])
               rangeName = '_'.join(['range',lepton,year,'cat'+cat,'M'+mass])
 
               signalList.append(TH1F(histName, histName, 100, lowCutOff, highCutOff))
               signalList[-1].SetLineColor(kRed)
               signalTree = signalDict[prod+"_"+lepton+year+"_M"+mass].Get(treeName)
-              
+
               if verbose:
                 print histName
                 signalTree.Print()
@@ -253,10 +253,10 @@ def doInitialFits(subdir):
                 #signal.paramOn(testFrame)
                 #signal.statOn(testFrame)
                 #mzg_argS.writeToFile('myargset.txt')
-                
+
               testFrame.Draw()
               c.SaveAs(plotBase+'_'.join(['signals',prod,year,lepton,'cat'+cat,'M'+mass])+'.png')
-              
+
             if debugPlots:
               testFrame = mzg.frame()
               for signal in signalListDS:
@@ -283,7 +283,7 @@ def doInitialFits(subdir):
 
           if fabs(i.ph_eta)>EBetaCut: continue
           if i.ph_pt/i.m_llg < ptMllgCut or i.di_pt/i.m_llg < ptMllgCut: continue
-          
+
           if i.m_llg> lowCutOff and i.m_llg<highCutOff:
             mzg.setVal(i.m_llg)
             data_ds.add(data_argS)
@@ -297,10 +297,10 @@ def doInitialFits(subdir):
         if debugPlots:
           testFrame = mzg.frame()
           data_ds.plotOn(testFrame,RooFit.Binning(binning))
-              
+
           testFrame.Draw()
           c.SaveAs(plotBase+'_'.join(['data',year,lepton,'cat'+cat,'M'+mass])+'.png')
-          
+
         getattr(ws,'import')(data_ds)
 
 
@@ -309,7 +309,7 @@ def doInitialFits(subdir):
         # make fits #
         # ############
         if verbose: 'starting fits'
-        
+
         if cat!='5':
           #GaussExp = BuildGaussExp(year, lepton, cat, mzg)
           #SechExp  = BuildSechExp(year, lepton, cat, mzg)
@@ -353,7 +353,7 @@ def doInitialFits(subdir):
             #GaussBern4.Print()
             #GaussBern5.Print()
             #GaussBern6.Print()
-                        
+
           #GaussExp.fitTo(data_ds,RooFit.Range('FullRegion'))
           #SechExp.fitTo(data_ds,RooFit.Range('FullRegion'))
           #GaussBern3.fitTo(data_ds,RooFit.Range('FullRegion'))
@@ -378,7 +378,7 @@ def doInitialFits(subdir):
           #gauss.fitTo(data_ds,RooFit.Range('DalitzRegion'))
           #BetaFunc.fitTo(data_ds,RooFit.Range('FullRegion'))
           #Kumaraswamy.fitTo(data_ds,RooFit.Range('FullRegion'))
-          
+
           #BB.fitTo(data_ds,RooFit.Range('FullRegion'))
           #GB.fitTo(data_ds,RooFit.Range('FullRegion'))
 
@@ -403,7 +403,7 @@ def doInitialFits(subdir):
             Bern4.plotOn(testFrame,RooFit.LineColor(colors['bern4']), RooFit.Name('Bern4'))
             Bern5.plotOn(testFrame,RooFit.LineColor(colors['bern5']), RooFit.Name('Bern5'))
             Bern6.plotOn(testFrame,RooFit.LineColor(colors['bern6']), RooFit.Name('Bern6'))
-            
+
             #GaussPow.plotOn(testFrame,RooFit.LineColor(kCyan),  RooFit.Name('GaussPow'))
             #SechPow.plotOn(testFrame,RooFit.LineColor(kOrange),  RooFit.Name('SechPow'))
             #SechBern3.plotOn(testFrame,RooFit.LineColor(kMagenta))
@@ -412,7 +412,7 @@ def doInitialFits(subdir):
             #gauss.plotOn(testFrame,RooFit.LineColor(kBlue), RooFit.Name('Gauss'))
             #BetaFunc.plotOn(testFrame,RooFit.LineColor(kBlack), RooFit.Name('Beta'))
             #Kumaraswamy.plotOn(testFrame,RooFit.LineColor(kCyan), RooFit.Name('Kumaraswamy'))
-            
+
             #BB.plotOn(testFrame,RooFit.LineColor(kViolet), RooFit.Name('Beta+Bern4'))
             #GB.plotOn(testFrame,RooFit.LineColor(kGreen), RooFit.Name('GaussBern3'))
             testFrame.Draw()
@@ -428,7 +428,7 @@ def doInitialFits(subdir):
             #leg.AddEntry(testFrame.findObject('Beta'),'Beta','l')
             #leg.AddEntry(testFrame.findObject('Kumaraswamy'),'Kumaraswamy','l')
             #leg.AddEntry(testFrame.findObject('Beta+Bern4'),'Beta+Bern4','l')
-            
+
             #leg.AddEntry(testFrame.findObject('GaussPow'),'GaussPow','l')
             #leg.AddEntry(testFrame.findObject('SechPow'), 'SechPow', 'l')
 
@@ -440,7 +440,7 @@ def doInitialFits(subdir):
             #leg.AddEntry(testFrame.findObject('GaussBern6'),'GaussBern6','l')
             leg.Draw()
             c.Print(plotBase+'_'.join(['fits',year,lepton,'cat'+cat])+'.png')
- 
+
 
           #raw_input()
           #getattr(ws,'import')(GaussExp)
@@ -467,7 +467,7 @@ def doInitialFits(subdir):
 
         else:
           print cat
-          
+
 
         ws.commitTransaction()
 
@@ -480,7 +480,7 @@ def doInitialFits(subdir):
   ws.writeToFile(subdir+'/testRooFitOut_Dalitz.root')
 
   ws.Print()
-  
+
   print '*** Some yields from data'
   print 'Full range:', yi_da0
   print 'in 122-128:', yi_da1
@@ -492,10 +492,10 @@ def doInitialFits(subdir):
 
   print "You should also notice that EBeta cut was", EBetaCut
   print "And that the range was from ", lowCutOff, 'to', highCutOff
-    
+
   print "\n Mean:", mean_gg0
   print "\n Sigma:", sigma_gg0
-  
+
   print '\n \t we did it!\t'
 
 
@@ -506,10 +506,18 @@ if __name__=="__main__":
   print sys.argv
   if len(sys.argv) != 3:
     sys.exit()
-    
+
   s = sys.argv[1]
+  if 'vv/' in s: s = s[3:].rstrip('/')
   print s
-  cf.set("fits","ver", s)
+  cf.set("path","ver", s)
+  if '/tthome' in os.getcwd():
+      cf.set("path","base", '/tthome/andrey')
+      cf.set("path","htmlbase", '/tthome/andrey')
+  else:
+      cf.set("path","base", '/eos/uscms/store/user/andreypz')
+      cf.set("path","htmlbase", '/uscms_data/d2/andreypz/')
+
   cf.set("colors","bern2",kCyan+1)
   cf.set("colors","bern3",kOrange)
   cf.set("colors","bern4",kGreen+1)
@@ -526,6 +534,6 @@ if __name__=="__main__":
 
   with open(r'config.cfg', 'wb') as configfile:
     cf.write(configfile)
-    
+
   doInitialFits(s)
   print "done"

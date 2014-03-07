@@ -7,8 +7,8 @@ from ROOT import *
 import numpy as np
 
 gSystem.SetIncludePath( "-I$ROOFITSYS/include/" );
-gROOT.ProcessLine('.x RooStepBernstein.cxx+')
-gROOT.ProcessLine('.x RooGaussStepBernstein.cxx+')
+#gROOT.ProcessLine('.x RooStepBernstein.cxx+')
+#gROOT.ProcessLine('.x RooGaussStepBernstein.cxx+')
 #gROOT.ProcessLine('.x HZGRooPdfs.cxx++')
 
 def BuildBetaAndBern(year,lepton,cat,mzg,rangeName,frac = 0.1, fracLow = 0, fracHigh = 0.9):

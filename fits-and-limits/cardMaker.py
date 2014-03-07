@@ -16,7 +16,7 @@ parser.add_option("--ext",dest="ext", action="store_true", default=False, help="
 import ConfigParser as cp
 cf = cp.ConfigParser()
 cf.read('config.cfg')
-s = cf.get("fits","ver")
+s = cf.get("path","ver")
 
 # ################################################
 # We're finally ready to make the datacards     #

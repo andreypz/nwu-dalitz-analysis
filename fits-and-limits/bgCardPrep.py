@@ -16,13 +16,14 @@ doExt   = 0
 
 cf = cp.ConfigParser()
 cf.read('config.cfg')
-subdir = cf.get("fits","ver")  
+subdir = cf.get("path","ver")  
 yearList   = [a.strip() for a in (cf.get("fits","yearList")).split(',')]
 leptonList = [a.strip() for a in (cf.get("fits","leptonList")).split(',')]
 catList    = [a.strip() for a in (cf.get("fits","catList")).split(',')]
 doBlind    = int(cf.get("fits","blind"))
 
-plotBase = "/uscms_data/d2/andreypz/html/zgamma/dalitz/fits-"+subdir
+plotBase = cf.get("path","htmlbase")+"/html/zgamma/dalitz/fits-"+subdir
+
 u.createDir(plotBase)
 rooWsFile = TFile(subdir+'/testRooFitOut_Dalitz.root')
 myWs    = rooWsFile.Get('ws')
@@ -218,7 +219,7 @@ for year in yearList:
       fitName  = '_'.join([bkgModel,year,lepton,'cat'+cat])
       normName = 'norm'+bkgModel+'_'+suffix      
 
-      hPath    = "/eos/uscms/store/user/andreypz/batch_output/zgamma/8TeV/"+subdir
+      hPath    = cf.get("path","base")+"/batch_output/zgamma/8TeV/"+subdir
       sigFileMAD  = TFile(hPath+"/mugamma_"+year+"/hhhh_ggH-mad125_1.root", "OPEN")
 
       Nev = sigFileMAD.Get("Counts/evt_byCut").GetBinContent(2)

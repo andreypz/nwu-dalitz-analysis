@@ -16,12 +16,12 @@ gStyle.SetOptTitle(0)
 
 doObs = 1
 
-s = cf.get("fits","ver")
+s = cf.get("path","ver")
 method = 'Asymptotic'
 #method = 'ProfileLikelihood'
 out = TFile(s+"/limit-data.root","recreate")
 
-plotBase = '/uscms_data/d2/andreypz/html/zgamma/dalitz/fits-'+s
+plotBase = cf.get("path","htmlbase")+'/html/zgamma/dalitz/fits-'+s
 u.createDir(plotBase)
 
 fullCombo = True

@@ -38,20 +38,20 @@ def SignalNameParamFixer(year,lepton,cat,sig,mass,ws):
   
   
 def SignalFitMaker(lep, year, cat, subdir):
-  # reasd these from a config file:
   #massList        = [str(a)+".0" for a in xrange(120,123)]
   massList   = ['%.1f'%(a) for a in u.drange(120,150,0.5)]
     
   #print massList
   #raw_input("Input raws  ")
       
+  # reasd these from a config file:
   #massList        = [a.strip() for a in (cf.get("fits","massList-more")).split(',')]
   sigNameList     = [a.strip() for a in (cf.get("fits","sigNameList")).split(',')]
 
   #print massList
   #raw_input()
   
-  plotBase = "/uscms_data/d2/andreypz/html/zgamma/dalitz/fits-"+subdir
+  plotBase = cf.get("path","htmlbase")+"/html/zgamma/dalitz/fits-"+subdir
   u.createDir(plotBase)
   rooWsFile = TFile(subdir+'/testRooFitOut_Dalitz.root')
   myWs = rooWsFile.Get('ws')
@@ -175,20 +175,20 @@ def SignalFitMaker(lep, year, cat, subdir):
       cardDict[lep][year][cat][str(mass)].commitTransaction()
 
       testFrame = mzg.frame(float(massList[0])-10,float(massList[-1])+10)
-      for signal in dsList:
-        signal.plotOn(testFrame)
-        #print signal.mean(mzg)
-        #raw_input("Mean of the fit ")
+    for signal in dsList:
+      signal.plotOn(testFrame)
+      # print signal.mean(mzg)
+      # raw_input("Mean of the fit ")
 
-      for i,fit in enumerate(fitList):
-        regionName = fit.GetName().split('_')[-1]
-        #fit.plotOn(testFrame)
-        #fit.plotOn(testFrame, RooFit.NormRange('fitRegion_'+regionName))
-        fit.plotOn(testFrame, RooFit.Normalization(normList[i],RooAbsReal.NumEvent))
-        fit.paramOn(testFrame)
-        # testFrame.getAttText().SetTextSize(0.02)
-        # testFrame.getAttText().SetTextColor(kRed)
-        # fit.statOn(testFrame,RooFit.Layout(0.18,0.43,0.87))
+    for i,fit in enumerate(fitList):
+      regionName = fit.GetName().split('_')[-1]
+      # fit.plotOn(testFrame)
+      # fit.plotOn(testFrame, RooFit.NormRange('fitRegion_'+regionName))
+      fit.plotOn(testFrame, RooFit.Normalization(normList[i],RooAbsReal.NumEvent))
+      fit.paramOn(testFrame)
+      # testFrame.getAttText().SetTextSize(0.02)
+      # testFrame.getAttText().SetTextColor(kRed)
+      # fit.statOn(testFrame,RooFit.Layout(0.18,0.43,0.87))
 
     testFrame.SetMaximum(0.7)
     testFrame.Draw()

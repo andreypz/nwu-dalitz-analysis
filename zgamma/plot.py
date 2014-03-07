@@ -246,7 +246,7 @@ if __name__ == "__main__":
         exit(1)
         
     ver    = sys.argv[1]
-    if 'vv/' in ver: ver = ver[3:]
+    if 'vv/' in ver: ver = ver[3:].rstrip('/')
     #subdir = sys.argv[3]        
     cut=str(options.cut)
     doMerge = options.merge

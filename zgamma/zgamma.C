@@ -646,6 +646,7 @@ Bool_t zgamma::Process(Long64_t entry)
 
   if (gamma.Pt() < cut_gammapt) return kTRUE;
   if (fabs(gamma.Eta()) > 1.444) return kTRUE;
+  //if (fabs(gamma.SCEta()) > 1.444) return kTRUE;
 
   if(!isRealData && makeGen){
     hists->fill1DHist(genMll,  "gen_Mll_reco_gamma_iso",  ";gen_Mll",100,0,mllMax, 1,"eff");
@@ -695,10 +696,10 @@ Bool_t zgamma::Process(Long64_t entry)
   hists->fill1DHist(Mll,  Form("diLep_mass_high_cut%i", 3),";M(ll)", 50, 0,120, 1, "");
 
   
-  if (lPt1.Pt() > 20 && zgamma::CalculateMuonIso(&muons[0]) > 0.4)
-    return kTRUE;
-  if (lPt2.Pt() > 20 && zgamma::CalculateMuonIso(&muons[1]) > 0.4)
-    return kTRUE;
+  //if (lPt1.Pt() > 20 && zgamma::CalculateMuonIso(&muons[0]) > 0.4)
+  //return kTRUE;
+  //if (lPt2.Pt() > 20 && zgamma::CalculateMuonIso(&muons[1]) > 0.4)
+  //return kTRUE;
 
   //if (zgamma::CalculateMuonIso(&muons[1]) > 0.4)
   //return kTRUE;
@@ -1141,7 +1142,7 @@ bool zgamma::PassMuonIdAndIso(TCMuon *lep, muIdAndIsoCuts cuts, TVector3 *pv)
      && ((lep->IsTRK() && lep->NumberOfMatches() > 0) || lep->IsGLB())
      && fabs(lep->Dxy(pv))     < cuts.dxy
      && fabs(lep->Dz(pv))      < cuts.dz
-     //&& (lep->Pt() < 20 || zgamma::CalculateMuonIso(lep) < 0.4)
+     && (lep->Pt() < 20 || zgamma::CalculateMuonIso(lep) < 0.4)
      )
     pass = true;
   /*  
