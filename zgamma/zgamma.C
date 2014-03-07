@@ -606,7 +606,6 @@ Bool_t zgamma::Process(Long64_t entry)
           break;}}
 
     if(thisMuon->Pt() > 4
-       //&& PassMuonIdAndIso(thisMuon, muIdAndIsoCutsTight, pvPosition)
        && PassMuonIdAndIso(thisMuon, muIdAndIsoCutsSoft, pvPosition)
        ) {
 
@@ -697,10 +696,12 @@ Bool_t zgamma::Process(Long64_t entry)
 
   
   if (lPt1.Pt() > 20 && zgamma::CalculateMuonIso(&muons[0]) > 0.4)
-  return kTRUE;
+    return kTRUE;
+  if (lPt2.Pt() > 20 && zgamma::CalculateMuonIso(&muons[1]) > 0.4)
+    return kTRUE;
 
-  if (zgamma::CalculateMuonIso(&muons[1]) > 0.4)
-  return kTRUE;
+  //if (zgamma::CalculateMuonIso(&muons[1]) > 0.4)
+  //return kTRUE;
   
   MakePhotonPlots(gamma);
   

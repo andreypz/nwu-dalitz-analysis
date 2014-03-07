@@ -11,15 +11,20 @@ WeightUtils::WeightUtils(string sampleName, string dataPeriod, string selection,
     rnGen   = new TRandom3();
     _puFile = new TFile("../data/puReweight.root", "OPEN");
 
-    _phFileID = new TFile("../data/Photon_ID_CSEV_SF_Jan22rereco_Full2012_RD1_MC_V01.root", "OPEN");
+    //TString MC("S10");
+    TString MC("RD1");
+    _phFileID = new TFile("../data/Photon_ID_CSEV_SF_Jan22rereco_Full2012_"+MC+"_MC_V01.root", "OPEN");
     //_muFileID  = new TFile("../data/MuonEfficiencies_Run2012ReReco_53X.root", "OPEN");
     _muFileISO = new TFile("../data/MuonEfficiencies_ISO_Run_2012ReReco_53X.root", "OPEN");
 
-    h2_photonIDSF   = (TH2D*)_phFileID->Get("PhotonIDSF_MediumWP_Jan22rereco_Full2012_RD1_MC_V01");
-    h2_photonCSEVSF = (TH2D*)_phFileID->Get("PhotonCSEVSF_MediumWP_Jan22rereco_Full2012_RD1_MC_V01");
+    h2_photonIDSF   = (TH2D*)_phFileID->Get("PhotonIDSF_MediumWP_Jan22rereco_Full2012_"+MC+"_MC_V01");
+    h2_photonCSEVSF = (TH2D*)_phFileID->Get("PhotonCSEVSF_MediumWP_Jan22rereco_Full2012_"+MC+"_MC_V01");
+    
     //h2_photonIDSF->Print("all");
+    //h2_photonCSEVSF->Print("all");
     //for (Int_t i = 1; i < 9; i++)
-    //cout<<i<<" bin "<<h2_photonIDSF->GetYaxis()->GetBinLowEdge(i)<<endl;
+    //cout<<i<<" bin "<<h2_photonIDSF->GetXaxis()->GetBinLowEdge(i)<<endl;
+
     //  Bin edges are:
     // X(Pt): 0 - 10 - 15 - 20 - 30 - 50 - 1000
     // Y(Eta): 0 - 0.8 - 1.444 - 1.566 - 2.0 - 2.5 - 3 - 3.5
