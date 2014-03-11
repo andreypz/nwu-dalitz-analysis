@@ -27,7 +27,7 @@ brTag = ''
 
 Ext = options.ext
 
-brLLG = '1.10'
+brLLG = '1.20'
 # Unsertainities to be put in the datacard:
 lumi    = '1.026'
 muID    = '1.110'

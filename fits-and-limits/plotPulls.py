@@ -6,14 +6,13 @@ gROOT.SetBatch()
 import ConfigParser as cp
 cf = cp.ConfigParser()
 cf.read('config.cfg')
-s = cf.get("fits","ver")
-
+s = cf.get("path","ver")
 
 gROOT.ProcessLine(".L ~/tdrstyle.C")
 setTDRStyle()
 #plotBase = '/uscms_data/d2/andreypz/html/zgamma/dalitz/fits-'+s+'/toyFits/'
-plotBase = '/tthome/andrey/html/zgamma/bias-feb14-all/'
-toysDir = '../biasToys-feb14-all'
+plotBase = '/tthome/andrey/html/zgamma/bias-mar11/'
+toysDir = '../biasToys-mar11'
 
 def loopThruPulls():
   massList  = ['120','125','130']

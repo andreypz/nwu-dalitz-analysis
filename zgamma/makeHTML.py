@@ -21,16 +21,14 @@ def makeHTML(title, htmlDir, plot_types, description, IFRAMEA):
     for x in plot_types:
         newDir = htmlDir+"/"+x
         createDir(newDir)
-        #if not os.path.exists(newDir):
-        #    print "Creating ", newDir
-        #    os.makedirs(newDir)
-
 
         fname = x+".html"
         imgfile = open(fname,"w")
         imgfile.write("<html><head><title>"+x+"</title></head><body>\n")
 
         fileList[x] = os.listdir(newDir)
+
+        #print "\n In Making html:", x
         #print fileList[x]
         
         count =1
@@ -57,7 +55,10 @@ def makeHTML(title, htmlDir, plot_types, description, IFRAMEA):
     message = '<h2>Comments</h2>'
     message+='<ul>'
     for d in description:
-        message+="<li>"+d+" </li>"
+        message += "<li>"+d+" </li>"
+        message += "<li><a href=\"yields_all.twiki\">twiki</a></li>"
+        message += "<li><a href=\"yields_all.tex\">tex</a></li>"
+
         message+='</ul>'
 
     tempfile = open("indextemplate.html","r")
@@ -74,67 +75,9 @@ def makeHTML(title, htmlDir, plot_types, description, IFRAMEA):
     ifile.write(whole_thing)
     ifile.close()
 
-    os.system("cp yields.html "+htmlDir)
+    os.system("cp yields* "+htmlDir)
     
     print "\n\n *** End of  making HTML pages - all done *** \n"
-
-
-def makeTable(table, opt="tex"):
-    print "Making sure that the list is alright"
-    n_row = len(table)
-    n_col = len(table[0])
-    for l in table:
-        if len(l)!=n_col:
-            print "No good, the number of columns is messed up"
-            
-            
-    myTable = ''
-    if opt=="tex":
-        beginTable = '\\begin{tabular}{|'+n_col*"l|"+'} \n \\hline \n'
-        endTable   = '\\end{tabular} \n'
-
-        beginLine  = ''
-        endLine    = '\\\\\\hline \n'
-        separator  = ' & '
-
-
-    if opt=="html":
-        beginTable = '<table border = "10"    cellpadding="5">'
-        endTable = '</table>'
-
-        beginLine  = '\n<tr>\n<td>'
-        endLine    = '</td>\n</tr>'
-        separator  = '</td><td>'
-
-    if opt=="twiki":
-        beginTable = ''
-        endTable   = ''
-
-        beginLine  = '| '
-        endLine    = ' |\n'
-        separator  = ' |  '
-
-
-    myTable +=beginTable
-    for l in range(n_row):
-        #print l, table[l]
-        myTable+=beginLine
-        for c in range(n_col):
-            val = table[l][c]
-            if not isinstance(val,str):
-                myTable+="%.0f" % (table[l][c])
-            else:
-                myTable+=val
-            if c!=n_col-1:
-                myTable+=separator
-        myTable+=endLine
-
-    myTable +=endTable
-    
-    ifile = open("yields.html","w")
-    ifile.write(myTable)
-    ifile.close()
-    print myTable
 
 
 if __name__ == "__main__":

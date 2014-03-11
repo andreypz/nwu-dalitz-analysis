@@ -11,8 +11,8 @@ WeightUtils::WeightUtils(string sampleName, string dataPeriod, string selection,
     rnGen   = new TRandom3();
     _puFile = new TFile("../data/puReweight.root", "OPEN");
 
-    //TString MC("S10");
-    TString MC("RD1");
+    TString MC("S10");
+    //TString MC("RD1");
     _phFileID = new TFile("../data/Photon_ID_CSEV_SF_Jan22rereco_Full2012_"+MC+"_MC_V01.root", "OPEN");
     //_muFileID  = new TFile("../data/MuonEfficiencies_Run2012ReReco_53X.root", "OPEN");
     _muFileISO = new TFile("../data/MuonEfficiencies_ISO_Run_2012ReReco_53X.root", "OPEN");

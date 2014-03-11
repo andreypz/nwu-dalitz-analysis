@@ -296,7 +296,7 @@ for year in yearList:
         # print "Figuring out norms of PDFs",sigP.getVal(), sigP.analyticalIntegral()
         raw_input("pdf norm / chi2  ")
         
-      testFrame.SetMaximum(50)
+      testFrame.SetMaximum(60)
       testFrame.Draw()
       testFrame.SetTitle(";m_{H} (GeV);Events/"+str(binWidth)+" GeV")
 

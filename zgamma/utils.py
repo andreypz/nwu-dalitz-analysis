@@ -142,7 +142,7 @@ def drawAllInFile(f1, name1, f2, name2, f3, name3, dir,path, N, howToScale="none
     #dirList.Print()
     createDir(path)
     scale2 = scale3 = 1
-    split = os.path.split(path)
+    split = os.path.split(path.rstrip("/"))
     print "Split lit lit", split[0], split[1]
 
     doOverflow = 0
@@ -411,7 +411,11 @@ def makeTable(table, name, opt="tex"):
         for c in range(n_col):
             val = table[l][c]
             if not isinstance(val,str):
-                myTable+="%.2f" % (table[l][c])
+                if c==2:
+                    myTable+="%.0f" % (val)
+                else:
+                    myTable+="%.2f" % (val)
+
             else:
                 myTable+=val
             if c!=n_col-1:

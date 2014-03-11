@@ -4,7 +4,7 @@ import sys,os,re
 import ConfigParser as cp
 cf = cp.ConfigParser()
 cf.read('config.cfg')
-s = cf.get("fits","ver")
+s = cf.get("path","ver")
 verbose = 0
 
 from ROOT import *
@@ -52,7 +52,7 @@ def doBiasStudy(year = '2012', lepton = 'mu', cat = '0', genFunc = 'Bern3', mass
     print '  RAW INPUT HERE:'
     raw_input()
   
-  rooWsFile = TFile(fileBase.replace('/','')+'-testRooFitOut_Dalitz.root','r')
+  rooWsFile = TFile(fileBase.replace('/','')+'/testRooFitOut_Dalitz.root','r')
   myWs = rooWsFile.Get('ws')
   sigRangeName = '_'.join(['range',lepton,year,'cat'+cat,'M'+mass])
 

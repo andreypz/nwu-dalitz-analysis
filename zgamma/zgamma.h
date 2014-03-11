@@ -54,6 +54,7 @@
 #include "../plugins/rochcor2012v2.h"
 #include "../plugins/ZGAngles.h"
 #include "../plugins/HistManager.h"
+#include "../plugins/PhotonScaleCorrections.hh"
 //#include "../plugins/PhosphorCorrectorFunctor.hh"
 // Header file for the classes stored in the TTree if any.
 #include <TClonesArray.h>
@@ -124,6 +125,7 @@ class zgamma : public TSelector {
   UInt_t nEvents[nC];
   UInt_t totEvents;  
 
+  TRandom3 *myRandom;
   ofstream fout;
 
   //auto_ptr<ammagz::PhosphorCorrectionFunctor> phoCorrector;

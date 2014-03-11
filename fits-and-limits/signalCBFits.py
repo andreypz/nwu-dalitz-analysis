@@ -240,7 +240,7 @@ if __name__=="__main__":
   leptonList      = [a.strip() for a in (cf.get("fits","leptonList")).split(',')]
   catList         = [a.strip() for a in (cf.get("fits","catList")).split(',')]
 
-  ver = cf.get("fits","ver")
+  ver = cf.get("path","ver")
 
   for y in yearList:
     for c in catList:

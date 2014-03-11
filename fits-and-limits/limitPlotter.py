@@ -144,8 +144,7 @@ if fullCombo:
   prelim.Draw()
 
   mg.SetMinimum(0)
-  mg.SetMaximum(26)
-
+  mg.SetMaximum(31)
 
   sqrt = TLatex(0.20,0.85, "#sqrt{s} = 8 Tev; #it{L_{int}} = 19.7 fb^{-1}")
   sqrt.SetNDC();
@@ -158,8 +157,6 @@ if fullCombo:
   leg.AddEntry(expected,"Expected", "l")
   leg.AddEntry(oneSigma,"Expected #pm 1#sigma", "f")
   leg.AddEntry(twoSigma,"Expected #pm 2#sigma", "f")
-
-
   
   selection = TLatex()
   if "mu" in s:

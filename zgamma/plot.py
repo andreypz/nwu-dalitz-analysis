@@ -276,6 +276,7 @@ if __name__ == "__main__":
     yields_data = {}
     yields_bkg  = {}
     yields_sig  = {}
+    yields_ggH  = {}
     yields_vbf  = {}
     yields_vh   = {}
 
@@ -296,7 +297,7 @@ if __name__ == "__main__":
                 os.system("hadd "+hPath+"/m_Data_" +thissel+"_"+period+".root "+hPath+"/"+thissel+"_"+period+"/hhhh_*Run20*.root")
 
             if doBkg:
-                os.system("hadd "+hPath+"/m_DY_"   +thissel+"_"+period+".root "+hPath+"/"+thissel+"_"+period+"/hhhh_DYjets*.root")
+                os.system("hadd "+hPath+"/m_DY_"   +thissel+"_"+period+".root "+hPath+"/"+thissel+"_"+period+"/hhhh_DYjets50*.root")
             #os.system("hadd "+hPath+"/m_ZG_"    +thissel+"_"+period+".root "
             #         +hPath+"/"+thissel+"_"+period+"/hhhh_ZG_*.root ")
 
@@ -319,19 +320,23 @@ if __name__ == "__main__":
         
         dataFile[thissel] = TFile(hPath+"/m_Data_"+thissel+"_"+period+".root","OPEN")
         if doBkg:
-            bkgFile[thissel]  = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_DYjets0_1.root", "OPEN")
-            #bkgFile[thissel]  = TFile(hPath+"/m_DY_"+thissel+"_"+period+".root","OPEN")
+            #bkgFile[thissel]  = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_DYjets0_1.root", "OPEN")
+            bkgFile[thissel]  = TFile(hPath+"/m_DY_"+thissel+"_"+period+".root","OPEN")
+        else:
+            bkgFile[thissel]=None
 
 
         yields_data[thissel] = u.getYields(dataFile[thissel])
-        yields_sig[thissel]  = u.getYields(sigFile, 'ggH-125',True) 
+        yields_ggH[thissel]  = u.getYields(sigFile, 'ggH-125',True) 
         yields_vbf[thissel]  = u.getYields(sigFileVBF, 'vbfH-125', True) 
         yields_vh[thissel]   = u.getYields(sigFileVH,  'vH-125', True) 
-        #yields_sig[thissel]  = u.getYields(sigFile, False)
-        #yields_bkg[thissel]  = u.getYields(bkgFile[thissel])
+        yields_sig[thissel]  = [sum(x) for x in zip(yields_ggH[thissel],yields_vbf[thissel],yields_vh[thissel])]
+
+        print 'ggH yi',yields_ggH[thissel]
+        print 'sig yi', yields_sig[thissel]
 
         if doBkg:
-            yields_bkg[thissel]  = u.getYields(bkgFile[thissel])
+            yields_bkg[thissel]  = u.getYields(bkgFile[thissel],"DY",True)
 
         #if int(cut) >2:
         #tri_hists[thissel]   = dataFile[thissel].Get("tri_mass_cut"+cut).Clone()
@@ -340,19 +345,17 @@ if __name__ == "__main__":
         u.drawAllInFile(dataFile[thissel], "Data", None, "", sigFile,"Signal",  "",path, cut, "norm")
         #u.drawAllInFile(dataFile[thissel], "data", None, "", sigFile,"signal",  "",path, cut, "norm", doRatio=1)
         #u.drawAllInFile(dataFile[thissel], "Data", None, "", sigFile,"50xSignal",  "",path, cut, "lumi")
-        u.drawAllInFile(dataFile[thissel], "data", None, "", sigFile,"50xSignal","EB",pathBase+"/EB", cut, "lumi")
-        u.drawAllInFile(dataFile[thissel], "data", None, "", sigFile,"50xSignal","EE",pathBase+"/EE", cut, "lumi")
+        #u.drawAllInFile(dataFile[thissel], "data", None, "", sigFile,"50xSignal","EB",pathBase+"/EB", cut, "lumi")
+        #u.drawAllInFile(dataFile[thissel], "data", None, "", sigFile,"50xSignal","EE",pathBase+"/EE", cut, "lumi")
 
         if thissel =="mugamma":
-            u.drawAllInFile(dataFile[thissel], "data",None, "",sigFile,"signal",  "Muons", pathBase+"/Muons", None,"norm")
+            # u.drawAllInFile(dataFile[thissel], "data",None, "",sigFile,"signal",  "Muons", pathBase+"/Muons", None,"norm")
+            u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",  
+                            "Muons", pathBase+"/Muons/", None,"norm")
+            u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal", 
+                            "Photon",pathBase+"/Photon/", None,"norm")
 
-            #u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",  "Muons", pathBase+"/Muons/", None,"norm")
-            #u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",  "Photon",pathBase+"/Photon/", None,"norm")
         elif thissel =="elgamma":
-            if not doBkg:
-                bkgFile[thissel]=None
-
-
             u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",
                             "Photon",     pathBase+"/Photon",     None,"norm")
             
@@ -492,18 +495,18 @@ if __name__ == "__main__":
     #plot_types
     print yields_sig
 
-    table_all  = u.yieldsTable([yields_data,yields_sig, yields_vbf, yields_vh], sel)
-
     if doBkg:
-        table_bkg = u.yieldsTable(yields_bkg, sel)        
+        table_all  = u.yieldsTable([yields_data,yields_bkg,yields_sig, yields_ggH,yields_vbf, yields_vh], sel)
+    else:
+        table_all  = u.yieldsTable([yields_data,yields_sig, yields_ggH,yields_vbf, yields_vh], sel)
 
     u.makeTable(table_all,"all", "html")
     u.makeTable(table_all,"all", "twiki")
+    u.makeTable(table_all,"all", "tex")
 
-    if doBkg:
-        u.makeTable(table_bkg, "bkg",  "twiki")
-
-    os.system("cat yields_all.html > yields.html")
+    os.system("cat yields_all.html   > yields.html")
+    #os.system("cat yields_all.twiki  > yields.html")
+    #os.system("cat yields_all.tex    > yields.html")
 
     comments = ["These plots are made for ...",
                 "Blah"]

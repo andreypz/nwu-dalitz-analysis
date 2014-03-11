@@ -20,16 +20,16 @@ parser.add_option("--bkg",  dest="bkg",  action="store_true", default=False, hel
 parser.add_option("--test", dest="test", action="store_true", default=False, help="Run over the test sample")
 parser.add_option("--all",  dest="all",  action="store_true", default=False, help="Run over all the samples!")
 parser.add_option("--gen",  dest="gen",  action="store_true", default=False, help="Do gen-level analysis.")
-    
+
 (options, args) = parser.parse_args()
 
 
 if len(args) < 1:
     parser.print_usage()
     exit(1)
-    
+
 ''' Specify parameters '''
-dCache      = '/pnfs/cms/WAX/11/store/user' 
+dCache      = '/pnfs/cms/WAX/11/store/user'
 EOS         = '/eos/uscms/store/user'
 outputPath  = EOS+'/andreypz/batch_output/zgamma/8TeV'
 executable  = 'batchJob.sh'
@@ -47,7 +47,7 @@ if '/tthome' in os.getcwd():
     outputPath  = '/tthome/andrey/batch_output/zgamma/8TeV'
     DIRNATE  = '/tthome/naodell/storage/data'
     DIRBRIAN = '/tthome/bpollack/storage'
-    
+
 
 if options.elgamma:
     selection="elgamma"
@@ -57,8 +57,8 @@ if options.mumu:
     selection="mumu"
 if options.singlemu:
     selection="single-mu"
-                                            
-    
+
+
 version    = args[0]
 period    = '2012'
 doTest    = options.test
@@ -76,7 +76,7 @@ if options.all:
     doBG   = 1
     doSignal = 1
 
-''' 
+'''
     Set job configurations.  The order of arguments is:
     (Dataset, path to data, number of jobs, arguments to pass to executable, output directory name)
 '''
@@ -86,7 +86,7 @@ data = []
 bg = []
 signal = []
 
-    
+
 
 test.extend([
     #cfg('SingleMu_Run2012A',        dCache+'/andreypz/nuTuples_v6_8TeV/SingleMu/Run2012A-22Jan2013',         5, 'DATA '+selection+' 2012 0' + whereWeRun),
@@ -97,7 +97,7 @@ test.extend([
 
 
 if period =="2012":
-    
+
     if selection == 'mumu':
         data.extend([
             cfg('DoubleMu_Run2012A',  DIR+'/bpollack/V09_05_8TeV/DoubleMu/Run2012A',  5, 'DATA '+selection+' 2012 0' + whereWeRun),
@@ -113,65 +113,45 @@ if period =="2012":
             cfg('SingleMu_Run2012C',  dCache+'/andreypz/nuTuples_v6_8TeV/SingleMu/Run2012C-22Jan2013-v1',  8, 'DATA '+selection+' 2012 0' + whereWeRun),
             cfg('SingleMu_Run2012D',  dCache+'/andreypz/nuTuples_v6_8TeV/SingleMu/Run2012D-22Jan2013',    15, 'DATA '+selection+' 2012 0' + whereWeRun),
             ])
-        
-    if selection == 'mugamma':
-    
-        data.extend([
-            
-            cfg('MuEG_Run2012A',  DIRNATE+'/nuTuples_v9.6_8TeV/Data/MuEG_Run2012A',  5, 'DATA '+selection+' 2012 0' + whereWeRun),
-            cfg('MuEG_Run2012B',  DIRNATE+'/nuTuples_v9.6_8TeV/Data/MuEG_Run2012B',  8, 'DATA '+selection+' 2012 0' + whereWeRun),
-            cfg('MuEG_Run2012C',  DIRNATE+'/nuTuples_v9.6_8TeV/Data/MuEG_Run2012C',  8, 'DATA '+selection+' 2012 0' + whereWeRun),
-            cfg('MuEG_Run2012D',  DIRNATE+'/nuTuples_v9.6_8TeV/Data/MuEG_Run2012D',  15,'DATA '+selection+' 2012 0' + whereWeRun),
 
-            ])
-    
+    if selection == 'mugamma':
+        data.extend([
+                cfg('MuEG_Run2012A',  DIRNATE+'/nuTuples_v9.6_8TeV/Data/MuEG_Run2012A',  5, 'DATA '+selection+' 2012 0' + whereWeRun),
+                cfg('MuEG_Run2012B',  DIRNATE+'/nuTuples_v9.6_8TeV/Data/MuEG_Run2012B',  8, 'DATA '+selection+' 2012 0' + whereWeRun),
+                cfg('MuEG_Run2012C',  DIRNATE+'/nuTuples_v9.6_8TeV/Data/MuEG_Run2012C',  8, 'DATA '+selection+' 2012 0' + whereWeRun),
+                cfg('MuEG_Run2012D',  DIRNATE+'/nuTuples_v9.6_8TeV/Data/MuEG_Run2012D',  15,'DATA '+selection+' 2012 0' + whereWeRun),
+                ])
+        
     if selection == 'elgamma':
         data.extend([
-            cfg('DoublePhoton_Run2012A', dCache+'/andreypz/nuTuples_v9_8TeV/Photon/Run2012A-22Jan2013',         10, 'DATA '+selection+' 2012 0' + whereWeRun),
-            cfg('DoublePhoton_Run2012B', dCache+'/andreypz/nuTuples_v9_8TeV/DoublePhoton/Run2012B-22Jan2013',   15, 'DATA '+selection+' 2012 0' + whereWeRun),
-            cfg('DoublePhoton_Run2012C', dCache+'/andreypz/nuTuples_v9_8TeV/DoublePhoton/Run2012C-22Jan2013',   20, 'DATA '+selection+' 2012 0' + whereWeRun),
-            cfg('DoublePhoton_Run2012D', dCache+'/andreypz/nuTuples_v9_8TeV/DoublePhoton/Run2012D-22Jan2013',   30, 'DATA '+selection+' 2012 0' + whereWeRun),
+                cfg('DoublePhoton_Run2012A', dCache+'/andreypz/nuTuples_v9_8TeV/Photon/Run2012A-22Jan2013',         10, 'DATA '+selection+' 2012 0' + whereWeRun),
+                cfg('DoublePhoton_Run2012B', dCache+'/andreypz/nuTuples_v9_8TeV/DoublePhoton/Run2012B-22Jan2013',   15, 'DATA '+selection+' 2012 0' + whereWeRun),
+                cfg('DoublePhoton_Run2012C', dCache+'/andreypz/nuTuples_v9_8TeV/DoublePhoton/Run2012C-22Jan2013',   20, 'DATA '+selection+' 2012 0' + whereWeRun),
+                cfg('DoublePhoton_Run2012D', dCache+'/andreypz/nuTuples_v9_8TeV/DoublePhoton/Run2012D-22Jan2013',   30, 'DATA '+selection+' 2012 0' + whereWeRun),
             ])
-        
-        
+
+
     bg.extend([
-        cfg('DYjets50',  DIR+'/bpollack/V09_05_8TeV/MC/DYJetsToLL_M-50',  1, 'DYjets50 ' +selection+' '+period),
+            cfg('DYjets50',  DIRBRIAN+'/nuTuples_v9.6_8TeV/MC/DYJetsToLL_M-50_RD1',  20, 'DYjets50 ' +selection+'  2012 0' + whereWeRun ),
+            cfg('ZGToLLG',   DIRBRIAN+'/nuTuples_v9.6_8TeV/MC/ZGToLLG_RD1',          5, 'ZGToLLG  ' +selection+'  2012 0' + whereWeRun ),
         ])
 
-    if selection == 'elgamma':
-        bg.extend([
-            #cfg('DYjets10', dCache+'/andreypz/nuTuples_v9_8TeV/DYJets_M10To50', 20, 'DYjets10 '+selection+' '+period),
-            #cfg('DYjets50',  dCache+'/andreypz/nuTuples_v9_8TeV/DYJets_M0To50',  1, 'DYjets0 ' +selection+' '+period),
-            ])
+    #if selection == 'elgamma':
+    #    bg.extend([
+    #            ])
 
     if selection == 'mugamma':
         bg.extend([
-            #cfg('DYdalitz', dCache+'/andreypz/nutuples_v9.4_8TeV/DYMuMuGammaDalitz', 1, 'DY '+selection+' '+period),
-            ])
-    """
-    cfg('WZJetsTo3LNu',  dCache+'/andreypz/nuTuples_v5_8TeV/WZJetsTo3LNu',  1, 'WZ '+selection+' '+period),
-    cfg('WWJetsTo2L2Nu', dCache+'/andreypz/nuTuples_v5_8TeV/WWJetsTo2L2Nu', 1, 'WW '+selection+' '+period),
-    cfg('ZZJetsTo2L2Nu', dCache+'/andreypz/nuTuples_v5_8TeV/ZZJetsTo2L2Nu', 1, 'ZZ '+selection+' '+period),
-    cfg('ttbar',         dCache+'/andreypz/nuTuples_v5_8TeV/TTJets',       10, 'ttbar '+selection+' '+period),
-    cfg('tW',            dCache+'/andreypz/nuTuples_v5_8TeV/tW',            1, 'tW '+selection+' '+period),
-    cfg('tbarW',         dCache+'/andreypz/nuTuples_v5_8TeV/tbarW',         1, 'tbarW '+selection+' '+period),
-    cfg('DYjets',        dCache+'/andreypz/nuTuples_v5_8TeV/DYjets',       30, 'DYjets '+selection+' '+period),
-    cfg('DYjets10',      dCache+'/naodell/nuTuples_v5_8TeV/DYJetsToLL_M-10To50', 20, 'DYjets10 '+selection+' '+period),
-    cfg('vbfZ',          dCache+'/andreypz/nuTuples_v5_8TeV/Zvbf',          1, 'vbfZ '+selection+' '+period),
-    
-    cfg('WJetsToLNu',    dCache+'/naodell/nuTuples_v5_8TeV/WJetsToLNu',     5, 'WJetsToLNu '+selection+' '+period),
-    cfg('WZJetsTo2L2Q',  dCache+'/naodell/nuTuples_v5_8TeV/WZJetsTo2L2Q',   1, 'WZJetsTo2L2Q '+selection+' '+period),
-        cfg('ZZJetsTo2L2Q',  dCache+'/naodell/nuTuples_v5_8TeV/ZZJetsTo2L2Q',   1, 'ZZJetsTo2L2Q '+selection+' '+period),
-        """
-        
-        
+                cfg('DYjetDalitz', DIR+'/nuTuples_v9.6_8TeV/dalitz/DYtoMuMuJet', 1, 'DY '+selection+'  2012 0' + whereWeRun ),
+                ])
+
     signal.extend([
         cfg('ggHZG-125', DIRBRIAN+'/nuTuples_v9.6_8TeV/MC/ggHZG_M125_RD1',1, 'HZG '+selection+' '+period+gen + whereWeRun),
         ])
-    
+
     if selection in ["mumu","mugamma","single-mu"]:
         signal.extend([
-            
+
             cfg('ggH-mad120', DIR+'/nuTuples_v9.6_8TeV/dalitz/ggHiggsToMuMuGamma_MH120',1, 'dalitz '+selection+' '+period+gen + whereWeRun),
             cfg('ggH-mad125', DIR+'/nuTuples_v9.6_8TeV/dalitz/ggHiggsToMuMuGamma_MH125',1, 'dalitz '+selection+' '+period+gen + whereWeRun),
             cfg('ggH-mad130', DIR+'/nuTuples_v9.6_8TeV/dalitz/ggHiggsToMuMuGamma_MH130',1, 'dalitz '+selection+' '+period+gen + whereWeRun),
@@ -187,7 +167,7 @@ if period =="2012":
             cfg('vbf-mad140', DIR+'/nuTuples_v9.6_8TeV/dalitz/vbfHiggsToMuMuGamma_MH140',1, 'dalitz '+selection+' '+period+gen + whereWeRun),
             cfg('vbf-mad145', DIR+'/nuTuples_v9.6_8TeV/dalitz/vbfHiggsToMuMuGamma_MH145',1, 'dalitz '+selection+' '+period+gen + whereWeRun),
             cfg('vbf-mad150', DIR+'/nuTuples_v9.6_8TeV/dalitz/vbfHiggsToMuMuGamma_MH150',1, 'dalitz '+selection+' '+period+gen + whereWeRun),
-            
+
             cfg('vh-mad120', DIR+'/nuTuples_v9.6_8TeV/dalitz/VHiggsToMuMuGamma_MH120',1, 'dalitz '+selection+' '+period+gen + whereWeRun),
             cfg('vh-mad125', DIR+'/nuTuples_v9.6_8TeV/dalitz/VHiggsToMuMuGamma_MH125',1, 'dalitz '+selection+' '+period+gen + whereWeRun),
             cfg('vh-mad130', DIR+'/nuTuples_v9.6_8TeV/dalitz/VHiggsToMuMuGamma_MH130',1, 'dalitz '+selection+' '+period+gen + whereWeRun),
@@ -208,7 +188,7 @@ if period =="2012":
             cfg('ggH-mad145', dCache+'/andreypz/nuTuples_v9.4_8TeV/HiggsToEEGamma_MH145', 1, 'dalitz '+selection+' '+period+gen + whereWeRun),
             cfg('ggH-mad150', dCache+'/andreypz/nuTuples_v9.4_8TeV/HiggsToEEGamma_MH150', 1, 'dalitz '+selection+' '+period+gen + whereWeRun),
             ])
-        
+
 else:
     print "Only 2012! Other periods are not supported"
 
@@ -226,5 +206,5 @@ if doSignal:
 if len(inputSamples) is not 0:
     batcher = b.BatchMaster(inputSamples, outputPath, shortQueue = False, stageDir = '../StageBatch_'+version,
                             executable = executable, prefix = version + '/' + selection +"_"+ period)
-    print "Submitting to batch?"
+    print "Submitting to batch"
     batcher.submit_to_batch()

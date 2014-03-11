@@ -25,10 +25,10 @@ outputPath = version
 #outputPath = version+'-bias'
 
 inputSamples = []
-#inputSamples.append(cfg('None', 'None', int(options.jobs), str(options.trials) +' 120 '+whereWeRun))
+inputSamples.append(cfg('None', 'None', int(options.jobs), str(options.trials) +' 120 '+whereWeRun))
 inputSamples.append(cfg('None', 'None', int(options.jobs), str(options.trials) +' 125 '+whereWeRun))
-#inputSamples.append(cfg('None', 'None', int(options.jobs), str(options.trials) +' 130 '+whereWeRun))
-#inputSamples.append(cfg('None', 'None', int(options.jobs), str(options.trials) +' 135 '+whereWeRun))
+inputSamples.append(cfg('None', 'None', int(options.jobs), str(options.trials) +' 130 '+whereWeRun))
+inputSamples.append(cfg('None', 'None', int(options.jobs), str(options.trials) +' 135 '+whereWeRun))
 #inputSamples.append(cfg('None', 'None', int(options.jobs), str(options.trials) +' 140 '+whereWeRun))
 #inputSamples.append(cfg('None', 'None', int(options.jobs), str(options.trials) +' 145 '+whereWeRun))
 #inputSamples.append(cfg('None', 'None', int(options.jobs), str(options.trials) +' 150 '+whereWeRun))
