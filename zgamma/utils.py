@@ -36,9 +36,9 @@ def getCS(sample, useMCFM=False, mySel=None):
         sel = conf.get("selection", "sel")[0:2]
     else:
         sel = mySel
-    cs = float(conf.get(sample, "cs-"+sel))      
+    cs = float(conf.get(sample, "cs-"+sel))
 
-    #cs = float(conf.get(sample, "cs"))      
+    #cs = float(conf.get(sample, "cs"))
 
     return cs
 
@@ -48,8 +48,8 @@ def drange(start, stop, step):
     while r <= stop:
         yield r
         r += step
-        
-                  
+
+
 def handleOverflowBins(hist):
     if hist == None:
         return
@@ -91,7 +91,7 @@ def blindIt(h):
     hbin =  h.FindBin(125)
     for b in xrange(hbin-10,hbin+10):
         h.SetBinContent(b,0)
-    
+
 def set_palette(name="palette", ncontours=999):
     """Set a color palette from a given RGB list
     stops, red, green and blue should all be lists of the same length
@@ -124,7 +124,7 @@ def set_palette(name="palette", ncontours=999):
     npoints = len(s)
     TColor.CreateGradientColorTable(npoints, s, r, g, b, ncontours)
     gStyle.SetNumberContours(ncontours)
-    
+
 
 def createDir(dir):
     if not os.path.exists(dir):
@@ -158,35 +158,36 @@ def drawAllInFile(f1, name1, f2, name2, f3, name3, dir,path, N, howToScale="none
         cro = getCS("dy")
         scale2 = float(1000*lumi*cro)/Nev
         print Nev, lumi, cro, scale2
-        
-        
+
+
     if f3!=None and howToScale=="lumi": # only assume signal MC for now
         Nev = f3.Get("Counts/evt_byCut_raw").GetBinContent(1)
         cro = getCS("ggH-125")
         scale3 = float(lumi*cro)/Nev
         print Nev, lumi, cro, scale3
 
-
+    histoName = None
     for k1 in dirList:
         if k1.GetName() in ["eff"]: continue
         if N!=None:
             if not("cut"+N) in k1.GetName(): continue
         h1 = k1.ReadObj()
 
+        histoName = h1.GetName()
         h2 = TH1F()
         h3 = TH1F()
 
         hmaxs = []
-        
+
         if f2!=None:
             #f2.Print()
             if dir!="":
-                h2 = f2.Get(dir+"/"+k1.GetName()) #assumes that the histograms in signal file have the same names  
+                h2 = f2.Get(dir+"/"+k1.GetName()) #assumes that the histograms in signal file have the same names
             else:
                 print k1.GetName()
                 h2 = f2.Get(k1.GetName())
             if h2==None: continue
-            
+
             h2.Scale(float(scale2))
 
         if f3!=None:
@@ -195,28 +196,28 @@ def drawAllInFile(f1, name1, f2, name2, f3, name3, dir,path, N, howToScale="none
             else:
                 h3 = f3.Get(k1.GetName())
             if h3==None: continue
-            
+
             h3.Scale(float(scale3))
 
 
-        print "drawing", h1.GetName()
+        print "drawing", histoName
 
         if h1.InheritsFrom("TH2"):
             createDir(split[0]+"/TH2_"+split[1])
             h1.Draw("col")
-            prename = split[0]+"/TH2_"+split[1]+"/"+h1.GetName()
+            prename = split[0]+"/TH2_"+split[1]+"/"+histoName
             c1.SaveAs(prename+"_data.png")
             if f3!=None and h3!=None:
                 h3.Draw("col")
                 c1.SaveAs(prename+"_sig.png")
 
             continue
-        
+
             #set_palette("gray")
             #h1.Draw("col same")
-            #if "h2D_tri_vs_diLep_mass" in h1.GetName():
+            #if "h2D_tri_vs_diLep_mass" in histoName:
             #    c1.SetLogy()
-                
+
         else:
             pad1 = TPad("pad1","pad1",0,0.3,1,1);
             pad2 = TPad("pad2","pad2",0,0,1,0.3);
@@ -226,8 +227,8 @@ def drawAllInFile(f1, name1, f2, name2, f3, name3, dir,path, N, howToScale="none
                 pad1.Draw();
                 pad1.cd();
                 pad1.SetLogy(isLog)
-                
-            
+
+
             if doOverflow:
                 handleOverflowBins(h1)
 
@@ -236,18 +237,18 @@ def drawAllInFile(f1, name1, f2, name2, f3, name3, dir,path, N, howToScale="none
             #h1.SetMarkerStyle(20)
             h1.SetLineColor(kBlack)
             h1.UseCurrentStyle()
-            
+
             #if "tri_mass" in k1.GetName() and name1 not in ["madgra","mcfm"]:
             #    blindIt(h1)
             if "h_mass" in k1.GetName():
                 print "\n *** H-mass RMS:",  h1.GetRMS(), h2.GetRMS()
                 print "\n *** H-mass Mean:", h1.GetMean(),h2.GetMean()
-                 
-            leg = TLegend(0.67,0.75,0.92,0.90);
-            leg.AddEntry(h1,name1, "l")
-            leg.SetTextSize(0.05)
 
-            #if "phi" in h1.GetName():
+            leg = TLegend(0.63,0.72,0.92,0.90);
+            leg.AddEntry(h1,name1, "l")
+            leg.SetTextSize(0.04)
+
+            #if "phi" in histoName:
             #    h1.SetMinimum(0)
             #    if howToScale=="norm":
             #        h1.SetMaximum(0.035)
@@ -256,7 +257,7 @@ def drawAllInFile(f1, name1, f2, name2, f3, name3, dir,path, N, howToScale="none
             if howToScale =="norm" and  norm1!=0:
                 h1.Scale(1./norm1)
                 hmaxs.append(h1.GetMaximum())
-                         
+
             if f2!=None and h2!=None:
                 if doOverflow:
                     handleOverflowBins(h2)
@@ -268,7 +269,7 @@ def drawAllInFile(f1, name1, f2, name2, f3, name3, dir,path, N, howToScale="none
                     hmaxs.append(h2.GetMaximum())
 
                 leg.AddEntry(h2,name2, "l")
-                
+
 
             if f3!=None and h3!=None:
                 if doOverflow:
@@ -284,15 +285,15 @@ def drawAllInFile(f1, name1, f2, name2, f3, name3, dir,path, N, howToScale="none
                     h3.Scale(1./norm3)
                     hmaxs.append(h3.GetMaximum())
                 leg.AddEntry(h3,name3, "l")
-                
+
                 if doRatio:
                     c1.cd()
                     pad2.SetBottomMargin(0.25);
                     pad2.SetTopMargin(0);
                     pad2.Draw();
                     pad2.cd();
-                    
-                    r = h1.Clone("")                                        
+
+                    r = h1.Clone("")
                     r.Divide(h3);
                     r.GetYaxis().SetTitle("Data/MC");
                     r.SetMaximum(2);
@@ -301,33 +302,71 @@ def drawAllInFile(f1, name1, f2, name2, f3, name3, dir,path, N, howToScale="none
                     r.GetYaxis().SetTitleOffset(0.4);
                     r.SetTitleSize(0.1,"XYZ");
                     r.SetLabelSize(0.1,"XY");
-                    
+
                     r.Draw("e1p");
-                    
+
                     pad1.cd();
-            
+
             # prelim = TLatex(0.15,0.95, "CMS Preliminary %s #it{L_{int}} = %0.1f fb^{-1}" % (8, lumi))
-            prelim = TLatex(0.15,0.95, "CMS Preliminary #sqrt{s} = 8TeV")
+            prelim = TLatex(0.15,0.95, "CMS Preliminary #sqrt{s} = 8TeV, L = 19.6 fb^{-1}   H#rightarrow#gamma*#gamma#rightarrow#mu#mu#gamma")
             prelim.SetNDC();
-            prelim.SetTextSize(0.03);
+            prelim.SetTextSize(0.035);
             prelim.Draw();
-            
+
             if howToScale =="norm":
                 #print "HMAXS=",hmaxs
                 if len(hmaxs)>0:
                     m = max(hmaxs)
                     h1.SetMaximum(1.1*m)
-                h1.GetYaxis().SetTitle("a.u.")
+                h1.GetYaxis().SetTitle("arbitrary units")
 
             # Here we consider particular cases (histograms) that need special care
-            if "tri_mass_longTail" in h1.GetName() and howToScale=="lumi":
+            if "tri_mass_longTail" in histoName and howToScale=="lumi":
                 h1.SetMaximum(750)
 
-            if "diLep_mass_low" in h1.GetName() and howToScale=="norm" and f2!=None:
+            if "diLep_mass_low" in histoName and howToScale=="norm" and f2!=None:
                 s1 = h1.Integral(90,200)
                 s2 = h2.Integral(90,200)
                 h2.Scale(float(s1)/s2)
-                
+
+            if "lPt1_gamma_deltaR" in histoName:
+                #h1.Rebin(2)
+                #h2.Rebin(2)
+                h1.SetAxisRange(1,5,"X")
+                h1.SetXTitle("#DeltaR(#gamma, #mu_{1})")
+
+            if "ll_deltaR_" in histoName:
+                #h1.SetAxisRange(0,1,"X")
+                h1.SetXTitle("#DeltaR(#mu_{1}, #mu_{2})")
+
+            if "gamma_pt__" in histoName:
+                h1.SetXTitle("Photon p_{T} (GeV)")
+            if "lPt1_pt__" in histoName:
+                h1.SetXTitle("Leading muon p_{T} (GeV)")
+            if "lPt2_pt__" in histoName:
+                h1.SetXTitle("Trailing muon p_{T} (GeV)")
+
+            if "ph_energyCorrection" in histoName:
+                gStyle.SetOptStat(1111)
+                h1.SetName("Data")
+                h3.SetName("ggH-125")
+                stats1 = h1.GetListOfFunctions().FindObject("stats");
+                stats3 = h3.GetListOfFunctions().FindObject("stats");
+                stats1.Print()
+                stats1.SetX1NDC(0.7)
+                stats1.SetX2NDC(0.95)
+                stats1.SetY1NDC(0.9)
+                stats1.SetY2NDC(0.7)
+                stats3.SetX1NDC(0.7)
+                stats3.SetX2NDC(0.95)
+                stats3.SetY1NDC(0.7)
+                stats3.SetY2NDC(0.5)
+                stats3.SetTextColor(kRed+1)
+                leg.SetX1(0.19)
+                leg.SetX2(0.46)
+                leg.SetY1(0.85)
+                leg.SetY2(0.7)
+
             c1.cd()
             leg.SetFillColor(kWhite)
             leg.Draw()
@@ -336,15 +375,17 @@ def drawAllInFile(f1, name1, f2, name2, f3, name3, dir,path, N, howToScale="none
             #if "diLep_mass_low":
             #    h1.
 
-            c1.SaveAs(path+"/"+h1.GetName()+".png")
+            c1.SaveAs(path+"/"+histoName+".png")
+            gStyle.SetOptStat(0)
+
         c1.SetLogy(0)
-        
+
 def yieldsTable(yieldList, sel, num=True):
     print sel
     t = []
     if len(sel)==0:
         return t
-    
+
     cuts =  getCuts(conf, "cuts-"+sel[0][0:2])
 
 
@@ -364,9 +405,9 @@ def yieldsTable(yieldList, sel, num=True):
                 l.append(yi[thissel][line])
             #print l
             t.append(l)
-        
+
     return t
-                                                        
+
 def makeTable(table, name, opt="tex"):
     print "Making sure that the list is alright"
     n_row = len(table)
@@ -375,8 +416,8 @@ def makeTable(table, name, opt="tex"):
     for l in table:
         if len(l)!=n_col:
             print "No good, the number of columns is messed up"
-            
-            
+
+
     myTable = ''
     if opt=="tex":
         beginTable = '\\begin{tabular}{|'+n_col*"l|"+'} \n \\hline \n'
@@ -423,12 +464,12 @@ def makeTable(table, name, opt="tex"):
         myTable+=endLine
 
     myTable +=endTable
-    
+
     ifile = open("yields_"+name+"."+opt,"w")
     ifile.write(myTable)
     ifile.close()
-    
-    if opt in ["twiki","tex"]:
+
+    if opt in ["twiki"]:
         print myTable
 
 def getTotalEvents(f):

@@ -25,8 +25,8 @@ plotBase = cf.get("path","htmlbase")+'/html/zgamma/dalitz/fits-'+s
 u.createDir(plotBase)
 
 fullCombo = True
-#massList   = [float(a.strip()) for a in (cf.get("fits","massList-more")).split(',')]
-massList        = [float(a) for a in u.drange(120,150,0.5)]
+massList   = [float(a) for a in (cf.get("fits","massList-more")).split(',')]
+#massList        = [float(a) for a in u.drange(120,150,.5)]
 
 print massList
   
@@ -138,13 +138,16 @@ if fullCombo:
   mg.GetXaxis().SetLimits(massList[0],massList[-1]);
   gPad.RedrawAxis()
 
-  prelim = TLatex(0.15,0.95, "CMS Preliminary")
+  prelim = TLatex()
   prelim.SetNDC();
-  prelim.SetTextSize(0.03)
-  prelim.Draw()
+  prelim.SetTextSize(0.04)
+  prelim.DrawLatex(0.25,0.95, "CMS Preliminary")
+  prelim.DrawLatex(0.60,0.8, "H#rightarrow#gamma*#gamma#rightarrow#mu#mu#gamma")
+  #  prelim.Draw()
 
   mg.SetMinimum(0)
   mg.SetMaximum(31)
+  #mg.SetMaximum(8)
 
   sqrt = TLatex(0.20,0.85, "#sqrt{s} = 8 Tev; #it{L_{int}} = 19.7 fb^{-1}")
   sqrt.SetNDC();

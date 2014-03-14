@@ -105,9 +105,9 @@ def doInitialFits(subdir):
                 'v_mu2012_M125':TFile(basePath1+musel+'_2012/hhhh_vh-mad125_1.root','r'),
                 'v_mu2012_M130':TFile(basePath1+musel+'_2012/hhhh_vh-mad130_1.root','r'),
                 'v_mu2012_M135':TFile(basePath1+musel+'_2012/hhhh_vh-mad135_1.root','r'),
-                'v_mu2012_M140':TFile(basePath1+musel+'_2012/hhhh_vbf-mad140_1.root','r'),
-                'v_mu2012_M145':TFile(basePath1+musel+'_2012/hhhh_vbf-mad145_1.root','r'),
-                'v_mu2012_M150':TFile(basePath1+musel+'_2012/hhhh_vbf-mad150_1.root','r')
+                'v_mu2012_M140':TFile(basePath1+musel+'_2012/hhhh_vh-mad140_1.root','r'),
+                'v_mu2012_M145':TFile(basePath1+musel+'_2012/hhhh_vh-mad145_1.root','r'),
+                'v_mu2012_M150':TFile(basePath1+musel+'_2012/hhhh_vh-mad150_1.root','r')
 
                 #'gg_el2012_M125':TFile(basePath2+'electron_2012/hhhh_dal-mad125_1.root','r')
                 }
@@ -132,12 +132,12 @@ def doInitialFits(subdir):
 
   ws = RooWorkspace("ws")
 
-  yi_da0 = AutoVivification()
-  yi_da1 = AutoVivification()
-  yi_gg0 = AutoVivification()
-  yi_gg1 = AutoVivification()
-  mean_gg0 = AutoVivification()
-  sigma_gg0 = AutoVivification()
+  yi_da0  = AutoVivification()
+  yi_da1  = AutoVivification()
+  yi_sig0 = AutoVivification()
+  yi_sig1 = AutoVivification()
+  mean_sig  = AutoVivification()
+  sigma_sig = AutoVivification()
   # ###################################
   # start loop over all year/lep/cat #
   # ###################################
@@ -197,38 +197,37 @@ def doInitialFits(subdir):
             # but this is mostly for compatibility, we may change to unbinned
             # during a future iteration
 
+            histName  = '_'.join(['sig',prod,lepton,year,'cat'+cat,'M'+mass])
+            signalList.append(TH1F(histName, histName, 100, lowCutOff, highCutOff))
+            signalList[-1].SetLineColor(kRed)
+            signalTree = signalDict[prod+"_"+lepton+year+"_M"+mass].Get(treeName)
+
+
+            if verbose: print 'signal mass loop', mass
+            print 'in gg   INPUT ', cat, prod,mass
+            # raw_input()
+            
+            if verbose:
+              print histName
+              signalTree.Print()
+              print
+                
+            if cat=="0":
+              signalTree.Draw('m_llg>>'+histName,'weight')
+            elif cat=="EB":
+              signalTree.Draw('m_llg>>'+histName,"weight*(fabs(ph_eta)<"+str(EBetaCut)+")")
+            elif cat=="EE":
+              signalTree.Draw('m_llg>>'+histName,"weight*(fabs(ph_eta)>"+str(EBetaCut)+")")
+              
+            if signalList[-1].Integral()!=0:
+              signalList[-1].Scale(1/signalList[-1].Integral())
+            signalList[-1].Smooth(2)
+
             if prod=='gg':
-
-              if verbose: print 'signal mass loop', mass
-              print 'in gg   INPUT ', cat, prod,mass
-              #raw_input()
-
-              histName  = '_'.join(['sig',lepton,year,'cat'+cat,'M'+mass])
-              rangeName = '_'.join(['range',lepton,year,'cat'+cat,'M'+mass])
-
-              signalList.append(TH1F(histName, histName, 100, lowCutOff, highCutOff))
-              signalList[-1].SetLineColor(kRed)
-              signalTree = signalDict[prod+"_"+lepton+year+"_M"+mass].Get(treeName)
-
-              if verbose:
-                print histName
-                signalTree.Print()
-                print
-
-              if cat=="0":
-                signalTree.Draw('m_llg>>'+histName,'weight')
-              elif cat=="EB":
-                signalTree.Draw('m_llg>>'+histName,"weight*(fabs(ph_eta)<"+str(EBetaCut)+")")
-              elif cat=="EE":
-                signalTree.Draw('m_llg>>'+histName,"weight*(fabs(ph_eta)>"+str(EBetaCut)+")")
-
-              if signalList[-1].Integral()!=0:
-                signalList[-1].Scale(1/signalList[-1].Integral())
-              signalList[-1].Smooth(2)
-
               # range is +/- 1 RMS centered around signal peak
               rangeLow = signalList[-1].GetMean()-1.0*signalList[-1].GetRMS()
               rangeHi  = signalList[-1].GetMean()+1.0*signalList[-1].GetRMS()
+              rangeName = '_'.join(['range',lepton,year,'cat'+cat,'M'+mass])
               mzg.setRange(rangeName,rangeLow,rangeHi)
 
               mzg_argL = RooArgList(mzg)
@@ -237,33 +236,40 @@ def doInitialFits(subdir):
               signalListPDF.append(RooHistPdf('pdf_'+histName,'pdf_'+histName,mzg_argS,signalListDH[-1],2))
               getattr(ws,'import')(signalListPDF[-1])
 
-              yi_gg0[year][mass][lepton][cat] = sig_ds.sumEntries()
-              yi_gg1[year][mass][lepton][cat] = sig_ds.sumEntries('1','SignalRegion')
+              if verbose: print '\n\n ** finished one mass -->>', mass
 
-              mean_gg0[year][mass][lepton][cat]  = [signalList[-1].GetMean(), signalList[-1].GetMeanError()]
-              sigma_gg0[year][mass][lepton][cat] = [signalList[-1].GetRMS(), signalList[-1].GetRMSError()]
+            yi_sig0[year][mass][lepton][cat][prod] = sig_ds.sumEntries()
+            yi_sig1[year][mass][lepton][cat][prod] = sig_ds.sumEntries('1','SignalRegion')
 
-              if verbose: print '\n\n ** finshed one mass -->>', mass
+            #mean_sig[year][mass][lepton][cat][prod]  = [signalList[-1].mean(mzg), signalList[-1].GetMeanError()]
+            #sigma_sig[year][mass][lepton][cat][prod] = [signalList[-1].GetRMS(), signalList[-1].GetRMSError()]
+            mean_sig[year][mass][lepton][cat][prod]  = [signalList[-1].GetMean(), signalList[-1].GetMeanError()]
+            sigma_sig[year][mass][lepton][cat][prod] = [signalList[-1].GetRMS(), signalList[-1].GetRMSError()]
 
-            if debugPlots and prod=='gg':
-              testFrame = mzg.frame()
-              for i,signal in enumerate(signalListPDF):
-                signalListDH[i].plotOn(testFrame)
-                signal.plotOn(testFrame)
-                #signal.paramOn(testFrame)
-                #signal.statOn(testFrame)
-                #mzg_argS.writeToFile('myargset.txt')
+            # mean_dh[year][mass][lepton][cat]  = [signalListDH[-1].GetMean(), signalListDH[-1].GetMeanError()]
+            # sigma_dh[year][mass][lepton][cat] = [signalListDH[-1].GetRMS(), signalListDH[-1].GetRMSError()]
 
-              testFrame.Draw()
-              c.SaveAs(plotBase+'_'.join(['signals',prod,year,lepton,'cat'+cat,'M'+mass])+'.png')
 
-            if debugPlots:
-              testFrame = mzg.frame()
-              for signal in signalListDS:
-                signal.plotOn(testFrame, RooFit.DrawOption('pl'))
-              testFrame.Draw()
-              c.SaveAs(plotBase+'_'.join(['ds','sig',prod,year,lepton,'cat'+cat,'M'+mass])+'.png')
-            del signalTree
+          print '\n\n Now make some ploOns!\n'
+          testFrame = mzg.frame()
+          for i,signal in enumerate(signalListPDF):
+            signalListDH[i].plotOn(testFrame)
+            signal.plotOn(testFrame)
+            # signal.paramOn(testFrame)
+            # signal.statOn(testFrame)
+            # mzg_argS.writeToFile('myargset.txt')
+            print i,signal
+            testFrame.Draw()
+          # raw_input("All DONE. INPUT NEEDED")
+          c.SaveAs(plotBase+'_'.join(['signals',prod,year,lepton,'cat'+cat])+'.png')
+
+          testFrame = mzg.frame()
+          for signal in signalListDS:
+            signal.plotOn(testFrame, RooFit.DrawOption('pl'))
+            testFrame.Draw()
+          c.SaveAs(plotBase+'_'.join(['ds','sig',prod,year,lepton,'cat'+cat])+'.png')
+
+        del signalTree
 
 
         # ###############
@@ -416,7 +422,7 @@ def doInitialFits(subdir):
             #BB.plotOn(testFrame,RooFit.LineColor(kViolet), RooFit.Name('Beta+Bern4'))
             #GB.plotOn(testFrame,RooFit.LineColor(kGreen), RooFit.Name('GaussBern3'))
             testFrame.Draw()
-            testFrame.SetTitle(";m_{H} (GeV);Events/"+str(binWidth)+" GeV")
+            testFrame.SetTitle(";m_{#mu#mu#gamma} (GeV);Events/"+str(binWidth)+" GeV")
             leg.AddEntry(testFrame.findObject('Exp'),'Exp','l')
             leg.AddEntry(testFrame.findObject('Pow'),'Pow','l')
             leg.AddEntry(testFrame.findObject('Bern2'),'Bern2','l')
@@ -476,6 +482,8 @@ def doInitialFits(subdir):
         yi_da1[year][lepton][cat] = data_ds.sumEntries('1','SignalRegion')
 
 
+
+
   u.createDir(subdir)
   ws.writeToFile(subdir+'/testRooFitOut_Dalitz.root')
 
@@ -486,15 +494,43 @@ def doInitialFits(subdir):
   print 'in 122-128:', yi_da1
 
   print '*** Some yields from ggH'
-  print 'Full range:', yi_gg0
-  print 'in 122-128:', yi_gg1
+  print 'Full range:', yi_sig0
+  print 'in 122-128:', yi_sig1
 
 
-  print "You should also notice that EBeta cut was", EBetaCut
+  print "\n ** You should also notice that EBeta cut was: ", EBetaCut
   print "And that the range was from ", lowCutOff, 'to', highCutOff
 
-  print "\n Mean:", mean_gg0
-  print "\n Sigma:", sigma_gg0
+  print "\n Mean from dataset: ", mean_sig
+  print "\n Sigma DS:", sigma_sig
+
+  #print "\n Mean from Datahist:", mean_gg0_dh
+  #print "\n Sigma DH:", sigma_gg0_dh
+
+
+  for year in yearList:
+    for lepton in leptonList:
+      for cat in catList:
+        t_mean = []
+        t_sigma = []
+        for mass in massList:
+          l_mean = []
+          l_sigma = []
+          l_mean.append(mass)
+          l_sigma.append(mass)
+          for prod in sigNameList:
+            print year, lepton, cat, prod
+            print mean_sig[year][mass][lepton][cat][prod]
+            print sigma_sig[year][mass][lepton][cat][prod]
+            #a,b = mean_sig[year][mass][lepton][cat][prod]
+            #l.append("%.2f &pm; %.2f"%(a,b))
+            l_mean.append( "%.3f &pm; %.3f"%(mean_sig[year][mass][lepton][cat][prod][0], mean_sig[year][mass][lepton][cat][prod][1]))
+            l_sigma.append("%.3f &pm; %.3f"%(sigma_sig[year][mass][lepton][cat][prod][0],sigma_sig[year][mass][lepton][cat][prod][1]))
+            #print l
+          t_mean.append(l_mean)
+          t_sigma.append(l_sigma)
+        u.makeTable(t_mean,  "mean",  opt="twiki")
+        u.makeTable(t_sigma, "sigma", opt="twiki")
 
   print '\n \t we did it!\t'
 

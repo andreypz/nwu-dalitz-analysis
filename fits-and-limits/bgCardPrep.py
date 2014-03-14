@@ -16,7 +16,7 @@ doExt   = 0
 
 cf = cp.ConfigParser()
 cf.read('config.cfg')
-subdir = cf.get("path","ver")  
+subdir = cf.get("path","ver")
 yearList   = [a.strip() for a in (cf.get("fits","yearList")).split(',')]
 leptonList = [a.strip() for a in (cf.get("fits","leptonList")).split(',')]
 catList    = [a.strip() for a in (cf.get("fits","catList")).split(',')]
@@ -117,7 +117,7 @@ def BackgroundNameFixer(fitName, year, lepton, cat, ws, Ext=True):
           ws.factory('EDIT::'+fitExtNameNew+'('+fitExtName+','
                      +p0Name+'='+p0NameNew+','+p1Name+'='+p1NameNew+','+p2Name+'='+p2NameNew+','
                      +p3Name+'='+p3NameNew+','+p4Name+'='+p4NameNew+')')
-          
+
       elif n =='Bern5':
         if Ext:
           ws.factory('EDIT::'+fitExtNameNew+'('+fitExtName+','+normName+'='+normNameNew+','
@@ -217,19 +217,33 @@ for year in yearList:
       print dataName, suffix
 
       fitName  = '_'.join([bkgModel,year,lepton,'cat'+cat])
-      normName = 'norm'+bkgModel+'_'+suffix      
+      normName = 'norm'+bkgModel+'_'+suffix
 
       hPath    = cf.get("path","base")+"/batch_output/zgamma/8TeV/"+subdir
-      sigFileMAD  = TFile(hPath+"/mugamma_"+year+"/hhhh_ggH-mad125_1.root", "OPEN")
+      sigFile_gg   = TFile(hPath+"/mugamma_"+year+"/hhhh_ggH-mad125_1.root", "OPEN")
+      sigFile_vbf  = TFile(hPath+"/mugamma_"+year+"/hhhh_vbf-mad125_1.root", "OPEN")
+      sigFile_vh   = TFile(hPath+"/mugamma_"+year+"/hhhh_vh-mad125_1.root", "OPEN")
+      fsig= [sigFile_gg,sigFile_vbf,sigFile_vh]
+      hsig = []
+      for i,f in enumerate(fsig):
+        Nev = f.Get("Counts/evt_byCut").GetBinContent(2)
+        if i==0:
+          cro = u.getCS("ggH-125",mySel='mu')
+        elif i==1:
+          cro = u.getCS("vbfH-125",mySel='mu')
+        elif i==2:
+          cro = u.getCS("vH-125",mySel='mu')
+        lumi = u.getLumi("2012")
+        scale = float(lumi*cro)/Nev
+        print f.GetName(), cro,Nev,scale
 
-      Nev = sigFileMAD.Get("Counts/evt_byCut").GetBinContent(2)
-      cro = u.getCS("ggH-125",mySel='mu')
-      lumi = u.getLumi("2012")
-      scale = float(lumi*cro)/Nev
-      
-      hc7 = sigFileMAD.Get("tri_mass__cut10").Clone()
-      hc7.Scale(10*scale)
-                        
+        hsig.append(f.Get("tri_mass__cut10").Clone())
+        hsig[-1].Scale(10*scale)
+        #hsig[-1].Print("all")
+
+      hsig[0].Add(hsig[1])
+      hsig[0].Add(hsig[2])
+
       print fitName, dataName
       data = myWs.data(dataName)
       fit  = myWs.pdf(fitName)
@@ -253,12 +267,11 @@ for year in yearList:
       if verbose:
         print norm.getVal(), norm.getError()
         raw_input("norm.getVal(), norm.getError()")
-      
-      
+
+
       fit_ext.fitTo(data,RooFit.Range('DalitzRegion'))
       myBinning = 30
       binWidth = 2.
-      
 
       testFrame = mzg.frame(RooFit.Range('DalitzRegion'))
       if doBlind:
@@ -268,25 +281,24 @@ for year in yearList:
         data.plotOn(testFrame, RooFit.Binning(myBinning), RooFit.Name('data'))
 
       fit_ext.plotOn(testFrame, RooFit.Name(bkgModel),  RooFit.LineColor(kBlue))
-      
-      sigDSName = '_'.join(['ds_sig','gg',lepton,year,'cat'+cat,'M125'])
-      sigName = 'pdf_sig_mu_2012_cat0_M125'
-      myWs.Print()
-      sigP  = myWs.pdf(sigName)
-      if doBlind:
-        sigP.plotOn(testFrame,  RooFit.Name('signal'), RooFit.LineColor(kRed+2),RooFit.Range(115,135),
-                    RooFit.Normalization(15.e-02))
-      else:
-        sigP.plotOn(testFrame,  RooFit.Name('signal'), RooFit.LineColor(kRed+2),RooFit.Range(115,135),
-                    RooFit.Normalization(10* 3.33/binWidth/151))
 
-      #sig_dh = RooDataHist("sig_dh","sig histogram",RooArgList(mzg), hc7);
-      #sig_dh.plotOn(testFrame,  RooFit.Name('signal2'), RooFit.LineColor(kRed+2),
-      #              RooFit.Range(115,135), RooFit.MarkerStyle(0), RooFit.LineStyle(1))
-                    
-      #hc7.plotOn(testFrame, RooFit.Name('signal2'))
-      hc7.Draw('same hist')
-  
+      # sigDSName = '_'.join(['ds_sig','gg',lepton,year,'cat'+cat,'M125'])
+      # sigName = 'pdf_sig_mu_2012_cat0_M125'
+      # myWs.Print()
+      # sigP  = myWs.pdf(sigName)
+
+      #if doBlind:
+      #  sigP.plotOn(testFrame,  RooFit.Name('signal'), RooFit.LineColor(kRed+2),RooFit.Range(115,135),
+      #              RooFit.Normalization(15.e-02))
+      #else:
+      #  sigP.plotOn(testFrame,  RooFit.Name('signal'), RooFit.LineColor(kRed+2),RooFit.Range(115,135),
+      #              RooFit.Normalization(10* 3.33/binWidth/151))
+      #
+      #  #sig_dh = RooDataHist("sig_dh","sig histogram",RooArgList(mzg), hc7);
+      #  #sig_dh.plotOn(testFrame,  RooFit.Name('signal2'), RooFit.LineColor(kRed+2),
+      #  #             RooFit.Range(115,135), RooFit.SetRooFit.MarkerStyle(0), RooFit.LineStyle(1))
+
+
 
       if verbose:
         print 'have unit norm?? ', sigP.haveUnitNorm()
@@ -295,24 +307,34 @@ for year in yearList:
         print ' chiSquare=', chi2, chi2_4
         # print "Figuring out norms of PDFs",sigP.getVal(), sigP.analyticalIntegral()
         raw_input("pdf norm / chi2  ")
-        
-      testFrame.SetMaximum(60)
-      testFrame.Draw()
-      testFrame.SetTitle(";m_{H} (GeV);Events/"+str(binWidth)+" GeV")
 
-      leg  = TLegend(0.65,0.7,0.87,0.87)
+      testFrame.SetMaximum(62)
+      testFrame.Draw()
+
+      hsig[0].SetLineColor(kRed+1)
+      hsig[0].SetLineWidth(2)
+      hsig[0].Draw('same hist')
+
+      testFrame.SetTitle(";m_{#mu#mu#gamma} (GeV);Events/"+str(binWidth)+" GeV")
+
+      leg  = TLegend(0.53,0.65,0.93,0.87)
       leg.SetFillColor(0)
-      leg.SetShadowColor(0)
+      #leg.SetShadowColor(0)
       leg.SetBorderSize(1)
-      leg.AddEntry(testFrame.findObject(bkgModel),bkgModel,'l')
-      leg.AddEntry(testFrame.findObject('signal'),'10x ggH','l')
+      leg.AddEntry(testFrame.findObject(bkgModel),"Background Model",'l')
+      leg.AddEntry(hsig[0],'Expected signal x10','l')
+      leg.SetTextSize(0.045)
+      #leg.AddEntry(testFrame.findObject('signal'),'10x ggH','l')
       leg.Draw()
 
-      prelim = TLatex(0.15,0.95, "CMS Preliminary, #sqrt{s} = 8 TeV")
+      prelim = TLatex()
       prelim.SetNDC();
-      prelim.SetTextSize(0.03)
-      prelim.Draw()
-              
+      prelim.SetTextSize(0.045)
+      prelim.SetTextFont(62)
+      prelim.DrawLatex(0.15,0.95, ("CMS Preliminary"))
+      prelim.DrawLatex(0.40,0.95, "#sqrt{s} = 8 TeV, L = 19.7 fb^{-1}   H#rightarrow#gamma*#gamma#rightarrow#mu#mu#gamma")
+      #prelim.Draw()
+      gPad.RedrawAxis()
       c.SaveAs(plotBase+'/'+'_'.join(['best_fit',year,lepton,'cat'+cat])+'.png')
 
       ###### Import the fit and data, and rename them to the card convention
@@ -339,7 +361,7 @@ for year in yearList:
       BackgroundNameFixer(fitName, year,lepton,cat,card_ws, doExt)
 
       card_ws.Print()
-            
+
       print "\n * The end * \n"
 
 card_ws.writeToFile(subdir+'/testCardBackground_Dalitz.root')

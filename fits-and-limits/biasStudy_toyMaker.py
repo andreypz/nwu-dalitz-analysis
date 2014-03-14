@@ -82,11 +82,12 @@ def doBiasStudy(year = '2012', lepton = 'mu', cat = '0', genFunc = 'Bern3', mass
     genFit.Print()
 
   # get the signal
-  sigName = '_'.join(['pdf','sig',lepton,year,'cat'+cat,'M'+mass])
+  sigName = '_'.join(['pdf','sig_gg',lepton,year,'cat'+cat,'M'+mass])
   sig = myWs.pdf(sigName)
   if verbose:
     print sigName
     sig.Print()
+    raw_input("DO raw input here ")
 
   # get the test functions, turn them into extended pdfs with signal models.  Also include the gen function for closure tests
   testPdfs     = []

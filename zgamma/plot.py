@@ -159,21 +159,21 @@ def effPlots(f1, path):
     #f1.cd(dir)
 
     for var in ["Mll","dR"]:
-    
+
         h0 = f1.Get("eff/gen_"+var+"_0")
         h1 = f1.Get("eff/gen_"+var+"_acc_gamma")
         h2 = f1.Get("eff/gen_"+var+"_acc_lept")
 
         h3 = f1.Get("eff/gen_"+var+"_reco_gamma_iso")
         h4 = f1.Get("eff/gen_"+var+"_two_lep_reco")
-        
+
 
         h0.Draw("hist")
         #h1.Draw("hist same")
         #h2.Draw("hist same")
         #h3.Draw("hist same")
         c1.SaveAs(path+var+".png")
-        
+
         #for acceptance
         r1 = h1.Clone()
         r1.Divide(h0)
@@ -191,7 +191,7 @@ def effPlots(f1, path):
         #r7 = h7.Clone()
         #r7.Divide(h2)
 
-        
+
         if var=="Mll":
             xname = ";M(l1,l2)"
         if var=="dR":
@@ -211,16 +211,16 @@ def effPlots(f1, path):
         leg.SetFillColor(kWhite)
         leg.Draw()
         c1.SaveAs(path+"acceptance_"+var+".png")
-        
+
         r3.Draw("hist")
         r3.SetMinimum(0)
         r3.SetMaximum(1)
-        r3.SetTitle(xname+" gen; reco eff")    
+        r3.SetTitle(xname+" gen; reco eff")
         r4.Draw("hist same")
         #r5.Draw("hist same")
         #r6.Draw("hist same")
         #r7.Draw("hist same")
-    
+
         r3.SetLineColor(kBlack)
         r4.SetLineColor(kOrange+1)
         #r5.SetLineColor(kGreen+1)
@@ -235,29 +235,29 @@ def effPlots(f1, path):
         leg.SetFillColor(kWhite)
         leg.Draw()
         c1.SaveAs(path+"eff_"+var+".png")
-        
+
 
 if __name__ == "__main__":
     timer = TStopwatch()
     timer.Start()
-    
+
     if len(args) < 1:
         parser.print_usage()
         exit(1)
-        
+
     ver    = sys.argv[1]
     if 'vv/' in ver: ver = ver[3:].rstrip('/')
-    #subdir = sys.argv[3]        
+    #subdir = sys.argv[3]
     cut=str(options.cut)
     doMerge = options.merge
     period  = options.period
     doBkg   = options.bkg
-    
+
     gROOT.ProcessLine(".L ~/tdrstyle.C")
     setTDRStyle()
     TH1.SetDefaultSumw2(kTRUE)
-    
-    
+
+
     pathBase = "/uscms_data/d2/andreypz/html/zgamma/dalitz/"+ver+"_cut"+cut
     hPath    = "/eos/uscms/store/user/andreypz/batch_output/zgamma/8TeV/"+ver
     if options.noeos:
@@ -289,7 +289,7 @@ if __name__ == "__main__":
         if thissel=='none': continue
         u.setSelection(thissel)
 
-        
+
         if doMerge:
             if thissel =="elgamma":
                 os.system("hadd "+hPath+"/m_Data_" +thissel+"_"+period+".root "+hPath+"/"+thissel+"_"+period+"/hhhh_*Run2012D*.root")
@@ -307,8 +307,8 @@ if __name__ == "__main__":
             path = pathBase+"/bkg_"+subdir
             u.createDir(path)
         path = pathBase+"/"+subdir
-                
-        
+
+
         #sigFileMCFM = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_ggHMCFM_1.root", "OPEN")
         #sigFileMCFM = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_ggH-mcfm_1.root", "OPEN")
         sigFileMAD  = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_ggH-mad"+str(mass)+"_1.root", "OPEN")
@@ -317,7 +317,7 @@ if __name__ == "__main__":
 
         if options.mcfm: sigFile = sigFileMCFM
         else:            sigFile = sigFileMAD
-        
+
         dataFile[thissel] = TFile(hPath+"/m_Data_"+thissel+"_"+period+".root","OPEN")
         if doBkg:
             #bkgFile[thissel]  = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_DYjets0_1.root", "OPEN")
@@ -327,9 +327,9 @@ if __name__ == "__main__":
 
 
         yields_data[thissel] = u.getYields(dataFile[thissel])
-        yields_ggH[thissel]  = u.getYields(sigFile, 'ggH-125',True) 
-        yields_vbf[thissel]  = u.getYields(sigFileVBF, 'vbfH-125', True) 
-        yields_vh[thissel]   = u.getYields(sigFileVH,  'vH-125', True) 
+        yields_ggH[thissel]  = u.getYields(sigFile, 'ggH-125',True)
+        yields_vbf[thissel]  = u.getYields(sigFileVBF, 'vbfH-125', True)
+        yields_vh[thissel]   = u.getYields(sigFileVH,  'vH-125', True)
         yields_sig[thissel]  = [sum(x) for x in zip(yields_ggH[thissel],yields_vbf[thissel],yields_vh[thissel])]
 
         print 'ggH yi',yields_ggH[thissel]
@@ -340,9 +340,9 @@ if __name__ == "__main__":
 
         #if int(cut) >2:
         #tri_hists[thissel]   = dataFile[thissel].Get("tri_mass_cut"+cut).Clone()
-        
 
-        u.drawAllInFile(dataFile[thissel], "Data", None, "", sigFile,"Signal",  "",path, cut, "norm")
+
+        u.drawAllInFile(dataFile[thissel], "Data", None, "", sigFile,"#splitline{Signal}{m_{H}=125 GeV}",  "",path, cut, "norm")
         #u.drawAllInFile(dataFile[thissel], "data", None, "", sigFile,"signal",  "",path, cut, "norm", doRatio=1)
         #u.drawAllInFile(dataFile[thissel], "Data", None, "", sigFile,"50xSignal",  "",path, cut, "lumi")
         #u.drawAllInFile(dataFile[thissel], "data", None, "", sigFile,"50xSignal","EB",pathBase+"/EB", cut, "lumi")
@@ -350,15 +350,15 @@ if __name__ == "__main__":
 
         if thissel =="mugamma":
             # u.drawAllInFile(dataFile[thissel], "data",None, "",sigFile,"signal",  "Muons", pathBase+"/Muons", None,"norm")
-            u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",  
+            u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",
                             "Muons", pathBase+"/Muons/", None,"norm")
-            u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal", 
+            u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"#splitline{Signal}{m_{H}=125 GeV}",
                             "Photon",pathBase+"/Photon/", None,"norm")
 
         elif thissel =="elgamma":
             u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",
                             "Photon",     pathBase+"/Photon",     None,"norm")
-            
+
             u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",
                             "DalitzEle-Before",  pathBase+"/DalitzEle-Before",  None,"norm")
             u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",
@@ -367,8 +367,8 @@ if __name__ == "__main__":
                             "DalitzEle-Before_tracks",  pathBase+"/DalitzEle-Before_tracks",  None,"norm")
             u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",
                             "DalitzEle-AfterAll_tracks",  pathBase+"/DalitzEle-AfterAll_tracks",  None,"norm")
-            
-            
+
+
             u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",
                             "DalitzEle",  pathBase+"/DalitzEle",  None,"norm")
 
@@ -382,16 +382,16 @@ if __name__ == "__main__":
             u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",
                             "DalitzEleEE_tracks",pathBase+"/DalitzEleEE_tracks",None,"norm")
 
-            
+
         #dataFile.Close()
     #print yields_data
 
 
     #u.drawAllInFile(sigFileMAD, "signal", None, "", None,"","GEN-RECO",pathBase+"/GEN-RECO", None, "lumi")
-    
+
     #u.drawAllInFile(bkgFile[thissel], "DY electrons", sigFile, "Dalitz 2el",  "NewEle-1", pathBase+"/NewEle-1/", None,"norm", isLog=1, )
 
-    
+
     #sigFileMAD  = TFile(hPath+"/mugamma_"+period+"/hhhh_ggH-mad125_1.root", "OPEN")
     if sel[0]=='none':
         sigFileMAD  = TFile("hhhh_ggH-mad125_1.root", "OPEN")
@@ -424,38 +424,38 @@ if __name__ == "__main__":
     hc7 = sigFileMAD.Get("tri_mass80__cut7").Integral(35,41)*scale
     hc8 = sigFileMAD.Get("tri_mass80__cut8").Integral(35,41)*scale
     hc9 = sigFileMAD.Get("tri_mass80__cut9").Integral(35,41)*scale
-    print "Yields in bins that supposed to correspond to [122,128] window:\n",hc7, hc8, hc9 
+    print "Yields in bins that supposed to correspond to [122,128] window:\n",hc7, hc8, hc9
 
     hc7 = dataFile[thissel].Get("tri_mass80__cut7").Integral(36,40)
     hc8 = dataFile[thissel].Get("tri_mass80__cut8").Integral(36,40)
     hc9 = dataFile[thissel].Get("tri_mass80__cut9").Integral(36,40)
-    print "Yields in bins that supposed to correspond to [122,128] window:\n",hc7, hc8, hc9 
+    print "Yields in bins that supposed to correspond to [122,128] window:\n",hc7, hc8, hc9
 
 
     m1 = 110.
     m2 = 170.
-    
+
     for r in ["0"]:
         etaCut = TCut("")
         if r=="EB":
             etaCut = "fabs(ph_eta)<1"
         elif r=="EE":
             etaCut = "fabs(ph_eta)>1"
-            
+
         cut = TCut("m_llg>"+str(m1)+"&&m_llg<"+str(m2))
         cut += etaCut
         treeda = dataFile[thissel].Get("fitTree/fitTree")
         treeda.Draw("m_llg>>hda", cut)
-        
+
         treesi = sigFile.Get("fitTree/fitTree")
         treesi.Draw("m_llg>>hsi", cut)
-        
+
         yda = hda.Integral()
         ysi = hsi.Integral()
         ysi_sc = ysi*scale
         print 'yields inside ', m1,m2, ' r=',r, 'data=', yda, 'signal=',ysi_sc
         print "significance=", ysi_sc/sqrt(ysi_sc+yda)
-    
+
     '''
     '''
     h2da = dataFile[thissel].Get("h2D_dalitzPlot_rotation__cut"+cut).ProjectionX("hda_prx")
@@ -463,7 +463,7 @@ if __name__ == "__main__":
 
     #u.handleOverflowBins(h2da)
     #u.handleOverflowBins(h2si)
-        
+
     h2da.Draw("hist")
     h2si.Draw("same hist")
     h2si.SetLineColor(kRed+1)
@@ -471,7 +471,7 @@ if __name__ == "__main__":
     h2da.SetTitle(";projectionX;Events")
     c1.SaveAs("h2da_dalitz.png")
     '''
-    
+
     '''
     nx = h2da.GetNbinsX()
     ny = h2da.GetNbinsY()
@@ -485,7 +485,7 @@ if __name__ == "__main__":
             h2da_rot.SetBinContent(a,b, fda)
             h2si_rot.SetBinContent(a,b,fda)
     '''
-                        
+
     plot_types =[]
     list = os.listdir(pathBase)
     for d in list:
@@ -510,7 +510,7 @@ if __name__ == "__main__":
 
     comments = ["These plots are made for ...",
                 "Blah"]
-    
+
     ht.makeHTML("h &rarr; dalitz decay plots",pathBase, plot_types, comments, "mugamma")
 
     print "\n\t\t finita la comedia \n"

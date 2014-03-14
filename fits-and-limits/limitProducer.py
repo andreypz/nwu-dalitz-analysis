@@ -24,8 +24,9 @@ def produceLimits(inputFolder = '', outPutFolder = 'limitOutputs/', mass = '125.
 
 if __name__ == "__main__":
 
-  massList   = ['%.1f'%(a) for a in u.drange(120,150,0.5)]
-    
+  #massList   = ['%.1f'%(a) for a in u.drange(120,150,.5)]
+  massList   = [a.strip() for a in (cf.get("fits","massList-more")).split(',')]
+
   s = cf.get("path","ver")
   dir = s
   if options.noSyst:
@@ -35,13 +36,13 @@ if __name__ == "__main__":
     cf.set("path","ver", dir)
     with open(r'config.cfg', 'wb') as configfile:
       cf.write(configfile)
-      
+
   if options.br:
     dir = s.replace("/","")+"-br"
     print s, dir
     os.system("cp -r "+s+"  "+dir)
 
-  
+
   for m in massList:
     print "\n**\t Making limits for M=",m,"\t**\n"
     #card = "output_cards/hzg_el_2012_cat0_M"+m+"_Dalitz.txt"
@@ -49,7 +50,7 @@ if __name__ == "__main__":
 
     if options.br:
       card_mu  = dir+"/output_cards/hzg_mu_2012_cat0_M"+m+"_Dalitz_br.txt"
-      
+
     #card_ele = "./cards_ele2/realistic-counting-experiment_"+m[0:3]+".txt"
     card = ""
 

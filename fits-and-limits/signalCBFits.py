@@ -11,6 +11,8 @@ import ConfigParser as cp
 cf = cp.ConfigParser()
 cf.read('config.cfg')
 
+massList   = ['%.1f'%(a) for a in u.drange(120,150,.5)]
+
 gROOT.ProcessLine(".L ~/tdrstyle.C")
 setTDRStyle()
 
@@ -35,22 +37,19 @@ def SignalNameParamFixer(year,lepton,cat,sig,mass,ws):
   ws.factory('prod::'+sigmaCBNew+'('+sigmaCB+','+sigmaShift+')')
   ws.factory('prod::'+sigmaGNew+'('+sigmaG+','+sigmaShift+')')
   ws.factory('EDIT::'+newFitName+'('+fitName+','+mean+'='+meanNew+','+sigmaCB+'='+sigmaCBNew+','+sigmaG+'='+sigmaGNew+')')
-  
-  
+
+
 def SignalFitMaker(lep, year, cat, subdir):
-  #massList        = [str(a)+".0" for a in xrange(120,123)]
-  massList   = ['%.1f'%(a) for a in u.drange(120,150,0.5)]
-    
   #print massList
   #raw_input("Input raws  ")
-      
+
   # reasd these from a config file:
   #massList        = [a.strip() for a in (cf.get("fits","massList-more")).split(',')]
   sigNameList     = [a.strip() for a in (cf.get("fits","sigNameList")).split(',')]
 
   #print massList
   #raw_input()
-  
+
   plotBase = cf.get("path","htmlbase")+"/html/zgamma/dalitz/fits-"+subdir
   u.createDir(plotBase)
   rooWsFile = TFile(subdir+'/testRooFitOut_Dalitz.root')
@@ -67,11 +66,11 @@ def SignalFitMaker(lep, year, cat, subdir):
     cardDict[lep][year][cat][mass] = RooWorkspace('ws_card')
 
     print cardDict[lep][year][cat][mass]
-    
+
     # we need crystal ball + gaussian fits for all mass points, and for all production methods.
     # we also need to interpolate the distributions for 0.5 mass bins, so we use some tricks
     # in order to create new fits out of the existing 5GeV steps
-    
+
     # ##################
     # Start the Loop! #
     # ##################
@@ -107,7 +106,6 @@ def SignalFitMaker(lep, year, cat, subdir):
         oldMassHi  = massHi
 
         ###### fit the low mass point
-        #if massLow<=125:
         if massLow<=125:
           mzg.setRange('fitRegion1',110,int(massLow)+10)
         else:
@@ -163,7 +161,7 @@ def SignalFitMaker(lep, year, cat, subdir):
 
       #print paramList
       #raw_input("Param List")
-      
+
       for param in paramList:
         param.setConstant(True)
       fitList.append(CBG_Interp)
@@ -192,7 +190,7 @@ def SignalFitMaker(lep, year, cat, subdir):
 
     testFrame.SetMaximum(0.7)
     testFrame.Draw()
-    testFrame.SetTitle(";m_{H} (GeV);fit pdf")
+    testFrame.SetTitle(";m_{#mu#mu#gamma} (GeV);fit pdf")
     c.SaveAs(plotBase+"/"+'_'.join(['sig','fit',prod,lep,year,'cat'+cat])+'.png')
 
   for prod in sigNameList:
@@ -204,13 +202,13 @@ def SignalFitMaker(lep, year, cat, subdir):
 
     file = TFile("parampampam.root",'recreate')
     file.cd()
-    
-    #mass="121.0"
-    #mean  = RooRealVar("mean","mean", 130,120,140) 
-    #sigma = RooRealVar("sigma","sigma", 5, 0.1,30.0) 
-    #fff = RooGaussian("fff","gauss model",mzg, mean, sigma) 
 
-    #fff = (cardDict[lep][year][cat][mass]).pdf('_'.join(['sig',prod,lep,year,'cat'+cat]))    
+    #mass="121.0"
+    #mean  = RooRealVar("mean","mean", 130,120,140)
+    #sigma = RooRealVar("sigma","sigma", 5, 0.1,30.0)
+    #fff = RooGaussian("fff","gauss model",mzg, mean, sigma)
+
+    #fff = (cardDict[lep][year][cat][mass]).pdf('_'.join(['sig',prod,lep,year,'cat'+cat]))
     #fff.fitTo(sig_ds_Low, RooFit.Range(110, 150))
     #fff.fitTo(sig_ds_Low, RooFit.Range(110, 130), RooFit.SumW2Error(kTRUE), RooFit.Strategy(1), RooFit.NumCPU(4), RooFit.PrintLevel(-1))
     #testFrame = mzg.frame(110,150)
@@ -219,19 +217,14 @@ def SignalFitMaker(lep, year, cat, subdir):
     #fff.paramOn(testFrame, RooFit.Layout(0.18,0.43,0.67))
     #testFrame.Draw()
     ##c.SaveAs(plotBase+"/"+'_'.join(['refit_sig','fit',prod,lep,year,'cat'+cat])+'.png')
-    #c.Write()  
-        
-      
+    #c.Write()
+
+
   for mass in massList:
     fileName = subdir+'/'+'_'.join(['SignalOutput',lep,year,'cat'+cat,mass])
     cardDict[lep][year][cat][mass].writeToFile(fileName+'.root')
     #cardDict[lep][year][cat][mass].writeToFile('testCards/'+fileName+'.root')
 
-
-#signal = myWs.data('ds_sig_gg_el_2012_cat4_M125')
-#CBG = BuildCrystalBallGauss('2012','el','4','gg','125',mzg)
-#CBG.fitTo(signal, RooFit.Range('fitRegion1'), RooFit.SumW2Error(kTRUE), RooFit.PrintLevel(-1))
-#CBG.fitTo(signal, RooFit.SumW2Error(kTRUE), RooFit.PrintLevel(-1))
 
 if __name__=="__main__":
   print len(sys.argv), sys.argv
