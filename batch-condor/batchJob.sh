@@ -50,23 +50,27 @@ if [ $selection == "egamma" ]
     then
     echo "Electrons,  double-photon trigger is used"
     ./run.py ${suffix} ${dataName} -e -t pho26 -p ${period}  -b
-elif [ $selection == "mugamma" ] 
+elif [ $selection == "mugamma" ]
     then
     echo "Mu+photon trigger will be used"
-    if [ ${gen} == "gen" ] 
-        then
-        ./run.py ${suffix} ${dataName} -t mugamma -p ${period} --gen -b
+    if [ ${gen} == "gen" ]
+	then
+	./run.py ${suffix} ${dataName} -t mugamma -p ${period} --gen -b
     else
-        ./run.py ${suffix} ${dataName} -t mugamma -p ${period}  -b
+	./run.py ${suffix} ${dataName} -t mugamma -p ${period}  -b
     fi
-elif [ $selection == "single-mu" ] 
+elif [ $selection == "single-mu" ]
     then
     echo "Single - IsoMu trigger will be used"
     ./run.py ${suffix} ${dataName} -t single-mu -p ${period} -b
-elif [ $selection == "mumu" }
+elif [ $selection == "mumu" ]
     then
     echo "Mu-mu selections"
     ./run.py ${suffix} ${dataName} -t double-mu -p ${period} -b
+elif [ $selection == "zee" ]
+    then
+    echo "Zee study"
+    ./run.py ${suffix} ${dataName} --zee -p ${period} -b
 else
     echo "No selection provided!"
     exit

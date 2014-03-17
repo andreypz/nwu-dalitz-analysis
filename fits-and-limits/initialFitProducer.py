@@ -42,6 +42,7 @@ gStyle.SetOptTitle(0)
 
 debugPlots = True
 verbose    = 0
+noSFweight = 0
 rootrace   = False
 
 EBetaCut = 1.444
@@ -183,7 +184,6 @@ def doInitialFits(subdir):
                 mzg.setVal(i.m_llg)
 
                 sigWeight = lumiWeight*i.weight
-                #sigWeight = lumiWeight
                 sig_ds.add(sig_argSW, sigWeight)
                 #sig_argSW.Print()
 
@@ -206,19 +206,23 @@ def doInitialFits(subdir):
             if verbose: print 'signal mass loop', mass
             print 'in gg   INPUT ', cat, prod,mass
             # raw_input()
-            
+
             if verbose:
               print histName
               signalTree.Print()
               print
-                
+
             if cat=="0":
-              signalTree.Draw('m_llg>>'+histName,'weight')
+              if noSFweight:
+                signalTree.Draw('m_llg>>'+histName,'')
+              else:
+                signalTree.Draw('m_llg>>'+histName,'weight')
+
             elif cat=="EB":
               signalTree.Draw('m_llg>>'+histName,"weight*(fabs(ph_eta)<"+str(EBetaCut)+")")
             elif cat=="EE":
               signalTree.Draw('m_llg>>'+histName,"weight*(fabs(ph_eta)>"+str(EBetaCut)+")")
-              
+
             if signalList[-1].Integral()!=0:
               signalList[-1].Scale(1/signalList[-1].Integral())
             signalList[-1].Smooth(2)

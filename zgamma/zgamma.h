@@ -114,7 +114,7 @@ phIdAndIsoCuts phIdAndIsoCutsHZG,   phIdAndIsoCutsTight, phIdAndIsoCutsLoose;
 
 class zgamma : public TSelector {
  private:
-  TFile* histoFile;  
+  TFile* histoFile;
   TTree* thisTree;
 
   ZGAngles *ang;
@@ -123,7 +123,7 @@ class zgamma : public TSelector {
   WeightUtils *weighter;
   rochcor2012 *roch;
   UInt_t nEvents[nC];
-  UInt_t totEvents;  
+  UInt_t totEvents;
 
   TRandom3 *myRandom;
   ofstream fout;
@@ -247,22 +247,23 @@ class zgamma : public TSelector {
    virtual bool PassElectronIdAndIso(TCElectron *l, elIdAndIsoCuts c, TVector3 *pv);
    virtual bool PassElectronIdAndIsoMVA(TCElectron *l);
    virtual bool PassPhotonIdAndIso(TCPhoton *p, phIdAndIsoCuts c, TVector3 *pv);
-   
+
    virtual void CalculatePhotonIso(TCPhoton *p, float& chIsoCor, float& nhIsoCor, float& phIsoCor);
    virtual void FillHistosFull(Int_t n, Double_t w, TCPhysObject , TCPhysObject , TCPhysObject , TCPhysObject , TCPhysObject, string s="");
    virtual void FillHistoCounts(Int_t n, Double_t w);
    virtual void MakeMuonPlots(TCMuon mu, TVector3 *pv);
    virtual void MakePhotonPlots(TCPhoton ph);
- 
+   virtual void MakeZeePlots(TCPhoton , TCPhoton );
    virtual void MuonDump(TCMuon mu, TVector3 *pv);
    virtual void PhotonDump(TCPhoton pho,  phIdAndIsoCuts c);
+   virtual void MakePhotonEnergyCorrPlots(TCPhoton , Float_t , Float_t );
 
    virtual void PhotonR9Corrector(TCPhoton& ph);
 
    TCGenParticle * GetPrimaryAncestor(TCGenParticle *p);
 
    virtual void DiscoverGeneology(TCGenParticle *p, ULong64_t ev);
-   
+
    ClassDef(zgamma,0);
 };
 
@@ -294,7 +295,7 @@ void zgamma::Init(TTree *tree)
    // Set branch addresses and branch pointers
    totEvents = 0;
    if (!tree) return;
-   thisTree    = tree; 
+   thisTree    = tree;
    fChain = tree;
    fChain->SetMakeClass(1);
 

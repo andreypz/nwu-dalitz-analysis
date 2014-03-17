@@ -238,6 +238,22 @@ def drawAllInFile(f1, name1, f2, name2, f3, name3, dir,path, N, howToScale="none
             h1.SetLineColor(kBlack)
             h1.UseCurrentStyle()
 
+            if "lPt1_gamma_deltaR" in histoName:
+                h1.SetAxisRange(1,5,"X")
+                h1.SetXTitle("#DeltaR(#gamma, #mu_{1})")
+
+            if "ll_deltaR_" in histoName:
+                h1.SetAxisRange(0,1,"X")
+                h1.SetXTitle("#DeltaR(#mu_{1}, #mu_{2})")
+
+            if "gamma_pt__" in histoName:
+                h1.SetXTitle("Photon p_{T} (GeV)")
+            if "lPt1_pt__" in histoName:
+                h1.SetXTitle("Leading muon p_{T} (GeV)")
+            if "lPt2_pt__" in histoName:
+                h1.SetXTitle("Trailing muon p_{T} (GeV)")
+
+
             #if "tri_mass" in k1.GetName() and name1 not in ["madgra","mcfm"]:
             #    blindIt(h1)
             if "h_mass" in k1.GetName():
@@ -261,7 +277,7 @@ def drawAllInFile(f1, name1, f2, name2, f3, name3, dir,path, N, howToScale="none
             if f2!=None and h2!=None:
                 if doOverflow:
                     handleOverflowBins(h2)
-                h2.Draw("same hist")
+                h2.Draw("sames hist")
                 h2.SetLineColor(kBlue+1)
                 norm2 = h2.Integral()
                 if howToScale =="norm" and  norm2!=0:
@@ -276,6 +292,9 @@ def drawAllInFile(f1, name1, f2, name2, f3, name3, dir,path, N, howToScale="none
                     handleOverflowBins(h3)
                 h3.Draw("sames hist")
                 h3.SetLineColor(kRed+1)
+                h3.SetLineWidth(2)
+                h3.SetFillColor(kYellow-7)
+                h1.Draw("same hist")
                 extract_from_name = re.findall(r'\d+', name3)
                 #print extract_from_name
                 if len(extract_from_name) == 1:
@@ -284,7 +303,7 @@ def drawAllInFile(f1, name1, f2, name2, f3, name3, dir,path, N, howToScale="none
                 if howToScale =="norm" and  norm3!=0:
                     h3.Scale(1./norm3)
                     hmaxs.append(h3.GetMaximum())
-                leg.AddEntry(h3,name3, "l")
+                leg.AddEntry(h3,name3, "f")
 
                 if doRatio:
                     c1.cd()
@@ -329,23 +348,6 @@ def drawAllInFile(f1, name1, f2, name2, f3, name3, dir,path, N, howToScale="none
                 s2 = h2.Integral(90,200)
                 h2.Scale(float(s1)/s2)
 
-            if "lPt1_gamma_deltaR" in histoName:
-                #h1.Rebin(2)
-                #h2.Rebin(2)
-                h1.SetAxisRange(1,5,"X")
-                h1.SetXTitle("#DeltaR(#gamma, #mu_{1})")
-
-            if "ll_deltaR_" in histoName:
-                #h1.SetAxisRange(0,1,"X")
-                h1.SetXTitle("#DeltaR(#mu_{1}, #mu_{2})")
-
-            if "gamma_pt__" in histoName:
-                h1.SetXTitle("Photon p_{T} (GeV)")
-            if "lPt1_pt__" in histoName:
-                h1.SetXTitle("Leading muon p_{T} (GeV)")
-            if "lPt2_pt__" in histoName:
-                h1.SetXTitle("Trailing muon p_{T} (GeV)")
-
             if "ph_energyCorrection" in histoName:
                 gStyle.SetOptStat(1111)
                 h1.SetName("Data")
@@ -362,6 +364,29 @@ def drawAllInFile(f1, name1, f2, name2, f3, name3, dir,path, N, howToScale="none
                 stats3.SetY1NDC(0.7)
                 stats3.SetY2NDC(0.5)
                 stats3.SetTextColor(kRed+1)
+                leg.SetX1(0.19)
+                leg.SetX2(0.46)
+                leg.SetY1(0.85)
+                leg.SetY2(0.7)
+
+
+            if "zee_" in histoName:
+                gStyle.SetOptStat(1111)
+                h1.SetName("Data")
+                h2.SetName("DYjets")
+                #h2.Print("all")
+                stats1 = h1.GetListOfFunctions().FindObject("stats");
+                stats2 = h2.GetListOfFunctions().FindObject("stats");
+                stats2.Print()
+                stats1.SetX1NDC(0.7)
+                stats1.SetX2NDC(0.95)
+                stats1.SetY1NDC(0.9)
+                stats1.SetY2NDC(0.7)
+                stats2.SetX1NDC(0.7)
+                stats2.SetX2NDC(0.95)
+                stats2.SetY1NDC(0.7)
+                stats2.SetY2NDC(0.5)
+                stats2.SetTextColor(kBlue+1)
                 leg.SetX1(0.19)
                 leg.SetX2(0.46)
                 leg.SetY1(0.85)

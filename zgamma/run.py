@@ -6,6 +6,8 @@ from optparse import OptionParser
 parser = OptionParser(usage="usage: %prog [options -e], -m], -p 2011] sample sourcefile")
 parser.add_option("-e", "--ele", dest="electron", action="store_true", default=False,
                   help="Use electron selection (by default it will run muon selection)")
+parser.add_option("--zee", dest="zee", action="store_true", default=False,
+                  help="Run z to ee cross checks")
 parser.add_option("-t","--trigger", dest="trigger", type="string", default="mugamma",
                   help="Select a trigger to run. options are: double-mu, single-mu, mu-pho, pho, single-el")
 parser.add_option("-p", "--period", dest="period", default="2012", help="Set data period (2011/2012)")
@@ -20,13 +22,13 @@ if options.clean:
     os.system("rm ../src/*.so ../src/*.d ../plugins/*.so ../plugins/*.d ./*.so")
     print "All cleaned"
     exit(0)
-    
+
 if len(args) < 2:
     parser.print_usage()
     exit(1)
 
 sample    = args[0]
-sourcefilename = args[1] 
+sourcefilename = args[1]
 
 period    = options.period
 trigger   = options.trigger
@@ -37,8 +39,11 @@ if options.electron:
     print "options.electorn", options.electron
     selection="el"
     ana="egamma"
-    
-isbatch   = options.batch    
+
+if options.zee:
+    selection="zee"
+
+isbatch   = options.batch
 if(isbatch):
     sourceFiles = "./input.txt"
     print "Do batch, source files: \n", sourceFiles
@@ -46,7 +51,7 @@ else:
     sourceFiles = "./"+sourcefilename
     print "Run locally, source files: \n", sourceFiles
 
-    
+
 print "Running on sample", sample, "with selection=", selection, ", trigger=", trigger,\
       "in source=", sourcefilename, ", period=", period, " batch=",  isbatch, " and gen selection=", options.gen
 

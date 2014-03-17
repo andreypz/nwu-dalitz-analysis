@@ -12,6 +12,7 @@ parser.add_option("-e", "--elgamma", dest="elgamma", action="store_true", defaul
                   help="Use electron selection (by default it will run muon selection)")
 parser.add_option("--mugamma",   dest="mugamma",  action="store_true", default=False,
                   help="Use Mu+Photon trigger (for running on MuEG path)")
+parser.add_option("--zee",       dest="zee",      action="store_true", default=False, help="Do Zee peak study")
 parser.add_option("--mumu",      dest="mumu",     action="store_true", default=False, help="Use Double-Mu trigger")
 parser.add_option("--singlemu",  dest="singlemu", action="store_true", default=False, help="Use Iso-mu trigger")
 parser.add_option("--data", dest="data", action="store_true", default=False, help="Run over the data sample")
@@ -57,6 +58,8 @@ if options.mumu:
     selection="mumu"
 if options.singlemu:
     selection="single-mu"
+if options.zee:
+    selection="zee"
 
 
 version    = args[0]
@@ -89,10 +92,7 @@ signal = []
 
 
 test.extend([
-    #cfg('SingleMu_Run2012A',        dCache+'/andreypz/nuTuples_v6_8TeV/SingleMu/Run2012A-22Jan2013',         5, 'DATA '+selection+' 2012 0' + whereWeRun),
-    #cfg('MuEG_Run2012A',        dCache+'/andreypz/nuTuples_v6_8TeV/MuEG/Run2012A-22Jan2013',         5, 'DATA mugamma 2012 0' + whereWeRun),
-    cfg('dal-mad120', dCache+'/andreypz/nuTuples_v9.4_8TeV/HiggsToMuMuGamma_MH120',1, 'dalitz mugamma '+period+gen),
-
+    cfg('dal-mad120', DIR+'/nuTuples_v9.6_8TeV/dalitz/ggHiggsToMuMuGamma_MH120',1, 'dalitz mugamma '+period+gen+whereWeRun),
 ])
 
 
@@ -105,6 +105,15 @@ if period =="2012":
             cfg('DoubleMu_Run2012C',  DIR+'/bpollack/V09_05_8TeV/DoubleMu/Run2012C', 10, 'DATA '+selection+' 2012 0' + whereWeRun),
             cfg('DoubleMu_Run2012D',  DIR+'/bpollack/V09_05_8TeV/DoubleMu/Run2012D', 10, 'DATA '+selection+' 2012 0' + whereWeRun),
             ])
+
+    if selection == 'zee':
+        data.extend([
+                cfg('DoubleElectron_Run2012A',  DIRBRIAN+'/nuTuples_v9.6_8TeV/Data/DoubleElectron_Run2012A',  5, 'DATA '+selection+' 2012 0' + whereWeRun),
+                cfg('DoubleElectron_Run2012B',  DIRBRIAN+'/nuTuples_v9.6_8TeV/Data/DoubleElectron_Run2012B',  5, 'DATA '+selection+' 2012 0' + whereWeRun),
+                cfg('DoubleElectron_Run2012C',  DIRBRIAN+'/nuTuples_v9.6_8TeV/Data/DoubleElectron_Run2012C',  10, 'DATA '+selection+' 2012 0' + whereWeRun),
+                cfg('DoubleElectron_Run2012D',  DIRBRIAN+'/nuTuples_v9.6_8TeV/Data/DoubleElectron_Run2012D',  20, 'DATA '+selection+' 2012 0' + whereWeRun),
+                ])
+
 
     if selection == 'single-mu':
         data.extend([
@@ -121,7 +130,7 @@ if period =="2012":
                 cfg('MuEG_Run2012C',  DIRNATE+'/nuTuples_v9.6_8TeV/Data/MuEG_Run2012C',  8, 'DATA '+selection+' 2012 0' + whereWeRun),
                 cfg('MuEG_Run2012D',  DIRNATE+'/nuTuples_v9.6_8TeV/Data/MuEG_Run2012D',  15,'DATA '+selection+' 2012 0' + whereWeRun),
                 ])
-        
+
     if selection == 'elgamma':
         data.extend([
                 cfg('DoublePhoton_Run2012A', dCache+'/andreypz/nuTuples_v9_8TeV/Photon/Run2012A-22Jan2013',         10, 'DATA '+selection+' 2012 0' + whereWeRun),

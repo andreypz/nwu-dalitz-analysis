@@ -1,7 +1,7 @@
 #define zgamma_cxx
 #include "zgamma.h"
 
-const UInt_t ntrig = 7;
+const UInt_t ntrig = 8;
 string myTriggers[ntrig] = {
   "HLT_IsoMu24_v",
   "HLT_IsoMu24_eta2p1_v",
@@ -9,7 +9,8 @@ string myTriggers[ntrig] = {
   "HLT_Mu17_Mu8_v",
   "HLT_Mu17_TkMu8_v",
   "HLT_Mu22_TkMu8_v",
-  "HLT_Mu22_Photon22_CaloIdL_v"
+  "HLT_Mu22_Photon22_CaloIdL_v",
+  "HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v"
 };
 
 UInt_t nEventsTrig[nC][ntrig];
@@ -31,6 +32,8 @@ Float_t mllMax = 20;
 
 Float_t global_Mll = 0;
 Bool_t applyPhosphor = 0;
+Bool_t doRochCorr = 1;
+Bool_t doZee = 0;
 Int_t  dal=0, nodal=0;
 Bool_t makeFitTree = 1;
 const UInt_t hisEVTS[] = {9331};
@@ -45,12 +48,18 @@ void zgamma::Begin(TTree * tree)
 
   cout<<"option = "<<option.Data()<<endl;
   TObjArray *args = (TObjArray*)option.Tokenize(" ");
-  //TObjArray *args = (TObjArray*)fOption.Tokenize(" ");
   sample    = (string)((TObjString*)args->At(0))->GetString();
   selection = (string)((TObjString*)args->At(1))->GetString();
   trigger   = (string)((TObjString*)args->At(2))->GetString();
   gen       = (string)((TObjString*)args->At(3))->GetString();
   period    = "2012";
+
+
+  if (selection == "zee")
+    {
+      doZee = true;
+      trigger = "ee";
+    }
 
   cout<<sample<<selection<<trigger<<gen<<endl;
 
@@ -92,6 +101,27 @@ void zgamma::Begin(TTree * tree)
   }
 
   //Cuts
+  //electrons are two types: Barrel/Endcap
+  //Loose
+  elIdAndIsoCutsLoose.ptErrorOverPt[0] = 99999;
+  elIdAndIsoCutsLoose.dPhiIn[0]        = 0.1;
+  elIdAndIsoCutsLoose.dEtaIn[0]        = 0.01;
+  elIdAndIsoCutsLoose.sigmaIetaIeta[0] = 0.02;
+  elIdAndIsoCutsLoose.HadOverEm[0]     = 0.3;
+  elIdAndIsoCutsLoose.fabsEPDiff[0]    = 99999;
+  elIdAndIsoCutsLoose.dxy[0]           = 0.5;
+  elIdAndIsoCutsLoose.dz[0]            = 0.5;
+  elIdAndIsoCutsLoose.pfIso04[0]       = 0.3;
+
+  elIdAndIsoCutsLoose.ptErrorOverPt[1] = 99999;
+  elIdAndIsoCutsLoose.dPhiIn[1]        = 0.1;
+  elIdAndIsoCutsLoose.dEtaIn[1]        = 0.03;
+  elIdAndIsoCutsLoose.sigmaIetaIeta[1] = 0.1;
+  elIdAndIsoCutsLoose.HadOverEm[1]     = 0.3;
+  elIdAndIsoCutsLoose.fabsEPDiff[1]    = 99999;
+  elIdAndIsoCutsLoose.dxy[1]           = 0.5;
+  elIdAndIsoCutsLoose.dz[1]            = 0.5;
+  elIdAndIsoCutsLoose.pfIso04[1]       = 0.3;
 
   //Tight
   elIdAndIsoCutsTight.ptErrorOverPt[0] = 9999.;
@@ -227,6 +257,13 @@ Bool_t zgamma::Process(Long64_t entry)
   else if (trigger=="single-mu")
     {
       myTrigger = "HLT_IsoMu24_eta2p1_v";
+      cut_l1pt = 25;
+      cut_l2pt = 7;
+      cut_gammapt = 23;
+    }
+  else if (trigger=="ee")
+    {
+      myTrigger = "HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v";
       cut_l1pt = 25;
       cut_l2pt = 7;
       cut_gammapt = 23;
@@ -536,36 +573,23 @@ Bool_t zgamma::Process(Long64_t entry)
 	    }
 
 
-	  //Double_t corrPhoEn = correctedPhotonEnergy(thisPhoton->SCEnergy(), thisPhoton->SCEta(), thisPhoton->R9(), runNumber,
-	  //					     0, "Moriond2014", !isRealData, myRandom);
-	  Double_t corrPhoEn = correctedPhotonEnergy(thisPhoton->E(), thisPhoton->SCEta(), thisPhoton->R9(), runNumber,
-						     0, "Moriond2014", !isRealData, myRandom);
+	  Double_t corrPhoEnSC   = correctedPhotonEnergy(thisPhoton->SCEnergy(), thisPhoton->SCEta(), thisPhoton->R9(), runNumber,
+							 0, "Moriond2014", !isRealData, myRandom);
+	  Double_t corrPhoEnReco = correctedPhotonEnergy(thisPhoton->E(), thisPhoton->SCEta(), thisPhoton->R9(), runNumber,
+							 0, "Moriond2014", !isRealData, myRandom);
 
-	  hists->fill1DHist(thisPhoton->M(), "ph_recoMass",";M_{#gamma}", 100,-0.05,0.05, 1,"Photon");
 
-	  hists->fill1DHist((thisPhoton->E() - corrPhoEn)/thisPhoton->E(),"ph_energyCorrection",
-			    ";(E_{#gamma}^{0} - E_{#gamma}^{corr})/E_{#gamma}^{0}", 100,-0.1,0.1, 1,"Photon");
-
-	  hists->fill1DHist((thisPhoton->E() - thisPhoton->SCEnergy())/thisPhoton->E(),"ph_energyRecoVsSC",
-			    ";(E_{#gamma}^{reco} - E_{#gamma}^{SC})/E_{#gamma}^{reco}", 100,-0.1,0.1, 1,"Photon");
-	  if (thisPhoton->Pt()>40 && fabs(thisPhoton->SCEta())<1.444){
-	    hists->fill1DHist((thisPhoton->E() - corrPhoEn)/thisPhoton->E(),"ph_energyCorrectionPtEtaCut",
-			      ";(E_{#gamma}^{0} - E_{#gamma}^{corr})/E_{#gamma}^{0}", 100,-0.1,0.1, 1,"Photon");
-	    hists->fill1DHist((thisPhoton->E() - thisPhoton->SCEnergy())/thisPhoton->E(),"ph_energyRecoVsSC_PtEtaCut",
-			      ";(E_{#gamma}^{reco} - E_{#gamma}^{SC})/E_{#gamma}^{reco}", 100,-0.1,0.1, 1,"Photon");
-	    if (thisPhoton->R9() > 0.94)
-	      hists->fill1DHist((thisPhoton->E() - corrPhoEn)/thisPhoton->E(),"ph_energyCorrectionPtEtaCut_highR9",
-				";(E_{#gamma}^{0} - E_{#gamma}^{corr})/E_{#gamma}^{0}", 100,-0.1,0.1, 1,"Photon");
-	    else
-	      hists->fill1DHist((thisPhoton->E() - corrPhoEn)/thisPhoton->E(),"ph_energyCorrectionPtEtaCut_lowR9",
-				";(E_{#gamma}^{0} - E_{#gamma}^{corr})/E_{#gamma}^{0}", 100,-0.1,0.1, 1,"Photon");
-
-	  }
+	  zgamma::MakePhotonEnergyCorrPlots(*thisPhoton, corrPhoEnReco, corrPhoEnSC);
 
 	  //cout<<runNumber<<"  uncor en="<< thisPhoton->E()<<"  cor en = "<<corrPhoEn<<endl;
-	  Double_t scale = corrPhoEn/thisPhoton->E();
+	  //Double_t scale = 1;
+	  //Double_t scale = corrPhoEnReco/thisPhoton->E();
+	  Double_t scale = corrPhoEnSC/thisPhoton->E();
+
 	  thisPhoton->SetXYZM(scale*thisPhoton->Px(), scale*thisPhoton->Py(),scale*thisPhoton->Pz(),0);
+
 	  //cout<<runNumber<<"  uncor en="<< thisPhoton->E()<<"  cor en = "<<corrPhoEn<<endl;
+	  //thisPhoton->SetPtEtaPhiM(corrPhoEnSC/cosh(SCEta()));
 
 	  photonsHZG.push_back(*thisPhoton);
 
@@ -609,20 +633,53 @@ Bool_t zgamma::Process(Long64_t entry)
     if (thisElec->Pt() > 10.0){
       if(isRealData || !makeGen || ( selection=="el" && makeGen && (gen_l1.DeltaR(*thisElec) < 0.1 || gen_l2.DeltaR(*thisElec)<0.1)  && thisElec->Pt()>10))
 	{
-	  if (thisElec->MvaID() > -0.20)
-	    electrons0.push_back(*thisElec);
+	  if (thisElec->MvaID() > -0.50 && thisElec->Pt()>20)
+	    electrons.push_back(*thisElec);
 	}
       if (
 	  //PassElectronIdAndIsoMVA(thisElec)
-	  PassElectronIdAndIso(thisElec, elIdAndIsoCutsTight, pvPosition)
+	  PassElectronIdAndIso(thisElec, elIdAndIsoCutsLoose, pvPosition)
 	  )
-	electrons.push_back(*thisElec);
-
+	electrons0.push_back(*thisElec);
 
     }
   }
   sort(electrons0.begin(), electrons0.end(), P4SortCondition);
   sort(electrons.begin(),  electrons.end(),  P4SortCondition);
+
+  if (doZee){
+
+    if (electrons.size()<2 || photons0.size()<2) return kTRUE;
+
+    //cout<<"doing zee.  Enough photons and electrons!"<<endl;
+
+    if (checkTrigger){
+      triggerSelector->SelectTrigger(myTrigger, triggerStatus, hltPrescale, isFound, triggerPass, prescale);
+      if (!triggerPass) return kTRUE;
+    }
+
+    //cout<<"passed the trigger"<<endl;
+
+    Int_t match1 = -1, match2 = -1;
+    for (Int_t p=0; p<photons0.size(); p++)
+      {
+	if (photons0[p].Pt() < 40 || fabs(photons0[p].SCEta())>1.444) continue;
+	for (Int_t e=0; e<electrons.size(); e++)
+	  {
+	    if (photons0[p].DeltaR(electrons[e]) < 0.2)
+	      {
+		//cout<<"matched! photon "<<p<<"  to electron "<<e<<endl;
+		if (match1==-1) match1=p;
+		else {match2=p; break;}
+	      }
+	  }
+      }
+
+    if (match1!=-1 && match2!=-1)
+      zgamma::MakeZeePlots(photons0[match1], photons0[match2]);
+
+    return kTRUE;
+  }
 
 
   for (Int_t i = 0; i < recoMuons->GetSize(); ++ i) {
@@ -643,14 +700,16 @@ Bool_t zgamma::Process(Long64_t entry)
        ) {
 
 
-      Float_t qter = 1;
-      //cout<<"DBG before rochcor"<<endl;
-      if (isRealData)
-	roch->momcor_data(*thisMuon, thisMuon->Charge(), 0, qter);
-      else
-	roch->momcor_mc(*thisMuon,  thisMuon->Charge(), 0, qter );
+      if (doRochCorr){
+	Float_t qter = 1;
+	//cout<<"DBG before rochcor"<<endl;
+	if (isRealData)
+	  roch->momcor_data(*thisMuon, thisMuon->Charge(), 0, qter);
+	else
+	  roch->momcor_mc(*thisMuon,  thisMuon->Charge(), 0, qter );
 
-      //cout<<"DBG after rochcor"<<endl;
+	//cout<<"DBG after rochcor"<<endl;
+      }
 
       muons.push_back(*thisMuon);
     }
@@ -1436,10 +1495,8 @@ void zgamma::MakePhotonPlots(TCPhoton ph)
   hists->fill1DHist(ph.ConversionVeto(),"ph_ConversionVeto",";ConversionVeto", 3, 0, 3,   1,"Photon");
   //hists->fill1DHist(ph., "ph_",";", 3, 0, 3, 1, "Photon");
   //hists->fill1DHist(ph., "ph_",";", 3, 0, 3, 1, "Photon");
-  //hists->fill1DHist(ph., "ph_",";", 3, 0, 3, 1, "Photon");
 
 }
-
 
 TCGenParticle * zgamma::GetPrimaryAncestor(TCGenParticle *p)
 {
@@ -1534,3 +1591,61 @@ void zgamma::PhotonR9Corrector(TCPhoton& ph){
   ph.SetR9(R9Cor);
 }
 
+
+void zgamma::MakePhotonEnergyCorrPlots(TCPhoton pho, Float_t corrPhoEnReco, Float_t corrPhoEnSC)
+{
+  hists->fill1DHist(pho.M(), "ph_recoMass",";M_{#gamma}", 100,-0.05,0.05, 1,"Photon");
+
+  hists->fill1DHist((pho.E() - corrPhoEnReco)/pho.E(),"ph_energyCorrectionReco",
+		    ";(E_{#gamma}^{reco} - E_{#gamma}^{reco corr})/E_{#gamma}^{reco}", 100,-0.1,0.1, 1,"Photon");
+
+  hists->fill1DHist((pho.SCEnergy() - corrPhoEnSC)/pho.SCEnergy(),"ph_energyCorrectionSC",
+		    ";(E_{#gamma}^{SC} - E_{#gamma}^{SC corr})/E_{#gamma}^{SC}", 100,-0.1,0.1, 1,"Photon");
+
+  hists->fill1DHist((pho.E() - pho.SCEnergy())/pho.E(),"ph_energyRecoVsSC",
+		    ";(E_{#gamma}^{reco} - E_{#gamma}^{SC})/E_{#gamma}^{reco}", 100,-0.1,0.1, 1,"Photon");
+
+  if (pho.Pt()>40 && fabs(pho.SCEta())<1.444){
+    hists->fill1DHist((pho.E() - pho.SCEnergy())/pho.E(),"ph_energyRecoVsSC_PtEtaCut",
+		      ";(E_{#gamma}^{reco} - E_{#gamma}^{SC})/E_{#gamma}^{reco}", 100,-0.1,0.1, 1,"Photon");
+
+    hists->fill1DHist((pho.E() - corrPhoEnReco)/pho.E(),"ph_energyCorrectionReco_PtEtaCut",
+		      ";(E_{#gamma}^{reco} - E_{#gamma}^{reco corr})/E_{#gamma}^{reco}", 100,-0.1,0.1, 1,"Photon");
+
+    hists->fill1DHist((pho.SCEnergy() - corrPhoEnSC)/pho.SCEnergy(),"ph_energyCorrectionSC_PtEtaCut",
+		      ";(E_{#gamma}^{SC} - E_{#gamma}^{SC corr})/E_{#gamma}^{SC}", 100,-0.1,0.1, 1,"Photon");
+
+    if (pho.R9() > 0.94)
+      {
+	hists->fill1DHist((pho.E() - corrPhoEnReco)/pho.E(),"ph_energyCorrectionReco_PtEtaCut_hightR9",
+			  ";(E_{#gamma}^{reco} - E_{#gamma}^{reco corr})/E_{#gamma}^{reco}", 100,-0.1,0.1, 1,"Photon");
+
+	hists->fill1DHist((pho.SCEnergy()-corrPhoEnSC)/pho.SCEnergy(),"ph_energyCorrectionSC_PtEtaCut_highR9",
+			  ";(E_{#gamma}^{SC} - E_{#gamma}^{SC corr})/E_{#gamma}^{SC}", 100,-0.1,0.1, 1,"Photon");
+      }
+    else
+      {
+	hists->fill1DHist((pho.E() - corrPhoEnReco)/pho.E(),"ph_energyCorrectionReco_PtEtaCut_lowR9",
+			  ";(E_{#gamma}^{reco} - E_{#gamma}^{reco corr})/E_{#gamma}^{reco}", 100,-0.1,0.1, 1,"Photon");
+
+	hists->fill1DHist((pho.SCEnergy()-corrPhoEnSC)/pho.SCEnergy(),"ph_energyCorrectionSC_PtEtaCut_lowR9",
+			  ";(E_{#gamma}^{SC} - E_{#gamma}^{SC corr})/E_{#gamma}^{SC}", 100,-0.1,0.1, 1,"Photon");
+
+      }
+  }
+}
+
+void zgamma::MakeZeePlots(TCPhoton p1, TCPhoton p2)
+{
+  hists->fill2DHist(p1.R9(), p2.R9(), "zee_p1R9_p2R9",";#gamma_{1} R9; #gamma_{2} R9", 100, 0,1, 100,0,1,  1, "Zee");
+  Float_t mZ = (p1+p2).M();
+  hists->fill1DHist(mZ, "zee_M",";", 100, 70, 110, 1, "Zee");
+  if (p1.R9() > 0.94 && p2.R9() > 0.94)
+    hists->fill1DHist(mZ, "zee_M_highR9",";", 100, 70, 110, 1, "Zee");
+  else
+    hists->fill1DHist(mZ, "zee_M_lowR9",";", 100, 70, 110, 1, "Zee");
+
+  //hists->fill1DHist(mZ, "zee_M",";", 200, 60, 130, 1, "Zee");
+  //hists->fill1DHist(mZ, "zee_M",";", 200, 60, 130, 1, "Zee");
+
+}

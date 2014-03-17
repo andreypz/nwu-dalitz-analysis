@@ -17,6 +17,7 @@ parser.add_option("--bkg",  dest="bkg",  action="store_true", default=False, hel
 parser.add_option("--mcfm", dest="mcfm", action="store_true", default=False, help="Use MCFM  as a signal")
 parser.add_option("--noeos",dest="noeos",action="store_true", default=False, help="Don't use EOS. pick up the files from nobackup area")
 
+parser.add_option("--zee",   dest="zee",    action="store_true", default=False, help="Z to ee study")
 parser.add_option("--mumu",   dest="mumu",    action="store_true", default=False, help="MuMuGamma selection with Double-Mu trigger")
 parser.add_option("--mugamma",dest="mugamma", action="store_true", default=False, help="MuMuGamma selection with Mu-Pho trigger")
 parser.add_option("--elgamma",dest="elgamma", action="store_true", default=False, help="EEGamma selection")
@@ -28,6 +29,8 @@ mass = options.mass
 sel = []
 if options.mugamma:
     sel.append("mugamma")
+if options.zee:
+    sel.append("zee")
 if options.mumu:
     sel.append("mumu")
 if options.elgamma:
@@ -325,6 +328,10 @@ if __name__ == "__main__":
         else:
             bkgFile[thissel]=None
 
+        if thissel=="zee":
+            u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",None,"",
+                            "Zee",  pathBase+"/Zee",  None,"norm")
+            continue
 
         yields_data[thissel] = u.getYields(dataFile[thissel])
         yields_ggH[thissel]  = u.getYields(sigFile, 'ggH-125',True)
@@ -393,6 +400,7 @@ if __name__ == "__main__":
 
 
     #sigFileMAD  = TFile(hPath+"/mugamma_"+period+"/hhhh_ggH-mad125_1.root", "OPEN")
+    '''
     if sel[0]=='none':
         sigFileMAD  = TFile("hhhh_ggH-mad125_1.root", "OPEN")
 
@@ -411,7 +419,7 @@ if __name__ == "__main__":
     int1 = htmp.Integral()
     int2 = htmp.Integral(0,10)
     print '\n Fraction of event with dR(l1,l2)<0.4: \n', float(int2)/int1
-
+    '''
     '''
     c1 = TCanvas("c4","small canvas",600,600);
     c1.cd()
@@ -495,16 +503,16 @@ if __name__ == "__main__":
     #plot_types
     print yields_sig
 
-    if doBkg:
-        table_all  = u.yieldsTable([yields_data,yields_bkg,yields_sig, yields_ggH,yields_vbf, yields_vh], sel)
-    else:
-        table_all  = u.yieldsTable([yields_data,yields_sig, yields_ggH,yields_vbf, yields_vh], sel)
+    #if doBkg:
+    #    table_all  = u.yieldsTable([yields_data,yields_bkg,yields_sig, yields_ggH,yields_vbf, yields_vh], sel)
+    #else:
+    #    table_all  = u.yieldsTable([yields_data,yields_sig, yields_ggH,yields_vbf, yields_vh], sel)
 
-    u.makeTable(table_all,"all", "html")
-    u.makeTable(table_all,"all", "twiki")
-    u.makeTable(table_all,"all", "tex")
+    #u.makeTable(table_all,"all", "html")
+    #u.makeTable(table_all,"all", "twiki")
+    #u.makeTable(table_all,"all", "tex")
 
-    os.system("cat yields_all.html   > yields.html")
+    #os.system("cat yields_all.html   > yields.html")
     #os.system("cat yields_all.twiki  > yields.html")
     #os.system("cat yields_all.tex    > yields.html")
 
