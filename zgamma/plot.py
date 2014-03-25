@@ -22,6 +22,7 @@ parser.add_option("--mumu",   dest="mumu",    action="store_true", default=False
 parser.add_option("--mugamma",dest="mugamma", action="store_true", default=False, help="MuMuGamma selection with Mu-Pho trigger")
 parser.add_option("--elgamma",dest="elgamma", action="store_true", default=False, help="EEGamma selection")
 parser.add_option("--apz",dest="apz", action="store_true", default=False, help="Study AlphaPiZ particle")
+parser.add_option("--four",dest="four", action="store_true", default=False, help="Four lepton analysis")
 
 (options, args) = parser.parse_args()
 
@@ -36,6 +37,87 @@ if options.mumu:
     sel.append("mumu")
 if options.elgamma:
     sel.append("elgamma")
+if options.four:
+    sel.append("2e2mu")
+
+def alphaPiZ2(f1, globalCut, path):
+    print "study alpha/piz particle"
+    u.createDir(path)
+    c1.cd()
+    t = f1.Get('apzTree/apzTree')
+    gStyle.SetMarkerSize(0.6)
+    gStyle.SetMarkerStyle(20);
+    gStyle.SetLineWidth(1);
+    gStyle.SetOptStat(111)
+    opt = ''
+
+    binDownSize = 1
+
+    name = 'h01-m12-full'
+    mllCut = TCut('')
+    #myFullCut = TCut(mllCut+globalCut)
+    m1 = '0'
+    m2 = '50'
+    nBins = 100/binDownSize
+    #print 10*'***', 'Downsized to ', nBins
+    binWidth = (float(m2)-float(m1))/float(nBins)
+    t.Draw('m12>>'+name+'('+str(nBins)+','+m1+','+m2+')',  mllCut+globalCut, opt)
+    h = gDirectory.Get(name)
+    h.Draw("same e1p")
+    h.SetTitle(name+';m_{#mu#mu} (GeV);Events/%.2f GeV' % binWidth)
+    h.UseCurrentStyle()
+    c1.SaveAs(path+"/"+name+".png")
+
+
+    name = 'h02-m34-full'
+    mllCut = TCut('')
+    #myFullCut = TCut(mllCut+globalCut)
+    m1 = '0'
+    m2 = '200'
+    nBins = 100/binDownSize
+    #print 10*'***', 'Downsized to ', nBins
+    binWidth = (float(m2)-float(m1))/float(nBins)
+    t.Draw('m34>>'+name+'('+str(nBins)+','+m1+','+m2+')',  mllCut+globalCut, opt)
+    h = gDirectory.Get(name)
+    h.Draw("same e1p")
+    h.SetTitle(name+';m_{ee} (GeV);Events/%.2f GeV' % binWidth)
+    h.UseCurrentStyle()
+    c1.SaveAs(path+"/"+name+".png")
+
+
+    name = 'h03-ml12-apz'
+    mllCut = TCut('')
+    #myFullCut = TCut(mllCut+globalCut)
+    m1 = '10'
+    m2 = '35'
+    nBins = 15/binDownSize
+    #print 10*'***', 'Downsized to ', nBins
+    binWidth = (float(m2)-float(m1))/float(nBins)
+    t.Draw('m12>>'+name+'('+str(nBins)+','+m1+','+m2+')',  mllCut+globalCut, opt)
+    h = gDirectory.Get(name)
+    h.Draw("same e1p")
+    h.SetTitle(name+';m_{#mu#mu} (GeV);Events/%.2f GeV' % binWidth)
+    h.UseCurrentStyle()
+    c1.SaveAs(path+"/"+name+".png")
+
+
+    name = 'h04-m4l_full'
+    mllCut = TCut('')
+    #myFullCut = TCut(mllCut+globalCut)
+    m1 = '60'
+    m2 = '200'
+
+    nBins = 50/binDownSize
+    #print 10*'***', 'Downsized to ', nBins
+    binWidth = (float(m2)-float(m1))/float(nBins)
+    t.Draw('m4l>>'+name+'('+str(nBins)+','+m1+','+m2+')',  mllCut+globalCut, opt)
+    h = gDirectory.Get(name)
+    h.Draw("same e1p")
+    h.SetTitle(name+';m_{4l} (GeV);Events/%.2f GeV' % binWidth)
+    h.UseCurrentStyle()
+    c1.SaveAs(path+"/"+name+".png")
+
+
 
 def alphaPiZ(f1, globalCut, path):
     print "study alpha/piz particle"
@@ -611,6 +693,8 @@ if __name__ == "__main__":
                 os.system("hadd "+hPath+"/m_Data_" +thissel+"_"+period+".root "+hPath+"/"+thissel+"_"+period+"/hhhh_*Run2012D*.root")
             else:
                 os.system("hadd "+hPath+"/m_Data_" +thissel+"_"+period+".root "+hPath+"/"+thissel+"_"+period+"/hhhh_*Run20*.root")
+                #os.system("hadd "+hPath+"/m_Data_" +thissel+"_"+period+".root "+hPath+"/"+thissel+"_"+period+"/hhhh_MuEG*Run20*.root")
+                #os.system("hadd "+hPath+"/m_Data_" +thissel+"_"+period+".root "+hPath+"/"+thissel+"_"+period+"/hhhh_*Run20*.root")
 
             if doBkg:
                 os.system("hadd "+hPath+"/m_DY_"   +thissel+"_"+period+".root "+hPath+"/"+thissel+"_"+period+"/hhhh_DYjets50*.root")
@@ -629,7 +713,7 @@ if __name__ == "__main__":
         #sigFileMCFM = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_ggH-mcfm_1.root", "OPEN")
         sigFileMAD  = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_ggH-mad"+str(mass)+"_1.root", "OPEN")
         sigFileVBF  = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_vbf-mad"+str(mass)+"_1.root", "OPEN")
-        sigFileVH   = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_vh-mad"+str(mass)+"_1.root", "OPEN")
+        sigFileVH   = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_vh-mad"+str(mass)+"_1.root",  "OPEN")
 
         if options.mcfm: sigFile = sigFileMCFM
         else:            sigFile = sigFileMAD
@@ -668,6 +752,7 @@ if __name__ == "__main__":
             # u.drawAllInFile(dataFile[thissel], "data", None, "", sigFile,"50xSignal","EB",pathBase+"/EB", cut, "lumi")
             # u.drawAllInFile(dataFile[thissel], "data", None, "", sigFile,"50xSignal","EE",pathBase+"/EE", cut, "lumi")
             print 'Not in inin'
+
 
         if thissel == "mugamma":
             if cut not in ['12','14','15','16']:
@@ -724,6 +809,18 @@ if __name__ == "__main__":
 
     if options.apz:
         c1 = TCanvas("c4","small canvas",600,600);
+        data = TFile("/tthome/andrey/m_Data_DoubleMu_2e2mu_2012.root","OPEN")
+        #data = TFile("/tthome/andrey/m_Data_MuEG_2e2mu_2012.root","OPEN")
+
+        alphaPiZ2(data, TCut(''),   pathBase+"/alphaPiZ-1/")
+        alphaPiZ2(data, TCut('pt12/m4l>0.3 && pt34/m4l>0.3'),                   pathBase+"/alphaPiZ-2/")
+        alphaPiZ2(data, TCut('pt12/m4l>0.3 && pt34/m4l>0.3 && m4l>100'),        pathBase+"/alphaPiZ-3/")
+        alphaPiZ2(data, TCut('pt12/m4l>0.3 && pt34/m4l>0.3 && m4l>100 && m12>15 && m12<30'),     pathBase+"/alphaPiZ-4/")
+
+
+    '''
+    if options.apz:
+        c1 = TCanvas("c4","small canvas",600,600);
         data = TFile(hPath+"/m_Data_mugamma_"+period+".root","OPEN")
 
         alphaPiZ(data, TCut(''),                                                            pathBase+"/alphaPiZ-1/")
@@ -735,6 +832,8 @@ if __name__ == "__main__":
 
         alphaPiZ(data, TCut('ph_pt/m_llg>0.33 && di_pt/m_llg>0.33 &&ph_pt/m_llg<0.5 && di_pt/m_llg<0.7'), pathBase+"/alphaPiZ-7/")
         alphaPiZ(data, TCut('ph_pt/m_llg>0.33 && di_pt/m_llg>0.33 &&ph_pt/m_llg<0.5 && di_pt/m_llg<0.7 &&m_llg>85&&m_llg<96'), pathBase+"/alphaPiZ-8/")
+    '''
+
 
     '''
     if sel[0]=='none':
@@ -842,10 +941,11 @@ if __name__ == "__main__":
     if doBkg:
         table_all  = u.yieldsTable([yields_data,yields_bkg,yields_sig, yields_ggH,yields_vbf, yields_vh], sel)
     else:
-        table_all  = u.yieldsTable([yields_data,yields_sig, yields_ggH,yields_vbf, yields_vh], sel)
+        if not options.four:
+            table_all  = u.yieldsTable([yields_data,yields_sig, yields_ggH,yields_vbf, yields_vh], sel)
 
     #u.makeTable(table_all,"all", "html")
-    u.makeTable(table_all,"all", "twiki")
+    # u.makeTable(table_all,"all", "twiki")
     #u.makeTable(table_all,"all", "tex")
 
     #os.system("cat yields_all.html   > yields.html")
@@ -860,7 +960,8 @@ if __name__ == "__main__":
     elif cut in ['14','15']: defaultPage = 'apz'
 
     print defaultPage
-    plot_types.append('alphaPiZ')
+    #plot_types.append('alphaPiZ')
+
     ht.makeHTML("h &rarr; dalitz decay plots",pathBase, plot_types, comments, defaultPage)
 
     print "\n\t\t finita la comedia \n"

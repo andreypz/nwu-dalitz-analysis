@@ -26,15 +26,14 @@ float EAPho[7][3] = {
 };
 string  myTrigger = "";
 Float_t cut_l1pt  = 23;
-Float_t cut_l2pt  = 7, cut_l2pt_low = 4;
-const Float_t cut_iso_mu1 = 0.4, cut_iso_mu2=0;
+Float_t cut_l2pt  = 4;
+//const Float_t cut_iso_mu1 = 0.4, cut_iso_mu2=0;
 Float_t cut_gammapt = 25;
-Float_t mllMax = 25;
+Float_t mllMax = 50;
 
-Float_t global_Mll = 0;
+//Float_t global_Mll = 0;
 Bool_t doRochCorr  = 1;
-Bool_t makeApzTree = 0;
-Bool_t makeFitTree = 0;
+Bool_t makeApzTree = 1;
 const UInt_t hisEVTS[] = {9331};
 Int_t evSize = sizeof(hisEVTS)/sizeof(int);
 
@@ -76,7 +75,6 @@ void fourLeptons::Begin(TTree * tree)
 
   histoFile = new TFile(Form("a_%s_higgsHistograms.root", selection.c_str()), "RECREATE");
 
-  histoFile->mkdir("fitTree", "fitTree");
   histoFile->mkdir("apzTree", "apzTree");
 
   hists = new HistManager(histoFile);
@@ -176,20 +174,6 @@ void fourLeptons::Begin(TTree * tree)
   fout.open("./out_synch_.txt",ofstream::out);
   fout.precision(3); fout.setf(ios::fixed, ios::floatfield);
 
-  histoFile->cd("fitTree");
-  if (makeFitTree){
-    _fitTree = new TTree("fitTree", "Mllg tree for fitting");
-    _fitTree->Branch("m_llg",  &fit_m_llg, "m_llg/D");
-    _fitTree->Branch("m_4l",   &fit_m_4l,  "m_4l/D");
-    _fitTree->Branch("m_ll",   &fit_m_ll,  "m_ll/D");
-    _fitTree->Branch("m_ll2",  &fit_m_ll2, "m_ll2/D");
-    _fitTree->Branch("ph_eta", &fit_phEta, "m_phEta/D");
-    _fitTree->Branch("ph_pt",  &fit_phPt,  "m_phPt/D");
-    _fitTree->Branch("di_pt",  &fit_diPt,  "m_diPt/D");
-    _fitTree->Branch("isLowPt",&fit_isLowPt,"isLowPt/O");
-    _fitTree->Branch("weight", &fit_weight,"weight/D");
-  }
-
   histoFile->cd("apzTree");
   if (makeApzTree){
     _apzTree = new TTree("apzTree", "A tree for studying new particles");
@@ -246,11 +230,11 @@ Bool_t fourLeptons::Process(Long64_t entry)
   //----------------------//
 
   Bool_t checkTrigger = kTRUE;
-  if (trigger=="double-mu")
+  if (trigger=="mumu")
     {
       myTrigger = "HLT_Mu13_Mu8_v";
       //myTrigger = "HLT_Mu17_Mu8_v";
-      //cut_l1pt = 15;
+      cut_l1pt = 15;
       //cut_l2pt = 9;
       //cut_gammapt = 23;
     }
@@ -265,7 +249,7 @@ Bool_t fourLeptons::Process(Long64_t entry)
     {
       myTrigger = "HLT_IsoMu24_eta2p1_v";
       cut_l1pt = 25;
-      cut_l2pt = 7;
+      cut_l2pt = 4;
       cut_gammapt = 23;
     }
   else if (trigger=="ee")
@@ -427,60 +411,80 @@ Bool_t fourLeptons::Process(Long64_t entry)
   CountEvents(3);
 
 
-  if (muons.size()<2) return kTRUE;
+  if (selection=="2e2mu")
+    {
 
-  Float_t tmpMll = 99999;
-  Float_t MAPZ   = 0;
+      if (muons.size()<2) return kTRUE;
 
-  if (muons.size()==2){
-    lPt1 = muons[0];
-    lPt2 = muons[1];
-  }
-  else
-    for (UInt_t m1=0; m1 < muons.size(); m1++){
-      for (UInt_t m2=m1; m2 < muons.size(); m2++){
-	if (muons[m1].Charge()*muons[m2].Charge()==1) continue; //same charge - don't care
+      Float_t tmpMll = 99999;
+      Float_t MAPZ   = 0;
 
-	if( fabs((muons[m1]+muons[m2]).M() - MAPZ) < tmpMll)
-	  {
-	    lPt1 = muons[m1];
-	    lPt2 = muons[m2];
-	    tmpMll = (muons[m1]+muons[m2]).M();
-	  }
+      if (muons.size()==2){
+	lPt1 = muons[0];
+	lPt2 = muons[1];
       }
+      else
+	for (UInt_t m1=0; m1 < muons.size(); m1++){
+	  for (UInt_t m2=m1; m2 < muons.size(); m2++){
+	    if (muons[m1].Charge()*muons[m2].Charge()==1) continue; //same charge - don't care
+
+	    if( fabs((muons[m1]+muons[m2]).M() - MAPZ) < tmpMll)
+	      {
+		lPt1 = muons[m1];
+		lPt2 = muons[m2];
+		tmpMll = (muons[m1]+muons[m2]).M();
+	      }
+	  }
+	}
+
+      if (lPt1.Charge()*lPt2.Charge() == 1)
+	return kTRUE;//Abort("reco * They are the same charge!");
+
+      //if (fourLeptons::CalculateMuonIso(&muons[0]) > 0.4)
+      //return kTRUE;
+      //if (lPt2.Pt() > 20 && fourLeptons::CalculateMuonIso(&muons[1]) > 0.4)
+      //return kTRUE;
+
+      FillHistoCounts(4, eventWeight);
+      CountEvents(4);
+
+      if(electrons0.size()<2) return kTRUE;
+
+      FillHistoCounts(5, eventWeight);
+      CountEvents(5);
+
+      lPt3 = electrons0[0];
+      lPt4 = electrons0[1];
     }
+  else if (selection == "4mu")
+    {
 
-  if (lPt1.Charge()==1 && lPt2.Charge()==-1){
-    l1 = lPt1;
-    l2 = lPt2;
-  }
-  else if (lPt1.Charge()==-1 && lPt2.Charge()==1){
-    l1 = lPt2;
-    l2 = lPt1;
-  }
-  else{
-    //cout<<"ch1 = "<<muons[0].Charge()<<"  ch2 = "<<muons[1].Charge()<<endl;
-    return kTRUE;//Abort("reco * They are the same charge!");
-  }
+      if (muons.size()<4) return kTRUE;
 
-  if (fourLeptons::CalculateMuonIso(&muons[0]) > 0.4)
-    return kTRUE;
-  //if (lPt2.Pt() > 20 && fourLeptons::CalculateMuonIso(&muons[1]) > 0.4)
-  //return kTRUE;
+      Float_t tmpMll = 99999;
+      Float_t MAPZ   = 0;
 
-  FillHistoCounts(4, eventWeight);
-  CountEvents(4);
+      for (UInt_t m1=0; m1 < muons.size(); m1++){
+	for (UInt_t m2=m1; m2 < muons.size(); m2++){
+	  if (muons[m1].Charge()*muons[m2].Charge()==1) continue; //same charge - don't care
 
-  if(electrons0.size()<2) return kTRUE;
+	  if( fabs((muons[m1]+muons[m2]).M() - MAPZ) < tmpMll)
+	    {
+	      lPt1 = muons[m1];
+	      lPt2 = muons[m2];
+	      tmpMll = (muons[m1]+muons[m2]).M();
+	    }
+	}
 
-  FillHistoCounts(5, eventWeight);
-  CountEvents(5);
-
-  lPt3 = electrons0[0];
-  lPt4 = electrons0[1];
+      }
 
 
-  if (lPt1.Pt() < cut_l1pt || lPt2.Pt() < cut_l2pt_low)   return kTRUE;
+      Abort("Yet to be done");
+    }
+  else
+    Abort("Selection is not supported");
+
+  if (lPt1.Pt() < cut_l1pt || lPt2.Pt() < cut_l2pt)   return kTRUE;
   if (lPt3.Pt() < 25 || lPt4.Pt() < 5)   return kTRUE;
 
   FillHistoCounts(6, eventWeight);
@@ -509,8 +513,8 @@ Bool_t fourLeptons::Process(Long64_t entry)
   fout<<runNumber<<" "<<eventNumber<<endl;
 
   Double_t Mll = (lPt1+lPt2).M();
-  hists->fill1DHist(Mll,  Form("diLep_mass_low_cut%i", 3), ";M(ll)", 50, 0,20,  1, "");
-  hists->fill1DHist(Mll,  Form("diLep_mass_high_cut%i", 3),";M(ll)", 50, 0,120, 1, "");
+  hists->fill1DHist(Mll,  Form("diLep_mass_low_cut%i",  3), ";M(ll)", 50, 0,20,  1, "");
+  hists->fill1DHist(Mll,  Form("diLep_mass_high_cut%i", 3), ";M(ll)", 50, 0,120, 1, "");
 
 
   if (Mll > mllMax) return kTRUE;
@@ -543,29 +547,6 @@ Bool_t fourLeptons::Process(Long64_t entry)
   }
   return kTRUE;
 
-
-  if (makeFitTree){
-    fit_m_llg   = Mllg;
-    fit_m_4l    = M4l;
-    fit_m_ll    = Mll;
-    //fit_m_ll2   = Mll2;
-    fit_weight  = eventWeight;
-    //if (selection!="apz")
-    //fit_phEta   = gamma.SCEta();
-  //fit_phPt   = gamma.Pt();
-
-    fit_phPt   = (lPt3+lPt4).Pt();
-    fit_phEta  = (lPt3+lPt4).Eta();
-    fit_diPt   = (l1+l2).Pt();
-    fit_isLowPt = false;
-
-    if (lPt2.Pt() < cut_l2pt)
-      fit_isLowPt = true;
-
-    _fitTree->Fill();
-  }
-
-  return kTRUE;
 
 }
 
@@ -641,8 +622,8 @@ bool fourLeptons::PassElectronIdAndIso(TCElectron *lep, elIdAndIsoCuts cuts, TVe
        && lep->HadOverEm()         < cuts.HadOverEm[0]
        && fabs(lep->Dxy(pv))       < cuts.dxy[0]
        && fabs(lep->Dz(pv))        < cuts.dz[0]
-       && fabs(lep->InverseEnergyMomentumDiff()) < cuts.fabsEPDiff[0]
-       && eleISO < cuts.pfIso04[0]
+       //&& fabs(lep->InverseEnergyMomentumDiff()) < cuts.fabsEPDiff[0]
+       //&& eleISO < cuts.pfIso04[0]
        )||
       (fabs(lep->Eta()) > 1.556
        && lep->PtError()/lep->Pt() < cuts.ptErrorOverPt[1]
@@ -652,10 +633,10 @@ bool fourLeptons::PassElectronIdAndIso(TCElectron *lep, elIdAndIsoCuts cuts, TVe
        && lep->HadOverEm()         < cuts.HadOverEm[1]
        && fabs(lep->Dxy(pv))       < cuts.dxy[1]
        && fabs(lep->Dz(pv))        < cuts.dz[1]
-       && fabs(lep->InverseEnergyMomentumDiff()) < cuts.fabsEPDiff[1]
-       && eleISO < cuts.pfIso04[1]
+       // && fabs(lep->InverseEnergyMomentumDiff()) < cuts.fabsEPDiff[1]
+       //&& eleISO < cuts.pfIso04[1]
        ))
-     && lep->PassConversionVeto()
+     //&& lep->PassConversionVeto()
      ) pass = true;
 
   //pass = true;
@@ -731,7 +712,7 @@ bool fourLeptons::PassMuonIdAndIso(TCMuon *lep, muIdAndIsoCuts cuts, TVector3 *p
      && ((lep->IsTRK() && lep->NumberOfMatches() > 0) || lep->IsGLB())
      && fabs(lep->Dxy(pv))     < cuts.dxy
      && fabs(lep->Dz(pv))      < cuts.dz
-     //&& (lep->Pt() < 20 || fourLeptons::CalculateMuonIso(lep) < 0.4)
+     && (lep->Pt() < 20 || fourLeptons::CalculateMuonIso(lep) < 0.4)
      )
     pass = true;
   /*

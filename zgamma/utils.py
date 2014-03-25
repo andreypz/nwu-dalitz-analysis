@@ -545,6 +545,8 @@ def getTotalEvents(f):
 
 def getYields(f, sample='ggH-125', doLumiScale=False):
     ev = f.Get("Counts/evt_byCut")
+    if ev==None: return [0]
+
     sel = conf.get("selection", "sel")[0:2]
     cuts =  getCuts(conf, "cuts-"+sel)
     y = []

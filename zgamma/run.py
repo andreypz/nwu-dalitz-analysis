@@ -4,16 +4,10 @@ import sys,os
 
 from optparse import OptionParser
 parser = OptionParser(usage="usage: %prog [options -e], -m], -p 2011] sample sourcefile")
-parser.add_option("-e", "--ele", dest="electron", action="store_true", default=False,
-                  help="Use electron selection (by default it will run muon selection)")
-parser.add_option("--zee", dest="zee", action="store_true", default=False,
-                  help="Run z to ee cross checks")
-parser.add_option("--apz", dest="apz", action="store_true", default=False,
-                  help="Discover new particles")
-parser.add_option("--four", dest="four", action="store_true", default=False,
-                  help="Four lepton analysis")
+parser.add_option("-s", '--sel', dest="sel", type="string", default='mugamma',
+                  help="Selection to be used. Options are: '4mu','2e2mu', 'zee','mugamma', 'egamma'")
 parser.add_option("-t","--trigger", dest="trigger", type="string", default="mugamma",
-                  help="Select a trigger to run. options are: double-mu, single-mu, mu-pho, pho, single-el")
+                  help="Select a trigger to run. options are: mumu, single-mu, mugamma, pho, single-el")
 parser.add_option("-p", "--period", dest="period", default="2012", help="Set data period (2011/2012)")
 parser.add_option("-b", "--batch", dest="batch", action="store_true", default=False,
                   help="Run in batch (uning the scripts in batch_condor).That would imply the use of input.txt")
@@ -36,23 +30,17 @@ sourcefilename = args[1]
 
 period    = options.period
 trigger   = options.trigger
-selection = "mu"
+selection = "mugamma"
 ana = "zgamma"
 
-if options.electron:
-    print "options.electorn", options.electron
-    selection="el"
+selection=options.sel
+if selection=='egamma':
     ana="egamma"
-
-if options.zee:
-    selection="zee"
-if options.apz:
-    selection="apz"
-if options.four:
-    selection="four"
-    ana = 'fourLeptons'
+if selection in ['4mu','2e2mu']:
+    ana='fourLeptons'
 
 isbatch   = options.batch
+
 if(isbatch):
     sourceFiles = "./input.txt"
     print "Do batch, source files: \n", sourceFiles
@@ -61,7 +49,7 @@ else:
     print "Run locally, source files: \n", sourceFiles
 
 
-print "Running on sample", sample, "with selection=", selection, ", trigger=", trigger,\
+print "Running ", ana, " analyzer, on sample", sample, "with selection=", selection, ", trigger=", trigger,\
       "in source=", sourcefilename, ", period=", period, " batch=",  isbatch, " and gen selection=", options.gen
 
 from ROOT import *
