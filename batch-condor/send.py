@@ -12,6 +12,8 @@ parser.add_option("-e", "--elgamma", dest="elgamma", action="store_true", defaul
                   help="Use electron selection (by default it will run muon selection)")
 parser.add_option("--mugamma",   dest="mugamma",  action="store_true", default=False,
                   help="Use Mu+Photon trigger (for running on MuEG path)")
+parser.add_option("--apz",       dest="apz",      action="store_true", default=False, help="Discover new particles")
+parser.add_option("--four",      dest="four",     action="store_true", default=False, help="Four lepton study")
 parser.add_option("--zee",       dest="zee",      action="store_true", default=False, help="Do Zee peak study")
 parser.add_option("--mumu",      dest="mumu",     action="store_true", default=False, help="Use Double-Mu trigger")
 parser.add_option("--singlemu",  dest="singlemu", action="store_true", default=False, help="Use Iso-mu trigger")
@@ -54,6 +56,10 @@ if options.elgamma:
     selection="elgamma"
 if options.mugamma:
     selection="mugamma"
+if options.apz:
+    selection="apz"
+if options.four:
+    selection="four"
 if options.mumu:
     selection="mumu"
 if options.singlemu:
@@ -98,15 +104,15 @@ test.extend([
 
 if period =="2012":
 
-    if selection == 'mumu':
+    if selection in ['mumu','four']:
         data.extend([
-            cfg('DoubleMu_Run2012A',  DIR+'/bpollack/V09_05_8TeV/DoubleMu/Run2012A',  5, 'DATA '+selection+' 2012 0' + whereWeRun),
-            cfg('DoubleMu_Run2012B',  DIR+'/bpollack/V09_05_8TeV/DoubleMu/Run2012B',  8, 'DATA '+selection+' 2012 0' + whereWeRun),
-            cfg('DoubleMu_Run2012C',  DIR+'/bpollack/V09_05_8TeV/DoubleMu/Run2012C', 10, 'DATA '+selection+' 2012 0' + whereWeRun),
-            cfg('DoubleMu_Run2012D',  DIR+'/bpollack/V09_05_8TeV/DoubleMu/Run2012D', 10, 'DATA '+selection+' 2012 0' + whereWeRun),
+                cfg('DoubleMu_Run2012A',  DIRBRIAN+'/nuTuples_v9.6_8TeV/Data/DoubleMu_Run2012A',  5, 'DATA '+selection+' 2012 0' + whereWeRun),
+                cfg('DoubleMu_Run2012B',  DIRBRIAN+'/nuTuples_v9.6_8TeV/Data/DoubleMu_Run2012B',  10, 'DATA '+selection+' 2012 0' + whereWeRun),
+                cfg('DoubleMu_Run2012C',  DIRBRIAN+'/nuTuples_v9.6_8TeV/Data/DoubleMu_Run2012C',  15, 'DATA '+selection+' 2012 0' + whereWeRun),
+                cfg('DoubleMu_Run2012D',  DIRBRIAN+'/nuTuples_v9.6_8TeV/Data/DoubleMu_Run2012D',  20, 'DATA '+selection+' 2012 0' + whereWeRun),
             ])
 
-    if selection == 'zee':
+    if selection == ['zee','four']:
         data.extend([
                 cfg('DoubleElectron_Run2012A',  DIRBRIAN+'/nuTuples_v9.6_8TeV/Data/DoubleElectron_Run2012A',  5, 'DATA '+selection+' 2012 0' + whereWeRun),
                 cfg('DoubleElectron_Run2012B',  DIRBRIAN+'/nuTuples_v9.6_8TeV/Data/DoubleElectron_Run2012B',  5, 'DATA '+selection+' 2012 0' + whereWeRun),
@@ -123,7 +129,7 @@ if period =="2012":
             cfg('SingleMu_Run2012D',  dCache+'/andreypz/nuTuples_v6_8TeV/SingleMu/Run2012D-22Jan2013',    15, 'DATA '+selection+' 2012 0' + whereWeRun),
             ])
 
-    if selection == 'mugamma':
+    if selection in ['mugamma','apz','four']:
         data.extend([
                 cfg('MuEG_Run2012A',  DIRNATE+'/nuTuples_v9.6_8TeV/Data/MuEG_Run2012A',  5, 'DATA '+selection+' 2012 0' + whereWeRun),
                 cfg('MuEG_Run2012B',  DIRNATE+'/nuTuples_v9.6_8TeV/Data/MuEG_Run2012B',  8, 'DATA '+selection+' 2012 0' + whereWeRun),
@@ -149,7 +155,7 @@ if period =="2012":
     #    bg.extend([
     #            ])
 
-    if selection == 'mugamma':
+    if selection in ['mugamma','apz']:
         bg.extend([
                 cfg('DYjetDalitz', DIR+'/nuTuples_v9.6_8TeV/dalitz/DYtoMuMuJet', 1, 'DY '+selection+'  2012 0' + whereWeRun ),
                 ])

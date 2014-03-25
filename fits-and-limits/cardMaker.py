@@ -141,7 +141,7 @@ def makeCards(subdir):
 
           for sig in sigNameList:
             card.write('{0:<40} {1:<10} {2:^10} {3:^10}\n'.format('sig_'+sig+'_mShift_'    +channel,'param', 1, 0.005))
-            card.write('{0:<40} {1:<10} {2:^10} {3:^10}\n'.format('sig_'+sig+'_sigmaShift_'+channel,'param', 1, 0.20))
+            card.write('{0:<40} {1:<10} {2:^10} {3:^10}\n'.format('sig_'+sig+'_sigmaShift_'+channel,'param', 1, 0.05))
 
           for param in bkgParams[:-1]:
             card.write('{0:<45} {1:<15}\n'.format('bkg_'+param+'_'+channel,'flatParam'))

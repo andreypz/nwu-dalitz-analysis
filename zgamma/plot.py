@@ -21,6 +21,7 @@ parser.add_option("--zee",   dest="zee",    action="store_true", default=False, 
 parser.add_option("--mumu",   dest="mumu",    action="store_true", default=False, help="MuMuGamma selection with Double-Mu trigger")
 parser.add_option("--mugamma",dest="mugamma", action="store_true", default=False, help="MuMuGamma selection with Mu-Pho trigger")
 parser.add_option("--elgamma",dest="elgamma", action="store_true", default=False, help="EEGamma selection")
+parser.add_option("--apz",dest="apz", action="store_true", default=False, help="Study AlphaPiZ particle")
 
 (options, args) = parser.parse_args()
 
@@ -35,6 +36,318 @@ if options.mumu:
     sel.append("mumu")
 if options.elgamma:
     sel.append("elgamma")
+
+def alphaPiZ(f1, globalCut, path):
+    print "study alpha/piz particle"
+    u.createDir(path)
+    c1.cd()
+    t = f1.Get('fitTree/fitTree')
+    gStyle.SetMarkerSize(0.6)
+    gStyle.SetMarkerStyle(20);
+    gStyle.SetLineWidth(1);
+    gStyle.SetOptStat(111)
+    opt = ''
+
+    binDownSize = 1
+    if 'alphaPiZ-3' in path:
+        binDownSize = 2
+    elif 'alphaPiZ-4' in path:
+        binDownSize = 2
+    elif 'alphaPiZ-5' in path:
+        binDownSize = 2
+    elif 'alphaPiZ-6' in path:
+        binDownSize = 2
+
+    name = 'h01-mll-full'
+    mllCut = TCut('')
+    #myFullCut = TCut(mllCut+globalCut)
+    m1 = '0'
+    m2 = '25'
+    nBins = 100/binDownSize
+    #print 10*'***', 'Downsized to ', nBins
+    binWidth = (float(m2)-float(m1))/float(nBins)
+    t.Draw('m_ll>>'+name+'('+str(nBins)+','+m1+','+m2+')',  mllCut+globalCut, opt)
+    h = gDirectory.Get(name)
+    h.Draw("same e1p")
+    h.SetTitle(name+';m_{#mu#mu} (GeV);Events/%.2f GeV' % binWidth)
+    h.UseCurrentStyle()
+    c1.SaveAs(path+"/"+name+".png")
+
+    name = 'h02-mll-jpsi'
+    m1 = '2.7'
+    m2 = '4.0'
+    nBins = 100/binDownSize
+    binWidth = (float(m2)-float(m1))/float(nBins)
+    mllCut = TCut('(m_ll>'+m1+') && (m_ll<'+m2+')')
+    #myFullCut = TCut(mllCut+globalCut)
+    t.Draw('m_ll>>'+name+'('+str(nBins)+','+m1+','+m2+')',  mllCut+globalCut, opt)
+    h = gDirectory.Get(name)
+    h.Draw("same e1p")
+    h.UseCurrentStyle()
+    h.SetTitle(name+';m_{#mu#mu} (GeV);Events/%.2f GeV' % binWidth)
+    c1.SaveAs(path+"/"+name+".png")
+
+
+    name = "h03-mll-upsilon"
+    m1 = '9.0'
+    m2 = '12.0'
+    nBins = 30/binDownSize
+    binWidth = (float(m2)-float(m1))/float(nBins)
+    mllCut = TCut('(m_ll>'+m1+') && (m_ll<'+m2+')')
+    #myFullCut = TCut(mllCut+globalCut)
+    t.Draw('m_ll>>'+name+'('+str(nBins)+','+m1+','+m2+')',  mllCut+globalCut, opt)
+    h = gDirectory.Get(name)
+    h.Draw("same e1p")
+    h.UseCurrentStyle()
+    h.SetTitle(name+';m_{#mu#mu} (GeV);Events/%.2f GeV' % binWidth)
+    c1.SaveAs(path+"/"+name+".png")
+
+
+    name = "h04-mll-apz"
+    m1 = '15.0'
+    m2 = '25.0'
+    nBins = 30/binDownSize
+    binWidth = (float(m2)-float(m1))/float(nBins)
+    mllCut = TCut('(m_ll>'+m1+') && (m_ll<'+m2+')')
+    #myFullCut = TCut(mllCut+globalCut)
+    t.Draw('m_ll>>'+name+'('+str(nBins)+','+m1+','+m2+')',  mllCut+globalCut, opt)
+    h = gDirectory.Get(name)
+    h.Draw("same e1p")
+    h.UseCurrentStyle()
+    h.SetTitle(name+';m_{#mu#mu} (GeV);Events/%.2f GeV' % binWidth)
+    c1.SaveAs(path+"/"+name+".png")
+
+
+    name = "h05-mllg-full"
+    mllg1 = '60'
+    mllg2 = '150'
+    m1 = '0'
+    m2 = '25'
+    nBins = 50/binDownSize
+    binWidth = (float(mllg2)-float(mllg1))/float(nBins)
+    mllCut = TCut('(m_ll>'+m1+') && (m_ll<'+m2+')')
+    #myFullCut = TCut(mllCut+globalCut)
+    t.Draw('m_llg>>'+name+'('+str(nBins)+','+mllg1+','+mllg2+')',  mllCut+globalCut, opt)
+    h = gDirectory.Get(name)
+    h.Draw("same e1p")
+    h.UseCurrentStyle()
+    h.SetTitle(name+';m_{#mu#mu#gamma} (GeV);Events/%.2f GeV' % binWidth)
+    c1.SaveAs(path+"/"+name+".png")
+
+
+    name = "h06-mllg-jpsi-full"
+    mllg1 = '100'
+    mllg2 = '150'
+    m1 = '3.0'
+    m2 = '3.2'
+    nBins = 50/binDownSize
+    binWidth = (float(mllg2)-float(mllg1))/float(nBins)
+    mllCut = TCut('m_ll>'+m1+' && m_ll<'+m2)
+    #myFullCut = TCut(mllCut+globalCut)
+    t.Draw('m_llg>>'+name+'('+str(nBins)+','+mllg1+','+mllg2+')',mllCut*globalCut, opt)
+    #print 3*"***", 'my integrall =', h.Integral()
+    h = gDirectory.Get(name)
+    h.Draw("same e1p")
+    h.UseCurrentStyle()
+    h.SetTitle(name+';m_{#mu#mu#gamma} (GeV);Events/%.2f GeV' % binWidth)
+    c1.SaveAs(path+"/"+name+".png")
+
+    name = "h07-mllg-jpsi-Z"
+    mllg1 = '70'
+    mllg2 = '110'
+    m1 = '3.0'
+    m2 = '3.2'
+    nBins = '30'
+    binWidth = (float(mllg2)-float(mllg1))/float(nBins)
+    mllCut = TCut('(m_ll>'+m1+') && (m_ll<'+m2+')')
+    #myFullCut = TCut(mllCut+globalCut)
+    t.Draw('m_llg>>'+name+'('+str(nBins)+','+mllg1+','+mllg2+')',  mllCut+globalCut, opt)
+    h = gDirectory.Get(name)
+    h.Draw("same e1p")
+    h.UseCurrentStyle()
+    h.SetTitle(name+';m_{#mu#mu#gamma} (GeV);Events/%.2f GeV' % binWidth)
+    c1.SaveAs(path+"/"+name+".png")
+
+
+    name = "h08-mllg-upsilon-Z"
+    mllg1 = '70'
+    mllg2 = '110'
+    m1 = '9.2'
+    m2 = '9.6'
+    nBins = '30'
+    binWidth = (float(mllg2)-float(mllg1))/float(nBins)
+    mllCut = TCut('(m_ll>'+m1+') && (m_ll<'+m2+')')
+    #myFullCut = TCut(mllCut+globalCut)
+    t.Draw('m_llg>>'+name+'('+str(nBins)+','+mllg1+','+mllg2+')',  mllCut+globalCut, opt)
+    h = gDirectory.Get(name)
+    h.Draw("same e1p")
+    h.UseCurrentStyle()
+    h.SetTitle(name+';m_{#mu#mu#gamma} (GeV);Events/%.2f GeV' % binWidth)
+    c1.SaveAs(path+"/"+name+".png")
+
+    name = "h09-mllg-apz-full"
+    mllg1 = '70'
+    mllg2 = '200'
+    m1 = '17.0'
+    m2 = '19.0'
+    nBins = 100/binDownSize
+    binWidth = (float(mllg2)-float(mllg1))/float(nBins)
+    mllCut = TCut('(m_ll>'+m1+') && (m_ll<'+m2+')')
+    #myFullCut = TCut(mllCut+globalCut)
+    t.Draw('m_llg>>'+name+'('+str(nBins)+','+mllg1+','+mllg2+')',  mllCut+globalCut, opt)
+    h = gDirectory.Get(name)
+    h.Draw("same e1p")
+    h.UseCurrentStyle()
+    h.SetTitle(name+';m_{#mu#mu#gamma} (GeV);Events/%.2f GeV' % binWidth)
+    c1.SaveAs(path+"/"+name+".png")
+
+
+
+    name = "h10-mllg-apz-full"
+    mllg1 = '100'
+    mllg2 = '150'
+    m1 = '17.0'
+    m2 = '19.0'
+    nBins = 60/binDownSize
+    binWidth = (float(mllg2)-float(mllg1))/float(nBins)
+    mllCut = TCut('m_ll>'+m1+' && m_ll<'+m2)
+    #myFullCut = TCut(mllCut+globalCut)
+    #print 15*"*", 'myCut is = ', myFullCut
+    t.Draw('m_llg>>'+name+'('+str(nBins)+','+mllg1+','+mllg2+')',  mllCut+globalCut, opt)
+    #t.Draw('m_llg>>'+name,  mllCut+globalCut, opt)
+    h = gDirectory.Get(name)
+    h.Draw("same e1p")
+    h.UseCurrentStyle()
+    h.SetTitle(name+';m_{#mu#mu#gamma} (GeV);Events/%.2f GeV' % binWidth)
+    c1.SaveAs(path+"/"+name+".png")
+
+
+    name = "h11-mllg-apz-Z"
+    mllg1 = '70'
+    mllg2 = '110'
+    m1 = '17'
+    m2 = '19'
+    nBins = 40/binDownSize
+    binWidth = (float(mllg2)-float(mllg1))/float(nBins)
+    mllCut = TCut('(m_ll>'+m1+') && (m_ll<'+m2+')')
+    myFullCut = TCut(mllCut+globalCut)
+    t.Draw('m_llg>>'+name+'('+str(nBins)+','+mllg1+','+mllg2+')',  mllCut+globalCut, opt)
+    h = gDirectory.Get(name)
+    h.Draw("same e1p")
+    h.UseCurrentStyle()
+    h.SetTitle(name+';m_{#mu#mu#gamma} (GeV);Events/%.2f GeV' % binWidth)
+    c1.SaveAs(path+"/"+name+".png")
+
+
+    name = "h12-phEta-apz"
+    m1 = '17.0'
+    m2 = '19.0'
+    nBins = 50/binDownSize
+    mllCut = TCut('(m_ll>'+m1+') && (m_ll<'+m2+')')
+    myFullCut = TCut(mllCut+globalCut)
+    t.Draw('fabs(ph_eta)>>'+name+'('+str(nBins)+',0,3)',  mllCut+globalCut, opt)
+    h = gDirectory.Get(name)
+    h.Draw("same e1p")
+    h.UseCurrentStyle()
+    h.SetTitle(name+';|#eta_{#gamma}|;Events')
+    c1.SaveAs(path+"/"+name+".png")
+
+    name = "h13-mllg-apz-125"
+    mllg1 = '115'
+    mllg2 = '135'
+    m1 = '17.0'
+    m2 = '19.0'
+    nBins = 30/binDownSize
+    binWidth = (float(mllg2)-float(mllg1))/float(nBins)
+    mllCut = TCut('(m_ll>'+m1+') && (m_ll<'+m2+')')
+    myFullCut = TCut(mllCut+globalCut)
+    t.Draw('m_llg>>'+name+'('+str(nBins)+','+mllg1+','+mllg2+')',  mllCut+globalCut, opt)
+    h = gDirectory.Get(name)
+    h.Draw("same e1p")
+    h.UseCurrentStyle()
+    h.SetTitle(name+';m_{#mu#mu#gamma} (GeV);Events/%.2f GeV' % binWidth)
+    c1.SaveAs(path+"/"+name+".png")
+
+    name = "h14-mllg-jpsi-125"
+    mllg1 = '115'
+    mllg2 = '135'
+    myFullCut = TCut(mllCut+globalCut)
+    m1 = '3.0'
+    m2 = '3.2'
+    nBins = 30/binDownSize
+    binWidth = (float(mllg2)-float(mllg1))/float(nBins)
+    mllCut = TCut('(m_ll>'+m1+') && (m_ll<'+m2+')')
+    t.Draw('m_llg>>'+name+'('+str(nBins)+','+mllg1+','+mllg2+')',  mllCut+globalCut, opt)
+    h = gDirectory.Get(name)
+    h.Draw("same e1p")
+    h.UseCurrentStyle()
+    h.SetTitle(name+';m_{#mu#mu#gamma} (GeV);Events/%.2f GeV' % binWidth)
+    c1.SaveAs(path+"/"+name+".png")
+
+    name = "h15-ptgamma-apz"
+    pt1='40'
+    pt2='120'
+    m1 = '17.0'
+    m2 = '19.0'
+    nBins = 30/binDownSize
+    binWidth = (float(pt2)-float(pt1))/float(nBins)
+    mllCut = TCut('m_ll>'+m1+' && m_ll<'+m2)
+    myFullCut = TCut(mllCut+globalCut)
+    t.Draw('ph_pt>>'+name+'('+str(nBins)+','+pt1+','+pt2+')',  mllCut+globalCut, opt)
+    h = gDirectory.Get(name)
+    h.Draw("same e1p")
+    h.UseCurrentStyle()
+    h.SetTitle(name+';p_{T}^{#gamma} (GeV);Events/%.2f GeV' % binWidth)
+    c1.SaveAs(path+"/"+name+".png")
+
+    name = "h16-ptll-apz"
+    pt1='40'
+    pt2='120'
+    m1 = '17.0'
+    m2 = '19.0'
+    nBins = 30/binDownSize
+    binWidth = (float(pt2)-float(pt1))/float(nBins)
+    mllCut = TCut('m_ll>'+m1+' && m_ll<'+m2)
+    myFullCut = TCut(mllCut+globalCut)
+    t.Draw('di_pt>>'+name+'('+str(nBins)+','+pt1+','+pt2+')',  mllCut+globalCut, opt)
+    h = gDirectory.Get(name)
+    h.Draw("same e1p")
+    h.UseCurrentStyle()
+    h.SetTitle(name+';p_{T}^{#mu#mu} (GeV);Events/%.2f GeV' % binWidth)
+    c1.SaveAs(path+"/"+name+".png")
+
+    name = "h17-ptgamma-overMllg-apz"
+    pt1='0.3'
+    pt2='1.0'
+    m1 = '17.0'
+    m2 = '19.0'
+    nBins = 30/binDownSize
+    binWidth = (float(pt2)-float(pt1))/float(nBins)
+    mllCut = TCut('m_ll>'+m1+' && m_ll<'+m2)
+    myFullCut = TCut(mllCut+globalCut)
+    t.Draw('ph_pt/m_llg>>'+name+'('+str(nBins)+','+pt1+','+pt2+')',  mllCut+globalCut, opt)
+    h = gDirectory.Get(name)
+    h.Draw("same e1p")
+    h.UseCurrentStyle()
+    h.SetTitle(name+';p_{T}^{#gamma}/m_{#mu#mu#gamma};Events/%.2f bin' % binWidth)
+    c1.SaveAs(path+"/"+name+".png")
+
+    name = "h18-ptll-overMllg-apz"
+    pt1='0.3'
+    pt2='1.0'
+    m1 = '17.0'
+    m2 = '19.0'
+    nBins = 30/binDownSize
+    binWidth = (float(pt2)-float(pt1))/float(nBins)
+    mllCut = TCut('m_ll>'+m1+' && m_ll<'+m2)
+    myFullCut = TCut(mllCut+globalCut)
+    t.Draw('di_pt/m_llg>>'+name+'('+str(nBins)+','+pt1+','+pt2+')',  mllCut+globalCut, opt)
+    h = gDirectory.Get(name)
+    h.Draw("same e1p")
+    h.UseCurrentStyle()
+    h.SetTitle(name+';p_{T}^{#mu#mu}/m_{#mu#mu#gamma};Events/%.2f bin' % binWidth)
+    c1.SaveAs(path+"/"+name+".png")
+
 
 
 def effPlots2(f1, path):
@@ -348,21 +661,30 @@ if __name__ == "__main__":
         #if int(cut) >2:
         #tri_hists[thissel]   = dataFile[thissel].Get("tri_mass_cut"+cut).Clone()
 
+        if cut not in ['12','14','15']:
+            u.drawAllInFile(dataFile[thissel], "Data", None, "", sigFile,"#splitline{Signal}{m_{H}=125 GeV}",  "",path, cut, "norm")
+            # u.drawAllInFile(dataFile[thissel], "data", None, "", sigFile,"signal",  "",path, cut, "norm", doRatio=1)
+            # u.drawAllInFile(dataFile[thissel], "Data", None, "", sigFile,"50xSignal",  "",path, cut, "lumi")
+            # u.drawAllInFile(dataFile[thissel], "data", None, "", sigFile,"50xSignal","EB",pathBase+"/EB", cut, "lumi")
+            # u.drawAllInFile(dataFile[thissel], "data", None, "", sigFile,"50xSignal","EE",pathBase+"/EE", cut, "lumi")
+            print 'Not in inin'
 
-        u.drawAllInFile(dataFile[thissel], "Data", None, "", sigFile,"#splitline{Signal}{m_{H}=125 GeV}",  "",path, cut, "norm")
-        #u.drawAllInFile(dataFile[thissel], "data", None, "", sigFile,"signal",  "",path, cut, "norm", doRatio=1)
-        #u.drawAllInFile(dataFile[thissel], "Data", None, "", sigFile,"50xSignal",  "",path, cut, "lumi")
-        #u.drawAllInFile(dataFile[thissel], "data", None, "", sigFile,"50xSignal","EB",pathBase+"/EB", cut, "lumi")
-        #u.drawAllInFile(dataFile[thissel], "data", None, "", sigFile,"50xSignal","EE",pathBase+"/EE", cut, "lumi")
+        if thissel == "mugamma":
+            if cut not in ['12','14','15','16']:
+                # u.drawAllInFile(dataFile[thissel], "data",None, "",sigFile,"signal",  "Muons", pathBase+"/Muons", None,"norm")
+                u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",
+                                "Muons", pathBase+"/Muons/", None,"norm")
+                u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"#splitline{Signal}{m_{H}=125 GeV}",
+                                "Photon",pathBase+"/Photon/", None,"norm")
 
-        if thissel =="mugamma":
-            # u.drawAllInFile(dataFile[thissel], "data",None, "",sigFile,"signal",  "Muons", pathBase+"/Muons", None,"norm")
-            u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",
-                            "Muons", pathBase+"/Muons/", None,"norm")
-            u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"#splitline{Signal}{m_{H}=125 GeV}",
-                            "Photon",pathBase+"/Photon/", None,"norm")
+            elif cut in ['12']:
+                u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"#splitline{Signal}{m_{H}=125 GeV}",
+                                "jpsi",pathBase+"/jpsi/", cut,"norm2")
+            elif cut in ['14','15','16']:
+                u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",None,"",
+                                "AlphaPiZ",pathBase+"/apz/", cut,"norm2")
 
-        elif thissel =="elgamma":
+        elif thissel == "elgamma":
             u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",
                             "Photon",     pathBase+"/Photon",     None,"norm")
 
@@ -390,7 +712,7 @@ if __name__ == "__main__":
                             "DalitzEleEE_tracks",pathBase+"/DalitzEleEE_tracks",None,"norm")
 
 
-        #dataFile.Close()
+    # dataFile.Close()
     #print yields_data
 
 
@@ -398,8 +720,22 @@ if __name__ == "__main__":
 
     #u.drawAllInFile(bkgFile[thissel], "DY electrons", sigFile, "Dalitz 2el",  "NewEle-1", pathBase+"/NewEle-1/", None,"norm", isLog=1, )
 
-
     #sigFileMAD  = TFile(hPath+"/mugamma_"+period+"/hhhh_ggH-mad125_1.root", "OPEN")
+
+    if options.apz:
+        c1 = TCanvas("c4","small canvas",600,600);
+        data = TFile(hPath+"/m_Data_mugamma_"+period+".root","OPEN")
+
+        alphaPiZ(data, TCut(''),                                                            pathBase+"/alphaPiZ-1/")
+        alphaPiZ(data, TCut('ph_pt/m_llg>0.3 && di_pt/m_llg>0.3'),                          pathBase+"/alphaPiZ-2/")
+        alphaPiZ(data, TCut('ph_pt/m_llg>0.3 && di_pt/m_llg>0.3 && m_llg>100&&m_llg<150'),  pathBase+"/alphaPiZ-3/")
+        alphaPiZ(data, TCut('ph_pt/m_llg>0.35 && di_pt/m_llg>0.35 && m_llg>100&&m_llg<150'),pathBase+"/alphaPiZ-4/")
+        alphaPiZ(data, TCut('ph_pt/m_llg>0.35 && di_pt/m_llg>0.35 && m_llg>120&&m_llg<180'),pathBase+"/alphaPiZ-5/")
+        alphaPiZ(data, TCut('ph_pt/m_llg>0.32 && di_pt/m_llg>0.32 && m_llg>125&&m_llg<170'),pathBase+"/alphaPiZ-6/")
+
+        alphaPiZ(data, TCut('ph_pt/m_llg>0.33 && di_pt/m_llg>0.33 &&ph_pt/m_llg<0.5 && di_pt/m_llg<0.7'), pathBase+"/alphaPiZ-7/")
+        alphaPiZ(data, TCut('ph_pt/m_llg>0.33 && di_pt/m_llg>0.33 &&ph_pt/m_llg<0.5 && di_pt/m_llg<0.7 &&m_llg>85&&m_llg<96'), pathBase+"/alphaPiZ-8/")
+
     '''
     if sel[0]=='none':
         sigFileMAD  = TFile("hhhh_ggH-mad125_1.root", "OPEN")
@@ -503,22 +839,28 @@ if __name__ == "__main__":
     #plot_types
     print yields_sig
 
-    #if doBkg:
-    #    table_all  = u.yieldsTable([yields_data,yields_bkg,yields_sig, yields_ggH,yields_vbf, yields_vh], sel)
-    #else:
-    #    table_all  = u.yieldsTable([yields_data,yields_sig, yields_ggH,yields_vbf, yields_vh], sel)
+    if doBkg:
+        table_all  = u.yieldsTable([yields_data,yields_bkg,yields_sig, yields_ggH,yields_vbf, yields_vh], sel)
+    else:
+        table_all  = u.yieldsTable([yields_data,yields_sig, yields_ggH,yields_vbf, yields_vh], sel)
 
     #u.makeTable(table_all,"all", "html")
-    #u.makeTable(table_all,"all", "twiki")
+    u.makeTable(table_all,"all", "twiki")
     #u.makeTable(table_all,"all", "tex")
 
     #os.system("cat yields_all.html   > yields.html")
-    #os.system("cat yields_all.twiki  > yields.html")
+    os.system("cat yields_all.twiki  > yields.html")
     #os.system("cat yields_all.tex    > yields.html")
 
     comments = ["These plots are made for ...",
                 "Blah"]
 
-    ht.makeHTML("h &rarr; dalitz decay plots",pathBase, plot_types, comments, "mugamma")
+    defaultPage = 'mugamma'
+    if cut in ['12']: defaultPage = 'jpsi'
+    elif cut in ['14','15']: defaultPage = 'apz'
+
+    print defaultPage
+    plot_types.append('alphaPiZ')
+    ht.makeHTML("h &rarr; dalitz decay plots",pathBase, plot_types, comments, defaultPage)
 
     print "\n\t\t finita la comedia \n"

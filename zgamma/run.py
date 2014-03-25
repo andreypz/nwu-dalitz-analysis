@@ -8,6 +8,10 @@ parser.add_option("-e", "--ele", dest="electron", action="store_true", default=F
                   help="Use electron selection (by default it will run muon selection)")
 parser.add_option("--zee", dest="zee", action="store_true", default=False,
                   help="Run z to ee cross checks")
+parser.add_option("--apz", dest="apz", action="store_true", default=False,
+                  help="Discover new particles")
+parser.add_option("--four", dest="four", action="store_true", default=False,
+                  help="Four lepton analysis")
 parser.add_option("-t","--trigger", dest="trigger", type="string", default="mugamma",
                   help="Select a trigger to run. options are: double-mu, single-mu, mu-pho, pho, single-el")
 parser.add_option("-p", "--period", dest="period", default="2012", help="Set data period (2011/2012)")
@@ -42,6 +46,11 @@ if options.electron:
 
 if options.zee:
     selection="zee"
+if options.apz:
+    selection="apz"
+if options.four:
+    selection="four"
+    ana = 'fourLeptons'
 
 isbatch   = options.batch
 if(isbatch):

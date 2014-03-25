@@ -269,7 +269,8 @@ for year in yearList:
         raw_input("norm.getVal(), norm.getError()")
 
 
-      fit_ext.fitTo(data,RooFit.Range('DalitzRegion'))
+      fit_result = RooFitResult(fit_ext.fitTo(data,RooFit.Range('DalitzRegion'), RooFit.Save()))
+      # fit_ext.fitTo(data,RooFit.Range('DalitzRegion'), RooFit.Save())
       myBinning = 30
       binWidth = 2.
 
@@ -280,25 +281,19 @@ for year in yearList:
       else:
         data.plotOn(testFrame, RooFit.Binning(myBinning), RooFit.Name('data'))
 
-      fit_ext.plotOn(testFrame, RooFit.Name(bkgModel),  RooFit.LineColor(kBlue))
+      fit_ext.plotOn(testFrame, RooFit.Name(bkgModel+"2sigma"),
+                     RooFit.VisualizeError(fit_result,2), RooFit.FillColor(kCyan-10),RooFit.LineColor(kBlack))
+      fit_ext.plotOn(testFrame, RooFit.Name(bkgModel+"1sigma"),
+                     RooFit.VisualizeError(fit_result,1), RooFit.FillColor(kCyan-6), RooFit.LineColor(kBlack))
+      fit_ext.plotOn(testFrame, RooFit.Name(bkgModel), RooFit.LineColor(kBlue), RooFit.LineWidth(2))
+      fit_ext.paramOn(testFrame, RooFit.Layout(0.30,0.99,0.9))
+      #fit_ext.statOn(testFrame)
 
-      # sigDSName = '_'.join(['ds_sig','gg',lepton,year,'cat'+cat,'M125'])
-      # sigName = 'pdf_sig_mu_2012_cat0_M125'
-      # myWs.Print()
-      # sigP  = myWs.pdf(sigName)
-
-      #if doBlind:
-      #  sigP.plotOn(testFrame,  RooFit.Name('signal'), RooFit.LineColor(kRed+2),RooFit.Range(115,135),
-      #              RooFit.Normalization(15.e-02))
-      #else:
-      #  sigP.plotOn(testFrame,  RooFit.Name('signal'), RooFit.LineColor(kRed+2),RooFit.Range(115,135),
-      #              RooFit.Normalization(10* 3.33/binWidth/151))
-      #
-      #  #sig_dh = RooDataHist("sig_dh","sig histogram",RooArgList(mzg), hc7);
-      #  #sig_dh.plotOn(testFrame,  RooFit.Name('signal2'), RooFit.LineColor(kRed+2),
-      #  #             RooFit.Range(115,135), RooFit.SetRooFit.MarkerStyle(0), RooFit.LineStyle(1))
-
-
+      if doBlind:
+        data.plotOn(testFrame, RooFit.Binning(myBinning), RooFit.Name('data'), RooFit.CutRange('r1'))
+        data.plotOn(testFrame, RooFit.Binning(myBinning), RooFit.Name('data'), RooFit.CutRange('r2'))
+      else:
+        data.plotOn(testFrame, RooFit.Binning(myBinning), RooFit.Name('data'))
 
       if verbose:
         print 'have unit norm?? ', sigP.haveUnitNorm()
@@ -311,6 +306,7 @@ for year in yearList:
       testFrame.SetMaximum(62)
       testFrame.Draw()
 
+      hsig[0].SetAxisRange(115,135,"X")
       hsig[0].SetLineColor(kRed+1)
       hsig[0].SetLineWidth(2)
       hsig[0].Draw('same hist')
@@ -319,13 +315,22 @@ for year in yearList:
 
       leg  = TLegend(0.53,0.65,0.93,0.87)
       leg.SetFillColor(0)
-      #leg.SetShadowColor(0)
       leg.SetBorderSize(1)
       leg.AddEntry(testFrame.findObject(bkgModel),"Background Model",'l')
+      leg.AddEntry(0,'','')
+      leg.AddEntry(0,'','')
       leg.AddEntry(hsig[0],'Expected signal x10','l')
       leg.SetTextSize(0.045)
-      #leg.AddEntry(testFrame.findObject('signal'),'10x ggH','l')
-      leg.Draw()
+      #leg.Draw()
+
+      leg2  = TLegend(0.55,0.72,0.91,0.8)
+      leg2.SetNColumns(2)
+      leg2.SetFillColor(0)
+      leg2.SetBorderSize(0)
+      leg2.AddEntry(testFrame.findObject(bkgModel+'1sigma'),"#pm 1 #sigma",'f')
+      leg2.AddEntry(testFrame.findObject(bkgModel+'2sigma'),"#pm 2 #sigma",'f')
+      leg2.SetTextSize(0.045)
+      #leg2.Draw()
 
       prelim = TLatex()
       prelim.SetNDC();
@@ -335,7 +340,8 @@ for year in yearList:
       prelim.DrawLatex(0.40,0.95, "#sqrt{s} = 8 TeV, L = 19.7 fb^{-1}   H#rightarrow#gamma*#gamma#rightarrow#mu#mu#gamma")
       #prelim.Draw()
       gPad.RedrawAxis()
-      c.SaveAs(plotBase+'/'+'_'.join(['best_fit',year,lepton,'cat'+cat])+'.png')
+      for e in ['.png', '.pdf']:
+        c.SaveAs(plotBase+'/'+'_'.join(['best_fit',year,lepton,'cat'+cat])+e)
 
       ###### Import the fit and data, and rename them to the card convention
       dataNameNew = '_'.join(['data','obs',lepton,year,'cat'+cat])

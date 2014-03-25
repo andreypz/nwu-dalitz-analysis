@@ -10,7 +10,7 @@ def createDir(dir):
                 pass
             else:
                 raise
-                                            
+
 def makeHTML(title, htmlDir, plot_types, description, IFRAMEA):
 
     print "\n\n ******** Now making HTML pages ******** \n"
@@ -28,15 +28,25 @@ def makeHTML(title, htmlDir, plot_types, description, IFRAMEA):
 
         fileList[x] = os.listdir(newDir)
 
+        PDFfileList = [f[:-4] for f in os.listdir(newDir) if f.endswith(".pdf")]
+
+        #print PDFfileList
         #print "\n In Making html:", x
         #print fileList[x]
-        
-        count =1
-        mod =1
-        for pl in  sorted(fileList[x]):
+
+        count = 1
+        mod   = 1
+        for pl in sorted(fileList[x]):
+            if not pl.endswith(".png"): continue
             mod = count % 2
-            if mod==1: imgfile.write('<nobr><img src='+x+'/'+pl+' width=45%>')
-            if mod==0: imgfile.write('      <img src='+x+'/'+pl+' width=45%></nobr>\n')
+            if pl[:-4] in PDFfileList:
+                #print pl[:-3]
+
+                if mod==1: imgfile.write('<nobr><a href='+x+'/'+pl[:-4]+'.pdf><img src='+x+'/'+pl+' width=45%></a>')
+                if mod==0: imgfile.write('      <a href='+x+'/'+pl[:-4]+'.pdf><img src='+x+'/'+pl+' width=45%></a></nobr>\n')
+            else:
+                if mod==1: imgfile.write('<nobr><img src='+x+'/'+pl+' width=45%>')
+                if mod==0: imgfile.write('      <img src='+x+'/'+pl+' width=45%></nobr>\n')
             count+=1
         if mod==0: imgfile.write("")
         if mod==1: imgfile.write("</nobr>")
@@ -56,10 +66,9 @@ def makeHTML(title, htmlDir, plot_types, description, IFRAMEA):
     message+='<ul>'
     for d in description:
         message += "<li>"+d+" </li>"
-        message += "<li><a href=\"yields_all.twiki\">twiki</a></li>"
-        message += "<li><a href=\"yields_all.tex\">tex</a></li>"
-
-        message+='</ul>'
+    message += "<li><a href=\"yields_all.twiki\">twiki</a></li>"
+    message += "<li><a href=\"yields_all.tex\">tex</a></li>"
+    message+='</ul>'
 
     tempfile = open("indextemplate.html","r")
     whole_thing = tempfile.read()
@@ -76,22 +85,22 @@ def makeHTML(title, htmlDir, plot_types, description, IFRAMEA):
     ifile.close()
 
     os.system("cp yields* "+htmlDir)
-    
+
     print "\n\n *** End of  making HTML pages - all done *** \n"
 
 
 if __name__ == "__main__":
-    
+
     pathBase = "/uscms_data/d2/andreypz/html/zgamma/test"
 
     plot_types =["a","b","c"]
     table = [[]]
-        
+
     makeTable(table,"twiki")
 
     comments = ["1",
                 "Blah"]
-    
-    makeHTML("h &rarr; dalitz decay plots",pathBase, plot_types, comments, "a")
+
+    makeHTML("h &rarr; dalitz decay plots", pathBase, plot_types, comments, "a")
 
     print "\n\t\t finita la comedia \n"

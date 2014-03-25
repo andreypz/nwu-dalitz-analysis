@@ -323,72 +323,72 @@ Bool_t egamma::Process(Long64_t entry)
 
       //Higgs himself:
       if (thisParticle->GetPDGId()==25 && thisParticle->GetStatus()==3){
-        gen_higgs = *thisParticle;
-        hists->fill1DHist(thisParticle->M(), "gen_h_mass",";gen mu mass",  200, 124,126, 1,"GEN");
-        h++;
+	gen_higgs = *thisParticle;
+	hists->fill1DHist(thisParticle->M(), "gen_h_mass",";gen mu mass",  200, 124,126, 1,"GEN");
+	h++;
       }
 
 
       //GEN ELECTRONS
       if (abs(thisParticle->GetPDGId()) == 11 && thisParticle->GetStatus()==1) {
-        if (egamma::GetPrimaryAncestor(thisParticle)->GetPDGId()==A)
-          gen_el.push_back(*thisParticle);
-        else if (h==0 && thisParticle->Mother()
-                 && egamma::GetPrimaryAncestor(thisParticle)->GetPDGId() == thisParticle->GetPDGId())
-          gen_el.push_back(*thisParticle);
+	if (egamma::GetPrimaryAncestor(thisParticle)->GetPDGId()==A)
+	  gen_el.push_back(*thisParticle);
+	else if (h==0 && thisParticle->Mother()
+		 && egamma::GetPrimaryAncestor(thisParticle)->GetPDGId() == thisParticle->GetPDGId())
+	  gen_el.push_back(*thisParticle);
       }
 
 
       //PHOTON from the Higgs
       if (sample=="dalitz" && thisParticle->GetPDGId()==22 && thisParticle->GetStatus()==1
-          //&& egamma::GetPrimaryAncestor(thisParticle)->GetPDGId()==A
-          && thisParticle->Mother() &&  abs(thisParticle->Mother()->GetPDGId())!=13 && abs(thisParticle->Mother()->GetPDGId())!=11)
-        {
-          gen_gamma = *thisParticle;
-          ph++;
-        }
+	  //&& egamma::GetPrimaryAncestor(thisParticle)->GetPDGId()==A
+	  && thisParticle->Mother() &&  abs(thisParticle->Mother()->GetPDGId())!=13 && abs(thisParticle->Mother()->GetPDGId())!=11)
+	{
+	  gen_gamma = *thisParticle;
+	  ph++;
+	}
       else if (sample=="DY" &&
-               thisParticle->GetPDGId()==22 && thisParticle->GetStatus()==1 && egamma::GetPrimaryAncestor(thisParticle)->GetPDGId()==23)
-        gen_gamma = *thisParticle;
+	       thisParticle->GetPDGId()==22 && thisParticle->GetStatus()==1 && egamma::GetPrimaryAncestor(thisParticle)->GetPDGId()==23)
+	gen_gamma = *thisParticle;
 
 
 
       // **** Find FSR PHOTONS *** //
 
       if (thisParticle->GetPDGId()==22 //&& thisParticle->GetStatus()==1
-          && thisParticle->Mother()
-          //&& egamma::GetPrimaryAncestor(thisParticle)->GetPDGId()==A
-          && abs(thisParticle->Mother()->GetPDGId())==11
-          )
-        {
-          hists->fill1DHist(thisParticle->Pt(), "gen_fsr_pho_pt",";gen fsr photon pt",  200, 0,50, 1,"GEN");
-          // if (egamma::GetPrimaryAncestor(thisParticle)->GetPDGId()!=A)
-          //egamma::DiscoverGeneology(thisParticle, eventNumber);
+	  && thisParticle->Mother()
+	  //&& egamma::GetPrimaryAncestor(thisParticle)->GetPDGId()==A
+	  && abs(thisParticle->Mother()->GetPDGId())==11
+	  )
+	{
+	  hists->fill1DHist(thisParticle->Pt(), "gen_fsr_pho_pt",";gen fsr photon pt",  200, 0,50, 1,"GEN");
+	  // if (egamma::GetPrimaryAncestor(thisParticle)->GetPDGId()!=A)
+	  //egamma::DiscoverGeneology(thisParticle, eventNumber);
 
-          Float_t preFSR_pt = thisParticle->Mother()->Pt();
-          for (int j = 0; j < genParticles->GetSize(); ++j) {
-            TCGenParticle* fsr = (TCGenParticle*) genParticles->At(j);
-            if(fsr->GetPDGId()  == thisParticle->Mother()->GetPDGId()
-               && fsr->Mother() == thisParticle->Mother()){
+	  Float_t preFSR_pt = thisParticle->Mother()->Pt();
+	  for (int j = 0; j < genParticles->GetSize(); ++j) {
+	    TCGenParticle* fsr = (TCGenParticle*) genParticles->At(j);
+	    if(fsr->GetPDGId()  == thisParticle->Mother()->GetPDGId()
+	       && fsr->Mother() == thisParticle->Mother()){
 
-              //cout<<"   0--- this one --->>>"<<endl;
-              //egamma::DiscoverGeneology(fsr, eventNumber);
-              //cout<<"   <<---0 this one"<<endl;
+	      //cout<<"   0--- this one --->>>"<<endl;
+	      //egamma::DiscoverGeneology(fsr, eventNumber);
+	      //cout<<"   <<---0 this one"<<endl;
 
-              hists->fill1DHist((preFSR_pt - fsr->Pt())/preFSR_pt, "gen_fsr_el_dPt",";gen el (Pt_preFSR - Pt_afterFSR)/pt",  200, -1,1, 1,"GEN");
+	      hists->fill1DHist((preFSR_pt - fsr->Pt())/preFSR_pt, "gen_fsr_el_dPt",";gen el (Pt_preFSR - Pt_afterFSR)/pt",  200, -1,1, 1,"GEN");
 
-              if(thisParticle->Pt() > 1)
-                hists->fill1DHist((preFSR_pt - fsr->Pt())/preFSR_pt, "gen_fsr_el_dPt_photonPt1",";gen el (Pt_preFSR - Pt_afterFSR)/pt",  200, -1,1, 1,"GEN");
-              fsr_mu_count++;
-            }
-          }
-        }//end of fsr photons loop
+	      if(thisParticle->Pt() > 1)
+		hists->fill1DHist((preFSR_pt - fsr->Pt())/preFSR_pt, "gen_fsr_el_dPt_photonPt1",";gen el (Pt_preFSR - Pt_afterFSR)/pt",  200, -1,1, 1,"GEN");
+	      fsr_mu_count++;
+	    }
+	  }
+	}//end of fsr photons loop
     }// end of genparticles loop
 
 
     /*if (ph!=1 && sample=="dalitz")
       Abort(Form("ev #%i NONONO There has to be exactly one photon from the Higgs! \n \t\t but there is %i",
-                 (int)eventNumber, (int)ph));
+		 (int)eventNumber, (int)ph));
     */
     //if (h!=1 && sample=="dalitz")
     //return kTRUE;
@@ -424,7 +424,7 @@ Bool_t egamma::Process(Long64_t entry)
 
     if (gen_el.size()!=2 && gen_mu.size()!=2)
       Abort(Form("  - - WARNING - -\n ev #%i What's up with that?\n There should be exact two leptons from Higgs. Insteat there %i",
-                 (int)eventNumber, (int)(gen_el.size() + gen_mu.size())));
+		 (int)eventNumber, (int)(gen_el.size() + gen_mu.size())));
 
     if (gen_gamma.E()==0 && sample=="dalitz")// return kTRUE;
       Abort(Form("%i: No gen gamma in an event? that sounds bad",(int)eventNumber));//return kTRUE;
@@ -461,15 +461,15 @@ Bool_t egamma::Process(Long64_t entry)
       hists->fill1DHist(gendR,  "gen_dR_acc_gamma", ";gen_dR", 50,0,0.3,1,"eff");
 
       if(sample=="dalitz" &&
-         gen_lPt1.Pt()>cut_l1pt && fabs(gen_lPt1.Eta())<2.4 &&
-         gen_lPt2.Pt()>cut_l2pt && fabs(gen_lPt2.Eta())<2.4
-         ){
-        hists->fill1DHist(genMll,  "gen_Mll_acc_lept",  ";gen_Mll",50,0,15, 1,"eff");
-        hists->fill1DHist(gendR,   "gen_dR_acc_lept",   ";gen_dR", 50,0,0.3,1,"eff");
+	 gen_lPt1.Pt()>cut_l1pt && fabs(gen_lPt1.Eta())<2.4 &&
+	 gen_lPt2.Pt()>cut_l2pt && fabs(gen_lPt2.Eta())<2.4
+	 ){
+	hists->fill1DHist(genMll,  "gen_Mll_acc_lept",  ";gen_Mll",50,0,15, 1,"eff");
+	hists->fill1DHist(gendR,   "gen_dR_acc_lept",   ";gen_dR", 50,0,0.3,1,"eff");
 
       }
       else if (sample=="dalitz")
-        return kTRUE;
+	return kTRUE;
     }
     else if (sample=="dalitz")
       return kTRUE;
@@ -536,9 +536,9 @@ Bool_t egamma::Process(Long64_t entry)
 
     if(thisPhoton->Pt() > 20)
       for(Int_t ev=0; ev<evSize;ev++){
-        if (eventNumber==hisEVTS[ev]){cout<<"   ---> "<<eventNumber<<" <--- Found an event after cut "<<endl;
-          PhotonDump(*thisPhoton, phIdAndIsoCutsHZG);
-          break;}}
+	if (eventNumber==hisEVTS[ev]){cout<<"   ---> "<<eventNumber<<" <--- Found an event after cut "<<endl;
+	  PhotonDump(*thisPhoton, phIdAndIsoCutsHZG);
+	  break;}}
 
 
     if (!(fabs(thisPhoton->Eta()) < 2.5)) continue;
@@ -546,24 +546,24 @@ Bool_t egamma::Process(Long64_t entry)
 
 
     if (PassPhotonIdAndIso(thisPhoton, phIdAndIsoCutsHZG, pvPosition)
-        && makeGen && gen_lPt1.DeltaR(*thisPhoton) < 0.1 && thisPhoton->Pt()>20
-        && PassPhotonIdAndIso(thisPhoton, phIdAndIsoCutsHZG, pvPosition)
-        )
+	&& makeGen && gen_lPt1.DeltaR(*thisPhoton) < 0.1 && thisPhoton->Pt()>20
+	&& PassPhotonIdAndIso(thisPhoton, phIdAndIsoCutsHZG, pvPosition)
+	)
       fake_photons.push_back(*thisPhoton);
 
     if(thisPhoton->Pt() > 15){
       if (isRealData || !makeGen || (sample=="dalitz" && makeGen && gen_gamma.DeltaR(*thisPhoton) < 0.1) )
-        photons0.push_back(*thisPhoton);
+	photons0.push_back(*thisPhoton);
 
       if(PassPhotonIdAndIso(thisPhoton, phIdAndIsoCutsHZG, pvPosition)
-         //&& (isRealData || !makeGen || (sample=="dalitz" && makeGen && gen_gamma.DeltaR(*thisPhoton) < 0.2) )
-         )
-        photonsHZG.push_back(*thisPhoton);
+	 //&& (isRealData || !makeGen || (sample=="dalitz" && makeGen && gen_gamma.DeltaR(*thisPhoton) < 0.2) )
+	 )
+	photonsHZG.push_back(*thisPhoton);
 
       if(PassPhotonIdAndIso(thisPhoton, phIdAndIsoCutsTight, pvPosition)
-         //&& (isRealData || !makeGen || (sample=="dalitz" && makeGen && gen_gamma.DeltaR(*thisPhoton) < 0.2) )
-         )
-        photons.push_back(*thisPhoton);
+	 //&& (isRealData || !makeGen || (sample=="dalitz" && makeGen && gen_gamma.DeltaR(*thisPhoton) < 0.2) )
+	 )
+	photons.push_back(*thisPhoton);
     }
   }
 
@@ -611,23 +611,23 @@ Bool_t egamma::Process(Long64_t entry)
       //}
 
       if (thisElec->Pt() > 30.0 && fabs(thisElec->Eta()) < 1.4442){
-        //electrons0.push_back(*thisElec);
-        DAlectrons.push_back(*thisElec);
+	//electrons0.push_back(*thisElec);
+	DAlectrons.push_back(*thisElec);
       }
       if(isRealData || !makeGen || (sample=="dalitz" && makeGen && gen_gamma.DeltaR(*thisElec) < 0.1  && thisElec->Pt()>20))
-        fake_electrons0.push_back(*thisElec);
+	fake_electrons0.push_back(*thisElec);
 
       if (
-          PassElectronIdAndIsoMVA(thisElec)
-          //PassElectronIdAndIso(thisElec, elIdAndIsoCutsTight, pvPosition)
-          //&&(isRealData || !makeGen || ( selection=="el" && makeGen && (gen_l1.DeltaR(*thisElec) < 0.2 ||  gen_l2.DeltaR(*thisElec) < 0.2) )) // this should not fake a photon!
-          //&&(selection!="el" || ( gamma.Pt()>0 && gamma.DeltaR(*thisElec) > 0.4) ) // this should not fake a photon!
-          )
-        electrons.push_back(*thisElec);
+	  PassElectronIdAndIsoMVA(thisElec)
+	  //PassElectronIdAndIso(thisElec, elIdAndIsoCutsTight, pvPosition)
+	  //&&(isRealData || !makeGen || ( selection=="el" && makeGen && (gen_l1.DeltaR(*thisElec) < 0.2 ||  gen_l2.DeltaR(*thisElec) < 0.2) )) // this should not fake a photon!
+	  //&&(selection!="el" || ( gamma.Pt()>0 && gamma.DeltaR(*thisElec) > 0.4) ) // this should not fake a photon!
+	  )
+	electrons.push_back(*thisElec);
 
       // if ( PassElectronIdAndIsoDalitz(thisElec, pvPosition, false)
       //   && gamma.Pt()>0 && gamma.DeltaR(*thisElec) > 0.4  // this should not fake a photon!
-        //   )
+	//   )
       //DAlectrons.push_back(*thisElec);
 
       //if ( PassElectronIdAndIsoDalitz(thisElec, true)
@@ -736,10 +736,10 @@ Bool_t egamma::Process(Long64_t entry)
   for(Int_t ev=0; ev<evSize;ev++){
     if (eventNumber==hisEVTS[ev]){cout<<"   ---> "<<eventNumber<<" <--- Found an event after cut "<<endl;
       for (Int_t s = 0; s<photonsHZG.size();s++)
-        {
-          cout<<s<<"  photon"<<endl;
-          PhotonDump(photonsHZG[s], phIdAndIsoCutsHZG);
-        }
+	{
+	  cout<<s<<"  photon"<<endl;
+	  PhotonDump(photonsHZG[s], phIdAndIsoCutsHZG);
+	}
       break;}}
 
   //if (photonsHZG.size()<1) return kTRUE;
@@ -790,26 +790,26 @@ Bool_t egamma::Process(Long64_t entry)
   if(!isRealData && makeGen)
     {
       if (electrons0.size()>=1)
-        if (electrons0[0].Pt() > 30){
-          hists->fill1DHist(genMll,  "gen_Mll_one_ele_reco", ";gen_Mll",50,0,15, 1,"eff");
-          hists->fill1DHist(gendR,   "gen_dR_one_ele_reco",  ";gen_dR", 50,0,0.3,1,"eff");
-        }
+	if (electrons0[0].Pt() > 30){
+	  hists->fill1DHist(genMll,  "gen_Mll_one_ele_reco", ";gen_Mll",50,0,15, 1,"eff");
+	  hists->fill1DHist(gendR,   "gen_dR_one_ele_reco",  ";gen_dR", 50,0,0.3,1,"eff");
+	}
       if (electrons.size()>=1)
-        if (electrons[0].Pt() > 30){
-          hists->fill1DHist(genMll,  "gen_Mll_one_ele_reco_ID", ";gen_Mll",50,0,15, 1,"eff");
-          hists->fill1DHist(gendR,   "gen_dR_one_ele_reco_ID",  ";gen_dR", 50,0,0.3,1,"eff");
-        }
+	if (electrons[0].Pt() > 30){
+	  hists->fill1DHist(genMll,  "gen_Mll_one_ele_reco_ID", ";gen_Mll",50,0,15, 1,"eff");
+	  hists->fill1DHist(gendR,   "gen_dR_one_ele_reco_ID",  ";gen_dR", 50,0,0.3,1,"eff");
+	}
       if (electrons0.size()>=2)
-        if (electrons0[0].Pt() > cut_l1pt && electrons0[1].Pt() > cut_l2pt){
-          hists->fill1DHist(genMll,  "gen_Mll_two_ele_reco", ";gen_Mll",50,0,15, 1,"eff");
-          hists->fill1DHist(gendR,   "gen_dR_two_ele_reco",  ";gen_dR", 50,0,0.3,1,"eff");
-        }
+	if (electrons0[0].Pt() > cut_l1pt && electrons0[1].Pt() > cut_l2pt){
+	  hists->fill1DHist(genMll,  "gen_Mll_two_ele_reco", ";gen_Mll",50,0,15, 1,"eff");
+	  hists->fill1DHist(gendR,   "gen_dR_two_ele_reco",  ";gen_dR", 50,0,0.3,1,"eff");
+	}
 
       if (electrons.size()>=2)
-        if (electrons[0].Pt() > cut_l1pt && electrons[1].Pt() > cut_l2pt){
-          hists->fill1DHist(genMll,  "gen_Mll_two_ele_reco_ID", ";gen_Mll",50,0,15, 1,"eff");
-          hists->fill1DHist(gendR,   "gen_dR_two_ele_reco_ID",  ";gen_dR", 50,0,0.3,1,"eff");
-        }
+	if (electrons[0].Pt() > cut_l1pt && electrons[1].Pt() > cut_l2pt){
+	  hists->fill1DHist(genMll,  "gen_Mll_two_ele_reco_ID", ";gen_Mll",50,0,15, 1,"eff");
+	  hists->fill1DHist(gendR,   "gen_dR_two_ele_reco_ID",  ";gen_dR", 50,0,0.3,1,"eff");
+	}
     }
 
   //if (electrons.size()<2) return kTRUE;
@@ -824,27 +824,27 @@ Bool_t egamma::Process(Long64_t entry)
       //if (tracks.size()<2) return kTRUE;
 
       /*
-        if (tracks[0].Pt()>tracks[1].Pt()){
-        lPt1 = tracks[0];
-        lPt2 = tracks[1];
-        }
-        else {
-        lPt1 = tracks[1];
-        lPt2 = tracks[0];
-        }
+	if (tracks[0].Pt()>tracks[1].Pt()){
+	lPt1 = tracks[0];
+	lPt2 = tracks[1];
+	}
+	else {
+	lPt1 = tracks[1];
+	lPt2 = tracks[0];
+	}
 
-        if (tracks[0].Charge()==1 && tracks[1].Charge()==-1){
-        l1 = tracks[0];
-        l2 = tracks[1];
-        }
-        else if (tracks[0].Charge()==-1 && tracks[1].Charge()==1){
-        l1 = tracks[1];
-        l2 = tracks[0];
-        }
-        else {
-        cout<<"Track Charges are the same!  "<<tracks[0].Charge() <<"  "<<tracks[1].Charge()<<endl;
-        //return kTRUE;
-        }
+	if (tracks[0].Charge()==1 && tracks[1].Charge()==-1){
+	l1 = tracks[0];
+	l2 = tracks[1];
+	}
+	else if (tracks[0].Charge()==-1 && tracks[1].Charge()==1){
+	l1 = tracks[1];
+	l2 = tracks[0];
+	}
+	else {
+	cout<<"Track Charges are the same!  "<<tracks[0].Charge() <<"  "<<tracks[1].Charge()<<endl;
+	//return kTRUE;
+	}
       */
       isDalitzEle = true;
     }
@@ -863,9 +863,9 @@ Bool_t egamma::Process(Long64_t entry)
     {
       MakeElectronPlots(DAlectrons[0], "DalitzEle");
       if (fabs(DAlectrons[0].Eta()) < 1.44)
-        MakeElectronPlots(DAlectrons[0], "DalitzEleEB");
+	MakeElectronPlots(DAlectrons[0], "DalitzEleEB");
       else
-        MakeElectronPlots(DAlectrons[0], "DalitzEleEE");
+	MakeElectronPlots(DAlectrons[0], "DalitzEleEE");
       //cout<<" EEEEE "<<DAlectrons[0].Pt()<<endl;
     }
 
@@ -955,7 +955,7 @@ Bool_t egamma::Process(Long64_t entry)
   }
 
 
-  if (!PassElectronIdAndIsoDalitz(&DAlectrons[0], pvPosition, false)) 
+  if (!PassElectronIdAndIsoDalitz(&DAlectrons[0], pvPosition, false))
     return kTRUE;
 
   FillHistosFull(8, eventWeight, l1, l2, lPt1, lPt2, gamma, "", isDalitzEle);
@@ -1101,14 +1101,14 @@ void egamma::Terminate()
     //cout<<n<<"  "<<float(nEventsTrig[N][n])/nEvents[N]<<"   "<<myTriggers[n]<<endl;;
     cout<<n<<"  "<<float(nEventsTrig[0][n])/nEvents[0]<<"   after sel: "
       //<<nEventsTrig[N][n]<<"/"<<nEvents[N]<<"="
-        <<float(nEventsTrig[1][n])/nEvents[1]<<"   "
-        <<float(nEventsTrig[2][n])/nEvents[2]<<"   "
-        <<float(nEventsTrig[3][n])/nEvents[3]<<"   "
-        <<float(nEventsTrig[4][n])/nEvents[4]<<"   "
-        <<float(nEventsTrig[5][n])/nEvents[5]<<"   "
-        <<float(nEventsTrig[6][n])/nEvents[5]<<"   "
+	<<float(nEventsTrig[1][n])/nEvents[1]<<"   "
+	<<float(nEventsTrig[2][n])/nEvents[2]<<"   "
+	<<float(nEventsTrig[3][n])/nEvents[3]<<"   "
+	<<float(nEventsTrig[4][n])/nEvents[4]<<"   "
+	<<float(nEventsTrig[5][n])/nEvents[5]<<"   "
+	<<float(nEventsTrig[6][n])/nEvents[5]<<"   "
 
-        <<myTriggers[n]<<endl;;
+	<<myTriggers[n]<<endl;;
   }
   */
 
@@ -1268,28 +1268,28 @@ bool egamma::PassElectronIdAndIsoMVA(TCElectron *lep)
      (
       (lep->Pt()>10 && lep->Pt()<20 &&
        (
-        (fabs(lep->Eta()) < 0.8
-         && lep->MvaID() > 0.00)
-        ||
-        (fabs(lep->Eta()) >  0.8 && fabs(lep->Eta()) < 1.479
-         && lep->MvaID() > 0.10)
-        ||
-        (fabs(lep->Eta()) >  1.479 && fabs(lep->Eta()) < 2.5
-         && lep->MvaID() > 0.62)
-        )
+	(fabs(lep->Eta()) < 0.8
+	 && lep->MvaID() > 0.00)
+	||
+	(fabs(lep->Eta()) >  0.8 && fabs(lep->Eta()) < 1.479
+	 && lep->MvaID() > 0.10)
+	||
+	(fabs(lep->Eta()) >  1.479 && fabs(lep->Eta()) < 2.5
+	 && lep->MvaID() > 0.62)
+	)
        )
       ||
       (lep->Pt()>20 &&
        (
-        (fabs(lep->Eta()) < 0.8
-         && lep->MvaID() > 0.94)
-        ||
-        (fabs(lep->Eta()) >  0.8 && fabs(lep->Eta()) < 1.479
-         && lep->MvaID() > 0.85)
-        ||
-        (fabs(lep->Eta()) >  1.479 && fabs(lep->Eta()) < 2.5
-         && lep->MvaID() > 0.92)
-        )
+	(fabs(lep->Eta()) < 0.8
+	 && lep->MvaID() > 0.94)
+	||
+	(fabs(lep->Eta()) >  0.8 && fabs(lep->Eta()) < 1.479
+	 && lep->MvaID() > 0.85)
+	||
+	(fabs(lep->Eta()) >  1.479 && fabs(lep->Eta()) < 2.5
+	 && lep->MvaID() > 0.92)
+	)
        )
       )
      )
@@ -1418,8 +1418,8 @@ void egamma::FillHistoCounts(Int_t num, Double_t weight)
 }
 
 void egamma::FillHistosFull(Int_t num, Double_t weight,
-                            TCPhysObject l1, TCPhysObject l2, TCPhysObject lPt1, TCPhysObject lPt2, TCPhysObject gamma, string dir,
-                            bool isMergedEle)
+			    TCPhysObject l1, TCPhysObject l2, TCPhysObject lPt1, TCPhysObject lPt2, TCPhysObject gamma, string dir,
+			    bool isMergedEle)
 {
 
   char * d = new char [dir.length()+1];
@@ -1446,7 +1446,7 @@ void egamma::FillHistosFull(Int_t num, Double_t weight,
   hists->fill1DHist(lPt2Gamma.M(), Form("lPt2Gamma_%s_cut%i",d, num),";M(l2#gamma)",  100, 0,400,  weight, dir);
 
   hists->fill2DHist(lPt1Gamma.M2(), lPt2Gamma.M2(),
-                    Form("h2D_dalitzPlot_%s_cut%i",  d, num),";M(l1#gamma)^{2};M(l2#gamma)^{2}", 100,0,20000, 100, 0,10000,  weight, dir);
+		    Form("h2D_dalitzPlot_%s_cut%i",  d, num),";M(l1#gamma)^{2};M(l2#gamma)^{2}", 100,0,20000, 100, 0,10000,  weight, dir);
 
   double rotation = atan(-1.);
   double sin_rotation = sin(rotation);
@@ -1455,16 +1455,16 @@ void egamma::FillHistosFull(Int_t num, Double_t weight,
   double y_prime = lPt1Gamma.M2()*sin_rotation + lPt2Gamma.M2()*cos_rotation;
 
   hists->fill2DHist(x_prime, y_prime,
-                    Form("h2D_dalitzPlot_rotation_%s_cut%i",  d, num),";M(l1#gamma)^{2};M(l2#gamma)^{2}", 100,0,22000, 100, -14000,5000,  weight, dir);
+		    Form("h2D_dalitzPlot_rotation_%s_cut%i",  d, num),";M(l1#gamma)^{2};M(l2#gamma)^{2}", 100,0,22000, 100, -14000,5000,  weight, dir);
 
   hists->fill2DHist(tri.M(), diLep.M(),
-                    Form("h2D_tri_vs_diLep_mass0_%s_cut%i",  d, num),";M(llgamma);M(ll)", 100,0,200, 100, 0,20,  weight, dir);
+		    Form("h2D_tri_vs_diLep_mass0_%s_cut%i",  d, num),";M(llgamma);M(ll)", 100,0,200, 100, 0,20,  weight, dir);
   hists->fill2DHist(tri.M(), diLep.M(),
-                    Form("h2D_tri_vs_diLep_mass1_%s_cut%i",  d, num),";M(llgamma);M(ll)", 100,0,200, 100, 0,1.5, weight, dir);
+		    Form("h2D_tri_vs_diLep_mass1_%s_cut%i",  d, num),";M(llgamma);M(ll)", 100,0,200, 100, 0,1.5, weight, dir);
   hists->fill2DHist(tri.M(), diLep.M(),
-                    Form("h2D_tri_vs_diLep_mass2_%s_cut%i",  d, num),";M(llgamma);M(ll)", 100,0,200, 100, 1.5,8, weight, dir);
+		    Form("h2D_tri_vs_diLep_mass2_%s_cut%i",  d, num),";M(llgamma);M(ll)", 100,0,200, 100, 1.5,8, weight, dir);
   hists->fill2DHist(tri.M(), diLep.M(),
-                    Form("h2D_tri_vs_diLep_mass3_%s_cut%i",  d, num),";M(llgamma);M(ll)", 100,0,200, 100, 8,20,  weight, dir);
+		    Form("h2D_tri_vs_diLep_mass3_%s_cut%i",  d, num),";M(llgamma);M(ll)", 100,0,200, 100, 8,20,  weight, dir);
 
   hists->fill1DHist(diLep.M(),   Form("diLep_mass_low1_%s_cut%i",  d, num),";M(ll)", 100, 0,1.5,  weight, dir);
   hists->fill1DHist(diLep.M(),   Form("diLep_mass_low2_%s_cut%i",  d, num),";M(ll)", 100, 1.5,8,  weight, dir);
@@ -1503,17 +1503,17 @@ void egamma::FillHistosFull(Int_t num, Double_t weight,
   //";l+ pt; l- pt",    50, 0,100, 50,0,100, weight, dir);
 
   hists->fill2DHist(lPt1.Pt(), lPt2.Pt(), Form("h2D_Pt2_vs_Pt1_%s_cut%i", d, num),
-                    ";Leading lepton p_{T};Trailing lepton p_{T}",  50, 0,100, 50,0,100, weight, dir);
+		    ";Leading lepton p_{T};Trailing lepton p_{T}",  50, 0,100, 50,0,100, weight, dir);
   hists->fill2DHist(diLep.Pt(),gamma.Pt(),Form("h2D_diLep_vs_gamma_%s_cut%i",d, num),
-                    ";p_{T} of ll system; p_{T} of gamma",          50, 0,100, 50,0,100, weight, dir);
+		    ";p_{T} of ll system; p_{T} of gamma",          50, 0,100, 50,0,100, weight, dir);
 
   hists->fill2DHist(gammaCM.E(), gamma.Pt(),Form("h2D_gamma_Ecom_vs_Pt_%s_cut%i",  d, num),
-                    ";E_{#gamma} in CoM; p_{T}(#gamma)", 50, 0,100, 50,0,100, weight, dir);
+		    ";E_{#gamma} in CoM; p_{T}(#gamma)", 50, 0,100, 50,0,100, weight, dir);
   hists->fill2DHist(gammaCM.E(), tri.M(),   Form("h2D_gamma_Ecom_vs_triM_%s_cut%i",d, num),
-                    ";E_{#gamma} in CoM; M(ll#gamma)",   50, 0,100, 50,0,200, weight, dir);
+		    ";E_{#gamma} in CoM; M(ll#gamma)",   50, 0,100, 50,0,200, weight, dir);
 
   hists->fill2DHist(diLep.Eta()-gamma.Eta(), gamma.Pt(), Form("h2D_deltaEta_vs_gammaPt_deltaEta_%s_cut%i",d, num),
-                    ";#Delta#eta(ll, #gamma);p_{T} of {#gamma}",    100, -5,5, 100,0,130, weight, dir);
+		    ";#Delta#eta(ll, #gamma);p_{T} of {#gamma}",    100, -5,5, 100,0,130, weight, dir);
 
   hists->fill1DHist(lPt1.DeltaR(lPt2), Form("ll_deltaR_%s_cut%i",        d, num),";#Delta R(l_{1}, l_{2})",100,0,5, weight,dir);
   hists->fill1DHist(lPt1.DeltaR(gamma),Form("lPt1_gamma_deltaR_%s_cut%i",d, num),";#Delta R(#gamma,l_{1})",100,0,5, weight,dir);
@@ -1606,7 +1606,8 @@ void egamma::MakeElectronPlots(TCElectron el, string dir)
   hists->fill1DHist(el.IP3d(),                dir+"_el_ip3d",   ";ip3d",    100, 0, 0.04,1,dir);
   hists->fill1DHist(el.IP3dSig(),             dir+"_el_ip3dSig",";ip3dSig", 100, 0, 3,   1,dir);
   hists->fill1DHist(el.NumberOfValidHits(),   dir+"_el_NumberOfValidHits", ";NumberOfValidHits",   25, 0,25,   1,dir);
-  hists->fill1DHist(el.TrackerLayersWithMeasurement(), dir+"_el_TrackerLayersWithMeasurement",";TrackerLayersWithMeasurement", 20, 0,20,1,dir);
+  hists->fill1DHist(el.TrackerLayersWithMeasurement(), dir+"_el_TrackerLayersWithMeasurement",
+		    ";TrackerLayersWithMeasurement", 20, 0,20,1,dir);
 
   hists->fill1DHist(el.PassConversionVeto(), dir+"_el_passConv",";pass conv veto", 3, 0, 3, 1, dir);
   hists->fill1DHist(el.ConversionMissHits(), dir+"_el_convMissHits",";conv miss hits", 10, 0, 10, 1, dir);
@@ -1676,17 +1677,17 @@ void egamma::DiscoverGeneology(TCGenParticle *p, ULong64_t ev)
       cout<<"  grandmother = "<<g->GetPDGId()<<"  st="<<g->GetStatus()<<"\n pt="<<g->Pt()<<endl;
 
       if(g->Mother()){
-        TCGenParticle *gg = g->Mother();
-        cout<<"  grand-grandmother = "<<gg->GetPDGId()<<"  st="<<gg->GetStatus()<<"\n pt="<<gg->Pt()<<endl;
-        if(gg->Mother()){
-          TCGenParticle *ggg = gg->Mother();
-          cout<<"  grand-grand-grandmother = "<<ggg->GetPDGId()<<"  st="<<ggg->GetStatus()<<"\n pt="<<ggg->Pt()<<endl;
+	TCGenParticle *gg = g->Mother();
+	cout<<"  grand-grandmother = "<<gg->GetPDGId()<<"  st="<<gg->GetStatus()<<"\n pt="<<gg->Pt()<<endl;
+	if(gg->Mother()){
+	  TCGenParticle *ggg = gg->Mother();
+	  cout<<"  grand-grand-grandmother = "<<ggg->GetPDGId()<<"  st="<<ggg->GetStatus()<<"\n pt="<<ggg->Pt()<<endl;
 
-          if(ggg->Mother()){
-            TCGenParticle *gggg = ggg->Mother();
-            cout<<"  grand-grand-grand-grandmother = "<<gggg->GetPDGId()<<"  st="<<gggg->GetStatus()<<"\n pt="<<gggg->Pt()<<endl;
-          }
-        }
+	  if(ggg->Mother()){
+	    TCGenParticle *gggg = ggg->Mother();
+	    cout<<"  grand-grand-grand-grandmother = "<<gggg->GetPDGId()<<"  st="<<gggg->GetStatus()<<"\n pt="<<gggg->Pt()<<endl;
+	  }
+	}
       }
     }
   }
@@ -1700,14 +1701,14 @@ void egamma::MuonDump(TCMuon mu, TVector3 *pv)
   Float_t muISO = (mu.PfIsoCharged() + TMath::Max(0.0, mu.PfIsoPhoton() + mu.PfIsoNeutral()  - 0.5*mu.IsoMap("pfPUPt_R04")))/mu.Pt();
 
   cout  << runNumber << " " << eventNumber << " " << mu.Pt()
-        << " " << mu.Eta() << " " << mu.IsGLB() << " " << mu.IsPF() << " "<<mu.IsTRK()<<endl;
+	<< " " << mu.Eta() << " " << mu.IsGLB() << " " << mu.IsPF() << " "<<mu.IsTRK()<<endl;
   cout  << mu.NormalizedChi2_tracker() << "  " << muISO <<  " " << mu.Dxy(pv) << " " << mu.Dz(pv)
-        << "\n  good =" << mu.IsGood()
-        << "\n  trk =" << mu.TrackLayersWithMeasurement() << "  pix=" <<mu.PixelLayersWithMeasurement()
-        << "\n " << mu.NormalizedChi2() << " " << mu.NumberOfValidMuonHits() << " " << mu.NumberOfMatchedStations()
+	<< "\n  good =" << mu.IsGood()
+	<< "\n  trk =" << mu.TrackLayersWithMeasurement() << "  pix=" <<mu.PixelLayersWithMeasurement()
+	<< "\n " << mu.NormalizedChi2() << " " << mu.NumberOfValidMuonHits() << " " << mu.NumberOfMatchedStations()
 
-        << " " << mu.NumberOfValidPixelHits() << " " << mu.TrackLayersWithMeasurement()
-        << endl;
+	<< " " << mu.NumberOfValidPixelHits() << " " << mu.TrackLayersWithMeasurement()
+	<< endl;
 }
 
 

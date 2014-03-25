@@ -4,6 +4,7 @@ import sys,os,datetime,re
 from array import *
 from ROOT import *
 gROOT.SetBatch()
+TH1.SetDefaultSumw2(kTRUE)
 
 import ConfigParser as cp
 conf = cp.ConfigParser()
@@ -166,6 +167,7 @@ def drawAllInFile(f1, name1, f2, name2, f3, name3, dir,path, N, howToScale="none
         scale3 = float(lumi*cro)/Nev
         print Nev, lumi, cro, scale3
 
+    doPdf=0
     histoName = None
     for k1 in dirList:
         if k1.GetName() in ["eff"]: continue
@@ -233,25 +235,27 @@ def drawAllInFile(f1, name1, f2, name2, f3, name3, dir,path, N, howToScale="none
                 handleOverflowBins(h1)
 
             h1.Draw("hist")
+            h1.Draw("same e1p")
+            #h1.SetMinimum()
             #h1.GetRange
-            #h1.SetMarkerStyle(20)
+            h1.SetMarkerStyle(20)
+            h1.SetMarkerSize(0.75)
             h1.SetLineColor(kBlack)
-            h1.UseCurrentStyle()
-
-            if "lPt1_gamma_deltaR" in histoName:
-                h1.SetAxisRange(1,5,"X")
-                h1.SetXTitle("#DeltaR(#gamma, #mu_{1})")
+            #h1.UseCurrentStyle()
 
             if "ll_deltaR_" in histoName:
                 h1.SetAxisRange(0,1,"X")
                 h1.SetXTitle("#DeltaR(#mu_{1}, #mu_{2})")
-
+                doPdf=1
             if "gamma_pt__" in histoName:
                 h1.SetXTitle("Photon p_{T} (GeV)")
+                doPdf=1
             if "lPt1_pt__" in histoName:
                 h1.SetXTitle("Leading muon p_{T} (GeV)")
+                doPdf=1
             if "lPt2_pt__" in histoName:
                 h1.SetXTitle("Trailing muon p_{T} (GeV)")
+                doPdf=1
 
 
             #if "tri_mass" in k1.GetName() and name1 not in ["madgra","mcfm"]:
@@ -261,7 +265,7 @@ def drawAllInFile(f1, name1, f2, name2, f3, name3, dir,path, N, howToScale="none
                 print "\n *** H-mass Mean:", h1.GetMean(),h2.GetMean()
 
             leg = TLegend(0.63,0.72,0.92,0.90);
-            leg.AddEntry(h1,name1, "l")
+            leg.AddEntry(h1,name1, "lpe")
             leg.SetTextSize(0.04)
 
             #if "phi" in histoName:
@@ -270,8 +274,10 @@ def drawAllInFile(f1, name1, f2, name2, f3, name3, dir,path, N, howToScale="none
             #        h1.SetMaximum(0.035)
 
             norm1 = h1.Integral()
-            if howToScale =="norm" and  norm1!=0:
+            if howToScale=='norm' and  norm1!=0:
                 h1.Scale(1./norm1)
+                hmaxs.append(h1.GetMaximum())
+            elif howToScale=='norm2' and  norm1!=0:
                 hmaxs.append(h1.GetMaximum())
 
             if f2!=None and h2!=None:
@@ -280,8 +286,11 @@ def drawAllInFile(f1, name1, f2, name2, f3, name3, dir,path, N, howToScale="none
                 h2.Draw("sames hist")
                 h2.SetLineColor(kBlue+1)
                 norm2 = h2.Integral()
-                if howToScale =="norm" and  norm2!=0:
+                if howToScale=="norm" and  norm2!=0:
                     h2.Scale(1./norm2)
+                    hmaxs.append(h2.GetMaximum())
+                elif howToScale=="norm2" and  norm2!=0:
+                    h2.Scale(norm1/norm2)
                     hmaxs.append(h2.GetMaximum())
 
                 leg.AddEntry(h2,name2, "l")
@@ -291,18 +300,26 @@ def drawAllInFile(f1, name1, f2, name2, f3, name3, dir,path, N, howToScale="none
                 if doOverflow:
                     handleOverflowBins(h3)
                 h3.Draw("sames hist")
-                h3.SetLineColor(kRed+1)
                 h3.SetLineWidth(2)
-                h3.SetFillColor(kYellow-7)
+                h3.SetLineColor(kRed-9)
+                h3.SetFillColor(kYellow-9)
+                #h3.SetFillColor(kYellow-9)
                 h1.Draw("same hist")
+                h1.Draw("same e1p")
+                h1.SetMarkerStyle(20)
+                h1.SetMarkerSize(0.75)
                 extract_from_name = re.findall(r'\d+', name3)
                 #print extract_from_name
                 if len(extract_from_name) == 1:
                     h3.Scale(int(extract_from_name[0]))
                 norm3 = h3.Integral()
-                if howToScale =="norm" and  norm3!=0:
+                if howToScale=="norm" and  norm3!=0:
                     h3.Scale(1./norm3)
                     hmaxs.append(h3.GetMaximum())
+                elif howToScale=="norm2" and  norm3!=0:
+                    h3.Scale(norm1/norm3)
+                    hmaxs.append(h3.GetMaximum())
+
                 leg.AddEntry(h3,name3, "f")
 
                 if doRatio:
@@ -327,26 +344,45 @@ def drawAllInFile(f1, name1, f2, name2, f3, name3, dir,path, N, howToScale="none
                     pad1.cd();
 
             # prelim = TLatex(0.15,0.95, "CMS Preliminary %s #it{L_{int}} = %0.1f fb^{-1}" % (8, lumi))
-            prelim = TLatex(0.15,0.95, "CMS Preliminary #sqrt{s} = 8TeV, L = 19.6 fb^{-1}   H#rightarrow#gamma*#gamma#rightarrow#mu#mu#gamma")
+            prelim = TLatex(0.15,0.95, "CMS Preliminary #sqrt{s} = 8TeV, L = 19.7 fb^{-1}   H#rightarrow#gamma*#gamma#rightarrow#mu#mu#gamma")
             prelim.SetNDC();
             prelim.SetTextSize(0.035);
             prelim.Draw();
 
-            if howToScale =="norm":
-                #print "HMAXS=",hmaxs
-                if len(hmaxs)>0:
-                    m = max(hmaxs)
-                    h1.SetMaximum(1.1*m)
+            #print "hmax =", hmaxs
+            if len(hmaxs)>0:
+                m = max(hmaxs)
+                h1.SetMaximum(1.1*m)
+            if howToScale ==" norm":
                 h1.GetYaxis().SetTitle("arbitrary units")
+            if howToScale == "norm2":
+                h1.GetYaxis().SetTitle("Events")
+                h1.SetMaximum(int(1.1*m)+5)
 
             # Here we consider particular cases (histograms) that need special care
             if "tri_mass_longTail" in histoName and howToScale=="lumi":
                 h1.SetMaximum(750)
 
-            if "diLep_mass_low" in histoName and howToScale=="norm" and f2!=None:
-                s1 = h1.Integral(90,200)
-                s2 = h2.Integral(90,200)
-                h2.Scale(float(s1)/s2)
+            if "diLep_mass_low_" in histoName:
+                h1.Rebin(2)
+                h3.Rebin(2)
+                h1.SetXTitle("m_{#mu#mu} (GeV)")
+                h1.SetMaximum(1.2*h1.GetMaximum())
+
+                doPdf=1
+                if f2!=None and howToScale=='norm':
+                    s1 = h1.Integral(90,200)
+                    s2 = h2.Integral(90,200)
+                    h2.Scale(float(s1)/s2)
+
+            if "lPt1_gamma_deltaR" in histoName:
+                h1.Rebin(2)
+                h3.Rebin(2)
+                h1.SetAxisRange(1,5,"X")
+                h1.SetMaximum(1.2*h1.GetMaximum())
+                h1.SetXTitle("#DeltaR(#gamma, #mu_{1})")
+                doPdf=1
+
 
             if "ph_energyCorrection" in histoName:
                 gStyle.SetOptStat(1111)
@@ -392,6 +428,8 @@ def drawAllInFile(f1, name1, f2, name2, f3, name3, dir,path, N, howToScale="none
                 leg.SetY1(0.85)
                 leg.SetY2(0.7)
 
+            gPad.RedrawAxis()
+
             c1.cd()
             leg.SetFillColor(kWhite)
             leg.Draw()
@@ -400,7 +438,10 @@ def drawAllInFile(f1, name1, f2, name2, f3, name3, dir,path, N, howToScale="none
             #if "diLep_mass_low":
             #    h1.
 
-            c1.SaveAs(path+"/"+histoName+".png")
+            c1.SaveAs(path+"/"+histoName+'.png')
+            if doPdf:
+                c1.SaveAs(path+"/"+histoName+'.pdf')
+                doPdf=0
             gStyle.SetOptStat(0)
 
         c1.SetLogy(0)

@@ -2,11 +2,10 @@
 // This class has been automatically generated on
 // Wed Jun 19 18:10:37 2013 by ROOT version 5.32/00
 // from TTree eventTree/eventTree
-// found on file: /uscms/home/andreypz/nobackup/nuTuple_ZG_hack.root
 //////////////////////////////////////////////////////////
 
-#ifndef zgamma_h
-#define zgamma_h
+#ifndef fourLeptons_h
+#define fourLeptons_h
 
 #include <TROOT.h>
 #include <TChain.h>
@@ -112,7 +111,7 @@ muIdAndIsoCuts muIdAndIsoCutsTight, muIdAndIsoCutsLoose, muIdAndIsoCutsSoft;
 elIdAndIsoCuts elIdAndIsoCutsTight, elIdAndIsoCutsLoose;
 phIdAndIsoCuts phIdAndIsoCutsHZG,   phIdAndIsoCutsTight, phIdAndIsoCutsLoose;
 
-class zgamma : public TSelector {
+class fourLeptons : public TSelector {
  private:
   TFile* histoFile;
   TTree* thisTree;
@@ -137,11 +136,12 @@ class zgamma : public TSelector {
   Int_t nVtx, nVtxTotal;
   Float_t nDofVtx1, nDofVtx2;
 
+
   TTree* _apzTree;
   Double_t apz_dr12, apz_dr34, apz_dr1234;
-  Double_t apz_m12, apz_m34, apz_m4l;
   Double_t apz_pt12, apz_pt34;
-  Double_t apz_m12, apz_m34;
+  Double_t apz_pt1, apz_pt2, apz_pt3, apz_pt4;
+  Double_t apz_m12, apz_m34, apz_m4l;
 
   TTree* _fitTree;
   Double_t fit_m_llg, fit_m_ll, fit_phEta, fit_weight;
@@ -229,8 +229,8 @@ class zgamma : public TSelector {
    TBranch        *b_hltPrescale;   //!
    TBranch        *b_NoiseFilters;   //!
 
-   zgamma(TTree * /*tree*/ =0) : fChain(0) { }
-   virtual ~zgamma() { }
+   fourLeptons(TTree * /*tree*/ =0) : fChain(0) { }
+   virtual ~fourLeptons() { }
    virtual Int_t   Version() const { return 2; }
    virtual void    Begin(TTree *tree);
    virtual void    SlaveBegin(TTree *tree);
@@ -256,28 +256,29 @@ class zgamma : public TSelector {
    virtual bool PassPhotonIdAndIso(TCPhoton *p, phIdAndIsoCuts c, TVector3 *pv);
 
    virtual void CalculatePhotonIso(TCPhoton *p, float& chIsoCor, float& nhIsoCor, float& phIsoCor);
-   virtual void FillHistosFull(Int_t n, Double_t w, TCPhysObject , TCPhysObject , TCPhysObject , TCPhysObject , TCPhysObject, string s="");
+   //virtual void FillHistosFull(Int_t n, Double_t w, TCPhysObject , TCPhysObject , TCPhysObject , TCPhysObject , TCPhysObject, string s="");
    virtual void FillHistoCounts(Int_t n, Double_t w);
-   virtual void MakeMuonPlots(TCMuon mu, TVector3 *pv);
-   virtual void MakePhotonPlots(TCPhoton ph);
-   virtual void MakeZeePlots(TCPhoton , TCPhoton );
+   //virtual void MakeMuonPlots(TCMuon mu, TVector3 *pv);
+   //virtual void MakePhotonPlots(TCPhoton ph);
+   //virtual void MakeZeePlots(TCPhoton , TCPhoton );
    virtual void MuonDump(TCMuon mu, TVector3 *pv);
    virtual void PhotonDump(TCPhoton pho,  phIdAndIsoCuts c);
-   virtual void MakePhotonEnergyCorrPlots(TCPhoton , Float_t , Float_t );
+   virtual void ElectronDump(TCElectron ele, elIdAndIsoCuts c, TVector3 *pv);
+   //virtual void MakePhotonEnergyCorrPlots(TCPhoton , Float_t , Float_t );
 
-   virtual void PhotonR9Corrector(TCPhoton& ph);
+   //virtual void PhotonR9Corrector(TCPhoton& ph);
 
    TCGenParticle * GetPrimaryAncestor(TCGenParticle *p);
 
    virtual void DiscoverGeneology(TCGenParticle *p, ULong64_t ev);
 
-   ClassDef(zgamma,0);
+   ClassDef(fourLeptons,0);
 };
 
 #endif
 
-#ifdef zgamma_cxx
-void zgamma::Init(TTree *tree)
+#ifdef fourLeptons_cxx
+void fourLeptons::Init(TTree *tree)
 {
    // The Init() function is called when the selector needs to initialize
    // a new tree or chain. Typically here the branch addresses and branch
@@ -335,7 +336,7 @@ void zgamma::Init(TTree *tree)
    fChain->SetBranchAddress("NoiseFilters", &NoiseFilters_isScraping, &b_NoiseFilters);
 }
 
-Bool_t zgamma::Notify()
+Bool_t fourLeptons::Notify()
 {
    // The Notify() function is called when a new file is opened. This
    // can be either for a new TTree in a TChain or when when a new TTree
@@ -361,4 +362,4 @@ Bool_t zgamma::Notify()
    return kTRUE;
 }
 
-#endif // #ifdef zgamma_cxx
+#endif // #ifdef fourLeptons_cxx

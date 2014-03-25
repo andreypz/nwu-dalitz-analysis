@@ -29,7 +29,7 @@ massList   = [float(a) for a in (cf.get("fits","massList-more")).split(',')]
 #massList        = [float(a) for a in u.drange(120,150,.5)]
 
 print massList
-  
+
 c = TCanvas("c","c",0,0,500,400)
 c.cd()
 
@@ -66,13 +66,13 @@ if fullCombo:
         exp1SigHi.append(float(l.limit))
         exp2SigHi.append(float(l.limit))
         continue
-      
+
       if i==0: exp2SigLow.append(float(l.limit))
       if i==1: exp1SigLow.append(float(l.limit))
       if i==2: exp.append(float(l.limit))
       if i==3: exp1SigHi.append(float(l.limit))
       if i==4: exp2SigHi.append(float(l.limit))
-      if i==5: obs.append(float(l.limit))    
+      if i==5: obs.append(float(l.limit))
 
   print 'masses:', xAxis
   print 'exp:',exp
@@ -112,7 +112,7 @@ if fullCombo:
   observed = TGraphAsymmErrors(nPoints,xAxis_Array,obs_Array,zeros_Array,zeros_Array,zeros_Array,zeros_Array)
 
   #expected.Print("all")
-  
+
   oneSigma.SetFillColor(kGreen)
   twoSigma.SetFillColor(kYellow)
 
@@ -160,7 +160,7 @@ if fullCombo:
   leg.AddEntry(expected,"Expected", "l")
   leg.AddEntry(oneSigma,"Expected #pm 1#sigma", "f")
   leg.AddEntry(twoSigma,"Expected #pm 2#sigma", "f")
-  
+
   selection = TLatex()
   if "mu" in s:
     selection = TLatex(0.70,0.95, "#mu#mu selection");
@@ -170,13 +170,14 @@ if fullCombo:
     selection.SetTextColor(kGreen-3);
 
   #selection.SetNDC();
-  #selection.Draw();            
+  #selection.Draw();
 
   leg.SetTextSize(0.04)
   leg.SetFillColor(kWhite)
   leg.Draw()
-  
-  c.SaveAs(plotBase+'/Limits.png')
+
+  for e in ['.png', '.pdf']:
+    c.SaveAs(plotBase+'/Limits'+e)
 
 
   out.cd()

@@ -59,6 +59,15 @@ elif [ $selection == "mugamma" ]
     else
 	./run.py ${suffix} ${dataName} -t mugamma -p ${period}  -b
     fi
+elif [ $selection == "apz" ]
+    then
+    echo "This is apz selection"
+    echo "Mu+photon trigger will be used"
+    ./run.py ${suffix} ${dataName} --apz -p ${period}  -b
+elif [ $selection == "four" ]
+    then
+    echo "This is four lepton selection"
+    ./run.py ${suffix} ${dataName} --four -p ${period}  -b
 elif [ $selection == "single-mu" ]
     then
     echo "Single - IsoMu trigger will be used"
