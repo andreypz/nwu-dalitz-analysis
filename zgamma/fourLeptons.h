@@ -129,10 +129,6 @@ class fourLeptons : public TSelector {
 
   //auto_ptr<ammagz::PhosphorCorrectionFunctor> phoCorrector;
 
-  TTree* _mvaTree;
-  Float_t mva_SCPhiWidth, mva_SCEtaWidth, mva_SigmaIEtaIEta, mva_SigmaIPhiIPhi;
-  Float_t mva_fabsEPDiff, mva_EoP, mva_fbrem, mva_SCdPhi, mva_SCdEta;
-  Float_t mva_SCEta, mva_R9, mva_HadOverEm, mva_ome1x5oe5x5;
   Int_t nVtx, nVtxTotal;
   Float_t nDofVtx1, nDofVtx2;
 

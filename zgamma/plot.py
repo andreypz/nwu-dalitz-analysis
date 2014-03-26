@@ -4,6 +4,7 @@ import sys,os,datetime
 from array import *
 from ROOT import *
 import utils as u
+from apz import *
 import makeHTML as ht
 gROOT.SetBatch()
 
@@ -30,558 +31,167 @@ mass = options.mass
 
 sel = []
 if options.mugamma:
-    sel.append("mugamma")
+  sel.append("mugamma")
 if options.zee:
-    sel.append("zee")
+  sel.append("zee")
 if options.mumu:
-    sel.append("mumu")
+  sel.append("mumu")
 if options.elgamma:
-    sel.append("elgamma")
+  sel.append("elgamma")
 if options.four:
-    sel.append("2e2mu")
-
-def alphaPiZ2(f1, globalCut, path):
-    print "study alpha/piz particle"
-    u.createDir(path)
-    c1.cd()
-    t = f1.Get('apzTree/apzTree')
-    gStyle.SetMarkerSize(0.6)
-    gStyle.SetMarkerStyle(20);
-    gStyle.SetLineWidth(1);
-    gStyle.SetOptStat(111)
-    opt = ''
-
-    binDownSize = 1
-
-    name = 'h01-m12-full'
-    mllCut = TCut('')
-    #myFullCut = TCut(mllCut+globalCut)
-    m1 = '0'
-    m2 = '50'
-    nBins = 100/binDownSize
-    #print 10*'***', 'Downsized to ', nBins
-    binWidth = (float(m2)-float(m1))/float(nBins)
-    t.Draw('m12>>'+name+'('+str(nBins)+','+m1+','+m2+')',  mllCut+globalCut, opt)
-    h = gDirectory.Get(name)
-    h.Draw("same e1p")
-    h.SetTitle(name+';m_{#mu#mu} (GeV);Events/%.2f GeV' % binWidth)
-    h.UseCurrentStyle()
-    c1.SaveAs(path+"/"+name+".png")
-
-
-    name = 'h02-m34-full'
-    mllCut = TCut('')
-    #myFullCut = TCut(mllCut+globalCut)
-    m1 = '0'
-    m2 = '200'
-    nBins = 100/binDownSize
-    #print 10*'***', 'Downsized to ', nBins
-    binWidth = (float(m2)-float(m1))/float(nBins)
-    t.Draw('m34>>'+name+'('+str(nBins)+','+m1+','+m2+')',  mllCut+globalCut, opt)
-    h = gDirectory.Get(name)
-    h.Draw("same e1p")
-    h.SetTitle(name+';m_{ee} (GeV);Events/%.2f GeV' % binWidth)
-    h.UseCurrentStyle()
-    c1.SaveAs(path+"/"+name+".png")
-
-
-    name = 'h03-ml12-apz'
-    mllCut = TCut('')
-    #myFullCut = TCut(mllCut+globalCut)
-    m1 = '10'
-    m2 = '35'
-    nBins = 15/binDownSize
-    #print 10*'***', 'Downsized to ', nBins
-    binWidth = (float(m2)-float(m1))/float(nBins)
-    t.Draw('m12>>'+name+'('+str(nBins)+','+m1+','+m2+')',  mllCut+globalCut, opt)
-    h = gDirectory.Get(name)
-    h.Draw("same e1p")
-    h.SetTitle(name+';m_{#mu#mu} (GeV);Events/%.2f GeV' % binWidth)
-    h.UseCurrentStyle()
-    c1.SaveAs(path+"/"+name+".png")
-
-
-    name = 'h04-m4l_full'
-    mllCut = TCut('')
-    #myFullCut = TCut(mllCut+globalCut)
-    m1 = '60'
-    m2 = '200'
-
-    nBins = 50/binDownSize
-    #print 10*'***', 'Downsized to ', nBins
-    binWidth = (float(m2)-float(m1))/float(nBins)
-    t.Draw('m4l>>'+name+'('+str(nBins)+','+m1+','+m2+')',  mllCut+globalCut, opt)
-    h = gDirectory.Get(name)
-    h.Draw("same e1p")
-    h.SetTitle(name+';m_{4l} (GeV);Events/%.2f GeV' % binWidth)
-    h.UseCurrentStyle()
-    c1.SaveAs(path+"/"+name+".png")
-
-
-
-def alphaPiZ(f1, globalCut, path):
-    print "study alpha/piz particle"
-    u.createDir(path)
-    c1.cd()
-    t = f1.Get('fitTree/fitTree')
-    gStyle.SetMarkerSize(0.6)
-    gStyle.SetMarkerStyle(20);
-    gStyle.SetLineWidth(1);
-    gStyle.SetOptStat(111)
-    opt = ''
-
-    binDownSize = 1
-    if 'alphaPiZ-3' in path:
-        binDownSize = 2
-    elif 'alphaPiZ-4' in path:
-        binDownSize = 2
-    elif 'alphaPiZ-5' in path:
-        binDownSize = 2
-    elif 'alphaPiZ-6' in path:
-        binDownSize = 2
-
-    name = 'h01-mll-full'
-    mllCut = TCut('')
-    #myFullCut = TCut(mllCut+globalCut)
-    m1 = '0'
-    m2 = '25'
-    nBins = 100/binDownSize
-    #print 10*'***', 'Downsized to ', nBins
-    binWidth = (float(m2)-float(m1))/float(nBins)
-    t.Draw('m_ll>>'+name+'('+str(nBins)+','+m1+','+m2+')',  mllCut+globalCut, opt)
-    h = gDirectory.Get(name)
-    h.Draw("same e1p")
-    h.SetTitle(name+';m_{#mu#mu} (GeV);Events/%.2f GeV' % binWidth)
-    h.UseCurrentStyle()
-    c1.SaveAs(path+"/"+name+".png")
-
-    name = 'h02-mll-jpsi'
-    m1 = '2.7'
-    m2 = '4.0'
-    nBins = 100/binDownSize
-    binWidth = (float(m2)-float(m1))/float(nBins)
-    mllCut = TCut('(m_ll>'+m1+') && (m_ll<'+m2+')')
-    #myFullCut = TCut(mllCut+globalCut)
-    t.Draw('m_ll>>'+name+'('+str(nBins)+','+m1+','+m2+')',  mllCut+globalCut, opt)
-    h = gDirectory.Get(name)
-    h.Draw("same e1p")
-    h.UseCurrentStyle()
-    h.SetTitle(name+';m_{#mu#mu} (GeV);Events/%.2f GeV' % binWidth)
-    c1.SaveAs(path+"/"+name+".png")
-
-
-    name = "h03-mll-upsilon"
-    m1 = '9.0'
-    m2 = '12.0'
-    nBins = 30/binDownSize
-    binWidth = (float(m2)-float(m1))/float(nBins)
-    mllCut = TCut('(m_ll>'+m1+') && (m_ll<'+m2+')')
-    #myFullCut = TCut(mllCut+globalCut)
-    t.Draw('m_ll>>'+name+'('+str(nBins)+','+m1+','+m2+')',  mllCut+globalCut, opt)
-    h = gDirectory.Get(name)
-    h.Draw("same e1p")
-    h.UseCurrentStyle()
-    h.SetTitle(name+';m_{#mu#mu} (GeV);Events/%.2f GeV' % binWidth)
-    c1.SaveAs(path+"/"+name+".png")
-
-
-    name = "h04-mll-apz"
-    m1 = '15.0'
-    m2 = '25.0'
-    nBins = 30/binDownSize
-    binWidth = (float(m2)-float(m1))/float(nBins)
-    mllCut = TCut('(m_ll>'+m1+') && (m_ll<'+m2+')')
-    #myFullCut = TCut(mllCut+globalCut)
-    t.Draw('m_ll>>'+name+'('+str(nBins)+','+m1+','+m2+')',  mllCut+globalCut, opt)
-    h = gDirectory.Get(name)
-    h.Draw("same e1p")
-    h.UseCurrentStyle()
-    h.SetTitle(name+';m_{#mu#mu} (GeV);Events/%.2f GeV' % binWidth)
-    c1.SaveAs(path+"/"+name+".png")
-
-
-    name = "h05-mllg-full"
-    mllg1 = '60'
-    mllg2 = '150'
-    m1 = '0'
-    m2 = '25'
-    nBins = 50/binDownSize
-    binWidth = (float(mllg2)-float(mllg1))/float(nBins)
-    mllCut = TCut('(m_ll>'+m1+') && (m_ll<'+m2+')')
-    #myFullCut = TCut(mllCut+globalCut)
-    t.Draw('m_llg>>'+name+'('+str(nBins)+','+mllg1+','+mllg2+')',  mllCut+globalCut, opt)
-    h = gDirectory.Get(name)
-    h.Draw("same e1p")
-    h.UseCurrentStyle()
-    h.SetTitle(name+';m_{#mu#mu#gamma} (GeV);Events/%.2f GeV' % binWidth)
-    c1.SaveAs(path+"/"+name+".png")
-
-
-    name = "h06-mllg-jpsi-full"
-    mllg1 = '100'
-    mllg2 = '150'
-    m1 = '3.0'
-    m2 = '3.2'
-    nBins = 50/binDownSize
-    binWidth = (float(mllg2)-float(mllg1))/float(nBins)
-    mllCut = TCut('m_ll>'+m1+' && m_ll<'+m2)
-    #myFullCut = TCut(mllCut+globalCut)
-    t.Draw('m_llg>>'+name+'('+str(nBins)+','+mllg1+','+mllg2+')',mllCut*globalCut, opt)
-    #print 3*"***", 'my integrall =', h.Integral()
-    h = gDirectory.Get(name)
-    h.Draw("same e1p")
-    h.UseCurrentStyle()
-    h.SetTitle(name+';m_{#mu#mu#gamma} (GeV);Events/%.2f GeV' % binWidth)
-    c1.SaveAs(path+"/"+name+".png")
-
-    name = "h07-mllg-jpsi-Z"
-    mllg1 = '70'
-    mllg2 = '110'
-    m1 = '3.0'
-    m2 = '3.2'
-    nBins = '30'
-    binWidth = (float(mllg2)-float(mllg1))/float(nBins)
-    mllCut = TCut('(m_ll>'+m1+') && (m_ll<'+m2+')')
-    #myFullCut = TCut(mllCut+globalCut)
-    t.Draw('m_llg>>'+name+'('+str(nBins)+','+mllg1+','+mllg2+')',  mllCut+globalCut, opt)
-    h = gDirectory.Get(name)
-    h.Draw("same e1p")
-    h.UseCurrentStyle()
-    h.SetTitle(name+';m_{#mu#mu#gamma} (GeV);Events/%.2f GeV' % binWidth)
-    c1.SaveAs(path+"/"+name+".png")
-
-
-    name = "h08-mllg-upsilon-Z"
-    mllg1 = '70'
-    mllg2 = '110'
-    m1 = '9.2'
-    m2 = '9.6'
-    nBins = '30'
-    binWidth = (float(mllg2)-float(mllg1))/float(nBins)
-    mllCut = TCut('(m_ll>'+m1+') && (m_ll<'+m2+')')
-    #myFullCut = TCut(mllCut+globalCut)
-    t.Draw('m_llg>>'+name+'('+str(nBins)+','+mllg1+','+mllg2+')',  mllCut+globalCut, opt)
-    h = gDirectory.Get(name)
-    h.Draw("same e1p")
-    h.UseCurrentStyle()
-    h.SetTitle(name+';m_{#mu#mu#gamma} (GeV);Events/%.2f GeV' % binWidth)
-    c1.SaveAs(path+"/"+name+".png")
-
-    name = "h09-mllg-apz-full"
-    mllg1 = '70'
-    mllg2 = '200'
-    m1 = '17.0'
-    m2 = '19.0'
-    nBins = 100/binDownSize
-    binWidth = (float(mllg2)-float(mllg1))/float(nBins)
-    mllCut = TCut('(m_ll>'+m1+') && (m_ll<'+m2+')')
-    #myFullCut = TCut(mllCut+globalCut)
-    t.Draw('m_llg>>'+name+'('+str(nBins)+','+mllg1+','+mllg2+')',  mllCut+globalCut, opt)
-    h = gDirectory.Get(name)
-    h.Draw("same e1p")
-    h.UseCurrentStyle()
-    h.SetTitle(name+';m_{#mu#mu#gamma} (GeV);Events/%.2f GeV' % binWidth)
-    c1.SaveAs(path+"/"+name+".png")
-
-
-
-    name = "h10-mllg-apz-full"
-    mllg1 = '100'
-    mllg2 = '150'
-    m1 = '17.0'
-    m2 = '19.0'
-    nBins = 60/binDownSize
-    binWidth = (float(mllg2)-float(mllg1))/float(nBins)
-    mllCut = TCut('m_ll>'+m1+' && m_ll<'+m2)
-    #myFullCut = TCut(mllCut+globalCut)
-    #print 15*"*", 'myCut is = ', myFullCut
-    t.Draw('m_llg>>'+name+'('+str(nBins)+','+mllg1+','+mllg2+')',  mllCut+globalCut, opt)
-    #t.Draw('m_llg>>'+name,  mllCut+globalCut, opt)
-    h = gDirectory.Get(name)
-    h.Draw("same e1p")
-    h.UseCurrentStyle()
-    h.SetTitle(name+';m_{#mu#mu#gamma} (GeV);Events/%.2f GeV' % binWidth)
-    c1.SaveAs(path+"/"+name+".png")
-
-
-    name = "h11-mllg-apz-Z"
-    mllg1 = '70'
-    mllg2 = '110'
-    m1 = '17'
-    m2 = '19'
-    nBins = 40/binDownSize
-    binWidth = (float(mllg2)-float(mllg1))/float(nBins)
-    mllCut = TCut('(m_ll>'+m1+') && (m_ll<'+m2+')')
-    myFullCut = TCut(mllCut+globalCut)
-    t.Draw('m_llg>>'+name+'('+str(nBins)+','+mllg1+','+mllg2+')',  mllCut+globalCut, opt)
-    h = gDirectory.Get(name)
-    h.Draw("same e1p")
-    h.UseCurrentStyle()
-    h.SetTitle(name+';m_{#mu#mu#gamma} (GeV);Events/%.2f GeV' % binWidth)
-    c1.SaveAs(path+"/"+name+".png")
-
-
-    name = "h12-phEta-apz"
-    m1 = '17.0'
-    m2 = '19.0'
-    nBins = 50/binDownSize
-    mllCut = TCut('(m_ll>'+m1+') && (m_ll<'+m2+')')
-    myFullCut = TCut(mllCut+globalCut)
-    t.Draw('fabs(ph_eta)>>'+name+'('+str(nBins)+',0,3)',  mllCut+globalCut, opt)
-    h = gDirectory.Get(name)
-    h.Draw("same e1p")
-    h.UseCurrentStyle()
-    h.SetTitle(name+';|#eta_{#gamma}|;Events')
-    c1.SaveAs(path+"/"+name+".png")
-
-    name = "h13-mllg-apz-125"
-    mllg1 = '115'
-    mllg2 = '135'
-    m1 = '17.0'
-    m2 = '19.0'
-    nBins = 30/binDownSize
-    binWidth = (float(mllg2)-float(mllg1))/float(nBins)
-    mllCut = TCut('(m_ll>'+m1+') && (m_ll<'+m2+')')
-    myFullCut = TCut(mllCut+globalCut)
-    t.Draw('m_llg>>'+name+'('+str(nBins)+','+mllg1+','+mllg2+')',  mllCut+globalCut, opt)
-    h = gDirectory.Get(name)
-    h.Draw("same e1p")
-    h.UseCurrentStyle()
-    h.SetTitle(name+';m_{#mu#mu#gamma} (GeV);Events/%.2f GeV' % binWidth)
-    c1.SaveAs(path+"/"+name+".png")
-
-    name = "h14-mllg-jpsi-125"
-    mllg1 = '115'
-    mllg2 = '135'
-    myFullCut = TCut(mllCut+globalCut)
-    m1 = '3.0'
-    m2 = '3.2'
-    nBins = 30/binDownSize
-    binWidth = (float(mllg2)-float(mllg1))/float(nBins)
-    mllCut = TCut('(m_ll>'+m1+') && (m_ll<'+m2+')')
-    t.Draw('m_llg>>'+name+'('+str(nBins)+','+mllg1+','+mllg2+')',  mllCut+globalCut, opt)
-    h = gDirectory.Get(name)
-    h.Draw("same e1p")
-    h.UseCurrentStyle()
-    h.SetTitle(name+';m_{#mu#mu#gamma} (GeV);Events/%.2f GeV' % binWidth)
-    c1.SaveAs(path+"/"+name+".png")
-
-    name = "h15-ptgamma-apz"
-    pt1='40'
-    pt2='120'
-    m1 = '17.0'
-    m2 = '19.0'
-    nBins = 30/binDownSize
-    binWidth = (float(pt2)-float(pt1))/float(nBins)
-    mllCut = TCut('m_ll>'+m1+' && m_ll<'+m2)
-    myFullCut = TCut(mllCut+globalCut)
-    t.Draw('ph_pt>>'+name+'('+str(nBins)+','+pt1+','+pt2+')',  mllCut+globalCut, opt)
-    h = gDirectory.Get(name)
-    h.Draw("same e1p")
-    h.UseCurrentStyle()
-    h.SetTitle(name+';p_{T}^{#gamma} (GeV);Events/%.2f GeV' % binWidth)
-    c1.SaveAs(path+"/"+name+".png")
-
-    name = "h16-ptll-apz"
-    pt1='40'
-    pt2='120'
-    m1 = '17.0'
-    m2 = '19.0'
-    nBins = 30/binDownSize
-    binWidth = (float(pt2)-float(pt1))/float(nBins)
-    mllCut = TCut('m_ll>'+m1+' && m_ll<'+m2)
-    myFullCut = TCut(mllCut+globalCut)
-    t.Draw('di_pt>>'+name+'('+str(nBins)+','+pt1+','+pt2+')',  mllCut+globalCut, opt)
-    h = gDirectory.Get(name)
-    h.Draw("same e1p")
-    h.UseCurrentStyle()
-    h.SetTitle(name+';p_{T}^{#mu#mu} (GeV);Events/%.2f GeV' % binWidth)
-    c1.SaveAs(path+"/"+name+".png")
-
-    name = "h17-ptgamma-overMllg-apz"
-    pt1='0.3'
-    pt2='1.0'
-    m1 = '17.0'
-    m2 = '19.0'
-    nBins = 30/binDownSize
-    binWidth = (float(pt2)-float(pt1))/float(nBins)
-    mllCut = TCut('m_ll>'+m1+' && m_ll<'+m2)
-    myFullCut = TCut(mllCut+globalCut)
-    t.Draw('ph_pt/m_llg>>'+name+'('+str(nBins)+','+pt1+','+pt2+')',  mllCut+globalCut, opt)
-    h = gDirectory.Get(name)
-    h.Draw("same e1p")
-    h.UseCurrentStyle()
-    h.SetTitle(name+';p_{T}^{#gamma}/m_{#mu#mu#gamma};Events/%.2f bin' % binWidth)
-    c1.SaveAs(path+"/"+name+".png")
-
-    name = "h18-ptll-overMllg-apz"
-    pt1='0.3'
-    pt2='1.0'
-    m1 = '17.0'
-    m2 = '19.0'
-    nBins = 30/binDownSize
-    binWidth = (float(pt2)-float(pt1))/float(nBins)
-    mllCut = TCut('m_ll>'+m1+' && m_ll<'+m2)
-    myFullCut = TCut(mllCut+globalCut)
-    t.Draw('di_pt/m_llg>>'+name+'('+str(nBins)+','+pt1+','+pt2+')',  mllCut+globalCut, opt)
-    h = gDirectory.Get(name)
-    h.Draw("same e1p")
-    h.UseCurrentStyle()
-    h.SetTitle(name+';p_{T}^{#mu#mu}/m_{#mu#mu#gamma};Events/%.2f bin' % binWidth)
-    c1.SaveAs(path+"/"+name+".png")
-
-
+  sel.append("2e2mu")
 
 def effPlots2(f1, path):
-    c1.cd()
-    hh = []
-    ra = []
-    for n in xrange(0,31):
-        print n
-        hh.append(f1.Get("eff/gen_Mll_"+str(n)))
-        ra.append(hh[-1].Clone())
-        ra[-1].Divide(hh[0])
+  c1.cd()
+  hh = []
+  ra = []
+  for n in xrange(0,31):
+    print n
+    hh.append(f1.Get("eff/gen_Mll_"+str(n)))
+    ra.append(hh[-1].Clone())
+    ra[-1].Divide(hh[0])
 
-    ra[1].Draw("hist")
-    ra[1].SetMinimum(0)
-    ra[1].SetMaximum(1)
-    ra[1].SetTitle(";Mll; acc * eff")
-    bcol = 29
-    ra[1].SetLineColor(bcol)
-    ra[1].SetLineWidth(2)
-    leg = TLegend(0.70,0.65,0.95,0.98);
-    leg.AddEntry(ra[1],"pT(ll) > 25 GeV", "l")
-    for a in xrange(2,7):
-        ra[a].Draw('same hist')
-        ra[a].SetLineColor(bcol+2*(a-2))
-        ra[a].SetLineWidth(2)
-        leg.AddEntry(ra[a],"pT(ll) > %.0f GeV"%(25+5*(a-1)), "l")
-
-    leg.SetTextSize(0.03)
-    leg.SetFillColor(kWhite)
-    leg.Draw()
-    c1.SaveAs(path+"/acc_eff_Mll_ptll.png")
-
-    st = 7
-    ed = 12
-    ra[st].Draw("hist")
-    ra[st].SetMinimum(0)
-    ra[st].SetMaximum(1)
-    ra[st].SetTitle(";Mll; acc")
-    bcol = 33
-    ra[st].SetLineColor(bcol)
-    ra[st].SetLineWidth(2)
-    leg = TLegend(0.70,0.65,0.95,0.98);
-    leg.AddEntry(ra[st],"pT(#gamma) > 25 GeV", "l")
-    for a in xrange(st+1,ed+1):
-        ra[a].Draw('same hist')
-        ra[a].SetLineColor(bcol+2*(a-st))
-        ra[a].SetLineWidth(2)
-        leg.AddEntry(ra[a],"pT(#gamma) > %.0f GeV"%(25+5*(a-st)), "l")
-
-    leg.SetTextSize(0.03)
-    leg.SetFillColor(kWhite)
-    leg.Draw()
-    c1.SaveAs(path+"/acc_eff_Mll_ptgamma.png")
-
-    st = 13
-    ed = 18
-    ra[st].Draw("hist")
-    ra[st].SetMinimum(0)
-    ra[st].SetMaximum(1)
-    ra[st].SetTitle(";Mll; acc")
-    bcol = 38
-    ra[st].SetLineColor(bcol)
-    ra[st].SetLineWidth(2)
-    leg = TLegend(0.70,0.65,0.95,0.98);
-    leg.AddEntry(ra[st],"pT(#gamma)/Mllg > 0.20", "l")
-    for a in xrange(st+1,ed+1):
-        ra[a].Draw('same hist')
-        ra[a].SetLineColor(bcol+2*(a-st))
-        ra[a].SetLineWidth(2)
-        leg.AddEntry(ra[a],"pT(#gamma)/Mllg > %.2f"%(0.20+0.05*(a-st)), "l")
-
-    leg.SetTextSize(0.03)
-    leg.SetFillColor(kWhite)
-    leg.Draw()
-    c1.SaveAs(path+"/acc_eff_Mll_ptgammaMllg.png")
-
-    st = 19
-    ed = 24
-    ra[st].Draw("hist")
-    ra[st].SetMinimum(0)
-    ra[st].SetMaximum(1)
-    ra[st].SetTitle(";Mll; acc")
-    bcol = 41
-    ra[st].SetLineColor(bcol)
-    ra[st].SetLineWidth(2)
-    leg = TLegend(0.70,0.65,0.95,0.98);
-    leg.AddEntry(ra[st],"pT(ll)/Mllg > 0.20", "l")
-    for a in xrange(st+1,ed+1):
-        ra[a].Draw('same hist')
-        ra[a].SetLineColor(bcol+2*(a-st))
-        ra[a].SetLineWidth(2)
-        leg.AddEntry(ra[a],"pT(ll)/Mllg > %.2f"%(0.20+0.05*(a-st)), "l")
-
-    leg.SetTextSize(0.03)
-    leg.SetFillColor(kWhite)
-    leg.Draw()
-    c1.SaveAs(path+"/acc_eff_Mll_ptllMllg.png")
+  ra[1].Draw("hist")
+  ra[1].SetMinimum(0)
+  ra[1].SetMaximum(1)
+  ra[1].SetTitle(";Mll; acc * eff")
+  bcol = 29
+  ra[1].SetLineColor(bcol)
+  ra[1].SetLineWidth(2)
+  leg = TLegend(0.70,0.65,0.95,0.98);
+  leg.AddEntry(ra[1],"pT(ll) > 25 GeV", "l")
+  for a in xrange(2,7):
+    ra[a].Draw('same hist')
+    ra[a].SetLineColor(bcol+2*(a-2))
+    ra[a].SetLineWidth(2)
+    leg.AddEntry(ra[a],"pT(ll) > %.0f GeV"%(25+5*(a-1)), "l")
 
 
-    st = 25
-    ed = 30
-    ra[st].Draw("hist")
-    ra[st].SetMinimum(0)
-    ra[st].SetMaximum(1)
-    ra[st].SetTitle(";Mll; acc")
-    bcol = 43
-    ra[st].SetLineColor(bcol)
-    ra[st].SetLineWidth(2)
-    leg = TLegend(0.70,0.65,0.95,0.98);
-    leg.AddEntry(ra[st],"pT(both)/Mllg > 0.20", "l")
-    for a in xrange(st+1,ed+1):
-        ra[a].Draw('same hist')
-        ra[a].SetLineColor(bcol+2*(a-st))
-        ra[a].SetLineWidth(2)
-        leg.AddEntry(ra[a],"pT(both)/Mllg > %.2f"%(0.20+0.05*(a-st)), "l")
+  leg.SetTextSize(0.03)
+  leg.SetFillColor(kWhite)
+  leg.Draw()
+  c1.SaveAs(path+"/acc_eff_Mll_ptll.png")
 
-    leg.SetTextSize(0.03)
-    leg.SetFillColor(kWhite)
-    leg.Draw()
-    c1.SaveAs(path+"/acc_eff_Mll_ptbothMllg.png")
+  st = 7
+  ed = 12
+  ra[st].Draw("hist")
+  ra[st].SetMinimum(0)
+  ra[st].SetMaximum(1)
+  ra[st].SetTitle(";Mll; acc")
+  bcol = 33
+  ra[st].SetLineColor(bcol)
+  ra[st].SetLineWidth(2)
+  leg = TLegend(0.70,0.65,0.95,0.98);
+  leg.AddEntry(ra[st],"pT(#gamma) > 25 GeV", "l")
+  for a in xrange(st+1,ed+1):
+    ra[a].Draw('same hist')
+    ra[a].SetLineColor(bcol+2*(a-st))
+    ra[a].SetLineWidth(2)
+    leg.AddEntry(ra[a],"pT(#gamma) > %.0f GeV"%(25+5*(a-st)), "l")
+
+  leg.SetTextSize(0.03)
+  leg.SetFillColor(kWhite)
+  leg.Draw()
+  c1.SaveAs(path+"/acc_eff_Mll_ptgamma.png")
+
+  st = 13
+  ed = 18
+  ra[st].Draw("hist")
+  ra[st].SetMinimum(0)
+  ra[st].SetMaximum(1)
+  ra[st].SetTitle(";Mll; acc")
+  bcol = 38
+  ra[st].SetLineColor(bcol)
+  ra[st].SetLineWidth(2)
+  leg = TLegend(0.70,0.65,0.95,0.98);
+  leg.AddEntry(ra[st],"pT(#gamma)/Mllg > 0.20", "l")
+  for a in xrange(st+1,ed+1):
+    ra[a].Draw('same hist')
+    ra[a].SetLineColor(bcol+2*(a-st))
+    ra[a].SetLineWidth(2)
+    leg.AddEntry(ra[a],"pT(#gamma)/Mllg > %.2f"%(0.20+0.05*(a-st)), "l")
+
+  leg.SetTextSize(0.03)
+  leg.SetFillColor(kWhite)
+  leg.Draw()
+  c1.SaveAs(path+"/acc_eff_Mll_ptgammaMllg.png")
+
+  st = 19
+  ed = 24
+  ra[st].Draw("hist")
+  ra[st].SetMinimum(0)
+  ra[st].SetMaximum(1)
+  ra[st].SetTitle(";Mll; acc")
+  bcol = 41
+  ra[st].SetLineColor(bcol)
+  ra[st].SetLineWidth(2)
+  leg = TLegend(0.70,0.65,0.95,0.98);
+  leg.AddEntry(ra[st],"pT(ll)/Mllg > 0.20", "l")
+  for a in xrange(st+1,ed+1):
+    ra[a].Draw('same hist')
+    ra[a].SetLineColor(bcol+2*(a-st))
+    ra[a].SetLineWidth(2)
+    leg.AddEntry(ra[a],"pT(ll)/Mllg > %.2f"%(0.20+0.05*(a-st)), "l")
+
+  leg.SetTextSize(0.03)
+  leg.SetFillColor(kWhite)
+  leg.Draw()
+  c1.SaveAs(path+"/acc_eff_Mll_ptllMllg.png")
+
+
+  st = 25
+  ed = 30
+  ra[st].Draw("hist")
+  ra[st].SetMinimum(0)
+  ra[st].SetMaximum(1)
+  ra[st].SetTitle(";Mll; acc")
+  bcol = 43
+  ra[st].SetLineColor(bcol)
+  ra[st].SetLineWidth(2)
+  leg = TLegend(0.70,0.65,0.95,0.98);
+  leg.AddEntry(ra[st],"pT(both)/Mllg > 0.20", "l")
+  for a in xrange(st+1,ed+1):
+    ra[a].Draw('same hist')
+    ra[a].SetLineColor(bcol+2*(a-st))
+    ra[a].SetLineWidth(2)
+    leg.AddEntry(ra[a],"pT(both)/Mllg > %.2f"%(0.20+0.05*(a-st)), "l")
+
+  leg.SetTextSize(0.03)
+  leg.SetFillColor(kWhite)
+  leg.Draw()
+  c1.SaveAs(path+"/acc_eff_Mll_ptbothMllg.png")
 
 
 def effPlots(f1, path):
-    print "Now making efficiency plots"
-    #f1.cd(dir)
+  print "Now making efficiency plots"
+  # f1.cd(dir)
 
-    for var in ["Mll","dR"]:
+  for var in ["Mll","dR"]:
 
-        h0 = f1.Get("eff/gen_"+var+"_0")
-        h1 = f1.Get("eff/gen_"+var+"_acc_gamma")
-        h2 = f1.Get("eff/gen_"+var+"_acc_lept")
+    h0 = f1.Get("eff/gen_"+var+"_0")
+    h1 = f1.Get("eff/gen_"+var+"_acc_gamma")
+    h2 = f1.Get("eff/gen_"+var+"_acc_lept")
 
-        h3 = f1.Get("eff/gen_"+var+"_reco_gamma_iso")
-        h4 = f1.Get("eff/gen_"+var+"_two_lep_reco")
+    h3 = f1.Get("eff/gen_"+var+"_reco_gamma_iso")
+    h4 = f1.Get("eff/gen_"+var+"_two_lep_reco")
 
 
-        h0.Draw("hist")
+    h0.Draw("hist")
         #h1.Draw("hist same")
         #h2.Draw("hist same")
         #h3.Draw("hist same")
-        c1.SaveAs(path+var+".png")
+    c1.SaveAs(path+var+".png")
 
         #for acceptance
-        r1 = h1.Clone()
-        r1.Divide(h0)
-        r2 = h2.Clone()
-        r2.Divide(h0)
+    r1 = h1.Clone()
+    r1.Divide(h0)
+    r2 = h2.Clone()
+    r2.Divide(h0)
         #for reco eff
-        r3 = h3.Clone()
-        r3.Divide(h2)
-        r4 = h4.Clone()
-        r4.Divide(h2)
+    r3 = h3.Clone()
+    r3.Divide(h2)
+    r4 = h4.Clone()
+    r4.Divide(h2)
         #r5 = h5.Clone()
         #r5.Divide(h2)
         #r6 = h6.Clone()
@@ -590,214 +200,213 @@ def effPlots(f1, path):
         #r7.Divide(h2)
 
 
-        if var=="Mll":
-            xname = ";M(l1,l2)"
-        if var=="dR":
-            xname = ";dR(l1,l2)"
+    if var=="Mll":
+      xname = ";M(l1,l2)"
+      if var=="dR":
+        xname = ";dR(l1,l2)"
 
-        r1.Draw("hist")
-        r2.Draw("hist same")
-        r1.SetMinimum(0)
-        r1.SetMaximum(1)
-        r1.SetTitle(xname+" gen; acc")
-        r1.SetLineColor(kRed+1)
-        r2.SetLineColor(kGreen+1)
-        leg = TLegend(0.20,0.2,0.90,0.30);
-        leg.AddEntry(r1,"photon pt>25, eta<2.5", "l")
-        leg.AddEntry(r2,"photon pt>25 and p_{T}(l1)>23, p_{T}(l2)>4", "l")
-        leg.SetTextSize(0.04)
-        leg.SetFillColor(kWhite)
-        leg.Draw()
-        c1.SaveAs(path+"acceptance_"+var+".png")
+      r1.Draw("hist")
+      r2.Draw("hist same")
+      r1.SetMinimum(0)
+      r1.SetMaximum(1)
+      r1.SetTitle(xname+" gen; acc")
+      r1.SetLineColor(kRed+1)
+      r2.SetLineColor(kGreen+1)
+      leg = TLegend(0.20,0.2,0.90,0.30);
+      leg.AddEntry(r1,"photon pt>25, eta<2.5", "l")
+      leg.AddEntry(r2,"photon pt>25 and p_{T}(l1)>23, p_{T}(l2)>4", "l")
+      leg.SetTextSize(0.04)
+      leg.SetFillColor(kWhite)
+      leg.Draw()
+      c1.SaveAs(path+"acceptance_"+var+".png")
 
-        r3.Draw("hist")
-        r3.SetMinimum(0)
-        r3.SetMaximum(1)
-        r3.SetTitle(xname+" gen; reco eff")
-        r4.Draw("hist same")
+      r3.Draw("hist")
+      r3.SetMinimum(0)
+      r3.SetMaximum(1)
+      r3.SetTitle(xname+" gen; reco eff")
+      r4.Draw("hist same")
         #r5.Draw("hist same")
         #r6.Draw("hist same")
         #r7.Draw("hist same")
 
-        r3.SetLineColor(kBlack)
-        r4.SetLineColor(kOrange+1)
+      r3.SetLineColor(kBlack)
+      r4.SetLineColor(kOrange+1)
         #r5.SetLineColor(kGreen+1)
         #r6.SetLineColor(kRed+1)
-        leg = TLegend(0.35,0.15,0.98,0.30);
-        leg.AddEntry(r3,"Reco photon pt>25, Medium WP ID ", "l")
-        leg.AddEntry(r4,"Photon and two reco-muons (OUR ID/ISO)", "l")
+      leg = TLegend(0.35,0.15,0.98,0.30);
+      leg.AddEntry(r3,"Reco photon pt>25, Medium WP ID ", "l")
+      leg.AddEntry(r4,"Photon and two reco-muons (OUR ID/ISO)", "l")
         #leg.AddEntry(r5,"Photon + 2 electrons NO ID pt(e1,e2) > (23,7)", "l")
         #leg.AddEntry(r6,"Photon + 2 electrons ELE ID pt(e1,e2) > (23,7)", "l")
         #leg.AddEntry(r7,"Photon + ONE electron pt(e) > 30, No ID", "l")
-        leg.SetTextSize(0.025)
-        leg.SetFillColor(kWhite)
-        leg.Draw()
-        c1.SaveAs(path+"eff_"+var+".png")
+      leg.SetTextSize(0.025)
+      leg.SetFillColor(kWhite)
+      leg.Draw()
+      c1.SaveAs(path+"eff_"+var+".png")
 
 
 if __name__ == "__main__":
-    timer = TStopwatch()
-    timer.Start()
+  timer = TStopwatch()
+  timer.Start()
 
-    if len(args) < 1:
-        parser.print_usage()
-        exit(1)
+  if len(args) < 1:
+    parser.print_usage()
+    exit(1)
 
-    ver    = sys.argv[1]
-    if 'vv/' in ver: ver = ver[3:].rstrip('/')
-    #subdir = sys.argv[3]
-    cut=str(options.cut)
-    doMerge = options.merge
-    period  = options.period
-    doBkg   = options.bkg
+  ver    = sys.argv[1]
+  if 'vv/' in ver: ver = ver[3:].rstrip('/')
+  cut=str(options.cut)
+  doMerge = options.merge
+  period  = options.period
+  doBkg   = options.bkg
 
-    gROOT.ProcessLine(".L ~/tdrstyle.C")
-    setTDRStyle()
-    TH1.SetDefaultSumw2(kTRUE)
+  gROOT.ProcessLine(".L ~/tdrstyle.C")
+  setTDRStyle()
+  TH1.SetDefaultSumw2(kTRUE)
 
 
-    pathBase = "/uscms_data/d2/andreypz/html/zgamma/dalitz/"+ver+"_cut"+cut
-    hPath    = "/eos/uscms/store/user/andreypz/batch_output/zgamma/8TeV/"+ver
-    if options.noeos:
-        hPath  = "/uscms_data/d2/andreypz/zgamma/"+ver
+  pathBase = "/uscms_data/d2/andreypz/html/zgamma/dalitz/"+ver+"_cut"+cut
+  hPath    = "/eos/uscms/store/user/andreypz/batch_output/zgamma/8TeV/"+ver
+  if options.noeos:
+    hPath  = "/uscms_data/d2/andreypz/zgamma/"+ver
 
-    if '/tthome' in os.getcwd():
-      pathBase = "/tthome/andrey/html/zgamma/dalitz/"+ver+"_cut"+cut
-      hPath    = "/tthome/andrey/batch_output/zgamma/8TeV/"+ver
+  if '/tthome' in os.getcwd():
+    pathBase = "/tthome/andrey/html/zgamma/dalitz/"+ver+"_cut"+cut
+    hPath    = "/tthome/andrey/batch_output/zgamma/8TeV/"+ver
 
-    u.createDir(pathBase)
+  u.createDir(pathBase)
 
+
+
+  if doMerge:
+    os.system("rm "+hPath+"/m_*.root") #removing the old merged files
+  yields_data = {}
+  yields_bkg  = {}
+  yields_sig  = {}
+  yields_ggH  = {}
+  yields_vbf  = {}
+  yields_vh   = {}
+
+  tri_hists = {}
+  dataFile  = {}
+  bkgFile   = {}
+
+
+  for thissel in sel:
+    if thissel=='none': continue
+    u.setSelection(thissel)
 
 
     if doMerge:
-        os.system("rm "+hPath+"/m_*.root") #removing the old merged files
-    yields_data = {}
-    yields_bkg  = {}
-    yields_sig  = {}
-    yields_ggH  = {}
-    yields_vbf  = {}
-    yields_vh   = {}
+      if thissel =="elgamma":
+        os.system("hadd "+hPath+"/m_Data_" +thissel+"_"+period+".root "+hPath+"/"+thissel+"_"+period+"/hhhh_*Run2012D*.root")
+      else:
+        #os.system("hadd "+hPath+"/m_Data_" +thissel+"_"+period+".root "+hPath+"/"+thissel+"_"+period+"/hhhh_DoubleMu_Run20*.root")
+        #os.system("hadd "+hPath+"/m_Data_" +thissel+"_"+period+".root "+hPath+"/"+thissel+"_"+period+"/hhhh_MuEG_Run20*.root")
+        os.system("hadd "+hPath+"/m_Data_" +thissel+"_"+period+".root "+hPath+"/"+thissel+"_"+period+"/hhhh_DoubleElectron_Run20*.root")
 
-    tri_hists = {}
-    dataFile  = {}
-    bkgFile   = {}
+      if doBkg:
+        os.system("hadd "+hPath+"/m_DY_"   +thissel+"_"+period+".root "+hPath+"/"+thissel+"_"+period+"/hhhh_DYjets50*.root")
+        # os.system("hadd "+hPath+"/m_ZG_"    +thissel+"_"+period+".root "
+        #         +hPath+"/"+thissel+"_"+period+"/hhhh_ZG_*.root ")
 
-
-    for thissel in sel:
-        if thissel=='none': continue
-        u.setSelection(thissel)
-
-
-        if doMerge:
-            if thissel =="elgamma":
-                os.system("hadd "+hPath+"/m_Data_" +thissel+"_"+period+".root "+hPath+"/"+thissel+"_"+period+"/hhhh_*Run2012D*.root")
-            else:
-                os.system("hadd "+hPath+"/m_Data_" +thissel+"_"+period+".root "+hPath+"/"+thissel+"_"+period+"/hhhh_*Run20*.root")
-                #os.system("hadd "+hPath+"/m_Data_" +thissel+"_"+period+".root "+hPath+"/"+thissel+"_"+period+"/hhhh_MuEG*Run20*.root")
-                #os.system("hadd "+hPath+"/m_Data_" +thissel+"_"+period+".root "+hPath+"/"+thissel+"_"+period+"/hhhh_*Run20*.root")
-
-            if doBkg:
-                os.system("hadd "+hPath+"/m_DY_"   +thissel+"_"+period+".root "+hPath+"/"+thissel+"_"+period+"/hhhh_DYjets50*.root")
-            #os.system("hadd "+hPath+"/m_ZG_"    +thissel+"_"+period+".root "
-            #         +hPath+"/"+thissel+"_"+period+"/hhhh_ZG_*.root ")
-
-        subdir = thissel
-        path = pathBase+"/"+subdir
-        if doBkg:
-            path = pathBase+"/bkg_"+subdir
-            u.createDir(path)
-        path = pathBase+"/"+subdir
+    subdir = thissel
+    path = pathBase+"/"+subdir
+    if doBkg:
+      path = pathBase+"/bkg_"+subdir
+      u.createDir(path)
+    path = pathBase+"/"+subdir
 
 
-        #sigFileMCFM = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_ggHMCFM_1.root", "OPEN")
-        #sigFileMCFM = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_ggH-mcfm_1.root", "OPEN")
-        sigFileMAD  = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_ggH-mad"+str(mass)+"_1.root", "OPEN")
-        sigFileVBF  = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_vbf-mad"+str(mass)+"_1.root", "OPEN")
-        sigFileVH   = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_vh-mad"+str(mass)+"_1.root",  "OPEN")
+    # sigFileMCFM = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_ggHMCFM_1.root", "OPEN")
+    # sigFileMCFM = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_ggH-mcfm_1.root", "OPEN")
+    sigFileMAD  = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_ggH-mad"+str(mass)+"_1.root", "OPEN")
+    sigFileVBF  = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_vbf-mad"+str(mass)+"_1.root", "OPEN")
+    sigFileVH   = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_vh-mad"+str(mass)+"_1.root",  "OPEN")
 
-        if options.mcfm: sigFile = sigFileMCFM
-        else:            sigFile = sigFileMAD
+    if options.mcfm: sigFile = sigFileMCFM
+    else:            sigFile = sigFileMAD
 
-        dataFile[thissel] = TFile(hPath+"/m_Data_"+thissel+"_"+period+".root","OPEN")
-        if doBkg:
+    dataFile[thissel] = TFile(hPath+"/m_Data_"+thissel+"_"+period+".root","OPEN")
+    if doBkg:
             #bkgFile[thissel]  = TFile(hPath+"/"+thissel+"_"+period+"/hhhh_DYjets0_1.root", "OPEN")
-            bkgFile[thissel]  = TFile(hPath+"/m_DY_"+thissel+"_"+period+".root","OPEN")
-        else:
-            bkgFile[thissel]=None
+      bkgFile[thissel]  = TFile(hPath+"/m_DY_"+thissel+"_"+period+".root","OPEN")
+    else:
+      bkgFile[thissel]=None
 
-        if thissel=="zee":
-            u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",None,"",
-                            "Zee",  pathBase+"/Zee",  None,"norm")
-            continue
+    if thissel=="zee":
+      u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",None,"",
+                      "Zee",  pathBase+"/Zee",  None,"norm")
+      continue
 
-        yields_data[thissel] = u.getYields(dataFile[thissel])
-        yields_ggH[thissel]  = u.getYields(sigFile, 'ggH-125',True)
-        yields_vbf[thissel]  = u.getYields(sigFileVBF, 'vbfH-125', True)
-        yields_vh[thissel]   = u.getYields(sigFileVH,  'vH-125', True)
-        yields_sig[thissel]  = [sum(x) for x in zip(yields_ggH[thissel],yields_vbf[thissel],yields_vh[thissel])]
+    yields_data[thissel] = u.getYields(dataFile[thissel])
+    yields_ggH[thissel]  = u.getYields(sigFile, 'ggH-125',True)
+    yields_vbf[thissel]  = u.getYields(sigFileVBF, 'vbfH-125', True)
+    yields_vh[thissel]   = u.getYields(sigFileVH,  'vH-125', True)
+    yields_sig[thissel]  = [sum(x) for x in zip(yields_ggH[thissel],yields_vbf[thissel],yields_vh[thissel])]
 
-        print 'ggH yi',yields_ggH[thissel]
-        print 'sig yi', yields_sig[thissel]
+    print 'ggH yi',yields_ggH[thissel]
+    print 'sig yi', yields_sig[thissel]
 
-        if doBkg:
-            yields_bkg[thissel]  = u.getYields(bkgFile[thissel],"DY",True)
+    if doBkg:
+      yields_bkg[thissel]  = u.getYields(bkgFile[thissel],"DY",True)
 
         #if int(cut) >2:
         #tri_hists[thissel]   = dataFile[thissel].Get("tri_mass_cut"+cut).Clone()
 
-        if cut not in ['12','14','15']:
-            u.drawAllInFile(dataFile[thissel], "Data", None, "", sigFile,"#splitline{Signal}{m_{H}=125 GeV}",  "",path, cut, "norm")
-            # u.drawAllInFile(dataFile[thissel], "data", None, "", sigFile,"signal",  "",path, cut, "norm", doRatio=1)
-            # u.drawAllInFile(dataFile[thissel], "Data", None, "", sigFile,"50xSignal",  "",path, cut, "lumi")
-            # u.drawAllInFile(dataFile[thissel], "data", None, "", sigFile,"50xSignal","EB",pathBase+"/EB", cut, "lumi")
-            # u.drawAllInFile(dataFile[thissel], "data", None, "", sigFile,"50xSignal","EE",pathBase+"/EE", cut, "lumi")
-            print 'Not in inin'
+    if cut not in ['12','14','15']:
+      u.drawAllInFile(dataFile[thissel], "Data", None, "", sigFile,"#splitline{Signal}{m_{H}=125 GeV}",  "",path, cut, "norm")
+      # u.drawAllInFile(dataFile[thissel], "data", None, "", sigFile,"signal",  "",path, cut, "norm", doRatio=1)
+      # u.drawAllInFile(dataFile[thissel], "Data", None, "", sigFile,"50xSignal",  "",path, cut, "lumi")
+      # u.drawAllInFile(dataFile[thissel], "data", None, "", sigFile,"50xSignal","EB",pathBase+"/EB", cut, "lumi")
+      # u.drawAllInFile(dataFile[thissel], "data", None, "", sigFile,"50xSignal","EE",pathBase+"/EE", cut, "lumi")
+      print 'Not in inin'
 
 
-        if thissel == "mugamma":
-            if cut not in ['12','14','15','16']:
-                # u.drawAllInFile(dataFile[thissel], "data",None, "",sigFile,"signal",  "Muons", pathBase+"/Muons", None,"norm")
-                u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",
-                                "Muons", pathBase+"/Muons/", None,"norm")
-                u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"#splitline{Signal}{m_{H}=125 GeV}",
-                                "Photon",pathBase+"/Photon/", None,"norm")
+    if thissel == "mugamma":
+      if cut not in ['12','14','15','16']:
+        # u.drawAllInFile(dataFile[thissel], "data",None, "",sigFile,"signal",  "Muons", pathBase+"/Muons", None,"norm")
+        u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",
+                        "Muons", pathBase+"/Muons/", None,"norm")
+        u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"#splitline{Signal}{m_{H}=125 GeV}",
+                        "Photon",pathBase+"/Photon/", None,"norm")
 
-            elif cut in ['12']:
-                u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"#splitline{Signal}{m_{H}=125 GeV}",
-                                "jpsi",pathBase+"/jpsi/", cut,"norm2")
-            elif cut in ['14','15','16']:
-                u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",None,"",
-                                "AlphaPiZ",pathBase+"/apz/", cut,"norm2")
+      elif cut in ['12']:
+        u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"#splitline{Signal}{m_{H}=125 GeV}",
+                        "jpsi",pathBase+"/jpsi/", cut,"norm2")
+      elif cut in ['14','15','16']:
+        u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",None,"",
+                        "AlphaPiZ",pathBase+"/apz/", cut,"norm2")
 
-        elif thissel == "elgamma":
-            u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",
-                            "Photon",     pathBase+"/Photon",     None,"norm")
+    elif thissel == "elgamma":
+      u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",
+                      "Photon",     pathBase+"/Photon",     None,"norm")
 
-            u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",
-                            "DalitzEle-Before",  pathBase+"/DalitzEle-Before",  None,"norm")
-            u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",
-                            "DalitzEle-AfterAll",  pathBase+"/DalitzEle-AfterAll",  None,"norm")
-            u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",
-                            "DalitzEle-Before_tracks",  pathBase+"/DalitzEle-Before_tracks",  None,"norm")
-            u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",
-                            "DalitzEle-AfterAll_tracks",  pathBase+"/DalitzEle-AfterAll_tracks",  None,"norm")
-
-
-            u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",
-                            "DalitzEle",  pathBase+"/DalitzEle",  None,"norm")
-
-            u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",
-                            "DalitzEleEB",pathBase+"/DalitzEleEB",None,"norm")
-            u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",
-                            "DalitzEleEE",pathBase+"/DalitzEleEE/",None,"norm")
-
-            u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",
-                            "DalitzEleEB_tracks",pathBase+"/DalitzEleEB_tracks",None,"norm")
-            u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",
-                            "DalitzEleEE_tracks",pathBase+"/DalitzEleEE_tracks",None,"norm")
+      u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",
+                      "DalitzEle-Before",  pathBase+"/DalitzEle-Before",  None,"norm")
+      u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",
+                      "DalitzEle-AfterAll",  pathBase+"/DalitzEle-AfterAll",  None,"norm")
+      u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",
+                      "DalitzEle-Before_tracks",  pathBase+"/DalitzEle-Before_tracks",  None,"norm")
+      u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",
+                      "DalitzEle-AfterAll_tracks",  pathBase+"/DalitzEle-AfterAll_tracks",  None,"norm")
 
 
-    # dataFile.Close()
+      u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",
+                      "DalitzEle",  pathBase+"/DalitzEle",  None,"norm")
+
+      u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",
+                      "DalitzEleEB",pathBase+"/DalitzEleEB",None,"norm")
+      u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",
+                      "DalitzEleEE",pathBase+"/DalitzEleEE/",None,"norm")
+
+      u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",
+                      "DalitzEleEB_tracks",pathBase+"/DalitzEleEB_tracks",None,"norm")
+      u.drawAllInFile(dataFile[thissel], "data",bkgFile[thissel], "bkg",sigFile,"signal",
+                      "DalitzEleEE_tracks",pathBase+"/DalitzEleEE_tracks",None,"norm")
+
+
+# dataFile.Close()
     #print yields_data
 
 
@@ -807,15 +416,16 @@ if __name__ == "__main__":
 
     #sigFileMAD  = TFile(hPath+"/mugamma_"+period+"/hhhh_ggH-mad125_1.root", "OPEN")
 
-    if options.apz:
-        c1 = TCanvas("c4","small canvas",600,600);
-        data = TFile("/tthome/andrey/m_Data_DoubleMu_2e2mu_2012.root","OPEN")
-        #data = TFile("/tthome/andrey/m_Data_MuEG_2e2mu_2012.root","OPEN")
+  if options.apz:
+    c1 = TCanvas("c4","small canvas",600,600);
+    #data = TFile("/tthome/andrey/m_Data_DoubleMu_2e2mu_2012.root","OPEN")
+    #data = TFile("/tthome/andrey/m_Data_DoubleElectron_2e2mu_2012.root","OPEN")
+    data = TFile("/tthome/andrey/m_Data_MuEG_2e2mu_2012.root","OPEN")
 
-        alphaPiZ2(data, TCut(''),   pathBase+"/alphaPiZ-1/")
-        alphaPiZ2(data, TCut('pt12/m4l>0.3 && pt34/m4l>0.3'),                   pathBase+"/alphaPiZ-2/")
-        alphaPiZ2(data, TCut('pt12/m4l>0.3 && pt34/m4l>0.3 && m4l>100'),        pathBase+"/alphaPiZ-3/")
-        alphaPiZ2(data, TCut('pt12/m4l>0.3 && pt34/m4l>0.3 && m4l>100 && m12>15 && m12<30'),     pathBase+"/alphaPiZ-4/")
+    alphaPiZ2(data, c1, TCut(''),   pathBase+"/alphaPiZ-1/")
+    alphaPiZ2(data, c1, TCut('pt12/m4l>0.3 && pt34/m4l>0.3'),                   pathBase+"/alphaPiZ-2/")
+    alphaPiZ2(data, c1, TCut('pt12/m4l>0.3 && pt34/m4l>0.3 && m4l>100'),        pathBase+"/alphaPiZ-3/")
+    alphaPiZ2(data, c1, TCut('pt12/m4l>0.3 && pt34/m4l>0.3 && m4l>100 && m12>15 && m12<30'),     pathBase+"/alphaPiZ-4/")
 
 
     '''
@@ -929,39 +539,39 @@ if __name__ == "__main__":
             h2si_rot.SetBinContent(a,b,fda)
     '''
 
-    plot_types =[]
-    list = os.listdir(pathBase)
-    for d in list:
-        if os.path.isdir(pathBase+"/"+d):
-            plot_types.append(d)
+  plot_types =[]
+  list = os.listdir(pathBase)
+  for d in list:
+    if os.path.isdir(pathBase+"/"+d):
+      plot_types.append(d)
 
     #plot_types
-    print yields_sig
+  print yields_sig
 
-    if doBkg:
-        table_all  = u.yieldsTable([yields_data,yields_bkg,yields_sig, yields_ggH,yields_vbf, yields_vh], sel)
-    else:
-        if not options.four:
-            table_all  = u.yieldsTable([yields_data,yields_sig, yields_ggH,yields_vbf, yields_vh], sel)
+  if doBkg:
+    table_all  = u.yieldsTable([yields_data,yields_bkg,yields_sig, yields_ggH,yields_vbf, yields_vh], sel)
+  else:
+    if not options.four:
+      table_all  = u.yieldsTable([yields_data,yields_sig, yields_ggH,yields_vbf, yields_vh], sel)
 
     #u.makeTable(table_all,"all", "html")
     # u.makeTable(table_all,"all", "twiki")
     #u.makeTable(table_all,"all", "tex")
 
     #os.system("cat yields_all.html   > yields.html")
-    os.system("cat yields_all.twiki  > yields.html")
+  os.system("cat yields_all.twiki  > yields.html")
     #os.system("cat yields_all.tex    > yields.html")
 
-    comments = ["These plots are made for ...",
-                "Blah"]
+  comments = ["These plots are made for ...",
+              "Blah"]
 
-    defaultPage = 'mugamma'
-    if cut in ['12']: defaultPage = 'jpsi'
-    elif cut in ['14','15']: defaultPage = 'apz'
+  defaultPage = 'mugamma'
+  if cut in ['12']: defaultPage = 'jpsi'
+  elif cut in ['14','15']: defaultPage = 'apz'
 
-    print defaultPage
+  print defaultPage
     #plot_types.append('alphaPiZ')
 
-    ht.makeHTML("h &rarr; dalitz decay plots",pathBase, plot_types, comments, defaultPage)
+  ht.makeHTML("h &rarr; dalitz decay plots",pathBase, plot_types, comments, defaultPage)
 
-    print "\n\t\t finita la comedia \n"
+  print "\n\t\t finita la comedia \n"

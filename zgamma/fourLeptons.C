@@ -29,7 +29,7 @@ Float_t cut_l1pt  = 23;
 Float_t cut_l2pt  = 4;
 //const Float_t cut_iso_mu1 = 0.4, cut_iso_mu2=0;
 Float_t cut_gammapt = 25;
-Float_t mllMax = 50;
+Float_t mllMax = 200;
 
 //Float_t global_Mll = 0;
 Bool_t doRochCorr  = 1;
@@ -189,6 +189,9 @@ void fourLeptons::Begin(TTree * tree)
     _apzTree->Branch("pt2",   &apz_pt2,   "pt2/D");
     _apzTree->Branch("pt3",   &apz_pt3,   "pt3/D");
     _apzTree->Branch("pt4",   &apz_pt4,   "pt4/D");
+
+    _apzTree->Branch("run",  &runNumber,  "run/i");
+    _apzTree->Branch("event",&eventNumber,"event/l");
   }
 
   histoFile->cd();
@@ -255,8 +258,8 @@ Bool_t fourLeptons::Process(Long64_t entry)
   else if (trigger=="ee")
     {
       myTrigger = "HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v";
-      cut_l1pt = 25;
-      cut_l2pt = 7;
+      cut_l1pt = 18;
+      cut_l2pt = 4;
       cut_gammapt = 23;
     }
   else
@@ -484,7 +487,7 @@ Bool_t fourLeptons::Process(Long64_t entry)
   else
     Abort("Selection is not supported");
 
-  if (lPt1.Pt() < cut_l1pt || lPt2.Pt() < cut_l2pt)   return kTRUE;
+  if (lPt1.Pt() < 25 || lPt2.Pt() < 4)   return kTRUE;
   if (lPt3.Pt() < 25 || lPt4.Pt() < 5)   return kTRUE;
 
   FillHistoCounts(6, eventWeight);
