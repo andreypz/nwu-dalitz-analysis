@@ -90,16 +90,16 @@ if period =="2012":
   if selection in ['4mu', '2e2mu']:
     data.extend([
         cfg('DoubleMu_Run2012A',  DIRBRIAN+'/nuTuples_v9.6_8TeV/Data/DoubleMu_Run2012A',   5, 'DATA '+selection+' mumu '+' 2012 0' + whereWeRun),
-        cfg('DoubleMu_Run2012B',  DIRBRIAN+'/nuTuples_v9.6_8TeV/Data/DoubleMu_Run2012B',  10, 'DATA '+selection+' mumu '+' 2012 0' + whereWeRun),
-        cfg('DoubleMu_Run2012C',  DIRBRIAN+'/nuTuples_v9.6_8TeV/Data/DoubleMu_Run2012C',  15, 'DATA '+selection+' mumu '+' 2012 0' + whereWeRun),
-        cfg('DoubleMu_Run2012D',  DIRBRIAN+'/nuTuples_v9.6_8TeV/Data/DoubleMu_Run2012D',  20, 'DATA '+selection+' mumu '+' 2012 0' + whereWeRun),
+        cfg('DoubleMu_Run2012B',  DIRBRIAN+'/nuTuples_v9.6_8TeV/Data/DoubleMu_Run2012B',   8, 'DATA '+selection+' mumu '+' 2012 0' + whereWeRun),
+        cfg('DoubleMu_Run2012C',  DIRBRIAN+'/nuTuples_v9.6_8TeV/Data/DoubleMu_Run2012C',  12, 'DATA '+selection+' mumu '+' 2012 0' + whereWeRun),
+        cfg('DoubleMu_Run2012D',  DIRBRIAN+'/nuTuples_v9.6_8TeV/Data/DoubleMu_Run2012D',  16, 'DATA '+selection+' mumu '+' 2012 0' + whereWeRun),
         ])
 
   if selection in ['zee','2e2mu']:
     data.extend([
         cfg('DoubleElectron_Run2012A',  DIRBRIAN+'/nuTuples_v9.6_8TeV/Data/DoubleElectron_Run2012A',   5, 'DATA '+selection+' ee '+' 2012 0' + whereWeRun),
-        cfg('DoubleElectron_Run2012B',  DIRBRIAN+'/nuTuples_v9.6_8TeV/Data/DoubleElectron_Run2012B',   5, 'DATA '+selection+' ee '+' 2012 0' + whereWeRun),
-        cfg('DoubleElectron_Run2012C',  DIRBRIAN+'/nuTuples_v9.6_8TeV/Data/DoubleElectron_Run2012C',  10, 'DATA '+selection+' ee '+' 2012 0' + whereWeRun),
+        cfg('DoubleElectron_Run2012B',  DIRBRIAN+'/nuTuples_v9.6_8TeV/Data/DoubleElectron_Run2012B',   8, 'DATA '+selection+' ee '+' 2012 0' + whereWeRun),
+        cfg('DoubleElectron_Run2012C',  DIRBRIAN+'/nuTuples_v9.6_8TeV/Data/DoubleElectron_Run2012C',  12, 'DATA '+selection+' ee '+' 2012 0' + whereWeRun),
         cfg('DoubleElectron_Run2012D',  DIRBRIAN+'/nuTuples_v9.6_8TeV/Data/DoubleElectron_Run2012D',  20, 'DATA '+selection+' ee '+' 2012 0' + whereWeRun),
         ])
 

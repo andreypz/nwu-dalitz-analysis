@@ -26,7 +26,7 @@ def alphaPiZ2(f1, c1, globalCut, path):
   t.Draw('m12>>'+name+'('+str(nBins)+','+m1+','+m2+')',  mllCut+globalCut, opt)
   h = gDirectory.Get(name)
   h.Draw("same e1p")
-  h.SetTitle(name+';m_{#mu#mu} (GeV);Events/%.2f GeV' % binWidth)
+  h.SetTitle(name+';m_{12} (GeV);Events/%.2f GeV' % binWidth)
   h.UseCurrentStyle()
   c1.SaveAs(path+"/"+name+".png")
 
@@ -42,7 +42,7 @@ def alphaPiZ2(f1, c1, globalCut, path):
   t.Draw('m34>>'+name+'('+str(nBins)+','+m1+','+m2+')',  mllCut+globalCut, opt)
   h = gDirectory.Get(name)
   h.Draw("same e1p")
-  h.SetTitle(name+';m_{ee} (GeV);Events/%.2f GeV' % binWidth)
+  h.SetTitle(name+';m_{34} (GeV);Events/%.2f GeV' % binWidth)
   h.UseCurrentStyle()
   c1.SaveAs(path+"/"+name+".png")
 
@@ -58,16 +58,30 @@ def alphaPiZ2(f1, c1, globalCut, path):
   t.Draw('m12>>'+name+'('+str(nBins)+','+m1+','+m2+')',  mllCut+globalCut, opt)
   h = gDirectory.Get(name)
   h.Draw("same e1p")
-  h.SetTitle(name+';m_{#mu#mu} (GeV);Events/%.2f GeV' % binWidth)
+  h.SetTitle(name+';m_{12} (GeV);Events/%.2f GeV' % binWidth)
+  h.UseCurrentStyle()
+  c1.SaveAs(path+"/"+name+".png")
+
+  name = 'h04-ml34-apz'
+  mllCut = TCut('')
+  # myFullCut = TCut(mllCut+globalCut)
+  m1 = '10'
+  m2 = '35'
+  nBins = 15/binDownSize
+  # print 10*'***', 'Downsized to ', nBins
+  binWidth = (float(m2)-float(m1))/float(nBins)
+  t.Draw('m34>>'+name+'('+str(nBins)+','+m1+','+m2+')',  mllCut+globalCut, opt)
+  h = gDirectory.Get(name)
+  h.Draw("same e1p")
+  h.SetTitle(name+';m_{12} (GeV);Events/%.2f GeV' % binWidth)
   h.UseCurrentStyle()
   c1.SaveAs(path+"/"+name+".png")
 
 
-  name = 'h04-m4l_full'
+  name = 'h05-m4l_full'
   mllCut = TCut('')
   m1 = '60'
   m2 = '200'
-
   nBins = 30/binDownSize
   binWidth = (float(m2)-float(m1))/float(nBins)
   t.Draw('m4l>>'+name+'('+str(nBins)+','+m1+','+m2+')',  mllCut+globalCut, opt)
@@ -78,8 +92,76 @@ def alphaPiZ2(f1, c1, globalCut, path):
   c1.SaveAs(path+"/"+name+".png")
 
 
+  name = 'h06-m4l_full'
+  mllCut = TCut('')
+  m1 = '100'
+  m2 = '180'
+  nBins = 20/binDownSize
+  binWidth = (float(m2)-float(m1))/float(nBins)
+  t.Draw('m4l>>'+name+'('+str(nBins)+','+m1+','+m2+')',  mllCut+globalCut, opt)
+  h = gDirectory.Get(name)
+  h.Draw("same e1p")
+  h.SetTitle(name+';m_{4l} (GeV);Events/%.2f GeV' % binWidth)
+  h.UseCurrentStyle()
+  c1.SaveAs(path+"/"+name+".png")
 
-def alphaPiZ(f1, globalCut, path):
+
+
+  name = 'h07-pt12'
+  mllCut = TCut('')
+  m1 = '0'
+  m2 = '180'
+  nBins = 50/binDownSize
+  binWidth = (float(m2)-float(m1))/float(nBins)
+  t.Draw('pt12>>'+name+'('+str(nBins)+','+m1+','+m2+')',  mllCut+globalCut, opt)
+  h = gDirectory.Get(name)
+  h.Draw("same e1p")
+  h.SetTitle(name+';p_{T}^{12} (GeV);Events/%.2f GeV' % binWidth)
+  h.UseCurrentStyle()
+  c1.SaveAs(path+"/"+name+".png")
+
+  name = 'h08-pt34'
+  mllCut = TCut('')
+  m1 = '0'
+  m2 = '180'
+  nBins = 50/binDownSize
+  binWidth = (float(m2)-float(m1))/float(nBins)
+  t.Draw('pt34>>'+name+'('+str(nBins)+','+m1+','+m2+')',  mllCut+globalCut, opt)
+  h = gDirectory.Get(name)
+  h.Draw("same e1p")
+  h.SetTitle(name+';p_{T}^{34} (GeV);Events/%.2f GeV' % binWidth)
+  h.UseCurrentStyle()
+  c1.SaveAs(path+"/"+name+".png")
+
+  name = 'h09-pt12_over_m4l'
+  mllCut = TCut('')
+  m1 = '0'
+  m2 = '1'
+  nBins = 50/binDownSize
+  binWidth = (float(m2)-float(m1))/float(nBins)
+  t.Draw('pt12/m4l>>'+name+'('+str(nBins)+','+m1+','+m2+')',  mllCut+globalCut, opt)
+  h = gDirectory.Get(name)
+  h.Draw("same e1p")
+  h.SetTitle(name+';p_{T}^{12}/m_{4l} (GeV);Events/%.2f GeV' % binWidth)
+  h.UseCurrentStyle()
+  c1.SaveAs(path+"/"+name+".png")
+
+  name = 'h10-pt34_over_m4l'
+  mllCut = TCut('')
+  m1 = '0'
+  m2 = '1'
+  nBins = 50/binDownSize
+  binWidth = (float(m2)-float(m1))/float(nBins)
+  t.Draw('pt34/m4l>>'+name+'('+str(nBins)+','+m1+','+m2+')',  mllCut+globalCut, opt)
+  h = gDirectory.Get(name)
+  h.Draw("same e1p")
+  h.SetTitle(name+';p_{T}^{34}/m_{4l} (GeV);Events/%.2f GeV' % binWidth)
+  h.UseCurrentStyle()
+  c1.SaveAs(path+"/"+name+".png")
+
+
+
+def alphaPiZ(f1, c1, globalCut, path):
   print "study alpha/piz particle"
   u.createDir(path)
   c1.cd()
@@ -100,9 +182,25 @@ def alphaPiZ(f1, globalCut, path):
   elif 'alphaPiZ-6' in path:
     binDownSize = 2
 
+  name = 'h00-mll-HIG14-003'
+  mllCut = TCut('')
+  # myFullCut = TCut(mllCut+globalCut)
+  m1 = '0'
+  m2 = '20'
+  nBins = 50/binDownSize
+  # print 10*'***', 'Downsized to ', nBins
+  binWidth = (float(m2)-float(m1))/float(nBins)
+  t.Draw('m_ll>>'+name+'('+str(nBins)+','+m1+','+m2+')',  mllCut+globalCut, opt)
+  h = gDirectory.Get(name)
+  h.Draw("same e1p")
+  h.SetTitle(name+';m_{#mu#mu} (GeV);Events/%.2f GeV' % binWidth)
+  h.UseCurrentStyle()
+  c1.SaveAs(path+"/"+name+".png")
+
+
+
   name = 'h01-mll-full'
   mllCut = TCut('')
-
   # myFullCut = TCut(mllCut+globalCut)
   m1 = '0'
   m2 = '25'

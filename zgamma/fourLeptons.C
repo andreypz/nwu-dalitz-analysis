@@ -287,7 +287,7 @@ Bool_t fourLeptons::Process(Long64_t entry)
   vector<TCElectron> electrons0, electrons, electrons_dalitz, fake_electrons0;
   vector<TCMuon> muons0, muons;
   vector<TCPhoton> photons0, photonsTight, photonsHZG, fake_photons;
-  TCPhysObject l1,l2, lPt1, lPt2, lPt3, lPt4;
+  TCPhysObject l1, l2, l3, l4;
   TCPhoton gamma0, ufoton, ufelectron;
   //TCPhoton gamma;
   TCPhysObject gamma;
@@ -417,14 +417,36 @@ Bool_t fourLeptons::Process(Long64_t entry)
   if (selection=="2e2mu")
     {
 
-      if (muons.size()<2) return kTRUE;
+      hists->fill1DHist(muons.size(), "number_of_muons", ";m_{#mu}", 10, 0,10,  1, "apz-plots");
+      hists->fill1DHist(electrons0.size(), "number_of_electrons", ";m_{e}", 10, 0,10,  1, "apz-plots");
 
+
+      if (muons.size()<2) return kTRUE;
+      FillHistoCounts(4, eventWeight);
+      CountEvents(4);
+
+
+      if (electrons0.size()<2) return kTRUE;
+
+      FillHistoCounts(5, eventWeight);
+      CountEvents(5);
+
+      if (trigger=="mumu"){
+	if (muons[0].Pt()<14 || muons[1].Pt()<9 || electrons0[0].Pt()<15) return kTRUE;
+      }	else if (trigger=="mugamma"){
+	if (muons[0].Pt()<23 || electrons0[0].Pt()<25) return kTRUE;
+      }	else if (trigger=="ee"){
+	if (electrons0[0].Pt()<18 || electrons0[1].Pt()<9 || muons[0].Pt()<8) return kTRUE;
+      }
+
+
+      // Decide which muon pair to use if there are more than three muons
       Float_t tmpMll = 99999;
       Float_t MAPZ   = 0;
 
       if (muons.size()==2){
-	lPt1 = muons[0];
-	lPt2 = muons[1];
+	l1 = muons[0];
+	l2 = muons[1];
       }
       else
 	for (UInt_t m1=0; m1 < muons.size(); m1++){
@@ -433,65 +455,84 @@ Bool_t fourLeptons::Process(Long64_t entry)
 
 	    if( fabs((muons[m1]+muons[m2]).M() - MAPZ) < tmpMll)
 	      {
-		lPt1 = muons[m1];
-		lPt2 = muons[m2];
+		l1 = muons[m1];
+		l2 = muons[m2];
 		tmpMll = (muons[m1]+muons[m2]).M();
 	      }
 	  }
 	}
 
-      if (lPt1.Charge()*lPt2.Charge() == 1)
+      if (l1.Charge()*l2.Charge() == 1)
 	return kTRUE;//Abort("reco * They are the same charge!");
 
       //if (fourLeptons::CalculateMuonIso(&muons[0]) > 0.4)
       //return kTRUE;
-      //if (lPt2.Pt() > 20 && fourLeptons::CalculateMuonIso(&muons[1]) > 0.4)
+      //if (l2.Pt() > 20 && fourLeptons::CalculateMuonIso(&muons[1]) > 0.4)
       //return kTRUE;
 
-      FillHistoCounts(4, eventWeight);
-      CountEvents(4);
 
-      if(electrons0.size()<2) return kTRUE;
 
-      FillHistoCounts(5, eventWeight);
-      CountEvents(5);
+      l3 = electrons0[0];
+      l4 = electrons0[1];
 
-      lPt3 = electrons0[0];
-      lPt4 = electrons0[1];
+      FillHistoCounts(6, eventWeight);
+      CountEvents(6);
+
+
     }
   else if (selection == "4mu")
     {
 
+      hists->fill1DHist(muons.size(), "number_of_muons", ";m_{#mu}", 10, 0,10,  1, "apz-plots");
+      hists->fill1DHist(electrons0.size(), "number_of_electrons", ";m_{e}", 10, 0,10,  1, "apz-plots");
+
       if (muons.size()<4) return kTRUE;
+      FillHistoCounts(4, eventWeight);
+      CountEvents(4);
+
+
+      if (muons[0].Pt()<14 || muons[1].Pt()<9) return kTRUE;
+
+      FillHistoCounts(5, eventWeight);
+      CountEvents(5);
+
 
       Float_t tmpMll = 99999;
-      Float_t MAPZ   = 0;
+      const Float_t MAPZ   = 0;
 
-      for (UInt_t m1=0; m1 < muons.size(); m1++){
-	for (UInt_t m2=m1; m2 < muons.size(); m2++){
-	  if (muons[m1].Charge()*muons[m2].Charge()==1) continue; //same charge - don't care
+      l1 = muons[0];
+      Int_t ind_m2 = 0, ind_m3=0, ind_m4=0;
+      for (UInt_t m2=1; m2 < muons.size(); m2++){
+	if (muons[0].Charge()*muons[m2].Charge()==1) continue; //same charge - don't care
+	if( fabs((muons[0]+muons[m2]).M() - MAPZ) < tmpMll)
+	  {
+	    l2 = muons[m2];
+	    tmpMll = (muons[0]+muons[m2]).M();
+	  }
+      }
+      if (ind_m2==1) ind_m3=2;
+      else           ind_m3=1;
 
-	  if( fabs((muons[m1]+muons[m2]).M() - MAPZ) < tmpMll)
-	    {
-	      lPt1 = muons[m1];
-	      lPt2 = muons[m2];
-	      tmpMll = (muons[m1]+muons[m2]).M();
-	    }
-	}
+      l3 = muons[ind_m3];
 
+      tmpMll = 9999;
+      for (UInt_t m4=2; m4 < muons.size() && m4!=ind_m2 && m4!=ind_m3; m4++){
+	if (muons[ind_m3].Charge()*muons[m4].Charge()==1) continue; //same charge - don't care
+	if( fabs((muons[ind_m3]+muons[m4]).M() - MAPZ) < tmpMll)
+	  {
+	    l4 = muons[m4];
+	    tmpMll = (muons[ind_m3]+muons[m4]).M();
+	  }
       }
 
+      FillHistoCounts(6, eventWeight);
+      CountEvents(6);
 
-      Abort("Yet to be done");
     }
   else
     Abort("Selection is not supported");
 
-  if (lPt1.Pt() < 25 || lPt2.Pt() < 4)   return kTRUE;
-  if (lPt3.Pt() < 25 || lPt4.Pt() < 5)   return kTRUE;
 
-  FillHistoCounts(6, eventWeight);
-  CountEvents(6);
 
 
   if (!isfinite(eventWeight))
@@ -499,8 +540,8 @@ Bool_t fourLeptons::Process(Long64_t entry)
   //    if (fabs(eventWeight)>50 || fabs(eventWeight)<0.00001)
 
   if (!isRealData){
-    eventWeight *= weighter->MuonSF(lPt1);
-    eventWeight *= weighter->MuonSF(lPt2);
+    eventWeight *= weighter->MuonSF(l1);
+    eventWeight *= weighter->MuonSF(l2);
   }
 
 
@@ -511,39 +552,43 @@ Bool_t fourLeptons::Process(Long64_t entry)
   //}
 
   Float_t Mllg = 0;//(l1+l2+gamma).M();
-  Float_t M4l  = (l1+l2+lPt3+lPt4).M();
+  Float_t M4l  = (l1+l2+l3+l4).M();
 
   fout<<runNumber<<" "<<eventNumber<<endl;
 
-  Double_t Mll = (lPt1+lPt2).M();
-  hists->fill1DHist(Mll,  Form("diLep_mass_low_cut%i",  3), ";M(ll)", 50, 0,20,  1, "");
-  hists->fill1DHist(Mll,  Form("diLep_mass_high_cut%i", 3), ";M(ll)", 50, 0,120, 1, "");
+  Double_t M12 = (l1+l2).M();
+  hists->fill1DHist(M12, "diLep_mass_apz", ";m_{12}", 100, 10,30, 1, "apz-plots");
+  hists->fill1DHist(M12, "diLep_mass_low", ";m_{12}", 100,  0,30, 1, "apz-plots");
+  hists->fill1DHist(M12, "diLep_mass_high",";m_{12}", 100, 0,120, 1, "apz-plots");
+
+  hists->fill1DHist(muons.size(), "number_of_muons", ";m_{#mu}", 10, 0,10,  1, "apz-plots");
+  hists->fill1DHist(electrons0.size(), "number_of_electrons", ";m_{e}", 10, 0,10,  1, "apz-plots");
 
 
-  if (Mll > mllMax) return kTRUE;
+  //if (M12 > mllMax) return kTRUE;
 
   FillHistoCounts(7, eventWeight);
   CountEvents(7);
 
   if (makeApzTree){
 
-    apz_pt1 = lPt1.Pt();
-    apz_pt2 = lPt2.Pt();
-    apz_pt3 = lPt3.Pt();
-    apz_pt4 = lPt4.Pt();
+    apz_pt1 = l1.Pt();
+    apz_pt2 = l2.Pt();
+    apz_pt3 = l3.Pt();
+    apz_pt4 = l4.Pt();
 
-    apz_dr1234 = (lPt1+lPt2).DeltaR(lPt3+lPt4);
+    apz_dr1234 = (l1+l2).DeltaR(l3+l4);
 
-    apz_dr12 = lPt1.DeltaR(lPt2);
-    apz_dr34 = lPt3.DeltaR(lPt4);
+    apz_dr12 = l1.DeltaR(l2);
+    apz_dr34 = l3.DeltaR(l4);
 
-    apz_pt12 = (lPt1+lPt2).Pt();
-    apz_pt34 = (lPt3+lPt4).Pt();
+    apz_pt12 = (l1+l2).Pt();
+    apz_pt34 = (l3+l4).Pt();
 
-    apz_m12 = (lPt1+lPt2).M();
-    apz_m34 = (lPt3+lPt4).M();
+    apz_m12 = (l1+l2).M();
+    apz_m34 = (l3+l4).M();
 
-    apz_m4l = (lPt1+lPt2+lPt3+lPt4).M();
+    apz_m4l = (l1+l2+l3+l4).M();
 
     _apzTree->Fill();
 
@@ -563,10 +608,10 @@ void fourLeptons::Terminate()
   cout<<"| 1: n/a                     |\t"<< nEvents[1]  <<"\t|"<<float(nEvents[1])/nEvents[0]<<"\t|"<<endl;
   cout<<"| 2: vtx                     |\t"<< nEvents[2]  <<"\t|"<<float(nEvents[2])/nEvents[1]<<"\t|"<<endl;
   cout<<"| 3: trigger                 |\t"<< nEvents[3]  <<"\t|"<<float(nEvents[3])/nEvents[2]<<"\t|"<<endl;
-  cout<<"| 4: 2 muons                 |\t"<< nEvents[4]  <<"\t|"<<float(nEvents[4])/nEvents[3]<<"\t|"<<endl;
-  cout<<"| 5: 2 electrons             |\t"<< nEvents[5]  <<"\t|"<<float(nEvents[5])/nEvents[4]<<"\t|"<<endl;
-  cout<<"| 6: 2+2 and pt Cuts         |\t"<< nEvents[6]  <<"\t|"<<float(nEvents[6])/nEvents[5]<<"\t|"<<endl;
-  cout<<"| 7:   Mll < 25              |\t"<< nEvents[7]  <<"\t|"<<float(nEvents[7])/nEvents[6]<<"\t|"<<endl;
+  cout<<"| 4: 2/4 muons               |\t"<< nEvents[4]  <<"\t|"<<float(nEvents[4])/nEvents[3]<<"\t|"<<endl;
+  cout<<"| 5: 2e/4mu pt cuts          |\t"<< nEvents[5]  <<"\t|"<<float(nEvents[5])/nEvents[4]<<"\t|"<<endl;
+  cout<<"| 6: pair up: 2+2            |\t"<< nEvents[6]  <<"\t|"<<float(nEvents[6])/nEvents[5]<<"\t|"<<endl;
+  cout<<"| 7:   Mll < n/a             |\t"<< nEvents[7]  <<"\t|"<<float(nEvents[7])/nEvents[6]<<"\t|"<<endl;
   cout<<"| 8:  n/a                    |\t"<< nEvents[8]  <<"\t|"<<float(nEvents[8])/nEvents[7]<<"\t|"<<endl;
 
   cout<<"\n\n | Trigger efficiency 3              |\t"<<endl;

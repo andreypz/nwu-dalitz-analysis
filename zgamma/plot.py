@@ -18,28 +18,16 @@ parser.add_option("--bkg",  dest="bkg",  action="store_true", default=False, hel
 parser.add_option("--mcfm", dest="mcfm", action="store_true", default=False, help="Use MCFM  as a signal")
 parser.add_option("--noeos",dest="noeos",action="store_true", default=False, help="Don't use EOS. pick up the files from nobackup area")
 
-parser.add_option("--zee",   dest="zee",    action="store_true", default=False, help="Z to ee study")
-parser.add_option("--mumu",   dest="mumu",    action="store_true", default=False, help="MuMuGamma selection with Double-Mu trigger")
-parser.add_option("--mugamma",dest="mugamma", action="store_true", default=False, help="MuMuGamma selection with Mu-Pho trigger")
-parser.add_option("--elgamma",dest="elgamma", action="store_true", default=False, help="EEGamma selection")
-parser.add_option("--apz",dest="apz", action="store_true", default=False, help="Study AlphaPiZ particle")
-parser.add_option("--four",dest="four", action="store_true", default=False, help="Four lepton analysis")
+parser.add_option("--apz",dest="apz",action="store_true", default=False, help="Discover new particle")
+parser.add_option("-s", '--sel', dest="sel", type="string", default='mugamma',
+                  help="Selection to be used. Options are: '4mu','2e2mu', 'zee','mugamma', 'egamma'")
+
 
 (options, args) = parser.parse_args()
 
 mass = options.mass
 
-sel = []
-if options.mugamma:
-  sel.append("mugamma")
-if options.zee:
-  sel.append("zee")
-if options.mumu:
-  sel.append("mumu")
-if options.elgamma:
-  sel.append("elgamma")
-if options.four:
-  sel.append("2e2mu")
+sel = [options.sel]
 
 def effPlots2(f1, path):
   c1.cd()
@@ -416,33 +404,58 @@ if __name__ == "__main__":
 
     #sigFileMAD  = TFile(hPath+"/mugamma_"+period+"/hhhh_ggH-mad125_1.root", "OPEN")
 
-  if options.apz:
+  ss = options.sel
+  if options.apz and ss in ['4mu','2e2mu']:
+    if doMerge:
+      if ss in ['4mu','2e2mu']:
+        os.system("hadd -f "+hPath+"/m_Data_apz_DoubleMu_"+ss+"_"+period+".root "+hPath+"/"+ss+"_"+period+"/hhhh_DoubleMu_Run20*.root")
+        if ss == '2e2mu':
+          os.system("hadd -f "+hPath+"/m_Data_apz_MuEG_"+ss+"_"+period+".root "+hPath+"/"+ss+"_"+period+"/hhhh_MuEG_Run20*.root")
+          os.system("hadd -f "+hPath+"/m_Data_apz_DoubleElectron_"+ss+"_"+period+".root "+hPath+"/"+ss+"_"+period+"/hhhh_DoubleElectron_Run20*.root")
+
     c1 = TCanvas("c4","small canvas",600,600);
-    #data = TFile("/tthome/andrey/m_Data_DoubleMu_2e2mu_2012.root","OPEN")
-    #data = TFile("/tthome/andrey/m_Data_DoubleElectron_2e2mu_2012.root","OPEN")
-    data = TFile("/tthome/andrey/m_Data_MuEG_2e2mu_2012.root","OPEN")
 
-    alphaPiZ2(data, c1, TCut(''),   pathBase+"/alphaPiZ-1/")
-    alphaPiZ2(data, c1, TCut('pt12/m4l>0.3 && pt34/m4l>0.3'),                   pathBase+"/alphaPiZ-2/")
-    alphaPiZ2(data, c1, TCut('pt12/m4l>0.3 && pt34/m4l>0.3 && m4l>100'),        pathBase+"/alphaPiZ-3/")
-    alphaPiZ2(data, c1, TCut('pt12/m4l>0.3 && pt34/m4l>0.3 && m4l>100 && m12>15 && m12<30'),     pathBase+"/alphaPiZ-4/")
+    if ss=='2e2mu':
+      samples = ['DoubleMu','MuEG','DoubleElectron']
+    elif ss=='4mu':
+      samples = ['DoubleMu']
+
+    for s in samples:
+      data = TFile(hPath+"/m_Data_apz_"+s+"_"+ss+"_2012.root","OPEN")
+
+      alphaPiZ2(data, c1, TCut(''),   pathBase+"/"+s+"-alphaPiZ-1/")
+      alphaPiZ2(data, c1, TCut('pt12/m4l>0.3 && pt34/m4l>0.3'),                   pathBase+"/"+s+"-alphaPiZ-2/")
+      alphaPiZ2(data, c1, TCut('pt12/m4l>0.3 && pt34/m4l>0.3 && m4l>100'),        pathBase+"/"+s+"-alphaPiZ-3/")
+      alphaPiZ2(data, c1, TCut('pt12/m4l>0.3 && pt34/m4l>0.3 && m4l>100 && m12>15 && m12<30'),pathBase+"/"+s+"-alphaPiZ-4/")
+      alphaPiZ2(data, c1, TCut('m12>15 && m12<30 && m34>15 && m34<30'),pathBase+"/"+s+"-alphaPiZ-5/")
+
+      alphaPiZ2(data, c1, TCut('m12>15 && m12<30 && m34>15 && m34<30 && pt12>20 && pt34>20'),pathBase+"/"+s+"-alphaPiZ-6/")
+
+      alphaPiZ2(data, c1, TCut('m4l>140 && m4l<150'),pathBase+"/"+s+"-alphaPiZ-7/")
 
 
-    '''
-    if options.apz:
-        c1 = TCanvas("c4","small canvas",600,600);
-        data = TFile(hPath+"/m_Data_mugamma_"+period+".root","OPEN")
+      u.drawAllInFile(data, "data",None, "",None,"",
+                      "apz-plots",pathBase+"/apz-plots/",None,"norm2")
 
-        alphaPiZ(data, TCut(''),                                                            pathBase+"/alphaPiZ-1/")
-        alphaPiZ(data, TCut('ph_pt/m_llg>0.3 && di_pt/m_llg>0.3'),                          pathBase+"/alphaPiZ-2/")
-        alphaPiZ(data, TCut('ph_pt/m_llg>0.3 && di_pt/m_llg>0.3 && m_llg>100&&m_llg<150'),  pathBase+"/alphaPiZ-3/")
-        alphaPiZ(data, TCut('ph_pt/m_llg>0.35 && di_pt/m_llg>0.35 && m_llg>100&&m_llg<150'),pathBase+"/alphaPiZ-4/")
-        alphaPiZ(data, TCut('ph_pt/m_llg>0.35 && di_pt/m_llg>0.35 && m_llg>120&&m_llg<180'),pathBase+"/alphaPiZ-5/")
-        alphaPiZ(data, TCut('ph_pt/m_llg>0.32 && di_pt/m_llg>0.32 && m_llg>125&&m_llg<170'),pathBase+"/alphaPiZ-6/")
 
-        alphaPiZ(data, TCut('ph_pt/m_llg>0.33 && di_pt/m_llg>0.33 &&ph_pt/m_llg<0.5 && di_pt/m_llg<0.7'), pathBase+"/alphaPiZ-7/")
-        alphaPiZ(data, TCut('ph_pt/m_llg>0.33 && di_pt/m_llg>0.33 &&ph_pt/m_llg<0.5 && di_pt/m_llg<0.7 &&m_llg>85&&m_llg<96'), pathBase+"/alphaPiZ-8/")
-    '''
+  if options.apz and ss=='mugamma':
+    c1 = TCanvas("c4","small canvas",600,600);
+    data = TFile(hPath+"/m_Data_mugamma_"+period+".root","OPEN")
+
+    alphaPiZ(data, c1, TCut('ph_pt/m_llg>0.3 && di_pt/m_llg>0.3 && m_llg>100&&m_llg<170 && fabs(ph_eta)<1.444'),
+             pathBase+"/alphaPiZ-0/")
+    alphaPiZ(data, c1, TCut(''),                                                            pathBase+"/alphaPiZ-1/")
+    alphaPiZ(data, c1, TCut('ph_pt/m_llg>0.3 && di_pt/m_llg>0.3'),                          pathBase+"/alphaPiZ-2/")
+    alphaPiZ(data, c1, TCut('ph_pt/m_llg>0.3 && di_pt/m_llg>0.3 && m_llg>100&&m_llg<150'),  pathBase+"/alphaPiZ-3/")
+    alphaPiZ(data, c1, TCut('ph_pt/m_llg>0.35 && di_pt/m_llg>0.35 && m_llg>100&&m_llg<150'),pathBase+"/alphaPiZ-4/")
+    alphaPiZ(data, c1, TCut('ph_pt/m_llg>0.35 && di_pt/m_llg>0.35 && m_llg>120&&m_llg<180'),pathBase+"/alphaPiZ-5/")
+    alphaPiZ(data, c1, TCut('ph_pt/m_llg>0.32 && di_pt/m_llg>0.32 && m_llg>125&&m_llg<170'),pathBase+"/alphaPiZ-6/")
+
+    alphaPiZ(data, c1, TCut('ph_pt/m_llg>0.33 && di_pt/m_llg>0.33 &&ph_pt/m_llg<0.5 && di_pt/m_llg<0.7'),
+             pathBase+"/alphaPiZ-7/")
+    alphaPiZ(data, c1, TCut('ph_pt/m_llg>0.33 && di_pt/m_llg>0.33 &&ph_pt/m_llg<0.5 && di_pt/m_llg<0.7 &&m_llg>85&&m_llg<96'),
+             pathBase+"/alphaPiZ-8/")
+
 
 
     '''
@@ -551,16 +564,16 @@ if __name__ == "__main__":
   if doBkg:
     table_all  = u.yieldsTable([yields_data,yields_bkg,yields_sig, yields_ggH,yields_vbf, yields_vh], sel)
   else:
-    if not options.four:
+    if not options.apz:
       table_all  = u.yieldsTable([yields_data,yields_sig, yields_ggH,yields_vbf, yields_vh], sel)
 
-    #u.makeTable(table_all,"all", "html")
-    # u.makeTable(table_all,"all", "twiki")
-    #u.makeTable(table_all,"all", "tex")
+  # u.makeTable(table_all,"all", "html")
+  # u.makeTable(table_all,"all", "twiki")
+  # u.makeTable(table_all,"all", "tex")
 
-    #os.system("cat yields_all.html   > yields.html")
+  # os.system("cat yields_all.html   > yields.html")
   os.system("cat yields_all.twiki  > yields.html")
-    #os.system("cat yields_all.tex    > yields.html")
+  # os.system("cat yields_all.tex    > yields.html")
 
   comments = ["These plots are made for ...",
               "Blah"]
