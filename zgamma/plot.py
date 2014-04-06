@@ -405,16 +405,18 @@ if __name__ == "__main__":
     #sigFileMAD  = TFile(hPath+"/mugamma_"+period+"/hhhh_ggH-mad125_1.root", "OPEN")
 
   ss = options.sel
-  if options.apz and ss in ['4mu','2e2mu']:
-    if doMerge:
-      if ss in ['4mu','2e2mu']:
-        os.system("hadd -f "+hPath+"/m_Data_apz_DoubleMu_"+ss+"_"+period+".root "+hPath+"/"+ss+"_"+period+"/hhhh_DoubleMu_Run20*.root")
-        if ss == '2e2mu':
-          os.system("hadd -f "+hPath+"/m_Data_apz_MuEG_"+ss+"_"+period+".root "+hPath+"/"+ss+"_"+period+"/hhhh_MuEG_Run20*.root")
-          os.system("hadd -f "+hPath+"/m_Data_apz_DoubleElectron_"+ss+"_"+period+".root "+hPath+"/"+ss+"_"+period+"/hhhh_DoubleElectron_Run20*.root")
+  if options.apz and doMerge:
+    if ss in ['4mu','2e2mu']:
+      os.system("hadd -f "+hPath+"/m_Data_apz_DoubleMu_"+ss+"_"+period+".root "+hPath+"/"+ss+"_"+period+"/hhhh_DoubleMu_Run20*.root")
 
-    c1 = TCanvas("c4","small canvas",600,600);
+    if ss in ['2e2mu','mugamma']:
+      os.system("hadd -f "+hPath+"/m_Data_apz_MuEG_"+ss+"_"+period+".root "+hPath+"/"+ss+"_"+period+"/hhhh_MuEG_Run20*.root")
+    if ss =='2e2mu':
+      os.system("hadd -f "+hPath+"/m_Data_apz_DoubleElectron_"+ss+"_"+period+".root "+hPath+"/"+ss+"_"+period+"/hhhh_DoubleElectron_Run20*.root")
 
+  c1 = TCanvas("c4","small canvas",600,600);
+
+  if ss in ['4mu','2e2mu']:
     if ss=='2e2mu':
       samples = ['DoubleMu','MuEG','DoubleElectron']
     elif ss=='4mu':
@@ -438,9 +440,8 @@ if __name__ == "__main__":
                       "apz-plots",pathBase+"/apz-plots/",None,"norm2")
 
 
-  if options.apz and ss=='mugamma':
-    c1 = TCanvas("c4","small canvas",600,600);
-    data = TFile(hPath+"/m_Data_mugamma_"+period+".root","OPEN")
+  elif ss=='mugamma':
+    data = TFile(hPath+"/m_Data_apz_MuEG_mugamma_2012.root","OPEN")
 
     alphaPiZ(data, c1, TCut('ph_pt/m_llg>0.3 && di_pt/m_llg>0.3 && m_llg>100&&m_llg<170 && fabs(ph_eta)<1.444'),
              pathBase+"/alphaPiZ-0/")
@@ -449,11 +450,10 @@ if __name__ == "__main__":
     alphaPiZ(data, c1, TCut('ph_pt/m_llg>0.3 && di_pt/m_llg>0.3 && m_llg>100&&m_llg<150'),  pathBase+"/alphaPiZ-3/")
     alphaPiZ(data, c1, TCut('ph_pt/m_llg>0.35 && di_pt/m_llg>0.35 && m_llg>100&&m_llg<150'),pathBase+"/alphaPiZ-4/")
     alphaPiZ(data, c1, TCut('ph_pt/m_llg>0.35 && di_pt/m_llg>0.35 && m_llg>120&&m_llg<180'),pathBase+"/alphaPiZ-5/")
-    alphaPiZ(data, c1, TCut('ph_pt/m_llg>0.32 && di_pt/m_llg>0.32 && m_llg>125&&m_llg<170'),pathBase+"/alphaPiZ-6/")
+    alphaPiZ(data, c1, TCut('ph_pt/m_llg>0.35 && di_pt/m_llg>0.35 && m_llg>100&&m_llg<130'),pathBase+"/alphaPiZ-6/")
 
-    alphaPiZ(data, c1, TCut('ph_pt/m_llg>0.33 && di_pt/m_llg>0.33 &&ph_pt/m_llg<0.5 && di_pt/m_llg<0.7'),
-             pathBase+"/alphaPiZ-7/")
-    alphaPiZ(data, c1, TCut('ph_pt/m_llg>0.33 && di_pt/m_llg>0.33 &&ph_pt/m_llg<0.5 && di_pt/m_llg<0.7 &&m_llg>85&&m_llg<96'),
+    alphaPiZ(data, c1, TCut('ph_pt/m_llg>0.30 && di_pt/m_llg>0.30 && m_llg>121&&m_llg<131'),pathBase+"/alphaPiZ-7/")
+    alphaPiZ(data, c1, TCut('ph_pt/m_llg>0.30 && di_pt/m_llg>0.30 && m_llg>85&&m_llg<96'),
              pathBase+"/alphaPiZ-8/")
 
 

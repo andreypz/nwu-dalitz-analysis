@@ -55,63 +55,17 @@
 #include "../plugins/ZGAngles.h"
 #include "../plugins/HistManager.h"
 #include "../plugins/PhotonScaleCorrections.hh"
+
 //#include "../plugins/PhosphorCorrectorFunctor.hh"
 // Header file for the classes stored in the TTree if any.
+
+#include "../plugins/ObjectID.h"
+#include "../plugins/HistMaker.h"
 #include <TClonesArray.h>
 #include <TVector3.h>
 
 
 #define nC 16
-struct muIdAndIsoCuts{
-  Bool_t IsPF;
-  Bool_t IsGLB;
-  Float_t ptErrorOverPt;
-  Int_t TrackLayersWithMeasurement;
-  Int_t PixelLayersWithMeasurement;
-  Int_t NumberOfValidMuonHits;
-  Int_t NumberOfValidTrackerHits;
-  Int_t NumberOfValidPixelHits;
-  Int_t NumberOfMatches;
-  Int_t NumberOfMatchedStations;
-  Float_t NormalizedChi2;
-  Float_t NormalizedChi2_tracker;
-  Float_t dxy;
-  Float_t dz;
-  Float_t chIso04;
-  Float_t nhIso04;
-  Float_t phIso04;
-  Float_t pfIso04;
-};
-
-struct elIdAndIsoCuts{
-  //broken into [0] barrel and [1] endcap
-  Float_t ptErrorOverPt[2];
-  Float_t dEtaIn[2];
-  Float_t dPhiIn[2];
-  Float_t sigmaIetaIeta[2];
-  Float_t HadOverEm[2];
-  Float_t dxy[2];
-  Float_t dz[2];
-  Float_t fabsEPDiff[2];
-  Int_t ConversionMissHits[2];
-  Int_t PassedConversionProb[2];
-  Float_t pfIso04[2];
-};
-
-struct phIdAndIsoCuts{
-  //broken into [0] barrel and [1] endcap
-  Int_t PassedEleSafeVeto[2];
-  Float_t sigmaIetaIeta[2];
-  Float_t HadOverEm[2];
-  float chIso03[2];
-  float nhIso03[2];
-  float phIso03[2];
-};
-
-muIdAndIsoCuts muIdAndIsoCutsTight, muIdAndIsoCutsLoose, muIdAndIsoCutsSoft;
-elIdAndIsoCuts elIdAndIsoCutsTight, elIdAndIsoCutsLoose;
-phIdAndIsoCuts phIdAndIsoCutsHZG,   phIdAndIsoCutsTight, phIdAndIsoCutsLoose;
-
 class zgamma : public TSelector {
  private:
   TFile* histoFile;
@@ -122,6 +76,9 @@ class zgamma : public TSelector {
   HistManager *hists;
   WeightUtils *weighter;
   rochcor2012 *roch;
+  ObjectID *ObjID;
+  HistMaker *HM;
+
   UInt_t nEvents[nC];
   UInt_t totEvents;
 
@@ -137,17 +94,11 @@ class zgamma : public TSelector {
   Int_t nVtx, nVtxTotal;
   Float_t nDofVtx1, nDofVtx2;
 
-  TTree* _apzTree;
-  Double_t apz_dr12, apz_dr34, apz_dr1234;
-  Double_t apz_m12, apz_m34, apz_m4l;
-  Double_t apz_pt12, apz_pt34;
-  Double_t apz_m12, apz_m34;
-
   TTree* _fitTree;
   Double_t fit_m_llg, fit_m_ll, fit_phEta, fit_weight;
   Double_t fit_m_4l, fit_m_ll2;
   Double_t fit_phPt, fit_diPt;
-  Bool_t fit_isLowPt;
+  Bool_t   fit_isLowPt;
 
   string period;
   string sample;
@@ -245,33 +196,10 @@ class zgamma : public TSelector {
    virtual void    SlaveTerminate();
    virtual void    Terminate();
 
-
    virtual void CountEvents(Int_t);
-
-   virtual float CalculateMuonIso(TCMuon *lep);
-   virtual float CalculateElectronIso(TCElectron *lep);
-   virtual bool PassMuonIdAndIso(TCMuon *l, muIdAndIsoCuts c, TVector3 *pv);
-   virtual bool PassElectronIdAndIso(TCElectron *l, elIdAndIsoCuts c, TVector3 *pv);
-   virtual bool PassElectronIdAndIsoMVA(TCElectron *l);
-   virtual bool PassPhotonIdAndIso(TCPhoton *p, phIdAndIsoCuts c, TVector3 *pv);
-
-   virtual void CalculatePhotonIso(TCPhoton *p, float& chIsoCor, float& nhIsoCor, float& phIsoCor);
-   virtual void FillHistosFull(Int_t n, Double_t w, TCPhysObject , TCPhysObject , TCPhysObject , TCPhysObject , TCPhysObject, string s="");
    virtual void FillHistoCounts(Int_t n, Double_t w);
-   virtual void MakeMuonPlots(TCMuon mu, TVector3 *pv);
-   virtual void MakePhotonPlots(TCPhoton ph);
-   virtual void MakeZeePlots(TCPhoton , TCPhoton );
-   virtual void MuonDump(TCMuon mu, TVector3 *pv);
-   virtual void PhotonDump(TCPhoton pho,  phIdAndIsoCuts c);
-   virtual void MakePhotonEnergyCorrPlots(TCPhoton , Float_t , Float_t );
 
-   virtual void PhotonR9Corrector(TCPhoton& ph);
-
-   TCGenParticle * GetPrimaryAncestor(TCGenParticle *p);
-
-   virtual void DiscoverGeneology(TCGenParticle *p, ULong64_t ev);
-
-   ClassDef(zgamma,0);
+   ClassDef(zgamma,1);
 };
 
 #endif

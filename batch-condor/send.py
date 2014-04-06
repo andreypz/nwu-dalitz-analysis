@@ -112,8 +112,8 @@ if period =="2012":
     data.extend([
         cfg('MuEG_Run2012A',  DIRNATE+'/nuTuples_v9.6_8TeV/Data/MuEG_Run2012A',  5, 'DATA '+selection+' mugamma '+' 2012 0' + whereWeRun),
         cfg('MuEG_Run2012B',  DIRNATE+'/nuTuples_v9.6_8TeV/Data/MuEG_Run2012B',  8, 'DATA '+selection+' mugamma '+' 2012 0' + whereWeRun),
-        cfg('MuEG_Run2012C',  DIRNATE+'/nuTuples_v9.6_8TeV/Data/MuEG_Run2012C',  8, 'DATA '+selection+' mugamma '+' 2012 0' + whereWeRun),
-        cfg('MuEG_Run2012D',  DIRNATE+'/nuTuples_v9.6_8TeV/Data/MuEG_Run2012D',  15,'DATA '+selection+' mugamma '+' 2012 0' + whereWeRun),
+        cfg('MuEG_Run2012C',  DIRNATE+'/nuTuples_v9.6_8TeV/Data/MuEG_Run2012C', 12, 'DATA '+selection+' mugamma '+' 2012 0' + whereWeRun),
+        cfg('MuEG_Run2012D',  DIRNATE+'/nuTuples_v9.6_8TeV/Data/MuEG_Run2012D', 15, 'DATA '+selection+' mugamma '+' 2012 0' + whereWeRun),
         ])
 
   if selection in ['elgamma']:

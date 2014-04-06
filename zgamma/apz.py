@@ -177,8 +177,6 @@ def alphaPiZ(f1, c1, globalCut, path):
     binDownSize = 2
   elif 'alphaPiZ-4' in path:
     binDownSize = 2
-  elif 'alphaPiZ-5' in path:
-    binDownSize = 2
   elif 'alphaPiZ-6' in path:
     binDownSize = 2
 
@@ -277,7 +275,7 @@ def alphaPiZ(f1, c1, globalCut, path):
   mllg2 = '150'
   m1 = '3.0'
   m2 = '3.2'
-  nBins = 50/binDownSize
+  nBins = 20/binDownSize
   binWidth = (float(mllg2)-float(mllg1))/float(nBins)
   mllCut = TCut('m_ll>'+m1+' && m_ll<'+m2)
   t.Draw('m_llg>>'+name+'('+str(nBins)+','+mllg1+','+mllg2+')',mllCut*globalCut, opt)
@@ -293,7 +291,7 @@ def alphaPiZ(f1, c1, globalCut, path):
   mllg2 = '110'
   m1 = '3.0'
   m2 = '3.2'
-  nBins = '30'
+  nBins = 20/binDownSize
   binWidth = (float(mllg2)-float(mllg1))/float(nBins)
   mllCut = TCut('(m_ll>'+m1+') && (m_ll<'+m2+')')
   t.Draw('m_llg>>'+name+'('+str(nBins)+','+mllg1+','+mllg2+')',  mllCut+globalCut, opt)
@@ -341,7 +339,7 @@ def alphaPiZ(f1, c1, globalCut, path):
   mllg2 = '150'
   m1 = '17.0'
   m2 = '19.0'
-  nBins = 60/binDownSize
+  nBins = 20/binDownSize
   binWidth = (float(mllg2)-float(mllg1))/float(nBins)
   mllCut = TCut('m_ll>'+m1+' && m_ll<'+m2)
   # print 15*"*", 'myCut is = ', myFullCut

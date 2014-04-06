@@ -442,7 +442,7 @@ Bool_t fourLeptons::Process(Long64_t entry)
 
       // Decide which muon pair to use if there are more than three muons
       Float_t tmpMll = 99999;
-      Float_t MAPZ   = 0;
+      Float_t MAPZ   = 18;
 
       if (muons.size()==2){
 	l1 = muons[0];
@@ -498,7 +498,7 @@ Bool_t fourLeptons::Process(Long64_t entry)
 
 
       Float_t tmpMll = 99999;
-      const Float_t MAPZ   = 0;
+      const Float_t MAPZ   = 18;
 
       l1 = muons[0];
       Int_t ind_m2 = 0, ind_m3=0, ind_m4=0;
