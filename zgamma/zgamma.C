@@ -14,17 +14,6 @@ string myTriggers[ntrig] = {
 };
 
 UInt_t nEventsTrig[nC][ntrig];
-/*
-float EAPho[7][3] = {
-  {0.012,  0.030,   0.148}, //         eta < 1.0
-  {0.010,  0.057,   0.130}, // 1.0   < eta < 1.479
-  {0.014,  0.039,   0.112}, // 1.479 < eta < 2.0
-  {0.012,  0.015,   0.216}, // 2.0   < eta < 2.2
-  {0.016,  0.024,   0.262}, // 2.2   < eta < 2.3
-  {0.020,  0.039,   0.260}, // 2.3   < eta < 2.4
-  {0.012,  0.072,   0.266}  // 2.4   < eta
-};
-*/
 
 string  myTrigger = "";
 Float_t cut_l1pt  = 23;
@@ -34,7 +23,7 @@ Float_t cut_gammapt = 25;
 Float_t mllMax = 25;
 
 Float_t global_Mll = 0;
-Bool_t applyPhosphor = 0;
+//Bool_t applyPhosphor = 0;
 Bool_t doRochCorr = 1;
 Bool_t doZee = 0;
 Int_t  dal=0, nodal=0;
@@ -92,8 +81,6 @@ void zgamma::Begin(TTree * tree)
   roch     = new rochcor2012();
   triggerSelector = new TriggerSelector("", period, *triggerNames);
   myRandom = new TRandom3();
-
-  //phoCorrector.reset(new ammagz::PhosphorCorrectionFunctor("../data/PHOSPHOR_NUMBERS_EXPFIT_ERRORS.txt", true));
 
   for (Int_t n1=0; n1<nC; n1++){
     nEvents[n1]=0;
@@ -543,44 +530,11 @@ Bool_t zgamma::Process(Long64_t entry)
 	 //&& (isRealData || !makeGen || (sample=="dalitz" && makeGen && gen_gamma.DeltaR(*thisPhoton) < 0.2) )
 	 )
 	{
-	  if (applyPhosphor)
-	    {
-	      Float_t corrPhoPt = thisPhoton->Pt();
-
-	      if (isRealData){
-		//corrPhoPt = phoCorrector->GetCorrEtData(thisPhoton->R9(), 2012, thisPhoton->Pt(), thisPhoton->Eta());
-		thisPhoton->SetPtEtaPhiM(corrPhoPt,thisPhoton->Eta(),thisPhoton->Phi(),0.0);
-	      }
-	      else
-		{
-		  TCGenParticle goodGenPhoton;
-		  Float_t testDr = 9999;
-
-		  //PhotonR9Corrector(*thisPhoton);
-
-		  for (int j = 0; j < genParticles->GetSize(); ++j) {
-		    TCGenParticle* thisParticle = (TCGenParticle*) genParticles->At(j);
-		    if (thisParticle->GetPDGId()==22 && thisParticle->Mother() &&  thisParticle->GetStatus()==1
-			&& (thisParticle->Mother()->GetPDGId()==25 || thisParticle->Mother()->GetPDGId()==22)){
-
-		      if(thisPhoton->DeltaR(*thisParticle)<testDr){
-			goodGenPhoton = *thisParticle;
-			testDr = thisPhoton->DeltaR(*thisParticle);
-		      }
-		    }
-		  }
-		  //if (testDr < 0.2)
-		  //corrPhoPt = phoCorrector->GetCorrEtMC(thisPhoton->R9(), 2012, thisPhoton->Pt(), thisPhoton->Eta(), goodGenPhoton.E());
-		  thisPhoton->SetPtEtaPhiM(corrPhoPt,thisPhoton->Eta(),thisPhoton->Phi(),0.0);
-		}
-	    }
-
 
 	  Double_t corrPhoEnSC   = correctedPhotonEnergy(thisPhoton->SCEnergy(), thisPhoton->SCEta(), thisPhoton->R9(), runNumber,
 							 0, "Moriond2014", !isRealData, myRandom);
 	  Double_t corrPhoEnReco = correctedPhotonEnergy(thisPhoton->E(), thisPhoton->SCEta(), thisPhoton->R9(), runNumber,
 							 0, "Moriond2014", !isRealData, myRandom);
-
 
 	  HM->MakePhotonEnergyCorrPlots(*thisPhoton, corrPhoEnReco, corrPhoEnSC);
 
@@ -745,7 +699,7 @@ Bool_t zgamma::Process(Long64_t entry)
 
   if(!isRealData && makeGen){
     hists->fill1DHist(genMll,  "gen_Mll_reco_gamma_iso",  ";gen_Mll",100,0,mllMax, 1,"eff");
-    hists->fill1DHist(gendR,   "gen_dR_reco_gamma_iso",   ";gen_dR", 50,0,0.3,1,"eff");
+    hists->fill1DHist(gendR,   "gen_dR_reco_gamma_iso",   ";gen_dR", 50,0,0.3,     1,"eff");
   }
 
   FillHistoCounts(3, eventWeight);
@@ -815,7 +769,7 @@ Bool_t zgamma::Process(Long64_t entry)
 
   if(!isRealData && makeGen){
     hists->fill1DHist(genMll,  "gen_Mll_two_lep_reco", ";gen_Mll",100,0,mllMax, 1,"eff");
-    hists->fill1DHist(gendR,   "gen_dR_two_lep_reco",  ";gen_dR", 50,0,0.3,1,"eff");
+    hists->fill1DHist(gendR,   "gen_dR_two_lep_reco",  ";gen_dR", 50,0,0.3,     1,"eff");
   }
 
   HM->FillHistosFull(4, eventWeight, l1, l2, lPt1, lPt2, gamma, "");
@@ -915,9 +869,9 @@ Bool_t zgamma::Process(Long64_t entry)
   if(!isRealData && makeGen){
     for (Int_t i = 1; i<=6; i++){
       if ((l1+l2).Pt()>20+i*5)
-	hists->fill1DHist(genMll,  Form("gen_Mll_%i",i),";gen_Mll", 100,0,mllMax, 1,"eff");
+	hists->fill1DHist(genMll,  Form("gen_Mll_%i",i),";gen_Mll", 100,0,mllMax,    1,"eff");
       if (gamma.Pt()>20+i*5)
-	hists->fill1DHist(genMll,  Form("gen_Mll_%i",6+i),";gen_Mll", 100,0,mllMax, 1,"eff");
+	hists->fill1DHist(genMll,  Form("gen_Mll_%i",6+i),";gen_Mll", 100,0,mllMax,  1,"eff");
       if (gamma.Pt()/Mllg> 0.15+0.05*i)
 	hists->fill1DHist(genMll,  Form("gen_Mll_%i",12+i),";gen_Mll", 100,0,mllMax, 1,"eff");
       if ((l1+l2).Pt()/Mllg> 0.15+0.05*i)
