@@ -87,10 +87,11 @@ class zgamma : public TSelector {
 
   //auto_ptr<ammagz::PhosphorCorrectionFunctor> phoCorrector;
 
-  TTree* _mvaTree;
+  /*TTree* _mvaTree;
   Float_t mva_SCPhiWidth, mva_SCEtaWidth, mva_SigmaIEtaIEta, mva_SigmaIPhiIPhi;
   Float_t mva_fabsEPDiff, mva_EoP, mva_fbrem, mva_SCdPhi, mva_SCdEta;
   Float_t mva_SCEta, mva_R9, mva_HadOverEm, mva_ome1x5oe5x5;
+  */
   Int_t nVtx, nVtxTotal;
   Float_t nDofVtx1, nDofVtx2;
 
@@ -99,6 +100,13 @@ class zgamma : public TSelector {
   Double_t fit_m_4l, fit_m_ll2;
   Double_t fit_phPt, fit_diPt;
   Bool_t   fit_isLowPt;
+
+  TTree* _apzTree;
+  Double_t apz_dr12, apz_dr34, apz_dr1234;
+  Double_t apz_pt12, apz_pt34;
+  Double_t apz_pt1, apz_pt2, apz_pt3, apz_pt4;
+  Double_t apz_m12, apz_m34, apz_m123, apz_m4l;
+
 
   string period;
   string sample;

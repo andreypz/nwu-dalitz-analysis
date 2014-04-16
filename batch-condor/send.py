@@ -32,26 +32,27 @@ dCache      = '/pnfs/cms/WAX/11/store/user'
 EOS         = '/eos/uscms/store/user'
 outputPath  = EOS+'/andreypz/batch_output/zgamma/8TeV'
 executable  = 'batchJob.sh'
-selection = "mugamma"
+selection   = "mugamma"
 
-DIR = EOS+'/lpchzg'
+DIR      = EOS+'/lpchzg'
 DIRNATE  = EOS+'/naodell'
 DIRBRIAN = EOS+'/bpollack'
 whereWeRun = ' '
+
 if '/tthome' in os.getcwd():
   print 'We are running at NWU, yhaa'
   print os.getcwd()
   whereWeRun+='nwu'
   DIR = '/tthome/andrey'
   outputPath  = '/tthome/andrey/batch_output/zgamma/8TeV'
-  DIRNATE  = '/tthome/naodell/storage/data'
-  DIRBRIAN = '/tthome/bpollack/storage'
+  DIRNATE     = '/tthome/naodell/storage/data'
+  DIRBRIAN    = '/tthome/bpollack/storage'
 
 
 selection = options.sel
 trig      = ' '+options.trigger+' '
 
-version    = args[0]
+version   = args[0]
 period    = '2012'
 doTest    = options.test
 doData    = options.data
@@ -60,9 +61,9 @@ doSignal  = options.sig
 if options.gen and not options.sig:
   print "We only will do gen level analysis on Signal MC sample for now"
   sys.exit(0)
-gen=" 0"
+gen = " 0"
 if options.gen:
-  gen=" gen"
+  gen = " gen"
 if options.all:
   doData = 1
   doBG   = 1
@@ -133,7 +134,8 @@ if period =="2012":
 
   if selection in ['mugamma','4mu','2e2mu','apz']:
     bg.extend([
-        cfg('DYjetDalitz', DIR+'/nuTuples_v9.6_8TeV/dalitz/DYtoMuMuJet', 1, 'DY '+selection+trig+'  2012 0' + whereWeRun ),
+        cfg('DYjetDalitz',   DIR+'/nuTuples_v9.6_8TeV/dalitz/DYtoMuMuJet',   1, 'DY '+selection+trig+'  2012 0' + whereWeRun ),
+        cfg('DYgammaDalitz', DIR+'/nuTuples_v9.6_8TeV/dalitz/DYtoMuMuGamma', 1, 'DY '+selection+trig+'  2012 0' + whereWeRun ),
         ])
 
 # Signal MC configs
@@ -143,6 +145,9 @@ if period =="2012":
 
   if selection in ["mugamma"]:
     signal.extend([
+
+        cfg('ZtoJPsiGamma',     DIR+'/nuTuples_v9.6_8TeV/dalitz/ZtoJPsiGamma-MuMuGamma',1, 'dalitz '+selection+trig+period+gen + whereWeRun),
+        cfg('HiggsToJPsiGamma', DIR+'/nuTuples_v9.6_8TeV/dalitz/HiggsToJPsi',           1, 'dalitz '+selection+trig+period+gen + whereWeRun),
 
         cfg('ggH-mad120', DIR+'/nuTuples_v9.6_8TeV/dalitz/ggHiggsToMuMuGamma_MH120',1, 'dalitz '+selection+trig+period+gen + whereWeRun),
         cfg('ggH-mad125', DIR+'/nuTuples_v9.6_8TeV/dalitz/ggHiggsToMuMuGamma_MH125',1, 'dalitz '+selection+trig+period+gen + whereWeRun),
@@ -167,7 +172,6 @@ if period =="2012":
         cfg('vh-mad140', DIR+'/nuTuples_v9.6_8TeV/dalitz/VHiggsToMuMuGamma_MH140',1, 'dalitz '+selection+trig+period+gen + whereWeRun),
         cfg('vh-mad145', DIR+'/nuTuples_v9.6_8TeV/dalitz/VHiggsToMuMuGamma_MH145',1, 'dalitz '+selection+trig+period+gen + whereWeRun),
         cfg('vh-mad150', DIR+'/nuTuples_v9.6_8TeV/dalitz/VHiggsToMuMuGamma_MH150',1, 'dalitz '+selection+trig+period+gen + whereWeRun),
-
 
         ])
   elif selection in ["elgamma"]:

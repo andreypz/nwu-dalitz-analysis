@@ -1,7 +1,6 @@
 #ifndef _ObjectID_H
 #define _ObjectID_H
 
-
 #include "TLorentzVector.h"
 #include "../interface/TCPhoton.h"
 #include "../interface/TCEGamma.h"
@@ -60,22 +59,20 @@ muIdAndIsoCuts muIdAndIsoCutsTight, muIdAndIsoCutsLoose, muIdAndIsoCutsSoft;
 elIdAndIsoCuts elIdAndIsoCutsTight, elIdAndIsoCutsLoose;
 phIdAndIsoCuts phIdAndIsoCutsHZG,   phIdAndIsoCutsTight, phIdAndIsoCutsLoose;
 
-
-
 class ObjectID {
  public:
   ObjectID();
   virtual ~ObjectID();
 
   virtual void CalculatePhotonIso(TCPhoton *ph, float& chIsoCor, float& nhIsoCor, float& phIsoCor);
-  bool PassPhotonIdAndIso(TCPhoton *ph, phIdAndIsoCuts cuts, TVector3 *pv);
+  virtual bool PassPhotonIdAndIso(TCPhoton *ph, TString n);
   virtual void SetEventInfo(Bool_t, UInt_t, ULong64_t, Float_t );
   virtual void PhotonR9Corrector(TCPhoton *ph);
 
   virtual float CalculateMuonIso(TCMuon *l);
   virtual float CalculateElectronIso(TCElectron *l);
-  virtual bool PassMuonIdAndIso(TCMuon *l, muIdAndIsoCuts c, TVector3 *pv);
-  virtual bool PassElectronIdAndIso(TCElectron *l, elIdAndIsoCuts c, TVector3 *pv);
+  virtual bool PassMuonIdAndIso(TCMuon *l, TVector3 *pv, TString n);
+  virtual bool PassElectronIdAndIso(TCElectron *l, TVector3 *pv, TString n);
   virtual bool PassElectronIdAndIsoMVA(TCElectron *l);
 
    TCGenParticle * GetPrimaryAncestor(TCGenParticle *p);

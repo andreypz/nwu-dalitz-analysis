@@ -85,6 +85,7 @@ def makeHTML(title, htmlDir, plot_types, description, IFRAMEA):
     ifile.close()
 
     os.system("cp yields* "+htmlDir)
+    os.system("rm yields*")
 
     print "\n\n *** End of  making HTML pages - all done *** \n"
 

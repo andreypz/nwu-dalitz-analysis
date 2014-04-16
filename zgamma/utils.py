@@ -449,29 +449,28 @@ def drawAllInFile(f1, name1, f2, name2, f3, name3, dir,path, N, howToScale="none
 def yieldsTable(yieldList, sel, num=True):
     print sel
     t = []
-    if len(sel)==0:
-        return t
-
-    cuts =  getCuts(conf, "cuts-"+sel[0][0:2])
-
+    cuts =  getCuts(conf, "cuts-"+sel[0:2])
 
     l1 = ["Cut/trigger"]
     if num:
-        l1.insert(0,"")
-    l1.extend([ a+str(i) for a in sel  for i in range(0,len(yieldList))])
-    print l1
+      l1.insert(0,"")
+    l1.extend(5*[sel])
+
+    print 'First line in yieldsTable:', l1
+
     t.append(l1)
     for line in xrange(len(cuts)):
         l=[]
         if num:
             l.append(str((line-1)))
         l.append(cuts[line])
-        for thissel in sel:
-            for yi in yieldList:
-                l.append(yi[thissel][line])
-            #print l
-            t.append(l)
 
+        for yi in yieldList:
+          l.append(yi[sel][line])
+          print l
+        t.append(l)
+
+    print t
     return t
 
 def makeTable(table, name, opt="tex"):
@@ -479,55 +478,57 @@ def makeTable(table, name, opt="tex"):
     n_row = len(table)
     if n_row==0: return
     n_col = len(table[0])
+
+    # print table
     for l in table:
-        if len(l)!=n_col:
-            print "No good, the number of columns is messed up"
+      if len(l)!=n_col:
+        print "No good, the number of columns is messed up", len(l), n_col
 
 
     myTable = ''
     if opt=="tex":
-        beginTable = '\\begin{tabular}{|'+n_col*"l|"+'} \n \\hline \n'
-        endTable   = '\\end{tabular} \n'
+      beginTable = '\\begin{tabular}{|'+n_col*"l|"+'} \n \\hline \n'
+      endTable   = '\\end{tabular} \n'
 
-        beginLine  = ''
-        endLine    = ' \\\\ \\hline \n'
-        separator  = ' & '
+      beginLine  = ''
+      endLine    = ' \\\\ \\hline \n'
+      separator  = ' & '
 
 
     if opt=="html":
-        beginTable = '<table border = "10"    cellpadding="5">'
-        endTable = '</table>'
+      beginTable = '<table border = "10"    cellpadding="5">'
+      endTable = '</table>'
 
-        beginLine  = '\n<tr>\n<td>'
-        endLine    = '</td>\n</tr>'
-        separator  = '</td><td>'
+      beginLine  = '\n<tr>\n<td>'
+      endLine    = '</td>\n</tr>'
+      separator  = '</td><td>'
 
     if opt=="twiki":
-        beginTable = ''
-        endTable   = ''
+      beginTable = ''
+      endTable   = ''
 
-        beginLine  = '| '
-        endLine    = ' |\n'
-        separator  = ' |  '
+      beginLine  = '| '
+      endLine    = ' |\n'
+      separator  = ' |  '
 
 
     myTable +=beginTable
     for l in range(n_row):
-        #print l, table[l]
-        myTable+=beginLine
-        for c in range(n_col):
-            val = table[l][c]
-            if not isinstance(val,str):
-                if c==2:
-                    myTable+="%.0f" % (val)
-                else:
-                    myTable+="%.2f" % (val)
+      # print l, table[l]
+      myTable+=beginLine
+      for c in range(n_col):
+        val = table[l][c]
+        if not isinstance(val,str):
+          if c==2:
+            myTable+="%.0f" % (val)
+          else:
+            myTable+="%.2f" % (val)
+        else:
+          myTable+=val
+        if c!=n_col-1:
+          myTable+=separator
 
-            else:
-                myTable+=val
-            if c!=n_col-1:
-                myTable+=separator
-        myTable+=endLine
+      myTable+=endLine
 
     myTable +=endTable
 

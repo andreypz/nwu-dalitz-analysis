@@ -50,9 +50,9 @@ echo ${selection} ${trigger}
 
 if [ ${gen} == "gen" ]
 then
-    ./run.py ${suffix} ${dataName} -s ${selection} -t ${trigger} -p ${period}  -b
+    ./run.py ${suffix} ${dataName} -s ${selection} -t ${trigger} -p ${period}  --gen -b
 else
-    ./run.py ${suffix} ${dataName} -s ${selection} -t ${trigger} -p ${period} --gen -b
+    ./run.py ${suffix} ${dataName} -s ${selection} -t ${trigger} -p ${period} -b
 fi
 
 echo 'ls in analysis directory'

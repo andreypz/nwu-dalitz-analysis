@@ -2,6 +2,38 @@
 from ROOT import *
 import utils as u
 
+
+def ZJPG(f1, c1, globalCut, path):
+  print "study of Z/H -> J/Psi Gamma and more"
+  u.createDir(path)
+  c1.cd()
+  t = f1.Get('apzTree/apzTree')
+  gStyle.SetMarkerSize(0.6)
+  gStyle.SetMarkerStyle(20);
+  gStyle.SetLineWidth(1);
+  gStyle.SetOptStat(111)
+  opt = ''
+
+  binDownSize = 1
+
+  mllCut = TCut('')
+
+  name = 'h00-mll-HIG14-003'
+  m1 = '0'
+  m2 = '20'
+  mllCut = TCut('m12<'+m2)
+
+  nBins = 50/binDownSize
+  binWidth = (float(m2)-float(m1))/float(nBins)
+  t.Draw('m12>>'+name+'('+str(nBins)+','+m1+','+m2+')',  mllCut+globalCut, opt)
+  h = gDirectory.Get(name)
+  h.Draw("same e1p")
+  h.SetTitle(name+';m_{12} (GeV);Events/%.2f GeV' % binWidth)
+  h.UseCurrentStyle()
+  c1.SaveAs(path+"/"+name+".png")
+
+
+
 def alphaPiZ2(f1, c1, globalCut, path):
   print "study alpha/piz particle"
   u.createDir(path)

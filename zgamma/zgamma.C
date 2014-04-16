@@ -22,12 +22,14 @@ const Float_t cut_iso_mu1 = 0.4, cut_iso_mu2=0;
 Float_t cut_gammapt = 25;
 Float_t mllMax = 25;
 
+Bool_t checkTrigger = kTRUE;
 Float_t global_Mll = 0;
 //Bool_t applyPhosphor = 0;
 Bool_t doRochCorr = 1;
 Bool_t doZee = 0;
-Int_t  dal=0, nodal=0;
 Bool_t makeFitTree = 1;
+Bool_t makeApzTree = 1;
+
 const UInt_t hisEVTS[] = {9331};
 Int_t evSize = sizeof(hisEVTS)/sizeof(int);
 
@@ -53,7 +55,7 @@ void zgamma::Begin(TTree * tree)
       trigger = "ee";
     }
 
-  cout<<sample<<selection<<trigger<<gen<<endl;
+  //cout<<sample<<selection<<trigger<<gen<<endl;
 
   if (gen=="true")
     makeGen=true;
@@ -74,7 +76,7 @@ void zgamma::Begin(TTree * tree)
 
   histoFile = new TFile(Form("a_%s_higgsHistograms.root", selection.c_str()), "RECREATE");
   histoFile->mkdir("fitTree", "fitTree");
-  hists    = new HistManager(histoFile);
+  histoFile->mkdir("apzTree", "apzTree");                                                                                                                                            hists    = new HistManager(histoFile);
   HM       = new HistMaker(hists);
   ObjID    = new ObjectID();
   weighter = new WeightUtils(sample, period, selection, 0);
@@ -87,89 +89,6 @@ void zgamma::Begin(TTree * tree)
     for (UInt_t n2=0; n2<ntrig; n2++)
       nEventsTrig[n1][n2]=0;
   }
-
-  //Cuts
-  //electrons are two types: Barrel/Endcap
-  //Loose
-  elIdAndIsoCutsLoose.ptErrorOverPt[0] = 99999;
-  elIdAndIsoCutsLoose.dPhiIn[0]        = 0.1;
-  elIdAndIsoCutsLoose.dEtaIn[0]        = 0.01;
-  elIdAndIsoCutsLoose.sigmaIetaIeta[0] = 0.02;
-  elIdAndIsoCutsLoose.HadOverEm[0]     = 0.3;
-  elIdAndIsoCutsLoose.fabsEPDiff[0]    = 99999;
-  elIdAndIsoCutsLoose.dxy[0]           = 0.5;
-  elIdAndIsoCutsLoose.dz[0]            = 0.5;
-  elIdAndIsoCutsLoose.pfIso04[0]       = 0.3;
-
-  elIdAndIsoCutsLoose.ptErrorOverPt[1] = 99999;
-  elIdAndIsoCutsLoose.dPhiIn[1]        = 0.1;
-  elIdAndIsoCutsLoose.dEtaIn[1]        = 0.03;
-  elIdAndIsoCutsLoose.sigmaIetaIeta[1] = 0.1;
-  elIdAndIsoCutsLoose.HadOverEm[1]     = 0.3;
-  elIdAndIsoCutsLoose.fabsEPDiff[1]    = 99999;
-  elIdAndIsoCutsLoose.dxy[1]           = 0.5;
-  elIdAndIsoCutsLoose.dz[1]            = 0.5;
-  elIdAndIsoCutsLoose.pfIso04[1]       = 0.3;
-
-  //Tight
-  elIdAndIsoCutsTight.ptErrorOverPt[0] = 9999.;
-  elIdAndIsoCutsTight.dPhiIn[0] = 0.06;
-  elIdAndIsoCutsTight.dEtaIn[0] = 0.004;
-  elIdAndIsoCutsTight.sigmaIetaIeta[0] = 0.01;
-  elIdAndIsoCutsTight.HadOverEm[0] = 0.12;
-  elIdAndIsoCutsTight.fabsEPDiff[0] = 0.05;
-  elIdAndIsoCutsTight.dxy[0] = 0.02;
-  elIdAndIsoCutsTight.dz[0] = 0.1;
-  elIdAndIsoCutsTight.pfIso04[0] = 0.15;
-
-  elIdAndIsoCutsTight.ptErrorOverPt[1] = 9999.;
-  elIdAndIsoCutsTight.dPhiIn[1] = 0.03;
-  elIdAndIsoCutsTight.dEtaIn[1] = 0.007;
-  elIdAndIsoCutsTight.sigmaIetaIeta[1] = 0.03;
-  elIdAndIsoCutsTight.HadOverEm[1] = 0.10;
-  elIdAndIsoCutsTight.fabsEPDiff[1] = 0.05;
-  elIdAndIsoCutsTight.dxy[1] = 0.02;
-  elIdAndIsoCutsTight.dz[1] = 0.1;
-  elIdAndIsoCutsTight.pfIso04[1] = 0.15;
-
-  //Soft muon id (specific for dalitz)
-  muIdAndIsoCutsSoft.TrackLayersWithMeasurement = 5;
-  muIdAndIsoCutsSoft.PixelLayersWithMeasurement = 1;
-  muIdAndIsoCutsSoft.NormalizedChi2_tracker = 3;
-  muIdAndIsoCutsSoft.dxy             = 0.2; //3
-  muIdAndIsoCutsSoft.dz              = 0.5; //30
-  muIdAndIsoCutsSoft.pfIso04         = 0.4;
-
-  //Photon Id cuts
-  phIdAndIsoCutsTight.PassedEleSafeVeto[0] = 1;
-  phIdAndIsoCutsTight.HadOverEm[0]         = 0.05;
-  phIdAndIsoCutsTight.sigmaIetaIeta[0]     = 0.011;
-  phIdAndIsoCutsTight.chIso03[0] = 0.7;
-  phIdAndIsoCutsTight.nhIso03[0] = 0.4;
-  phIdAndIsoCutsTight.phIso03[0] = 0.5;
-
-  phIdAndIsoCutsTight.PassedEleSafeVeto[1] = 1;
-  phIdAndIsoCutsTight.HadOverEm[1]         = 0.05;
-  phIdAndIsoCutsTight.sigmaIetaIeta[1]     = 0.031;
-  phIdAndIsoCutsTight.chIso03[1] = 0.5;
-  phIdAndIsoCutsTight.nhIso03[1] = 1.5;
-  phIdAndIsoCutsTight.phIso03[1] = 1.0;
-
-
-  phIdAndIsoCutsHZG.PassedEleSafeVeto[0] = 1;
-  phIdAndIsoCutsHZG.HadOverEm[0]         = 0.05;
-  phIdAndIsoCutsHZG.sigmaIetaIeta[0]     = 0.011;
-  phIdAndIsoCutsHZG.chIso03[0] = 1.5;
-  phIdAndIsoCutsHZG.nhIso03[0] = 1.0;
-  phIdAndIsoCutsHZG.phIso03[0] = 0.7;
-
-  phIdAndIsoCutsHZG.PassedEleSafeVeto[1] = 1;
-  phIdAndIsoCutsHZG.HadOverEm[1]         = 0.05;
-  phIdAndIsoCutsHZG.sigmaIetaIeta[1]     = 0.033;
-  phIdAndIsoCutsHZG.chIso03[1] = 1.2;
-  phIdAndIsoCutsHZG.nhIso03[1] = 1.5;
-  phIdAndIsoCutsHZG.phIso03[1] = 1.0;
-
 
   //Angles class:
   ang = new ZGAngles();
@@ -189,47 +108,31 @@ void zgamma::Begin(TTree * tree)
     _fitTree->Branch("weight", &fit_weight,"weight/D");
   }
   histoFile->cd();
+  histoFile->cd("apzTree");
+  if (makeApzTree){
+    _apzTree = new TTree("apzTree", "A tree for studying new particles");
+    _apzTree->Branch("dr1234",&apz_dr1234,"dr1234/D");
+    _apzTree->Branch("dr12",  &apz_dr12,  "dr12/D");
+    _apzTree->Branch("dr34",  &apz_dr34,  "dr34/D");
+    _apzTree->Branch("pt12",  &apz_pt12,  "pt12/D");
+    _apzTree->Branch("pt34",  &apz_pt34,  "pt34/D");
+    _apzTree->Branch("m12",   &apz_m12,   "m12/D");
+    _apzTree->Branch("m123",  &apz_m123,  "m123/D");
+    _apzTree->Branch("m34",   &apz_m34,   "m34/D");
+    _apzTree->Branch("m4l",   &apz_m4l,   "m4l/D");
+    _apzTree->Branch("pt1",   &apz_pt1,   "pt1/D");
+    _apzTree->Branch("pt2",   &apz_pt2,   "pt2/D");
+    _apzTree->Branch("pt3",   &apz_pt3,   "pt3/D");
+    _apzTree->Branch("pt4",   &apz_pt4,   "pt4/D");
 
-}
-
-void zgamma::SlaveBegin(TTree * /*tree*/)
-{   TString option = GetOption(); }
-
-Bool_t zgamma::Process(Long64_t entry)
-{
-  GetEntry(entry);
-  CountEvents(0);
-  FillHistoCounts(0, 1);
-  if (nEvents[0] % (int)5e4 == 0) cout<<nEvents[8]<<" events passed of "<<nEvents[0]<<" checked!"<<endl;
-
-  if (nEvents[0] == 1) weighter->SetDataBit(isRealData);
-
-  //if (nEvents[0]>20) Abort("enough is enosugh!");
-
-  //////////////////
-  //Trigger status//
-  //////////////////
-  Bool_t triggerPass  = 1;
-  Bool_t isFound  = 0;
-  Int_t  prescale = 99;
-  Float_t eventWeight = 1.0;
-  for (UInt_t i =0; i<ntrig; i++)
-    {
-      triggerSelector->SelectTrigger(myTriggers[i], triggerStatus, hltPrescale, isFound, triggerPass, prescale);
-      if(triggerPass) nEventsTrig[0][i]++;
-    }
-
-
-  eventWeight = weighter->PUWeight(nPUVerticesTrue);
-  //cout<<" weight="<<eventWeight<<endl;
-  ObjID->SetEventInfo(isRealData, runNumber, eventNumber, rhoFactor);
-  //cout<<eventNumber<<"  ev rho = "<<rhoFactor<<endl;
+    _apzTree->Branch("run",  &runNumber,  "run/i");
+    _apzTree->Branch("event",&eventNumber,"event/l");
+  }
 
   //----------------------//
   // Selecting triggers   //
   //----------------------//
 
-  Bool_t checkTrigger = kTRUE;
   if (trigger=="double-mu")
     {
       myTrigger = "HLT_Mu13_Mu8_v";
@@ -262,6 +165,42 @@ Bool_t zgamma::Process(Long64_t entry)
   else
     checkTrigger = kFALSE;
   //cout<<"Other options are not supported!"<<endl;
+
+}
+
+void zgamma::SlaveBegin(TTree * /*tree*/)
+{   TString option = GetOption(); }
+
+Bool_t zgamma::Process(Long64_t entry)
+{
+  GetEntry(entry);
+  CountEvents(0);
+  FillHistoCounts(0, 1);
+  if (nEvents[0] % (int)5e4 == 0) cout<<nEvents[8]<<" events passed of "<<nEvents[0]<<" checked!"<<endl;
+
+  if (nEvents[0] == 1) weighter->SetDataBit(isRealData);
+
+  //if (nEvents[0]>20) Abort("enough is enosugh!");
+
+  //////////////////
+  //Trigger status//
+  //////////////////
+  Bool_t triggerPass  = 1;
+  Bool_t isFound  = 0;
+  Int_t  prescale = 99;
+  Float_t eventWeight = 1.0;
+
+  for (UInt_t i =0; i<ntrig; i++)
+    {
+      triggerSelector->SelectTrigger(myTriggers[i], triggerStatus, hltPrescale, isFound, triggerPass, prescale);
+      if(triggerPass) nEventsTrig[0][i]++;
+    }
+
+
+  eventWeight = weighter->PUWeight(nPUVerticesTrue);
+  //cout<<" weight="<<eventWeight<<endl;
+  ObjID->SetEventInfo(isRealData, runNumber, eventNumber, rhoFactor);
+  //cout<<eventNumber<<"  ev rho = "<<rhoFactor<<endl;
 
 
   // ----------------------//
@@ -474,7 +413,6 @@ Bool_t zgamma::Process(Long64_t entry)
 
       hists->fill1DHist(gen_higgs.Pt(),     "gen_higgs_pt","Pt of higgs",     100, 0,150,  1, "");
       hists->fill1DHist(gen_higgs.M(),      "gen_higgs_mass","Mass of higgs", 100, 50,180,  1, "");
-
       hists->fill1DHist(gen_gamma.Pt(),     "gen_gamma_pt","Pt of gamma",   50, 0,150,  1, "");
       hists->fill1DHist(gen_gamma.Eta(),    "gen_gamma_eta","Eta of gamma", 50, -3,3,  1, "");
       //hists->fill1DHist(gen_gamma_st1.Pt(), "gen_gamma_st1_pt","Pt of gamma",   50, 0,150,  1, "");
@@ -526,7 +464,7 @@ Bool_t zgamma::Process(Long64_t entry)
       if (isRealData || !makeGen || (sample=="dalitz" && makeGen && gen_gamma.DeltaR(*thisPhoton) < 0.1) )
 	photons0.push_back(*thisPhoton);
 
-      if(ObjID->PassPhotonIdAndIso(thisPhoton, phIdAndIsoCutsHZG, pvPosition)
+      if(ObjID->PassPhotonIdAndIso(thisPhoton, "CutBased-MediumWP")
 	 //&& (isRealData || !makeGen || (sample=="dalitz" && makeGen && gen_gamma.DeltaR(*thisPhoton) < 0.2) )
 	 )
 	{
@@ -540,8 +478,8 @@ Bool_t zgamma::Process(Long64_t entry)
 
 	  //cout<<runNumber<<"  uncor en="<< thisPhoton->E()<<"  cor en = "<<corrPhoEn<<endl;
 	  //Double_t scale = 1;
-	  //Double_t scale = corrPhoEnReco/thisPhoton->E();
-	  Double_t scale = corrPhoEnSC/thisPhoton->E();
+	  Double_t scale = corrPhoEnReco/thisPhoton->E();
+	  //Double_t scale = corrPhoEnSC/thisPhoton->E();
 
 	  thisPhoton->SetXYZM(scale*thisPhoton->Px(), scale*thisPhoton->Py(),scale*thisPhoton->Pz(),0);
 
@@ -552,7 +490,7 @@ Bool_t zgamma::Process(Long64_t entry)
 
 	}
 
-      if(ObjID->PassPhotonIdAndIso(thisPhoton, phIdAndIsoCutsTight, pvPosition)
+      if(ObjID->PassPhotonIdAndIso(thisPhoton, "CutBased-TightWP")
 	 //&& (isRealData || !makeGen || (sample=="dalitz" && makeGen && gen_gamma.DeltaR(*thisPhoton) < 0.2) )
 	 )
 	photonsTight.push_back(*thisPhoton);
@@ -569,7 +507,6 @@ Bool_t zgamma::Process(Long64_t entry)
   // Abort("Nah, this is too much.");
   if (fake_photons.size()>=1)
     ufoton = fake_photons[0];
-
 
   //if (photonsTight.size()<1) return kTRUE;
   //gamma = photonsTight[0];
@@ -595,7 +532,7 @@ Bool_t zgamma::Process(Long64_t entry)
 	}
       if (
 	  //PassElectronIdAndIsoMVA(thisElec)
-	  ObjID->PassElectronIdAndIso(thisElec, elIdAndIsoCutsLoose, pvPosition)
+	  ObjID->PassElectronIdAndIso(thisElec, pvPosition, "Loose")
 	  )
 	electrons0.push_back(*thisElec);
 
@@ -653,7 +590,7 @@ Bool_t zgamma::Process(Long64_t entry)
 	  break;}}
 
     if(thisMuon->Pt() > 4
-       && ObjID->PassMuonIdAndIso(thisMuon, muIdAndIsoCutsSoft, pvPosition)
+       && ObjID->PassMuonIdAndIso(thisMuon, pvPosition, "Soft")
        ) {
 
 
@@ -684,7 +621,7 @@ Bool_t zgamma::Process(Long64_t entry)
 
   if(!isRealData && makeGen){
     hists->fill1DHist(genMll,  "gen_Mll_reco_gamma",  ";gen_Mll",100,0,mllMax, 1,"eff");
-    hists->fill1DHist(gendR,   "gen_dR_reco_gamma",   ";gen_dR", 50,0,0.3,1,"eff");
+    hists->fill1DHist(gendR,   "gen_dR_reco_gamma",   ";gen_dR", 50, 0,0.3,    1,"eff");
   }
 
 
@@ -699,7 +636,7 @@ Bool_t zgamma::Process(Long64_t entry)
 
   if(!isRealData && makeGen){
     hists->fill1DHist(genMll,  "gen_Mll_reco_gamma_iso",  ";gen_Mll",100,0,mllMax, 1,"eff");
-    hists->fill1DHist(gendR,   "gen_dR_reco_gamma_iso",   ";gen_dR", 50,0,0.3,     1,"eff");
+    hists->fill1DHist(gendR,   "gen_dR_reco_gamma_iso",   ";gen_dR", 50, 0,0.3,    1,"eff");
   }
 
   FillHistoCounts(3, eventWeight);
@@ -755,6 +692,32 @@ Bool_t zgamma::Process(Long64_t entry)
   if (lPt1.Pt() < cut_l1pt || lPt2.Pt() < cut_l2pt_low)   return kTRUE;
 
 
+
+  if (makeApzTree){
+    apz_pt1 = lPt1.Pt();
+    apz_pt2 = lPt2.Pt();
+    apz_pt3 = gamma.Pt();
+    apz_pt4 = -1;
+
+    apz_dr1234 = (lPt1+lPt2).DeltaR(gamma);
+
+    apz_dr12 = lPt1.DeltaR(lPt2);
+    apz_dr34 = -1;
+
+    apz_pt12 = (lPt1+lPt2).Pt();
+    apz_pt34 = gamma.Pt();
+
+    apz_m12 = (lPt1+lPt2).M();
+    apz_m34 = gamma.M();
+
+    apz_m123 = (lPt1+lPt2+gamma).M();
+
+    apz_m4l = 0;
+
+    _apzTree->Fill();
+
+  }
+
   //if (!isfinite(eventWeight))
   //cout<<"nan/inf "<<eventWeight<<endl;
   //    if (fabs(eventWeight)>50 || fabs(eventWeight)<0.00001)
@@ -769,7 +732,7 @@ Bool_t zgamma::Process(Long64_t entry)
 
   if(!isRealData && makeGen){
     hists->fill1DHist(genMll,  "gen_Mll_two_lep_reco", ";gen_Mll",100,0,mllMax, 1,"eff");
-    hists->fill1DHist(gendR,   "gen_dR_two_lep_reco",  ";gen_dR", 50,0,0.3,     1,"eff");
+    hists->fill1DHist(gendR,   "gen_dR_two_lep_reco",  ";gen_dR", 50, 0,0.3,    1,"eff");
   }
 
   HM->FillHistosFull(4, eventWeight, l1, l2, lPt1, lPt2, gamma, "");
@@ -786,20 +749,6 @@ Bool_t zgamma::Process(Long64_t entry)
   Float_t Mllg = (l1+l2+gamma).M();
 
 
-  fit_m_llg   = Mllg;
-  fit_m_ll    = Mll;
-  fit_weight  = eventWeight;
-  fit_phEta   = gamma.SCEta();
-  fit_phPt   = gamma.Pt();
-  fit_diPt   = (l1+l2).Pt();
-  fit_isLowPt = false;
-
-  if (lPt2.Pt() < cut_l2pt)
-    fit_isLowPt = true;
-
-  _fitTree->Fill();
-
-
   if (Mllg<110 || Mllg>170)
     return kTRUE;
 
@@ -810,7 +759,9 @@ Bool_t zgamma::Process(Long64_t entry)
   FillHistoCounts(5, eventWeight);
   CountEvents(5);
 
-  if (Mll > mllMax) return kTRUE;
+  if (Mll > 20) return kTRUE;
+  //if (Mll > mllMax) return kTRUE;
+
 
   HM->FillHistosFull(6, eventWeight, l1, l2, lPt1, lPt2, gamma, "");
   FillHistoCounts(6, eventWeight);
@@ -883,7 +834,7 @@ Bool_t zgamma::Process(Long64_t entry)
 
 
 
-  //  if ( (Mll>2.9 && Mll<3.3) || (Mll>9.3 && Mll<9.7)) return kTRUE; //jpsi and upsilon removeal
+  if ( (Mll>2.9 && Mll<3.3) || (Mll>9.3 && Mll<9.7)) return kTRUE; //jpsi and upsilon removeal
   HM->FillHistosFull(8, eventWeight, l1, l2, lPt1, lPt2, gamma, "");
   FillHistoCounts(8, eventWeight);
   CountEvents(8);
@@ -892,6 +843,22 @@ Bool_t zgamma::Process(Long64_t entry)
   if ((l1+l2).Pt()/Mllg < 0.30 || gamma.Pt()/Mllg < 0.30)
     //if ((l1+l2).Pt() < 40 || gamma.Pt() < 40)
     return kTRUE;
+
+  if (makeFitTree){
+    fit_m_llg   = Mllg;
+    fit_m_ll    = Mll;
+    fit_weight  = eventWeight;
+    fit_phEta   = gamma.SCEta();
+    fit_phPt   = gamma.Pt();
+    fit_diPt   = (l1+l2).Pt();
+    fit_isLowPt = false;
+
+    if (lPt2.Pt() < cut_l2pt)
+      fit_isLowPt = true;
+
+    _fitTree->Fill();
+  }
+
 
   HM->FillHistosFull(9, eventWeight, l1, l2, lPt1, lPt2, gamma, "");
   FillHistoCounts(9, eventWeight);
@@ -1013,7 +980,7 @@ void zgamma::Terminate()
   cout<<"| 11: 100<mH<150      |\t"<< nEvents[11] <<"\t|"<<float(nEvents[11])/nEvents[7]<<"\t|"<<endl;
   cout<<"| 12: jpsi            |\t"<< nEvents[12] <<"\t|"<<float(nEvents[12])/nEvents[7]<<"\t|"<<endl;
   */
-  cout<<"dal = "<<dal<<"   nodal = "<<nodal<<"   tot="<<dal+nodal<<endl;
+  //cout<<"dal = "<<dal<<"   nodal = "<<nodal<<"   tot="<<dal+nodal<<endl;
 
   /*
   cout<<"\n\n | Trigger efficiency 2              |\t"<<endl;

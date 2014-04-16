@@ -15,7 +15,89 @@ ObjectID::ObjectID():
   _runNumber(0),
   _eventNumber(0),
   _rhoFactor(0)
-{}
+{
+  //Cuts
+  //electrons are two types: Barrel/Endcap
+  //Loose
+  elIdAndIsoCutsLoose.ptErrorOverPt[0] = 99999;
+  elIdAndIsoCutsLoose.dPhiIn[0]        = 0.1;
+  elIdAndIsoCutsLoose.dEtaIn[0]        = 0.01;
+  elIdAndIsoCutsLoose.sigmaIetaIeta[0] = 0.02;
+  elIdAndIsoCutsLoose.HadOverEm[0]     = 0.3;
+  elIdAndIsoCutsLoose.fabsEPDiff[0]    = 99999;
+  elIdAndIsoCutsLoose.dxy[0]           = 0.5;
+  elIdAndIsoCutsLoose.dz[0]            = 0.5;
+  elIdAndIsoCutsLoose.pfIso04[0]       = 0.3;
+
+  elIdAndIsoCutsLoose.ptErrorOverPt[1] = 99999;
+  elIdAndIsoCutsLoose.dPhiIn[1]        = 0.1;
+  elIdAndIsoCutsLoose.dEtaIn[1]        = 0.03;
+  elIdAndIsoCutsLoose.sigmaIetaIeta[1] = 0.1;
+  elIdAndIsoCutsLoose.HadOverEm[1]     = 0.3;
+  elIdAndIsoCutsLoose.fabsEPDiff[1]    = 99999;
+  elIdAndIsoCutsLoose.dxy[1]           = 0.5;
+  elIdAndIsoCutsLoose.dz[1]            = 0.5;
+  elIdAndIsoCutsLoose.pfIso04[1]       = 0.3;
+
+  //Tight
+  elIdAndIsoCutsTight.ptErrorOverPt[0] = 9999.;
+  elIdAndIsoCutsTight.dPhiIn[0] = 0.06;
+  elIdAndIsoCutsTight.dEtaIn[0] = 0.004;
+  elIdAndIsoCutsTight.sigmaIetaIeta[0] = 0.01;
+  elIdAndIsoCutsTight.HadOverEm[0] = 0.12;
+  elIdAndIsoCutsTight.fabsEPDiff[0] = 0.05;
+  elIdAndIsoCutsTight.dxy[0] = 0.02;
+  elIdAndIsoCutsTight.dz[0] = 0.1;
+  elIdAndIsoCutsTight.pfIso04[0] = 0.15;
+
+  elIdAndIsoCutsTight.ptErrorOverPt[1] = 9999.;
+  elIdAndIsoCutsTight.dPhiIn[1] = 0.03;
+  elIdAndIsoCutsTight.dEtaIn[1] = 0.007;
+  elIdAndIsoCutsTight.sigmaIetaIeta[1] = 0.03;
+  elIdAndIsoCutsTight.HadOverEm[1] = 0.10;
+  elIdAndIsoCutsTight.fabsEPDiff[1] = 0.05;
+  elIdAndIsoCutsTight.dxy[1] = 0.02;
+  elIdAndIsoCutsTight.dz[1] = 0.1;
+  elIdAndIsoCutsTight.pfIso04[1] = 0.15;
+
+  //Soft muon id (specific for dalitz)
+  muIdAndIsoCutsSoft.TrackLayersWithMeasurement = 5;
+  muIdAndIsoCutsSoft.PixelLayersWithMeasurement = 1;
+  muIdAndIsoCutsSoft.NormalizedChi2_tracker = 3;
+  muIdAndIsoCutsSoft.dxy             = 0.2; //3
+  muIdAndIsoCutsSoft.dz              = 0.5; //30
+  muIdAndIsoCutsSoft.pfIso04         = 0.4;
+
+  //Photon Id cuts
+  phIdAndIsoCutsTight.PassedEleSafeVeto[0] = 1;
+  phIdAndIsoCutsTight.HadOverEm[0]         = 0.05;
+  phIdAndIsoCutsTight.sigmaIetaIeta[0]     = 0.011;
+  phIdAndIsoCutsTight.chIso03[0] = 0.7;
+  phIdAndIsoCutsTight.nhIso03[0] = 0.4;
+  phIdAndIsoCutsTight.phIso03[0] = 0.5;
+
+  phIdAndIsoCutsTight.PassedEleSafeVeto[1] = 1;
+  phIdAndIsoCutsTight.HadOverEm[1]         = 0.05;
+  phIdAndIsoCutsTight.sigmaIetaIeta[1]     = 0.031;
+  phIdAndIsoCutsTight.chIso03[1] = 0.5;
+  phIdAndIsoCutsTight.nhIso03[1] = 1.5;
+  phIdAndIsoCutsTight.phIso03[1] = 1.0;
+
+  phIdAndIsoCutsHZG.PassedEleSafeVeto[0] = 1;
+  phIdAndIsoCutsHZG.HadOverEm[0]         = 0.05;
+  phIdAndIsoCutsHZG.sigmaIetaIeta[0]     = 0.011;
+  phIdAndIsoCutsHZG.chIso03[0] = 1.5;
+  phIdAndIsoCutsHZG.nhIso03[0] = 1.0;
+  phIdAndIsoCutsHZG.phIso03[0] = 0.7;
+
+  phIdAndIsoCutsHZG.PassedEleSafeVeto[1] = 1;
+  phIdAndIsoCutsHZG.HadOverEm[1]         = 0.05;
+  phIdAndIsoCutsHZG.sigmaIetaIeta[1]     = 0.033;
+  phIdAndIsoCutsHZG.chIso03[1] = 1.2;
+  phIdAndIsoCutsHZG.nhIso03[1] = 1.5;
+  phIdAndIsoCutsHZG.phIso03[1] = 1.0;
+
+}
 
 ObjectID::~ObjectID(){}
 
@@ -70,8 +152,19 @@ void ObjectID::CalculatePhotonIso(TCPhoton *ph, float& chIsoCor, float& nhIsoCor
 
 }
 
-bool ObjectID::PassPhotonIdAndIso(TCPhoton *ph, phIdAndIsoCuts cuts, TVector3 *pv)
+bool ObjectID::PassPhotonIdAndIso(TCPhoton *ph, TString n)
 {
+  phIdAndIsoCuts cuts;
+
+  if (n=="CutBased-MediumWP")
+    cuts = phIdAndIsoCutsHZG;
+  else if (n=="CutBased-TightWP")
+    cuts = phIdAndIsoCutsTight;
+  else  {
+    cout<<"PhotonID Warning: no such cut "<<n<<endl;
+    return false;
+  }
+
   bool pass = false;
   //Float_t phoISO = 0;
   float tmpEta = ph->SCEta();
@@ -127,8 +220,18 @@ float ObjectID::CalculateMuonIso(TCMuon *lep)
   return muISO;
 }
 
-bool ObjectID::PassMuonIdAndIso(TCMuon *lep, muIdAndIsoCuts cuts, TVector3 *pv)
+bool ObjectID::PassMuonIdAndIso(TCMuon *lep, TVector3 *pv, TString n)
 {
+  muIdAndIsoCuts cuts;
+  if (n=="Soft")
+    cuts = muIdAndIsoCutsSoft;
+  else if (n=="Tight")
+    cuts = muIdAndIsoCutsTight;
+  else {
+    cout<<"MuonID Warning: no such cut "<<n<<endl;
+    return false;
+  }
+
   bool pass = false;
 
   //Float_t muISO =  CalculateMuonIso(lep);
@@ -217,8 +320,18 @@ bool ObjectID::PassElectronIdAndIsoMVA(TCElectron *lep)
 }
 
 
-bool ObjectID::PassElectronIdAndIso(TCElectron *lep, elIdAndIsoCuts cuts, TVector3 *pv)
+bool ObjectID::PassElectronIdAndIso(TCElectron *lep, TVector3 *pv, TString n)
 {
+  elIdAndIsoCuts cuts;
+  if (n=="Loose")
+    cuts = elIdAndIsoCutsLoose;
+  else if (n=="Tight")
+    cuts = elIdAndIsoCutsTight;
+  else {
+    cout<<"ElectronID Warning: no such cut "<<n<<endl;
+    return false;
+  }
+
   bool pass = false;
 
   //Float_t eleISO = CalculateElectronIso(lep);
