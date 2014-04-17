@@ -113,6 +113,8 @@ void zgamma::Begin(TTree * tree)
     _apzTree = new TTree("apzTree", "A tree for studying new particles");
     _apzTree->Branch("dr1234",&apz_dr1234,"dr1234/D");
     _apzTree->Branch("dr12",  &apz_dr12,  "dr12/D");
+    _apzTree->Branch("dr13",  &apz_dr13,  "dr13/D");
+    _apzTree->Branch("dr23",  &apz_dr23,  "dr23/D");
     _apzTree->Branch("dr34",  &apz_dr34,  "dr34/D");
     _apzTree->Branch("pt12",  &apz_pt12,  "pt12/D");
     _apzTree->Branch("pt34",  &apz_pt34,  "pt34/D");
@@ -124,6 +126,14 @@ void zgamma::Begin(TTree * tree)
     _apzTree->Branch("pt2",   &apz_pt2,   "pt2/D");
     _apzTree->Branch("pt3",   &apz_pt3,   "pt3/D");
     _apzTree->Branch("pt4",   &apz_pt4,   "pt4/D");
+
+    _apzTree->Branch("eta1234",&apz_eta1234,"eta1234/D");
+    _apzTree->Branch("eta12",  &apz_eta12,  "eta12/D");
+    _apzTree->Branch("eta34",  &apz_eta34,  "eta12/D");
+    _apzTree->Branch("eta1",   &apz_eta1,   "eta1/D");
+    _apzTree->Branch("eta2",   &apz_eta2,   "eta2/D");
+    _apzTree->Branch("eta3",   &apz_eta3,   "eta3/D");
+    _apzTree->Branch("eta4",   &apz_eta4,   "eta4/D");
 
     _apzTree->Branch("run",  &runNumber,  "run/i");
     _apzTree->Branch("event",&eventNumber,"event/l");
@@ -698,14 +708,23 @@ Bool_t zgamma::Process(Long64_t entry)
     apz_pt2 = lPt2.Pt();
     apz_pt3 = gamma.Pt();
     apz_pt4 = -1;
-
-    apz_dr1234 = (lPt1+lPt2).DeltaR(gamma);
-
-    apz_dr12 = lPt1.DeltaR(lPt2);
-    apz_dr34 = -1;
-
     apz_pt12 = (lPt1+lPt2).Pt();
     apz_pt34 = gamma.Pt();
+
+    apz_dr1234 = (lPt1+lPt2).DeltaR(gamma);
+    apz_dr12 = lPt1.DeltaR(lPt2);
+    apz_dr13 = lPt1.DeltaR(gamma);
+    apz_dr23 = lPt2.DeltaR(gamma);
+    apz_dr34 = -1;
+
+    apz_eta1 = lPt1.Eta();
+    apz_eta2 = lPt2.Eta();
+    apz_eta3 = gamma.Eta();
+    apz_eta4 = -999;
+
+    apz_eta12 = (lPt1+lPt2).Eta();
+    apz_eta34 = gamma.Eta();
+    apz_eta1234 = (lPt1+lPt2+gamma).Eta();
 
     apz_m12 = (lPt1+lPt2).M();
     apz_m34 = gamma.M();

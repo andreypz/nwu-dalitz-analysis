@@ -19,7 +19,7 @@ parser.add_option("--mcfm", dest="mcfm", action="store_true", default=False, hel
 parser.add_option("--noeos",dest="noeos",action="store_true", default=False, help="Don't use EOS. pick up the files from nobackup area")
 
 parser.add_option("--apz",dest="apz",action="store_true", default=False, help="Discover new particle (requires apzTree produced)")
-parser.add_option("--jp",dest="jp",action="store_true", default=False, help="Study J/Psi region and more (requires apzTree)")
+parser.add_option("--zjp",dest="zjp",action="store_true", default=False, help="Study J/Psi region and more (requires apzTree)")
 parser.add_option("-s", '--sel', dest="sel", type="string", default='mugamma',
                   help="Selection to be used. Options are: '4mu','2e2mu', 'zee','mugamma', 'egamma'")
 
@@ -266,7 +266,6 @@ if __name__ == "__main__":
   u.createDir(pathBase)
 
 
-
   if doMerge:
     os.system("rm "+hPath+"/m_*.root") #removing the old merged files
   yields_data = {}
@@ -283,7 +282,6 @@ if __name__ == "__main__":
 
 
   u.setSelection(sel)
-
   if doMerge:
     if sel =="elgamma":
       os.system("hadd "+hPath+"/m_Data_" +sel+"_"+period+".root "+hPath+"/"+sel+"_"+period+"/hhhh_*Run2012D*.root")
@@ -311,7 +309,11 @@ if __name__ == "__main__":
   sigFileVBF  = TFile(hPath+"/"+sel+"_"+period+"/hhhh_vbf-mad"+str(mass)+"_1.root", "OPEN")
   sigFileVH   = TFile(hPath+"/"+sel+"_"+period+"/hhhh_vh-mad"+str(mass)+"_1.root",  "OPEN")
 
+  sigFileZjp  = TFile(hPath+"/"+sel+"_"+period+"/hhhh_ZtoJPsiGamma_1.root",  "OPEN")
+  sigFileHjp  = TFile(hPath+"/"+sel+"_"+period+"/hhhh_HiggstoJPsiGamma_1.root",  "OPEN")
+
   if options.mcfm: sigFile = sigFileMCFM
+  elif options.zjp: sigFile = sigFileZjp
   else:            sigFile = sigFileMAD
 
   dataFile[sel] = TFile(hPath+"/m_Data_"+sel+"_"+period+".root","OPEN")
@@ -441,6 +443,7 @@ if __name__ == "__main__":
 
 
     elif ss=='mugamma':
+
       data = TFile(hPath+"/m_Data_mugamma_2012.root","OPEN")
 
       alphaPiZ(data, c1, TCut('ph_pt/m_llg>0.3 && di_pt/m_llg>0.3 && m_llg>100&&m_llg<170 && fabs(ph_eta)<1.444'),
@@ -552,6 +555,17 @@ if __name__ == "__main__":
             h2si_rot.SetBinContent(a,b,fda)
     '''
 
+  if options.zjp and ss=='mugamma':
+    data = TFile(hPath+"/m_Data_mugamma_2012.root","OPEN")
+
+    ZJPG(data, c1, TCut('pt3/m123>0.3 && pt12/m123>0.3 && m123>110 && m123<170 && dr1234>1'),
+         pathBase+"/ZtoJPsiGamma-0/")
+
+    ZJPG(data, c1, TCut(''), pathBase+"/ZtoJPsiGamma-1-full/")
+    ZJPG(data, c1, TCut('m12<30'), pathBase+"/ZtoJPsiGamma-2-Mll30/")
+
+
+
   plot_types =[]
   list = os.listdir(pathBase)
   for d in list:
@@ -583,7 +597,7 @@ if __name__ == "__main__":
   elif cut in ['14','15']: defaultPage = 'apz'
 
   print defaultPage
-    #plot_types.append('alphaPiZ')
+
 
   ht.makeHTML("h &rarr; dalitz decay plots",pathBase, plot_types, comments, defaultPage)
 

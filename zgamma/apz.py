@@ -4,7 +4,9 @@ import utils as u
 
 
 def ZJPG(f1, c1, globalCut, path):
-  print "study of Z/H -> J/Psi Gamma and more"
+  print "\n\n *** Study of Z/H -> J/Psi Gamma and more ***\n"
+  print globalCut
+
   u.createDir(path)
   c1.cd()
   t = f1.Get('apzTree/apzTree')
@@ -28,14 +30,84 @@ def ZJPG(f1, c1, globalCut, path):
   t.Draw('m12>>'+name+'('+str(nBins)+','+m1+','+m2+')',  mllCut+globalCut, opt)
   h = gDirectory.Get(name)
   h.Draw("same e1p")
-  h.SetTitle(name+';m_{12} (GeV);Events/%.2f GeV' % binWidth)
+  h.SetTitle(name+';m_{#mu#mu} (GeV);Events/%.2f GeV' % binWidth)
   h.UseCurrentStyle()
   c1.SaveAs(path+"/"+name+".png")
 
 
+  name = 'h01-mll-25'
+  m1 = '0'
+  m2 = '30'
+  mllCut = TCut('m12<'+m2)
+  nBins = 100/binDownSize
+  binWidth = (float(m2)-float(m1))/float(nBins)
+  t.Draw('m12>>'+name+'('+str(nBins)+','+m1+','+m2+')',  mllCut+globalCut, opt)
+  h = gDirectory.Get(name)
+  h.Draw("same e1p")
+  h.SetTitle(name+';m_{#mu#mu} (GeV);Events/%.2f GeV' % binWidth)
+  h.UseCurrentStyle()
+  c1.SaveAs(path+"/"+name+".png")
+
+  name = 'h02-mll-full'
+  m1 = '0'
+  m2 = '150'
+  mllCut = TCut('m12<'+m2)
+  nBins = 100/binDownSize
+  binWidth = (float(m2)-float(m1))/float(nBins)
+  t.Draw('m12>>'+name+'('+str(nBins)+','+m1+','+m2+')',  mllCut+globalCut, opt)
+  h = gDirectory.Get(name)
+  h.Draw("same e1p")
+  h.SetTitle(name+';m_{#mu#mu} (GeV);Events/%.2f GeV' % binWidth)
+  h.UseCurrentStyle()
+  c1.SaveAs(path+"/"+name+".png")
+
+  name = "h03-mllg-in_Mll30"
+  mllg1 = '60'
+  mllg2 = '150'
+  m1 = '0'
+  m2 = '30'
+  nBins = 50/binDownSize
+  binWidth = (float(mllg2)-float(mllg1))/float(nBins)
+  mllCut = TCut('(m12>'+m1+') && (m12<'+m2+')')
+  rangeCut = TCut('(m123>'+mllg1+')&&(m123<'+mllg2+')')
+  t.Draw('m123>>'+name+'('+str(nBins)+','+mllg1+','+mllg2+')',  mllCut+globalCut+rangeCut, opt)
+  h = gDirectory.Get(name)
+  h.Draw("same e1p")
+  h.UseCurrentStyle()
+  h.SetTitle(name+';m_{#mu#mu#gamma} (GeV);Events/%.2f GeV' % binWidth)
+  c1.SaveAs(path+"/"+name+".png")
+
+
+  name = "h04-dr12"
+  nBins = 50/binDownSize
+  dr1 = '0'
+  dr2 = '4'
+  binWidth = (float(dr2)-float(dr1))/float(nBins)
+  rangeCut = TCut('(dr12>'+dr1+')&&(dr12<'+dr2+')')
+  t.Draw('dr12>>'+name+'('+str(nBins)+','+dr1+','+dr2+')',  globalCut+rangeCut, opt)
+  h = gDirectory.Get(name)
+  h.Draw("same e1p")
+  h.UseCurrentStyle()
+  h.SetTitle(name+';#Delta R(#mu_{1}, #mu_{2});Events/%.2f' % binWidth)
+  c1.SaveAs(path+"/"+name+".png")
+
+
+  name = "h04-dr1234"
+  nBins = 50/binDownSize
+  dr1 = '0'
+  dr2 = '4'
+  binWidth = (float(dr2)-float(dr1))/float(nBins)
+  rangeCut = TCut('(dr1234>'+dr1+')&&(dr1234<'+dr2+')')
+  t.Draw('dr1234>>'+name+'('+str(nBins)+','+dr1+','+dr2+')',  globalCut+rangeCut, opt)
+  h = gDirectory.Get(name)
+  h.Draw("same e1p")
+  h.UseCurrentStyle()
+  h.SetTitle(name+';#Delta R(#mu#mu, #gamma);Events/%.2f' % binWidth)
+  c1.SaveAs(path+"/"+name+".png")
+
 
 def alphaPiZ2(f1, c1, globalCut, path):
-  print "study alpha/piz particle"
+  print "\n\n *** Study alpha/piz particle ***\n"
   u.createDir(path)
   c1.cd()
   t = f1.Get('apzTree/apzTree')

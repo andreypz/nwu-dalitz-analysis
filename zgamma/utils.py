@@ -456,7 +456,7 @@ def yieldsTable(yieldList, sel, num=True):
       l1.insert(0,"")
     l1.extend(5*[sel])
 
-    print 'First line in yieldsTable:', l1
+    #print 'First line in yieldsTable:', l1
 
     t.append(l1)
     for line in xrange(len(cuts)):
@@ -467,10 +467,10 @@ def yieldsTable(yieldList, sel, num=True):
 
         for yi in yieldList:
           l.append(yi[sel][line])
-          print l
+          # print l
         t.append(l)
 
-    print t
+    #print t
     return t
 
 def makeTable(table, name, opt="tex"):
