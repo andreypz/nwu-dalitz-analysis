@@ -17,40 +17,43 @@ parser.add_option("-g", "--gen", dest="gen", action="store_true", default=False,
 (options, args) = parser.parse_args()
 
 if options.clean:
-    os.system("rm ../src/*.so ../src/*.d ../plugins/*.so ../plugins/*.d ./*.so")
-    print "All cleaned"
-    exit(0)
+  os.system("rm ../src/*.so ../src/*.d ../plugins/*.so ../plugins/*.d ./*.so")
+  print "All cleaned"
+  exit(0)
 
 if len(args) < 2:
-    parser.print_usage()
-    exit(1)
+  parser.print_usage()
+  exit(1)
 
-sample    = args[0]
+sample         = args[0]
 sourcefilename = args[1]
 
 period    = options.period
 trigger   = options.trigger
 selection = "mugamma"
-ana = "zgamma"
+ana       = "zgamma"
 
 selection=options.sel
 if selection=='egamma':
-    ana="egamma"
+  ana = "egamma"
 if selection in ['4mu','2e2mu']:
-    ana='fourLeptons'
+  ana = 'fourLeptons'
+if selection == 'jp-mugamma':
+  ana = 'jpsiGamma'
+  selection = 'mugamma'
 
 isbatch   = options.batch
 
 if(isbatch):
-    sourceFiles = "./input.txt"
-    print "Do batch, source files: \n", sourceFiles
+  sourceFiles = "./input.txt"
+  print "Do batch, source files: \n", sourceFiles
 else:
-    sourceFiles = "./"+sourcefilename
-    print "Run locally, source files: \n", sourceFiles
+  sourceFiles = "./"+sourcefilename
+  print "Run locally, source files: \n", sourceFiles
 
 
 print "Running ", ana, " analyzer, on sample", sample, "with selection=", selection, ", trigger=", trigger,\
-      "in source=", sourcefilename, ", period=", period, " batch=",  isbatch, " and gen selection=", options.gen
+    "in source=", sourcefilename, ", period=", period, " batch=",  isbatch, " and gen selection=", options.gen
 
 from ROOT import *
 
@@ -86,11 +89,11 @@ f = open(sourceFiles,"r")
 nfiles=0
 
 for l in f.readlines():
-    line = l.split('\n')[0]
-    if line.strip():
-        print line
-        fChain.Add(line)
-        nfiles+=1
+  line = l.split('\n')[0]
+  if line.strip():
+    print line
+    fChain.Add(line)
+    nfiles+=1
 print nfiles, " files added!"
 
 

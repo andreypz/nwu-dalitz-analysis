@@ -16,16 +16,18 @@ class HistMaker {
   HistMaker(HistManager * h);
   virtual ~HistMaker();
 
-   virtual void FillHistosFull(Int_t n, Double_t w,
-			       TCPhysObject , TCPhysObject , TCPhysObject , TCPhysObject , TCPhysObject,
-			       string s="");
+   virtual void FillHistosFull(Int_t n, Double_t w, string s="");
    virtual void MakeMuonPlots(TCMuon mu, TVector3 *pv);
    virtual void MakePhotonPlots(TCPhoton ph);
    virtual void MakeZeePlots(TCPhoton , TCPhoton );
    virtual void MakePhotonEnergyCorrPlots(TCPhoton , Float_t , Float_t );
+   virtual void SetLeptons(TCPhysObject l1, TCPhysObject l2);
+   virtual void SetGamma(TCPhysObject g);
 
  private:
   HistManager * hists;
+
+  TCPhysObject _lPt1, _lPt2, _gamma;
 
 };
 

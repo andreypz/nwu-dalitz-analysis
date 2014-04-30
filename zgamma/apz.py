@@ -2,6 +2,79 @@
 from ROOT import *
 import utils as u
 
+def treeInOne(name, var, r1, r2, nBins, globalCut, t,c1,path):
+  var1 = str(r1)
+  var2 = str(r2)
+  m1 = '0'
+  m2 = '2.9'
+  mllCut = TCut('(m12>'+m1+') && (m12<'+m2+')')
+  binWidth = (float(var2)-float(var1))/float(nBins)
+  rangeCut = TCut('('+var+'>'+var1+')&&('+var+'<'+var2+')')
+
+  name1 = name+m1+'_'+m2
+  t.Draw(var+'>>'+name1+'('+str(nBins)+','+var1+','+var2+')',  mllCut+globalCut+rangeCut, 'goff')
+
+  m1 = '2.9'
+  m2 = '3.3'
+  mllCut = TCut('(m12>'+m1+') && (m12<'+m2+')')
+  name2 = name+m1+'_'+m2
+  t.Draw(var+'>>'+name2+'('+str(nBins)+','+var1+','+var2+')',  mllCut+globalCut+rangeCut, 'goff')
+
+  m1 = '3.3'
+  m2 = '20'
+  mllCut = TCut('(m12>'+m1+') && (m12<'+m2+')')
+  name3 = name+m1+'_'+m2
+  t.Draw(var+'>>'+name3+'('+str(nBins)+','+var1+','+var2+')',  mllCut+globalCut+rangeCut, 'goff')
+
+  h1 = gDirectory.Get(name1)
+  h2 = gDirectory.Get(name2)
+  h3 = gDirectory.Get(name3)
+  h1.Draw("hist")
+  h2.Draw("sames hist")
+  h3.Draw("sames hist")
+  mm = max([h1.GetMaximum(), h2.GetMaximum(), h3.GetMaximum()])
+  h1.SetMaximum(1.4*mm)
+  h1.SetMinimum(0)
+
+  h2.SetLineColor(kGreen+2)
+  h3.SetLineColor(kRed+1)
+  #h1.UseCurrentStyle()
+
+  gStyle.SetOptStat(1111)
+  h1.SetName("Low Mll")
+  h2.SetName("J/Psi")
+  h3.SetName("High Mll")
+  stats1 = h1.GetListOfFunctions().FindObject("stats");
+  stats2 = h2.GetListOfFunctions().FindObject("stats");
+  stats3 = h3.GetListOfFunctions().FindObject("stats");
+  # stats1.Print()
+  stats1.SetX1NDC(0.7)
+  stats1.SetX2NDC(0.95)
+  stats1.SetY1NDC(0.9)
+  stats1.SetY2NDC(0.7)
+  stats1.SetTextColor(kBlue+2)
+
+  stats2.SetX1NDC(0.7)
+  stats2.SetX2NDC(0.95)
+  stats2.SetY1NDC(0.7)
+  stats2.SetY2NDC(0.5)
+  stats2.SetTextColor(kGreen+2)
+  stats3.SetX1NDC(0.7)
+  stats3.SetX2NDC(0.95)
+  stats3.SetY1NDC(0.5)
+  stats3.SetY2NDC(0.3)
+  stats3.SetTextColor(kRed+1)
+
+  leg = TLegend(0.20,0.76,0.48,0.92);
+  leg.AddEntry(h1,'0.2 < m_{#mu#mu} < 2.9', "l")
+  leg.AddEntry(h2,'2.9 < m_{#mu#mu} < 3.3', "l")
+  leg.AddEntry(h3,'3.3 < m_{#mu#mu} < 20', "l")
+  leg.SetTextSize(0.03)
+  leg.SetFillColor(kWhite)
+  leg.Draw()
+
+  h1.SetTitle(name+';m_{#mu#mu#gamma} (GeV);Events/%.2f GeV' % binWidth)
+  c1.SaveAs(path+"/"+name+".png")
 
 def ZJPG(f1, c1, globalCut, path):
   print "\n\n *** Study of Z/H -> J/Psi Gamma and more ***\n"
@@ -61,14 +134,25 @@ def ZJPG(f1, c1, globalCut, path):
   h.UseCurrentStyle()
   c1.SaveAs(path+"/"+name+".png")
 
-  name = "h03-mllg-in_Mll30"
-  mllg1 = '60'
-  mllg2 = '150'
-  m1 = '0'
-  m2 = '30'
+  name = 'h03-mll-jpsi'
+  m1 = '2.9'
+  m2 = '3.3'
+  mllCut = TCut('(m12>'+m1+') && (m12<'+m2+')')
+  nBins = 20/binDownSize
+  binWidth = (float(m2)-float(m1))/float(nBins)
+  t.Draw('m12>>'+name+'('+str(nBins)+','+m1+','+m2+')',  mllCut+globalCut, opt)
+  h = gDirectory.Get(name)
+  h.Draw("same e1p")
+  h.SetTitle(name+';m_{#mu#mu} (GeV);Events/%.2f GeV' % binWidth)
+  h.UseCurrentStyle()
+  c1.SaveAs(path+"/"+name+".png")
+
+  name = "h04-mllg-full"
+  mllg1 = '0'
+  mllg2 = '200'
+  mllCut = TCut('')
   nBins = 50/binDownSize
   binWidth = (float(mllg2)-float(mllg1))/float(nBins)
-  mllCut = TCut('(m12>'+m1+') && (m12<'+m2+')')
   rangeCut = TCut('(m123>'+mllg1+')&&(m123<'+mllg2+')')
   t.Draw('m123>>'+name+'('+str(nBins)+','+mllg1+','+mllg2+')',  mllCut+globalCut+rangeCut, opt)
   h = gDirectory.Get(name)
@@ -78,7 +162,24 @@ def ZJPG(f1, c1, globalCut, path):
   c1.SaveAs(path+"/"+name+".png")
 
 
-  name = "h04-dr12"
+  name = "h05-mllg-in_Mll30"
+  mllg1 = '60'
+  mllg2 = '150'
+  m1 = '0'
+  m2 = '30'
+  mllCut = TCut('(m12>'+m1+') && (m12<'+m2+')')
+  nBins = 50/binDownSize
+  binWidth = (float(mllg2)-float(mllg1))/float(nBins)
+  rangeCut = TCut('(m123>'+mllg1+')&&(m123<'+mllg2+')')
+  t.Draw('m123>>'+name+'('+str(nBins)+','+mllg1+','+mllg2+')',  mllCut+globalCut+rangeCut, opt)
+  h = gDirectory.Get(name)
+  h.Draw("same e1p")
+  h.UseCurrentStyle()
+  h.SetTitle(name+';m_{#mu#mu#gamma} (GeV);Events/%.2f GeV' % binWidth)
+  c1.SaveAs(path+"/"+name+".png")
+
+
+  name = "h06-dr12"
   nBins = 50/binDownSize
   dr1 = '0'
   dr2 = '4'
@@ -92,7 +193,7 @@ def ZJPG(f1, c1, globalCut, path):
   c1.SaveAs(path+"/"+name+".png")
 
 
-  name = "h04-dr1234"
+  name = "h07-dr1234"
   nBins = 50/binDownSize
   dr1 = '0'
   dr2 = '4'
@@ -105,6 +206,11 @@ def ZJPG(f1, c1, globalCut, path):
   h.SetTitle(name+';#Delta R(#mu#mu, #gamma);Events/%.2f' % binWidth)
   c1.SaveAs(path+"/"+name+".png")
 
+
+  treeInOne('h08-mllg_full_threeInOne', 'm123',  0, 200, 50, globalCut, t,c1,path)
+  treeInOne('h09-mllg_mZ_threeInOne',   'm123', 50, 140, 50, globalCut, t,c1,path)
+  treeInOne('h10-mllg_Hfull_threeInOne','m123',110, 170, 20, globalCut, t,c1,path)
+  treeInOne('h11-mllg_mH_threeInOne',   'm123',115, 135, 10, globalCut, t,c1,path)
 
 def alphaPiZ2(f1, c1, globalCut, path):
   print "\n\n *** Study alpha/piz particle ***\n"

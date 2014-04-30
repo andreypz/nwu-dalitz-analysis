@@ -19,11 +19,11 @@ class BatchMaster():
         self._executable = executable
         self._shortQueue = shortQueue
         self._bias      = bias
-    
+
 
     def get_current_time(self):
-        ''' 
-        Returns a string of the current time with the format  
+        '''
+        Returns a string of the current time with the format
         '''
 
         now = datetime.datetime.now()
@@ -39,7 +39,7 @@ class BatchMaster():
         if not os.path.exists(filePath):
             print "mkdir", filePath
             os.system('mkdir -p '+filePath)
-            
+
         if clear and len(os.listdir(filePath)) != 0:
             os.system('rm '+filePath+'/*')
 
@@ -51,7 +51,7 @@ class BatchMaster():
 
         fileList = os.listdir(directory)
         nFiles = len(fileList)
-        
+
         # Split files to requested number.  Cannot exceed
         # the number of files being run over.
         if nJobs > nFiles:
@@ -76,17 +76,17 @@ class BatchMaster():
         if not self._bias:
             ## make file with list of inputs ntuples for the analyzer
             input = open('{0}/input_{1}_{2}.txt'.format(self._stageDir, cfg._dataName, str(count+1)), 'w')
-        
+
             path = cfg._inDir
             if cfg._inDir[:5] == '/pnfs':
                 path = 'dcap://cmsdca1.fnal.gov:24140/pnfs/fnal.gov/usr' + cfg._inDir[5:]
-                
+
             for i,source in enumerate(sourceFiles):
                 input.write(path+'/'+source+'\n')
             input.close()
         else:
             input =None
-            
+
         ## Writing the batch config file
         batch_tmp = open('{0}/.batch_tmp_{1}_{2}'.format(self._stageDir, cfg._dataName, count+1), 'w')
         batch_tmp.write('Universe              = vanilla\n')
@@ -105,7 +105,8 @@ class BatchMaster():
         if self._bias:
             batch_tmp.write('Transfer_Input_Files  = {0}/source.tar.gz\n'.format(self._stageDir))
         else:
-            batch_tmp.write('Transfer_Output_Files  = nwu-my-analysis/zgamma/hhhh_{0}_{1}.root\n'.format(cfg._dataName,  str(count+1)))
+            batch_tmp.write('Transfer_Output_Files  = nwu-my-analysis/zgamma/out_synch_{0}_{1}.txt, nwu-my-analysis/zgamma/hhhh_{2}_{3}.root\n'.format(
+                cfg._dataName,  str(count+1), cfg._dataName,  str(count+1)))
             batch_tmp.write('Transfer_Input_Files  = {0}/source.tar.gz, {0}/input_{1}_{2}.txt\n'.format(self._stageDir, cfg._dataName,  str(count+1)))
 
         batch_tmp.write('Requirements = Memory >= 199 &&OpSys == "LINUX"&& (Arch != "DUMMY" )&& Disk > 1000000\n')
@@ -122,7 +123,7 @@ class BatchMaster():
     def submit_to_batch(self, bSystem = 'lpc'):
         '''
         Submits batch jobs to batch.  Currently only works
-        for lpc batch system, but should be updated for more 
+        for lpc batch system, but should be updated for more
         general use
         '''
 
@@ -145,7 +146,7 @@ class BatchMaster():
             for cfg in self._configList:
                 if self._bias:
                     for i in xrange(cfg._nJobs):
-                        print 'Submitting: ', i  
+                        print 'Submitting: ', i
                         self.make_batch_lpc(cfg, i, None)
                         subprocess.call('condor_submit .batch_tmp_{0}_{1}'.format(cfg._dataName, i+1), shell=True)
                 else:

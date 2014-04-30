@@ -20,6 +20,7 @@ parser.add_option("--noeos",dest="noeos",action="store_true", default=False, hel
 
 parser.add_option("--apz",dest="apz",action="store_true", default=False, help="Discover new particle (requires apzTree produced)")
 parser.add_option("--zjp",dest="zjp",action="store_true", default=False, help="Study J/Psi region and more (requires apzTree)")
+parser.add_option("--hjp",dest="hjp",action="store_true", default=False, help="Study J/Psi region and more (requires apzTree)")
 parser.add_option("-s", '--sel', dest="sel", type="string", default='mugamma',
                   help="Selection to be used. Options are: '4mu','2e2mu', 'zee','mugamma', 'egamma'")
 
@@ -27,212 +28,7 @@ parser.add_option("-s", '--sel', dest="sel", type="string", default='mugamma',
 (options, args) = parser.parse_args()
 
 mass = options.mass
-
 sel = options.sel
-
-def effPlots2(f1, path):
-  c1.cd()
-  hh = []
-  ra = []
-  for n in xrange(0,31):
-    print n
-    hh.append(f1.Get("eff/gen_Mll_"+str(n)))
-    ra.append(hh[-1].Clone())
-    ra[-1].Divide(hh[0])
-
-  ra[1].Draw("hist")
-  ra[1].SetMinimum(0)
-  ra[1].SetMaximum(1)
-  ra[1].SetTitle(";Mll; acc * eff")
-  bcol = 29
-  ra[1].SetLineColor(bcol)
-  ra[1].SetLineWidth(2)
-  leg = TLegend(0.70,0.65,0.95,0.98);
-  leg.AddEntry(ra[1],"pT(ll) > 25 GeV", "l")
-  for a in xrange(2,7):
-    ra[a].Draw('same hist')
-    ra[a].SetLineColor(bcol+2*(a-2))
-    ra[a].SetLineWidth(2)
-    leg.AddEntry(ra[a],"pT(ll) > %.0f GeV"%(25+5*(a-1)), "l")
-
-
-  leg.SetTextSize(0.03)
-  leg.SetFillColor(kWhite)
-  leg.Draw()
-  c1.SaveAs(path+"/acc_eff_Mll_ptll.png")
-
-  st = 7
-  ed = 12
-  ra[st].Draw("hist")
-  ra[st].SetMinimum(0)
-  ra[st].SetMaximum(1)
-  ra[st].SetTitle(";Mll; acc")
-  bcol = 33
-  ra[st].SetLineColor(bcol)
-  ra[st].SetLineWidth(2)
-  leg = TLegend(0.70,0.65,0.95,0.98);
-  leg.AddEntry(ra[st],"pT(#gamma) > 25 GeV", "l")
-  for a in xrange(st+1,ed+1):
-    ra[a].Draw('same hist')
-    ra[a].SetLineColor(bcol+2*(a-st))
-    ra[a].SetLineWidth(2)
-    leg.AddEntry(ra[a],"pT(#gamma) > %.0f GeV"%(25+5*(a-st)), "l")
-
-  leg.SetTextSize(0.03)
-  leg.SetFillColor(kWhite)
-  leg.Draw()
-  c1.SaveAs(path+"/acc_eff_Mll_ptgamma.png")
-
-  st = 13
-  ed = 18
-  ra[st].Draw("hist")
-  ra[st].SetMinimum(0)
-  ra[st].SetMaximum(1)
-  ra[st].SetTitle(";Mll; acc")
-  bcol = 38
-  ra[st].SetLineColor(bcol)
-  ra[st].SetLineWidth(2)
-  leg = TLegend(0.70,0.65,0.95,0.98);
-  leg.AddEntry(ra[st],"pT(#gamma)/Mllg > 0.20", "l")
-  for a in xrange(st+1,ed+1):
-    ra[a].Draw('same hist')
-    ra[a].SetLineColor(bcol+2*(a-st))
-    ra[a].SetLineWidth(2)
-    leg.AddEntry(ra[a],"pT(#gamma)/Mllg > %.2f"%(0.20+0.05*(a-st)), "l")
-
-  leg.SetTextSize(0.03)
-  leg.SetFillColor(kWhite)
-  leg.Draw()
-  c1.SaveAs(path+"/acc_eff_Mll_ptgammaMllg.png")
-
-  st = 19
-  ed = 24
-  ra[st].Draw("hist")
-  ra[st].SetMinimum(0)
-  ra[st].SetMaximum(1)
-  ra[st].SetTitle(";Mll; acc")
-  bcol = 41
-  ra[st].SetLineColor(bcol)
-  ra[st].SetLineWidth(2)
-  leg = TLegend(0.70,0.65,0.95,0.98);
-  leg.AddEntry(ra[st],"pT(ll)/Mllg > 0.20", "l")
-  for a in xrange(st+1,ed+1):
-    ra[a].Draw('same hist')
-    ra[a].SetLineColor(bcol+2*(a-st))
-    ra[a].SetLineWidth(2)
-    leg.AddEntry(ra[a],"pT(ll)/Mllg > %.2f"%(0.20+0.05*(a-st)), "l")
-
-  leg.SetTextSize(0.03)
-  leg.SetFillColor(kWhite)
-  leg.Draw()
-  c1.SaveAs(path+"/acc_eff_Mll_ptllMllg.png")
-
-
-  st = 25
-  ed = 30
-  ra[st].Draw("hist")
-  ra[st].SetMinimum(0)
-  ra[st].SetMaximum(1)
-  ra[st].SetTitle(";Mll; acc")
-  bcol = 43
-  ra[st].SetLineColor(bcol)
-  ra[st].SetLineWidth(2)
-  leg = TLegend(0.70,0.65,0.95,0.98);
-  leg.AddEntry(ra[st],"pT(both)/Mllg > 0.20", "l")
-  for a in xrange(st+1,ed+1):
-    ra[a].Draw('same hist')
-    ra[a].SetLineColor(bcol+2*(a-st))
-    ra[a].SetLineWidth(2)
-    leg.AddEntry(ra[a],"pT(both)/Mllg > %.2f"%(0.20+0.05*(a-st)), "l")
-
-  leg.SetTextSize(0.03)
-  leg.SetFillColor(kWhite)
-  leg.Draw()
-  c1.SaveAs(path+"/acc_eff_Mll_ptbothMllg.png")
-
-
-def effPlots(f1, path):
-  print "Now making efficiency plots"
-  # f1.cd(dir)
-
-  for var in ["Mll","dR"]:
-
-    h0 = f1.Get("eff/gen_"+var+"_0")
-    h1 = f1.Get("eff/gen_"+var+"_acc_gamma")
-    h2 = f1.Get("eff/gen_"+var+"_acc_lept")
-
-    h3 = f1.Get("eff/gen_"+var+"_reco_gamma_iso")
-    h4 = f1.Get("eff/gen_"+var+"_two_lep_reco")
-
-
-    h0.Draw("hist")
-        #h1.Draw("hist same")
-        #h2.Draw("hist same")
-        #h3.Draw("hist same")
-    c1.SaveAs(path+var+".png")
-
-        #for acceptance
-    r1 = h1.Clone()
-    r1.Divide(h0)
-    r2 = h2.Clone()
-    r2.Divide(h0)
-        #for reco eff
-    r3 = h3.Clone()
-    r3.Divide(h2)
-    r4 = h4.Clone()
-    r4.Divide(h2)
-        #r5 = h5.Clone()
-        #r5.Divide(h2)
-        #r6 = h6.Clone()
-        #r6.Divide(h2)
-        #r7 = h7.Clone()
-        #r7.Divide(h2)
-
-
-    if var=="Mll":
-      xname = ";M(l1,l2)"
-      if var=="dR":
-        xname = ";dR(l1,l2)"
-
-      r1.Draw("hist")
-      r2.Draw("hist same")
-      r1.SetMinimum(0)
-      r1.SetMaximum(1)
-      r1.SetTitle(xname+" gen; acc")
-      r1.SetLineColor(kRed+1)
-      r2.SetLineColor(kGreen+1)
-      leg = TLegend(0.20,0.2,0.90,0.30);
-      leg.AddEntry(r1,"photon pt>25, eta<2.5", "l")
-      leg.AddEntry(r2,"photon pt>25 and p_{T}(l1)>23, p_{T}(l2)>4", "l")
-      leg.SetTextSize(0.04)
-      leg.SetFillColor(kWhite)
-      leg.Draw()
-      c1.SaveAs(path+"acceptance_"+var+".png")
-
-      r3.Draw("hist")
-      r3.SetMinimum(0)
-      r3.SetMaximum(1)
-      r3.SetTitle(xname+" gen; reco eff")
-      r4.Draw("hist same")
-        #r5.Draw("hist same")
-        #r6.Draw("hist same")
-        #r7.Draw("hist same")
-
-      r3.SetLineColor(kBlack)
-      r4.SetLineColor(kOrange+1)
-        #r5.SetLineColor(kGreen+1)
-        #r6.SetLineColor(kRed+1)
-      leg = TLegend(0.35,0.15,0.98,0.30);
-      leg.AddEntry(r3,"Reco photon pt>25, Medium WP ID ", "l")
-      leg.AddEntry(r4,"Photon and two reco-muons (OUR ID/ISO)", "l")
-        #leg.AddEntry(r5,"Photon + 2 electrons NO ID pt(e1,e2) > (23,7)", "l")
-        #leg.AddEntry(r6,"Photon + 2 electrons ELE ID pt(e1,e2) > (23,7)", "l")
-        #leg.AddEntry(r7,"Photon + ONE electron pt(e) > 30, No ID", "l")
-      leg.SetTextSize(0.025)
-      leg.SetFillColor(kWhite)
-      leg.Draw()
-      c1.SaveAs(path+"eff_"+var+".png")
-
 
 if __name__ == "__main__":
   timer = TStopwatch()
@@ -268,20 +64,13 @@ if __name__ == "__main__":
 
   if doMerge:
     os.system("rm "+hPath+"/m_*.root") #removing the old merged files
-  yields_data = {}
-  yields_bkg  = {}
-  yields_sig  = {}
-  yields_ggH  = {}
-  yields_vbf  = {}
-  yields_vh   = {}
 
-  tri_hists = {}
-  dataFile  = {}
-  bkgFile   = {}
-
-
+  dataFile  = None
+  bkgFiles  = []
+  bkgNames  = []
 
   u.setSelection(sel)
+
   if doMerge:
     if sel =="elgamma":
       os.system("hadd "+hPath+"/m_Data_" +sel+"_"+period+".root "+hPath+"/"+sel+"_"+period+"/hhhh_*Run2012D*.root")
@@ -291,9 +80,58 @@ if __name__ == "__main__":
       # os.system("hadd "+hPath+"/m_Data_" +sel+"_"+period+".root "+hPath+"/"+sel+"_"+period+"/hhhh_DoubleElectron_Run20*.root")
 
     if doBkg:
-      os.system("hadd "+hPath+"/m_DY_"   +sel+"_"+period+".root "+hPath+"/"+sel+"_"+period+"/hhhh_DYjets50*.root")
-      # os.system("hadd "+hPath+"/m_ZG_"    +sel+"_"+period+".root "
-      #         +hPath+"/"+sel+"_"+period+"/hhhh_ZG_*.root ")
+      os.system("hadd "+hPath+"/m_DYJets50_"   +sel+"_"+period+".root "
+                +hPath+"/"+sel+"_"+period+"/hhhh_DYJets50*.root")
+      os.system("hadd "+hPath+"/m_ZG_"    +sel+"_"+period+".root "
+                +hPath+"/"+sel+"_"+period+"/hhhh_ZGToLLG_*.root ")
+
+
+
+  if doBkg:
+    bkgFiles.append(TFile(hPath+"/m_ZG_"+sel+"_"+period+".root","OPEN"))
+    bkgNames.append('ZG')
+    bkgFiles.append(TFile(hPath+"/m_DYJets50_"+sel+"_"+period+".root","OPEN"))
+    bkgNames.append('DYJets50')
+    bkgFiles.append(TFile(hPath+"/"+sel+"_"+period+"/hhhh_DYgammaDalitz_1.root","OPEN"))
+    bkgNames.append('DYgammaDalitz')
+    bkgFiles.append(TFile(hPath+"/"+sel+"_"+period+"/hhhh_DYJetsDalitz_1.root","OPEN"))
+    bkgNames.append('DYJetsDalitz')
+
+    #yields_bkg  = u.getYields(bkgFiles,"DY",True)
+
+  bkgZip = zip(bkgNames, bkgFiles)
+
+  sigFileMAD  = TFile(hPath+"/"+sel+"_"+period+"/hhhh_ggH-mad"+str(mass)+"_1.root", "OPEN")
+  sigFileVBF  = TFile(hPath+"/"+sel+"_"+period+"/hhhh_vbf-mad"+str(mass)+"_1.root", "OPEN")
+  sigFileVH   = TFile(hPath+"/"+sel+"_"+period+"/hhhh_vh-mad"+str(mass)+"_1.root",  "OPEN")
+
+  sigFileZjp  = TFile(hPath+"/"+sel+"_"+period+"/hhhh_ZtoJPsiGamma_1.root",  "OPEN")
+  sigFileHjp  = TFile(hPath+"/"+sel+"_"+period+"/hhhh_HiggsToJPsiGamma_1.root",  "OPEN")
+
+  if options.mcfm:  sigFile = sigFileMCFM
+  elif options.hjp: sigFile = sigFileHjp
+  elif options.zjp: sigFile = sigFileZjp
+  else:             sigFile = sigFileMAD
+
+  dataFile = TFile(hPath+"/m_Data_"+sel+"_"+period+".root","OPEN")
+
+  if sel=="zee":
+    u.drawAllInFile(dataFile, "data",bkgZip,None,"",
+                    "Zee",  pathBase+"/Zee",  None,"norm")
+
+  if options.zjp:
+    u.setSelection('mugamma')
+
+  yields_data = u.getYields(dataFile)
+  yields_zjp  = u.getYields(sigFileZjp, 'ZtoJPsiGamma',  True)
+  yields_hjp  = u.getYields(sigFileHjp, 'HtoJPsiGamma',  True)
+  yields_ggH  = u.getYields(sigFile,    'ggH-125',  True)
+  yields_vbf  = u.getYields(sigFileVBF, 'vbfH-125', True)
+  yields_vh   = u.getYields(sigFileVH,  'vH-125',   True)
+  yields_sig  = [sum(x) for x in zip(yields_ggH,yields_vbf,yields_vh)]
+
+  print 'ggH yi', yields_ggH
+  print 'sig yi', yields_sig
 
   subdir = sel
   path = pathBase+"/"+subdir
@@ -303,94 +141,60 @@ if __name__ == "__main__":
   path = pathBase+"/"+subdir
 
 
-  # sigFileMCFM = TFile(hPath+"/"+sel+"_"+period+"/hhhh_ggHMCFM_1.root", "OPEN")
-  # sigFileMCFM = TFile(hPath+"/"+sel+"_"+period+"/hhhh_ggH-mcfm_1.root", "OPEN")
-  sigFileMAD  = TFile(hPath+"/"+sel+"_"+period+"/hhhh_ggH-mad"+str(mass)+"_1.root", "OPEN")
-  sigFileVBF  = TFile(hPath+"/"+sel+"_"+period+"/hhhh_vbf-mad"+str(mass)+"_1.root", "OPEN")
-  sigFileVH   = TFile(hPath+"/"+sel+"_"+period+"/hhhh_vh-mad"+str(mass)+"_1.root",  "OPEN")
+  sigName = '#splitline{100xSignal}{m_{H}=125 GeV}'
+  if options.zjp: sigName= '#splitline{50xSignal}{Z #rightarrow J/Psi #gamma}'
+  if options.hjp: sigName= '#splitline{100xSignal}{h #rightarrow J/Psi #gamma}'
 
-  sigFileZjp  = TFile(hPath+"/"+sel+"_"+period+"/hhhh_ZtoJPsiGamma_1.root",  "OPEN")
-  sigFileHjp  = TFile(hPath+"/"+sel+"_"+period+"/hhhh_HiggstoJPsiGamma_1.root",  "OPEN")
-
-  if options.mcfm: sigFile = sigFileMCFM
-  elif options.zjp: sigFile = sigFileZjp
-  else:            sigFile = sigFileMAD
-
-  dataFile[sel] = TFile(hPath+"/m_Data_"+sel+"_"+period+".root","OPEN")
-  if doBkg:
-    # bkgFile[sel]  = TFile(hPath+"/"+sel+"_"+period+"/hhhh_DYjets0_1.root", "OPEN")
-    bkgFile[sel]  = TFile(hPath+"/m_DY_"+sel+"_"+period+".root","OPEN")
-  else:
-    bkgFile[sel]=None
-
-  if sel=="zee":
-    u.drawAllInFile(dataFile[sel], "data",bkgFile[sel], "bkg",None,"",
-                    "Zee",  pathBase+"/Zee",  None,"norm")
-
-  yields_data[sel] = u.getYields(dataFile[sel])
-  yields_ggH[sel]  = u.getYields(sigFile,    'ggH-125',  True)
-  yields_vbf[sel]  = u.getYields(sigFileVBF, 'vbfH-125', True)
-  yields_vh[sel]   = u.getYields(sigFileVH,  'vH-125',   True)
-  yields_sig[sel]  = [sum(x) for x in zip(yields_ggH[sel],yields_vbf[sel],yields_vh[sel])]
-
-  print 'ggH yi', yields_ggH[sel]
-  print 'sig yi', yields_sig[sel]
-
-  if doBkg:
-    yields_bkg[sel]  = u.getYields(bkgFile[sel],"DY",True)
-
-    # if int(cut) >2:
-    # tri_hists[sel]   = dataFile[sel].Get("tri_mass_cut"+cut).Clone()
+  if (options.zjp or options.hjp) and cut in ['12']:
+    u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName,  "jpsi",path, cut, "lumi")
 
   if cut not in ['12','14','15']:
-    u.drawAllInFile(dataFile[sel], "Data", None, "", sigFile,"#splitline{Signal}{m_{H}=125 GeV}",  "",path, cut, "norm")
-    # u.drawAllInFile(dataFile[sel], "data", None, "", sigFile,"signal",  "",path, cut, "norm", doRatio=1)
-    # u.drawAllInFile(dataFile[sel], "Data", None, "", sigFile,"50xSignal",  "",path, cut, "lumi")
-    # u.drawAllInFile(dataFile[sel], "data", None, "", sigFile,"50xSignal","EB",pathBase+"/EB", cut, "lumi")
-    # u.drawAllInFile(dataFile[sel], "data", None, "", sigFile,"50xSignal","EE",pathBase+"/EE", cut, "lumi")
-    print 'Not in inin'
+    u.drawAllInFile(dataFile, "Data", bkgZip, None, '', "", path, cut, "lumi")
+    #u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "", path, cut, "lumi")
+    #u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName,  "",path, cut, "norm")
+    # u.drawAllInFile(dataFile, "data", bkgZip, sigFile,"50xSignal","EB",pathBase+"/EB", cut, "lumi")
+    # u.drawAllInFile(dataFile, "data", bkgZip, sigFile,"50xSignal","EE",pathBase+"/EE", cut, "lumi")
 
-
-  if sel == "mugamma":
+  if sel == "mugamma" and not options.zjp:
     if cut not in ['12','14','15','16']:
-      # u.drawAllInFile(dataFile[sel], "data",None, "",sigFile,"signal",  "Muons", pathBase+"/Muons", None,"norm")
-      u.drawAllInFile(dataFile[sel], "data",bkgFile[sel], "bkg",sigFile,"signal",
+      # u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",  "Muons", pathBase+"/Muons", None,"norm")
+      u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",
                       "Muons", pathBase+"/Muons/", None,"norm")
-      u.drawAllInFile(dataFile[sel], "data",bkgFile[sel], "bkg",sigFile,"#splitline{Signal}{m_{H}=125 GeV}",
+      u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"#splitline{Signal}{m_{H}=125 GeV}",
                       "Photon",pathBase+"/Photon/", None,"norm")
 
     elif cut in ['12']:
-      u.drawAllInFile(dataFile[sel], "data",bkgFile[sel], "bkg",sigFile,"#splitline{Signal}{m_{H}=125 GeV}",
+      u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"#splitline{Signal}{m_{H}=125 GeV}",
                       "jpsi",pathBase+"/jpsi/", cut,"norm2")
     elif cut in ['14','15','16']:
-      u.drawAllInFile(dataFile[sel], "data",bkgFile[sel], "bkg",None,"",
+      u.drawAllInFile(dataFile, "data",bkgZip,None,"",
                       "AlphaPiZ",pathBase+"/apz/", cut,"norm2")
 
   elif sel == "elgamma":
-    u.drawAllInFile(dataFile[sel], "data",bkgFile[sel], "bkg",sigFile,"signal",
+    u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",
                     "Photon",     pathBase+"/Photon",     None,"norm")
 
-    u.drawAllInFile(dataFile[sel], "data",bkgFile[sel], "bkg",sigFile,"signal",
+    u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",
                     "DalitzEle-Before",  pathBase+"/DalitzEle-Before",  None,"norm")
-    u.drawAllInFile(dataFile[sel], "data",bkgFile[sel], "bkg",sigFile,"signal",
+    u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",
                     "DalitzEle-AfterAll",  pathBase+"/DalitzEle-AfterAll",  None,"norm")
-    u.drawAllInFile(dataFile[sel], "data",bkgFile[sel], "bkg",sigFile,"signal",
+    u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",
                     "DalitzEle-Before_tracks",  pathBase+"/DalitzEle-Before_tracks",  None,"norm")
-    u.drawAllInFile(dataFile[sel], "data",bkgFile[sel], "bkg",sigFile,"signal",
+    u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",
                     "DalitzEle-AfterAll_tracks",  pathBase+"/DalitzEle-AfterAll_tracks",  None,"norm")
 
 
-    u.drawAllInFile(dataFile[sel], "data",bkgFile[sel], "bkg",sigFile,"signal",
+    u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",
                     "DalitzEle",  pathBase+"/DalitzEle",  None,"norm")
 
-    u.drawAllInFile(dataFile[sel], "data",bkgFile[sel], "bkg",sigFile,"signal",
+    u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",
                     "DalitzEleEB",pathBase+"/DalitzEleEB",None,"norm")
-    u.drawAllInFile(dataFile[sel], "data",bkgFile[sel], "bkg",sigFile,"signal",
+    u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",
                     "DalitzEleEE",pathBase+"/DalitzEleEE/",None,"norm")
 
-    u.drawAllInFile(dataFile[sel], "data",bkgFile[sel], "bkg",sigFile,"signal",
+    u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",
                     "DalitzEleEB_tracks",pathBase+"/DalitzEleEB_tracks",None,"norm")
-    u.drawAllInFile(dataFile[sel], "data",bkgFile[sel], "bkg",sigFile,"signal",
+    u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",
                     "DalitzEleEE_tracks",pathBase+"/DalitzEleEE_tracks",None,"norm")
 
 
@@ -398,9 +202,9 @@ if __name__ == "__main__":
     #print yields_data
 
 
-    #u.drawAllInFile(sigFileMAD, "signal", None, "", None,"","GEN-RECO",pathBase+"/GEN-RECO", None, "lumi")
+    #u.drawAllInFile(sigFileMAD, "signal", bkgZip, None,"","GEN-RECO",pathBase+"/GEN-RECO", None, "lumi")
 
-    #u.drawAllInFile(bkgFile[sel], "DY electrons", sigFile, "Dalitz 2el",  "NewEle-1", pathBase+"/NewEle-1/", None,"norm", isLog=1, )
+    #u.drawAllInFile(bkgFiles, "DY electrons", sigFile, "Dalitz 2el",  "NewEle-1", pathBase+"/NewEle-1/", None,"norm", isLog=1, )
 
     #sigFileMAD  = TFile(hPath+"/mugamma_"+period+"/hhhh_ggH-mad125_1.root", "OPEN")
 
@@ -438,7 +242,7 @@ if __name__ == "__main__":
         alphaPiZ2(data, c1, TCut('m4l>140 && m4l<150'),pathBase+"/"+s+"-alphaPiZ-7/")
 
 
-        u.drawAllInFile(data, "data",None, "",None,"",
+        u.drawAllInFile(data, "data",bkgZip,None,"",
                         "apz-plots",pathBase+"/apz-plots/",None,"norm2")
 
 
@@ -446,11 +250,11 @@ if __name__ == "__main__":
 
       data = TFile(hPath+"/m_Data_mugamma_2012.root","OPEN")
 
-      alphaPiZ(data, c1, TCut('ph_pt/m_llg>0.3 && di_pt/m_llg>0.3 && m_llg>100&&m_llg<170 && fabs(ph_eta)<1.444'),
+      alphaPiZ(data, c1, TCut('ph_pt/m_llg>0.3 && di_pt/m_llg>0.3 && m_llg>100&&m_llg<170'),
                pathBase+"/alphaPiZ-0/")
       alphaPiZ(data, c1, TCut(''),                                                            pathBase+"/alphaPiZ-1/")
-      alphaPiZ(data, c1, TCut('ph_pt/m_llg>0.3 && di_pt/m_llg>0.3'),                          pathBase+"/alphaPiZ-2/")
-      alphaPiZ(data, c1, TCut('ph_pt/m_llg>0.3 && di_pt/m_llg>0.3 && m_llg>100&&m_llg<150'),  pathBase+"/alphaPiZ-3/")
+      alphaPiZ(data, c1, TCut('ph_pt/m_llg>0.30 && di_pt/m_llg>0.30'),                          pathBase+"/alphaPiZ-2/")
+      alphaPiZ(data, c1, TCut('ph_pt/m_llg>0.30 && di_pt/m_llg>0.30 && m_llg>100&&m_llg<150'),  pathBase+"/alphaPiZ-3/")
       alphaPiZ(data, c1, TCut('ph_pt/m_llg>0.35 && di_pt/m_llg>0.35 && m_llg>100&&m_llg<150'),pathBase+"/alphaPiZ-4/")
       alphaPiZ(data, c1, TCut('ph_pt/m_llg>0.35 && di_pt/m_llg>0.35 && m_llg>120&&m_llg<180'),pathBase+"/alphaPiZ-5/")
       alphaPiZ(data, c1, TCut('ph_pt/m_llg>0.35 && di_pt/m_llg>0.35 && m_llg>100&&m_llg<130'),pathBase+"/alphaPiZ-6/")
@@ -466,8 +270,8 @@ if __name__ == "__main__":
         sigFileMAD  = TFile("hhhh_ggH-mad125_1.root", "OPEN")
 
         u.createDir(pathBase+"/eff")
-        effPlots(sigFileMAD, pathBase+"/eff/")
-        effPlots2(sigFileMAD, pathBase+"/eff/")
+        u.effPlots(sigFileMAD, pathBase+"/eff/")
+        u.effPlots2(sigFileMAD, pathBase+"/eff/")
 
 
 
@@ -495,9 +299,9 @@ if __name__ == "__main__":
     hc9 = sigFileMAD.Get("tri_mass80__cut9").Integral(35,41)*scale
     print "Yields in bins that supposed to correspond to [122,128] window:\n",hc7, hc8, hc9
 
-    hc7 = dataFile[sel].Get("tri_mass80__cut7").Integral(36,40)
-    hc8 = dataFile[sel].Get("tri_mass80__cut8").Integral(36,40)
-    hc9 = dataFile[sel].Get("tri_mass80__cut9").Integral(36,40)
+    hc7 = dataFile.Get("tri_mass80__cut7").Integral(36,40)
+    hc8 = dataFile.Get("tri_mass80__cut8").Integral(36,40)
+    hc9 = dataFile.Get("tri_mass80__cut9").Integral(36,40)
     print "Yields in bins that supposed to correspond to [122,128] window:\n",hc7, hc8, hc9
 
 
@@ -513,7 +317,7 @@ if __name__ == "__main__":
 
         cut = TCut("m_llg>"+str(m1)+"&&m_llg<"+str(m2))
         cut += etaCut
-        treeda = dataFile[sel].Get("fitTree/fitTree")
+        treeda = dataFile.Get("fitTree/fitTree")
         treeda.Draw("m_llg>>hda", cut)
 
         treesi = sigFile.Get("fitTree/fitTree")
@@ -527,7 +331,7 @@ if __name__ == "__main__":
 
     '''
     '''
-    h2da = dataFile[sel].Get("h2D_dalitzPlot_rotation__cut"+cut).ProjectionX("hda_prx")
+    h2da = dataFile.Get("h2D_dalitzPlot_rotation__cut"+cut).ProjectionX("hda_prx")
     h2si = sigFile.Get("h2D_dalitzPlot_rotation__cut"+cut).ProjectionX("hsi_prx")
 
     #u.handleOverflowBins(h2da)
@@ -554,17 +358,16 @@ if __name__ == "__main__":
             h2da_rot.SetBinContent(a,b, fda)
             h2si_rot.SetBinContent(a,b,fda)
     '''
+  if options.zjp:
+    data = TFile(hPath+"/m_Data_"+sel+"_2012.root","OPEN")
 
-  if options.zjp and ss=='mugamma':
-    data = TFile(hPath+"/m_Data_mugamma_2012.root","OPEN")
-
-    ZJPG(data, c1, TCut('pt3/m123>0.3 && pt12/m123>0.3 && m123>110 && m123<170 && dr1234>1'),
+    ZJPG(data, c1, TCut('pt3/m123>0.3 && pt12/m123>0.3 && m123>110 && m123<170 && dr13>1 && dr23>1'),
          pathBase+"/ZtoJPsiGamma-0/")
 
     ZJPG(data, c1, TCut(''), pathBase+"/ZtoJPsiGamma-1-full/")
     ZJPG(data, c1, TCut('m12<30'), pathBase+"/ZtoJPsiGamma-2-Mll30/")
 
-
+    ZJPG(data, c1, TCut('pt3/m123>0.3 && pt12/m123>0.3 && m12<30 && dr1234>1'), pathBase+"/ZtoJPsiGamma-3-ptmllg03/")
 
   plot_types =[]
   list = os.listdir(pathBase)
@@ -576,9 +379,12 @@ if __name__ == "__main__":
   print yields_sig
 
   if doBkg:
-    table_all  = u.yieldsTable([yields_data,yields_bkg,yields_sig, yields_ggH,yields_vbf, yields_vh], sel)
+    #table_all  = u.yieldsTable([yields_data,yields_bkg,yields_sig, yields_ggH,yields_vbf, yields_vh], sel)
+    table_all = u.yieldsTable([yields_data, yields_hjp, yields_zjp], sel)
   else:
-    if not options.apz:
+    if options.zjp or options.hjp:
+      table_all = u.yieldsTable([yields_data, yields_hjp, yields_zjp], sel)
+    elif not options.apz:
       table_all  = u.yieldsTable([yields_data,yields_sig, yields_ggH,yields_vbf, yields_vh], sel)
 
   u.makeTable(table_all,"all", "html")

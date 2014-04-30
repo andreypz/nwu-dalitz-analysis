@@ -30,9 +30,9 @@ def makeHTML(title, htmlDir, plot_types, description, IFRAMEA):
 
         PDFfileList = [f[:-4] for f in os.listdir(newDir) if f.endswith(".pdf")]
 
-        #print PDFfileList
-        #print "\n In Making html:", x
-        #print fileList[x]
+        # print PDFfileList
+        # print "\n In Making html:", x
+        # print fileList[x]
 
         count = 1
         mod   = 1
