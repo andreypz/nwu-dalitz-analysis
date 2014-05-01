@@ -5,7 +5,7 @@ Debugged and improved.
 
 ### How to run it. 
 #### Fits and limits
- 1. ```initialFitProducer.py  path/to/rootfile``` to perform initial fits. Where _path/to/rootfile_ is specific to my setup (look into te code), and the root files in there have to contain a tree called 'fitTree/fitTree'. That tree has to contain the following variables: *m_llg*, *m_ll*, *di_pt*,*ph_pt*,**ph_eta** and *weight*. The *m_llg* is the most important one: three-body invariant mass that we are going to fit. 
+ 1. ```initialFitProducer.py  path/to/rootfile``` to perform initial fits. Where _path/to/rootfile_ is specific to my setup (look into te code), and the root files in there have to contain a tree called 'fitTree/fitTree'. That tree has to contain the following variables: **m_llg**, **m_ll**, **di_pt**, **ph_pt**, **ph_eta** and **weight**. The **m_llg** is the most important one: three-body invariant mass that we are going to fit. 
  It performs various different fits to Data (Exponential, Bernsteins etc) and also fits all signal MC to a  Gaussian plus a Crystall Ball function with the same mean.
  2. ```bgCardPrep.py``` makes a final fit of the Data to a choosen background model (e.g. Bern5 polynomials). It also renames the variables and created the RooFit Workspace for the use by Combination tool. 
  3. ```signalCBFits.py```  takes the fits to the signal perforemed at step 1 and performs an interpolation to other masses in beteen. Renames the variables and creates the RooFit workspaces to be used by Combination tool. 
