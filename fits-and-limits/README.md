@@ -1,14 +1,17 @@
 ## Fits,  Limit calculation and  Bias study
-These codes are meant for Higgs to l+l-gamma Dalitz mode analyzis.
+These codes are meant for Higgs to l+l-gamma Dalitz mode analysis,  but it could be used for any other similar tasks: fit the final mass distribution and search for peaks.
 Most of it was orriginally taken from Brover Clevelend [BiasAndLimits code][brover].
 Debugged and improved.
 
 ### How to run it. 
 #### Fits and limits
- 1. ```initialFitProducer.py``` to perform initial fits.
- 2. ```bgCardPrep.py``` and ```signalCBFits.py``` for the final fits and the info for the datacards
- 3. ```cardMaker.py``` makes the datacards
- 4. ```limitProducer.py``` produces the limit. Then ``limitPlotter.py``` makes the plots out of the result.
+ 1. ```initialFitProducer.py  path/to/rootfile``` to perform initial fits. Where _path/to/rootfile_ is specific to my setup (look into te code), and the root files in there have to contain a tree called 'fitTree/fitTree'. That tree has to contain the following variables: *m_llg*, *di_pt*,*ph_pt*,*xx* and *ph_eta*. The *m_llg* is the most important one: three-body invariant mass that we are going to fit. 
+ It performs various different fits to Data (Exponential, Bernsteins etc) and also fits all signal MC to a  Gaussian plus a Crystall Ball function with the same mean.
+ 2. ```bgCardPrep.py``` makes a final fit of the Data to a choosen background model (e.g. Bern5 polynomials). It also renames the variables and created the RooFit Workspace for the use by Combination tool. 
+ 3. ```signalCBFits.py```  takes the fits to the signal perforemed at step 1 and performs an interpolation to other masses in beteen. Renames the variables and creates the RooFit workspaces to be used by Combination tool. 
+ 4. ```cardMaker.py``` makes the datacards.
+ 5. ```limitProducer.py``` produces the limit by runnning the Combination tool. *The proper CMSSW version, recommended by Combination guys, has to be used at this stage!*. 
+ 6. Then ``limitPlotter.py``` makes the plots for the limits.
 
 #### Bias study
  1. ```biasStudy_toyMaker.py``` makes the toys from a given PDF and performes the fits with various test function.
