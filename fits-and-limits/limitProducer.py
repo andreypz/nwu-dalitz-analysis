@@ -8,8 +8,6 @@ parser.add_option("--noSyst", dest="noSyst",action="store_true", default=False,
                   help="Don't include systematics in the limit calculation")
 parser.add_option("--comb", dest="comb",action="store_true", default=False,
                   help="Combine with electrons")
-parser.add_option("--br", dest="br",action="store_true", default=False,
-                  help="Run on an alternative datacars that includes different error on dalitz BR()")
 parser.add_option("--prof", dest="prof",action="store_true", default=False,
                   help="Use -M ProfileLikelihood instead of Asymptotic")
 
@@ -24,8 +22,8 @@ def produceLimits(inputFolder = '', outPutFolder = 'limitOutputs/', mass = '125.
 
 if __name__ == "__main__":
 
-  #massList   = ['%.1f'%(a) for a in u.drange(120,150,.5)]
-  massList   = [a.strip() for a in (cf.get("fits","massList-more")).split(',')]
+  massList   = ['%.1f'%(a) for a in u.drange(120,150,5)]
+  #massList   = [a.strip() for a in (cf.get("fits","massList-more")).split(',')]
 
   s = cf.get("path","ver")
   dir = s
@@ -37,19 +35,10 @@ if __name__ == "__main__":
     with open(r'config.cfg', 'wb') as configfile:
       cf.write(configfile)
 
-  if options.br:
-    dir = s.replace("/","")+"-br"
-    print s, dir
-    os.system("cp -r "+s+"  "+dir)
-
-
   for m in massList:
     print "\n**\t Making limits for M=",m,"\t**\n"
     #card = "output_cards/hzg_el_2012_cat0_M"+m+"_Dalitz.txt"
     card_mu  = dir+"/output_cards/hzg_mu_2012_cat0_M"+m+"_Dalitz_.txt"
-
-    if options.br:
-      card_mu  = dir+"/output_cards/hzg_mu_2012_cat0_M"+m+"_Dalitz_br.txt"
 
     #card_ele = "./cards_ele2/realistic-counting-experiment_"+m[0:3]+".txt"
     card = ""
@@ -60,7 +49,6 @@ if __name__ == "__main__":
       card = card_mu
 
     print 'Using CARD = \n',card
-
 
 
     method = "Asymptotic"

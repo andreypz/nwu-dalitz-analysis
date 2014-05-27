@@ -45,7 +45,7 @@ if __name__ == "__main__":
   period  = options.period
   doBkg   = options.bkg
 
-  gROOT.ProcessLine(".L ~/tdrstyle.C")
+  gROOT.ProcessLine(".L ../tdrstyle.C")
   setTDRStyle()
   TH1.SetDefaultSumw2(kTRUE)
 
@@ -398,10 +398,10 @@ if __name__ == "__main__":
   comments = ["These plots are made for ...",
               "Blah"]
 
-  defaultPage = 'mugamma'
+  defaultPage = sel
   if cut in ['12']: defaultPage = 'jpsi'
   elif cut in ['14','15']: defaultPage = 'apz'
-
+  #elif options.zjp or options.hjp: defaultPage = 'jp-'+sel
   print defaultPage
 
 

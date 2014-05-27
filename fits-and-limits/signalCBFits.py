@@ -13,7 +13,7 @@ cf.read('config.cfg')
 
 massList   = ['%.1f'%(a) for a in u.drange(120,150,.5)]
 
-gROOT.ProcessLine(".L ~/tdrstyle.C")
+gROOT.ProcessLine(".L ../tdrstyle.C")
 setTDRStyle()
 
 # rounding function for interpolation

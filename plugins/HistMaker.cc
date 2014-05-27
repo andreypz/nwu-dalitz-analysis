@@ -104,7 +104,9 @@ void HistMaker::FillHistosFull(Int_t num, Double_t weight, string dir)
   hists->fill2DHist(tri.M(), diLep.M(), Form("h2D_tri_vs_diLep_mass3_%s_cut%i",  d, num),
 		    ";M(ll#gamma) (GeV);M(ll) (GeV)", nBins1,0,200, nBins1, 8,20,  weight, dir);
 
-  hists->fill1DHist(TMath::Log(diLep.M()),   Form("diLep_mass_log1_%s_cut%i",  d, num),";log(M(ll))", 100, 0,10,  weight, dir);
+  hists->fill1DHist(TMath::Log(diLep.M()),   Form("diLep_mass_log1_%s_cut%i",  d, num),";log(M(ll))", 100,   0,7, weight, dir);
+  hists->fill1DHist(TMath::Log(diLep.M()),   Form("diLep_mass_log2_%s_cut%i",  d, num),";log(M(ll))", 100,   0,3, weight, dir);
+  hists->fill1DHist(TMath::Log(diLep.M()),   Form("diLep_mass_log2_%s_cut%i",  d, num),";log(M(ll))", 100, 0,1.3, weight, dir);
 
   hists->fill1DHist(diLep.M(),   Form("diLep_mass_low1_%s_cut%i",  d, num),";M(ll) (GeV)", 50, 0,1.5,  weight, dir);
   hists->fill1DHist(diLep.M(),   Form("diLep_mass_low2_%s_cut%i",  d, num),";M(ll) (GeV)", 100, 1.5,8,  weight, dir);
@@ -153,7 +155,7 @@ void HistMaker::FillHistosFull(Int_t num, Double_t weight, string dir)
 		    ";E_{#gamma} in CoM; M(ll#gamma)",   50, 0,100, 50,0,200, weight, dir);
 
   hists->fill2DHist(diLep.Eta()-_gamma.Eta(), _gamma.Pt(), Form("h2D_deltaEta_vs_gammaPt_deltaEta_%s_cut%i",d, num),
-		    ";#Delta#eta(ll, #gamma);p_{T} of {#gamma}",    100, -5,5, 100,0,130, weight, dir);
+		    ";#Delta#eta(ll, #gamma);p_{T} of #gamma",    100, -5,5, 100,0,130, weight, dir);
 
   hists->fill1DHist(_lPt1.DeltaR(_lPt2), Form("ll_deltaR_full_%s_cut%i",   d, num),";#Delta R(l_{1}, l_{2})",50,0,4,  weight,dir);
   hists->fill1DHist(_lPt1.DeltaR(_lPt2), Form("ll_deltaR_%s_cut%i",        d, num),";#Delta R(l_{1}, l_{2})",50,0,1,  weight,dir);

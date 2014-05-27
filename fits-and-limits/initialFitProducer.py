@@ -34,9 +34,10 @@ for f,col in cf.items("colors"):
 #print "Begin, INPUT"
 #raw_input()
 
-#gSystem.SetIncludePath( "-I$ROOFITSYS/include/" );
-#gROOT.ProcessLine(".L ~/tdrstyle.C")
-#setTDRStyle()
+gSystem.SetIncludePath( "-I$ROOFITSYS/include/" );
+gROOT.ProcessLine(".L ../tdrstyle.C")
+setTDRStyle()
+
 TH1.SetDefaultSumw2(kTRUE)
 gStyle.SetOptTitle(0)
 

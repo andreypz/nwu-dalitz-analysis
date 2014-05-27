@@ -1,5 +1,17 @@
 #!/usr/bin/env python
 from collections import defaultdict
+import numpy as np
+cs_gg  = np.array([20.86, 19.27, 17.85, 16.57, 15.42, 14.46, 13.55], float)
+cs_vbf = np.array([1.649,1.578,1.511,1.448,1.389,1.333,1.280], float)
+cs_Wh  = np.array([0.8052,0.7046,0.6169,0.5416,0.4768,0.4216,0.3728],float)
+cs_Zh  = np.array([0.4710,0.4153,0.3671,0.3259,0.2899,0.2583,0.2308],float)
+cs_Vh  = np.sum([cs_Wh, cs_Zh], axis=0)
+
+cs_tot = cs_gg+cs_vbf+cs_Wh+cs_Zh
+print 'Higgs cross sections total:\n',cs_tot
+BR_mu  = np.array([ 3.77201342e-05, 3.91992735e-05, 3.91260504e-05,
+                    3.70906457e-05, 3.37937743e-05, 2.95381743e-05,
+                    2.42427306e-05])
 
 pdf_gg = defaultdict(dict)
 

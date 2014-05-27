@@ -6,7 +6,7 @@ gROOT.SetBatch()
 sys.path.append("../zgamma")
 import utils as u
 import ConfigParser as cp
-gROOT.ProcessLine(".L ~/tdrstyle.C")
+gROOT.ProcessLine(".L ../tdrstyle.C")
 setTDRStyle()
 
 print len(sys.argv), sys.argv
@@ -44,6 +44,7 @@ bkgModel = 'Bern4'
 # and rename the parameters to work    #
 # with the higgs combination tool      #
 # #######################################
+
 
 def BackgroundNameFixer(fitName, year, lepton, cat, ws, Ext=True):
   dataName      = '_'.join(['data',      lepton,year,'cat'+cat])
@@ -209,6 +210,81 @@ def BackgroundNameFixer(fitName, year, lepton, cat, ws, Ext=True):
 
 #myWs.Print()
 
+def doBandsFit(onesigma, twosigma, hmass, cpdf, nomcurve, datanorm, plot, year, lepton):
+  print '\n \t \t *** starting bands \n'
+  nlim = RooRealVar("nlim","", 0, 0,100)
+  print 'total steps needed:', plot.GetXaxis().GetNbins()
+  oldhi = oldlo = 9999
+
+  cpdf.Print()
+  datanorm.Print()
+  nomcurve.Print()
+
+  raw_input('Enter')
+
+  for i in range(1,plot.GetXaxis().GetNbins()+1):
+    #r = TRandom(i)
+    lowedge = plot.GetXaxis().GetBinLowEdge(i)
+    upedge  = plot.GetXaxis().GetBinUpEdge(i)
+    center  = plot.GetXaxis().GetBinCenter(i)
+    nombkg  = nomcurve.interpolate(center)
+    print 'bin number:', i, 'nombkg=', nombkg
+    nlim.setVal(nombkg)
+
+    #hmass.removeRange()
+    #nlim.removeRange()
+    nlim.setRange(nombkg*0.3, nombkg*3.0)
+    hmass.setRange("errRange",lowedge,upedge)
+    #hmass.Print()
+    epdf = RooExtendPdf("epdf","",cpdf,nlim,"errRange")
+
+    cl_one = 1.0 - 2.0*(RooStats.SignificanceToPValue(1.0))
+    cl_two = 1.0 - 2.0*(RooStats.SignificanceToPValue(2.0))
+    #print 'cl_one', cl_one, 'cl_two', cl_two
+    onesigma.SetPoint(i-1,center,nombkg)
+    tempi = i
+
+    #nll = epdf.createNLL(datanorm)
+    nll = epdf.createNLL(datanorm, RooFit.Extended())
+    #nll.Print()
+    minim = RooMinimizer(nll)
+    minim.setErrorLevel(0.5*pow(ROOT.Math.normal_quantile(1-0.5*(1-cl_one),1.0),2)) #0.5 is because qmu is -2*NLL
+    minim.setStrategy(2)
+    #minim.setPrintLevel(-1)
+    minim.migrad()
+    minim.hesse()
+    minim.minos(RooArgSet(nlim))
+    onelo = -nlim.getErrorLo()
+    onehi =  nlim.getErrorHi()
+    val = nlim.getVal()
+
+    onesigma.SetPointError(i-1,0.,0.,onelo,onehi)
+    if fabs(onelo)<0.01:
+      onesigma.SetPointError(i-1,0.,0.,onehi,onehi)
+      onelo=onehi
+    if fabs(onehi)<0.01:
+      onesigma.SetPointError(i-1,0.,0.,onelo,onelo)
+      onehi=onelo
+    if(fabs(onelo) <0.01 and fabs(onehi)<0.01):
+      onesigma.SetPointError(i-1,0.,0.,nlim.getError(),nlim.getError())
+      onelo=nlim.getError()
+      onehi=nlim.getError()
+
+    print 'val=', val, 'one errHi', onehi, 'one errLo', onelo
+
+    #minim.setErrorLevel(0.5*pow(ROOT.Math.normal_quantile(1-0.5*(1-cltwo),1.0),2)) #0.5 is because qmu is -2*NLL
+    # eventually if cl = 0.95 this is the usual 1.92!
+    twosigma.SetPoint(i-1,center,nombkg)
+    twolo = 1.92*onelo
+    twohi = 1.92*onehi
+    twosigma.SetPointError(i-1,0.,0.,twolo,twohi)
+
+    print 'two errHi', twohi, 'two errLo', twolo
+  onesigma.Print("V")
+  twosigma.Print("V")
+
+  raw_input('Enter ')
+
 for year in yearList:
   for lepton in leptonList:
     for cat in catList:
@@ -264,6 +340,7 @@ for year in yearList:
       fitExtName    = '_'.join(['bkgTmp',lepton,year,'cat'+cat])
       fit_ext       = RooExtendPdf(fitExtName,fitExtName, fit,norm)
 
+
       if verbose:
         print norm.getVal(), norm.getError()
         raw_input("norm.getVal(), norm.getError()")
@@ -281,19 +358,15 @@ for year in yearList:
       else:
         data.plotOn(testFrame, RooFit.Binning(myBinning), RooFit.Name('data'))
 
+
       fit_ext.plotOn(testFrame, RooFit.Name(bkgModel+"2sigma"),
                      RooFit.VisualizeError(fit_result,2), RooFit.FillColor(kCyan-10),RooFit.LineColor(kBlack))
       fit_ext.plotOn(testFrame, RooFit.Name(bkgModel+"1sigma"),
                      RooFit.VisualizeError(fit_result,1), RooFit.FillColor(kCyan-6), RooFit.LineColor(kBlack))
       fit_ext.plotOn(testFrame, RooFit.Name(bkgModel), RooFit.LineColor(kBlue), RooFit.LineWidth(2))
-      fit_ext.paramOn(testFrame, RooFit.Layout(0.30,0.99,0.9))
+      #fit_ext.paramOn(testFrame, RooFit.Layout(0.30,0.99,0.9))
       #fit_ext.statOn(testFrame)
 
-      if doBlind:
-        data.plotOn(testFrame, RooFit.Binning(myBinning), RooFit.Name('data'), RooFit.CutRange('r1'))
-        data.plotOn(testFrame, RooFit.Binning(myBinning), RooFit.Name('data'), RooFit.CutRange('r2'))
-      else:
-        data.plotOn(testFrame, RooFit.Binning(myBinning), RooFit.Name('data'))
 
       if verbose:
         print 'have unit norm?? ', sigP.haveUnitNorm()
@@ -303,15 +376,36 @@ for year in yearList:
         # print "Figuring out norms of PDFs",sigP.getVal(), sigP.analyticalIntegral()
         raw_input("pdf norm / chi2  ")
 
+
+      '''
+      onesigma = TGraphAsymmErrors()
+      twosigma = TGraphAsymmErrors()
+      tmpCurve = RooCurve(testFrame.findObject(bkgModel))
+      doBandsFit(onesigma, twosigma, mzg, fit, tmpCurve, data, testFrame, year, lepton)
+      twosigma.SetLineColor(kBlack)
+      twosigma.SetFillColor(kCyan-10)
+      onesigma.SetLineColor(kBlack)
+      onesigma.SetFillColor(kCyan-6)
+      twosigma.Draw("L3 same")
+      onesigma.Draw("L3 same")
+      '''
+
+      if doBlind:
+        data.plotOn(testFrame, RooFit.Binning(myBinning), RooFit.Name('data'), RooFit.CutRange('r1'))
+        data.plotOn(testFrame, RooFit.Binning(myBinning), RooFit.Name('data'), RooFit.CutRange('r2'))
+      else:
+        data.plotOn(testFrame, RooFit.Binning(myBinning), RooFit.Name('data'))
+
       testFrame.SetMaximum(62)
       testFrame.Draw()
-
       hsig[0].SetAxisRange(115,135,"X")
       hsig[0].SetLineColor(kRed+1)
       hsig[0].SetLineWidth(2)
       hsig[0].Draw('same hist')
 
+
       testFrame.SetTitle(";m_{#mu#mu#gamma} (GeV);Events/"+str(binWidth)+" GeV")
+
 
       leg  = TLegend(0.53,0.65,0.93,0.87)
       leg.SetFillColor(0)
@@ -321,7 +415,7 @@ for year in yearList:
       leg.AddEntry(0,'','')
       leg.AddEntry(hsig[0],'Expected signal x10','l')
       leg.SetTextSize(0.045)
-      #leg.Draw()
+      leg.Draw()
 
       leg2  = TLegend(0.55,0.72,0.91,0.8)
       leg2.SetNColumns(2)
@@ -337,7 +431,7 @@ for year in yearList:
       prelim.SetTextSize(0.045)
       prelim.SetTextFont(62)
       prelim.DrawLatex(0.15,0.95, ("CMS Preliminary"))
-      prelim.DrawLatex(0.40,0.95, "#sqrt{s} = 8 TeV, L = 19.7 fb^{-1}   H#rightarrow#gamma*#gamma#rightarrow#mu#mu#gamma")
+      prelim.DrawLatex(0.40,0.95, "#sqrt{s} = 8 TeV,  L = 19.7  fb^{-1}  H#rightarrow#gamma*#gamma#rightarrow#mu#mu#gamma")
       #prelim.Draw()
       gPad.RedrawAxis()
       for e in ['.png', '.pdf']:

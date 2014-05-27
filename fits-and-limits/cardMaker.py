@@ -10,7 +10,7 @@ parser = OptionParser(usage="usage: %prog  [options --brSyst 1.20]")
 parser.add_option("--brSyst", dest="brSyst", default='1.10', help="error on the branching ratio")
 parser.add_option("-b", dest="bach", action="store_true", default=True, help="batch")
 parser.add_option("--ext",dest="ext", action="store_true", default=False, help="Extended pdf for bkg")
-parser.add_option("--br",dest="br", action="store_true", default=False, help="Do the limit on BR instead of the mu")
+parser.add_option("--br",dest="br", action="store_true", default=False, help="Do the limit on BR*cs instead of the mu")
 (options, args) = parser.parse_args()
 
 import ConfigParser as cp
@@ -38,7 +38,14 @@ phoTRIG = '1.020'
 PU      = '1.008'
 
 proc = {'gg':'ggH', 'vbf':'qqH','v':'WH'}
-massList   = ['%.1f'%(a) for a in u.drange(120,150,.5)]
+massList   = ['%.1f'%(a) for a in u.drange(120,150,5)]
+#massList   = ['%.1f'%(a) for a in u.drange(120,150,.5)]
+csBR = {}
+for i,m in enumerate(massList):
+  # for now this numbers are retrieved from systematics.py file
+  ccc = cs_tot[i]*BR_mu[i]*1000
+  print "Cs and BR and cs*Br = ", cs_tot[i],BR_mu[i], ccc
+  csBR[m] = ccc
 
 def makeCards(subdir):
   yearList   = [a.strip() for a in (cf.get("fits","yearList")).split(',')]
@@ -64,13 +71,13 @@ def makeCards(subdir):
           sigFile = TFile(sigFileName)
           sigWs = sigFile.Get('ws_card')
           procList  = [proc[a] for a in sigNameList]
-          print procList
+          # print procList
           if options.br and float(mass)%5!=0:
             print "Sorry can't do this with those mass points yet, ",mass
             sys.exit(0)
-          if options.br:
-            croDict = {a:float(u.conf.get(a+"H-"+mass[0:3], "cs-mu")) for a in sigNameList}
-            print croDict
+          #if options.br:
+          #  croDict = {a:float(u.conf.get(a+"H-"+mass[0:3], "cs-mu")) for a in sigNameList}
+          #  print croDict
 
           u.createDir(subdir+'/output_cards/')
           card = open(subdir+'/output_cards/'+'_'.join(['hzg',lepton,year,'cat'+cat,'M'+mass,'Dalitz',brTag])+'.txt','w')
@@ -108,8 +115,8 @@ def makeCards(subdir):
           for s in sigNameList[::-1]:
             cs = 1
             if options.br:
-              cs = croDict[s]
-            print s, cs
+              cs = csBR[mass]
+            # print s, cs
             sigYields.append(sigWs.var('sig_'+s+'_yield_'+channel).getVal() /cs)
 
           print 'mh=',mass, sigYields
@@ -120,24 +127,27 @@ def makeCards(subdir):
           card.write(' \n')
 
           card.write('{0} {1}  {2} {3} {4} -  \n'.format(*(['lumi_8TeV',      'lnN']+3*[lumi])))
-          card.write('{0} {1}  {2} {3} {4} -  \n'.format(*(['CMS_hllg_brLLG', 'lnN']+3*[brLLG])))
-          card.write('{0} {1}  {2} {3} {4} -  \n'.format(*(['CMS_eff_m_ID',   'lnN']+3*[muID])))
-          card.write('{0} {1}  {2} {3} {4} -  \n'.format(*(['CMS_eff_m_ISO',  'lnN']+3*[muISO])))
-          card.write('{0} {1}  {2} {3} {4} -  \n'.format(*(['CMS_eff_m_TRIG', 'lnN']+3*[muTRIG])))
-          card.write('{0} {1}  {2} {3} {4} -  \n'.format(*(['CMS_eff_g_ID',   'lnN']+3*[phoID])))
-          card.write('{0} {1}  {2} {3} {4} -  \n'.format(*(['CMS_eff_g_TRIG', 'lnN']+3*[phoTRIG])))
-          card.write('{0} {1}  {2} {3} {4} -  \n'.format(*(['CMS_hllg_PU',    'lnN']+3*[PU])))
           mmm = mass
+
           if float(mass)>140:
+            # after mH=140 the syst only available with 1GeV intervals
             mmm = mass[0:4]+'0'
 
           if not options.br:
+            card.write('{0} {1}  {2} {3} {4} -  \n'.format(*(['CMS_hllg_brLLG', 'lnN']+3*[brLLG])))
             card.write('pdf_WH        lnN     '+pdf_wh[year][mmm]+'  -  -   -  \n')
             card.write('QCDscale_WH   lnN     '+qcd_wh[year][mmm]+'  -  -   -  \n')
             card.write('pdf_qqH       lnN     -   '+pdf_vbf[year][mmm]+' -  -  \n')
             card.write('QCDscale_qqH  lnN     -   '+qcd_vbf[year][mmm]+' -  -  \n')
             card.write('pdf_ggH       lnN     -   -  '+pdf_gg[year][mmm]+'  -  \n')
             card.write('QCDscale_ggH  lnN     -   -  '+qcd_gg[year][mmm]+'  -  \n')
+
+          card.write('{0} {1}  {2} {3} {4} -  \n'.format(*(['CMS_eff_m_ID',   'lnN']+3*[muID])))
+          card.write('{0} {1}  {2} {3} {4} -  \n'.format(*(['CMS_eff_m_ISO',  'lnN']+3*[muISO])))
+          card.write('{0} {1}  {2} {3} {4} -  \n'.format(*(['CMS_eff_m_TRIG', 'lnN']+3*[muTRIG])))
+          card.write('{0} {1}  {2} {3} {4} -  \n'.format(*(['CMS_eff_g_ID',   'lnN']+3*[phoID])))
+          card.write('{0} {1}  {2} {3} {4} -  \n'.format(*(['CMS_eff_g_TRIG', 'lnN']+3*[phoTRIG])))
+          card.write('{0} {1}  {2} {3} {4} -  \n'.format(*(['CMS_hllg_PU',    'lnN']+3*[PU])))
 
           for sig in sigNameList:
             card.write('{0:<40} {1:<10} {2:^10} {3:^10}\n'.format('sig_'+sig+'_mShift_'    +channel,'param', 1, 0.005))

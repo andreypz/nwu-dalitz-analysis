@@ -10,7 +10,7 @@ import ConfigParser as cp
 cf = cp.ConfigParser()
 cf.read('config.cfg')
 
-gROOT.ProcessLine(".L ~/tdrstyle.C")
+gROOT.ProcessLine(".L ../tdrstyle.C")
 setTDRStyle()
 gStyle.SetOptTitle(0)
 
@@ -146,8 +146,8 @@ if fullCombo:
   #  prelim.Draw()
 
   mg.SetMinimum(0)
-  mg.SetMaximum(31)
-  #mg.SetMaximum(8)
+  #mg.SetMaximum(31)
+  mg.SetMaximum(20)
 
   sqrt = TLatex(0.20,0.85, "#sqrt{s} = 8 Tev; #it{L_{int}} = 19.7 fb^{-1}")
   sqrt.SetNDC();

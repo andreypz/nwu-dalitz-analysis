@@ -759,7 +759,10 @@ Bool_t zgamma::Process(Long64_t entry)
     hists->fill1DHist(gendR,   "gen_dR_two_lep_reco",  ";gen_dR", 50, 0,0.3,    1,"eff");
   }
 
-  HM->FillHistosFull(4, eventWeight, l1, l2, lPt1, lPt2, gamma, "");
+  HM->SetLeptons(lPt1, lPt2);
+  HM->SetGamma(gamma);
+
+  HM->FillHistosFull(4, eventWeight, "");
   FillHistoCounts(4, eventWeight);
   CountEvents(4);
 
@@ -776,7 +779,7 @@ Bool_t zgamma::Process(Long64_t entry)
   if (Mllg<110 || Mllg>170)
     return kTRUE;
 
-  HM->FillHistosFull(5, eventWeight, l1, l2, lPt1, lPt2, gamma, "");
+  HM->FillHistosFull(5, eventWeight, "");
   FillHistoCounts(5, eventWeight);
   CountEvents(5);
 
@@ -784,7 +787,7 @@ Bool_t zgamma::Process(Long64_t entry)
   //if (Mll > mllMax) return kTRUE;
 
 
-  HM->FillHistosFull(6, eventWeight, l1, l2, lPt1, lPt2, gamma, "");
+  HM->FillHistosFull(6, eventWeight, "");
   FillHistoCounts(6, eventWeight);
   CountEvents(6);
   //if (fabs(gamma.Eta())<1.444)
@@ -799,7 +802,7 @@ Bool_t zgamma::Process(Long64_t entry)
 
 
   if (Mll>2.9 && Mll<3.3){ //jpsi window
-    HM->FillHistosFull(12, eventWeight, l1, l2, lPt1, lPt2, gamma, "jpsi");
+    HM->FillHistosFull(12, eventWeight, "jpsi");
     FillHistoCounts(12, eventWeight);
     CountEvents(12);
     //return kTRUE;
@@ -807,7 +810,7 @@ Bool_t zgamma::Process(Long64_t entry)
 
 
   if (lPt1.DeltaR(gamma)<1.0 || lPt2.DeltaR(gamma)<1.0) return kTRUE;
-  HM->FillHistosFull(7, eventWeight, l1, l2, lPt1, lPt2, gamma, "");
+  HM->FillHistosFull(7, eventWeight, "");
   FillHistoCounts(7, eventWeight);
   CountEvents(7);
 
@@ -833,7 +836,7 @@ Bool_t zgamma::Process(Long64_t entry)
 
 
   if (Mllg>122 && Mllg<128){
-    HM->FillHistosFull(13, eventWeight, l1, l2, lPt1, lPt2, gamma, "");
+    HM->FillHistosFull(13, eventWeight, "");
     FillHistoCounts(13, eventWeight);
     CountEvents(13);
   }
@@ -856,7 +859,7 @@ Bool_t zgamma::Process(Long64_t entry)
 
 
   if ( (Mll>2.9 && Mll<3.3) || (Mll>9.3 && Mll<9.7)) return kTRUE; //jpsi and upsilon removeal
-  HM->FillHistosFull(8, eventWeight, l1, l2, lPt1, lPt2, gamma, "");
+  HM->FillHistosFull(8, eventWeight, "");
   FillHistoCounts(8, eventWeight);
   CountEvents(8);
 
@@ -881,7 +884,7 @@ Bool_t zgamma::Process(Long64_t entry)
   }
 
 
-  HM->FillHistosFull(9, eventWeight, l1, l2, lPt1, lPt2, gamma, "");
+  HM->FillHistosFull(9, eventWeight, "");
   FillHistoCounts(9, eventWeight);
   CountEvents(9);
 
@@ -896,13 +899,13 @@ Bool_t zgamma::Process(Long64_t entry)
   }
 
 
-  HM->FillHistosFull(10, eventWeight, l1, l2, lPt1, lPt2, gamma, "");
+  HM->FillHistosFull(10, eventWeight, "");
   FillHistoCounts(10, eventWeight);
   CountEvents(10);
 
   if (Mllg<122 || Mllg>128) return kTRUE;
 
-  HM->FillHistosFull(11, eventWeight, l1, l2, lPt1, lPt2, gamma, "");
+  HM->FillHistosFull(11, eventWeight, "");
   FillHistoCounts(11, eventWeight);
   CountEvents(11);
 

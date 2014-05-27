@@ -62,7 +62,7 @@ def drange(start, stop, step):
 
 def handleOverflowBins(hist):
     if hist == None:
-        return
+      return
     nBins   = hist.GetNbinsX()
     lastBin = hist.GetBinContent(nBins)
     ovflBin = hist.GetBinContent(nBins+1);
@@ -73,7 +73,7 @@ def handleOverflowBins(hist):
     firstBinErr = hist.GetBinError(1);
     undflBinErr = hist.GetBinError(0);
     if hist.GetName()!="diLep_mass_low":
-        hist.SetBinContent(nBins, lastBin+ovflBin);
+      hist.SetBinContent(nBins, lastBin+ovflBin);
     hist.SetBinError(nBins, sqrt(pow(lastBinErr,2) + pow(ovflBinErr,2)) );
     hist.SetBinContent(1, firstBin+undflBin);
     hist.SetBinError(1, sqrt(pow(firstBinErr,2) + pow(undflBinErr,2)) );
@@ -183,27 +183,27 @@ def drawAllInFile(f1, name1, bZip, f3, name3, myDir,path, N, howToScale="none", 
 
     doOverflow = 0
     if doRatio:
-        c1 = TCanvas("c2","big canvas",600,700);
+      c1 = TCanvas("c2","big canvas",600,700);
     else:
-        c1 = TCanvas("c3","small canvas",600,600);
+      c1 = TCanvas("c3","small canvas",600,600);
     c1.SetLogy(isLog)
     c1.cd()
 
     if f3!=None and howToScale=="lumi": # only assume signal MC for now
-        Nev = f3.Get("Counts/evt_byCut_raw").GetBinContent(1)
-        print ' Fix ME FIX ME'
-        cro = getCS("ZtoJPsiGamma") #
-        print 'need more generic way to get cs by sample'
-        #cro = getCS("ggH-125")
-        scale3 = float(lumi*cro)/Nev
-        print Nev, lumi, cro, scale3
+      Nev = f3.Get("Counts/evt_byCut_raw").GetBinContent(1)
+      print ' Fix ME FIX ME'
+      cro = getCS("ZtoJPsiGamma") #
+      print 'need more generic way to get cs by sample'
+      # cro = getCS("ggH-125")
+      scale3 = float(lumi*cro)/Nev
+      print Nev, lumi, cro, scale3
 
     doPdf=0
     histoName = None
     for k1 in dirList:
         if k1.GetName() in ["eff"]: continue
         if N!=None:
-            if not("cut"+N) in k1.GetName(): continue
+          if not("cut"+N) in k1.GetName(): continue
         h1 = k1.ReadObj()
         histoName = h1.GetName()
 
@@ -212,13 +212,13 @@ def drawAllInFile(f1, name1, bZip, f3, name3, myDir,path, N, howToScale="none", 
         hmaxs = []
 
         if f3!=None:
-            if myDir!="":
-                h3 = f3.Get(myDir+"/"+histoName)
-            else:
-                h3 = f3.Get(histoName)
-            if h3==None: continue
+          if myDir!="":
+            h3 = f3.Get(myDir+"/"+histoName)
+          else:
+            h3 = f3.Get(histoName)
+          if h3==None: continue
 
-            h3.Scale(float(scale3))
+          h3.Scale(float(scale3))
 
 
         print "drawing", histoName
@@ -229,8 +229,8 @@ def drawAllInFile(f1, name1, bZip, f3, name3, myDir,path, N, howToScale="none", 
             prename = split[0]+"/TH2_"+split[1]+"/"+histoName
             c1.SaveAs(prename+"_data.png")
             if f3!=None and h3!=None:
-                h3.Draw("col")
-                c1.SaveAs(prename+"_sig.png")
+              h3.Draw("col")
+              c1.SaveAs(prename+"_sig.png")
 
             continue
 
@@ -244,17 +244,17 @@ def drawAllInFile(f1, name1, bZip, f3, name3, myDir,path, N, howToScale="none", 
             pad2 = TPad("pad2","pad2",0,0,1,0.3);
 
             if doRatio:
-                pad1.SetBottomMargin(0);
-                pad1.Draw();
-                pad1.cd();
-                pad1.SetLogy(isLog)
+              pad1.SetBottomMargin(0);
+              pad1.Draw();
+              pad1.cd();
+              pad1.SetLogy(isLog)
 
 
             if doOverflow:
-                handleOverflowBins(h1)
+              handleOverflowBins(h1)
 
             h1.Draw("hist")
-            h1.Draw("same e1p")
+            #h1.Draw("same e1p")
             #h1.SetMinimum()
             #h1.GetRange
             h1.SetMarkerStyle(20)
@@ -281,18 +281,20 @@ def drawAllInFile(f1, name1, bZip, f3, name3, myDir,path, N, howToScale="none", 
 
             #if "tri_mass" in k1.GetName() and name1 not in ["madgra","mcfm"]:
             #    blindIt(h1)
-            if "h_mass" in k1.GetName():
-                print "\n *** H-mass RMS:",  h1.GetRMS(), h2.GetRMS()
-                print "\n *** H-mass Mean:", h1.GetMean(),h2.GetMean()
+            #if "h_mass" in k1.GetName():
+            #  print "\n *** H-mass RMS:",  h1.GetRMS(), h3.GetRMS()
+            #  print "\n *** H-mass Mean:", h1.GetMean(),h3.GetMean()
 
             leg = TLegend(0.63,0.72,0.92,0.90);
-            leg.SetTextSize(0.03)
+            leg.SetTextSize(0.05)
+            #leg.SetTextSize(0.03)
 
             if len(bZip)!=0:
               leg = TLegend(0.55,0.7,0.99,0.92);
               leg.SetNColumns(2)
               leg.SetTextSize(0.04)
-            leg.AddEntry(h1,name1, "lpe")
+            #leg.AddEntry(h1,name1, "lpe")
+            leg.AddEntry(h1,name1, "l")
 
 
             #if "phi" in histoName:
@@ -302,7 +304,7 @@ def drawAllInFile(f1, name1, bZip, f3, name3, myDir,path, N, howToScale="none", 
 
             norm1 = h1.Integral()
             if howToScale=='norm' and  norm1!=0:
-                h1.Scale(1./norm1)
+              h1.Scale(1./norm1)
             hmaxs.append(h1.GetMaximum())
 
             if len(bZip)!=0:
@@ -319,123 +321,135 @@ def drawAllInFile(f1, name1, bZip, f3, name3, myDir,path, N, howToScale="none", 
 
             if f3!=None and h3!=None:
                 if doOverflow:
-                    handleOverflowBins(h3)
+                  handleOverflowBins(h3)
                 h3.Draw("sames hist")
                 h3.SetLineWidth(2)
                 h3.SetLineColor(kRed-9)
-                h3.SetFillColor(kYellow-9)
+                h3.SetLineColor(kBlue+2)
                 #h3.SetFillColor(kYellow-9)
                 h1.Draw("same hist")
-                h1.Draw("same e1p")
+                #h1.Draw("same e1p")
                 h1.SetMarkerStyle(20)
                 h1.SetMarkerSize(0.75)
                 extract_from_name = re.findall(r'\d+', name3)
                 #print extract_from_name
                 if len(extract_from_name) == 1:
-                    h3.Scale(int(extract_from_name[0]))
+                  h3.Scale(int(extract_from_name[0]))
                 norm3 = h3.Integral()
                 if howToScale=="norm" and  norm3!=0:
-                    h3.Scale(1./norm3)
+                  h3.Scale(1./norm3)
                 elif howToScale=="norm2" and  norm3!=0:
-                    h3.Scale(norm1/norm3)
+                  h3.Scale(norm1/norm3)
                 hmaxs.append(h3.GetMaximum())
 
-                leg.AddEntry(h3,name3, "f")
+                leg.AddEntry(h3,name3, "l")
+                #leg.AddEntry(h3,name3, "f")
 
                 if doRatio:
-                    c1.cd()
-                    pad2.SetBottomMargin(0.25);
-                    pad2.SetTopMargin(0);
-                    pad2.Draw();
-                    pad2.cd();
+                  c1.cd()
+                  pad2.SetBottomMargin(0.25);
+                  pad2.SetTopMargin(0);
+                  pad2.Draw();
+                  pad2.cd();
 
-                    r = h1.Clone("")
-                    r.Divide(h3);
-                    r.GetYaxis().SetTitle("Data/MC");
-                    r.SetMaximum(2);
-                    r.SetMinimum(0);
-                    r.GetYaxis().SetNdivisions(206);
-                    r.GetYaxis().SetTitleOffset(0.4);
-                    r.SetTitleSize(0.1,"XYZ");
-                    r.SetLabelSize(0.1,"XY");
+                  r = h1.Clone("")
+                  r.Divide(h3);
+                  r.GetYaxis().SetTitle("Data/MC");
+                  r.SetMaximum(2);
+                  r.SetMinimum(0);
+                  r.GetYaxis().SetNdivisions(206);
+                  r.GetYaxis().SetTitleOffset(0.4);
+                  r.SetTitleSize(0.1,"XYZ");
+                  r.SetLabelSize(0.1,"XY");
 
-                    r.Draw("e1p");
+                  r.Draw("e1p");
 
-                    pad1.cd();
+                  pad1.cd();
 
             h1.Draw("same hist")
-            h1.Draw("same e1p")
+            #h1.Draw("same e1p")
             # prelim = TLatex(0.15,0.95, "CMS Preliminary %s #it{L_{int}} = %0.1f fb^{-1}" % (8, lumi))
-            prelim = TLatex(0.15,0.95, "CMS Preliminary #sqrt{s} = 8TeV, L = 19.7 fb^{-1}   H#rightarrow#gamma*#gamma#rightarrow#mu#mu#gamma")
+            prelim = TLatex(0.15,0.95, "CMS Simulation          H#rightarrow#gamma*#gamma#rightarrow#mu#mu#gamma")
+            #prelim = TLatex(0.15,0.95, "CMS Preliminary #sqrt{s} = 8TeV, L = 19.7 fb^{-1}   H#rightarrow#gamma*#gamma#rightarrow#mu#mu#gamma")
             prelim.SetNDC();
             prelim.SetTextSize(0.035);
             prelim.Draw();
 
             #print "hmax =", hmaxs
             if len(hmaxs)>0:
-                m = max(hmaxs)
-                h1.SetMaximum(1.1*m)
+              m = max(hmaxs)
+              h1.SetMaximum(1.1*m)
             if howToScale ==" norm":
-                h1.GetYaxis().SetTitle("arbitrary units")
+              h1.GetYaxis().SetTitle("arbitrary units")
             if howToScale == "norm2":
-                h1.GetYaxis().SetTitle("Events")
-                h1.SetMaximum(int(1.1*m)+5)
+              h1.GetYaxis().SetTitle("Events")
+              h1.SetMaximum(int(1.1*m)+5)
 
             # Here we consider particular cases (histograms) that need special care
             # if "tri_mass_longTail" in histoName and howToScale=="lumi":
             # h1.SetMaximum(750)
 
-            if "diLep_mass_low_" in histoName:
-                h1.Rebin(2)
-                h3.Rebin(2)
-                h1.SetXTitle("m_{#mu#mu} (GeV)")
-                h1.SetMaximum(1.2*h1.GetMaximum())
+            if "diLep_mass_low" in histoName:
+              int1 = h1.Integral(100,200)
+              int3 = h3.Integral(100,200)
+              h1.Scale(100./int1)
+              h3.Scale(100./int3)
+              h1.SetTitle(";m_{ll} (GeV);arbitrary units")
+              h1.SetMaximum(1.2*h1.GetMaximum())
+              h1.SetNdivisions(505,'X')
+              doPdf=1
 
-                doPdf=1
+            if "diLep_mass_low_" in histoName:
+              #h1.Rebin(2)
+              #h3.Rebin(2)
+              h1.SetXTitle("m_{#mu#mu} (GeV)")
+              h1.SetMaximum(1.2*h1.GetMaximum())
+
+              doPdf=1
 
             if "ph_energyCorrection" in histoName:
-                gStyle.SetOptStat(1111)
-                h1.SetName("Data")
-                h3.SetName("ggH-125")
-                stats1 = h1.GetListOfFunctions().FindObject("stats");
-                stats3 = h3.GetListOfFunctions().FindObject("stats");
-                stats1.Print()
-                stats1.SetX1NDC(0.7)
-                stats1.SetX2NDC(0.95)
-                stats1.SetY1NDC(0.9)
-                stats1.SetY2NDC(0.7)
-                stats3.SetX1NDC(0.7)
-                stats3.SetX2NDC(0.95)
-                stats3.SetY1NDC(0.7)
-                stats3.SetY2NDC(0.5)
-                stats3.SetTextColor(kRed+1)
-                leg.SetX1(0.19)
-                leg.SetX2(0.46)
-                leg.SetY1(0.85)
-                leg.SetY2(0.7)
+              gStyle.SetOptStat(1111)
+              h1.SetName("Data")
+              h3.SetName("ggH-125")
+              stats1 = h1.GetListOfFunctions().FindObject("stats");
+              stats3 = h3.GetListOfFunctions().FindObject("stats");
+              stats1.Print()
+              stats1.SetX1NDC(0.7)
+              stats1.SetX2NDC(0.95)
+              stats1.SetY1NDC(0.9)
+              stats1.SetY2NDC(0.7)
+              stats3.SetX1NDC(0.7)
+              stats3.SetX2NDC(0.95)
+              stats3.SetY1NDC(0.7)
+              stats3.SetY2NDC(0.5)
+              stats3.SetTextColor(kRed+1)
+              leg.SetX1(0.19)
+              leg.SetX2(0.46)
+              leg.SetY1(0.85)
+              leg.SetY2(0.7)
 
 
             if "zee_" in histoName:
-                gStyle.SetOptStat(1111)
-                h1.SetName("Data")
-                h2.SetName("DYjets")
-                #h2.Print("all")
-                stats1 = h1.GetListOfFunctions().FindObject("stats");
-                stats2 = h2.GetListOfFunctions().FindObject("stats");
-                stats2.Print()
-                stats1.SetX1NDC(0.7)
-                stats1.SetX2NDC(0.95)
-                stats1.SetY1NDC(0.9)
-                stats1.SetY2NDC(0.7)
-                stats2.SetX1NDC(0.7)
-                stats2.SetX2NDC(0.95)
-                stats2.SetY1NDC(0.7)
-                stats2.SetY2NDC(0.5)
-                stats2.SetTextColor(kBlue+1)
-                leg.SetX1(0.19)
-                leg.SetX2(0.46)
-                leg.SetY1(0.85)
-                leg.SetY2(0.7)
+              gStyle.SetOptStat(1111)
+              h1.SetName("Data")
+              h2.SetName("DYjets")
+              # h2.Print("all")
+              stats1 = h1.GetListOfFunctions().FindObject("stats");
+              stats2 = h2.GetListOfFunctions().FindObject("stats");
+              stats2.Print()
+              stats1.SetX1NDC(0.7)
+              stats1.SetX2NDC(0.95)
+              stats1.SetY1NDC(0.9)
+              stats1.SetY2NDC(0.7)
+              stats2.SetX1NDC(0.7)
+              stats2.SetX2NDC(0.95)
+              stats2.SetY1NDC(0.7)
+              stats2.SetY2NDC(0.5)
+              stats2.SetTextColor(kBlue+1)
+              leg.SetX1(0.19)
+              leg.SetX2(0.46)
+              leg.SetY1(0.85)
+              leg.SetY2(0.7)
 
             gPad.RedrawAxis()
 
@@ -449,8 +463,8 @@ def drawAllInFile(f1, name1, bZip, f3, name3, myDir,path, N, howToScale="none", 
 
             c1.SaveAs(path+"/"+histoName+'.png')
             if doPdf:
-                c1.SaveAs(path+"/"+histoName+'.pdf')
-                doPdf=0
+              c1.SaveAs(path+"/"+histoName+'.pdf')
+              doPdf=0
             gStyle.SetOptStat(0)
 
         c1.SetLogy(0)
@@ -596,7 +610,6 @@ def effPlots2(f1, path):
     ra[a].SetLineWidth(2)
     leg.AddEntry(ra[a],"pT(ll) > %.0f GeV"%(25+5*(a-1)), "l")
 
-
   leg.SetTextSize(0.03)
   leg.SetFillColor(kWhite)
   leg.Draw()
@@ -618,6 +631,7 @@ def effPlots2(f1, path):
     ra[a].SetLineColor(bcol+2*(a-st))
     ra[a].SetLineWidth(2)
     leg.AddEntry(ra[a],"pT(#gamma) > %.0f GeV"%(25+5*(a-st)), "l")
+
 
   leg.SetTextSize(0.03)
   leg.SetFillColor(kWhite)
