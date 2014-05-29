@@ -3,6 +3,7 @@
 
 #include <cstring>
 #include "HistManager.h"
+#include "ZGAngles.h"
 
 #include "../interface/TCPhoton.h"
 #include "../interface/TCEGamma.h"
@@ -28,7 +29,9 @@ class HistMaker {
   HistManager * hists;
 
   TCPhysObject _lPt1, _lPt2, _gamma;
-
+  Bool_t _isLepSet;
+  Bool_t _isGammaSet;
+  ZGAngles *angles;
 };
 
 

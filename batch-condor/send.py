@@ -36,7 +36,7 @@ selection   = "mugamma"
 
 DIR      = EOS+'/lpchzg'
 DIRNATE  = EOS+'/naodell'
-DIRBRIAN = EOS+'/bpollack'
+DIRBRIAN = EOS+'/bpollack/storage'
 whereWeRun = ' '
 
 if '/tthome' in os.getcwd():
@@ -113,10 +113,10 @@ if period =="2012":
 
   if selection in ['mugamma','jp-mugamma','2e2mu']:
     data.extend([
-        cfg('MuEG_Run2012A',  DIRNATE+'/nuTuples_v9.6_8TeV/Data/MuEG_Run2012A',  5, 'DATA '+selection+' mugamma '+' 2012 0' + whereWeRun),
-        cfg('MuEG_Run2012B',  DIRNATE+'/nuTuples_v9.6_8TeV/Data/MuEG_Run2012B',  8, 'DATA '+selection+' mugamma '+' 2012 0' + whereWeRun),
-        cfg('MuEG_Run2012C',  DIRNATE+'/nuTuples_v9.6_8TeV/Data/MuEG_Run2012C', 12, 'DATA '+selection+' mugamma '+' 2012 0' + whereWeRun),
-        cfg('MuEG_Run2012D',  DIRNATE+'/nuTuples_v9.6_8TeV/Data/MuEG_Run2012D', 15, 'DATA '+selection+' mugamma '+' 2012 0' + whereWeRun),
+        cfg('MuEG_Run2012A',  DIRBRIAN+'/nuTuples_v9.8_8TeV/Data/MuEG_Run2012A',  5, 'DATA '+selection+' mugamma '+' 2012 0' + whereWeRun),
+        cfg('MuEG_Run2012B',  DIRBRIAN+'/nuTuples_v9.8_8TeV/Data/MuEG_Run2012B',  8, 'DATA '+selection+' mugamma '+' 2012 0' + whereWeRun),
+        cfg('MuEG_Run2012C',  DIRBRIAN+'/nuTuples_v9.8_8TeV/Data/MuEG_Run2012C', 12, 'DATA '+selection+' mugamma '+' 2012 0' + whereWeRun),
+        cfg('MuEG_Run2012D',  DIRBRIAN+'/nuTuples_v9.8_8TeV/Data/MuEG_Run2012D', 15, 'DATA '+selection+' mugamma '+' 2012 0' + whereWeRun),
         ])
 
   if selection in ['elgamma']:
@@ -134,8 +134,8 @@ if period =="2012":
       cfg('DYJets50',  DIRNATE+'/nuTuples_v9.6_8TeV/MC/DYJetsToLL_M-50',            25, 'DYJets ' +selection+trig+'  2012 0' + whereWeRun ),
       cfg('ZGToLLG',   DIRNATE+'/nuTuples_v9.6_8TeV/MC/ZGToLLG',                    10, 'ZG     ' +selection+trig+'  2012 0' + whereWeRun ),
 
-      cfg('DYJets50-RD1',  DIRBRIAN+'/nuTuples_v9.6_8TeV/MC/DYJetsToLL_M-50_RD1',  25, 'DYJets ' +selection+trig+'  2012 0' + whereWeRun ),
-      cfg('ZGToLLG-RD1',   DIRBRIAN+'/nuTuples_v9.6_8TeV/MC/ZGToLLG_RD1',          10, 'ZG     ' +selection+trig+'  2012 0' + whereWeRun ),
+      cfg('DYJets50-RD1',  DIRBRIAN+'/nuTuples_v9.8_8TeV/MC/DYJetsToLL_M-50_RD1',  25, 'DYJets ' +selection+trig+'  2012 0' + whereWeRun ),
+      cfg('ZGToLLG-RD1',   DIRBRIAN+'/nuTuples_v9.8_8TeV/MC/ZGToLLG_RD1',          10, 'ZG     ' +selection+trig+'  2012 0' + whereWeRun ),
 
       cfg('DYJetsPow20-RD1',  DIR+'/nuTuples_v9.7_8TeV/DYToMuMu-Pow_M-20',  25, 'DYJets ' +selection+trig+'  2012 0' + whereWeRun ),
       ])
@@ -148,15 +148,16 @@ if period =="2012":
 
 # Signal MC configs
   signal.extend([
-      cfg('ggHZG-125', DIRBRIAN+'/nuTuples_v9.6_8TeV/MC/ggHZG_M125_RD1',1, 'HZG '+selection+trig+' '+period+gen + whereWeRun),
+      cfg('ggHZG-125', DIRBRIAN+'/nuTuples_v9.8_8TeV/MC/ggHZG_M125_RD1',1, 'HZG '+selection+trig+' '+period+gen + whereWeRun),
       ])
 
   if selection in ['mugamma','jp-mugamma']:
     signal.extend([
-
-        cfg('ZtoJPsiGamma',     DIR+'/nuTuples_v9.6_8TeV/dalitz/ZtoJPsiGamma-MuMuGamma',1, 'dalitz '+selection+trig+period+gen + whereWeRun),
-        cfg('HiggsToJPsiGamma', DIR+'/nuTuples_v9.6_8TeV/dalitz/HiggsToJPsi',           1, 'dalitz '+selection+trig+period+gen + whereWeRun),
-
+        cfg('ZtoJPsiGamma',     DIR+'/nuTuples_v9.6_8TeV/dalitz/ZtoJPsiGamma-MuMuGamma',1, 'zjp '+selection+trig+period+gen + whereWeRun),
+        cfg('HiggsToJPsiGamma', DIR+'/nuTuples_v9.6_8TeV/dalitz/HiggsToJPsi',           1, 'hjp '+selection+trig+period+gen + whereWeRun),
+        ])
+  if selection in ['mugamma']:
+    signal.extend([
         cfg('ggH-mad120', DIR+'/nuTuples_v9.6_8TeV/dalitz/ggHiggsToMuMuGamma_MH120',1, 'dalitz '+selection+trig+period+gen + whereWeRun),
         cfg('ggH-mad125', DIR+'/nuTuples_v9.6_8TeV/dalitz/ggHiggsToMuMuGamma_MH125',1, 'dalitz '+selection+trig+period+gen + whereWeRun),
         cfg('ggH-mad130', DIR+'/nuTuples_v9.6_8TeV/dalitz/ggHiggsToMuMuGamma_MH130',1, 'dalitz '+selection+trig+period+gen + whereWeRun),

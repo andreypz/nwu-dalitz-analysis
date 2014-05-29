@@ -1,16 +1,19 @@
 #include "HistMaker.h"
 
-HistMaker::HistMaker(HistManager *h)
+HistMaker::HistMaker(HistManager *h):
+  _isLepSet(false),
+  _isGammaSet(false)
 {
   hists = h;
+  angles = new ZGAngles();
 }
 
 HistMaker::~HistMaker(){}
 
 void HistMaker::SetLeptons(TCPhysObject l1, TCPhysObject l2){
-  _lPt1 = l1;  _lPt2 = l2;}
+  _lPt1 = l1;  _lPt2 = l2; _isLepSet = 1;}
 void HistMaker::SetGamma(TCPhysObject g){
-  _gamma = g;}
+  _gamma = g; _isGammaSet=1;}
 
 void HistMaker::MakeMuonPlots(TCMuon mu, TVector3 *pv)
 {
@@ -82,8 +85,11 @@ void HistMaker::FillHistosFull(Int_t num, Double_t weight, string dir)
   hists->fill1DHist(lPt1Gamma.M(), Form("lPt1Gamma_%s_cut%i",d, num),";M(l1#gamma)",  100, 0,400,  weight, dir);
   hists->fill1DHist(lPt2Gamma.M(), Form("lPt2Gamma_%s_cut%i",d, num),";M(l2#gamma)",  100, 0,400,  weight, dir);
 
-  hists->fill2DHist(lPt1Gamma.M2(), lPt2Gamma.M2(), Form("h2D_dalitzPlot_%s_cut%i",  d, num),
-		    ";M(l1#gamma)^{2} (GeV^{2});M(l2#gamma)^{2} (GeV^{2})", 100,0,20000, 100, 0,10000,  weight, dir);
+  hists->fill2DHist(diLep.M2(), lPt2Gamma.M2(), Form("h2D_dalitzPlot_ll_vs_gl_%s_cut%i",  d, num),
+		    ";m^{2}_{ll} (GeV^{2});m^{2}_{l_{2}#gamma} (GeV^{2})", 100,0,20000, 100, 0,10000,  weight, dir);
+
+  hists->fill2DHist(lPt1Gamma.M2(), lPt2Gamma.M2(), Form("h2D_dalitzPlot_l1g_vs_l2g_%s_cut%i",  d, num),
+		    ";m^{2}_{l_{1}#gamma} (GeV^{2});m^{2}_{l_{2}#gamma} (GeV^{2})", 100,0,20000, 100, 0,10000,  weight, dir);
 
   double rotation = atan(-1.);
   double sin_rotation = sin(rotation);
@@ -91,31 +97,31 @@ void HistMaker::FillHistosFull(Int_t num, Double_t weight, string dir)
   double x_prime = (lPt1Gamma.M2()*cos_rotation - lPt2Gamma.M2()*sin_rotation) + (1.-cos_rotation)*pow(125.,2);
   double y_prime = lPt1Gamma.M2()*sin_rotation + lPt2Gamma.M2()*cos_rotation;
 
-  hists->fill2DHist(x_prime, y_prime, Form("h2D_dalitzPlot_rotation_%s_cut%i",  d, num),
+  hists->fill2DHist(x_prime, y_prime, Form("h2D_dalitzPlot_l1g_vs_l2g_rotation_%s_cut%i",  d, num),
 		    ";M(l1#gamma)^{2};M(l2#gamma)^{2}", 100,0,22000, 100, -14000,5000,  weight, dir);
 
   const UInt_t nBins1 = 60;
   hists->fill2DHist(tri.M(), diLep.M(), Form("h2D_tri_vs_diLep_mass0_%s_cut%i",  d, num),
-		    ";M(ll#gamma) (GeV);M(ll) (GeV)", nBins1,0,200, nBins1, 0,20,  weight, dir);
+		    ";m_{ll#gamma} (GeV);m_{ll} (GeV)", nBins1,0,200, nBins1, 0,20,  weight, dir);
   hists->fill2DHist(tri.M(), diLep.M(), Form("h2D_tri_vs_diLep_mass1_%s_cut%i",  d, num),
-		    ";M(ll#gamma) (GeV);M(ll) (GeV)", nBins1,0,200, nBins1, 0,1.5, weight, dir);
+		    ";m_{ll#gamma} (GeV);m_{ll} (GeV)", nBins1,0,200, nBins1, 0,1.5, weight, dir);
   hists->fill2DHist(tri.M(), diLep.M(), Form("h2D_tri_vs_diLep_mass2_%s_cut%i",  d, num),
-		    ";M(ll#gamma) (GeV);M(ll) (GeV)", nBins1,0,200, nBins1, 1.5,8, weight, dir);
+		    ";m_{ll#gamma} (GeV);m_{ll} (GeV)", nBins1,0,200, nBins1, 1.5,8, weight, dir);
   hists->fill2DHist(tri.M(), diLep.M(), Form("h2D_tri_vs_diLep_mass3_%s_cut%i",  d, num),
-		    ";M(ll#gamma) (GeV);M(ll) (GeV)", nBins1,0,200, nBins1, 8,20,  weight, dir);
+		    ";m_{ll#gamma} (GeV);m_{ll} (GeV)", nBins1,0,200, nBins1, 8,20,  weight, dir);
 
-  hists->fill1DHist(TMath::Log(diLep.M()),   Form("diLep_mass_log1_%s_cut%i",  d, num),";log(M(ll))", 100,   0,7, weight, dir);
-  hists->fill1DHist(TMath::Log(diLep.M()),   Form("diLep_mass_log2_%s_cut%i",  d, num),";log(M(ll))", 100,   0,3, weight, dir);
-  hists->fill1DHist(TMath::Log(diLep.M()),   Form("diLep_mass_log2_%s_cut%i",  d, num),";log(M(ll))", 100, 0,1.3, weight, dir);
+  hists->fill1DHist(TMath::Log(diLep.M()),   Form("diLep_mass_log1_%s_cut%i",  d, num),";log(m_{ll})", 100,   0,7, weight, dir);
+  hists->fill1DHist(TMath::Log(diLep.M()),   Form("diLep_mass_log2_%s_cut%i",  d, num),";log(m_{ll})", 100,   0,3, weight, dir);
+  hists->fill1DHist(TMath::Log(diLep.M()),   Form("diLep_mass_log2_%s_cut%i",  d, num),";log(m_{ll})", 100, 0,1.3, weight, dir);
 
-  hists->fill1DHist(diLep.M(),   Form("diLep_mass_low1_%s_cut%i",  d, num),";M(ll) (GeV)", 50, 0,1.5,  weight, dir);
-  hists->fill1DHist(diLep.M(),   Form("diLep_mass_low2_%s_cut%i",  d, num),";M(ll) (GeV)", 100, 1.5,8,  weight, dir);
-  hists->fill1DHist(diLep.M(),   Form("diLep_mass_low3_%s_cut%i",  d, num),";M(ll) (GeV)", 30, 8,20,   weight, dir);
-  hists->fill1DHist(diLep.M(),   Form("diLep_mass_jpsi_%s_cut%i",  d, num),";M(ll) (GeV)", 100, 2.7,3.5,weight, dir);
+  hists->fill1DHist(diLep.M(),   Form("diLep_mass_low1_%s_cut%i",  d, num),";m_{ll} (GeV)", 50, 0,1.5,  weight, dir);
+  hists->fill1DHist(diLep.M(),   Form("diLep_mass_low2_%s_cut%i",  d, num),";m_{ll} (GeV)", 100, 1.5,8,  weight, dir);
+  hists->fill1DHist(diLep.M(),   Form("diLep_mass_low3_%s_cut%i",  d, num),";m_{ll} (GeV)", 30, 8,20,   weight, dir);
+  hists->fill1DHist(diLep.M(),   Form("diLep_mass_jpsi_%s_cut%i",  d, num),";m_{ll} (GeV)", 100, 2.7,3.5,weight, dir);
 
   hists->fill1DHist(diLep.M(),   Form("diLep_mass_low_%s_cut%i",  d, num),";M_{#mu#mu} (GeV)", 100, 0,20,  weight, dir);
   hists->fill1DHist(diLep.M(),   Form("diLep_mass_high_%s_cut%i", d, num),";M_{#mu#mu} (GeV)", 100, 0,120, weight, dir);
-  //hists->fill1DHist(diLep.M(),   Form("diLep_mass_jpsi_%s_cut%i",d, dir, num),";M(ll) (GeV)", 100, 2,5,   weight, "jpsi");
+  //hists->fill1DHist(diLep.M(),   Form("diLep_mass_jpsi_%s_cut%i",d, dir, num),";m_{ll} (GeV)", 100, 2,5,   weight, "jpsi");
   hists->fill1DHist(diLep.Pt(),  Form("diLep_pt_%s_cut%i",   d, num),";di-Lepton p_{T}", 50, 0,120, weight, dir);
   hists->fill1DHist(diLep.Eta(), Form("diLep_eta_%s_cut%i",  d, num),";di-Lepton eta",   50, -3.5,3.5, weight, dir);
   hists->fill1DHist(diLep.Phi(), Form("diLep_phi_%s_cut%i",  d, num),";di-Lepton phi",   50, -TMath::Pi(),TMath::Pi(), weight, dir);
@@ -152,7 +158,7 @@ void HistMaker::FillHistosFull(Int_t num, Double_t weight, string dir)
   hists->fill2DHist(gammaCM.E(), _gamma.Pt(),Form("h2D_gamma_Ecom_vs_Pt_%s_cut%i",  d, num),
 		    ";E_{#gamma} in CoM; p_{T}(#gamma)", 50, 0,100, 50,0,100, weight, dir);
   hists->fill2DHist(gammaCM.E(), tri.M(),   Form("h2D_gamma_Ecom_vs_triM_%s_cut%i",d, num),
-		    ";E_{#gamma} in CoM; M(ll#gamma)",   50, 0,100, 50,0,200, weight, dir);
+		    ";E_{#gamma} in CoM; m_{ll#gamma}",   50, 0,100, 50,0,200, weight, dir);
 
   hists->fill2DHist(diLep.Eta()-_gamma.Eta(), _gamma.Pt(), Form("h2D_deltaEta_vs_gammaPt_deltaEta_%s_cut%i",d, num),
 		    ";#Delta#eta(ll, #gamma);p_{T} of #gamma",    100, -5,5, 100,0,130, weight, dir);
@@ -163,19 +169,22 @@ void HistMaker::FillHistosFull(Int_t num, Double_t weight, string dir)
   hists->fill1DHist(_lPt2.DeltaR(_gamma),Form("lPt2_gamma_deltaR_%s_cut%i",d, num),";#Delta R(#gamma,l_{2})",100,0,5, weight,dir);
 
   //ZGanlgles:
-  /*
-if(selection!="el"){
-
+  if (_isLepSet && _isGammaSet){
     double co1,co2,phi,co3;
-    ang->GetAngles(l1,l2,_gamma,co1,co2,phi,co3);
+    if (_lPt1.Charge()==1 && _lPt2.Charge()==-1)
+      angles->GetAngles(_lPt1,_lPt2,_gamma,co1,co2,phi,co3);
+    else if (_lPt1.Charge()==-1 && _lPt2.Charge()==1)
+      angles->GetAngles(_lPt2,_lPt1,_gamma,co1,co2,phi,co3);
+    else
+      cout<<"Something is wrong: leptons have the same charge!"<<endl;
+
     //cout<<eventNumber<<"RECO  Angles: c1= "<<co1<<"  c2="<<co2<<"   phi="<<phi<<"   coco="<<co3<<endl;
 
-    hists->fill1DHist(co1, Form("co1_cut%i", num), ";cos_lp",  100,-1,1, 1,"Angles");
-    hists->fill1DHist(co2, Form("co2_cut%i", num), ";cos_lm,", 100,-1,1, 1,"Angles");
-    hists->fill1DHist(co3, Form("co3_cut%i", num), ";cosTheta",100,-1,1, 1,"Angles");
-    hists->fill1DHist(phi, Form("phi_cut%i", num), ";phi lp",  100, -TMath::Pi(), TMath::Pi(), 1,"Angles");
+    hists->fill1DHist(co1, Form("co1_cut%i", num), ";cos(#vec{l-},#vec{Z}) in CM", 100,-1,1, 1,"Angles");
+    hists->fill1DHist(co2, Form("co2_cut%i", num), ";cos(#vec{l+},#vec{Z}) in CM", 100,-1,1, 1,"Angles");
+    hists->fill1DHist(co3, Form("co3_cut%i", num), ";cos(#Theta)",  100,-1,1, 1,"Angles");
+    hists->fill1DHist(phi, Form("phi_cut%i", num), ";#phi(l-)",  50, -TMath::Pi(), TMath::Pi(), 1,"Angles");
   }
-  */
   //hists->fill1DHist(nVtxTotal, Form("vtx_nPV_tot_%s_cut%i",   d, num), "vtx_nPV_tot",    40, 0,40, weight, dir);
   //hists->fill1DHist(nVtx,      Form("vtx_nPV_raw_%s_cut%i",   d, num), "Raw;nPV",    40, 0,40,      1, dir);
   //hists->fill1DHist(nVtx,      Form("vtx_nPV_weight_%s_cut%i",d, num), "Re-weighted;nPV", 40, 0,40, weight, dir);

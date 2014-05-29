@@ -147,10 +147,12 @@ def makeStack(bZip, histoName, leg, lumi):
   for n,f in bZip:
     print f,n
 
-    h = f.Get(histoName).Clone()
-    if h==None:
+    h1 = f.Get(histoName)
+    if h1==None:
       print 'None histogrammm:',histoName
       continue
+    else:
+      h = h1.Clone()
 
     # if doOverflow:
     # handleOverflowBins(h)
@@ -172,305 +174,315 @@ def makeStack(bZip, histoName, leg, lumi):
 
 
 def drawAllInFile(f1, name1, bZip, f3, name3, myDir,path, N, howToScale="none", isLog=False, doRatio=False):
-    print 'myDir is ', myDir
-    f1.cd(myDir)
-    dirList = gDirectory.GetListOfKeys()
-    # dirList.Print()
-    createDir(path)
-    scale2 = scale3 = 1
-    split = os.path.split(path.rstrip("/"))
-    print "Split lit lit", split[0], split[1]
+  print 'myDir is ', myDir
+  f1.cd(myDir)
+  dirList = gDirectory.GetListOfKeys()
+  # dirList.Print()
+  createDir(path)
+  scale2 = scale3 = 1
+  split = os.path.split(path.rstrip("/"))
+  print "Split lit lit", split[0], split[1]
 
-    doOverflow = 0
-    if doRatio:
-      c1 = TCanvas("c2","big canvas",600,700);
+  doOverflow = 0
+  if doRatio:
+    c1 = TCanvas("c2","big canvas",600,700);
+  else:
+    c1 = TCanvas("c3","small canvas",600,600);
+  c1.SetLogy(isLog)
+  c1.cd()
+
+  if f3!=None and howToScale=="lumi": # only assume signal MC for now
+    Nev = f3.Get("Counts/evt_byCut_raw").GetBinContent(1)
+    print ' Fix ME FIX ME'
+    cro = getCS("ZtoJPsiGamma") #
+    print 'need more generic way to get cs by sample'
+    # cro = getCS("ggH-125")
+    scale3 = float(lumi*cro)/Nev
+    print Nev, lumi, cro, scale3
+
+  doPdf=0
+  histoName = None
+  for k1 in dirList:
+    if k1.GetName() in ["eff"]: continue
+    if N!=None:
+      if not("cut"+N) in k1.GetName(): continue
+    h1 = k1.ReadObj()
+    histoName = h1.GetName()
+
+    h3 = TH1F()
+
+    hmaxs = []
+
+    if f3!=None:
+      if myDir!="":
+        h3 = f3.Get(myDir+"/"+histoName)
+      else:
+        h3 = f3.Get(histoName)
+      if h3==None: continue
+
+      h3.Scale(float(scale3))
+
+
+    print "drawing", histoName
+
+    if h1.InheritsFrom("TH2"):
+      createDir(split[0]+"/TH2_"+split[1])
+      h1.Draw("col")
+      prename = split[0]+"/TH2_"+split[1]+"/"+histoName
+      if "_dalitzPlot_" in histoName:
+        h1.SetNdivisions(505,'X')
+        h1.SetNdivisions(505,'Y')
+      c1.SaveAs(prename+"_data.png")
+
+
+      if f3!=None and h3!=None:
+        h3.Draw("col")
+        if "_dalitzPlot_" in histoName:
+          h3.SetNdivisions(505,'X')
+          h3.SetNdivisions(505,'Y')
+        c1.SaveAs(prename+"_sig.png")
+
+      continue
+
+    # set_palette("gray")
+    # h1.Draw("col same")
+    # if "h2D_tri_vs_diLep_mass" in histoName:
+    #    c1.SetLogy()
+
     else:
-      c1 = TCanvas("c3","small canvas",600,600);
-    c1.SetLogy(isLog)
-    c1.cd()
+      pad1 = TPad("pad1","pad1",0,0.3,1,1);
+      pad2 = TPad("pad2","pad2",0,0,1,0.3);
 
-    if f3!=None and howToScale=="lumi": # only assume signal MC for now
-      Nev = f3.Get("Counts/evt_byCut_raw").GetBinContent(1)
-      print ' Fix ME FIX ME'
-      cro = getCS("ZtoJPsiGamma") #
-      print 'need more generic way to get cs by sample'
-      # cro = getCS("ggH-125")
-      scale3 = float(lumi*cro)/Nev
-      print Nev, lumi, cro, scale3
-
-    doPdf=0
-    histoName = None
-    for k1 in dirList:
-        if k1.GetName() in ["eff"]: continue
-        if N!=None:
-          if not("cut"+N) in k1.GetName(): continue
-        h1 = k1.ReadObj()
-        histoName = h1.GetName()
-
-        h3 = TH1F()
-
-        hmaxs = []
-
-        if f3!=None:
-          if myDir!="":
-            h3 = f3.Get(myDir+"/"+histoName)
-          else:
-            h3 = f3.Get(histoName)
-          if h3==None: continue
-
-          h3.Scale(float(scale3))
+      if doRatio:
+        pad1.SetBottomMargin(0);
+        pad1.Draw();
+        pad1.cd();
+        pad1.SetLogy(isLog)
 
 
-        print "drawing", histoName
+      if doOverflow:
+        handleOverflowBins(h1)
 
-        if h1.InheritsFrom("TH2"):
-            createDir(split[0]+"/TH2_"+split[1])
-            h1.Draw("col")
-            prename = split[0]+"/TH2_"+split[1]+"/"+histoName
-            c1.SaveAs(prename+"_data.png")
-            if f3!=None and h3!=None:
-              h3.Draw("col")
-              c1.SaveAs(prename+"_sig.png")
+      h1.Draw("hist")
+      #h1.Draw("same e1p")
+      #h1.SetMinimum()
+      #h1.GetRange
+      h1.SetMarkerStyle(20)
+      h1.SetMarkerSize(0.75)
+      h1.SetLineColor(kBlack)
+      #h1.UseCurrentStyle()
 
-            continue
-
-            #set_palette("gray")
-            #h1.Draw("col same")
-            #if "h2D_tri_vs_diLep_mass" in histoName:
-            #    c1.SetLogy()
-
-        else:
-            pad1 = TPad("pad1","pad1",0,0.3,1,1);
-            pad2 = TPad("pad2","pad2",0,0,1,0.3);
-
-            if doRatio:
-              pad1.SetBottomMargin(0);
-              pad1.Draw();
-              pad1.cd();
-              pad1.SetLogy(isLog)
-
-
-            if doOverflow:
-              handleOverflowBins(h1)
-
-            h1.Draw("hist")
-            #h1.Draw("same e1p")
-            #h1.SetMinimum()
-            #h1.GetRange
-            h1.SetMarkerStyle(20)
-            h1.SetMarkerSize(0.75)
-            h1.SetLineColor(kBlack)
-            #h1.UseCurrentStyle()
-
-            if "phi" in histoName:
-              h1.SetMinimum(0)
-            if "ll_deltaR_" in histoName:
-              # h1.SetAxisRange(0,1,"X")
-              h1.SetXTitle("#DeltaR(#mu_{1}, #mu_{2})")
-              doPdf=1
-            if "gamma_pt__" in histoName:
-              h1.SetXTitle("Photon p_{T} (GeV)")
-              doPdf=1
-            if "lPt1_pt__" in histoName:
-              h1.SetXTitle("Leading muon p_{T} (GeV)")
-              doPdf=1
-            if "lPt2_pt__" in histoName:
-              h1.SetXTitle("Trailing muon p_{T} (GeV)")
-              doPdf=1
+      if "phi" in histoName:
+        h1.SetMinimum(0)
+      if "ll_deltaR_" in histoName:
+        # h1.SetAxisRange(0,1,"X")
+        h1.SetXTitle("#DeltaR(#mu_{1}, #mu_{2})")
+        doPdf=1
+      if "gamma_pt__" in histoName:
+        h1.SetXTitle("Photon p_{T} (GeV)")
+        doPdf=1
+      if "lPt1_pt__" in histoName:
+        h1.SetXTitle("Leading muon p_{T} (GeV)")
+        doPdf=1
+      if "lPt2_pt__" in histoName:
+        h1.SetXTitle("Trailing muon p_{T} (GeV)")
+        doPdf=1
 
 
-            #if "tri_mass" in k1.GetName() and name1 not in ["madgra","mcfm"]:
-            #    blindIt(h1)
-            #if "h_mass" in k1.GetName():
-            #  print "\n *** H-mass RMS:",  h1.GetRMS(), h3.GetRMS()
-            #  print "\n *** H-mass Mean:", h1.GetMean(),h3.GetMean()
+      #if "tri_mass" in k1.GetName() and name1 not in ["madgra","mcfm"]:
+      #    blindIt(h1)
+      #if "h_mass" in k1.GetName():
+      #  print "\n *** H-mass RMS:",  h1.GetRMS(), h3.GetRMS()
+      #  print "\n *** H-mass Mean:", h1.GetMean(),h3.GetMean()
 
-            leg = TLegend(0.63,0.72,0.92,0.90);
-            leg.SetTextSize(0.05)
-            #leg.SetTextSize(0.03)
+      leg = TLegend(0.63,0.72,0.92,0.90);
+      #leg.SetTextSize(0.05)
+      leg.SetTextSize(0.03)
 
-            if len(bZip)!=0:
-              leg = TLegend(0.55,0.7,0.99,0.92);
-              leg.SetNColumns(2)
-              leg.SetTextSize(0.04)
-            #leg.AddEntry(h1,name1, "lpe")
-            leg.AddEntry(h1,name1, "l")
+      if len(bZip)!=0: # need more columns if there are backgrounds
+        leg = TLegend(0.55,0.7,0.99,0.92);
+        leg.SetNColumns(2)
+        leg.SetTextSize(0.04)
 
 
-            #if "phi" in histoName:
-            #    h1.SetMinimum(0)
-            #    if howToScale=="norm":
-            #        h1.SetMaximum(0.035)
-
-            norm1 = h1.Integral()
-            if howToScale=='norm' and  norm1!=0:
-              h1.Scale(1./norm1)
-            hmaxs.append(h1.GetMaximum())
-
-            if len(bZip)!=0:
-              print ' if bZip!=None!'
-              print bZip
-
-              if myDir!="":
-                histoName = myDir+"/"+histoName
+      leg.AddEntry(h1,name1, "lpe")
+      #leg.AddEntry(h1,name1, "l")
 
 
-              stack = makeStack(bZip, histoName, leg, lumi)
-              stack.Draw('same hist')
-              hmaxs.append(stack.GetMaximum())
+      #if "phi" in histoName:
+      #    h1.SetMinimum(0)
+      #    if howToScale=="norm":
+      #        h1.SetMaximum(0.035)
 
-            if f3!=None and h3!=None:
-                if doOverflow:
-                  handleOverflowBins(h3)
-                h3.Draw("sames hist")
-                h3.SetLineWidth(2)
-                h3.SetLineColor(kRed-9)
-                h3.SetLineColor(kBlue+2)
-                #h3.SetFillColor(kYellow-9)
-                h1.Draw("same hist")
-                #h1.Draw("same e1p")
-                h1.SetMarkerStyle(20)
-                h1.SetMarkerSize(0.75)
-                extract_from_name = re.findall(r'\d+', name3)
-                #print extract_from_name
-                if len(extract_from_name) == 1:
-                  h3.Scale(int(extract_from_name[0]))
-                norm3 = h3.Integral()
-                if howToScale=="norm" and  norm3!=0:
-                  h3.Scale(1./norm3)
-                elif howToScale=="norm2" and  norm3!=0:
-                  h3.Scale(norm1/norm3)
-                hmaxs.append(h3.GetMaximum())
+      norm1 = h1.Integral()
+      if howToScale=='norm' and  norm1!=0:
+        h1.Scale(1./norm1)
+      hmaxs.append(h1.GetMaximum())
+      if len(bZip)!=0:
+        print ' if bZip!=None!'
+        print bZip
 
-                leg.AddEntry(h3,name3, "l")
-                #leg.AddEntry(h3,name3, "f")
-
-                if doRatio:
-                  c1.cd()
-                  pad2.SetBottomMargin(0.25);
-                  pad2.SetTopMargin(0);
-                  pad2.Draw();
-                  pad2.cd();
-
-                  r = h1.Clone("")
-                  r.Divide(h3);
-                  r.GetYaxis().SetTitle("Data/MC");
-                  r.SetMaximum(2);
-                  r.SetMinimum(0);
-                  r.GetYaxis().SetNdivisions(206);
-                  r.GetYaxis().SetTitleOffset(0.4);
-                  r.SetTitleSize(0.1,"XYZ");
-                  r.SetLabelSize(0.1,"XY");
-
-                  r.Draw("e1p");
-
-                  pad1.cd();
-
-            h1.Draw("same hist")
-            #h1.Draw("same e1p")
-            # prelim = TLatex(0.15,0.95, "CMS Preliminary %s #it{L_{int}} = %0.1f fb^{-1}" % (8, lumi))
-            prelim = TLatex(0.15,0.95, "CMS Simulation          H#rightarrow#gamma*#gamma#rightarrow#mu#mu#gamma")
-            #prelim = TLatex(0.15,0.95, "CMS Preliminary #sqrt{s} = 8TeV, L = 19.7 fb^{-1}   H#rightarrow#gamma*#gamma#rightarrow#mu#mu#gamma")
-            prelim.SetNDC();
-            prelim.SetTextSize(0.035);
-            prelim.Draw();
-
-            #print "hmax =", hmaxs
-            if len(hmaxs)>0:
-              m = max(hmaxs)
-              h1.SetMaximum(1.1*m)
-            if howToScale ==" norm":
-              h1.GetYaxis().SetTitle("arbitrary units")
-            if howToScale == "norm2":
-              h1.GetYaxis().SetTitle("Events")
-              h1.SetMaximum(int(1.1*m)+5)
-
-            # Here we consider particular cases (histograms) that need special care
-            # if "tri_mass_longTail" in histoName and howToScale=="lumi":
-            # h1.SetMaximum(750)
-
-            if "diLep_mass_low" in histoName:
-              int1 = h1.Integral(100,200)
-              int3 = h3.Integral(100,200)
-              h1.Scale(100./int1)
-              h3.Scale(100./int3)
-              h1.SetTitle(";m_{ll} (GeV);arbitrary units")
-              h1.SetMaximum(1.2*h1.GetMaximum())
-              h1.SetNdivisions(505,'X')
-              doPdf=1
-
-            if "diLep_mass_low_" in histoName:
-              #h1.Rebin(2)
-              #h3.Rebin(2)
-              h1.SetXTitle("m_{#mu#mu} (GeV)")
-              h1.SetMaximum(1.2*h1.GetMaximum())
-
-              doPdf=1
-
-            if "ph_energyCorrection" in histoName:
-              gStyle.SetOptStat(1111)
-              h1.SetName("Data")
-              h3.SetName("ggH-125")
-              stats1 = h1.GetListOfFunctions().FindObject("stats");
-              stats3 = h3.GetListOfFunctions().FindObject("stats");
-              stats1.Print()
-              stats1.SetX1NDC(0.7)
-              stats1.SetX2NDC(0.95)
-              stats1.SetY1NDC(0.9)
-              stats1.SetY2NDC(0.7)
-              stats3.SetX1NDC(0.7)
-              stats3.SetX2NDC(0.95)
-              stats3.SetY1NDC(0.7)
-              stats3.SetY2NDC(0.5)
-              stats3.SetTextColor(kRed+1)
-              leg.SetX1(0.19)
-              leg.SetX2(0.46)
-              leg.SetY1(0.85)
-              leg.SetY2(0.7)
+        if myDir!="":
+          histoName = myDir+"/"+histoName
 
 
-            if "zee_" in histoName:
-              gStyle.SetOptStat(1111)
-              h1.SetName("Data")
-              h2.SetName("DYjets")
-              # h2.Print("all")
-              stats1 = h1.GetListOfFunctions().FindObject("stats");
-              stats2 = h2.GetListOfFunctions().FindObject("stats");
-              stats2.Print()
-              stats1.SetX1NDC(0.7)
-              stats1.SetX2NDC(0.95)
-              stats1.SetY1NDC(0.9)
-              stats1.SetY2NDC(0.7)
-              stats2.SetX1NDC(0.7)
-              stats2.SetX2NDC(0.95)
-              stats2.SetY1NDC(0.7)
-              stats2.SetY2NDC(0.5)
-              stats2.SetTextColor(kBlue+1)
-              leg.SetX1(0.19)
-              leg.SetX2(0.46)
-              leg.SetY1(0.85)
-              leg.SetY2(0.7)
+        stack = makeStack(bZip, histoName, leg, lumi)
+        stack.Draw('same hist')
+        hmaxs.append(stack.GetMaximum())
 
-            gPad.RedrawAxis()
+      if f3!=None and h3!=None:
+        if doOverflow:
+          handleOverflowBins(h3)
+        h3.Draw("sames hist")
+        h3.SetLineWidth(2)
+        h3.SetLineColor(kRed-9)
+        h3.SetLineColor(kBlue+2)
+        # h3.SetFillColor(kYellow-9)
+        h1.Draw("same hist")
+        # h1.Draw("same e1p")
+        h1.SetMarkerStyle(20)
+        h1.SetMarkerSize(0.75)
+        extract_from_name = re.findall(r'\d+', name3)
+        # print extract_from_name
+        if len(extract_from_name) == 1:
+          h3.Scale(int(extract_from_name[0]))
+        norm3 = h3.Integral()
+        if howToScale=="norm" and  norm3!=0:
+          h3.Scale(1./norm3)
+        elif howToScale=="norm2" and  norm3!=0:
+          h3.Scale(norm1/norm3)
+        hmaxs.append(h3.GetMaximum())
 
-            c1.cd()
-            leg.SetFillColor(kWhite)
-            leg.Draw()
+        leg.AddEntry(h3,name3, "l")
+        # leg.AddEntry(h3,name3, "f")
 
-            c1.SetLogy(int(isLog))
-            #if "diLep_mass_low":
-            #    h1.
+        if doRatio:
+          c1.cd()
+          pad2.SetBottomMargin(0.25);
+          pad2.SetTopMargin(0);
+          pad2.Draw();
+          pad2.cd();
 
-            c1.SaveAs(path+"/"+histoName+'.png')
-            if doPdf:
-              c1.SaveAs(path+"/"+histoName+'.pdf')
-              doPdf=0
-            gStyle.SetOptStat(0)
+          r = h1.Clone("")
+          r.Divide(h3);
+          r.GetYaxis().SetTitle("Data/MC");
+          r.SetMaximum(2);
+          r.SetMinimum(0);
+          r.GetYaxis().SetNdivisions(206);
+          r.GetYaxis().SetTitleOffset(0.4);
+          r.SetTitleSize(0.1,"XYZ");
+          r.SetLabelSize(0.1,"XY");
 
-        c1.SetLogy(0)
+          r.Draw("e1p");
+
+          pad1.cd();
+
+        h1.Draw("same hist")
+        h1.Draw("same e1p")
+        # prelim = TLatex(0.15,0.95, "CMS Simulation          H#rightarrow#gamma*#gamma#rightarrow#mu#mu#gamma")
+        prelim = TLatex(0.15,0.95, "CMS Preliminary #sqrt{s} = 8TeV, L = 19.7 fb^{-1}   H#rightarrow#gamma*#gamma#rightarrow#mu#mu#gamma")
+        prelim.SetNDC();
+        prelim.SetTextSize(0.035);
+        prelim.Draw();
+
+        #print "hmax =", hmaxs
+        if len(hmaxs)>0:
+          m = max(hmaxs)
+          h1.SetMaximum(1.1*m)
+        if howToScale ==" norm":
+          h1.GetYaxis().SetTitle("arbitrary units")
+        if howToScale == "norm2":
+          h1.GetYaxis().SetTitle("Events")
+          h1.SetMaximum(int(1.1*m)+5)
+
+        # Here we consider particular cases (histograms) that need special care
+        # if "tri_mass_longTail" in histoName and howToScale=="lumi":
+        # h1.SetMaximum(750)
+
+        if "diLep_mass_low"==histoName: # this is for LHE analyzer plots
+          int1 = h1.Integral(100,200)
+          int3 = h3.Integral(100,200)
+          h1.Scale(100./int1)
+          h3.Scale(100./int3)
+          h1.SetTitle(";m_{ll} (GeV);arbitrary units")
+          h1.SetMaximum(1.2*h1.GetMaximum())
+          h1.SetNdivisions(505,'X')
+          doPdf=1
+
+        if "diLep_mass_low_" in histoName:
+          #h1.Rebin(2)
+          #h3.Rebin(2)
+          h1.SetXTitle("m_{#mu#mu} (GeV)")
+          h1.SetMaximum(1.2*h1.GetMaximum())
+
+          doPdf=1
+
+        if "ph_energyCorrection" in histoName:
+          gStyle.SetOptStat(1111)
+          h1.SetName("Data")
+          h3.SetName("ggH-125")
+          stats1 = h1.GetListOfFunctions().FindObject("stats");
+          stats3 = h3.GetListOfFunctions().FindObject("stats");
+          stats1.Print()
+          stats1.SetX1NDC(0.7)
+          stats1.SetX2NDC(0.95)
+          stats1.SetY1NDC(0.9)
+          stats1.SetY2NDC(0.7)
+          stats3.SetX1NDC(0.7)
+          stats3.SetX2NDC(0.95)
+          stats3.SetY1NDC(0.7)
+          stats3.SetY2NDC(0.5)
+          stats3.SetTextColor(kRed+1)
+          leg.SetX1(0.19)
+          leg.SetX2(0.46)
+          leg.SetY1(0.85)
+          leg.SetY2(0.7)
+
+
+        if "zee_" in histoName:
+          gStyle.SetOptStat(1111)
+          h1.SetName("Data")
+          h2.SetName("DYjets")
+          # h2.Print("all")
+          stats1 = h1.GetListOfFunctions().FindObject("stats");
+          stats2 = h2.GetListOfFunctions().FindObject("stats");
+          stats2.Print()
+          stats1.SetX1NDC(0.7)
+          stats1.SetX2NDC(0.95)
+          stats1.SetY1NDC(0.9)
+          stats1.SetY2NDC(0.7)
+          stats2.SetX1NDC(0.7)
+          stats2.SetX2NDC(0.95)
+          stats2.SetY1NDC(0.7)
+          stats2.SetY2NDC(0.5)
+          stats2.SetTextColor(kBlue+1)
+          leg.SetX1(0.19)
+          leg.SetX2(0.46)
+          leg.SetY1(0.85)
+          leg.SetY2(0.7)
+
+
+        gPad.RedrawAxis()
+
+      c1.cd()
+      leg.SetFillColor(kWhite)
+      leg.Draw()
+
+      c1.SetLogy(int(isLog))
+        #if "diLep_mass_low":
+        #    h1.
+      #print 'Saving PNG:', histoName
+      c1.SaveAs(path+"/"+histoName+'.png')
+      if doPdf:
+        c1.SaveAs(path+"/"+histoName+'.pdf')
+        doPdf=0
+      gStyle.SetOptStat(0)
+
+    c1.SetLogy(0)
 
 def yieldsTable(yieldList, sel, num=True):
   print sel
+  print yieldList
   t = []
   cuts =  getCuts(conf, "cuts-"+sel[0:2])
 
@@ -484,11 +496,13 @@ def yieldsTable(yieldList, sel, num=True):
   t.append(l1)
   for line in xrange(len(cuts)):
     l=[]
+    #print line, cuts[line]
     if num:
       l.append(str((line-1)))
     l.append(cuts[line])
 
     for yi in yieldList:
+      #print line, yi
       l.append(yi[line])
       # print l
     t.append(l)
@@ -560,29 +574,30 @@ def makeTable(table, name, opt="tex"):
     ifile.close()
 
     if opt in ["twiki"]:
-        print myTable
+      print myTable
 
 def getYields(f, sample='ggH-125', doLumiScale=False):
-    ev = f.Get("Counts/evt_byCut")
-    if ev==None: return [0]
+  print 'Calculating yields for ',sample
+  ev = f.Get("Counts/evt_byCut")
+  sel = conf.get("selection", "sel")[0:2]
+  cuts =  getCuts(conf, "cuts-"+sel)
+  if ev==None: return len(cuts)*[0]
 
-    sel = conf.get("selection", "sel")[0:2]
-    cuts =  getCuts(conf, "cuts-"+sel)
-    y = []
-    scale=1
-    if doLumiScale: # only assume signal MC for now
-        Nev = ev.GetBinContent(1)
-        if any(substring in sample for substring in ['ggH','vbfH','vH']):
-          cro = getCS(sample, sel)
-        else:
-          cro = getCS(sample)
-        scale = float(lumi*cro)/Nev
-        print "Lumi scale for sel=",sel, "Nev=",Nev, "cro=",cro, "scale=",scale
+  y = []
+  scale=1
+  if doLumiScale: # only assume signal MC for now
+    Nev = ev.GetBinContent(1)
+    if any(substring in sample for substring in ['ggH','vbfH','vH']):
+      cro = getCS(sample, sel)
+    else:
+      cro = getCS(sample)
+    scale = float(lumi*cro)/Nev
+    print "Lumi scale for sample =", sample, ", sel=",sel, "Nev=",Nev, "cro=",cro, "scale=",scale
 
-    for a in xrange(len(cuts)):
-        y.append(scale*ev.GetBinContent(a+1)) # well, that's how the histogram is set up
+  for a in xrange(len(cuts)):
+    y.append(scale*ev.GetBinContent(a+1)) # well, that's how the histogram is set up
 
-    return y
+  return y
 
 
 def effPlots2(f1, path):

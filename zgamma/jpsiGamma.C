@@ -237,8 +237,13 @@ Bool_t jpsiGamma::Process(Long64_t entry)
       //Higgs himself:
       if (thisParticle->GetPDGId()==25 && thisParticle->GetStatus()==3){
 	gen_higgs = *thisParticle;
-	hists->fill1DHist(thisParticle->M(), "gen_h_mass",";gen mu mass",  200, 124,126, 1,"GEN");
+	hists->fill1DHist(thisParticle->M(), "gen_h_mass",";gen Higgs mass",  200, 124,126, 1,"GEN");
 	h++;
+      }
+
+      //Z propagator mass:
+      if (thisParticle->GetPDGId()==23){
+	hists->fill1DHist(thisParticle->M(), "gen_z_mass",";gen Z mass (GeV)",  200, 124,126, 1,"GEN");
       }
 
       //GEN MUONS
@@ -338,15 +343,9 @@ Bool_t jpsiGamma::Process(Long64_t entry)
 	  hists->fill1DHist(thisParticle->Pt(),  "gen_ISR_pho_pt", ";gen ISR photon pt",   200, 0,50, 1,"GEN");
 	  hists->fill1DHist(thisParticle->Eta(), "gen_ISR_pho_eta",";gen ISR photon eta",  200, -5,5, 1,"GEN");
 	}
- }// end of genparticles loop
+    }// end of genparticles loop
 
 
-    if (ph!=1 && sample=="dalitz")
-      Abort(Form("ev #%i NONONO There has to be exactly one photon from the Higgs! \n \t\t but there is %i",
-		 (int)eventNumber, (int)ph));
-    //if (h!=1 && sample=="dalitz")
-    //return kTRUE;
-    //Abort(Form(" NONONO There has to be exactly one Higgs! \n \t\t but there is %i", h));
 
     sort(gen_el.begin(), gen_el.end(), P4SortCondition);
     sort(gen_mu.begin(), gen_mu.end(), P4SortCondition);
@@ -394,17 +393,18 @@ Bool_t jpsiGamma::Process(Long64_t entry)
 
 
       //ZGAnlgles:
-      double co1,co2,phi,co3;
 
-      if (sample=="dalitz")
-	ang->GetAngles(gen_l1, gen_l2, gen_gamma, co1,co2,phi,co3);
-      //cout<<eventNumber<<" gen Angles: c1= "<<co1<<"  c2="<<co2<<"   phi="<<phi<<"   coTh="<<co3<<endl;
+      if (sample=="dalitz" || sample=="hjp" || sample=="zjp")
+	{
+	  double co1,co2,phi,co3;
+	  ang->GetAngles(gen_l1, gen_l2, gen_gamma, co1,co2,phi,co3);
+	  //cout<<eventNumber<<" gen Angles: c1= "<<co1<<"  c2="<<co2<<"   phi="<<phi<<"   coTh="<<co3<<endl;
 
-      hists->fill1DHist(co1, "gen_co1",";gen cos_lp",  100,-1,1, 1,"");
-      hists->fill1DHist(co2, "gen_co2",";gen cos_lm",  100,-1,1, 1,"");
-      hists->fill1DHist(co3, "gen_co3",";gen cosTheta",100,-1,1, 1,"");
-      hists->fill1DHist(phi, "gen_phi",";gen phi lp",  100, -TMath::Pi(), TMath::Pi(), 1,"");
-
+	  hists->fill1DHist(co1, "gen_co1",";gen cos_lp",  100,-1,1, 1,"");
+	  hists->fill1DHist(co2, "gen_co2",";gen cos_lm",  100,-1,1, 1,"");
+	  hists->fill1DHist(co3, "gen_co3",";gen cosTheta",100,-1,1, 1,"");
+	  hists->fill1DHist(phi, "gen_phi",";gen phi lp",  100, -TMath::Pi(), TMath::Pi(), 1,"");
+	}
 
       FillHistoCounts(1, eventWeight);
       CountEvents(1);
