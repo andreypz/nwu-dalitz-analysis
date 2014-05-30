@@ -512,7 +512,7 @@ Bool_t jpsiGamma::Process(Long64_t entry)
 
       if (vetoIt) continue;
 
-      if(ObjID->PassPhotonIdAndIso(thisPhoton, "CutBased-MediumWP")
+      if(ObjID->PassPhotonIdAndIso(*thisPhoton, "CutBased-MediumWP")
 	 //&& (isRealData || !makeGen || (sample=="dalitz" && makeGen && gen_gamma.DeltaR(*thisPhoton) < 0.2) )
 	 )
 	{
@@ -538,7 +538,7 @@ Bool_t jpsiGamma::Process(Long64_t entry)
 
 	}
 
-      if(ObjID->PassPhotonIdAndIso(thisPhoton, "CutBased-TightWP")
+      if(ObjID->PassPhotonIdAndIso(*thisPhoton, "CutBased-TightWP")
 	 //&& (isRealData || !makeGen || (sample=="dalitz" && makeGen && gen_gamma.DeltaR(*thisPhoton) < 0.2) )
 	 )
 	photonsTight.push_back(*thisPhoton);
@@ -583,7 +583,7 @@ Bool_t jpsiGamma::Process(Long64_t entry)
 	}
       if (
 	  //PassElectronIdAndIsoMVA(thisElec)
-	  ObjID->PassElectronIdAndIso(thisElec, pvPosition, "Loose")
+	  ObjID->PassElectronIdAndIso(*thisElec, pvPosition, "Loose")
 	  )
 	electrons0.push_back(*thisElec);
 
@@ -641,7 +641,7 @@ Bool_t jpsiGamma::Process(Long64_t entry)
 	  break;}}
 
     if(thisMuon->Pt() > 4
-       && ObjID->PassMuonIdAndIso(thisMuon, pvPosition, "Soft")
+       && ObjID->PassMuonIdAndIso(*thisMuon, pvPosition, "Soft")
        ) {
 
 
@@ -733,9 +733,9 @@ Bool_t jpsiGamma::Process(Long64_t entry)
   hists->fill1DHist(Mll,  Form("diLep_mass_high_cut%i", 3),";M(ll)", 50, 0,120, 1, "");
 
 
-  if (ObjID->CalculateMuonIso(&muons[0]) > 0.4)
+  if (ObjID->CalculateMuonIso(muons[0]) > 0.4)
     return kTRUE;
-  //if (lPt2.Pt() > 20 && ObjID->CalculateMuonIso(&muons[1]) > 0.4)
+  //if (lPt2.Pt() > 20 && ObjID->CalculateMuonIso(muons[1]) > 0.4)
   //return kTRUE;
 
   HM->MakePhotonPlots(gamma);

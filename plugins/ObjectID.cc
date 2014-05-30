@@ -109,11 +109,11 @@ void ObjectID::SetEventInfo(Bool_t is, UInt_t run, ULong64_t evt, Float_t rho) {
 
 }
 
-void ObjectID::CalculatePhotonIso(TCPhoton *ph, float& chIsoCor, float& nhIsoCor, float& phIsoCor){
+void ObjectID::CalculatePhotonIso(const TCPhoton& ph, float& chIsoCor, float& nhIsoCor, float& phIsoCor){
   float chEA,nhEA,phEA,tmpEta;
 
   //cout<<"ObjID.  rhoFactor = "<<_rhoFactor<<endl;
-  tmpEta = ph->SCEta();
+  tmpEta = ph.SCEta();
 
   if (fabs(tmpEta) < 1.0){
     chEA = _EAPho[0][0];
@@ -145,14 +145,14 @@ void ObjectID::CalculatePhotonIso(TCPhoton *ph, float& chIsoCor, float& nhIsoCor
     phEA = _EAPho[6][2];
   }
 
-  chIsoCor = ph->PfIsoCharged() - _rhoFactor*chEA;
-  nhIsoCor = ph->PfIsoNeutral() - _rhoFactor*nhEA;
-  phIsoCor = ph->PfIsoPhoton()  - _rhoFactor*phEA;
+  chIsoCor = ph.PfIsoCharged() - _rhoFactor*chEA;
+  nhIsoCor = ph.PfIsoNeutral() - _rhoFactor*nhEA;
+  phIsoCor = ph.PfIsoPhoton()  - _rhoFactor*phEA;
   //cout<<chIsoCor<<"  "<<nhIsoCor<<"  "<<phIsoCor<<endl;
 
 }
 
-bool ObjectID::PassPhotonIdAndIso(TCPhoton *ph, TString n)
+bool ObjectID::PassPhotonIdAndIso(const TCPhoton& ph, TString n)
 {
   phIdAndIsoCuts cuts;
 
@@ -167,60 +167,60 @@ bool ObjectID::PassPhotonIdAndIso(TCPhoton *ph, TString n)
 
   bool pass = false;
   //Float_t phoISO = 0;
-  float tmpEta = ph->SCEta();
+  float tmpEta = ph.SCEta();
 
   float chIsoCor=0, nhIsoCor=0, phIsoCor=0;
   CalculatePhotonIso(ph, chIsoCor,nhIsoCor,phIsoCor);
 
   if(
      (fabs(tmpEta)  < 1.442
-      && ph->ConversionVeto()       == cuts.PassedEleSafeVeto[0]
-      && ph->HadOverEm()             < cuts.HadOverEm[0]
-      && ph->SigmaIEtaIEta()         < cuts.sigmaIetaIeta[0]
+      && ph.ConversionVeto()       == cuts.PassedEleSafeVeto[0]
+      && ph.HadOverEm()             < cuts.HadOverEm[0]
+      && ph.SigmaIEtaIEta()         < cuts.sigmaIetaIeta[0]
       && max((double)chIsoCor,0.)    < cuts.chIso03[0]
-      && max((double)nhIsoCor,0.)    < cuts.nhIso03[0] + 0.040*ph->Pt()
-      && max((double)phIsoCor,0.)    < cuts.phIso03[0] + 0.005*ph->Pt()
+      && max((double)nhIsoCor,0.)    < cuts.nhIso03[0] + 0.040*ph.Pt()
+      && max((double)phIsoCor,0.)    < cuts.phIso03[0] + 0.005*ph.Pt()
       ) ||
      (fabs(tmpEta)  > 1.566
-      && ph->ConversionVeto()       == cuts.PassedEleSafeVeto[1]
-      && ph->HadOverEm()             < cuts.HadOverEm[1]
-      && ph->SigmaIEtaIEta()         < cuts.sigmaIetaIeta[1]
+      && ph.ConversionVeto()       == cuts.PassedEleSafeVeto[1]
+      && ph.HadOverEm()             < cuts.HadOverEm[1]
+      && ph.SigmaIEtaIEta()         < cuts.sigmaIetaIeta[1]
 
       && max((double)chIsoCor,0.)    < cuts.chIso03[1]
-      && max((double)nhIsoCor,0.)    < cuts.nhIso03[1] + 0.040*ph->Pt()
-      && max((double)phIsoCor,0.)    < cuts.phIso03[1] + 0.005*ph->Pt()
+      && max((double)nhIsoCor,0.)    < cuts.nhIso03[1] + 0.040*ph.Pt()
+      && max((double)phIsoCor,0.)    < cuts.phIso03[1] + 0.005*ph.Pt()
       )
      ) pass = true;
 
   return pass;
 }
 
-
-void ObjectID::PhotonR9Corrector(TCPhoton *ph){
+/*
+void ObjectID::PhotonR9Corrector(const TCPhoton& ph){
   //old R9 correction
   float R9Cor;
-  R9Cor = ph->R9();
+  R9Cor = ph.R9();
 
-  if (fabs(ph->SCEta()) < 1.479)
-    R9Cor = ph->R9()*1.0045 + 0.0010;
+  if (fabs(ph.SCEta()) < 1.479)
+    R9Cor = ph.R9()*1.0045 + 0.0010;
   else
-    R9Cor = ph->R9()*1.0086 - 0.0007;
+    R9Cor = ph.R9()*1.0086 - 0.0007;
 
-  ph->SetR9(R9Cor);
+  //ph.SetR9(R9Cor);
 }
+*/
 
-
-float ObjectID::CalculateMuonIso(TCMuon *lep)
+float ObjectID::CalculateMuonIso(const TCMuon& lep)
 {
-  float muISO = (lep->PfIsoCharged() + TMath::Max(0.0, lep->PfIsoPhoton() + lep->PfIsoNeutral() - 0.5*lep->PfIsoPU()))/lep->Pt();
+  float muISO = (lep.PfIsoCharged() + TMath::Max(0.0, lep.PfIsoPhoton() + lep.PfIsoNeutral() - 0.5*lep.PfIsoPU()))/lep.Pt();
 
-  //  Float_t muISO = (lep->IsoMap("pfChargedHadronPt_R04") +
-  //TMath::Max(0.0, lep->IsoMap("pfNeutralHadronEt_R04") + lep->IsoMap("pfPhotonEt_R04") - 0.5*lep->IsoMap("pfPUPt_R04")))/lep->Pt();
+  //  Float_t muISO = (lep.IsoMap("pfChargedHadronPt_R04") +
+  //TMath::Max(0.0, lep.IsoMap("pfNeutralHadronEt_R04") + lep.IsoMap("pfPhotonEt_R04") - 0.5*lep.IsoMap("pfPUPt_R04")))/lep.Pt();
 
   return muISO;
 }
 
-bool ObjectID::PassMuonIdAndIso(TCMuon *lep, TVector3 *pv, TString n)
+bool ObjectID::PassMuonIdAndIso(const TCMuon& lep, TVector3 *pv, TString n)
 {
   muIdAndIsoCuts cuts;
   if (n=="Soft")
@@ -237,19 +237,19 @@ bool ObjectID::PassMuonIdAndIso(TCMuon *lep, TVector3 *pv, TString n)
   //Float_t muISO =  CalculateMuonIso(lep);
 
   if(1
-     && lep->IsPF()
-     && ((lep->IsTRK() && lep->NumberOfMatches() > 0) || lep->IsGLB())
-     && fabs(lep->Dxy(pv))     < cuts.dxy
-     && fabs(lep->Dz(pv))      < cuts.dz
-     //&& (lep->Pt() < 20 || zgamma::CalculateMuonIso(lep) < 0.4)
+     && lep.IsPF()
+     && ((lep.IsTRK() && lep.NumberOfMatches() > 0) || lep.IsGLB())
+     && fabs(lep.Dxy(pv))     < cuts.dxy
+     && fabs(lep.Dz(pv))      < cuts.dz
+     //&& (lep.Pt() < 20 || zgamma::CalculateMuonIso(lep) < 0.4)
      )
     pass = true;
   /*
   if(1
-     && lep->IsPF() && lep->IsTRK()
-     && lep->NormalizedChi2_tracker()  < cuts.NormalizedChi2_tracker
-     && fabs(lep->Dxy(pv))     < cuts.dxy
-     && fabs(lep->Dz(pv))      < cuts.dz
+     && lep.IsPF() && lep.IsTRK()
+     && lep.NormalizedChi2_tracker()  < cuts.NormalizedChi2_tracker
+     && fabs(lep.Dxy(pv))     < cuts.dxy
+     && fabs(lep.Dz(pv))      < cuts.dz
      )
     pass = true;
   */
@@ -259,13 +259,13 @@ bool ObjectID::PassMuonIdAndIso(TCMuon *lep, TVector3 *pv, TString n)
 
 
 
-float ObjectID::CalculateElectronIso(TCElectron *lep)
+float ObjectID::CalculateElectronIso(const TCElectron& lep)
 {
   float eleISO = 0;
   //if(period=="2012")
-    //eleISO = (lep->IsoMap("pfChIso_R04") + TMath::Max(0.0, (Double_t)(lep->IsoMap("pfPhoIso_R04") + lep->IsoMap("pfNeuIso_R04") - rho25Factor*lep->IsoMap("EffArea_R04"))))/lep->Pt();
+    //eleISO = (lep.IsoMap("pfChIso_R04") + TMath::Max(0.0, (Double_t)(lep.IsoMap("pfPhoIso_R04") + lep.IsoMap("pfNeuIso_R04") - rho25Factor*lep.IsoMap("EffArea_R04"))))/lep.Pt();
     //else if(period=="2011")
-    //eleISO = (lep->IsoMap("SumPt_R04") + TMath::Max(0.0, (Double_t)(lep->IsoMap("EmIso_R04") + lep->IsoMap("HadIso_R04") - rhoFactor*TMath::Pi()*0.09)))/lep->Pt();
+    //eleISO = (lep.IsoMap("SumPt_R04") + TMath::Max(0.0, (Double_t)(lep.IsoMap("EmIso_R04") + lep.IsoMap("HadIso_R04") - rhoFactor*TMath::Pi()*0.09)))/lep.Pt();
     //else cout<<"Ele iso - Period is not defined!"<<period<<endl;
 
   return eleISO;
@@ -275,7 +275,7 @@ float ObjectID::CalculateElectronIso(TCElectron *lep)
 
 
 
-bool ObjectID::PassElectronIdAndIsoMVA(TCElectron *lep)
+bool ObjectID::PassElectronIdAndIsoMVA(const TCElectron& lep)
 {
   bool pass = false;
 
@@ -283,33 +283,33 @@ bool ObjectID::PassElectronIdAndIsoMVA(TCElectron *lep)
 
   if(
      eleISO < 0.15
-     && lep->ConversionMissHits()==0
-     && lep->PassConversionVeto() == true
+     && lep.ConversionMissHits()==0
+     && lep.PassConversionVeto() == true
      &&
      (
-      (lep->Pt()>10 && lep->Pt()<20 &&
+      (lep.Pt()>10 && lep.Pt()<20 &&
        (
-	(fabs(lep->Eta()) < 0.8
-	 && lep->MvaID() > 0.00)
+	(fabs(lep.Eta()) < 0.8
+	 && lep.MvaID() > 0.00)
 	||
-	(fabs(lep->Eta()) >  0.8 && fabs(lep->Eta()) < 1.479
-	 && lep->MvaID() > 0.10)
+	(fabs(lep.Eta()) >  0.8 && fabs(lep.Eta()) < 1.479
+	 && lep.MvaID() > 0.10)
 	||
-	(fabs(lep->Eta()) >  1.479 && fabs(lep->Eta()) < 2.5
-	 && lep->MvaID() > 0.62)
+	(fabs(lep.Eta()) >  1.479 && fabs(lep.Eta()) < 2.5
+	 && lep.MvaID() > 0.62)
 	)
        )
       ||
-      (lep->Pt()>20 &&
+      (lep.Pt()>20 &&
        (
-	(fabs(lep->Eta()) < 0.8
-	 && lep->MvaID() > 0.94)
+	(fabs(lep.Eta()) < 0.8
+	 && lep.MvaID() > 0.94)
 	||
-	(fabs(lep->Eta()) >  0.8 && fabs(lep->Eta()) < 1.479
-	 && lep->MvaID() > 0.85)
+	(fabs(lep.Eta()) >  0.8 && fabs(lep.Eta()) < 1.479
+	 && lep.MvaID() > 0.85)
 	||
-	(fabs(lep->Eta()) >  1.479 && fabs(lep->Eta()) < 2.5
-	 && lep->MvaID() > 0.92)
+	(fabs(lep.Eta()) >  1.479 && fabs(lep.Eta()) < 2.5
+	 && lep.MvaID() > 0.92)
 	)
        )
       )
@@ -320,7 +320,7 @@ bool ObjectID::PassElectronIdAndIsoMVA(TCElectron *lep)
 }
 
 
-bool ObjectID::PassElectronIdAndIso(TCElectron *lep, TVector3 *pv, TString n)
+bool ObjectID::PassElectronIdAndIso(const TCElectron& lep, TVector3 *pv, TString n)
 {
   elIdAndIsoCuts cuts;
   if (n=="Loose")
@@ -336,27 +336,27 @@ bool ObjectID::PassElectronIdAndIso(TCElectron *lep, TVector3 *pv, TString n)
 
   //Float_t eleISO = CalculateElectronIso(lep);
 
-  if(((fabs(lep->Eta()) < 1.442
-       && lep->PtError()/lep->Pt() < cuts.ptErrorOverPt[0]
-       && lep->SigmaIEtaIEta() < cuts.sigmaIetaIeta[0]
-       && fabs(lep->SCDeltaPhi()) < cuts.dPhiIn[0]
-       && fabs(lep->SCDeltaEta()) < cuts.dEtaIn[0]
-       && lep->HadOverEm() < cuts.HadOverEm[0]
-       && fabs(lep->Dxy(pv)) < cuts.dxy[0]
-       && fabs(lep->Dz(pv)) < cuts.dz[0]
+  if(((fabs(lep.Eta()) < 1.442
+       && lep.PtError()/lep.Pt() < cuts.ptErrorOverPt[0]
+       && lep.SigmaIEtaIEta() < cuts.sigmaIetaIeta[0]
+       && fabs(lep.SCDeltaPhi()) < cuts.dPhiIn[0]
+       && fabs(lep.SCDeltaEta()) < cuts.dEtaIn[0]
+       && lep.HadOverEm() < cuts.HadOverEm[0]
+       && fabs(lep.Dxy(pv)) < cuts.dxy[0]
+       && fabs(lep.Dz(pv)) < cuts.dz[0]
        //&& eleISO < cuts.pfIso04[0]
        )||
-      (fabs(lep->Eta()) > 1.556
-       && lep->PtError()/lep->Pt() < cuts.ptErrorOverPt[1]
-       && lep->SigmaIEtaIEta() < cuts.sigmaIetaIeta[1]
-       && fabs(lep->SCDeltaPhi()) < cuts.dPhiIn[1]
-       && fabs(lep->SCDeltaEta()) < cuts.dEtaIn[1]
-       && lep->HadOverEm() < cuts.HadOverEm[1]
-       && fabs(lep->Dxy(pv)) < cuts.dxy[1]
-       && fabs(lep->Dz(pv)) < cuts.dz[1]
+      (fabs(lep.Eta()) > 1.556
+       && lep.PtError()/lep.Pt() < cuts.ptErrorOverPt[1]
+       && lep.SigmaIEtaIEta() < cuts.sigmaIetaIeta[1]
+       && fabs(lep.SCDeltaPhi()) < cuts.dPhiIn[1]
+       && fabs(lep.SCDeltaEta()) < cuts.dEtaIn[1]
+       && lep.HadOverEm() < cuts.HadOverEm[1]
+       && fabs(lep.Dxy(pv)) < cuts.dxy[1]
+       && fabs(lep.Dz(pv)) < cuts.dz[1]
        //&& eleISO < cuts.pfIso04[1]
        ))
-     //&& lep->ConversionVeto()
+     //&& lep.ConversionVeto()
      ) pass = true;
 
   //pass = true;
@@ -405,9 +405,9 @@ void ObjectID::DiscoverGeneology(TCGenParticle *p)
 }
 
 
-void ObjectID::MuonDump(TCMuon mu, TVector3 *pv)
+void ObjectID::MuonDump(const TCMuon& mu, TVector3 *pv)
 {
-  Float_t muISO = CalculateMuonIso(&mu);
+  Float_t muISO = CalculateMuonIso(mu);
   //Float_t muISO = (mu.IsoMap("pfChargedHadronPt_R04") +
   //               TMath::Max(0.0, mu.IsoMap("pfNeutralHadronEt_R04") + mu.IsoMap("pfPhotonEt_R04") - 0.5*mu.IsoMap("pfPUPt_R04")))/mu.Pt();
 
@@ -422,13 +422,13 @@ void ObjectID::MuonDump(TCMuon mu, TVector3 *pv)
 	<< endl;
 }
 
-void ObjectID::PhotonDump(TCPhoton pho, phIdAndIsoCuts cuts)
+void ObjectID::PhotonDump(const TCPhoton& pho, phIdAndIsoCuts cuts)
 {
   //Float_t phoISO = 0;
   float chIsoCor,nhIsoCor,phIsoCor;
   float tmpEta = pho.SCEta();
 
-  CalculatePhotonIso(&pho, chIsoCor,nhIsoCor,phIsoCor);
+  CalculatePhotonIso(pho, chIsoCor,nhIsoCor,phIsoCor);
 
   cout  << _runNumber << " " << _eventNumber << " " << pho.Pt() << " " << pho.Eta() << " " << pho.SCEta() <<endl;
   cout<<"conv:"<<pho.ConversionVeto()<<"  hoem:"<< pho.HadOverEm() <<"  sieie:"<<pho.SigmaIEtaIEta()<<endl;

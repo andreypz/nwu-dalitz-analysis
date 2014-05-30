@@ -15,7 +15,7 @@ void HistMaker::SetLeptons(TCPhysObject l1, TCPhysObject l2){
 void HistMaker::SetGamma(TCPhysObject g){
   _gamma = g; _isGammaSet=1;}
 
-void HistMaker::MakeMuonPlots(TCMuon mu, TVector3 *pv)
+void HistMaker::MakeMuonPlots(const TCMuon& mu, TVector3 *pv)
 {
   hists->fill1DHist(mu.PixelLayersWithMeasurement(),"mu_PixelLayersWithMeasurement",";PixelLayersWithMeasurement",   15, 0,15, 1, "Muons");
   hists->fill1DHist(mu.TrackLayersWithMeasurement(),"mu_TrackLayersWithMeasurement",";TrackerLayersWithMeasurement", 30, 0,30, 1, "Muons");
@@ -38,7 +38,7 @@ void HistMaker::MakeMuonPlots(TCMuon mu, TVector3 *pv)
 
 }
 
-void HistMaker::MakePhotonPlots(TCPhoton ph)
+void HistMaker::MakePhotonPlots(const TCPhoton& ph)
 {
 
   hists->fill1DHist(ph.R9(),            "ph_R9",           ";R9",        100,    0, 1,    1,"Photon");
@@ -195,7 +195,7 @@ void HistMaker::FillHistosFull(Int_t num, Double_t weight, string dir)
 }
 
 
-void HistMaker::MakePhotonEnergyCorrPlots(TCPhoton pho, Float_t corrPhoEnReco, Float_t corrPhoEnSC)
+void HistMaker::MakePhotonEnergyCorrPlots(const TCPhoton& pho, Float_t corrPhoEnReco, Float_t corrPhoEnSC)
 {
   hists->fill1DHist(pho.M(), "ph_recoMass",";M_{#gamma}", 100,-0.05,0.05, 1,"Photon");
 
@@ -238,7 +238,7 @@ void HistMaker::MakePhotonEnergyCorrPlots(TCPhoton pho, Float_t corrPhoEnReco, F
   }
 }
 
-void HistMaker::MakeZeePlots(TCPhoton p1, TCPhoton p2)
+void HistMaker::MakeZeePlots(const TCPhoton& p1, const TCPhoton& p2)
 {
   hists->fill2DHist(p1.R9(), p2.R9(), "zee_p1R9_p2R9",";#gamma_{1} R9; #gamma_{2} R9", 100, 0,1, 100,0,1,  1, "Zee");
   Float_t mZ = (p1+p2).M();

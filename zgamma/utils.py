@@ -139,17 +139,21 @@ def createDir(myDir):
         raise
 
 
-def makeStack(bZip, histoName, leg, lumi):
+def makeStack(bZip, histDir, histoName, leg, lumi, howToScale, normToScale=None):
   hs = THStack("temp", "Stacked histo")
 
   #samplesToAdd = []
+  if histDir!="":
+    hName = histDir+"/"+histoName
+  else:
+    hName = histoName
 
   for n,f in bZip:
-    print n,f
+    #print n,f
 
-    h1 = f.Get(histoName)
+    h1 = f.Get(hName)
     if h1==None:
-      print 'None histogrammm:',histoName
+      print 'None histogrammm:',hName
       continue
     else:
       h = h1.Clone()
@@ -162,7 +166,17 @@ def makeStack(bZip, histoName, leg, lumi):
     scale = float(lumi*cro)/Nev
     print n, Nev, lumi, cro, scale
 
-    h.Scale(scale)
+    normh = h.Integral()
+    if howToScale == 'lumi':
+      h.Scale(scale)
+    elif howToScale == 'norm':
+      h.Scale(1./normh)
+    elif howToScale == 'norm1':
+      h.Scale(normToScale/normh)
+    else:
+      print 'Sorry, there must be a mistake, this norm is not supported: ',howToScale
+      sys.exit(0)
+
     h.SetLineColor( int(getColors(n)[0]))
     h.SetFillColor( int(getColors(n)[1]))
     hs.Add(h)
@@ -322,10 +336,7 @@ def drawAllInFile(f1, name1, bZip, f3, name3, myDir,path, N, howToScale="none", 
         #print ' if bZip!=None'
         #print bZip
 
-        if myDir!="":
-          histoName = myDir+"/"+histoName
-
-        stack = makeStack(bZip, histoName, leg, lumi)
+        stack = makeStack(bZip, myDir, histoName, leg, lumi, howToScale, norm1)
         stack.Draw('same hist')
         hmaxs.append(stack.GetMaximum())
 
@@ -348,7 +359,7 @@ def drawAllInFile(f1, name1, bZip, f3, name3, myDir,path, N, howToScale="none", 
         norm3 = h3.Integral()
         if howToScale=="norm" and  norm3!=0:
           h3.Scale(1./norm3)
-        elif howToScale=="norm2" and  norm3!=0:
+        elif howToScale=="norm1" and  norm3!=0:
           h3.Scale(norm1/norm3)
         hmaxs.append(h3.GetMaximum())
 
@@ -388,9 +399,9 @@ def drawAllInFile(f1, name1, bZip, f3, name3, myDir,path, N, howToScale="none", 
         if len(hmaxs)>0:
           m = max(hmaxs)
           h1.SetMaximum(1.1*m)
-        if howToScale ==" norm":
+        if howToScale == "norm":
           h1.GetYaxis().SetTitle("arbitrary units")
-        if howToScale == "norm2":
+        if howToScale == "norm1":
           h1.GetYaxis().SetTitle("Events")
           h1.SetMaximum(int(1.1*m)+5)
 

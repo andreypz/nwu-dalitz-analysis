@@ -64,21 +64,21 @@ class ObjectID {
   ObjectID();
   virtual ~ObjectID();
 
-  virtual void CalculatePhotonIso(TCPhoton *ph, float& chIsoCor, float& nhIsoCor, float& phIsoCor);
-  virtual bool PassPhotonIdAndIso(TCPhoton *ph, TString n);
+  virtual void CalculatePhotonIso(const TCPhoton& ph, float& chIsoCor, float& nhIsoCor, float& phIsoCor);
+  virtual bool PassPhotonIdAndIso(const TCPhoton& ph, TString n);
   virtual void SetEventInfo(Bool_t, UInt_t, ULong64_t, Float_t );
-  virtual void PhotonR9Corrector(TCPhoton *ph);
+  //virtual void PhotonR9Corrector(const TCPhoton& ph);
 
-  virtual float CalculateMuonIso(TCMuon *l);
-  virtual float CalculateElectronIso(TCElectron *l);
-  virtual bool PassMuonIdAndIso(TCMuon *l, TVector3 *pv, TString n);
-  virtual bool PassElectronIdAndIso(TCElectron *l, TVector3 *pv, TString n);
-  virtual bool PassElectronIdAndIsoMVA(TCElectron *l);
+  virtual float CalculateMuonIso(const TCMuon& l);
+  virtual float CalculateElectronIso(const TCElectron& l);
+  virtual bool PassMuonIdAndIso(const TCMuon& l, TVector3 *pv, TString n);
+  virtual bool PassElectronIdAndIso(const TCElectron& l, TVector3 *pv, TString n);
+  virtual bool PassElectronIdAndIsoMVA(const TCElectron& l);
 
    TCGenParticle * GetPrimaryAncestor(TCGenParticle *p);
    virtual void DiscoverGeneology(TCGenParticle *p);
-   virtual void MuonDump(TCMuon mu, TVector3 *pv);
-   virtual void PhotonDump(TCPhoton pho,  phIdAndIsoCuts c);
+   virtual void MuonDump(const TCMuon& mu, TVector3 *pv);
+   virtual void PhotonDump(const TCPhoton& pho,  phIdAndIsoCuts c);
 
  private:
    Bool_t    _isRealData;
