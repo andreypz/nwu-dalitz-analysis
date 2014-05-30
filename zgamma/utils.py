@@ -166,9 +166,14 @@ def makeStack(bZip, histDir, histoName, leg, lumi, howToScale, normToScale=None)
     scale = float(lumi*cro)/Nev
     print n, Nev, lumi, cro, scale
 
+    h.SetLineColor( int(getColors(n)[0]))
+    h.SetLineWidth(2)
+
     normh = h.Integral()
     if howToScale == 'lumi':
       h.Scale(scale)
+      # only fill the colors if we are going to stack them (scale to lumi)
+      h.SetFillColor( int(getColors(n)[1]))
     elif howToScale == 'norm':
       h.Scale(1./normh)
     elif howToScale == 'norm1':
@@ -177,8 +182,6 @@ def makeStack(bZip, histDir, histoName, leg, lumi, howToScale, normToScale=None)
       print 'Sorry, there must be a mistake, this norm is not supported: ',howToScale
       sys.exit(0)
 
-    h.SetLineColor( int(getColors(n)[0]))
-    h.SetFillColor( int(getColors(n)[1]))
     hs.Add(h)
     leg.AddEntry(h, conf.get(n,"shortName") ,"f")
 
@@ -337,7 +340,10 @@ def drawAllInFile(f1, name1, bZip, f3, name3, myDir,path, N, howToScale="none", 
         #print bZip
 
         stack = makeStack(bZip, myDir, histoName, leg, lumi, howToScale, norm1)
-        stack.Draw('same hist')
+        if howToScale=='lumi':
+          stack.Draw('same hist')
+        else:
+          stack.Draw('same nostack hist')
         hmaxs.append(stack.GetMaximum())
 
       if f3!=None and h3!=None:
@@ -348,7 +354,7 @@ def drawAllInFile(f1, name1, bZip, f3, name3, myDir,path, N, howToScale="none", 
         h3.SetLineColor(kRed-9)
         h3.SetLineColor(kBlue+2)
         # h3.SetFillColor(kYellow-9)
-        h1.Draw("same hist")
+        #h1.Draw("same hist")
         # h1.Draw("same e1p")
         h1.SetMarkerStyle(20)
         h1.SetMarkerSize(0.75)
@@ -388,9 +394,12 @@ def drawAllInFile(f1, name1, bZip, f3, name3, myDir,path, N, howToScale="none", 
           pad1.cd();
 
         h1.Draw("same hist")
-        h1.Draw("same e1p")
+        if howToScale=='lumi': h1.Draw("same e1p")
+        #proc = 'H#rightarrow#gamma*#gamma#rightarrow#mu#mu#gamma'
+        proc = 'Z#rightarrow J/#Psi#gamma#rightarrow#mu#mu#gamma'
+        #proc = 'H#rightarrow#J/#Psi#gamma#rightarrow#mu#mu#gamma'
         # prelim = TLatex(0.15,0.95, "CMS Simulation          H#rightarrow#gamma*#gamma#rightarrow#mu#mu#gamma")
-        prelim = TLatex(0.15,0.95, "CMS Preliminary #sqrt{s} = 8TeV, L = 19.7 fb^{-1}   H#rightarrow#gamma*#gamma#rightarrow#mu#mu#gamma")
+        prelim = TLatex(0.15,0.95, "CMS Preliminary #sqrt{s} = 8TeV, L = 19.7 fb^{-1}   "+proc)
         prelim.SetNDC();
         prelim.SetTextSize(0.035);
         prelim.Draw();

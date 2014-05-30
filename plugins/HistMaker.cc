@@ -110,9 +110,9 @@ void HistMaker::FillHistosFull(Int_t num, Double_t weight, string dir)
   hists->fill2DHist(tri.M(), diLep.M(), Form("h2D_tri_vs_diLep_mass3_%s_cut%i",  d, num),
 		    ";m_{ll#gamma} (GeV);m_{ll} (GeV)", nBins1,0,200, nBins1, 8,20,  weight, dir);
 
-  hists->fill1DHist(TMath::Log(diLep.M()),   Form("diLep_mass_log1_%s_cut%i",  d, num),";log(m_{ll})", 100,   0,7, weight, dir);
-  hists->fill1DHist(TMath::Log(diLep.M()),   Form("diLep_mass_log2_%s_cut%i",  d, num),";log(m_{ll})", 100,   0,3, weight, dir);
-  hists->fill1DHist(TMath::Log(diLep.M()),   Form("diLep_mass_log2_%s_cut%i",  d, num),";log(m_{ll})", 100, 0,1.3, weight, dir);
+  hists->fill1DHist(TMath::Log10(diLep.M()),   Form("diLep_mass_log1_%s_cut%i",  d, num),";log(m_{ll})", 100,   -1,7, weight, dir);
+  hists->fill1DHist(TMath::Log10(diLep.M()),   Form("diLep_mass_log2_%s_cut%i",  d, num),";log(m_{ll})", 100,   -1,3, weight, dir);
+  hists->fill1DHist(TMath::Log10(diLep.M()),   Form("diLep_mass_log3_%s_cut%i",  d, num),";log(m_{ll})", 100, -1,1.3, weight, dir);
 
   hists->fill1DHist(diLep.M(),   Form("diLep_mass_low1_%s_cut%i",  d, num),";m_{ll} (GeV)", 50, 0,1.5,  weight, dir);
   hists->fill1DHist(diLep.M(),   Form("diLep_mass_low2_%s_cut%i",  d, num),";m_{ll} (GeV)", 100, 1.5,8,  weight, dir);
@@ -131,7 +131,7 @@ void HistMaker::FillHistosFull(Int_t num, Double_t weight, string dir)
 		    ";di-Lepton p_{T}/M_{ll#gamma}",100, 0,1, weight, dir);
   hists->fill1DHist(_gamma.Pt()/tri.M(), Form("gamma_ptOverMllg_%s_cut%i",   d, num),
 		    ";Photon p_{T}/M_{ll#gamma}",  100, 0,1, weight, dir);
-  hists->fill1DHist(gammaCM.E(),Form("gamma_Ecom_%s_cut%i", d, num),";E_{#gamma} in CoM",  50, 0,120,  weight, dir);
+  hists->fill1DHist(gammaCM.E(), Form("gamma_Ecom_%s_cut%i", d, num),";E_{#gamma} in CoM",  50, 0,120,  weight, dir);
   hists->fill1DHist(_gamma.E(),  Form("gamma_E_%s_cut%i",    d, num),";Photon Energy", 50, 0,200, weight, dir);
   hists->fill1DHist(_gamma.Pt(), Form("gamma_pt_%s_cut%i",   d, num),";Photon p_{T} (GeV)",  50, 0,120, weight, dir);
   hists->fill1DHist(_gamma.Eta(),Form("gamma_eta_%s_cut%i",  d, num),";Photon eta", 50, -3.5,3.5, weight, dir);
@@ -172,9 +172,9 @@ void HistMaker::FillHistosFull(Int_t num, Double_t weight, string dir)
   if (_isLepSet && _isGammaSet){
     double co1,co2,phi,co3;
     if (_lPt1.Charge()==1 && _lPt2.Charge()==-1)
-      angles->GetAngles(_lPt1,_lPt2,_gamma,co1,co2,phi,co3);
+      angles->GetAngles(_lPt1, _lPt2, _gamma,co1,co2,phi,co3);
     else if (_lPt1.Charge()==-1 && _lPt2.Charge()==1)
-      angles->GetAngles(_lPt2,_lPt1,_gamma,co1,co2,phi,co3);
+      angles->GetAngles(_lPt2, _lPt1, _gamma,co1,co2,phi,co3);
     else
       cout<<"Something is wrong: leptons have the same charge!"<<endl;
 

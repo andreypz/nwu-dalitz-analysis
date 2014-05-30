@@ -243,7 +243,7 @@ Bool_t jpsiGamma::Process(Long64_t entry)
 
       //Z propagator mass:
       if (thisParticle->GetPDGId()==23){
-	hists->fill1DHist(thisParticle->M(), "gen_z_mass",";gen Z mass (GeV)",  200, 124,126, 1,"GEN");
+	hists->fill1DHist(thisParticle->M(), "gen_z_mass",";gen Z mass (GeV)",  200, 0,200, 1,"GEN");
       }
 
       //GEN MUONS
@@ -676,10 +676,10 @@ Bool_t jpsiGamma::Process(Long64_t entry)
   }
 
 
-  if (checkTrigger){
-    triggerSelector->SelectTrigger(myTrigger, triggerStatus, hltPrescale, isFound, triggerPass, prescale);
-    if (!triggerPass) return kTRUE;
-  }
+  //if (checkTrigger){
+  //triggerSelector->SelectTrigger(myTrigger, triggerStatus, hltPrescale, isFound, triggerPass, prescale);
+  //if (!triggerPass) return kTRUE;
+  //}
 
   if (gamma.Pt() < cut_gammapt) return kTRUE;
   //if (fabs(gamma.Eta()) > 1.444) return kTRUE;

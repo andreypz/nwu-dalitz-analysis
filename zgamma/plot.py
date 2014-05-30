@@ -30,6 +30,10 @@ parser.add_option("-s", '--sel', dest="sel", type="string", default='mugamma',
 mass = options.mass
 sel = options.sel
 
+comments = ["These plots are made for z -> J/Psi gamma analysis",
+            "MuEG dataset used"]
+
+
 if __name__ == "__main__":
   timer = TStopwatch()
   timer.Start()
@@ -87,14 +91,14 @@ if __name__ == "__main__":
                 +hPath+"/"+sel+"_"+period+"/hhhh_ZGToLLG_*.root ")
 
   if doBkg:
-    #bkgFiles.append(TFile(hPath+"/m_ZG_"+sel+"_"+period+".root","OPEN"))
-    #bkgNames.append('ZG')
+    bkgFiles.append(TFile(hPath+"/m_ZG_"+sel+"_"+period+".root","OPEN"))
+    bkgNames.append('ZG')
     #bkgFiles.append(TFile(hPath+"/m_DYJets50_"+sel+"_"+period+".root","OPEN"))
     #bkgNames.append('DYJets50')
     bkgFiles.append(TFile(hPath+"/"+sel+"_"+period+"/hhhh_ZGDalitz_1.root","OPEN"))
     bkgNames.append('ZGDalitz')
-    #bkgFiles.append(TFile(hPath+"/"+sel+"_"+period+"/hhhh_DYJetsDalitz_1.root","OPEN"))
-    #bkgNames.append('DYJetsDalitz')
+    bkgFiles.append(TFile(hPath+"/"+sel+"_"+period+"/hhhh_DYJetsDalitz_1.root","OPEN"))
+    bkgNames.append('DYJetsDalitz')
 
     #yields_bkg  = u.getYields(bkgFiles,"DY",True)
 
@@ -360,7 +364,7 @@ if __name__ == "__main__":
             h2da_rot.SetBinContent(a,b, fda)
             h2si_rot.SetBinContent(a,b,fda)
     '''
-  if options.zjp:
+  if options.zjp and cut==4:
     data = TFile(hPath+"/m_Data_"+sel+"_2012.root","OPEN")
 
     ZJPG(data, c1, TCut('pt3/m123>0.3 && pt12/m123>0.3 && m123>110 && m123<170 && dr13>1 && dr23>1'),
@@ -370,6 +374,12 @@ if __name__ == "__main__":
     ZJPG(data, c1, TCut('m12<30'), pathBase+"/ZtoJPsiGamma-2-Mll30/")
 
     ZJPG(data, c1, TCut('pt3/m123>0.3 && pt12/m123>0.3 && m12<30 && dr1234>1'), pathBase+"/ZtoJPsiGamma-3-ptmllg03/")
+
+    comments.append('ZtoJPsiGamma-0 is Dalitz-like selection (as in HIG-14-003 analysis)')
+    comments.append('ZtoJPsiGamma-1 are full events (even without Mll cut)')
+    comments.append('ZtoJPsiGamma-2 is with Mll<30 GeV cut')
+    comments.append('ZtoJPsiGamma-3: pt3/m123>0.3 && pt12/m123>0.3 && m12<30 && dr1234>1 ')
+
 
   plot_types =[]
   list = os.listdir(pathBase)
@@ -396,9 +406,6 @@ if __name__ == "__main__":
   os.system("cat yields_all.html   > yields.html")
   #os.system("cat yields_all.twiki  > yields.html")
   #os.system("cat yields_all.tex    > yields.html")
-
-  comments = ["These plots are made for ...",
-              "Blah"]
 
   defaultPage = sel
   if cut in ['12']: defaultPage = 'jpsi'

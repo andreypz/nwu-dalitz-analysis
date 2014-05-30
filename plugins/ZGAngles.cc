@@ -9,7 +9,7 @@ ZGAngles::ZGAngles():
 {}
 ZGAngles::~ZGAngles(){}
 
-void ZGAngles::SetAngles(TLorentzVector lplus, TLorentzVector lminus, TLorentzVector gamma)
+void ZGAngles::SetAngles(const TLorentzVector& lplus, const TLorentzVector& lminus, const TLorentzVector& gamma)
 {
   //Set the angles (they are private variables of the class)
 
@@ -128,7 +128,8 @@ void ZGAngles::GetAngles(double& costheta_lplus, double& costheta_lminus, double
 }
 
 
-void ZGAngles::GetAngles(TLorentzVector lplus, TLorentzVector lminus, TLorentzVector g, double& costheta_lplus, double& costheta_lminus, double& phi, double& cosTheta)
+void ZGAngles::GetAngles(const TLorentzVector& lplus, const TLorentzVector& lminus, const TLorentzVector& g,
+			 double& costheta_lplus, double& costheta_lminus, double& phi, double& cosTheta)
 {
   SetAngles(lminus, lplus, g);
 

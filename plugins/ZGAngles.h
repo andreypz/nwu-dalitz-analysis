@@ -13,9 +13,9 @@ class ZGAngles {
  public:
   ZGAngles();
   virtual ~ZGAngles();
-  void SetAngles(TLorentzVector l1, TLorentzVector l2, TLorentzVector g);
+  void SetAngles(const TLorentzVector& l1, const TLorentzVector& l2, const TLorentzVector& g);
   void GetAngles(double& cos1, double& cos2, double& phi, double& cos3);
-  void GetAngles(TLorentzVector l1, TLorentzVector l2, TLorentzVector g, double& cos1, double& cos2, double& phi, double& cos3);
+  void GetAngles(const TLorentzVector& l1, const TLorentzVector& l2, const TLorentzVector& g, double& cos1, double& cos2, double& phi, double& cos3);
   double GetCos1();
   double GetCos2();
   double GetCosTheta();
