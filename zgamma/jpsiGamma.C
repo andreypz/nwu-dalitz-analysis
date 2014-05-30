@@ -328,7 +328,7 @@ Bool_t jpsiGamma::Process(Long64_t entry)
 	      hists->fill1DHist((preFSR_pt - fsr->Pt())/preFSR_pt, "gen_fsr_mu_dPt",";gen mu (Pt_preFSR - Pt_afterFSR)/pt",  200, -1,1, 1,"GEN");
 
 	      if(thisParticle->Pt() > 1)
-		hists->fill1DHist((preFSR_pt - fsr->Pt())/preFSR_pt, "gen_fsr_mu_dPt_photonPt1",";gen mu (Pt_preFSR - Pt_afterFSR)/pt",  200, -1,1, 1,"GEN");
+		hists->fill1DHist((preFSR_pt - fsr->Pt())/preFSR_pt, "gen_fsr_mu_dPt_photonPt1GeV",";gen mu (Pt_preFSR - Pt_afterFSR)/pt",  200, -1,1, 1,"GEN");
 	      fsr_mu_count++;
 	    }
 	  }
@@ -400,10 +400,10 @@ Bool_t jpsiGamma::Process(Long64_t entry)
 	  ang->GetAngles(gen_l1, gen_l2, gen_gamma, co1,co2,phi,co3);
 	  //cout<<eventNumber<<" gen Angles: c1= "<<co1<<"  c2="<<co2<<"   phi="<<phi<<"   coTh="<<co3<<endl;
 
-	  hists->fill1DHist(co1, "gen_co1",";gen cos_lp",  100,-1,1, 1,"");
-	  hists->fill1DHist(co2, "gen_co2",";gen cos_lm",  100,-1,1, 1,"");
-	  hists->fill1DHist(co3, "gen_co3",";gen cosTheta",100,-1,1, 1,"");
-	  hists->fill1DHist(phi, "gen_phi",";gen phi lp",  100, -TMath::Pi(), TMath::Pi(), 1,"");
+	  hists->fill1DHist(co1, "gen_co1",";gen cos_lp",  100,-1,1, 1,"GEN");
+	  hists->fill1DHist(co2, "gen_co2",";gen cos_lm",  100,-1,1, 1,"GEN");
+	  hists->fill1DHist(co3, "gen_co3",";gen cosTheta",100,-1,1, 1,"GEN");
+	  hists->fill1DHist(phi, "gen_phi",";gen phi lp",  100, -TMath::Pi(), TMath::Pi(), 1,"GEN");
 	}
 
       FillHistoCounts(1, eventWeight);
@@ -411,6 +411,8 @@ Bool_t jpsiGamma::Process(Long64_t entry)
 
       gendR  = gen_l1.DeltaR(gen_l2);
       genMll = (gen_l1+gen_l2).M();
+
+      hists->fill1DHist(genMll,"gen_Mll",";gen m_{ll} (GeV)",100,0,mllMax, 1,"GEN");
 
       hists->fill1DHist(genMll,"gen_Mll_0",";gen_Mll",100,0,mllMax, 1,"eff");
       hists->fill1DHist(gendR, "gen_dR_0", ";gen_dR", 50,0,0.3,1,"eff");
@@ -427,7 +429,7 @@ Bool_t jpsiGamma::Process(Long64_t entry)
 	   gen_lPt2.Pt()>cut_l2pt_low && fabs(gen_lPt2.Eta())<2.4
 	   ){
 	  hists->fill1DHist(genMll,  "gen_Mll_acc_lept",  ";gen_Mll",100,0,mllMax, 1,"eff");
-	  hists->fill1DHist(gendR,   "gen_dR_acc_lept",   ";gen_dR", 50,0,0.3,1,"eff");
+	  hists->fill1DHist(gendR,   "gen_dR_acc_lept",   ";gen_dR", 50,0,0.3,     1,"eff");
 
 	}
 	else if (sample=="dalitz")
