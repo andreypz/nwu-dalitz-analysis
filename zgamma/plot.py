@@ -91,8 +91,8 @@ if __name__ == "__main__":
     #bkgNames.append('ZG')
     bkgFiles.append(TFile(hPath+"/m_DYJets50_"+sel+"_"+period+".root","OPEN"))
     bkgNames.append('DYJets50')
-    bkgFiles.append(TFile(hPath+"/"+sel+"_"+period+"/hhhh_DYgammaDalitz_1.root","OPEN"))
-    bkgNames.append('DYgammaDalitz')
+    bkgFiles.append(TFile(hPath+"/"+sel+"_"+period+"/hhhh_ZGDalitz_1.root","OPEN"))
+    bkgNames.append('ZGDalitz')
     #bkgFiles.append(TFile(hPath+"/"+sel+"_"+period+"/hhhh_DYJetsDalitz_1.root","OPEN"))
     #bkgNames.append('DYJetsDalitz')
 

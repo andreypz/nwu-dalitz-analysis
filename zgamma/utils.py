@@ -145,7 +145,7 @@ def makeStack(bZip, histoName, leg, lumi):
   #samplesToAdd = []
 
   for n,f in bZip:
-    print f,n
+    print n,f
 
     h1 = f.Get(histoName)
     if h1==None:
@@ -193,7 +193,7 @@ def drawAllInFile(f1, name1, bZip, f3, name3, myDir,path, N, howToScale="none", 
 
   if f3!=None and howToScale=="lumi": # only assume signal MC for now
     Nev = f3.Get("Counts/evt_byCut_raw").GetBinContent(1)
-    print ' Fix ME FIX ME'
+    print '\n\n Fix ME FIX ME  \n\n'
     cro = getCS("ZtoJPsiGamma") #
     print 'need more generic way to get cs by sample'
     # cro = getCS("ggH-125")
@@ -319,12 +319,11 @@ def drawAllInFile(f1, name1, bZip, f3, name3, myDir,path, N, howToScale="none", 
         h1.Scale(1./norm1)
       hmaxs.append(h1.GetMaximum())
       if len(bZip)!=0:
-        print ' if bZip!=None!'
-        print bZip
+        #print ' if bZip!=None'
+        #print bZip
 
         if myDir!="":
           histoName = myDir+"/"+histoName
-
 
         stack = makeStack(bZip, histoName, leg, lumi)
         stack.Draw('same hist')
