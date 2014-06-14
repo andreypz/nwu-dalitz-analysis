@@ -44,7 +44,7 @@ ls -l
 
 chmod 755 run.py
 
-./run.py --clean
+#./run.py --clean
 
 echo ${selection} ${trigger}
 

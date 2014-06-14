@@ -47,7 +47,7 @@
 #include "../interface/TCGenParticle.h"
 #include "../interface/TCGenJet.h"
 #include "../interface/TCPrimaryVtx.h"
-#include "../interface/TCTriggerObject.h"
+//#include "../interface/TCTriggerObject.h"
 
 #include "../plugins/WeightUtils.h"
 #include "../plugins/TriggerSelector.h"
@@ -126,7 +126,7 @@ class zgamma : public TSelector {
    TClonesArray    *recoMuons;
    TClonesArray    *recoPhotons;
    TCMET           *recoMET;
-   TClonesArray    *triggerObjects;
+   //TClonesArray    *triggerObjects;
    TClonesArray    *genJets;
    TClonesArray    *genParticles;
    TClonesArray    *primaryVtx;
@@ -166,7 +166,7 @@ class zgamma : public TSelector {
    TBranch        *b_recoMuons;   //!
    TBranch        *b_recoPhotons;   //!
    TBranch        *b_recoMET;   //!
-   TBranch        *b_triggerObjects;   //!
+   //   TBranch        *b_triggerObjects;   //!
    TBranch        *b_genJets;   //!
    TBranch        *b_genParticles;   //!
    TBranch        *b_primaryVtx;   //!
@@ -230,7 +230,7 @@ void zgamma::Init(TTree *tree)
    recoMuons = 0;
    recoPhotons = 0;
    recoMET = 0;
-   triggerObjects = 0;
+   //triggerObjects = 0;
    genJets = 0;
    genParticles = 0;
    primaryVtx = 0;
@@ -248,7 +248,7 @@ void zgamma::Init(TTree *tree)
    fChain->SetBranchAddress("recoMuons", &recoMuons, &b_recoMuons);
    fChain->SetBranchAddress("recoPhotons", &recoPhotons, &b_recoPhotons);
    fChain->SetBranchAddress("recoMET", &recoMET, &b_recoMET);
-   fChain->SetBranchAddress("triggerObjects", &triggerObjects, &b_triggerObjects);
+   //fChain->SetBranchAddress("triggerObjects", &triggerObjects, &b_triggerObjects);
    fChain->SetBranchAddress("genJets", &genJets, &b_genJets);
    fChain->SetBranchAddress("genParticles", &genParticles, &b_genParticles);
    fChain->SetBranchAddress("primaryVtx", &primaryVtx, &b_primaryVtx);

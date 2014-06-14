@@ -5,21 +5,22 @@
 TCPhysObject::TCPhysObject():
   _vtx(-9,-9,-9),
   _charge(0),
-  _isPF(false)
+  _isPF(false),
+  _isTriggered(false)
 {
 }
 
 TCPhysObject::TCPhysObject(TLorentzVector p4, int charge):
   _vtx(-9,-9,-9),
   _charge(charge),
-  _isPF(false)
+  _isPF(false),
+  _isTriggered(false)
 {
     this->SetP4(p4);
 }
 
 
-TCPhysObject::~TCPhysObject() {
-}
+TCPhysObject::~TCPhysObject() {}
 
 // "get" methods -------------------------------------
 
@@ -39,19 +40,6 @@ float TCPhysObject::IdMap(string key) const {
     return _IdMap.find(key)->second; 
 }
 
-float TCPhysObject::IsoMap(string key) const { 
-    
-    //Check that key is present in the iso map
-    try {
-        string exception = "Can't find " + key + " in isolation map"; 
-        if (_IsoMap.count(key) == 0)
-            throw exception;
-    } catch (string ex) {
-        cout << ex << endl;
-    }
-
-    return _IsoMap.find(key)->second; 
-}
 
 TVector2 TCPhysObject::P2() const {
     TVector2 v2(this->Px(), this->Py());
@@ -61,12 +49,12 @@ TVector2 TCPhysObject::P2() const {
 TVector3 TCPhysObject::Vtx()  const { return _vtx; }
 int  TCPhysObject::Charge() const   { return _charge; }
 bool TCPhysObject::IsPF()   const   { return _isPF; }
+bool TCPhysObject::IsTriggered() const {return _isTriggered;}
 
 // "set" methods ---------------------------------------------
 
 void TCPhysObject::SetP4(TLorentzVector p4) { this->SetPxPyPzE(p4.Px(), p4.Py(), p4.Pz(), p4.E()); } 
 void TCPhysObject::SetIdMap(string s, float v){ _IdMap[s] = v; }
-void TCPhysObject::SetIsoMap(string s, float v){ _IsoMap[s] = v; }
 
 void TCPhysObject::SetVtx(float vx, float vy, float vz) {
     TVector3 v3(vx, vy, vz);
@@ -75,6 +63,7 @@ void TCPhysObject::SetVtx(float vx, float vy, float vz) {
 
 void TCPhysObject::SetCharge(int c) { _charge = c; }
 void TCPhysObject::SetPF(bool p)    { _isPF = p;}
+void TCPhysObject::SetTriggered(bool t)    { _isTriggered = t;}
 
 // generally useful methods -----------------------------------
 
@@ -97,3 +86,9 @@ float TCPhysObject::Dz(TVector3 *primVtx) const {
     float ret =  (vz-pvz)-((vx-pvx)*px +(vy-pvy)*py)/pt*(pz/pt);
     return ret;
 }
+
+ostream& TCPhysObject::TCprint(ostream& os) const {
+ return os << "pt: "<< this->Pt() << " eta: " << this->Eta() << " phi: "<< this->Phi() <<" e: " << this->E() << " charge: "<<this->Charge();
+}
+
+

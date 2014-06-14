@@ -1,6 +1,12 @@
 The log of changes:
 ==================
 
+2014-Jun-14
+  * Intruduced HistMaker and ObjID plugins 
+  * Split multiple analyzers: zgamma, jpsiGamma etc., using same modules for Id and hist making 
+  * LHE analyzer updated to plot three things
+  * Improved plotting scripts to make stacks and more
+
 2014-Feb-08
   * Complete bias study scripts and improves fits-and-limits
   * BatchMaster is modified in order to run bias studies
