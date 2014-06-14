@@ -43,8 +43,13 @@ def getCS(sample, mySel=None):
   return cs
 
 def getColors(sample):
-  l = conf.get(sample, "line")
-  f = conf.get(sample, "fill")
+  l = 45
+  f = 0
+  if conf.has_option(sample,'line'):
+    l = conf.get(sample, "line")
+  if conf.has_option(sample,'fill'):
+    f = conf.get(sample, "fill")
+
   return [l,f]
 
 def getTotalEvents(f):
@@ -161,29 +166,35 @@ def makeStack(bZip, histDir, histoName, leg, lumi, howToScale, normToScale=None)
     # if doOverflow:
     # handleOverflowBins(h)
 
-    Nev = getTotalEvents(f)
-    cro = getCS(n)
-    scale = float(lumi*cro)/Nev
-    print n, Nev, lumi, cro, scale
+    scale = 1
 
     h.SetLineColor( int(getColors(n)[0]))
     h.SetLineWidth(2)
 
     normh = h.Integral()
+    #print 'norm =', normh, n
     if howToScale == 'lumi':
+      Nev = getTotalEvents(f)
+      cro = getCS(n)
+      scale = float(lumi*cro)/Nev
+      print n, Nev, lumi, cro, scale
+
       h.Scale(scale)
       # only fill the colors if we are going to stack them (scale to lumi)
       h.SetFillColor( int(getColors(n)[1]))
     elif howToScale == 'norm':
-      h.Scale(1./normh)
+      if normh!=0: h.Scale(1./normh)
     elif howToScale == 'norm1':
-      h.Scale(normToScale/normh)
+      if normh!=0: h.Scale(normToScale/normh)
     else:
       print 'Sorry, there must be a mistake, this norm is not supported: ',howToScale
       sys.exit(0)
 
     hs.Add(h)
-    leg.AddEntry(h, conf.get(n,"shortName") ,"f")
+    if conf.has_option(n,"shortName"):
+      leg.AddEntry(h, conf.get(n,"shortName") ,"f")
+    else:
+      leg.AddEntry(h, n, "l")
 
     #hm.Print('all')
 
@@ -323,7 +334,10 @@ def drawAllInFile(f1, name1, bZip, f3, name3, myDir,path, N, howToScale="none", 
 
 
         if "phi" in histoName:
-          h1.SetMinimum(0)
+          if isLog:
+            h1.SetMinimum(1e-6)
+          else:
+            h1.SetMinimum(0)
         if "ll_deltaR_" in histoName:
           # h1.SetAxisRange(0,1,"X")
           h1.SetXTitle("#DeltaR(#mu_{1}, #mu_{2})")
@@ -436,6 +450,8 @@ def drawAllInFile(f1, name1, bZip, f3, name3, myDir,path, N, howToScale="none", 
         if len(hmaxs)>0:
           m = max(hmaxs)
           mainHist.SetMaximum(1.1*m)
+          if isLog:
+            mainHist.SetMaximum(10*m)
         if howToScale == "norm":
           mainHist.GetYaxis().SetTitle("arbitrary units")
         if howToScale == "norm1":
@@ -449,8 +465,8 @@ def drawAllInFile(f1, name1, bZip, f3, name3, myDir,path, N, howToScale="none", 
         if "diLep_mass_low"==histoName: # this is for LHE analyzer plots
           int1 = h1.Integral(100,200)
           int3 = h3.Integral(100,200)
-          h1.Scale(100./int1)
-          h3.Scale(100./int3)
+          h1.Scale(50./int1)
+          h3.Scale(50./int3)
 
           mainHist.SetTitle(";m_{ll} (GeV);arbitrary units")
           mainHist.SetMaximum(1.2*h1.GetMaximum())
@@ -517,8 +533,6 @@ def drawAllInFile(f1, name1, bZip, f3, name3, myDir,path, N, howToScale="none", 
       leg.Draw()
 
       c1.SetLogy(int(isLog))
-        #if "diLep_mass_low":
-        #    h1.
       #print 'Saving PNG:', histoName
       c1.SaveAs(path+"/"+histoName+'.png')
       if doPdf:

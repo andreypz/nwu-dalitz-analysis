@@ -19,15 +19,17 @@ files={}
 #files["one"] = ['/uscms_data/d2/andreypz/lhe_vh_mumugamma/hmumug_m125.root']
 #files["two"] = ['/uscms_data/d2/andreypz/lhe_higgs_mumugamma_dalitz/hmumug_m120.root']
 #files["one"] = ['/uscms_data/d2/andreypz/lhe_higgs_eegamma_dalitz/heeg_m120.root']
-files["two"] = ['~/hmumug_m120.root']
-files["one"] = ['~/heeg_m120.root']
+#files["one"] = ['~/LHE_files/dygamma_dalitz_muonmass_run02.root']
+files["one"] = ['~/LHE_files/dygamma_dalitz_muonmass_dRll_dRlg_run05.root']
+files["two"] = ['~/LHE_files/luisa/dygamma.lhe.root']
+files["three"] = ['~/LHE_files/hmumug_m120.root']
 
 #files["one"] = ['/tthome/andrey/LHE_dalitz_Luisa/dygamma.lhe.root']
 #files["two"] = ['/tthome/andrey/LHE_dalitz_Luisa/dyjet.lhe.root']
 
-MH = 120
+MH = 0
 LEPID1 = 13
-LEPID2 = 11
+LEPID2 = 13
 
 print files
 #gSystem.Load("/home/andreypz/workspace/MadGraph5/ExRootAnalysis/lib/libExRootAnalysis.so")
@@ -45,7 +47,7 @@ twoFile.cd()
 h2 = HistManager(twoFile)
 
 testFile = TFile(outpath+"out_test_"+subdir+".root","RECREATE")
-testFile.mkdir("eff")
+#testFile.mkdir("eff")
 testFile.cd()
 h3 = HistManager(testFile)
 
@@ -157,7 +159,7 @@ def FillAllHists(files, h):
     if hasZ:
       zcount +=1
 
-# f not hasGamma: continue
+  # f not hasGamma: continue
 
     dcount += 1
     #if dcount > 1000: break
@@ -247,12 +249,14 @@ def FillAllHists(files, h):
         #h.fill1DHist(l2.Eta(),   "l2_eta", ";l- eta",   50, -3.5,3.5, 1, "")
         #h.fill1DHist(l2.Phi(),   "l2_phi", ";l- phi",   50, -TMath.Pi(),TMath.Pi(), 1, "")
 
-    h.fill1DHist(diLep.M(),   "diLep_mass",     ";M(ll), GeV", 200, 0,60,  1, "")
-    h.fill1DHist(diLep.M(),   "diLep_mass_full",";M(ll), GeV", 200, 0,130, 1, "")
-    h.fill1DHist(diLep.M(),   "diLep_mass_low", ";M(ll), GeV", 200, 0,1,   1, "")
-    h.fill1DHist(tri.M(),     "h_mass",";M(ll#gamma), GeV",    200, 80,180,1, "")
-    h.fill1DHist(tri.M(),     "h_mass_zoom",";M(ll#gamma), GeV",  200, MH-1,MH+1,  1, "")
-    h.fill1DHist(tri.M(),     "h_mass_zoom2",";M(ll#gamma), GeV", 200, MH-0.1,MH+0.1,  1, "")
+    h.fill1DHist(diLep.M(),   "diLep_mass",     ";M(ll), GeV", 100, 0,60,  1, "")
+    h.fill1DHist(diLep.M(),   "diLep_mass_full",";M(ll), GeV", 100, 0,130, 1, "")
+    h.fill1DHist(diLep.M(),   "diLep_mass_low", ";M(ll), GeV", 100, 0,1,   1, "")
+    h.fill1DHist(tri.M(),     "h_mass",";M(ll#gamma), GeV",    100, 80,180,1, "")
+    h.fill1DHist(tri.M(),     "h_mass_low",";M(ll#gamma), GeV",100,  0,50, 1, "")
+    if MH!=0:
+      h.fill1DHist(tri.M(),     "h_mass_zoom",";M(ll#gamma), GeV",  200, MH-1,MH+1,  1, "")
+      h.fill1DHist(tri.M(),     "h_mass_zoom2",";M(ll#gamma), GeV", 200, MH-0.1,MH+0.1,  1, "")
 
         ## VBF Plots:
     if qq==2:
@@ -275,16 +279,16 @@ def FillAllHists(files, h):
       '''
 
     h.fill1DHist(gammaCM.E(), "gamma_Ecom",";E_{#gamma} in CoM, GeV",  50, 0,200,  1, "")
-    h.fill1DHist(diLepCM.E(), "diLep_Ecom",";Ecom(ll), GeV", 50, 0,100,  1, "")
+    h.fill1DHist(diLepCM.E(), "diLep_Ecom",";E^{com}_{ll}, GeV", 50, 0,100,  1, "")
 
 
     h.fill1DHist(diLep.Pt(),    "diLep_pt",  ";diLep_pt, GeV",    50, 0,100, 1, "")
     h.fill1DHist(diLep.Eta(),   "diLep_eta", ";diLep_eta",   50, -3.5,3.5, 1, "")
     h.fill1DHist(diLep.Phi(),   "diLep_phi", ";diLep_phi",   50, -TMath.Pi(),TMath.Pi(), 1, "")
-    h.fill1DHist(gamma.E(),  "gamma_E",  ";gamma_E, GeV",   50, 0,200, 1, "")
-    h.fill1DHist(gamma.Pt(), "gamma_pt", ";gamma_pt",  50, 0,100, 1, "")
-    h.fill1DHist(gamma.Eta(),"gamma_eta",";gamma_eta", 50, -3.5,3.5, 1, "")
-    h.fill1DHist(gamma.Phi(),"gamma_phi",";gamma_phi", 50, -TMath.Pi(),TMath.Pi(), 1, "")
+    h.fill1DHist(gamma.E(),  "gamma_E",  ";E_{#gamma}, GeV", 50, 0,200, 1, "")
+    h.fill1DHist(gamma.Pt(), "gamma_pt", ";p_{T}_{#gamma}, GeV",  50, 0,100, 1, "")
+    h.fill1DHist(gamma.Eta(),"gamma_eta",";#eta_{#gamma}", 50, -3.5,3.5, 1, "")
+    h.fill1DHist(gamma.Phi(),"gamma_phi",";#phi_{#gamma}", 50, -TMath.Pi(),TMath.Pi(), 1, "")
 
     h.fill1DHist(lPt1.Pt(),    "lPt1_pt",  ";Leading lepton pt",    50, 0,100, 1, "")
     h.fill1DHist(lPt1.Eta(),   "lPt1_eta", ";Leading lepton eta",   50, -3.5,3.5, 1, "")
@@ -299,7 +303,8 @@ def FillAllHists(files, h):
     h.fill2DHist(gammaCM.E(), gamma.Pt(),"h2D_gamma_Ecom_vs_Pt",   ";E_{#gamma} in CoM; Photon Pt",   50, 0,100, 50,0,100, 1, "")
     h.fill2DHist(gammaCM.E(), tri.M(),   "h2D_gamma_Ecom_vs_triM", ";E_{#gamma} in CoM; M(ll#gamma)", 50, 0,100, 50,0,200, 1, "")
 
-    h.fill2DHist(gamma.Pt(), diLep.Eta()-gamma.Eta(),"h2D_gammaPt_vs_deltaEta", ";Pt_{#gamma}; #Delta#eta(ll, #gamma)",    50, 0,100, 50,-5,5, 1, "")
+    h.fill2DHist(gamma.Pt(), diLep.Eta()-gamma.Eta(),"h2D_gammaPt_vs_deltaEta",
+                 ";p_{T}_{#gamma}; #Delta#eta(ll, #gamma)",    50, 0,100, 50,-5,5, 1, "")
 
 
     h.fill1DHist(diLep.DeltaR(gamma),               "dR_diLep_gamma", ";dR(ll, #gamma)",         50, 0,10, 1, "")
@@ -309,6 +314,7 @@ def FillAllHists(files, h):
     h.fill1DHist(TVector2.Phi_mpi_pi(diLep.Phi()-gamma.Phi()), "dPhi_diLep_gamma", ";dPhi(ll, #gamma)",            50, -10,10, 1, "")
 
     h.fill1DHist(lPt1.DeltaR(gamma),     "dR_lPt1_gamma",     ";dR(l1, #gamma)", 50, 0,5, 1, "")
+    h.fill1DHist(lPt2.DeltaR(gamma),     "dR_lPt2_gamma",     ";dR(l2, #gamma)", 50, 0,5, 1, "")
     h.fill1DHist(l1.DeltaR(l2),     "dR_l1_l2",     ";dR(l+, l-)",      50, 0,5, 1, "")
     h.fill1DHist(diLep.DeltaR(l1),  "dR_diLep_l1",  ";dR(diLep, l+)",   50, 0,5, 1, "")
     h.fill1DHist(diLep.DeltaR(l2),  "dR_diLep_l2",  ";dR(diLep, l-)",   50, 0,5, 1, "")
@@ -330,6 +336,7 @@ if __name__ == "__main__":
 
   FillAllHists(files["one"],  h1)
   FillAllHists(files["two"],  h2)
+  FillAllHists(files["three"],  h3)
 
 
   oneFile.cd()
@@ -341,9 +348,12 @@ if __name__ == "__main__":
   print "Saved files: \n",testFile.GetName(), "\n", oneFile.GetName(), "\n", twoFile.GetName()
 
 
-  blah = []
+  blah = ['LHE files comparison for DY+gamma sample',
+          'Luisa\'s vs mine']
 
-  u.drawAllInFile(oneFile, "Electrons",'',twoFile, 'Muons','', path, None,"norm", isLog=True)
+  u.drawAllInFile(oneFile, "New", [('Old',twoFile)],testFile, 'Sig', '', path, None,"norm", isLog=True)
+  #u.drawAllInFile(oneFile, "Mine",'',twoFile, 'Luisa','', path, None,"norm", isLog=True)
+  #u.drawAllInFile(oneFile, "Electrons",'',twoFile, 'Muons','', path, None,"norm", isLog=True)
   # u.drawAllInFile(oneFile, "MCFM ele", twoFile, "Madgraph mu",None,"","", path, None,"norm")
   # u.drawAllInFile(oneFile, "vbf ele", twoFile, "vbf mu",None,"","", path, None,"norm", isLog=True)
   # u.drawAllInFile(oneFile, "MAD-125",None,"", None,"","", path, None,"norm")
