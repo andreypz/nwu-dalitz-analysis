@@ -749,6 +749,8 @@ Bool_t jpsiGamma::Process(Long64_t entry)
     apz_pt2 = lPt2.Pt();
     apz_pt3 = gamma.Pt();
     apz_pt4 = -1;
+    if (gamma2.Pt()>3)
+      apz_pt4 = gamma2.Pt();
     apz_pt12 = (lPt1+lPt2).Pt();
     apz_pt34 = gamma.Pt();
 
@@ -773,6 +775,8 @@ Bool_t jpsiGamma::Process(Long64_t entry)
     apz_m123 = (lPt1+lPt2+gamma).M();
 
     apz_m4l = 0;
+    if (gamma2.Pt()>3)
+      apz_m4l = (lPt1+lPt2+gamma+gamma2).M();
 
     _apzTree->Fill();
 
@@ -797,6 +801,8 @@ Bool_t jpsiGamma::Process(Long64_t entry)
 
   HM->SetLeptons(lPt1, lPt2);
   HM->SetGamma(gamma);
+  if (gamma2.Pt()>3)
+    HM->SetGamma2(gamma2);
 
   HM->FillHistosFull(4, eventWeight, "");
   FillHistoCounts(4, eventWeight);
@@ -818,10 +824,17 @@ Bool_t jpsiGamma::Process(Long64_t entry)
   FillHistoCounts(5, eventWeight);
   CountEvents(5);
 
-  if (Mll<2.9 || Mll>3.3) return kTRUE; //jpsi and upsilon removeal
+  if (lPt1.DeltaR(gamma)<1.0 || lPt2.DeltaR(gamma)<1.0) return kTRUE;
   HM->FillHistosFull(6, eventWeight, "");
   FillHistoCounts(6, eventWeight);
   CountEvents(6);
+
+
+  if (Mll<2.9 || Mll>3.3) return kTRUE; //jpsi and upsilon removeal
+
+  HM->FillHistosFull(7, eventWeight, "");
+  FillHistoCounts(7, eventWeight);
+  CountEvents(7);
 
   //global_Mll = Mll;
   HM->MakeMuonPlots(muons[0], pvPosition);
@@ -833,6 +846,7 @@ Bool_t jpsiGamma::Process(Long64_t entry)
     FillHistoCounts(12, eventWeight);
     CountEvents(12);
   }
+
   if (Mllg>122 && Mllg<128){
     HM->FillHistosFull(13, eventWeight, "");
     FillHistoCounts(13, eventWeight);
@@ -878,22 +892,14 @@ Bool_t jpsiGamma::Process(Long64_t entry)
 
 
 
-  if (lPt1.DeltaR(gamma)<1.0 || lPt2.DeltaR(gamma)<1.0) return kTRUE;
-
-  HM->FillHistosFull(7, eventWeight, "");
-  FillHistoCounts(7, eventWeight);
-  CountEvents(7);
 
   if ((l1+l2).Pt()/Mllg < 0.30 || gamma.Pt()/Mllg < 0.30)
     //if ((l1+l2).Pt() < 40 || gamma.Pt() < 40)
     return kTRUE;
 
-
   HM->FillHistosFull(8, eventWeight, "");
   FillHistoCounts(8, eventWeight);
   CountEvents(8);
-
-
 
   if (checkTrigger){
     triggerSelector->SelectTrigger(myTrigger, triggerStatus, hltPrescale, isFound, triggerPass, prescale);
@@ -990,8 +996,8 @@ void jpsiGamma::Terminate()
   cout<<"| 3: trigger & reco gamma iso|\t"<< nEvents[3]  <<"\t|"<<float(nEvents[3])/nEvents[2]<<"\t|"<<endl;
   cout<<"| 4: reco muons, and pt      |\t"<< nEvents[4]  <<"\t|"<<float(nEvents[4])/nEvents[3]<<"\t|"<<endl;
   cout<<"| 5: Mll < 20                |\t"<< nEvents[5]  <<"\t|"<<float(nEvents[5])/nEvents[4]<<"\t|"<<endl;
-  cout<<"| 6: 2.9 < Mll < 3.3         |\t"<< nEvents[6]  <<"\t|"<<float(nEvents[6])/nEvents[5]<<"\t|"<<endl;
-  cout<<"| 7:  dR (l,g) > 1           |\t"<< nEvents[7]  <<"\t|"<<float(nEvents[7])/nEvents[6]<<"\t|"<<endl;
+  cout<<"| 6: dR (l,g) > 1            |\t"<< nEvents[6]  <<"\t|"<<float(nEvents[6])/nEvents[5]<<"\t|"<<endl;
+  cout<<"| 7: 2.9 < Mll < 3.3         |\t"<< nEvents[7]  <<"\t|"<<float(nEvents[7])/nEvents[6]<<"\t|"<<endl;
   cout<<"| 8: pT/Mllg > 0.30          |\t"<< nEvents[8]  <<"\t|"<<float(nEvents[8])/nEvents[7]<<"\t|"<<endl;
   cout<<"| 9: trigger 2-check         |\t"<< nEvents[9]  <<"\t|"<<float(nEvents[9])/nEvents[8]<<"\t|"<<endl;
   cout<<"| 10:  76 < mllg < 106       |\t"<< nEvents[10] <<"\t|"<<float(nEvents[10])/nEvents[9]<<"\t|"<<endl;

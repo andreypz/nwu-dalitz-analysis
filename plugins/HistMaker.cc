@@ -2,7 +2,8 @@
 
 HistMaker::HistMaker(HistManager *h):
   _isLepSet(false),
-  _isGammaSet(false)
+  _isGammaSet(false),
+  _isGamma2Set(false)
 {
   hists = h;
   angles = new ZGAngles();
@@ -14,6 +15,8 @@ void HistMaker::SetLeptons(TCPhysObject l1, TCPhysObject l2){
   _lPt1 = l1;  _lPt2 = l2; _isLepSet = 1;}
 void HistMaker::SetGamma(TCPhysObject g){
   _gamma = g; _isGammaSet=1;}
+void HistMaker::SetGamma2(TCPhysObject g){
+  _gamma2 = g; _isGamma2Set=1;}
 
 void HistMaker::MakeMuonPlots(const TCMuon& mu, TVector3 *pv)
 {
@@ -64,7 +67,8 @@ void HistMaker::FillHistosFull(Int_t num, Double_t weight, string dir)
   std::strcpy (d, dir.c_str());
 
   TLorentzVector diLep = _lPt1 + _lPt2;
-  TLorentzVector tri = diLep + _gamma;
+  TLorentzVector tri  = diLep + _gamma;
+  TLorentzVector four = diLep + _gamma + _gamma2;
 
   TLorentzVector lPt1Gamma = _lPt1+_gamma;
   TLorentzVector lPt2Gamma = _lPt2+_gamma;
@@ -77,6 +81,9 @@ void HistMaker::FillHistosFull(Int_t num, Double_t weight, string dir)
 
 
   hists->fill1DHist(weight,  Form("weight_%s_cut%i",         d, num),";weight",  200, 0,3, 1, dir);
+
+  if (_isGammaSet && _isGamma2Set)
+    hists->fill1DHist(four.M(), Form("four_massZ_%s_cut%i",d, num),";m_{ll#gamma#gamma}",  100,70,120,  weight, dir);
 
   hists->fill1DHist(tri.M(), Form("tri_mass_%s_cut%i",         d, num),";M(ll#gamma)",  100, 0,200,  weight, dir);
   hists->fill1DHist(tri.M(), Form("tri_mass80_%s_cut%i",       d, num),";M(ll#gamma)",  100,80,200,  weight, dir);
@@ -112,7 +119,7 @@ void HistMaker::FillHistosFull(Int_t num, Double_t weight, string dir)
 
   hists->fill1DHist(TMath::Log10(diLep.M()),   Form("diLep_mass_log1_%s_cut%i",  d, num),";log(m_{ll})", 100,   -1,7, weight, dir);
   hists->fill1DHist(TMath::Log10(diLep.M()),   Form("diLep_mass_log2_%s_cut%i",  d, num),";log(m_{ll})", 100,   -1,3, weight, dir);
-  hists->fill1DHist(TMath::Log10(diLep.M()),   Form("diLep_mass_log3_%s_cut%i",  d, num),";log(m_{ll})", 100, -1,1.3, weight, dir);
+  hists->fill1DHist(TMath::Log10(diLep.M()),   Form("diLep_mass_log3_%s_cut%i",  d, num),";log(m_{ll})", 100,-0.7,1.3,weight, dir);
 
   hists->fill1DHist(diLep.M(),   Form("diLep_mass_low1_%s_cut%i",  d, num),";m_{ll} (GeV)", 50, 0,1.5,  weight, dir);
   hists->fill1DHist(diLep.M(),   Form("diLep_mass_low2_%s_cut%i",  d, num),";m_{ll} (GeV)", 100, 1.5,8,  weight, dir);

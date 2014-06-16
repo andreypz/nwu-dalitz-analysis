@@ -361,14 +361,18 @@ if __name__ == "__main__":
     h2da_rot = TH2D("h2da_rot","", nx, )
     h2si_rot = TH2D("h2si_rot","")
     for a in nx:
-        for b in ny:
-            fda = h2da.GetBinContent(a,b)
-            fsi = h2si.GetBinContent(a,b)
+    for b in ny:
+    fda = h2da.GetBinContent(a,b)
+    fsi = h2si.GetBinContent(a,b)
 
-            h2da_rot.SetBinContent(a,b, fda)
-            h2si_rot.SetBinContent(a,b,fda)
+    h2da_rot.SetBinContent(a,b, fda)
+    h2si_rot.SetBinContent(a,b,fda)
     '''
-  if options.zjp and cut==4:
+
+  print 'Before Here'
+  print options.zjp, cut
+  if options.zjp and cut=='4':
+    print '\n\n Here\n'
     data = TFile(hPath+"/m_Data_"+sel+"_2012.root","OPEN")
 
     ZJPG(data, c1, TCut('pt3/m123>0.3 && pt12/m123>0.3 && m123>110 && m123<170 && dr13>1 && dr23>1'),

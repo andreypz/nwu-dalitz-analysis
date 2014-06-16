@@ -24,13 +24,15 @@ class HistMaker {
    virtual void MakePhotonEnergyCorrPlots(const TCPhoton& p, Float_t , Float_t );
    virtual void SetLeptons(TCPhysObject l1, TCPhysObject l2);
    virtual void SetGamma(TCPhysObject g);
+   virtual void SetGamma2(TCPhysObject g);
 
  private:
   HistManager * hists;
 
-  TCPhysObject _lPt1, _lPt2, _gamma;
+  TCPhysObject _lPt1, _lPt2, _gamma, _gamma2;
   Bool_t _isLepSet;
   Bool_t _isGammaSet;
+  Bool_t _isGamma2Set;
   ZGAngles *angles;
 };
 
