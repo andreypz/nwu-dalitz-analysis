@@ -364,7 +364,7 @@ for year in yearList:
       fit_ext.plotOn(testFrame, RooFit.Name(bkgModel+"1sigma"),
                      RooFit.VisualizeError(fit_result,1), RooFit.FillColor(kCyan-6), RooFit.LineColor(kBlack))
       fit_ext.plotOn(testFrame, RooFit.Name(bkgModel), RooFit.LineColor(kBlue), RooFit.LineWidth(2))
-      #fit_ext.paramOn(testFrame, RooFit.Layout(0.30,0.99,0.9))
+      fit_ext.paramOn(testFrame, RooFit.Layout(0.30,0.99,0.9))
       #fit_ext.statOn(testFrame)
 
 
@@ -415,7 +415,7 @@ for year in yearList:
       leg.AddEntry(0,'','')
       leg.AddEntry(hsig[0],'Expected signal x10','l')
       leg.SetTextSize(0.045)
-      leg.Draw()
+      #leg.Draw()
 
       leg2  = TLegend(0.55,0.72,0.91,0.8)
       leg2.SetNColumns(2)
@@ -432,7 +432,7 @@ for year in yearList:
       prelim.SetTextFont(62)
       prelim.DrawLatex(0.15,0.95, ("CMS Preliminary"))
       prelim.DrawLatex(0.40,0.95, "#sqrt{s} = 8 TeV,  L = 19.7  fb^{-1}  H#rightarrow#gamma*#gamma#rightarrow#mu#mu#gamma")
-      #prelim.Draw()
+
       gPad.RedrawAxis()
       for e in ['.png', '.pdf']:
         c.SaveAs(plotBase+'/'+'_'.join(['best_fit',year,lepton,'cat'+cat])+e)
@@ -454,13 +454,15 @@ for year in yearList:
 
       fit_ext.Print()
       fit.Print()
-      print 'printing the card'
+      print 'printing the WS before renaming!'
       card_ws.Print()
 
       #print normName
       BackgroundNameFixer(fitName, year,lepton,cat,card_ws, doExt)
 
+      print 'Now print it After renaming'
       card_ws.Print()
+
 
       print "\n * The end * \n"
 

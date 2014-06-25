@@ -6,6 +6,11 @@ from ROOT import *
 gROOT.SetBatch()
 sys.path.append("../zgamma")
 import utils as u
+from optparse import OptionParser
+parser = OptionParser(usage="usage: %prog  [options]")
+parser.add_option("--br",dest="br", action="store_true", default=False, help="Do the limit on BR*cs instead of the mu")
+(options, args) = parser.parse_args()
+
 import ConfigParser as cp
 cf = cp.ConfigParser()
 cf.read('config.cfg')
@@ -26,7 +31,7 @@ u.createDir(plotBase)
 
 fullCombo = True
 massList   = [float(a) for a in (cf.get("fits","massList-more")).split(',')]
-#massList        = [float(a) for a in u.drange(120,150,.5)]
+#massList        = [float(a) for a in u.drange(120,150,5)]
 
 print massList
 
@@ -132,29 +137,34 @@ if fullCombo:
   if doObs:
     mg.Add(observed)
 
+
+  mg.SetMinimum(0)
+
   mg.Draw('AL3')
   mg.GetXaxis().SetTitle('m_{H} (GeV)')
-  mg.GetYaxis().SetTitle('95% CL limit on #sigma/#sigma_{SM}')
   mg.GetXaxis().SetLimits(massList[0],massList[-1]);
+  if options.br:
+    mg.GetYaxis().SetTitle('#sigma(gg #rightarrow a)#times BR(a#rightarrow#mu#mu#gamma) (fb)')
+    mg.SetMaximum(21)
+  else:
+    mg.GetYaxis().SetTitle('95% CL limit on #sigma#times BR/#sigma_{SM}#times BR_{SM}')
+    mg.SetMaximum(31)
   gPad.RedrawAxis()
 
   prelim = TLatex()
   prelim.SetNDC();
   prelim.SetTextSize(0.04)
-  prelim.DrawLatex(0.25,0.95, "CMS Preliminary")
+  prelim.DrawLatex(0.20,0.95, "CMS Preliminary")
   prelim.DrawLatex(0.60,0.8, "H#rightarrow#gamma*#gamma#rightarrow#mu#mu#gamma")
+  prelim.DrawLatex(0.60,0.74, "m_{#mu#mu} < 20 GeV")
   #  prelim.Draw()
 
-  mg.SetMinimum(0)
-  #mg.SetMaximum(31)
-  mg.SetMaximum(20)
-
-  sqrt = TLatex(0.20,0.85, "#sqrt{s} = 8 Tev; #it{L_{int}} = 19.7 fb^{-1}")
+  sqrt = TLatex(0.50,0.95, "#sqrt{s} = 8 Tev  #it{L_{int}}  =  19.7  fb^{-1}")
   sqrt.SetNDC();
   sqrt.SetTextSize(0.04);
   sqrt.Draw();
 
-  leg = TLegend(0.25,0.65,0.50,0.83)
+  leg = TLegend(0.25,0.7,0.50,0.88)
   if doObs:
     leg.AddEntry(observed,"Observed", "l")
   leg.AddEntry(expected,"Expected", "l")
@@ -175,11 +185,27 @@ if fullCombo:
   leg.SetTextSize(0.04)
   leg.SetFillColor(kWhite)
   leg.Draw()
+  if options.br:
+    f = TFile('../data/Dalitz_BR50.root','READ')
+    g = f.Get('csbr_mu')
+    for i in range(g.GetN()):
+      g.GetY()[i] *= 10
+
+    #fit = g.GetFunction('pol4')
+    #fit.Print()
+    g.SetLineColor(kRed+2)
+    g.SetLineWidth(2)
+    #g.SetMarkerStyle(0)
+    g.Draw('same L')
+    #print fit(125)
+    #g.Print('all')
+    gStyle.SetOptFit(0)
+    leg.SetY1NDC(0.64)
+    leg.AddEntry(g,"10#timesSM", "l")
 
   for e in ['.png', '.pdf']:
     c.SaveAs(plotBase+'/Limits'+e)
-
-
+    
   out.cd()
   observed.Write("observed")
   expected.Write("expected")

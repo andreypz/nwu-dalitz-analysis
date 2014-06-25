@@ -38,14 +38,23 @@ phoTRIG = '1.020'
 PU      = '1.008'
 
 proc = {'gg':'ggH', 'vbf':'qqH','v':'WH'}
-massList   = ['%.1f'%(a) for a in u.drange(120,150,5)]
-#massList   = ['%.1f'%(a) for a in u.drange(120,150,.5)]
+#massList   = ['%.1f'%(a) for a in u.drange(120,150,5)]
+massList   = ['%.1f'%(a) for a in u.drange(120,150,.5)]
 csBR = {}
-for i,m in enumerate(massList):
-  # for now this numbers are retrieved from systematics.py file
-  ccc = cs_tot[i]*BR_mu[i]*1000
-  print "Cs and BR and cs*Br = ", cs_tot[i],BR_mu[i], ccc
-  csBR[m] = ccc
+
+#for i,m in enumerate(massList):
+#  # for now this numbers are retrieved from systematics.py file
+#  ccc = cs_tot[i]*BR_mu[i]*1000
+#  print i,m,"CS, BR and cs*Br = ", cs_tot[i],BR_mu[i], ccc
+#  ## this is wrong really, cant use total cross section..
+#  ## don't use this
+#  csBR[m] = ccc
+
+if options.br:
+  f = TFile('../data/Dalitz_BR50.root','READ')
+  g = f.Get('csbr_mu')
+  fit = g.GetFunction('pol4')
+  #g.Print('all')
 
 def makeCards(subdir):
   yearList   = [a.strip() for a in (cf.get("fits","yearList")).split(',')]
@@ -71,11 +80,15 @@ def makeCards(subdir):
           sigFile = TFile(sigFileName)
           sigWs = sigFile.Get('ws_card')
           procList  = [proc[a] for a in sigNameList]
+          if options.br:
+            procList=['ggH']
+            
+          nProc = len(procList)
           # print procList
-          if options.br and float(mass)%5!=0:
-            print "Sorry can't do this with those mass points yet, ",mass
-            sys.exit(0)
-          #if options.br:
+          #if options.br and float(mass)%5!=0:
+          #  print "Sorry can't do this with those mass points yet, ",mass
+          #  sys.exit(0)
+            
           #  croDict = {a:float(u.conf.get(a+"H-"+mass[0:3], "cs-mu")) for a in sigNameList}
           #  print croDict
 
@@ -105,28 +118,43 @@ def makeCards(subdir):
 
           #print "WTF is [::-1] ??? ->"
           #print channel, prefixSigList, prefixSigList[::-1]
+          nSubLine1 = '{0:<25}'
+          nSubLine2 = '{0:<30}'
+          for i in xrange(nProc):
+            nSubLine1 +=' {'+str(i+1)+':^15}'
+            nSubLine2 +=' {'+str(i+1)+':^5}'
+            #print i, nSubLine
 
-          card.write('{0:<25} {1:^15} {2:^15} {3:^15} {4:^15}\n'.format(*(['bin']+[channel]*4)))
-          card.write('{0:<25} {1:^15} {2:^15} {3:^15} {4:^15}\n'.format(*(['process']+procList[::-1]+['bkg'])))
-          card.write('{0:<25} {1:^15} {2:^15} {3:^15} {4:^15}\n'.format(*(['process', -2,-1,0,1])))
+          nSubLine1 +=' {'+str(i+2)+':^15}\n'
+          nSubLine2 +=' {'+str(i+2)+':5} - \n'
 
+          print nSubLine1
+            
+          card.write(nSubLine1.format(*(['bin']+[channel]*(nProc+1))))
+          card.write(nSubLine1.format(*(['process']+procList[::-1]+['bkg'])))
+          card.write(nSubLine1.format(*(['process']+range(-(nProc-1), 2, 1))))
+                    
           card.write('--------------------------------------------------------------\n')
           sigYields = []
           for s in sigNameList[::-1]:
             cs = 1
             if options.br:
-              cs = csBR[mass]
-            # print s, cs
+              cs = fit(float(mass))
+              #print 'from the fit', fit(float(mass))
+              # dont use this:: cs = csBR[mass]
+              #print 'from csbr:',cs
+            print mass, s, cs
+            #sigYields.append(sigWs.var('sig_'+s+'_yield_'+channel).getVal()*cs)
             sigYields.append(sigWs.var('sig_'+s+'_yield_'+channel).getVal() /cs)
 
           print 'mh=',mass, sigYields
           sigRate = sigYields
-          card.write('{0:<25} {1:^15.4} {2:^15.4} {3:^15.5} {4:^15}\n'.format(*(['rate']+sigYields+[bkgRate])))
+          card.write(nSubLine1.format(*(['rate']+sigRate+[bkgRate])))
 
           card.write('-------------------------------------------------------------\n')
           card.write(' \n')
 
-          card.write('{0} {1}  {2} {3} {4} -  \n'.format(*(['lumi_8TeV',      'lnN']+3*[lumi])))
+          card.write(nSubLine2.format(*(['lumi_8TeV',      'lnN']+nProc*[lumi])))
           mmm = mass
 
           if float(mass)>140:
@@ -134,7 +162,7 @@ def makeCards(subdir):
             mmm = mass[0:4]+'0'
 
           if not options.br:
-            card.write('{0} {1}  {2} {3} {4} -  \n'.format(*(['CMS_hllg_brLLG', 'lnN']+3*[brLLG])))
+            card.write(nSubLine2.format(*(['CMS_hllg_brLLG', 'lnN']+nProc*[brLLG])))
             card.write('pdf_WH        lnN     '+pdf_wh[year][mmm]+'  -  -   -  \n')
             card.write('QCDscale_WH   lnN     '+qcd_wh[year][mmm]+'  -  -   -  \n')
             card.write('pdf_qqH       lnN     -   '+pdf_vbf[year][mmm]+' -  -  \n')
@@ -142,12 +170,12 @@ def makeCards(subdir):
             card.write('pdf_ggH       lnN     -   -  '+pdf_gg[year][mmm]+'  -  \n')
             card.write('QCDscale_ggH  lnN     -   -  '+qcd_gg[year][mmm]+'  -  \n')
 
-          card.write('{0} {1}  {2} {3} {4} -  \n'.format(*(['CMS_eff_m_ID',   'lnN']+3*[muID])))
-          card.write('{0} {1}  {2} {3} {4} -  \n'.format(*(['CMS_eff_m_ISO',  'lnN']+3*[muISO])))
-          card.write('{0} {1}  {2} {3} {4} -  \n'.format(*(['CMS_eff_m_TRIG', 'lnN']+3*[muTRIG])))
-          card.write('{0} {1}  {2} {3} {4} -  \n'.format(*(['CMS_eff_g_ID',   'lnN']+3*[phoID])))
-          card.write('{0} {1}  {2} {3} {4} -  \n'.format(*(['CMS_eff_g_TRIG', 'lnN']+3*[phoTRIG])))
-          card.write('{0} {1}  {2} {3} {4} -  \n'.format(*(['CMS_hllg_PU',    'lnN']+3*[PU])))
+          card.write(nSubLine2.format(*(['CMS_eff_m_ID',   'lnN']+nProc*[muID])))
+          card.write(nSubLine2.format(*(['CMS_eff_m_ISO',  'lnN']+nProc*[muISO])))
+          card.write(nSubLine2.format(*(['CMS_eff_m_TRIG', 'lnN']+nProc*[muTRIG])))
+          card.write(nSubLine2.format(*(['CMS_eff_g_ID',   'lnN']+nProc*[phoID])))
+          card.write(nSubLine2.format(*(['CMS_eff_g_TRIG', 'lnN']+nProc*[phoTRIG])))
+          card.write(nSubLine2.format(*(['CMS_hllg_PU',    'lnN']+nProc*[PU])))
 
           for sig in sigNameList:
             card.write('{0:<40} {1:<10} {2:^10} {3:^10}\n'.format('sig_'+sig+'_mShift_'    +channel,'param', 1, 0.005))
