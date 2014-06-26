@@ -51,7 +51,7 @@ csBR = {}
 #  csBR[m] = ccc
 
 if options.br:
-  f = TFile('../data/Dalitz_BR50.root','READ')
+  f = TFile('../data/Dalitz_BR20.root','READ')
   g = f.Get('csbr_mu')
   fit = g.GetFunction('pol4')
   #g.Print('all')

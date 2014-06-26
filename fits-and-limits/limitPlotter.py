@@ -144,10 +144,10 @@ if fullCombo:
   mg.GetXaxis().SetTitle('m_{H} (GeV)')
   mg.GetXaxis().SetLimits(massList[0],massList[-1]);
   if options.br:
-    mg.GetYaxis().SetTitle('#sigma(gg #rightarrow a)#times BR(a#rightarrow#mu#mu#gamma) (fb)')
+    mg.GetYaxis().SetTitle('#sigma(gg #rightarrow a)#timesBR(a#rightarrow#mu#mu#gamma) (fb)')
     mg.SetMaximum(21)
   else:
-    mg.GetYaxis().SetTitle('95% CL limit on #sigma#times BR/#sigma_{SM}#times BR_{SM}')
+    mg.GetYaxis().SetTitle('95% CL limit on #sigma#timesBR/#sigma_{SM}#times BR_{SM}')
     mg.SetMaximum(31)
   gPad.RedrawAxis()
 
@@ -186,7 +186,7 @@ if fullCombo:
   leg.SetFillColor(kWhite)
   leg.Draw()
   if options.br:
-    f = TFile('../data/Dalitz_BR50.root','READ')
+    f = TFile('../data/Dalitz_BR20.root','READ')
     g = f.Get('csbr_mu')
     for i in range(g.GetN()):
       g.GetY()[i] *= 10
