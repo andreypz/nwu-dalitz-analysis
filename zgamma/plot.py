@@ -24,7 +24,6 @@ parser.add_option("--hjp",dest="hjp",action="store_true", default=False, help="S
 parser.add_option("-s", '--sel', dest="sel", type="string", default='mugamma',
                   help="Selection to be used. Options are: '4mu','2e2mu', 'zee','mugamma', 'egamma'")
 
-
 (options, args) = parser.parse_args()
 
 mass = options.mass
@@ -32,7 +31,6 @@ sel = options.sel
 
 comments = ["These plots are made for z -> J/Psi gamma analysis",
             "MuEG dataset used"]
-
 
 if __name__ == "__main__":
   timer = TStopwatch()
@@ -95,10 +93,11 @@ if __name__ == "__main__":
     #bkgNames.append('ZG')
     #bkgFiles.append(TFile(hPath+"/m_DYJets50_"+sel+"_"+period+".root","OPEN"))
     #bkgNames.append('DYJets50')
+    #bkgFiles.append(TFile(hPath+"/"+sel+"_"+period+"/hhhh_ZGDalitz-OLD_1.root","OPEN"))
     bkgFiles.append(TFile(hPath+"/"+sel+"_"+period+"/hhhh_ZGDalitz_1.root","OPEN"))
     bkgNames.append('ZGDalitz')
-    #bkgFiles.append(TFile(hPath+"/"+sel+"_"+period+"/hhhh_DYJetsDalitz_1.root","OPEN"))
-    #bkgNames.append('DYJetsDalitz')
+    bkgFiles.append(TFile(hPath+"/"+sel+"_"+period+"/hhhh_DYJetsDalitz_1.root","OPEN"))
+    bkgNames.append('DYJetsDalitz')
 
     #yields_bkg  = u.getYields(bkgFiles,"DY",True)
 
@@ -369,10 +368,7 @@ if __name__ == "__main__":
     h2si_rot.SetBinContent(a,b,fda)
     '''
 
-  print 'Before Here'
-  print options.zjp, cut
   if options.zjp and cut=='4':
-    print '\n\n Here\n'
     data = TFile(hPath+"/m_Data_"+sel+"_2012.root","OPEN")
 
     ZJPG(data, c1, TCut('pt3/m123>0.3 && pt12/m123>0.3 && m123>110 && m123<170 && dr13>1 && dr23>1'),

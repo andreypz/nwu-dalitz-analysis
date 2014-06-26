@@ -21,11 +21,13 @@ files={}
 #files["one"] = ['/uscms_data/d2/andreypz/lhe_higgs_eegamma_dalitz/heeg_m120.root']
 #files["one"] = ['~/LHE_files/dygamma_dalitz_muonmass_run02.root']
 files["one"] = ['~/LHE_files/dygamma_dalitz_muonmass_dRll_dRlg_run05.root']
-files["two"] = ['~/LHE_files/luisa/dygamma.lhe.root']
+files["two"] = ['~/LHE_files/dyjet_dalitz_run09.root']
+#files["two"] = ['~/LHE_files/luisa/dygamma.lhe.root']
 files["three"] = ['~/LHE_files/hmumug_m120.root']
 
 #files["one"] = ['/tthome/andrey/LHE_dalitz_Luisa/dygamma.lhe.root']
 #files["two"] = ['/tthome/andrey/LHE_dalitz_Luisa/dyjet.lhe.root']
+fakeGammaFromJet = 1
 
 MH = 0
 LEPID1 = 13
@@ -115,6 +117,11 @@ def FillAllHists(files, h):
         gamma.SetPxPyPzE(px,py,pz,E)
         hasGamma=1
 
+      if fakeGammaFromJet:
+        if ((p.PID == 21 and p.Status==1)  or (abs(p.PID) <= 5 and p.Status==1)):
+          gamma.SetPxPyPzE(px,py,pz,E)
+          hasGamma=1
+
       if (p.PID == LEPID1 or p.PID==LEPID2):
         l1.SetPxPyPzE(px,py,pz,E)
       if (p.PID == -LEPID1 or p.PID==-LEPID2):
@@ -162,17 +169,17 @@ def FillAllHists(files, h):
   # f not hasGamma: continue
 
     dcount += 1
-    #if dcount > 1000: break
+    #if dcount > 20: break
 
 
     tri = diLep + gamma
 
     if hi==0:
       # print dcount,"No higgs??? what's up with that??"
-      h.fill1DHist(tri.M(),   "h_mass_noHiggs",     ";M(ll#gamma)",  200, 80,180, 1, "")
-      h.fill1DHist(tri.M(),   "h_mass_zoom_noHiggs",";M(ll#gamma)",  200, 124,126,1, "")
-      h.fill1DHist(diLep.M(), "h_mumu_noHiggs",     ";M(ll)",        200, 80,180, 1, "")
-      h.fill1DHist(gamma.Pt(),"gamma_pt_noHiggs",   ";pt_#gamma",    200, 00,180, 1, "")
+      h.fill1DHist(tri.M(),   "h_mass_noHiggs",     ";m_{ll#gamma}",  200, 80,180, 1, "")
+      h.fill1DHist(tri.M(),   "h_mass_zoom_noHiggs",";m_{ll#gamma}",  200, 124,126,1, "")
+      h.fill1DHist(diLep.M(), "h_mumu_noHiggs",     ";m_{ll}",        200, 80,180, 1, "")
+      h.fill1DHist(gamma.Pt(),"gamma_pt_noHiggs",   ";p_{T}^{#gamma}",    200, 00,180, 1, "")
     else:
       h.fill1DHist(trueHiggs.M(),   "h_mass_trueHiggs",";mH",   200, 124,126,1, "")
     # exit(0)
@@ -286,7 +293,7 @@ def FillAllHists(files, h):
     h.fill1DHist(diLep.Eta(),   "diLep_eta", ";diLep_eta",   50, -3.5,3.5, 1, "")
     h.fill1DHist(diLep.Phi(),   "diLep_phi", ";diLep_phi",   50, -TMath.Pi(),TMath.Pi(), 1, "")
     h.fill1DHist(gamma.E(),  "gamma_E",  ";E_{#gamma}, GeV", 50, 0,200, 1, "")
-    h.fill1DHist(gamma.Pt(), "gamma_pt", ";p_{T}_{#gamma}, GeV",  50, 0,100, 1, "")
+    h.fill1DHist(gamma.Pt(), "gamma_pt", ";p_{T}^{#gamma}, GeV",  50, 0,100, 1, "")
     h.fill1DHist(gamma.Eta(),"gamma_eta",";#eta_{#gamma}", 50, -3.5,3.5, 1, "")
     h.fill1DHist(gamma.Phi(),"gamma_phi",";#phi_{#gamma}", 50, -TMath.Pi(),TMath.Pi(), 1, "")
 
@@ -351,7 +358,7 @@ if __name__ == "__main__":
   blah = ['LHE files comparison for DY+gamma sample',
           'Luisa\'s vs mine']
 
-  u.drawAllInFile(oneFile, "New", [('Old',twoFile)],testFile, 'Sig', '', path, None,"norm", isLog=True)
+  u.drawAllInFile(oneFile, "DYG", [('DYJ',twoFile)],testFile, 'Sig', '', path, None,"norm", isLog=True)
   #u.drawAllInFile(oneFile, "Mine",'',twoFile, 'Luisa','', path, None,"norm", isLog=True)
   #u.drawAllInFile(oneFile, "Electrons",'',twoFile, 'Muons','', path, None,"norm", isLog=True)
   # u.drawAllInFile(oneFile, "MCFM ele", twoFile, "Madgraph mu",None,"","", path, None,"norm")

@@ -145,12 +145,14 @@ if period =="2012":
   if selection in ['mugamma','jp-mugamma','4mu','2e2mu','apz']:
     bg.extend([
         cfg('DYJetsDalitz', DIRME+'/nuTuples_v9.6_8TeV/dalitz/DYtoMuMuJet',   1, 'DYJets '+selection+trig+'  2012 0' + whereWeRun ),
-        cfg('ZGDalitz',     DIR+'/nuTuples_v9.8_8TeV/dalitz2/DYtoMuMuGamma', 1, 'ZG     '+selection+trig+'  2012 0' + whereWeRun ),
+        cfg('ZGDalitz',     DIR+'/nuTuples_v9.8_8TeV/dalitz2/DYtoMuMuGamma',  1, 'ZG     '+selection+trig+'  2012 0' + whereWeRun ),
+        cfg('ZGDalitz-OLD', DIRME+'/nuTuples_v9.6_8TeV/dalitz/DYtoMuMuGamma', 1, 'ZG     '+selection+trig+'  2012 0' + whereWeRun ),
         ])
 
 # Signal MC configs
   signal.extend([
-      cfg('ggHZG-125', DIR+'/nuTuples_v9.8_8TeV/MC/ggHZG_M125_RD1',1, 'HZG '+selection+trig+' '+period+gen + whereWeRun),
+      cfg('ggHZG-125',  DIR+'/nuTuples_v9.8_8TeV/MC/ggHZG_M125_RD1',1, 'HZG '+selection+trig+' '+period+gen + whereWeRun),
+      cfg('ggH-mad125', DIR+'/nuTuples_v9.8_8TeV/dalitz2/ggHiggsToMuMuGamma_MH125',1, 'dalitz '+selection+trig+period+gen + whereWeRun),
       ])
 
   if selection in ['mugamma','jp-mugamma']:
@@ -161,7 +163,6 @@ if period =="2012":
   if selection in ['mugamma']:
     signal.extend([
         cfg('ggH-mad120', DIR+'/nuTuples_v9.8_8TeV/dalitz/ggHiggsToMuMuGamma_MH120',1, 'dalitz '+selection+trig+period+gen + whereWeRun),
-        cfg('ggH-mad125', DIR+'/nuTuples_v9.8_8TeV/dalitz/ggHiggsToMuMuGamma_MH125',1, 'dalitz '+selection+trig+period+gen + whereWeRun),
         cfg('ggH-mad130', DIR+'/nuTuples_v9.8_8TeV/dalitz/ggHiggsToMuMuGamma_MH130',1, 'dalitz '+selection+trig+period+gen + whereWeRun),
         cfg('ggH-mad135', DIR+'/nuTuples_v9.8_8TeV/dalitz/ggHiggsToMuMuGamma_MH135',1, 'dalitz '+selection+trig+period+gen + whereWeRun),
         cfg('ggH-mad140', DIR+'/nuTuples_v9.8_8TeV/dalitz/ggHiggsToMuMuGamma_MH140',1, 'dalitz '+selection+trig+period+gen + whereWeRun),

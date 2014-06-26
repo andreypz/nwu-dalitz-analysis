@@ -1,5 +1,8 @@
 The log of changes:
-==================
+===================
+
+2014-Jun-26
+  * Limit on xs*BR for dalitz
 
 2014-Jun-14
   * Intruduced HistMaker and ObjID plugins 
