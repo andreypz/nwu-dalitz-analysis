@@ -51,7 +51,7 @@ csBR = {}
 #  csBR[m] = ccc
 
 if options.br:
-  f = TFile('../data/Dalitz_BR20.root','READ')
+  f = TFile('../data/Dalitz_BR50.root','READ')
   g = f.Get('csbr_mu')
   fit = g.GetFunction('pol4')
   #g.Print('all')
@@ -82,13 +82,13 @@ def makeCards(subdir):
           procList  = [proc[a] for a in sigNameList]
           if options.br:
             procList=['ggH']
-            
+
           nProc = len(procList)
           # print procList
           #if options.br and float(mass)%5!=0:
           #  print "Sorry can't do this with those mass points yet, ",mass
           #  sys.exit(0)
-            
+
           #  croDict = {a:float(u.conf.get(a+"H-"+mass[0:3], "cs-mu")) for a in sigNameList}
           #  print croDict
 
@@ -129,11 +129,11 @@ def makeCards(subdir):
           nSubLine2 +=' {'+str(i+2)+':5} - \n'
 
           print nSubLine1
-            
+
           card.write(nSubLine1.format(*(['bin']+[channel]*(nProc+1))))
           card.write(nSubLine1.format(*(['process']+procList[::-1]+['bkg'])))
           card.write(nSubLine1.format(*(['process']+range(-(nProc-1), 2, 1))))
-                    
+
           card.write('--------------------------------------------------------------\n')
           sigYields = []
           for s in sigNameList[::-1]:

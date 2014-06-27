@@ -186,7 +186,7 @@ if fullCombo:
   leg.SetFillColor(kWhite)
   leg.Draw()
   if options.br:
-    f = TFile('../data/Dalitz_BR20.root','READ')
+    f = TFile('../data/Dalitz_BR50.root','READ')
     g = f.Get('csbr_mu')
     for i in range(g.GetN()):
       g.GetY()[i] *= 10
@@ -205,7 +205,7 @@ if fullCombo:
 
   for e in ['.png', '.pdf']:
     c.SaveAs(plotBase+'/Limits'+e)
-    
+
   out.cd()
   observed.Write("observed")
   expected.Write("expected")

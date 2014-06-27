@@ -1,8 +1,12 @@
 The log of changes:
 ===================
 
+2014-Jun-27
+  * Photon MVA ID implemented in ObjectID plugin
+
 2014-Jun-26
   * Limit on xs*BR for dalitz
+  * Tagged v7.0-new-level
 
 2014-Jun-14
   * Intruduced HistMaker and ObjID plugins 

@@ -514,7 +514,8 @@ Bool_t jpsiGamma::Process(Long64_t entry)
 
       if (vetoIt) continue;
 
-      if(ObjID->PassPhotonIdAndIso(*thisPhoton, "CutBased-MediumWP")
+      if(ObjID->PassPhotonIdAndIso(*thisPhoton, "MVA")
+	 //if(ObjID->PassPhotonIdAndIso(*thisPhoton, "CutBased-MediumWP")
 	 //&& (isRealData || !makeGen || (sample=="dalitz" && makeGen && gen_gamma.DeltaR(*thisPhoton) < 0.2) )
 	 )
 	{

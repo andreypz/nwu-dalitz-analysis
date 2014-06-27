@@ -9,6 +9,8 @@
 #include "../interface/TCMuon.h"
 #include "../interface/TCGenParticle.h"
 
+#include "TMVA/Reader.h"
+
 struct muIdAndIsoCuts{
   Bool_t IsPF;
   Bool_t IsGLB;
@@ -74,11 +76,13 @@ class ObjectID {
   virtual bool PassMuonIdAndIso(const TCMuon& l, TVector3 *pv, TString n);
   virtual bool PassElectronIdAndIso(const TCElectron& l, TVector3 *pv, TString n);
   virtual bool PassElectronIdAndIsoMVA(const TCElectron& l);
+  virtual bool HggPreselection(const TCPhoton& ph);
+  virtual bool PassPhotonMVA(const TCPhoton& ph);
 
-   TCGenParticle * GetPrimaryAncestor(TCGenParticle *p);
-   virtual void DiscoverGeneology(TCGenParticle *p);
-   virtual void MuonDump(const TCMuon& mu, TVector3 *pv);
-   virtual void PhotonDump(const TCPhoton& pho,  phIdAndIsoCuts c);
+  TCGenParticle * GetPrimaryAncestor(TCGenParticle *p);
+  virtual void DiscoverGeneology(TCGenParticle *p);
+  virtual void MuonDump(const TCMuon& mu, TVector3 *pv);
+  virtual void PhotonDump(const TCPhoton& pho,  phIdAndIsoCuts c);
 
  private:
    Bool_t    _isRealData;

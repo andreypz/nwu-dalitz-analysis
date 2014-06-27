@@ -160,6 +160,10 @@ bool ObjectID::PassPhotonIdAndIso(const TCPhoton& ph, TString n)
     cuts = phIdAndIsoCutsHZG;
   else if (n=="CutBased-TightWP")
     cuts = phIdAndIsoCutsTight;
+  else if (n=="MVA")
+    //return HggPreselection(ph);
+    return PassPhotonMVA(ph);
+
   else  {
     cout<<"PhotonID Warning: no such cut "<<n<<endl;
     return false;
@@ -270,8 +274,6 @@ float ObjectID::CalculateElectronIso(const TCElectron& lep)
 
   return eleISO;
 }
-
-
 
 
 
@@ -404,6 +406,139 @@ void ObjectID::DiscoverGeneology(TCGenParticle *p)
 
 }
 
+
+bool ObjectID::HggPreselection(const TCPhoton& ph)
+{
+  /* Preselection of photon candidates for the identification with MVA.
+   *
+   * Returns true if candidate passes the preselection or false otherwise.
+   */
+
+  if (ph.Et() < 15 || ph.Et() > 200) return false;
+  if (ph.ConversionVeto() == 0) return false;
+
+  // ECAL barrel
+  if (fabs(ph.SCEta()) < 1.479) {
+    if (ph.SigmaIEtaIEta() > 0.014) return false;
+    if (ph.R9() > 0.9) {
+      if (ph.HadOverEm() > 0.082) return false;
+    } else {
+      if (ph.HadOverEm() > 0.075) return false;
+    }
+    // ECAL endcaps
+  } else {
+    if (ph.SigmaIEtaIEta() > 0.034) return false;
+    if (ph.HadOverEm() > 0.075) return false;
+  }
+
+  // isolation
+  if (ph.R9() > 0.9) {
+    if (ph.IdMap("HadIso_R03") - 0.005 * ph.Et() > 50) return false;
+    if (ph.IdMap("TrkIso_R03") - 0.002 * ph.Et() > 50) return false;
+    if (ph.CiCPF4chgpfIso02()[0] > 4) return false;
+  } else {
+    if (ph.IdMap("HadIso_R03") - 0.005 * ph.Et() > 4) return false;
+    if (ph.IdMap("TrkIso_R03") - 0.002 * ph.Et() > 4) return false;
+    if (ph.CiCPF4chgpfIso02()[0] > 4) return false;
+  }
+
+  // preselection successful
+  return true;
+}
+
+bool ObjectID::PassPhotonMVA(const TCPhoton& ph){
+
+  bool mvaPass = false;
+  if (!HggPreselection(ph)) return false;
+
+  // classification variables
+  static Float_t phoEt_, phoEta_, phoPhi_, phoR9_;
+  static Float_t phoSigmaIEtaIEta_, phoSigmaIEtaIPhi_;
+  static Float_t phoS13_, phoS4_, phoS25_, phoSCEta_, phoSCRawE_;
+  static Float_t phoSCEtaWidth_, phoSCPhiWidth_, rho2012_;
+  static Float_t phoPFPhoIso_, phoPFChIso_, phoPFChIsoWorst_;
+  static Float_t phoESEnToRawE_, phoESEffSigmaRR_x_;
+
+  // MVA classifiers for 0=ECAL barrel and 1=ECAL endcaps
+  static TMVA::Reader* tmvaReader[2] = {NULL, NULL};
+
+  // 0=ECAL barrel or 1=ECAL endcaps
+  int iBE = (fabs(ph.SCEta()) < 1.479) ? 0 : 1;
+
+  // one-time MVA initialization
+  if (!tmvaReader[iBE]) {
+    tmvaReader[iBE] = new TMVA::Reader("!Color:Silent");
+
+    // add classification variables
+    tmvaReader[iBE]->AddVariable("phoPhi", &phoPhi_);
+    tmvaReader[iBE]->AddVariable("phoR9", &phoR9_);
+    tmvaReader[iBE]->AddVariable("phoSigmaIEtaIEta", &phoSigmaIEtaIEta_);
+    tmvaReader[iBE]->AddVariable("phoSigmaIEtaIPhi", &phoSigmaIEtaIPhi_);
+    tmvaReader[iBE]->AddVariable("s13", &phoS13_);
+    tmvaReader[iBE]->AddVariable("s4ratio", &phoS4_);
+    tmvaReader[iBE]->AddVariable("s25", &phoS25_);
+    tmvaReader[iBE]->AddVariable("phoSCEta", &phoSCEta_);
+    tmvaReader[iBE]->AddVariable("phoSCRawE", &phoSCRawE_);
+    tmvaReader[iBE]->AddVariable("phoSCEtaWidth", &phoSCEtaWidth_);
+    tmvaReader[iBE]->AddVariable("phoSCPhiWidth", &phoSCPhiWidth_);
+
+    if (iBE == 1) {
+      tmvaReader[iBE]->AddVariable("phoESEn/phoSCRawE", &phoESEnToRawE_);
+      tmvaReader[iBE]->AddVariable("phoESEffSigmaRR", &phoESEffSigmaRR_x_);
+    }
+
+    tmvaReader[iBE]->AddVariable("rho2012", &rho2012_);
+    tmvaReader[iBE]->AddVariable("phoPFPhoIso", &phoPFPhoIso_);
+    tmvaReader[iBE]->AddVariable("phoPFChIso", &phoPFChIso_);
+
+    tmvaReader[iBE]->AddVariable("phoPFChIsoWorst", &phoPFChIsoWorst_);
+
+    tmvaReader[iBE]->AddSpectator("phoEt", &phoEt_);
+    tmvaReader[iBE]->AddSpectator("phoEta", &phoEta_);
+
+    // weight files
+    if (iBE == 0)
+      tmvaReader[0]->BookMVA("BDT", "../data/PhotonMVAID_EB_weights.xml");
+    else
+      tmvaReader[1]->BookMVA("BDT", "../data/PhotonMVAID_EE_weights.xml");
+
+  } // one-time initialization
+
+  // set MVA variables
+  phoSigmaIEtaIEta_ = ph.SigmaIEtaIEta();
+  phoSigmaIEtaIPhi_ = ph.SigmaIEtaIPhi();
+  phoS4_  = ph.E2x2()/ph.E5x5();
+  phoS13_ = ph.E1x3()/ph.E5x5();
+  phoS25_ = ph.E2x5Max()/ph.E5x5();
+  phoEt_  = ph.Pt();
+  phoEta_ = ph.Eta();
+  phoPhi_ = ph.Phi();
+  phoR9_  = ph.R9();
+  phoSCEta_  = ph.SCEta();
+  phoSCRawE_ = ph.SCRawEnergy();
+  phoSCEtaWidth_ = ph.SCEtaWidth();
+  phoSCPhiWidth_ = ph.SCPhiWidth();
+  rho2012_       = _rhoFactor;
+  phoPFPhoIso_   = ph.PfIsoPhoton();
+  phoPFChIso_    = ph.PfIsoCharged();
+  phoESEnToRawE_ = ph.PreShowerOverRaw();
+  phoESEffSigmaRR_x_= ph.ESEffSigmaRR()[0];
+
+  // evaluate largest isolation value
+  phoPFChIsoWorst_ = 0;
+  for (size_t k = 0; k < ph.CiCPF4chgpfIso03().size(); ++k){
+    if (phoPFChIsoWorst_ < ph.CiCPF4chgpfIso03()[k]) phoPFChIsoWorst_ = ph.CiCPF4chgpfIso03()[k];
+  }
+
+  //                        EB    EE
+  const float mvacuts[2] = {0.1, 0.1};
+
+  if (tmvaReader[iBE]->EvaluateMVA("BDT") > mvacuts[iBE])
+    mvaPass = true;
+
+  return mvaPass;
+
+}
 
 void ObjectID::MuonDump(const TCMuon& mu, TVector3 *pv)
 {
