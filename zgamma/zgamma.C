@@ -452,7 +452,7 @@ Bool_t zgamma::Process(Long64_t entry)
 
   vector<TCElectron> electrons0, electrons, electrons_dalitz, fake_electrons0;
   vector<TCMuon> muons0, muons;
-  vector<TCPhoton> photons0, photonsTight, photonsHZG, fake_photons;
+  vector<TCPhoton> photons0, photonsTight, photonsHZG, photonsMVA, fake_photons;
   TCPhysObject l1,l2, lPt1, lPt2;
   TCPhoton gamma0, gamma, ufoton, ufelectron;
 
@@ -479,7 +479,7 @@ Bool_t zgamma::Process(Long64_t entry)
       if (isRealData || !makeGen || (sample=="dalitz" && makeGen && gen_gamma.DeltaR(*thisPhoton) < 0.1) )
 	photons0.push_back(*thisPhoton);
 
-      if(ObjID->PassPhotonIdAndIso(thisPhoton, "CutBased-MediumWP")
+      if(ObjID->PassPhotonIdAndIso(*thisPhoton, "CutBased-MediumWP")
 	 //&& (isRealData || !makeGen || (sample=="dalitz" && makeGen && gen_gamma.DeltaR(*thisPhoton) < 0.2) )
 	 )
 	{
@@ -505,10 +505,11 @@ Bool_t zgamma::Process(Long64_t entry)
 
 	}
 
-      if(ObjID->PassPhotonIdAndIso(thisPhoton, "CutBased-TightWP")
-	 //&& (isRealData || !makeGen || (sample=="dalitz" && makeGen && gen_gamma.DeltaR(*thisPhoton) < 0.2) )
-	 )
+      if(ObjID->PassPhotonIdAndIso(*thisPhoton, "CutBased-TightWP"))
 	photonsTight.push_back(*thisPhoton);
+
+      if(ObjID->PassPhotonIdAndIso(*thisPhoton, "MVA"))
+	photonsMVA.push_back(*thisPhoton);
     }
   }
 
@@ -516,6 +517,7 @@ Bool_t zgamma::Process(Long64_t entry)
   sort(photons0.begin(),     photons0.end(),     P4SortCondition);
   sort(photonsTight.begin(), photonsTight.end(), P4SortCondition);
   sort(photonsHZG.begin(),   photonsHZG.end(),   P4SortCondition);
+  sort(photonsMVA.begin(),   photonsMVA.end(),   P4SortCondition);
   sort(fake_photons.begin(), fake_photons.end(), P4SortCondition);
 
   //if (fake_photons.size()>1)
@@ -526,8 +528,11 @@ Bool_t zgamma::Process(Long64_t entry)
   //if (photonsTight.size()<1) return kTRUE;
   //gamma = photonsTight[0];
 
-  if (photonsHZG.size()<1) return kTRUE;
-  gamma = photonsHZG[0];
+  //if (photonsHZG.size()<1) return kTRUE;
+  //gamma = photonsHZG[0];
+
+  if (photonsMVA.size()<1) return kTRUE;
+  gamma = photonsMVA[0];
 
   if (!isRealData)
     eventWeight *= weighter->PhotonSF(gamma);
@@ -547,7 +552,7 @@ Bool_t zgamma::Process(Long64_t entry)
 	}
       if (
 	  //PassElectronIdAndIsoMVA(thisElec)
-	  ObjID->PassElectronIdAndIso(thisElec, pvPosition, "Loose")
+	  ObjID->PassElectronIdAndIso(*thisElec, pvPosition, "Loose")
 	  )
 	electrons0.push_back(*thisElec);
 
@@ -605,7 +610,7 @@ Bool_t zgamma::Process(Long64_t entry)
 	  break;}}
 
     if(thisMuon->Pt() > 4
-       && ObjID->PassMuonIdAndIso(thisMuon, pvPosition, "Soft")
+       && ObjID->PassMuonIdAndIso(*thisMuon, pvPosition, "Soft")
        ) {
 
 
@@ -697,7 +702,7 @@ Bool_t zgamma::Process(Long64_t entry)
   hists->fill1DHist(Mll,  Form("diLep_mass_high_cut%i", 3),";M(ll)", 50, 0,120, 1, "");
 
 
-  if (ObjID->CalculateMuonIso(&muons[0]) > 0.4)
+  if (ObjID->CalculateMuonIso(muons[0]) > 0.4)
     return kTRUE;
   //if (lPt2.Pt() > 20 && ObjID->CalculateMuonIso(&muons[1]) > 0.4)
   //return kTRUE;

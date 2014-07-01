@@ -99,7 +99,7 @@ if __name__ == "__main__":
     bkgFiles.append(TFile(hPath+"/"+sel+"_"+period+"/hhhh_DYJetsDalitz_1.root","OPEN"))
     bkgNames.append('DYJetsDalitz')
 
-    #yields_bkg  = u.getYields(bkgFiles,"DY",True)
+    yields_bkg  = u.getYields(bkgFiles[0],"ZGDalitz",True)
 
     bkgZip = zip(bkgNames, bkgFiles)
   else: bkgZip = ''
@@ -158,7 +158,10 @@ if __name__ == "__main__":
     u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "Angles", pathBase+'/Angles', cut, "norm1")
     u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "Muons",  pathBase+'/Muons', None, "norm1")
 
-    u.drawAllInFile(None, "", bkgZip, sigFile, sigName, "GEN", pathBase+'/GEN', None, "norm")
+
+    u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "Star",  pathBase+'/Star', cut, "norm1")
+
+    #u.drawAllInFile(None, "", bkgZip, sigFile, sigName, "GEN", pathBase+'/GEN', None, "norm")
     #u.drawAllInFile(None, "", '', sigFile, sigName, "GEN", pathBase+'/GEN-angles', None, "norm")
     #u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName,  "",path, cut, "norm")
     # u.drawAllInFile(dataFile, "data", bkgZip, sigFile,"50xSignal","EB",pathBase+"/EB", cut, "lumi")
@@ -167,10 +170,10 @@ if __name__ == "__main__":
   if sel == "mugamma" and not options.zjp:
     if cut not in ['12','14','15','16']:
       # u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",  "Muons", pathBase+"/Muons", None,"norm")
-      u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",
-                      "Muons", pathBase+"/Muons/", None,"norm")
-      u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"#splitline{Signal}{m_{H}=125 GeV}",
-                      "Photon",pathBase+"/Photon/", None,"norm")
+      u.drawAllInFile(dataFile, "data",bkgZip,sigFile,sigName,
+                      "Muons", pathBase+"/Muons/", None, "norm")
+      u.drawAllInFile(dataFile, "data",bkgZip,sigFile,sigName,
+                      "Photon",pathBase+"/Photon/", None, "norm")
 
     elif cut in ['12']:
       u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"#splitline{Signal}{m_{H}=125 GeV}",
@@ -395,8 +398,8 @@ if __name__ == "__main__":
   print yields_sig
 
   if doBkg:
+    table_all  = u.yieldsTable([yields_data,yields_bkg,yields_sig], sel)
     #table_all  = u.yieldsTable([yields_data,yields_bkg,yields_sig, yields_ggH,yields_vbf, yields_vh], sel)
-    table_all = u.yieldsTable([yields_data, yields_hjp, yields_zjp], sel)
   else:
     if options.zjp or options.hjp:
       table_all = u.yieldsTable([yields_data, yields_hjp, yields_zjp], sel)

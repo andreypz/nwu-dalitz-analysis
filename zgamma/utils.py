@@ -481,13 +481,14 @@ def drawAllInFile(f1, name1, bZip, f3, name3, myDir,path, N, howToScale="none", 
 
           doPdf=1
 
+        '''
         if "ph_energyCorrection" in histoName:
           gStyle.SetOptStat(1111)
           h1.SetName("Data")
           h3.SetName("ggH-125")
           stats1 = h1.GetListOfFunctions().FindObject("stats");
           stats3 = h3.GetListOfFunctions().FindObject("stats");
-          stats1.Print()
+          stats3.Print()
           stats1.SetX1NDC(0.7)
           stats1.SetX2NDC(0.95)
           stats1.SetY1NDC(0.9)
@@ -501,7 +502,7 @@ def drawAllInFile(f1, name1, bZip, f3, name3, myDir,path, N, howToScale="none", 
           leg.SetX2(0.46)
           leg.SetY1(0.85)
           leg.SetY2(0.7)
-
+        '''
 
         if "zee_" in histoName:
           gStyle.SetOptStat(1111)
@@ -640,9 +641,9 @@ def makeTable(table, name, opt="tex"):
 
 def getYields(f, sample='ggH-125', doLumiScale=False):
   print 'Calculating yields for ',sample
-  ev = f.Get("Counts/evt_byCut")
-  sel = conf.get("selection", "sel")[0:2]
-  cuts =  getCuts(conf, "cuts-"+sel)
+  ev   = f.Get("Counts/evt_byCut")
+  sel  = conf.get("selection", "sel")[0:2]
+  cuts = getCuts(conf, "cuts-"+sel)
   if ev==None: return len(cuts)*[0]
 
   y = []

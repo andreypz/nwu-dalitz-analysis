@@ -9,6 +9,8 @@ float _EAPho[7][3] = {
   {0.020,  0.039,   0.260}, // 2.3   < eta < 2.4
   {0.012,  0.072,   0.266}  // 2.4   < eta
 };
+//                EB   EE
+float _mvaCuts[2] = {0.2, 0.2};
 
 ObjectID::ObjectID():
   _isRealData(0),
@@ -163,9 +165,8 @@ bool ObjectID::PassPhotonIdAndIso(const TCPhoton& ph, TString n)
   else if (n=="MVA")
     //return HggPreselection(ph);
     return PassPhotonMVA(ph);
-
   else  {
-    cout<<"PhotonID Warning: no such cut "<<n<<endl;
+    cout<<"PhotonID Warning: no such cut or method"<<n<<endl;
     return false;
   }
 
@@ -217,10 +218,6 @@ void ObjectID::PhotonR9Corrector(const TCPhoton& ph){
 float ObjectID::CalculateMuonIso(const TCMuon& lep)
 {
   float muISO = (lep.PfIsoCharged() + TMath::Max(0.0, lep.PfIsoPhoton() + lep.PfIsoNeutral() - 0.5*lep.PfIsoPU()))/lep.Pt();
-
-  //  Float_t muISO = (lep.IsoMap("pfChargedHadronPt_R04") +
-  //TMath::Max(0.0, lep.IsoMap("pfNeutralHadronEt_R04") + lep.IsoMap("pfPhotonEt_R04") - 0.5*lep.IsoMap("pfPUPt_R04")))/lep.Pt();
-
   return muISO;
 }
 
@@ -530,10 +527,8 @@ bool ObjectID::PassPhotonMVA(const TCPhoton& ph){
     if (phoPFChIsoWorst_ < ph.CiCPF4chgpfIso03()[k]) phoPFChIsoWorst_ = ph.CiCPF4chgpfIso03()[k];
   }
 
-  //                        EB    EE
-  const float mvacuts[2] = {0.1, 0.1};
 
-  if (tmvaReader[iBE]->EvaluateMVA("BDT") > mvacuts[iBE])
+  if (tmvaReader[iBE]->EvaluateMVA("BDT") > _mvaCuts[iBE])
     mvaPass = true;
 
   return mvaPass;

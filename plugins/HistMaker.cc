@@ -49,11 +49,12 @@ void HistMaker::MakePhotonPlots(const TCPhoton& ph)
   hists->fill1DHist(ph.TrackVeto(),     "ph_trackVeto",    ";track veto",  3,    0, 3,    1,"Photon");
   hists->fill1DHist(ph.HadOverEm(),     "ph_HadOverEm",    ";HadOverEm", 100,    0, 0.05, 1,"Photon");
   //hists->fill1DHist(ph.NormChi2(),    "ph_NormChi2",     ";NormChi2",  100,    0, 0.01, 1,"Photon");
-  hists->fill1DHist(ph.SCDeltaPhi(),    "ph_SCDeltaPhi",   ";SCDeltaPhi", 100, -0.2, 0.2, 1,"Photon");
-  hists->fill1DHist(ph.SCDeltaEta(),    "ph_SCDeltaEta",   ";SCDeltaEta", 100,-0.02, 0.02,1,"Photon");
+  //hists->fill1DHist(ph.SCDeltaPhi(),    "ph_SCDeltaPhi",   ";SCDeltaPhi", 100, -0.2, 0.2, 1,"Photon");
+  //hists->fill1DHist(ph.SCDeltaEta(),    "ph_SCDeltaEta",   ";SCDeltaEta", 100,-0.02, 0.02,1,"Photon");
   hists->fill1DHist(ph.GetNCrystals(),  "ph_nCrystals",    ";nCrystals",     160, 0, 160, 1,"Photon");
-  hists->fill1DHist(ph.SigmaIEtaIEta(), "ph_SigmaIEtaIEta",";SigmaIEtaIEta", 100, 0, 0.1, 1,"Photon");
-  hists->fill1DHist(ph.SigmaIPhiIPhi(), "ph_SigmaIPhiIPhi",";SigmaIPhiIPhi", 100, 0, 0.1, 1,"Photon");
+  hists->fill1DHist(ph.SigmaIEtaIPhi(), "ph_SigmaIEtaIPhi",";SigmaIEtaIPhi", 100, 0, 0.02, 1,"Photon");
+  hists->fill1DHist(ph.SigmaIEtaIEta(), "ph_SigmaIEtaIEta",";SigmaIEtaIEta", 100, 0, 0.02, 1,"Photon");
+  hists->fill1DHist(ph.SigmaIPhiIPhi(), "ph_SigmaIPhiIPhi",";SigmaIPhiIPhi", 100, 0, 0.01, 1,"Photon");
   hists->fill1DHist(ph.ConversionVeto(),"ph_ConversionVeto",";ConversionVeto", 3, 0, 3,   1,"Photon");
   //hists->fill1DHist(ph., "ph_",";", 3, 0, 3, 1, "Photon");
   //hists->fill1DHist(ph., "ph_",";", 3, 0, 3, 1, "Photon");
@@ -67,8 +68,8 @@ void HistMaker::FillHistosFull(Int_t num, Double_t weight, string dir)
   std::strcpy (d, dir.c_str());
 
   TLorentzVector diLep = _lPt1 + _lPt2;
-  TLorentzVector tri  = diLep + _gamma;
-  TLorentzVector four = diLep + _gamma + _gamma2;
+  TLorentzVector tri   = diLep + _gamma;
+  TLorentzVector four  = diLep + _gamma + _gamma2;
 
   TLorentzVector lPt1Gamma = _lPt1+_gamma;
   TLorentzVector lPt2Gamma = _lPt2+_gamma;
@@ -198,6 +199,26 @@ void HistMaker::FillHistosFull(Int_t num, Double_t weight, string dir)
 
   //hists->fill1DHist(nDofVtx1, Form("vtx_ndof1_%s_cut%i",  d, num), ";First vertex ndof", 50, 0,200, weight, dir);
   //hists->fill1DHist(nDofVtx2, Form("vtx_ndof2_%s_cut%i",  d, num), ";Second vertex ndof", 50, 0,200, weight, dir);
+
+
+  //Phi* variable
+  TLorentzVector l1,l2;
+  if(_lPt1.Charge()==-1 && _lPt2.Charge()==1)
+    {l1 = _lPt1; l2 = _lPt2;}
+  else if (_lPt1.Charge()==1 && _lPt2.Charge()==-1)
+    {l1 = _lPt2; l2 = _lPt1;}
+  else {
+    cout<<" this won't work, they are the same charge!"<<endl;
+    return;
+  }
+
+  float phi_acop = TMath::Pi() - fabs(l1.DeltaPhi(l2));
+  float theta_star = TMath::ACos(TMath::TanH( (l1.Eta() - l2.Eta())/2));
+  float phi_star   = sin(theta_star)*TMath::Tan(phi_acop/2);
+
+  hists->fill1DHist(phi_acop, Form("%s_phi_acop_cut%i", d, num), ";#phi_{acop}",  50, 0, TMath::Pi(), 1,"Star");
+  hists->fill1DHist(phi_star, Form("%s_phi_star_cut%i", d, num), ";#phi^{*}",     50, 0,          20, 1,"Star");
+  hists->fill1DHist(cos(theta_star), Form("%s_cos_theta_cut%i", d, num), ";cos(#theta^{*})",  50, -1, 1, 1,"Star");
 
 }
 

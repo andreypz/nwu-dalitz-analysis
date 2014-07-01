@@ -74,18 +74,18 @@ class BatchMaster():
         5. Poor house :(
         '''
         if not self._bias:
-            ## make file with list of inputs ntuples for the analyzer
-            input = open('{0}/input_{1}_{2}.txt'.format(self._stageDir, cfg._dataName, str(count+1)), 'w')
+          ## make file with list of inputs ntuples for the analyzer
+          input = open('{0}/input_{1}_{2}.txt'.format(self._stageDir, cfg._dataName, str(count+1)), 'w')
 
-            path = cfg._inDir
-            if cfg._inDir[:5] == '/pnfs':
-                path = 'dcap://cmsdca1.fnal.gov:24140/pnfs/fnal.gov/usr' + cfg._inDir[5:]
+          path = cfg._inDir
+          if cfg._inDir[:5] == '/pnfs':
+            path = 'dcap://cmsdca1.fnal.gov:24140/pnfs/fnal.gov/usr' + cfg._inDir[5:]
 
-            for i,source in enumerate(sourceFiles):
-                input.write(path+'/'+source+'\n')
-            input.close()
+          for i,source in enumerate(sourceFiles):
+            input.write(path+'/'+source+'\n')
+          input.close()
         else:
-            input =None
+          input =None
 
         ## Writing the batch config file
         batch_tmp = open('{0}/.batch_tmp_{1}_{2}'.format(self._stageDir, cfg._dataName, count+1), 'w')
@@ -95,10 +95,10 @@ class BatchMaster():
         #batch_tmp.write('Universe              = globus\n')
         #batch_tmp.write('globusscheduler       = cmsosgce.fnal.gov/jobmanager-condor\n')
         if self._bias:
-            batch_tmp.write('Arguments             = {0} {1} {2}\n'.format(self._outDir, count, cfg._args))
-            print "Creating condor cfg for:",self._outDir, count+1,cfg._args
+          batch_tmp.write('Arguments             = {0} {1} {2}\n'.format(self._outDir, count, cfg._args))
+          print "Creating condor cfg for:",self._outDir, count+1,cfg._args
         else:
-            batch_tmp.write('Arguments             = {0} {1} {2} {3}\n'.format(self._outDir, count+1, cfg._dataName, cfg._args))
+          batch_tmp.write('Arguments             = {0} {1} {2} {3}\n'.format(self._outDir, count+1, cfg._dataName, cfg._args))
         batch_tmp.write('Executable            = {0}\n'.format(self._executable))
         batch_tmp.write('Should_Transfer_Files = YES\n')
         batch_tmp.write('WhenToTransferOutput  = ON_EXIT\n')
@@ -137,27 +137,27 @@ class BatchMaster():
 
         print "Making a tar-ball", self._stageDir
         if not self._bias:
-            os.system('tar czf {0}/source.tar.gz ../zgamma ../src ../interface ../plugins ../data 2> /dev/null'.format(self._stageDir))
+          os.system('tar czf {0}/source.tar.gz ../zgamma ../src ../interface ../plugins ../data 2> /dev/null'.format(self._stageDir))
         else:
-            os.system('tar czf {0}/source.tar.gz ../fits-and-limits  2> /dev/null'.format(self._stageDir))
+          os.system('tar czf {0}/source.tar.gz ../fits-and-limits  2> /dev/null'.format(self._stageDir))
 
 
-        if bSystem is 'lpc':
+        if bSystem=='lpc' or bSystem=='tier3':
             for cfg in self._configList:
                 if self._bias:
-                    for i in xrange(cfg._nJobs):
-                        print 'Submitting: ', i
-                        self.make_batch_lpc(cfg, i, None)
-                        subprocess.call('condor_submit .batch_tmp_{0}_{1}'.format(cfg._dataName, i+1), shell=True)
+                  for i in xrange(cfg._nJobs):
+                    print 'Submitting: ', i
+                    self.make_batch_lpc(cfg, i, None)
+                    subprocess.call('condor_submit .batch_tmp_{0}_{1}'.format(cfg._dataName, i+1), shell=True)
                 else:
-                    sourceFiles = self.split_jobs(cfg._inDir, cfg._nJobs)
+                  sourceFiles = self.split_jobs(cfg._inDir, cfg._nJobs)
 
-                    for i, source in enumerate(sourceFiles):
-                        self.make_batch_lpc(cfg, i, source)
-                        subprocess.call('condor_submit .batch_tmp_{0}_{1}'.format(cfg._dataName, i+1), shell=True)
-                        # subprocess.call('condor_submit {0}/.batch_tmp_{1}_{2}'.format(self._stageDir, cfg._dataName, i+1), shell=True)
+                  for i, source in enumerate(sourceFiles):
+                    self.make_batch_lpc(cfg, i, source)
+                    subprocess.call('condor_submit .batch_tmp_{0}_{1}'.format(cfg._dataName, i+1), shell=True)
+                    # subprocess.call('condor_submit {0}/.batch_tmp_{1}_{2}'.format(self._stageDir, cfg._dataName, i+1), shell=True)
         else:
-            print "Non LPC?  Sorry, this is not supported yet"
+          print "Non LPC or Tier3?  Sorry, this is not supported yet"
 
 
 
