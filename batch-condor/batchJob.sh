@@ -37,8 +37,12 @@ cd nwu-my-analysis
 cp ../source.tar.gz .
 tar -xzf source.tar.gz
 
-cd zgamma
-
+if [ ${selection} == "nate" ]
+then
+    cd testAnalyzer
+else
+    cd zgamma
+fi
 cp ../../input_${dataName}_${count}.txt input.txt
 ls -l
 
@@ -62,5 +66,7 @@ echo "Done. Will copy the files to " $outDir
 # for EOS:
 cp hhhh_${dataName}.root $outDir/hhhh_${dataName}_${count}.root
 # For condor internal output:
-cp hhhh_${dataName}.root hhhh_${dataName}_${count}.root
-cp out_synch_.txt out_synch_${dataName}_${count}.txt
+cp hhhh_${dataName}.root ../../hhhh_${dataName}_${count}.root
+cp out_synch_.txt ../../out_synch_${dataName}_${count}.txt
+
+echo "Trully, the END"

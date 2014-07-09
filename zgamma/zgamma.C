@@ -186,7 +186,7 @@ Bool_t zgamma::Process(Long64_t entry)
   GetEntry(entry);
   CountEvents(0);
   FillHistoCounts(0, 1);
-  if (nEvents[0] % (int)5e4 == 0) cout<<nEvents[8]<<" events passed of "<<nEvents[0]<<" checked!"<<endl;
+  if (nEvents[0] % (int)5e4 == 0) cout<<nEvents[4]<<" events passed of "<<nEvents[0]<<" checked!"<<endl;
 
   if (nEvents[0] == 1) weighter->SetDataBit(isRealData);
 
@@ -211,6 +211,8 @@ Bool_t zgamma::Process(Long64_t entry)
   //cout<<" weight="<<eventWeight<<endl;
   ObjID->SetEventInfo(isRealData, runNumber, eventNumber, rhoFactor);
   //cout<<eventNumber<<"  ev rho = "<<rhoFactor<<endl;
+  hists->fill1DHist(nPUVerticesTrue, "nPUVerticesTrue",";nPUVerticesTrue",  100, 0,100, 1,"GEN");
+  hists->fill1DHist(nPUVertices,     "nPUVertices",";nPUVertices",          100, 0,100, 1,"GEN");
 
 
   // ----------------------//
@@ -528,11 +530,11 @@ Bool_t zgamma::Process(Long64_t entry)
   //if (photonsTight.size()<1) return kTRUE;
   //gamma = photonsTight[0];
 
-  //if (photonsHZG.size()<1) return kTRUE;
-  //gamma = photonsHZG[0];
+  if (photonsHZG.size()<1) return kTRUE;
+  gamma = photonsHZG[0];
 
-  if (photonsMVA.size()<1) return kTRUE;
-  gamma = photonsMVA[0];
+  //if (photonsMVA.size()<1) return kTRUE;
+  //gamma = photonsMVA[0];
 
   if (!isRealData)
     eventWeight *= weighter->PhotonSF(gamma);
@@ -610,7 +612,7 @@ Bool_t zgamma::Process(Long64_t entry)
 	  break;}}
 
     if(thisMuon->Pt() > 4
-       && ObjID->PassMuonIdAndIso(*thisMuon, pvPosition, "Soft")
+       && ObjID->PassMuonId(*thisMuon, pvPosition, "Soft")
        ) {
 
 

@@ -10,7 +10,7 @@ float _EAPho[7][3] = {
   {0.012,  0.072,   0.266}  // 2.4   < eta
 };
 //                EB   EE
-float _mvaCuts[2] = {0.2, 0.2};
+float _mvaCuts[2] = {0.08, 0.08};
 
 ObjectID::ObjectID():
   _isRealData(0),
@@ -69,6 +69,19 @@ ObjectID::ObjectID():
   muIdAndIsoCutsSoft.dxy             = 0.2; //3
   muIdAndIsoCutsSoft.dz              = 0.5; //30
   muIdAndIsoCutsSoft.pfIso04         = 0.4;
+
+  //muon id cuts
+  muIdAndIsoCutsTight.ptErrorOverPt = 9999.;
+  muIdAndIsoCutsTight.TrackLayersWithMeasurement = 5;
+  muIdAndIsoCutsTight.NumberOfValidMuonHits      = 0;
+  muIdAndIsoCutsTight.NumberOfValidTrackerHits   = 10;
+  muIdAndIsoCutsTight.NumberOfValidPixelHits     = 0;
+  muIdAndIsoCutsTight.NumberOfMatches            = 1;
+  muIdAndIsoCutsTight.NumberOfMatchedStations    = 1;
+  muIdAndIsoCutsTight.NormalizedChi2 = 10;
+  muIdAndIsoCutsTight.dxy = 0.2;
+  muIdAndIsoCutsTight.dz  = 0.5;
+  muIdAndIsoCutsTight.pfIso04 = 0.4;
 
   //Photon Id cuts
   phIdAndIsoCutsTight.PassedEleSafeVeto[0] = 1;
@@ -221,7 +234,19 @@ float ObjectID::CalculateMuonIso(const TCMuon& lep)
   return muISO;
 }
 
-bool ObjectID::PassMuonIdAndIso(const TCMuon& lep, TVector3 *pv, TString n)
+//if (ObjID->CalculateMuonIso(muons[1]) > 1.4)
+
+
+bool ObjectID::PassMuonIso(const TCMuon& lep)
+{
+  float iso = ObjectID::CalculateMuonIso(lep);
+  if (iso<0.12)
+    return true;
+  else
+    return false;
+}
+
+bool ObjectID::PassMuonId(const TCMuon& lep, TVector3 *pv, TString n)
 {
   muIdAndIsoCuts cuts;
   if (n=="Soft")
@@ -235,30 +260,37 @@ bool ObjectID::PassMuonIdAndIso(const TCMuon& lep, TVector3 *pv, TString n)
 
   bool pass = false;
 
-  //Float_t muISO =  CalculateMuonIso(lep);
 
-  if(1
+  if(n=="Soft"
      && lep.IsPF()
      && ((lep.IsTRK() && lep.NumberOfMatches() > 0) || lep.IsGLB())
      && fabs(lep.Dxy(pv))     < cuts.dxy
      && fabs(lep.Dz(pv))      < cuts.dz
-     //&& (lep.Pt() < 20 || zgamma::CalculateMuonIso(lep) < 0.4)
      )
     pass = true;
-  /*
-  if(1
-     && lep.IsPF() && lep.IsTRK()
-     && lep.NormalizedChi2_tracker()  < cuts.NormalizedChi2_tracker
-     && fabs(lep.Dxy(pv))     < cuts.dxy
-     && fabs(lep.Dz(pv))      < cuts.dz
-     )
-    pass = true;
-  */
 
+  else if(n == "Tight"
+	  && lep.IsPF() && lep.IsGLB()
+	  && lep.NormalizedChi2()             < cuts.NormalizedChi2
+	  && lep.NumberOfValidMuonHits()      > cuts.NumberOfValidMuonHits
+	  && lep.NumberOfMatchedStations()    > cuts.NumberOfMatchedStations
+	  && lep.NumberOfValidPixelHits()     > cuts.NumberOfValidPixelHits
+	  && lep.TrackLayersWithMeasurement() > cuts.TrackLayersWithMeasurement
+	  && fabs(lep.Dxy(pv)) < cuts.dxy
+	  && fabs(lep.Dz(pv))  < cuts.dz
+	  )
+    pass = true;
   return pass;
 }
 
 
+bool ObjectID::PassMuonIdAndIso(const TCMuon& lep, TVector3 *pv, TString n)
+{
+  if (PassMuonId(lep, pv, n) && PassMuonIso(lep))
+    return true;
+  else
+    return false;
+}
 
 float ObjectID::CalculateElectronIso(const TCElectron& lep)
 {
@@ -337,22 +369,22 @@ bool ObjectID::PassElectronIdAndIso(const TCElectron& lep, TVector3 *pv, TString
 
   if(((fabs(lep.Eta()) < 1.442
        && lep.PtError()/lep.Pt() < cuts.ptErrorOverPt[0]
-       && lep.SigmaIEtaIEta() < cuts.sigmaIetaIeta[0]
+       && lep.SigmaIEtaIEta()    < cuts.sigmaIetaIeta[0]
        && fabs(lep.SCDeltaPhi()) < cuts.dPhiIn[0]
        && fabs(lep.SCDeltaEta()) < cuts.dEtaIn[0]
-       && lep.HadOverEm() < cuts.HadOverEm[0]
+       && lep.HadOverEm()   < cuts.HadOverEm[0]
        && fabs(lep.Dxy(pv)) < cuts.dxy[0]
-       && fabs(lep.Dz(pv)) < cuts.dz[0]
+       && fabs(lep.Dz(pv))  < cuts.dz[0]
        //&& eleISO < cuts.pfIso04[0]
        )||
       (fabs(lep.Eta()) > 1.556
        && lep.PtError()/lep.Pt() < cuts.ptErrorOverPt[1]
-       && lep.SigmaIEtaIEta() < cuts.sigmaIetaIeta[1]
+       && lep.SigmaIEtaIEta()    < cuts.sigmaIetaIeta[1]
        && fabs(lep.SCDeltaPhi()) < cuts.dPhiIn[1]
        && fabs(lep.SCDeltaEta()) < cuts.dEtaIn[1]
-       && lep.HadOverEm() < cuts.HadOverEm[1]
+       && lep.HadOverEm()   < cuts.HadOverEm[1]
        && fabs(lep.Dxy(pv)) < cuts.dxy[1]
-       && fabs(lep.Dz(pv)) < cuts.dz[1]
+       && fabs(lep.Dz(pv))  < cuts.dz[1]
        //&& eleISO < cuts.pfIso04[1]
        ))
      //&& lep.ConversionVeto()
@@ -467,30 +499,31 @@ bool ObjectID::PassPhotonMVA(const TCPhoton& ph){
     tmvaReader[iBE] = new TMVA::Reader("!Color:Silent");
 
     // add classification variables
+    // Orger Matters!!
     tmvaReader[iBE]->AddVariable("phoPhi", &phoPhi_);
-    tmvaReader[iBE]->AddVariable("phoR9", &phoR9_);
+    tmvaReader[iBE]->AddVariable("phoR9",  &phoR9_);
     tmvaReader[iBE]->AddVariable("phoSigmaIEtaIEta", &phoSigmaIEtaIEta_);
     tmvaReader[iBE]->AddVariable("phoSigmaIEtaIPhi", &phoSigmaIEtaIPhi_);
-    tmvaReader[iBE]->AddVariable("s13", &phoS13_);
-    tmvaReader[iBE]->AddVariable("s4ratio", &phoS4_);
-    tmvaReader[iBE]->AddVariable("s25", &phoS25_);
-    tmvaReader[iBE]->AddVariable("phoSCEta", &phoSCEta_);
+    tmvaReader[iBE]->AddVariable("s13",       &phoS13_);
+    tmvaReader[iBE]->AddVariable("s4ratio",   &phoS4_);
+    tmvaReader[iBE]->AddVariable("s25",       &phoS25_);
+    tmvaReader[iBE]->AddVariable("phoSCEta",  &phoSCEta_);
     tmvaReader[iBE]->AddVariable("phoSCRawE", &phoSCRawE_);
     tmvaReader[iBE]->AddVariable("phoSCEtaWidth", &phoSCEtaWidth_);
     tmvaReader[iBE]->AddVariable("phoSCPhiWidth", &phoSCPhiWidth_);
 
     if (iBE == 1) {
       tmvaReader[iBE]->AddVariable("phoESEn/phoSCRawE", &phoESEnToRawE_);
-      tmvaReader[iBE]->AddVariable("phoESEffSigmaRR", &phoESEffSigmaRR_x_);
+      tmvaReader[iBE]->AddVariable("phoESEffSigmaRR",   &phoESEffSigmaRR_x_);
     }
 
-    tmvaReader[iBE]->AddVariable("rho2012", &rho2012_);
+    tmvaReader[iBE]->AddVariable("rho2012",     &rho2012_);
     tmvaReader[iBE]->AddVariable("phoPFPhoIso", &phoPFPhoIso_);
-    tmvaReader[iBE]->AddVariable("phoPFChIso", &phoPFChIso_);
+    tmvaReader[iBE]->AddVariable("phoPFChIso",  &phoPFChIso_);
 
     tmvaReader[iBE]->AddVariable("phoPFChIsoWorst", &phoPFChIsoWorst_);
 
-    tmvaReader[iBE]->AddSpectator("phoEt", &phoEt_);
+    tmvaReader[iBE]->AddSpectator("phoEt",  &phoEt_);
     tmvaReader[iBE]->AddSpectator("phoEta", &phoEta_);
 
     // weight files

@@ -2,14 +2,14 @@
 import sys,os,datetime
 
 def createDir(dir):
-    if not os.path.exists(dir):
-        try:
-            os.makedirs(dir)
-        except OSError:
-            if os.path.isdir(dir):
-                pass
-            else:
-                raise
+  if not os.path.exists(dir):
+    try:
+      os.makedirs(dir)
+    except OSError:
+      if os.path.isdir(dir):
+        pass
+      else:
+        raise
 
 def makeHTML(title, htmlDir, plot_types, description, IFRAMEA):
 
@@ -70,7 +70,7 @@ def makeHTML(title, htmlDir, plot_types, description, IFRAMEA):
     message += "<li><a href=\"yields_all.tex\">tex</a></li>"
     message+='</ul>'
 
-    tempfile = open("indextemplate.html","r")
+    tempfile = open("../zgamma/indextemplate.html","r")
     whole_thing = tempfile.read()
     whole_thing = whole_thing.replace("{TITLE}", title)
     whole_thing = whole_thing.replace("{MENU}", menu)

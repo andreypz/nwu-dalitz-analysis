@@ -25,6 +25,7 @@ class HistMaker {
    virtual void SetLeptons(TCPhysObject l1, TCPhysObject l2);
    virtual void SetGamma(TCPhysObject g);
    virtual void SetGamma2(TCPhysObject g);
+   virtual void Reset(float r);
 
  private:
   HistManager * hists;
@@ -33,6 +34,7 @@ class HistMaker {
   Bool_t _isLepSet;
   Bool_t _isGammaSet;
   Bool_t _isGamma2Set;
+  Float_t _rhoFactor;
   ZGAngles *angles;
 };
 

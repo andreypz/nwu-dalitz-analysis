@@ -81,13 +81,14 @@ if __name__ == "__main__":
 
 
     if doBkg:
-      os.system("hadd "+hPath+"/m_DYJets50_"   +sel+"_"+period+".root "
+      os.system("hadd "+hPath+"/m_DYJetsPow20_"+sel+"_"+period+".root "
                 +hPath+"/"+sel+"_"+period+"/hhhh_DYJetsPow20-RD1*.root")
-      #os.system("hadd "+hPath+"/m_DYJets50_"   +sel+"_"+period+".root "
-      #          +hPath+"/"+sel+"_"+period+"/hhhh_DYJets50*.root")
-      os.system("hadd "+hPath+"/m_ZG_"    +sel+"_"+period+".root "
-                +hPath+"/"+sel+"_"+period+"/hhhh_ZGToLLG_*.root ")
-
+      os.system("hadd "+hPath+"/m_DYJets50_"+sel+"_"+period+".root "
+                +hPath+"/"+sel+"_"+period+"/hhhh_DYJets50-RD1*.root")
+      os.system("hadd "+hPath+"/m_ZG_"+sel+"_"+period+".root "
+                +hPath+"/"+sel+"_"+period+"/hhhh_ZGToLLG-RD1*.root ")
+      os.system("hadd "+hPath+"/m_QCD_"+sel+"_"+period+".root "
+                +hPath+"/"+sel+"_"+period+"/hhhh_QCD_*.root ")
   if doBkg:
     #bkgFiles.append(TFile(hPath+"/m_ZG_"+sel+"_"+period+".root","OPEN"))
     #bkgNames.append('ZG')
@@ -98,6 +99,8 @@ if __name__ == "__main__":
     bkgNames.append('ZGDalitz')
     bkgFiles.append(TFile(hPath+"/"+sel+"_"+period+"/hhhh_DYJetsDalitz_1.root","OPEN"))
     bkgNames.append('DYJetsDalitz')
+    bkgFiles.append(TFile(hPath+"/m_QCD_"+sel+"_"+period+".root","OPEN"))
+    bkgNames.append('QCD')
 
     yields_bkg  = u.getYields(bkgFiles[0],"ZGDalitz",True)
 
@@ -157,7 +160,6 @@ if __name__ == "__main__":
     u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "", path, cut, "lumi")
     u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "Angles", pathBase+'/Angles', cut, "norm1")
     u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "Muons",  pathBase+'/Muons', None, "norm1")
-
 
     u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "Star",  pathBase+'/Star', cut, "norm1")
 

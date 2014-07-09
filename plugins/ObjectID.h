@@ -73,6 +73,8 @@ class ObjectID {
 
   virtual float CalculateMuonIso(const TCMuon& l);
   virtual float CalculateElectronIso(const TCElectron& l);
+  virtual bool PassMuonIso(const TCMuon& l);
+  virtual bool PassMuonId(const TCMuon& l, TVector3 *pv, TString n);
   virtual bool PassMuonIdAndIso(const TCMuon& l, TVector3 *pv, TString n);
   virtual bool PassElectronIdAndIso(const TCElectron& l, TVector3 *pv, TString n);
   virtual bool PassElectronIdAndIsoMVA(const TCElectron& l);

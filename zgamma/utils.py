@@ -154,7 +154,7 @@ def makeStack(bZip, histDir, histoName, leg, lumi, howToScale, normToScale=None)
     hName = histoName
 
   for n,f in bZip:
-    #print n,f
+    print n,f
 
     h1 = f.Get(hName)
     if h1==None:
@@ -422,112 +422,115 @@ def drawAllInFile(f1, name1, bZip, f3, name3, myDir,path, N, howToScale="none", 
 
           pad1.cd();
 
-        #proc = 'H#rightarrow#gamma*#gamma#rightarrow#mu#mu#gamma'
-        proc = 'Z#rightarrow J/#Psi#gamma#rightarrow#mu#mu#gamma'
-        #proc = 'H#rightarrow#J/#Psi#gamma#rightarrow#mu#mu#gamma'
-        # prelim = TLatex(0.15,0.95, "CMS Simulation          H#rightarrow#gamma*#gamma#rightarrow#mu#mu#gamma")
-        prelim = TLatex(0.15,0.95, "CMS Preliminary #sqrt{s} = 8TeV, L = 19.7 fb^{-1}   "+proc)
-        prelim.SetNDC();
-        prelim.SetTextSize(0.035);
-        prelim.Draw();
 
-        #print "hmax =", hmaxs
+      mainHist.Draw('hist')
+      if bZip!='':
+        if howToScale=='lumi':
+          stack.Draw('same hist')
+        else:
+          stack.Draw('same nostack hist')
+        hmaxs.append(stack.GetMaximum())
+      if h1!=None:
+        h1.Draw("same e1p hist")
+        # if howToScale=='lumi': h1.Draw("same e1p hist")
+        # else: h1.Draw("same hist")
+      if h3!=None:
+        h3.Draw("same hist")
 
-        mainHist.Draw('hist')
-        if bZip!='':
-          if howToScale=='lumi':
-            stack.Draw('same hist')
-          else:
-            stack.Draw('same nostack hist')
-          hmaxs.append(stack.GetMaximum())
-        if h1!=None:
-          h1.Draw("same e1p hist")
-          #if howToScale=='lumi': h1.Draw("same e1p hist")
-          #else: h1.Draw("same hist")
-        if h3!=None:
-          h3.Draw("same hist")
+      if len(hmaxs)>0:
+        m = max(hmaxs)
+        mainHist.SetMaximum(1.1*m)
+        if isLog:
+          mainHist.SetMaximum(10*m)
+      if howToScale == "norm":
+        mainHist.GetYaxis().SetTitle("arbitrary units")
+      elif howToScale == "norm1":
+        mainHist.GetYaxis().SetTitle("Events")
+        mainHist.SetMaximum(int(1.1*m)+5)
+      else:
+        mainHist.GetYaxis().SetTitle("Events")
 
-        if len(hmaxs)>0:
-          m = max(hmaxs)
-          mainHist.SetMaximum(1.1*m)
-          if isLog:
-            mainHist.SetMaximum(10*m)
-        if howToScale == "norm":
-          mainHist.GetYaxis().SetTitle("arbitrary units")
-        if howToScale == "norm1":
-          mainHist.GetYaxis().SetTitle("Events")
-          mainHist.SetMaximum(int(1.1*m)+5)
+      # Here we consider particular cases (histograms) that need special care
+      # if "tri_mass_longTail" in histoName and howToScale=="lumi":
+      # h1.SetMaximum(750)
 
-        # Here we consider particular cases (histograms) that need special care
-        # if "tri_mass_longTail" in histoName and howToScale=="lumi":
-        # h1.SetMaximum(750)
+      if "diLep_mass_low"==histoName: # this is for LHE analyzer plots
+        int1 = h1.Integral(100,200)
+        int3 = h3.Integral(100,200)
+        h1.Scale(50./int1)
+        h3.Scale(50./int3)
 
-        if "diLep_mass_low"==histoName: # this is for LHE analyzer plots
-          int1 = h1.Integral(100,200)
-          int3 = h3.Integral(100,200)
-          h1.Scale(50./int1)
-          h3.Scale(50./int3)
+        mainHist.SetTitle(";m_{ll} (GeV);arbitrary units")
+        mainHist.SetMaximum(1.2*h1.GetMaximum())
+        mainHist.SetNdivisions(505,'X')
+        doPdf=1
 
-          mainHist.SetTitle(";m_{ll} (GeV);arbitrary units")
-          mainHist.SetMaximum(1.2*h1.GetMaximum())
-          mainHist.SetNdivisions(505,'X')
-          doPdf=1
+      if "diLep_mass_low_" in histoName:
+        #h1.Rebin(2)
+        #h3.Rebin(2)
+        mainHist.SetXTitle("m_{#mu#mu} (GeV)")
+        mainHist.SetMaximum(1.2*h1.GetMaximum())
 
-        if "diLep_mass_low_" in histoName:
-          #h1.Rebin(2)
-          #h3.Rebin(2)
-          mainHist.SetXTitle("m_{#mu#mu} (GeV)")
-          mainHist.SetMaximum(1.2*h1.GetMaximum())
+        doPdf=1
 
-          doPdf=1
+      '''
+      if "ph_energyCorrection" in histoName:
+        gStyle.SetOptStat(1111)
+        h1.SetName("Data")
+        h3.SetName("ggH-125")
+        stats1 = h1.GetListOfFunctions().FindObject("stats");
+        stats3 = h3.GetListOfFunctions().FindObject("stats");
+        stats3.Print()
+        stats1.SetX1NDC(0.7)
+        stats1.SetX2NDC(0.95)
+        stats1.SetY1NDC(0.9)
+        stats1.SetY2NDC(0.7)
+        stats3.SetX1NDC(0.7)
+        stats3.SetX2NDC(0.95)
+        stats3.SetY1NDC(0.7)
+        stats3.SetY2NDC(0.5)
+        stats3.SetTextColor(kRed+1)
+        leg.SetX1(0.19)
+        leg.SetX2(0.46)
+        leg.SetY1(0.85)
+        leg.SetY2(0.7)
+      '''
 
-        '''
-        if "ph_energyCorrection" in histoName:
-          gStyle.SetOptStat(1111)
-          h1.SetName("Data")
-          h3.SetName("ggH-125")
-          stats1 = h1.GetListOfFunctions().FindObject("stats");
-          stats3 = h3.GetListOfFunctions().FindObject("stats");
-          stats3.Print()
-          stats1.SetX1NDC(0.7)
-          stats1.SetX2NDC(0.95)
-          stats1.SetY1NDC(0.9)
-          stats1.SetY2NDC(0.7)
-          stats3.SetX1NDC(0.7)
-          stats3.SetX2NDC(0.95)
-          stats3.SetY1NDC(0.7)
-          stats3.SetY2NDC(0.5)
-          stats3.SetTextColor(kRed+1)
-          leg.SetX1(0.19)
-          leg.SetX2(0.46)
-          leg.SetY1(0.85)
-          leg.SetY2(0.7)
-        '''
-
-        if "zee_" in histoName:
-          gStyle.SetOptStat(1111)
-          h1.SetName("Data")
-          h2.SetName("DYjets")
-          # h2.Print("all")
-          stats1 = h1.GetListOfFunctions().FindObject("stats");
-          stats2 = h2.GetListOfFunctions().FindObject("stats");
-          stats2.Print()
-          stats1.SetX1NDC(0.7)
-          stats1.SetX2NDC(0.95)
-          stats1.SetY1NDC(0.9)
-          stats1.SetY2NDC(0.7)
-          stats2.SetX1NDC(0.7)
-          stats2.SetX2NDC(0.95)
-          stats2.SetY1NDC(0.7)
-          stats2.SetY2NDC(0.5)
-          stats2.SetTextColor(kBlue+1)
-          leg.SetX1(0.19)
-          leg.SetX2(0.46)
-          leg.SetY1(0.85)
-          leg.SetY2(0.7)
+      if "zee_" in histoName:
+        gStyle.SetOptStat(1111)
+        h1.SetName("Data")
+        h2.SetName("DYjets")
+        # h2.Print("all")
+        stats1 = h1.GetListOfFunctions().FindObject("stats");
+        stats2 = h2.GetListOfFunctions().FindObject("stats");
+        stats2.Print()
+        stats1.SetX1NDC(0.7)
+        stats1.SetX2NDC(0.95)
+        stats1.SetY1NDC(0.9)
+        stats1.SetY2NDC(0.7)
+        stats2.SetX1NDC(0.7)
+        stats2.SetX2NDC(0.95)
+        stats2.SetY1NDC(0.7)
+        stats2.SetY2NDC(0.5)
+        stats2.SetTextColor(kBlue+1)
+        leg.SetX1(0.19)
+        leg.SetX2(0.46)
+        leg.SetY1(0.85)
+        leg.SetY2(0.7)
 
 
-        gPad.RedrawAxis()
+      gPad.RedrawAxis()
+
+      #proc = 'H#rightarrow#gamma*#gamma#rightarrow#mu#mu#gamma'
+      proc = 'Z#rightarrow J/#Psi#gamma#rightarrow#mu#mu#gamma'
+      # proc = 'H#rightarrow#J/#Psi#gamma#rightarrow#mu#mu#gamma'
+      # prelim = TLatex(0.15,0.95, "CMS Simulation          H#rightarrow#gamma*#gamma#rightarrow#mu#mu#gamma")
+      prelim = TLatex(0.15,0.95, "CMS Preliminary #sqrt{s} = 8TeV, L = 19.7 fb^{-1}   "+proc)
+      prelim.SetNDC();
+      prelim.SetTextSize(0.035);
+      prelim.Draw();
+
+      # print "hmax =", hmaxs
 
       c1.cd()
       leg.SetFillColor(kWhite)

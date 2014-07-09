@@ -20,10 +20,14 @@ files={}
 #files["two"] = ['/uscms_data/d2/andreypz/lhe_higgs_mumugamma_dalitz/hmumug_m120.root']
 #files["one"] = ['/uscms_data/d2/andreypz/lhe_higgs_eegamma_dalitz/heeg_m120.root']
 #files["one"] = ['~/LHE_files/dygamma_dalitz_muonmass_run02.root']
-files["one"] = ['~/LHE_files/dygamma_dalitz_muonmass_dRll_dRlg_run05.root']
-files["two"] = ['~/LHE_files/dyjet_dalitz_run09.root']
+#files["one"] = ['~/LHE_files/dygamma_dalitz_muonmass_dRll_dRlg_run05.root']
+#files["two"] = ['~/LHE_files/dyjet_dalitz_run09.root']
 #files["two"] = ['~/LHE_files/luisa/dygamma.lhe.root']
-files["three"] = ['~/LHE_files/hmumug_m120.root']
+#files["three"] = ['~/LHE_files/hmumug_m120.root']
+
+files["one"]   = ['~/LHE_files/dyJet/dyJet_xcut_03.root']
+files["two"]   = ['~/LHE_files/dyJet/dyJet_xcut_15.root']
+files["three"] = ['~/LHE_files/dyJet/dyJet_xcut_35_verylarge.root']
 
 #files["one"] = ['/tthome/andrey/LHE_dalitz_Luisa/dygamma.lhe.root']
 #files["two"] = ['/tthome/andrey/LHE_dalitz_Luisa/dyjet.lhe.root']
@@ -358,7 +362,8 @@ if __name__ == "__main__":
   blah = ['LHE files comparison for DY+gamma sample',
           'Luisa\'s vs mine']
 
-  u.drawAllInFile(oneFile, "DYG", [('DYJ',twoFile)],testFile, 'Sig', '', path, None,"norm", isLog=True)
+  u.drawAllInFile(oneFile, "3 GeV", [('15 GeV',twoFile)],testFile, '35 GeV', '', path, None,"norm", isLog=True)
+  #u.drawAllInFile(oneFile, "DYG", [('DYJ',twoFile)],testFile, 'Sig', '', path, None,"norm", isLog=True)
   #u.drawAllInFile(oneFile, "Mine",'',twoFile, 'Luisa','', path, None,"norm", isLog=True)
   #u.drawAllInFile(oneFile, "Electrons",'',twoFile, 'Muons','', path, None,"norm", isLog=True)
   # u.drawAllInFile(oneFile, "MCFM ele", twoFile, "Madgraph mu",None,"","", path, None,"norm")
