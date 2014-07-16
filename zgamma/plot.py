@@ -22,7 +22,7 @@ parser.add_option("--apz",dest="apz",action="store_true", default=False, help="D
 parser.add_option("--zjp",dest="zjp",action="store_true", default=False, help="Study J/Psi region and more (requires apzTree)")
 parser.add_option("--hjp",dest="hjp",action="store_true", default=False, help="Study J/Psi region and more (requires apzTree)")
 parser.add_option("-s", '--sel', dest="sel", type="string", default='mugamma',
-                  help="Selection to be used. Options are: '4mu','2e2mu', 'zee','mugamma', 'egamma'")
+                  help="Selection to be used. Options are: '4mu','2e2mu', 'zee','mugamma', 'elgamma'")
 
 (options, args) = parser.parse_args()
 
@@ -73,7 +73,7 @@ if __name__ == "__main__":
 
   if doMerge:
     if sel =="elgamma":
-      os.system("hadd "+hPath+"/m_Data_" +sel+"_"+period+".root "+hPath+"/"+sel+"_"+period+"/hhhh_*Run2012D*.root")
+      os.system("hadd "+hPath+"/m_Data_" +sel+"_"+period+".root "+hPath+"/"+sel+"_"+period+"/hhhh_*Run2012*.root")
     else:
       # os.system("hadd "+hPath+"/m_Data_" +sel+"_"+period+".root "+hPath+"/"+sel+"_"+period+"/hhhh_DoubleMu_Run20*.root")
       os.system("hadd "+hPath+"/m_Data_" +sel+"_"+period+".root "+hPath+"/"+sel+"_"+period+"/hhhh_MuEG_Run20*.root")
@@ -89,12 +89,12 @@ if __name__ == "__main__":
                 +hPath+"/"+sel+"_"+period+"/hhhh_ZGToLLG-RD1*.root ")
       os.system("hadd "+hPath+"/m_QCD_"+sel+"_"+period+".root "
                 +hPath+"/"+sel+"_"+period+"/hhhh_QCD_*.root ")
+
   if doBkg:
-    #bkgFiles.append(TFile(hPath+"/m_ZG_"+sel+"_"+period+".root","OPEN"))
-    #bkgNames.append('ZG')
-    #bkgFiles.append(TFile(hPath+"/m_DYJets50_"+sel+"_"+period+".root","OPEN"))
-    #bkgNames.append('DYJets50')
-    #bkgFiles.append(TFile(hPath+"/"+sel+"_"+period+"/hhhh_ZGDalitz-OLD_1.root","OPEN"))
+    bkgFiles.append(TFile(hPath+"/m_ZG_"+sel+"_"+period+".root","OPEN"))
+    bkgNames.append('ZG')
+    bkgFiles.append(TFile(hPath+"/m_DYJets50_"+sel+"_"+period+".root","OPEN"))
+    bkgNames.append('DYJets50')
     bkgFiles.append(TFile(hPath+"/"+sel+"_"+period+"/hhhh_ZGDalitz_1.root","OPEN"))
     bkgNames.append('ZGDalitz')
     bkgFiles.append(TFile(hPath+"/"+sel+"_"+period+"/hhhh_DYJetsDalitz_1.root","OPEN"))
@@ -154,7 +154,6 @@ if __name__ == "__main__":
   if (options.zjp or options.hjp) and cut in ['12']:
     u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName,  "jpsi",path, cut, "lumi")
 
-
   if cut not in ['12','14','15']:
     #u.drawAllInFile(dataFile, "Data", bkgZip, None, '', "", path, cut, "lumi")
     u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "", path, cut, "lumi")
@@ -169,13 +168,15 @@ if __name__ == "__main__":
     # u.drawAllInFile(dataFile, "data", bkgZip, sigFile,"50xSignal","EB",pathBase+"/EB", cut, "lumi")
     # u.drawAllInFile(dataFile, "data", bkgZip, sigFile,"50xSignal","EE",pathBase+"/EE", cut, "lumi")
 
+
+  u.drawAllInFile(dataFile, "data",bkgZip,sigFile,sigName,"Photon",pathBase+"/Photon/", None, "norm")
+  u.drawAllInFile(dataFile, "data",bkgZip,sigFile,sigName,"Photon-EGamma",pathBase+"/Photon-EGamma/", None, "norm")
+  #u.drawAllInFile(dataFile, "data",bkgZip,sigFile,sigName,"Photon-EnergyCorr",pathBase+"/Photon-EnergyCorr/", None, "norm")
+
   if sel == "mugamma" and not options.zjp:
     if cut not in ['12','14','15','16']:
       # u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",  "Muons", pathBase+"/Muons", None,"norm")
-      u.drawAllInFile(dataFile, "data",bkgZip,sigFile,sigName,
-                      "Muons", pathBase+"/Muons/", None, "norm")
-      u.drawAllInFile(dataFile, "data",bkgZip,sigFile,sigName,
-                      "Photon",pathBase+"/Photon/", None, "norm")
+      u.drawAllInFile(dataFile, "data",bkgZip,sigFile,sigName,"Muons", pathBase+"/Muons/", None, "norm")
 
     elif cut in ['12']:
       u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"#splitline{Signal}{m_{H}=125 GeV}",
@@ -186,21 +187,22 @@ if __name__ == "__main__":
 
   elif sel == "elgamma":
     u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",
-                    "Photon",     pathBase+"/Photon",     None,"norm")
+                    "DalitzEle-Before",  pathBase+"/DalitzEle-Before/",  None,"norm")
+    u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",
+                    "DalitzEle-AfterAll",  pathBase+"/DalitzEle-AfterAll/",  None,"norm")
+    u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",
+                    "DalitzEle-Before_tracks",  pathBase+"/DalitzEle-Before_tracks/",  None,"norm")
+    #u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",
+    #                "DalitzEle-AfterAll_tracks",  pathBase+"/DalitzEle-AfterAll_tracks/",  None,"norm")
 
     u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",
-                    "DalitzEle-Before",  pathBase+"/DalitzEle-Before",  None,"norm")
+                    "DalitzEle",  pathBase+"/DalitzEle/",  None,"norm")
     u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",
-                    "DalitzEle-AfterAll",  pathBase+"/DalitzEle-AfterAll",  None,"norm")
+                    "DalitzEle-EGamma",  pathBase+"/DalitzEle-EGamma/",  None,"norm")
     u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",
-                    "DalitzEle-Before_tracks",  pathBase+"/DalitzEle-Before_tracks",  None,"norm")
-    u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",
-                    "DalitzEle-AfterAll_tracks",  pathBase+"/DalitzEle-AfterAll_tracks",  None,"norm")
+                    "DalitzEle-BaseSC",  pathBase+"/DalitzEle-BaseSC/",  None,"norm")
 
-
-    u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",
-                    "DalitzEle",  pathBase+"/DalitzEle",  None,"norm")
-
+    '''
     u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",
                     "DalitzEleEB",pathBase+"/DalitzEleEB",None,"norm")
     u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",
@@ -210,7 +212,7 @@ if __name__ == "__main__":
                     "DalitzEleEB_tracks",pathBase+"/DalitzEleEB_tracks",None,"norm")
     u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",
                     "DalitzEleEE_tracks",pathBase+"/DalitzEleEE_tracks",None,"norm")
-
+    '''
 
     # dataFile.Close()
     #print yields_data
@@ -267,16 +269,14 @@ if __name__ == "__main__":
       alphaPiZ(data, c1, TCut('ph_pt/m_llg>0.3 && di_pt/m_llg>0.3 && m_llg>100&&m_llg<170'),
                pathBase+"/alphaPiZ-0/")
       alphaPiZ(data, c1, TCut(''),                                                            pathBase+"/alphaPiZ-1/")
-      alphaPiZ(data, c1, TCut('ph_pt/m_llg>0.30 && di_pt/m_llg>0.30'),                          pathBase+"/alphaPiZ-2/")
-      alphaPiZ(data, c1, TCut('ph_pt/m_llg>0.30 && di_pt/m_llg>0.30 && m_llg>100&&m_llg<150'),  pathBase+"/alphaPiZ-3/")
+      alphaPiZ(data, c1, TCut('ph_pt/m_llg>0.30 && di_pt/m_llg>0.30'),                        pathBase+"/alphaPiZ-2/")
+      alphaPiZ(data, c1, TCut('ph_pt/m_llg>0.30 && di_pt/m_llg>0.30 && m_llg>100&&m_llg<150'),pathBase+"/alphaPiZ-3/")
       alphaPiZ(data, c1, TCut('ph_pt/m_llg>0.35 && di_pt/m_llg>0.35 && m_llg>100&&m_llg<150'),pathBase+"/alphaPiZ-4/")
       alphaPiZ(data, c1, TCut('ph_pt/m_llg>0.35 && di_pt/m_llg>0.35 && m_llg>120&&m_llg<180'),pathBase+"/alphaPiZ-5/")
       alphaPiZ(data, c1, TCut('ph_pt/m_llg>0.35 && di_pt/m_llg>0.35 && m_llg>100&&m_llg<130'),pathBase+"/alphaPiZ-6/")
 
       alphaPiZ(data, c1, TCut('ph_pt/m_llg>0.30 && di_pt/m_llg>0.30 && m_llg>121&&m_llg<131'),pathBase+"/alphaPiZ-7/")
-      alphaPiZ(data, c1, TCut('ph_pt/m_llg>0.30 && di_pt/m_llg>0.30 && m_llg>85&&m_llg<96'),
-               pathBase+"/alphaPiZ-8/")
-
+      alphaPiZ(data, c1, TCut('ph_pt/m_llg>0.30 && di_pt/m_llg>0.30 && m_llg>85&&m_llg<96'),  pathBase+"/alphaPiZ-8/")
 
 
     '''

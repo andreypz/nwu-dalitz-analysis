@@ -34,8 +34,9 @@ selection = "mugamma"
 ana       = "zgamma"
 
 selection=options.sel
-if selection=='egamma':
+if selection=='elgamma':
   ana = "egamma"
+  trigger = 'pho26'
 if selection in ['4mu','2e2mu']:
   ana = 'fourLeptons'
 if selection == 'jp-mugamma':

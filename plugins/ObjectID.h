@@ -78,6 +78,7 @@ class ObjectID {
   virtual bool PassMuonIdAndIso(const TCMuon& l, TVector3 *pv, TString n);
   virtual bool PassElectronIdAndIso(const TCElectron& l, TVector3 *pv, TString n);
   virtual bool PassElectronIdAndIsoMVA(const TCElectron& l);
+  virtual bool PassDalitzEleID(const TCElectron& l, TString n);
   virtual bool HggPreselection(const TCPhoton& ph);
   virtual bool PassPhotonMVA(const TCPhoton& ph);
 

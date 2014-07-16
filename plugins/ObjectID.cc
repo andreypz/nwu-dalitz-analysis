@@ -43,23 +43,23 @@ ObjectID::ObjectID():
 
   //Tight
   elIdAndIsoCutsTight.ptErrorOverPt[0] = 9999.;
-  elIdAndIsoCutsTight.dPhiIn[0] = 0.06;
-  elIdAndIsoCutsTight.dEtaIn[0] = 0.004;
+  elIdAndIsoCutsTight.dPhiIn[0]        = 0.06;
+  elIdAndIsoCutsTight.dEtaIn[0]        = 0.004;
   elIdAndIsoCutsTight.sigmaIetaIeta[0] = 0.01;
-  elIdAndIsoCutsTight.HadOverEm[0] = 0.12;
-  elIdAndIsoCutsTight.fabsEPDiff[0] = 0.05;
+  elIdAndIsoCutsTight.HadOverEm[0]     = 0.12;
+  elIdAndIsoCutsTight.fabsEPDiff[0]    = 0.05;
   elIdAndIsoCutsTight.dxy[0] = 0.02;
-  elIdAndIsoCutsTight.dz[0] = 0.1;
+  elIdAndIsoCutsTight.dz[0]  = 0.1;
   elIdAndIsoCutsTight.pfIso04[0] = 0.15;
 
   elIdAndIsoCutsTight.ptErrorOverPt[1] = 9999.;
-  elIdAndIsoCutsTight.dPhiIn[1] = 0.03;
-  elIdAndIsoCutsTight.dEtaIn[1] = 0.007;
+  elIdAndIsoCutsTight.dPhiIn[1]        = 0.03;
+  elIdAndIsoCutsTight.dEtaIn[1]        = 0.007;
   elIdAndIsoCutsTight.sigmaIetaIeta[1] = 0.03;
-  elIdAndIsoCutsTight.HadOverEm[1] = 0.10;
-  elIdAndIsoCutsTight.fabsEPDiff[1] = 0.05;
+  elIdAndIsoCutsTight.HadOverEm[1]     = 0.10;
+  elIdAndIsoCutsTight.fabsEPDiff[1]    = 0.05;
   elIdAndIsoCutsTight.dxy[1] = 0.02;
-  elIdAndIsoCutsTight.dz[1] = 0.1;
+  elIdAndIsoCutsTight.dz[1]  = 0.1;
   elIdAndIsoCutsTight.pfIso04[1] = 0.15;
 
   //Soft muon id (specific for dalitz)
@@ -305,6 +305,70 @@ float ObjectID::CalculateElectronIso(const TCElectron& lep)
 }
 
 
+
+bool ObjectID::PassDalitzEleID(const TCElectron& el, TString n)
+{
+  if (n=="MVA")
+    return true;
+  else {
+    cout<<"EleID Warning: no such cut "<<n<<endl;
+    return false;
+  }
+
+
+  //bool mvaPass = false;
+  //if (!HggPreselection(ph)) return false;
+
+  // classification variables
+  static Float_t rho2012_, r9_, HoverE_;
+  static Float_t eleBCS25_1_, eleBCS25_2_, eleGSFPt1_, eleGSFPt2_, eleGSFdR_;
+  static Float_t SCEtaWidth_, SCPhiWidth_, dEtaAtVtx_, dPhiAtVtx_;
+  static Float_t EcalEnPin_, recoSCEta_, eleBCSieie2_;
+  static Float_t eleBCS15_2_, eleBCSieie1_;
+
+  // MVA classifiers for 0=ECAL barrel and 1=ECAL endcaps
+  static TMVA::Reader* tmvaDalitz = NULL;
+
+  if (!tmvaDalitz) {
+    tmvaDalitz = new TMVA::Reader("!Color:Silent");
+
+    tmvaDalitz->AddVariable("rho2012",    &rho2012_);
+    tmvaDalitz->AddVariable("eleBCS25_1", &eleBCS25_1_);
+    tmvaDalitz->AddVariable("eleBCS25_2", &eleBCS25_2_);
+    tmvaDalitz->AddVariable("eleGSFPt1",  &eleGSFPt1_);
+    tmvaDalitz->AddVariable("eleGSFPt2",  &eleGSFPt2_);
+    tmvaDalitz->AddVariable("eleGSFdR",   &eleGSFdR_);
+    tmvaDalitz->AddVariable("r9", &r9_);
+    tmvaDalitz->AddVariable("SCEtaWidth", &SCEtaWidth_);
+    tmvaDalitz->AddVariable("SCPhiWidth", &SCPhiWidth_);
+    tmvaDalitz->AddVariable("HoverE",     &HoverE_);
+    tmvaDalitz->AddVariable("dEtaAtVtx",  &dEtaAtVtx_);
+    tmvaDalitz->AddVariable("dPhiAtVtx",  &dPhiAtVtx_);
+    tmvaDalitz->AddVariable("EcalEnPin",  &EcalEnPin_);
+    tmvaDalitz->AddVariable("recoSCEta",  &recoSCEta_);
+    tmvaDalitz->AddVariable("eleBCSieie2",&eleBCSieie2_);
+    //tmvaDalitz->AddVariable("eleBCSieie1", &eleBCSieie1_);
+    //tmvaDalitz->AddVariable("eleBCS15_2", &eleBCS15_2_);
+
+  }
+  /*
+  r9_ = el.R9();
+  rho2012_    = _rhoFactor;
+  eleBCS25_1_ = el.BaseSC()[0];
+  eleBCS25_2_ = el.;
+  eleGSFPt1_  = el.;
+  eleGSFPt2_  = el.;
+  eleGSFdR_   = el.;
+  SCEtaWidth_ = el.;
+  SCPhiWidth_ = el.;
+  HoverE_     = el.;
+  dEtaAtVtx_  = el.;
+  dPhiAtVtx_  = el.;
+  EcalEnPin_  = el.;
+  recoSCEta_  = el.;
+  eleBCSieie2_= el.;
+  */
+}
 
 bool ObjectID::PassElectronIdAndIsoMVA(const TCElectron& lep)
 {

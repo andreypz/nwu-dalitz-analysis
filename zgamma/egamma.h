@@ -35,7 +35,6 @@
 #include <TProfile.h>
 #include <TRandom3.h>
 
-
 #include "../interface/TCPhysObject.h"
 #include "../interface/TCJet.h"
 #include "../interface/TCMET.h"
@@ -48,94 +47,66 @@
 #include "../interface/TCGenParticle.h"
 #include "../interface/TCGenJet.h"
 #include "../interface/TCPrimaryVtx.h"
-#include "../interface/TCTriggerObject.h"
+//#include "../interface/TCTriggerObject.h"
 
-//#include "../plugins/WeightUtils.h"
+#include "../plugins/WeightUtils.h"
 #include "../plugins/TriggerSelector.h"
-//#include "../plugins/rochcor.h"
+#include "../plugins/rochcor2012v2.h"
 #include "../plugins/ZGAngles.h"
 #include "../plugins/HistManager.h"
-//#include "zgamma.h"
+#include "../plugins/PhotonScaleCorrections.hh"
 
+//#include "../plugins/PhosphorCorrectorFunctor.hh"
 // Header file for the classes stored in the TTree if any.
+
+#include "../plugins/ObjectID.h"
+#include "../plugins/HistMaker.h"
 #include <TClonesArray.h>
 #include <TVector3.h>
 
 
-#define nC 14
-struct muIdAndIsoCuts{
-  Bool_t IsPF;
-  Bool_t IsGLB;
-  Float_t ptErrorOverPt;
-  Int_t TrackLayersWithMeasurement;
-  Int_t PixelLayersWithMeasurement;
-  Int_t NumberOfValidMuonHits;
-  Int_t NumberOfValidTrackerHits;
-  Int_t NumberOfValidPixelHits;
-  Int_t NumberOfMatches;
-  Int_t NumberOfMatchedStations;
-  Float_t NormalizedChi2;
-  Float_t NormalizedChi2_tracker;
-  Float_t dxy;
-  Float_t dz;
-  Float_t chIso04;
-  Float_t nhIso04;
-  Float_t phIso04;
-  Float_t pfIso04;
-};
-
-struct elIdAndIsoCuts{
-  //broken into [0] barrel and [1] endcap
-  Float_t ptErrorOverPt[2];
-  Float_t dEtaIn[2];
-  Float_t dPhiIn[2];
-  Float_t sigmaIetaIeta[2];
-  Float_t HadOverEm[2];
-  Float_t dxy[2];
-  Float_t dz[2];
-  Float_t fabsEPDiff[2];
-  Int_t ConversionMissHits[2];
-  Int_t PassedConversionProb[2];
-  Float_t pfIso04[2];
-};
-
-struct phIdAndIsoCuts{
-  //broken into [0] barrel and [1] endcap
-  Int_t PassedEleSafeVeto[2];
-  Float_t sigmaIetaIeta[2];
-  Float_t HadOverEm[2];
-  float chIso03[2];
-  float nhIso03[2];
-  float phIso03[2];
-};
-
-
+#define nC 18
 class egamma : public TSelector {
  private:
-  TFile* histoFile;  
+  TFile* histoFile;
   TTree* thisTree;
-
-  muIdAndIsoCuts muIdAndIsoCutsTight, muIdAndIsoCutsLoose, muIdAndIsoCutsSoft;
-  elIdAndIsoCuts elIdAndIsoCutsTight, elIdAndIsoCutsLoose;
-  phIdAndIsoCuts phIdAndIsoCutsHZG,   phIdAndIsoCutsTight, phIdAndIsoCutsLoose;
-
 
   ZGAngles *ang;
   TriggerSelector *triggerSelector;
   HistManager *hists;
-  UInt_t nEvents[nC];
-  UInt_t totEvents;  
+  WeightUtils *weighter;
+  rochcor2012 *roch;
+  ObjectID *ObjID;
+  HistMaker *HM;
 
+  UInt_t nEvents[nC];
+  UInt_t totEvents;
+
+  TRandom3 *myRandom;
   ofstream fout;
 
-  TTree* _mvaTree;
+  //auto_ptr<ammagz::PhosphorCorrectionFunctor> phoCorrector;
+
+  /*TTree* _mvaTree;
   Float_t mva_SCPhiWidth, mva_SCEtaWidth, mva_SigmaIEtaIEta, mva_SigmaIPhiIPhi;
   Float_t mva_fabsEPDiff, mva_EoP, mva_fbrem, mva_SCdPhi, mva_SCdEta;
   Float_t mva_SCEta, mva_R9, mva_HadOverEm, mva_ome1x5oe5x5;
+  */
+  Int_t nVtx, nVtxTotal;
+  Float_t nDofVtx1, nDofVtx2;
 
   TTree* _fitTree;
   Double_t fit_m_llg, fit_m_ll, fit_phEta, fit_weight;
-  Bool_t fit_isLowPt;
+  Double_t fit_m_4l, fit_m_ll2;
+  Double_t fit_phPt, fit_diPt;
+  Bool_t   fit_isLowPt;
+
+  TTree* _apzTree;
+  Double_t apz_dr12, apz_dr13, apz_dr23, apz_dr34, apz_dr1234;
+  Double_t apz_pt12, apz_pt34;
+  Double_t apz_pt1, apz_pt2, apz_pt3, apz_pt4;
+  Double_t apz_m12, apz_m34, apz_m123, apz_m4l;
+  Double_t apz_eta1234, apz_eta12, apz_eta34, apz_eta1, apz_eta2, apz_eta3, apz_eta4;
 
   string period;
   string sample;
@@ -155,7 +126,7 @@ class egamma : public TSelector {
    TClonesArray    *recoMuons;
    TClonesArray    *recoPhotons;
    TCMET           *recoMET;
-   TClonesArray    *triggerObjects;
+   //TClonesArray    *triggerObjects;
    TClonesArray    *genJets;
    TClonesArray    *genParticles;
    TClonesArray    *primaryVtx;
@@ -195,7 +166,7 @@ class egamma : public TSelector {
    TBranch        *b_recoMuons;   //!
    TBranch        *b_recoPhotons;   //!
    TBranch        *b_recoMET;   //!
-   TBranch        *b_triggerObjects;   //!
+   //   TBranch        *b_triggerObjects;   //!
    TBranch        *b_genJets;   //!
    TBranch        *b_genParticles;   //!
    TBranch        *b_primaryVtx;   //!
@@ -233,34 +204,10 @@ class egamma : public TSelector {
    virtual void    SlaveTerminate();
    virtual void    Terminate();
 
-
    virtual void CountEvents(Int_t);
-
-   virtual float CalculateMuonIso(TCMuon *lep);
-   virtual float CalculateElectronIso(TCElectron *lep);
-   virtual bool PassMuonIdAndIso(TCMuon *l, muIdAndIsoCuts c, TVector3 *pv);
-   virtual bool PassElectronIdAndIso(TCElectron *l, elIdAndIsoCuts c, TVector3 *pv);
-   virtual bool PassElectronIdAndIsoMVA(TCElectron *l);
-   virtual bool PassElectronIdAndIsoDalitz(TCElectron *l, TVector3 *pv, bool);
-   virtual bool PassPhotonIdAndIso(TCPhoton *p, phIdAndIsoCuts c, TVector3 *pv);
-   
-   virtual void CalculatePhotonIso(TCPhoton *p, float& chIsoCor, float& nhIsoCor, float& phIsoCor);
-   virtual void FillHistosFull(Int_t n, Double_t w, TCPhysObject , TCPhysObject , TCPhysObject , TCPhysObject , TCPhysObject, string s="", bool isMergedEle=false);
    virtual void FillHistoCounts(Int_t n, Double_t w);
-   virtual void MakeMuonPlots(TCMuon mu, TVector3 *pv);
-   virtual void MakePhotonPlots(TCPhoton ph);
-   //virtual void MakeElectronPlots(TCElectron el);
-   virtual void MakeElectronPlots(TCElectron el, string d="Electrons");
-   virtual void FillElecronMVATree(TCElectron el);
 
-   virtual void MuonDump(TCMuon mu, TVector3 *pv);
-   virtual void PhotonDump(TCPhoton pho,  phIdAndIsoCuts c);
-
-   TCGenParticle * GetPrimaryAncestor(TCGenParticle *p);
-
-   virtual void DiscoverGeneology(TCGenParticle *p, ULong64_t ev);
-   
-   ClassDef(egamma,0);
+   ClassDef(egamma,1);
 };
 
 #endif
@@ -283,7 +230,7 @@ void egamma::Init(TTree *tree)
    recoMuons = 0;
    recoPhotons = 0;
    recoMET = 0;
-   triggerObjects = 0;
+   //triggerObjects = 0;
    genJets = 0;
    genParticles = 0;
    primaryVtx = 0;
@@ -291,7 +238,7 @@ void egamma::Init(TTree *tree)
    // Set branch addresses and branch pointers
    totEvents = 0;
    if (!tree) return;
-   thisTree    = tree; 
+   thisTree    = tree;
    fChain = tree;
    fChain->SetMakeClass(1);
 
@@ -301,7 +248,7 @@ void egamma::Init(TTree *tree)
    fChain->SetBranchAddress("recoMuons", &recoMuons, &b_recoMuons);
    fChain->SetBranchAddress("recoPhotons", &recoPhotons, &b_recoPhotons);
    fChain->SetBranchAddress("recoMET", &recoMET, &b_recoMET);
-   fChain->SetBranchAddress("triggerObjects", &triggerObjects, &b_triggerObjects);
+   //fChain->SetBranchAddress("triggerObjects", &triggerObjects, &b_triggerObjects);
    fChain->SetBranchAddress("genJets", &genJets, &b_genJets);
    fChain->SetBranchAddress("genParticles", &genParticles, &b_genParticles);
    fChain->SetBranchAddress("primaryVtx", &primaryVtx, &b_primaryVtx);

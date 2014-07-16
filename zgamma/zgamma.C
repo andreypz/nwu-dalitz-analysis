@@ -213,7 +213,7 @@ Bool_t zgamma::Process(Long64_t entry)
   //cout<<eventNumber<<"  ev rho = "<<rhoFactor<<endl;
   hists->fill1DHist(nPUVerticesTrue, "nPUVerticesTrue",";nPUVerticesTrue",  100, 0,100, 1,"GEN");
   hists->fill1DHist(nPUVertices,     "nPUVertices",";nPUVertices",          100, 0,100, 1,"GEN");
-
+  HM->Reset(rhoFactor);
 
   // ----------------------//
   // Gen level particles --//
@@ -452,11 +452,11 @@ Bool_t zgamma::Process(Long64_t entry)
   }
   pvPosition = mainPrimaryVertex;
 
-  vector<TCElectron> electrons0, electrons, electrons_dalitz, fake_electrons0;
+  vector<TCElectron> electrons0, electrons;
   vector<TCMuon> muons0, muons;
   vector<TCPhoton> photons0, photonsTight, photonsHZG, photonsMVA, fake_photons;
   TCPhysObject l1,l2, lPt1, lPt2;
-  TCPhoton gamma0, gamma, ufoton, ufelectron;
+  TCPhoton gamma0, gamma;
 
 
   if (nVtx>50){
@@ -898,13 +898,41 @@ Bool_t zgamma::Process(Long64_t entry)
   //fout<<" nEvt = "<<nEvents[0]<<" : Run/lumi/event = "<<runNumber<<"/"<<lumiSection<<"/"<<eventNumber<<endl;
 
 
-  if (checkTrigger){
-    triggerSelector->SelectTrigger(myTrigger, triggerStatus, hltPrescale, isFound, triggerPass, prescale);
-    if (!triggerPass) return kTRUE;
-    //  else Abort("Event trigger should mu or el");
+  //if (checkTrigger){
+  //triggerSelector->SelectTrigger(myTrigger, triggerStatus, hltPrescale, isFound, triggerPass, prescale);
+  //if (!triggerPass) return kTRUE;
+  ////  else Abort("Event trigger should mu or el");
+  //}
 
-  }
+  if (NoiseFilters_isScraping ||
+      NoiseFilters_isNoiseHcalHBHE || NoiseFilters_isNoiseHcalLaser
+      )
+    return kTRUE;
 
+  FillHistoCounts(14, eventWeight);
+  CountEvents(14);
+
+
+  if (NoiseFilters_isNoiseEcalTP || NoiseFilters_isNoiseEcalBE || NoiseFilters_isNoiseEEBadSc
+      )
+    return kTRUE;
+
+  FillHistoCounts(15, eventWeight);
+  CountEvents(15);
+
+
+  if (NoiseFilters_isCSCTightHalo || NoiseFilters_isCSCLooseHalo
+      )
+    return kTRUE;
+  FillHistoCounts(16, eventWeight);
+  CountEvents(16);
+
+  if (NoiseFilters_isNoiseTracking ||
+      !NoiseFilters_isNoisetrkPOG1 || !NoiseFilters_isNoisetrkPOG2 || !NoiseFilters_isNoisetrkPOG3
+      )
+    return kTRUE;
+  FillHistoCounts(17, eventWeight);
+  CountEvents(17);
 
   HM->FillHistosFull(10, eventWeight, "");
   FillHistoCounts(10, eventWeight);

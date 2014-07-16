@@ -65,7 +65,7 @@
 #include <TVector3.h>
 
 
-#define nC 16
+#define nC 18
 class zgamma : public TSelector {
  private:
   TFile* histoFile;
