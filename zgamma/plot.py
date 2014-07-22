@@ -73,7 +73,7 @@ if __name__ == "__main__":
 
   if doMerge:
     if sel =="elgamma":
-      os.system("hadd "+hPath+"/m_Data_" +sel+"_"+period+".root "+hPath+"/"+sel+"_"+period+"/hhhh_*Run2012*.root")
+      os.system("hadd "+hPath+"/m_Data_" +sel+"_"+period+".root "+hPath+"/"+sel+"_"+period+"/hhhh_*Run2012D*.root")
     else:
       # os.system("hadd "+hPath+"/m_Data_" +sel+"_"+period+".root "+hPath+"/"+sel+"_"+period+"/hhhh_DoubleMu_Run20*.root")
       os.system("hadd "+hPath+"/m_Data_" +sel+"_"+period+".root "+hPath+"/"+sel+"_"+period+"/hhhh_MuEG_Run20*.root")
@@ -91,18 +91,18 @@ if __name__ == "__main__":
                 +hPath+"/"+sel+"_"+period+"/hhhh_QCD_*.root ")
 
   if doBkg:
-    bkgFiles.append(TFile(hPath+"/m_ZG_"+sel+"_"+period+".root","OPEN"))
-    bkgNames.append('ZG')
-    bkgFiles.append(TFile(hPath+"/m_DYJets50_"+sel+"_"+period+".root","OPEN"))
-    bkgNames.append('DYJets50')
+    #bkgFiles.append(TFile(hPath+"/m_ZG_"+sel+"_"+period+".root","OPEN"))
+    #bkgNames.append('ZG')
+    #bkgFiles.append(TFile(hPath+"/m_DYJets50_"+sel+"_"+period+".root","OPEN"))
+    #bkgNames.append('DYJets50')
     bkgFiles.append(TFile(hPath+"/"+sel+"_"+period+"/hhhh_ZGDalitz_1.root","OPEN"))
     bkgNames.append('ZGDalitz')
     bkgFiles.append(TFile(hPath+"/"+sel+"_"+period+"/hhhh_DYJetsDalitz_1.root","OPEN"))
     bkgNames.append('DYJetsDalitz')
-    bkgFiles.append(TFile(hPath+"/m_QCD_"+sel+"_"+period+".root","OPEN"))
-    bkgNames.append('QCD')
+    #bkgFiles.append(TFile(hPath+"/m_QCD_"+sel+"_"+period+".root","OPEN"))
+    #bkgNames.append('QCD')
 
-    yields_bkg  = u.getYields(bkgFiles[0],"ZGDalitz",True)
+    yields_bkg  = u.getYields(bkgFiles[1],bkgNames[1],True)
 
     bkgZip = zip(bkgNames, bkgFiles)
   else: bkgZip = ''
@@ -147,20 +147,18 @@ if __name__ == "__main__":
   #path = pathBase+"/"+subdir
 
 
-  sigName = '#splitline{100xSignal}{m_{H}=125 GeV}'
+  sigName = '#splitline{1000xSignal}{m_{H}=125 GeV}'
   if options.zjp: sigName= '#splitline{50xSignal}{Z #rightarrow J/Psi #gamma}'
   if options.hjp: sigName= '#splitline{100xSignal}{h #rightarrow J/Psi #gamma}'
 
   if (options.zjp or options.hjp) and cut in ['12']:
     u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName,  "jpsi",path, cut, "lumi")
 
-  if cut not in ['12','14','15']:
+  if cut not in ['14','15']:
     #u.drawAllInFile(dataFile, "Data", bkgZip, None, '', "", path, cut, "lumi")
-    u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "", path, cut, "lumi")
+    u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "", path, cut, "norm1")
     u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "Angles", pathBase+'/Angles', cut, "norm1")
-    u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "Muons",  pathBase+'/Muons', None, "norm1")
-
-    u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "Star",  pathBase+'/Star', cut, "norm1")
+    #u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "Muons",  pathBase+'/Muons', None, "norm1")
 
     #u.drawAllInFile(None, "", bkgZip, sigFile, sigName, "GEN", pathBase+'/GEN', None, "norm")
     #u.drawAllInFile(None, "", '', sigFile, sigName, "GEN", pathBase+'/GEN-angles', None, "norm")
@@ -186,27 +184,36 @@ if __name__ == "__main__":
                       "AlphaPiZ",pathBase+"/apz/", cut,"norm2")
 
   elif sel == "elgamma":
-    u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",
-                    "DalitzEle-Before",  pathBase+"/DalitzEle-Before/",  None,"norm")
-    u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",
-                    "DalitzEle-AfterAll",  pathBase+"/DalitzEle-AfterAll/",  None,"norm")
-    u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",
-                    "DalitzEle-Before_tracks",  pathBase+"/DalitzEle-Before_tracks/",  None,"norm")
     #u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",
-    #                "DalitzEle-AfterAll_tracks",  pathBase+"/DalitzEle-AfterAll_tracks/",  None,"norm")
+    #                "AnElectron",  pathBase+"/AnElectron/",  None,"norm")
+    #u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",
+    #                "AnElectron-EGamma",  pathBase+"/AnElectron-EGamma/",  None,"norm")
 
-    u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",
-                    "DalitzEle",  pathBase+"/DalitzEle/",  None,"norm")
-    u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",
-                    "DalitzEle-EGamma",  pathBase+"/DalitzEle-EGamma/",  None,"norm")
-    u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",
-                    "DalitzEle-BaseSC",  pathBase+"/DalitzEle-BaseSC/",  None,"norm")
+    if cut in ['7','9','12']:
+      dirnameshort = "DalitzEle"
+      dirname = dirnameshort+"-cut"+cut
+      u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",
+                      dirname,  pathBase+"/"+dirnameshort+"/",  None,"norm")
+      u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",
+                      dirname+"-EGamma",  pathBase+"/"+dirnameshort+"-EGamma/",  None,"norm")
+      u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",
+                      dirname+"-BaseSC-1",  pathBase+"/"+dirnameshort+"-BaseSC-1/",  None,"norm")
+      u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",
+                      dirname+"-BaseSC-2",  pathBase+"/"+dirnameshort+"-BaseSC-2/",  None,"norm")
+
+      u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",
+                      dirname+"-track-1",  pathBase+"/"+dirnameshort+"-track-1/",  None,"norm")
+      u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",
+                    dirname+"-track-2",  pathBase+"/"+dirnameshort+"-track-2/",  None,"norm")
+      u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",
+                      dirname+"-track-3",  pathBase+"/"+dirnameshort+"-track-3/",  None,"norm")
+
 
     '''
     u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",
-                    "DalitzEleEB",pathBase+"/DalitzEleEB",None,"norm")
+                    dirname+"EB",pathBase+"/DalitzEleEB",None,"norm")
     u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",
-                    "DalitzEleEE",pathBase+"/DalitzEleEE/",None,"norm")
+                    dirname+"EE",pathBase+"/DalitzEleEE/",None,"norm")
 
     u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",
                     "DalitzEleEB_tracks",pathBase+"/DalitzEleEB_tracks",None,"norm")
@@ -417,7 +424,7 @@ if __name__ == "__main__":
   #os.system("cat yields_all.tex    > yields.html")
 
   defaultPage = sel
-  if cut in ['12']: defaultPage = 'jpsi'
+  if sel=='mugamma' and cut in ['12']: defaultPage = 'jpsi'
   elif cut in ['14','15']: defaultPage = 'apz'
   #elif options.zjp or options.hjp: defaultPage = 'jp-'+sel
   print defaultPage

@@ -210,7 +210,9 @@ Bool_t zgamma::Process(Long64_t entry)
   eventWeight = weighter->PUWeight(nPUVerticesTrue);
   //cout<<" weight="<<eventWeight<<endl;
   ObjID->SetEventInfo(isRealData, runNumber, eventNumber, rhoFactor);
-  //cout<<eventNumber<<"  ev rho = "<<rhoFactor<<endl;
+  float phoMvaScore;
+
+ //cout<<eventNumber<<"  ev rho = "<<rhoFactor<<endl;
   hists->fill1DHist(nPUVerticesTrue, "nPUVerticesTrue",";nPUVerticesTrue",  100, 0,100, 1,"GEN");
   hists->fill1DHist(nPUVertices,     "nPUVertices",";nPUVertices",          100, 0,100, 1,"GEN");
   HM->Reset(rhoFactor);
@@ -481,7 +483,7 @@ Bool_t zgamma::Process(Long64_t entry)
       if (isRealData || !makeGen || (sample=="dalitz" && makeGen && gen_gamma.DeltaR(*thisPhoton) < 0.1) )
 	photons0.push_back(*thisPhoton);
 
-      if(ObjID->PassPhotonIdAndIso(*thisPhoton, "CutBased-MediumWP")
+      if(ObjID->PassPhotonIdAndIso(*thisPhoton, "CutBased-MediumWP", phoMvaScore)
 	 //&& (isRealData || !makeGen || (sample=="dalitz" && makeGen && gen_gamma.DeltaR(*thisPhoton) < 0.2) )
 	 )
 	{
@@ -503,15 +505,20 @@ Bool_t zgamma::Process(Long64_t entry)
 	  //cout<<runNumber<<"  uncor en="<< thisPhoton->E()<<"  cor en = "<<corrPhoEn<<endl;
 	  //thisPhoton->SetPtEtaPhiM(corrPhoEnSC/cosh(SCEta()));
 
+	  thisPhoton->SetIdMap("mvaScore", phoMvaScore);
 	  photonsHZG.push_back(*thisPhoton);
 
 	}
 
-      if(ObjID->PassPhotonIdAndIso(*thisPhoton, "CutBased-TightWP"))
+      if(ObjID->PassPhotonIdAndIso(*thisPhoton, "CutBased-TightWP", phoMvaScore)){
+	thisPhoton->SetIdMap("mvaScore", phoMvaScore);
 	photonsTight.push_back(*thisPhoton);
+      }
 
-      if(ObjID->PassPhotonIdAndIso(*thisPhoton, "MVA"))
+      if(ObjID->PassPhotonIdAndIso(*thisPhoton, "MVA", phoMvaScore)){
+	thisPhoton->SetIdMap("mvaScore", phoMvaScore);
 	photonsMVA.push_back(*thisPhoton);
+      }
     }
   }
 
@@ -524,8 +531,6 @@ Bool_t zgamma::Process(Long64_t entry)
 
   //if (fake_photons.size()>1)
   // Abort("Nah, this is too much.");
-  if (fake_photons.size()>=1)
-    ufoton = fake_photons[0];
 
   //if (photonsTight.size()<1) return kTRUE;
   //gamma = photonsTight[0];

@@ -244,8 +244,12 @@ def drawAllInFile(f1, name1, bZip, f3, name3, myDir,path, N, howToScale="none", 
     #print k
     if k.GetName() in ["eff"]: continue
     if N!=None:
-      if not("cut"+N) in k.GetName(): continue
+      if not ("cut"+N) in k.GetName(): continue
+      if "DalitzEle" in k.GetName(): continue
+      #if k.ReadObj().isFolder(): continue
+
     mainHist = k.ReadObj()
+
 
     histoName = mainHist.GetName()
 
@@ -266,10 +270,10 @@ def drawAllInFile(f1, name1, bZip, f3, name3, myDir,path, N, howToScale="none", 
         h3 = f3.Get(myDir+"/"+histoName)
       else:
         h3 = f3.Get(histoName)
+        print myDir, histoName
       if h3==None: continue
 
       h3.Scale(float(scale3))
-
 
     print "drawing", histoName
 
@@ -521,9 +525,9 @@ def drawAllInFile(f1, name1, bZip, f3, name3, myDir,path, N, howToScale="none", 
 
       gPad.RedrawAxis()
 
-      #proc = 'H#rightarrow#gamma*#gamma#rightarrow#mu#mu#gamma'
-      proc = 'Z#rightarrow J/#Psi#gamma#rightarrow#mu#mu#gamma'
-      # proc = 'H#rightarrow#J/#Psi#gamma#rightarrow#mu#mu#gamma'
+      proc = 'H#rightarrow#gamma*#gamma#rightarrow#mu#mu#gamma'
+      #proc = 'Z#rightarrow J/#Psi#gamma#rightarrow#mu#mu#gamma'
+      #proc = 'H#rightarrow#J/#Psi#gamma#rightarrow#mu#mu#gamma'
       # prelim = TLatex(0.15,0.95, "CMS Simulation          H#rightarrow#gamma*#gamma#rightarrow#mu#mu#gamma")
       prelim = TLatex(0.15,0.95, "CMS Preliminary #sqrt{s} = 8TeV, L = 19.7 fb^{-1}   "+proc)
       prelim.SetNDC();

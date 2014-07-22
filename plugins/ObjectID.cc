@@ -10,7 +10,8 @@ float _EAPho[7][3] = {
   {0.012,  0.072,   0.266}  // 2.4   < eta
 };
 //                EB   EE
-float _mvaCuts[2] = {0.08, 0.08};
+float _phoMvaCuts[2] = {0.08, 0.08};
+float _DAleMvaCut = 0.00;
 
 ObjectID::ObjectID():
   _isRealData(0),
@@ -167,8 +168,9 @@ void ObjectID::CalculatePhotonIso(const TCPhoton& ph, float& chIsoCor, float& nh
 
 }
 
-bool ObjectID::PassPhotonIdAndIso(const TCPhoton& ph, TString n)
+bool ObjectID::PassPhotonIdAndIso(const TCPhoton& ph, TString n, float& mvaScore)
 {
+  mvaScore = -99;
   phIdAndIsoCuts cuts;
 
   if (n=="CutBased-MediumWP")
@@ -177,7 +179,7 @@ bool ObjectID::PassPhotonIdAndIso(const TCPhoton& ph, TString n)
     cuts = phIdAndIsoCutsTight;
   else if (n=="MVA")
     //return HggPreselection(ph);
-    return PassPhotonMVA(ph);
+    return PassPhotonMVA(ph, mvaScore);
   else  {
     cout<<"PhotonID Warning: no such cut or method"<<n<<endl;
     return false;
@@ -306,68 +308,83 @@ float ObjectID::CalculateElectronIso(const TCElectron& lep)
 
 
 
-bool ObjectID::PassDalitzEleID(const TCElectron& el, TString n)
+bool ObjectID::PassDalitzEleID(const TCElectron& el, TString n, float& mvaScore)
 {
+  mvaScore = -99;
   if (n=="MVA")
-    return true;
+    {
+      //bool mvaPass = false;
+      //if (!HggPreselection(el)) return false;
+
+      if (el.GetTracks().size() < 2 || el.BaseSC().size()<2)
+	return false;
+
+      // classification variables
+      static Float_t rho2012_, r9_, HoverE_;
+      static Float_t eleBCS25_1_, eleBCS25_2_, eleGSFPt1_, eleGSFPt2_, eleGSFdR_;
+      static Float_t SCEtaWidth_, SCPhiWidth_, dEtaAtVtx_, dPhiAtVtx_;
+      static Float_t EcalEnPin_, recoSCEta_, eleBCSieie2_;
+      static Float_t eleBCS15_2_, eleBCSieie1_;
+      // MVA classifiers for 0=ECAL barrel and 1=ECAL endcaps
+      static TMVA::Reader* tmvaDalitz = NULL;
+
+      if (!tmvaDalitz) {
+	tmvaDalitz = new TMVA::Reader("!Color:Silent");
+
+	tmvaDalitz->AddVariable("rho2012",    &rho2012_);
+	tmvaDalitz->AddVariable("eleBCS25_1", &eleBCS25_1_);
+	tmvaDalitz->AddVariable("eleBCS25_2", &eleBCS25_2_);
+	tmvaDalitz->AddVariable("eleGSFPt1",  &eleGSFPt1_);
+	tmvaDalitz->AddVariable("eleGSFPt2",  &eleGSFPt2_);
+	tmvaDalitz->AddVariable("eleGSFdR",   &eleGSFdR_);
+	tmvaDalitz->AddVariable("r9", &r9_);
+	tmvaDalitz->AddVariable("SCEtaWidth", &SCEtaWidth_);
+	tmvaDalitz->AddVariable("SCPhiWidth", &SCPhiWidth_);
+	tmvaDalitz->AddVariable("HoverE",     &HoverE_);
+	tmvaDalitz->AddVariable("dEtaAtVtx",  &dEtaAtVtx_);
+	tmvaDalitz->AddVariable("dPhiAtVtx",  &dPhiAtVtx_);
+	tmvaDalitz->AddVariable("EcalEnPin",  &EcalEnPin_);
+	tmvaDalitz->AddVariable("recoSCEta",  &recoSCEta_);
+	tmvaDalitz->AddVariable("eleBCSieie2",&eleBCSieie2_);
+
+	// Spectators
+	tmvaDalitz->AddSpectator("eleBCS15_2", &eleBCS15_2_);
+	tmvaDalitz->AddSpectator("eleBCSieie1",&eleBCSieie1_);
+
+	tmvaDalitz->BookMVA("BDT", "../data/ElectronDalitzMVAID.xml");
+      }
+
+	r9_ = el.R9();
+	rho2012_    = _rhoFactor;
+	eleBCS25_1_ = el.BaseSC()[0].E2x5()/el.BaseSC()[0].E5x5();
+	eleBCS25_2_ = el.BaseSC()[1].E2x5()/el.BaseSC()[1].E5x5();
+	eleGSFPt1_  = el.GetTracks()[0].Pt();
+	eleGSFPt2_  = el.GetTracks()[1].Pt();
+	eleGSFdR_   = el.GetTracks()[0].DeltaR(el.GetTracks()[1]);
+	SCEtaWidth_ = el.SCEtaWidth();
+	SCPhiWidth_ = el.SCPhiWidth();
+	HoverE_     = el.HadOverEm();
+	dEtaAtVtx_  = el.SCDeltaEta();
+	dPhiAtVtx_  = el.SCDeltaPhi();
+	EcalEnPin_  = el.InverseEnergyMomentumDiff(); //| 1/E - 1/Pin |
+	recoSCEta_  = el.SCEta();
+	eleBCSieie1_= el.BaseSC()[0].SigmaIEtaIEta();
+	eleBCSieie2_= el.BaseSC()[1].SigmaIEtaIEta();
+	eleBCS15_2_ = el.BaseSC()[1].E1x5()/el.BaseSC()[1].E5x5();
+
+	mvaScore = tmvaDalitz->EvaluateMVA("BDT");
+	if (mvaScore > _DAleMvaCut)
+	  return true;
+	else
+	  return false;
+
+    }
   else {
     cout<<"EleID Warning: no such cut "<<n<<endl;
     return false;
   }
 
 
-  //bool mvaPass = false;
-  //if (!HggPreselection(ph)) return false;
-
-  // classification variables
-  static Float_t rho2012_, r9_, HoverE_;
-  static Float_t eleBCS25_1_, eleBCS25_2_, eleGSFPt1_, eleGSFPt2_, eleGSFdR_;
-  static Float_t SCEtaWidth_, SCPhiWidth_, dEtaAtVtx_, dPhiAtVtx_;
-  static Float_t EcalEnPin_, recoSCEta_, eleBCSieie2_;
-  static Float_t eleBCS15_2_, eleBCSieie1_;
-
-  // MVA classifiers for 0=ECAL barrel and 1=ECAL endcaps
-  static TMVA::Reader* tmvaDalitz = NULL;
-
-  if (!tmvaDalitz) {
-    tmvaDalitz = new TMVA::Reader("!Color:Silent");
-
-    tmvaDalitz->AddVariable("rho2012",    &rho2012_);
-    tmvaDalitz->AddVariable("eleBCS25_1", &eleBCS25_1_);
-    tmvaDalitz->AddVariable("eleBCS25_2", &eleBCS25_2_);
-    tmvaDalitz->AddVariable("eleGSFPt1",  &eleGSFPt1_);
-    tmvaDalitz->AddVariable("eleGSFPt2",  &eleGSFPt2_);
-    tmvaDalitz->AddVariable("eleGSFdR",   &eleGSFdR_);
-    tmvaDalitz->AddVariable("r9", &r9_);
-    tmvaDalitz->AddVariable("SCEtaWidth", &SCEtaWidth_);
-    tmvaDalitz->AddVariable("SCPhiWidth", &SCPhiWidth_);
-    tmvaDalitz->AddVariable("HoverE",     &HoverE_);
-    tmvaDalitz->AddVariable("dEtaAtVtx",  &dEtaAtVtx_);
-    tmvaDalitz->AddVariable("dPhiAtVtx",  &dPhiAtVtx_);
-    tmvaDalitz->AddVariable("EcalEnPin",  &EcalEnPin_);
-    tmvaDalitz->AddVariable("recoSCEta",  &recoSCEta_);
-    tmvaDalitz->AddVariable("eleBCSieie2",&eleBCSieie2_);
-    //tmvaDalitz->AddVariable("eleBCSieie1", &eleBCSieie1_);
-    //tmvaDalitz->AddVariable("eleBCS15_2", &eleBCS15_2_);
-
-  }
-  /*
-  r9_ = el.R9();
-  rho2012_    = _rhoFactor;
-  eleBCS25_1_ = el.BaseSC()[0];
-  eleBCS25_2_ = el.;
-  eleGSFPt1_  = el.;
-  eleGSFPt2_  = el.;
-  eleGSFdR_   = el.;
-  SCEtaWidth_ = el.;
-  SCPhiWidth_ = el.;
-  HoverE_     = el.;
-  dEtaAtVtx_  = el.;
-  dPhiAtVtx_  = el.;
-  EcalEnPin_  = el.;
-  recoSCEta_  = el.;
-  eleBCSieie2_= el.;
-  */
 }
 
 bool ObjectID::PassElectronIdAndIsoMVA(const TCElectron& lep)
@@ -539,7 +556,9 @@ bool ObjectID::HggPreselection(const TCPhoton& ph)
   return true;
 }
 
-bool ObjectID::PassPhotonMVA(const TCPhoton& ph){
+bool ObjectID::PassPhotonMVA(const TCPhoton& ph, float& mvaScore){
+
+  mvaScore = -99;
 
   bool mvaPass = false;
   if (!HggPreselection(ph)) return false;
@@ -624,9 +643,10 @@ bool ObjectID::PassPhotonMVA(const TCPhoton& ph){
     if (phoPFChIsoWorst_ < ph.CiCPF4chgpfIso03()[k]) phoPFChIsoWorst_ = ph.CiCPF4chgpfIso03()[k];
   }
 
-
-  if (tmvaReader[iBE]->EvaluateMVA("BDT") > _mvaCuts[iBE])
+  mvaScore = tmvaReader[iBE]->EvaluateMVA("BDT");
+  if (mvaScore > _phoMvaCuts[iBE])
     mvaPass = true;
+
 
   return mvaPass;
 

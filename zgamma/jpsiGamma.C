@@ -502,6 +502,7 @@ Bool_t jpsiGamma::Process(Long64_t entry)
       if (isRealData || !makeGen || (sample=="dalitz" && makeGen && gen_gamma.DeltaR(*thisPhoton) < 0.1) )
 	photons0.push_back(*thisPhoton);
 
+      /*
       Bool_t vetoIt = 0;
       if (isDYJets)
 	for (UInt_t v = 0; v<vetoPhotons.size(); v++){
@@ -513,6 +514,7 @@ Bool_t jpsiGamma::Process(Long64_t entry)
 	}
 
       if (vetoIt) continue;
+      */
 
       if(ObjID->PassPhotonIdAndIso(*thisPhoton, "MVA")
 	 //if(ObjID->PassPhotonIdAndIso(*thisPhoton, "CutBased-MediumWP")

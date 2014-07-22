@@ -16,16 +16,19 @@ Those are:
   * *egamma.C* for electron channel,
   * *jpsiGamma.C* looking into J/Psi+gamma final state, where J/Psi goes into two muons.
   * *apz.py* - searching for a new particle at m_a = 18 GeV or so
-  * *fourLeptons.C* - a simple 4l analyzer also searching for an apz particle
 
 In order to run all of those I use *run.py* script. Here is how it goes for the local job to run the jpsiGamma analyzer:
-```run.py myTag file -s jp-mugamma -t mugamma```
+```run.py myTag file-list.txt -s jp-mugamma -t mugamma```,
+where *myTag* is appended to the output file name. It is  also passed to the analyzer itself, so that one could
+distinguish samples and apply different selections etc. *file-list.txt* is  a text file thst contains a list of input root files
+(full path names).
 
-where *myTag* is appended to an output file name and also is is passed to the analyzer itself, so that I could
-distinguish different samples.
+### testAnalyzer
+  * *natenalyzer.C* - same sign selection in di-muon channel
+  * *fourLeptons.C* - a simple 4l analyzer also searching for an apz particle
 
 ### fits-and-limits
-Scripts to set the limits on *h&rarr;llgamma& channel (may be extended to other situations). See the readme file inside it.
+Scripts to set the limits on *h&rarr;llgamma* channel (may be extended to other situations). See the readme file inside it.
 
 ### batch-condor
 BatchMaster scripts to submit jobs to condor. Works both at NU-tier3 and FNAL-lpc
@@ -53,5 +56,3 @@ In order to set up root I use *cmsenv.sh* script:
 * *zgamma/LHEanalyzer.py* - does the analysis on LHE files converted into root trees using ExRootAnalysis tool
 
 [1]: https://github.com/NWUHEP/ntupleProducer
-
- LocalWords:  llgamma readme BatchMaster tier3 FNAL lpc

@@ -67,7 +67,7 @@ class ObjectID {
   virtual ~ObjectID();
 
   virtual void CalculatePhotonIso(const TCPhoton& ph, float& chIsoCor, float& nhIsoCor, float& phIsoCor);
-  virtual bool PassPhotonIdAndIso(const TCPhoton& ph, TString n);
+  virtual bool PassPhotonIdAndIso(const TCPhoton& ph, TString n, float& m);
   virtual void SetEventInfo(Bool_t, UInt_t, ULong64_t, Float_t );
   //virtual void PhotonR9Corrector(const TCPhoton& ph);
 
@@ -78,9 +78,9 @@ class ObjectID {
   virtual bool PassMuonIdAndIso(const TCMuon& l, TVector3 *pv, TString n);
   virtual bool PassElectronIdAndIso(const TCElectron& l, TVector3 *pv, TString n);
   virtual bool PassElectronIdAndIsoMVA(const TCElectron& l);
-  virtual bool PassDalitzEleID(const TCElectron& l, TString n);
+  virtual bool PassDalitzEleID(const TCElectron& l, TString n, float& m);
   virtual bool HggPreselection(const TCPhoton& ph);
-  virtual bool PassPhotonMVA(const TCPhoton& ph);
+  virtual bool PassPhotonMVA(const TCPhoton& ph, float& m);
 
   TCGenParticle * GetPrimaryAncestor(TCGenParticle *p);
   virtual void DiscoverGeneology(TCGenParticle *p);
