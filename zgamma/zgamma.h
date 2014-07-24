@@ -65,7 +65,7 @@
 #include <TVector3.h>
 
 
-#define nC 18
+#define nC 20
 class zgamma : public TSelector {
  private:
   TFile* histoFile;
@@ -93,7 +93,7 @@ class zgamma : public TSelector {
   Float_t mva_SCEta, mva_R9, mva_HadOverEm, mva_ome1x5oe5x5;
   */
   Int_t nVtx, nVtxTotal;
-  Float_t nDofVtx1, nDofVtx2;
+  //Float_t nDofVtx1, nDofVtx2;
 
   TTree* _fitTree;
   Double_t fit_m_llg, fit_m_ll, fit_phEta, fit_weight;

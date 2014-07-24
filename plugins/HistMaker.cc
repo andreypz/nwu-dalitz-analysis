@@ -1,10 +1,12 @@
 #include "HistMaker.h"
 
 HistMaker::HistMaker(HistManager *h):
+  _isVtxSet(false),
   _isLepSet(false),
   _isGammaSet(false),
   _isGamma2Set(false),
-  _rhoFactor(-1)
+  _rhoFactor(-1),
+  _nVtx(0)
 {
   hists = h;
   angles = new ZGAngles();
@@ -12,10 +14,12 @@ HistMaker::HistMaker(HistManager *h):
 
 HistMaker::~HistMaker(){}
 
-void HistMaker::Reset(float rho){
+void HistMaker::Reset(float rho, UInt_t n){
   _isLepSet = 0; _isGammaSet=0; _isGamma2Set=0;
-  _rhoFactor = rho;}
+  _rhoFactor = rho; _nVtx=n;}
 
+void HistMaker::SetVtx(TCPrimaryVtx v){
+  _pv=v; _isVtxSet = 1;}
 void HistMaker::SetLeptons(TCPhysObject l1, TCPhysObject l2){
   _lPt1 = l1;  _lPt2 = l2; _isLepSet = 1;}
 void HistMaker::SetGamma(TCPhysObject g){
@@ -23,7 +27,7 @@ void HistMaker::SetGamma(TCPhysObject g){
 void HistMaker::SetGamma2(TCPhysObject g){
   _gamma2 = g; _isGamma2Set=1;}
 
-void HistMaker::MakeMuonPlots(const TCMuon& mu, TVector3 *pv)
+void HistMaker::MakeMuonPlots(const TCMuon& mu)
 {
   hists->fill1DHist(mu.PixelLayersWithMeasurement(),"mu_PixelLayersWithMeasurement",";PixelLayersWithMeasurement",   15, 0,15, 1, "Muons");
   hists->fill1DHist(mu.TrackLayersWithMeasurement(),"mu_TrackLayersWithMeasurement",";TrackerLayersWithMeasurement", 30, 0,30, 1, "Muons");
@@ -31,10 +35,10 @@ void HistMaker::MakeMuonPlots(const TCMuon& mu, TVector3 *pv)
   hists->fill1DHist(mu.NumberOfValidMuonHits(),   "mu_NumberOfValidMuonHits",   ";NumberOfValidMuonHits",   60, 0,60, 1, "Muons");
   hists->fill1DHist(mu.NumberOfValidTrackerHits(),"mu_NumberOfValidTrackerHits",";NumberOfValidTrackerHits",40, 0,40, 1, "Muons");
   hists->fill1DHist(mu.NumberOfValidPixelHits(),  "mu_NumberOfValidPixelHits",  ";NumberOfValidPixelHits",  15, 0,15, 1, "Muons");
-  hists->fill1DHist(mu.NormalizedChi2_tracker(),  "mu_NormalizedChi2_tracker",  ";NormalizedChi2_tracker", 100, 0,6,  1, "Muons");
-  hists->fill1DHist(mu.NormalizedChi2(),          "mu_NormalizedChi2",          ";NormalizedChi2",         100, 0,6,  1, "Muons");
-  hists->fill1DHist(mu.Dxy(pv), "mu_dxy", ";dxy", 50, -0.02,0.02, 1, "Muons");
-  hists->fill1DHist(mu.Dz(pv),  "mu_dxz", ";dz",  50, -0.1,0.1, 1, "Muons");
+  hists->fill1DHist(mu.NormalizedChi2_tracker(),  "mu_NormalizedChi2_tracker",  ";NormalizedChi2_tracker", 100, 0,4,  1, "Muons");
+  hists->fill1DHist(mu.NormalizedChi2(),          "mu_NormalizedChi2",          ";NormalizedChi2",         100, 0,4,  1, "Muons");
+  hists->fill1DHist(mu.Dxy(&_pv), "mu_dxy", ";dxy", 50, -0.02,0.02, 1, "Muons");
+  hists->fill1DHist(mu.Dz(&_pv),  "mu_dxz", ";dz",  50, -0.1,0.1, 1, "Muons");
   hists->fill1DHist(mu.PtError()/mu.Pt(), "mu_ptErrorOverPt", ";ptErrorOverPt", 50, 0,0.1, 1, "Muons");
 
   //Float_t muIso = ObjID->CalculateMuonIso(&mu);
@@ -91,8 +95,7 @@ void HistMaker::MakePhotonPlots(const TCPhoton& ph)
   hists->fill1DHist(ph.ConversionVeto(), "ph_ConversionVeto",";ConversionVeto",  3, 0, 3,   1,dir);
   hists->fill1DHist(ph.PfIsoPhoton(),    "ph_PfIsoPhoton",   ";PfIsoPhoton",   100, 0.01,5, 1,dir);
   hists->fill1DHist(ph.PfIsoCharged(),   "ph_PfIsoCharged",  ";PfIsoCharged",  100, 0.01,2, 1,dir);
-  hists->fill1DHist(ph.ESEffSigmaRR()[0],"ph_ESEffSigmaRR_x",";ESEffSigmaRR_x",100, 0,1e-6, 1,dir);
-  hists->fill1DHist(ph.ESEffSigmaRR()[0],"ph_ESEffSigmaRR_x-scale",";ESEffSigmaRR_x",100, -3,3, 1,dir);
+  hists->fill1DHist(ph.ESEffSigmaRR()[0],"ph_ESEffSigmaRR_x",";ESEffSigmaRR_x",100, 5e-8,5e-8, 1,dir);
 
   hists->fill1DHist(ph.IdMap("mvaScore"),"ph_mvaScore",      ";MVA score",     100, -1,1,   1,dir);
 
@@ -133,18 +136,17 @@ void HistMaker::MakeElectronPlots(const TCElectron& el, string dir)
 
   hists->fill1DHist(el.GetTracks().size(), dir+"_el_nTracks", ";nTracks", 10, 0,10, 1,dir);
 
-  if (el.GetTracks().size()>=2)
-    {
-      Float_t mll = (el.GetTracks()[0]+el.GetTracks()[1]).M();
-      Float_t dR  = el.GetTracks()[0].DeltaR(el.GetTracks()[1]);
-      hists->fill1DHist(mll, dir+"_el_dR",     ";dR(gsf1, gsf2)", 100,   0,3, 1,dir);
-      hists->fill1DHist(mll, dir+"_el_mll_full", ";m_{ll} (GeV)", 100, 0,120, 1,dir);
-      hists->fill1DHist(mll, dir+"_el_mll_low",  ";m_{ll} (GeV)", 100,  0,20, 1,dir);
-      hists->fill1DHist(mll, dir+"_el_mll_jpsi", ";m_{ll} (GeV)", 100,  1, 5, 1,dir);
+  if (el.GetTracks().size()>=2){
+    Float_t mll = (el.GetTracks()[0]+el.GetTracks()[1]).M();
+    Float_t dR  = el.GetTracks()[0].DeltaR(el.GetTracks()[1]);
+    hists->fill1DHist(dR,  dir+"_el_dR_all", ";dR(gsf1, gsf2)", 100,   0,4, 1,dir);
+    hists->fill1DHist(dR,  dir+"_el_dR_low", ";dR(gsf1, gsf2)", 100,   0,1, 1,dir);
+    hists->fill1DHist(mll, dir+"_el_mll_full", ";m_{ll} (GeV)", 100, 0,120, 1,dir);
+    hists->fill1DHist(mll, dir+"_el_mll_low",  ";m_{ll} (GeV)", 100,  0,20, 1,dir);
+    hists->fill1DHist(mll, dir+"_el_mll_jpsi", ";m_{ll} (GeV)", 100,  1, 5, 1,dir);
+  }
 
-    }
   for (UInt_t i=0; i<el.GetTracks().size() && i<3; i++){
-
     string subdir = dir+Form("-track-%i",i+1);
     hists->fill1DHist(el.GetTracks()[i].Pt(), subdir+Form("_el_01_track_%i",i+1)+"_Pt",
 		      Form(";gsf track %i Pt (GeV)",i+1), 200, 0,100, 1,subdir);
@@ -161,7 +163,6 @@ void HistMaker::MakeElectronPlots(const TCElectron& el, string dir)
       //hists->fill1DHist(inf.lxyPV,   subdir+Form("_el_conv_%i",i+1)+"_lxyPV",   Form(";lxyPV trk %i",   i+i), 200, 0,50, 1,subdir);
       hists->fill1DHist(inf.lxyBS,   subdir+Form("_el_conv_%i",i+1)+"_lxyBS",   Form(";lxyBS trk %i",   i+i), 200, 0,50, 1,subdir);
     }
-
   }
 
   hists->fill1DHist(el.BaseSC().size(), dir+"_el_nBaseSC", ";nBaseSC", 10, 0,10, 1,dir);
@@ -234,7 +235,6 @@ void HistMaker::FillHistosFull(Int_t num, Double_t weight, string dir)
 		      ";di-Lepton p_{T}/m_{ll#gamma}",100, 0,1, weight, dir);
   }
 
-
   hists->fill1DHist(diLep.M(),   Form("01__diLep_mass_low_%s_cut%i", d, num),";m_{#mu#mu} (GeV)", 100, 0,20,  weight, dir);
   hists->fill1DHist(diLep.M(),   Form("01_diLep_mass_high_%s_cut%i", d, num),";m_{#mu#mu} (GeV)", 100, 0,120, weight, dir);
   hists->fill1DHist(diLep.M(),   Form("01_diLep_mass_low1_%s_cut%i", d, num),";m_{ll} (GeV)",  50, 0,1.5,     weight, dir);
@@ -267,10 +267,10 @@ void HistMaker::FillHistosFull(Int_t num, Double_t weight, string dir)
 		    ";Leading lepton p_{T};Trailing lepton p_{T}",  50, 0,100, 50,0,100, weight, dir);
   if(_isGammaSet)
     {
-      hists->fill1DHist(_gamma.Pt()/tri.M(), Form("gamma_ptOverMllg_%s_cut%i",   d, num),
+      hists->fill1DHist(_gamma.Pt()/tri.M(), Form("03_gamma_ptOverMllg_%s_cut%i",   d, num),
 			";Photon p_{T}/M_{ll#gamma}",  100, 0,1, weight, dir);
-      hists->fill1DHist(gammaCM.E(), Form("gamma_Ecom_%s_cut%i",   d, num),";E_{#gamma} in CoM",  50, 0,120,  weight, dir);
-      hists->fill1DHist(_gamma.E(),  Form("03_gamma_E_%s_cut%i",   d, num),";Photon Energy",      50, 0,200,  weight, dir);
+      hists->fill1DHist(gammaCM.E(), Form("03_gamma_Ecom_%s_cut%i",d, num),";Photon Energy in CoM",50, 0,120, weight, dir);
+      hists->fill1DHist(_gamma.E(),  Form("03_gamma_E_%s_cut%i",   d, num),";Photon Energy",       50, 0,200, weight, dir);
       hists->fill1DHist(_gamma.Pt(), Form("03_gamma_pt_%s_cut%i",  d, num),";Photon p_{T} (GeV)",  50, 0,120, weight, dir);
       hists->fill1DHist(_gamma.Eta(),Form("03_gamma_eta_%s_cut%i", d, num),";Photon eta", 50, -3.5,3.5,       weight, dir);
       hists->fill1DHist(_gamma.Phi(),Form("03_gamma_phi_%s_cut%i", d, num),";Photon phi", 50, -TMath::Pi(),TMath::Pi(), weight, dir);
@@ -294,54 +294,75 @@ void HistMaker::FillHistosFull(Int_t num, Double_t weight, string dir)
     hists->fill1DHist(_lPt2.DeltaR(_gamma),Form("04_lPt2_gamma_deltaR_%s_cut%i",d, num),";#Delta R(#gamma,l_{2})",100,0,5, weight,dir);
   }
 
-  //ZGanlgles:
-  if (_isLepSet && _isGammaSet){
-    double co1,co2,phi,co3;
-    if (_lPt1.Charge()==1 && _lPt2.Charge()==-1)
-      angles->GetAngles(_lPt1, _lPt2, _gamma,co1,co2,phi,co3);
-    else if (_lPt1.Charge()==-1 && _lPt2.Charge()==1)
-      angles->GetAngles(_lPt2, _lPt1, _gamma,co1,co2,phi,co3);
-    else{
-      co1=co2=phi=co3=-5;
-      //cout<<"Something is wrong: leptons have the same charge!"<<endl;
-      }
-    //cout<<eventNumber<<"RECO  Angles: c1= "<<co1<<"  c2="<<co2<<"   phi="<<phi<<"   coco="<<co3<<endl;
-
-    hists->fill1DHist(co1, Form("co1_cut%i", num), ";cos(#vec{l-},#vec{Z}) in CM", 100,-1,1, 1,"Angles");
-    hists->fill1DHist(co2, Form("co2_cut%i", num), ";cos(#vec{l+},#vec{Z}) in CM", 100,-1,1, 1,"Angles");
-    hists->fill1DHist(co3, Form("co3_cut%i", num), ";cos(#Theta)",                 100,-1,1, 1,"Angles");
-    hists->fill1DHist(phi, Form("phi_cut%i", num), ";#phi(l-)",50, -TMath::Pi(), TMath::Pi(),1,"Angles");
-  }
-
-  hists->fill1DHist(_rhoFactor, Form("rhoFactor_cut%i", num), ";rhoFactor",    100, 0,100, weight, dir);
-
+  hists->fill1DHist(_rhoFactor, Form("rhoFactor_%s_cut%i",     d, num), ";#rho-factor",       100, 0,40, weight, dir);
+  hists->fill1DHist(_nVtx,      Form("vtx_nPV_weight_%s_cut%i",d, num), ";nPV, re-weighted", 40, 0,40, weight, dir);
+  hists->fill1DHist(_nVtx,      Form("vtx_nPV_raw_%s_cut%i",   d, num), ";nPV, Raw",         40, 0,40,      1, dir);
   //hists->fill1DHist(nVtxTotal, Form("vtx_nPV_tot_%s_cut%i",   d, num), "vtx_nPV_tot",    40, 0,40, weight, dir);
-  //hists->fill1DHist(nVtx,      Form("vtx_nPV_raw_%s_cut%i",   d, num), "Raw;nPV",    40, 0,40,      1, dir);
-  //hists->fill1DHist(nVtx,      Form("vtx_nPV_weight_%s_cut%i",d, num), "Re-weighted;nPV", 40, 0,40, weight, dir);
 
-  //hists->fill1DHist(nDofVtx1, Form("vtx_ndof1_%s_cut%i",  d, num), ";First vertex ndof", 50, 0,200, weight, dir);
+  hists->fill1DHist(_pv.NDof(), Form("vtx_ndof1_%s_cut%i",  d, num), ";First vertex nDof", 50, 0,200, weight, dir);
   //hists->fill1DHist(nDofVtx2, Form("vtx_ndof2_%s_cut%i",  d, num), ";Second vertex ndof", 50, 0,200, weight, dir);
 
 
-  //Phi* variable
-  TLorentzVector l1,l2;
-  if(_lPt1.Charge()==-1 && _lPt2.Charge()==1)
-    {l1 = _lPt1; l2 = _lPt2;}
-  else if (_lPt1.Charge()==1 && _lPt2.Charge()==-1)
-    {l1 = _lPt2; l2 = _lPt1;}
-  else {
-    //cout<<" this won't work, they are the same charge!"<<endl;
-    return;
+
+  if (_isLepSet){
+    TLorentzVector l1,l2;
+    // l1 has to be positive and l2 is negative! charge!
+
+    if (_lPt1.Charge()==1 && _lPt2.Charge()==-1)
+      {l1 = _lPt1; l2 = _lPt2;}
+    else if (_lPt1.Charge()==-1 && _lPt2.Charge()==1)
+      {l1 = _lPt2; l2 = _lPt1;}
+    else{
+      return;
+      //co1=co2=phi=co3=-5;
+      //cout<<"Something is wrong: leptons have the same charge!"<<endl;
+    }
+    //cout<<eventNumber<<"RECO  Angles: c1= "<<co1<<"  c2="<<co2<<"   phi="<<phi<<"   coco="<<co3<<endl;
+
+
+    //ZGanlgles:
+    double co1,co2,phi,co3;
+    if(_isGammaSet){
+      angles->GetAngles(l1, l2, _gamma,co1,co2,phi,co3);
+
+      hists->fill1DHist(co1, Form("co1_cut%i", num), ";cos(#vec{l-},#vec{Z}) in CM", 100,-1,1, weight,"Angles");
+      hists->fill1DHist(co2, Form("co2_cut%i", num), ";cos(#vec{l+},#vec{Z}) in CM", 100,-1,1, weight,"Angles");
+      hists->fill1DHist(co3, Form("co3_cut%i", num), ";cos(#Theta)",                 100,-1,1, weight,"Angles");
+      hists->fill1DHist(phi, Form("phi_cut%i", num), ";#phi(l-)",50, -TMath::Pi(), TMath::Pi(),weight,"Angles");
+    }
+
+    //Phi* variable
+
+    float phi_acop   = TMath::Pi() - fabs(l1.DeltaPhi(l2));
+    float theta_star = TMath::ACos(TMath::TanH( (l2.Eta() - l1.Eta())/2));
+    float phi_star   = sin(theta_star)*TMath::Tan(phi_acop/2);
+
+    hists->fill1DHist(phi_acop, Form("star_phi_acop_cut%i", num), ";#phi_{acop}",  50, 0, TMath::Pi(), weight,"Angles");
+    hists->fill1DHist(phi_star, Form("star_phi_star_cut%i", num), ";#phi*",        50, 0,          50, weight,"Angles");
+    hists->fill1DHist(cos(theta_star), Form("star_cos_theta_cut%i", num), ";cos(#theta*)",  50, -1, 1, weight,"Angles");
+
+
+    //Forward-Backward assymetry angles
+    int sign = (diLep.Z() > 0) ? 1 : -1;
+    float m = diLep.M();
+    float cosCS = sign*2*(l2.Pz()*l1.E() - l1.Pz()*l2.E())/(m*sqrt(m + pow(diLep.Pt(),2)));
+
+    hists->fill1DHist(cosCS, Form("FB_cosSC-ll_cut%i",  num), ";cosCS(l+,l-)", 100, -1, 1, weight,"Angles");
+    hists->fill2DHist(cosCS, m, Form("FB_cosSC-ll_vs_Mll_cut%i",  num), ";cosCS(l+,l-);m_{ll}",  100, -1,1, 100,0,20, weight,"Angles");
+
+    if (_isGammaSet){
+      sign = (tri.Z() > 0) ? 1 : -1;
+      m = tri.M();
+      cosCS = sign*2*(diLep.Pz()*_gamma.E() - _gamma.Pz()*diLep.E())/(m*sqrt(m + pow(tri.Pt(),2)));
+
+      hists->fill1DHist(cosCS, Form("FB_cosSC-diG_cut%i", num), ";cosCS(diLep,#gamma)",  100, -1, 1, weight,"Angles");
+      hists->fill2DHist(cosCS, m, Form("FB_cosSC-diG_vs_Mllg_cut%i", num), ";cosCS(diLep,#gamma);m_{ll#gamma}",  100, -1,1, 100,50,140, weight,"Angles");
+
+      float cosJ = _gamma.Dot(l1-l2)/_gamma.Dot(l1+l2);
+      hists->fill1DHist(cosJ, Form("FB_cosJ_cut%i", num), ";cosJ",  100, -1, 1, weight,"Angles");
+      hists->fill2DHist(cosJ, tri.M(), Form("FB_cosJ_vs_Mllg_cut%i", num), ";cosJ;m_{ll#gamma}",  100, -1,1, 100,50,140, weight,"Angles");
+    }
   }
-
-  float phi_acop   = TMath::Pi() - fabs(l1.DeltaPhi(l2));
-  float theta_star = TMath::ACos(TMath::TanH( (l1.Eta() - l2.Eta())/2));
-  float phi_star   = sin(theta_star)*TMath::Tan(phi_acop/2);
-
-  hists->fill1DHist(phi_acop, Form("star_phi_acop_cut%i", num), ";#phi_{acop}",  50, 0, TMath::Pi(), 1,"Angles");
-  hists->fill1DHist(phi_star, Form("star_phi_star_cut%i", num), ";#phi*",        50, 0,          50, 1,"Angles");
-  hists->fill1DHist(cos(theta_star), Form("star_cos_theta_cut%i", num), ";cos(#theta*)",  50, -1, 1, 1,"Angles");
-
 }
 
 

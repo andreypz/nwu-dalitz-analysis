@@ -215,7 +215,25 @@ Bool_t zgamma::Process(Long64_t entry)
  //cout<<eventNumber<<"  ev rho = "<<rhoFactor<<endl;
   hists->fill1DHist(nPUVerticesTrue, "nPUVerticesTrue",";nPUVerticesTrue",  100, 0,100, 1,"GEN");
   hists->fill1DHist(nPUVertices,     "nPUVertices",";nPUVertices",          100, 0,100, 1,"GEN");
-  HM->Reset(rhoFactor);
+
+  nVtx = primaryVtx->GetSize();
+  HM->Reset(rhoFactor, nVtx);
+
+  // --- Primary vertex ---//
+  if (primaryVtx->GetSize()<1) return kTRUE;
+  TCPrimaryVtx *mainPrimaryVertex = 0;//, *secondPrimaryVertex = 0;
+  mainPrimaryVertex   = (TCPrimaryVtx*)(primaryVtx->At(0));
+  TVector3* pvPosition;// = new TVector3();
+
+  //nDofVtx1 = mainPrimaryVertex->NDof();
+  //if(primaryVtx->GetSize() > 1){
+  //secondPrimaryVertex = (TCPrimaryVtx*)(primaryVtx->At(1));
+  //nDofVtx2 = secondPrimaryVertex->NDof();
+  //}
+  pvPosition = mainPrimaryVertex;
+
+  HM->SetVtx(*mainPrimaryVertex);
+
 
   // ----------------------//
   // Gen level particles --//
@@ -439,21 +457,6 @@ Bool_t zgamma::Process(Long64_t entry)
   CountEvents(2);
 
 
-  nVtx = primaryVtx->GetSize();
-  // --- Primary vertex ---//
-
-  if (primaryVtx->GetSize()<1) return kTRUE;
-  TCPrimaryVtx *mainPrimaryVertex = 0, *secondPrimaryVertex = 0;
-  mainPrimaryVertex   = (TCPrimaryVtx*)(primaryVtx->At(0));
-  TVector3* pvPosition;// = new TVector3();
-
-  nDofVtx1 = mainPrimaryVertex->NDof();
-  if(primaryVtx->GetSize() > 1){
-    secondPrimaryVertex = (TCPrimaryVtx*)(primaryVtx->At(1));
-    nDofVtx2 = secondPrimaryVertex->NDof();
-  }
-  pvPosition = mainPrimaryVertex;
-
   vector<TCElectron> electrons0, electrons;
   vector<TCMuon> muons0, muons;
   vector<TCPhoton> photons0, photonsTight, photonsHZG, photonsMVA, fake_photons;
@@ -639,12 +642,12 @@ Bool_t zgamma::Process(Long64_t entry)
   sort(muons.begin(), muons.end(), P4SortCondition);
 
 
-  hists->fill1DHist(muons.size(),     Form("size_mu_cut%i",  1),";Number of muons",    5,0,5, 1, "Muons");
-  //hists->fill1DHist(electrons.size(), Form("size_el_cut%i",  1),";Number of electrons",5,0,5, 1, "Electrons");
-  //hists->fill1DHist(electrons0.size(),Form("size_el0_cut%i", 1),";Number of electrons",5,0,5, 1, "Electrons");
-  //hists->fill1DHist(photons.size(),   Form("size_ph_cut%i",  1),";Number of photons",  5,0,5, 1, "Photon");
-  //hists->fill1DHist(photons0.size(),  Form("size_ph0_cut%i", 1),";Number of photons",  5,0,5, 1, "Photon");
-
+  hists->fill1DHist(muons.size(),     Form("size_mu_cut%i",  1),";Number of muons",    5,0,5, 1, "N");
+  hists->fill1DHist(electrons.size(), Form("size_el_cut%i",  1),";Number of electrons (HZZ)",   5,0,5, 1, "N");
+  hists->fill1DHist(electrons0.size(),Form("size_el0_cut%i", 1),";Number of electrons (Loose)", 5,0,5, 1, "N");
+  hists->fill1DHist(photonsHZG.size(),   Form("size_phHZG_cut%i",  1),";Number of photons (HZG)",   5,0,5, 1, "N");
+  hists->fill1DHist(photonsTight.size(), Form("size_phTight_cut%i",1),";Number of photons (Tight)", 5,0,5, 1, "N");
+  hists->fill1DHist(photonsMVA.size(),   Form("size_phMVA_cut%i",  1),";Number of photons (MVA)",   5,0,5, 1, "N");
 
   if(!isRealData && makeGen){
     hists->fill1DHist(genMll,  "gen_Mll_reco_gamma",  ";gen_Mll",100,0,mllMax, 1,"eff");
@@ -718,8 +721,6 @@ Bool_t zgamma::Process(Long64_t entry)
 
   if (lPt1.Pt() < cut_l1pt || lPt2.Pt() < cut_l2pt_low)   return kTRUE;
 
-
-
   if (makeApzTree){
     apz_pt1 = lPt1.Pt();
     apz_pt2 = lPt2.Pt();
@@ -788,7 +789,8 @@ Bool_t zgamma::Process(Long64_t entry)
   Float_t Mllg = (l1+l2+gamma).M();
 
 
-  if (Mllg<110 || Mllg>170)
+  if (Mllg<50 || Mllg>140)
+    //if (Mllg<110 || Mllg>170)
     return kTRUE;
 
   HM->FillHistosFull(5, eventWeight, "");
@@ -808,9 +810,8 @@ Bool_t zgamma::Process(Long64_t entry)
   //HM->FillHistosFull(6, eventWeight, l1, l2, lPt1, lPt2, gamma, "EE");
 
   global_Mll = Mll;
-  HM->MakeMuonPlots(muons[0], pvPosition);
-  HM->MakeMuonPlots(muons[1], pvPosition);
-
+  HM->MakeMuonPlots(muons[0]);
+  HM->MakeMuonPlots(muons[1]);
 
 
   if (Mll>2.9 && Mll<3.3){ //jpsi window
@@ -885,8 +886,8 @@ Bool_t zgamma::Process(Long64_t entry)
     fit_m_ll    = Mll;
     fit_weight  = eventWeight;
     fit_phEta   = gamma.SCEta();
-    fit_phPt   = gamma.Pt();
-    fit_diPt   = (l1+l2).Pt();
+    fit_phPt    = gamma.Pt();
+    fit_diPt    = (l1+l2).Pt();
     fit_isLowPt = false;
 
     if (lPt2.Pt() < cut_l2pt)
@@ -899,8 +900,6 @@ Bool_t zgamma::Process(Long64_t entry)
   HM->FillHistosFull(9, eventWeight, "");
   FillHistoCounts(9, eventWeight);
   CountEvents(9);
-
-  //fout<<" nEvt = "<<nEvents[0]<<" : Run/lumi/event = "<<runNumber<<"/"<<lumiSection<<"/"<<eventNumber<<endl;
 
 
   //if (checkTrigger){
@@ -926,7 +925,7 @@ Bool_t zgamma::Process(Long64_t entry)
   CountEvents(15);
 
 
-  if (NoiseFilters_isCSCTightHalo || NoiseFilters_isCSCLooseHalo
+  if (NoiseFilters_isCSCTightHalo// || NoiseFilters_isCSCLooseHalo
       )
     return kTRUE;
   FillHistoCounts(16, eventWeight);
@@ -942,6 +941,15 @@ Bool_t zgamma::Process(Long64_t entry)
   HM->FillHistosFull(10, eventWeight, "");
   FillHistoCounts(10, eventWeight);
   CountEvents(10);
+
+  if (lPt1.Phi() > -1.8 && lPt1.Phi() < -1.6){
+    HM->FillHistosFull(18, eventWeight, "");
+    FillHistoCounts(18, eventWeight);
+    CountEvents(18);
+    fout<<" nEvt = "<<nEvents[0]<<" : Run/lumi/event = "<<runNumber<<"/"<<lumiSection<<"/"<<eventNumber<<endl;
+    fout<<"lPt1:  "<<&lPt1<<endl;
+    fout<<"dilep phi = "<<(lPt1+lPt2).Phi()<<endl;
+  }
 
   if (Mllg<122 || Mllg>128) return kTRUE;
 

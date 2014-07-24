@@ -100,49 +100,45 @@ def blindIt(h):
     h.SetBinContent(b,0)
 
 def set_palette(name="palette", ncontours=999):
-    """Set a color palette from a given RGB list
-    stops, red, green and blue should all be lists of the same length
-    see set_decent_colors for an example"""
+  """Set a color palette from a given RGB list
+  stops, red, green and blue should all be lists of the same length
+  see set_decent_colors for an example"""
 
-    if name == "gray" or name == "grayscale":
-        stops = [0.00, 0.34, 0.61, 0.84, 1.00]
-        red   = [1.00, 0.84, 0.61, 0.34, 0.00]
-        green = [1.00, 0.84, 0.61, 0.34, 0.00]
-        blue  = [1.00, 0.84, 0.61, 0.34, 0.00]
-    elif name=="signal":
-        stops = [0.00, 0.34, 0.61, 0.84, 1.00]
-        red   = [1.00, 0.90, 0.60, 0.40, 0.20]
-        green = [0.00, 0.00, 0.00, 0.00, 0.00]
-        blue  = [0.00, 0.00, 0.00, 0.00, 0.00]
+  if name == "gray" or name == "grayscale":
+    stops = [0.00, 0.34, 0.61, 0.84, 1.00]
+    red   = [1.00, 0.84, 0.61, 0.34, 0.00]
+    green = [1.00, 0.84, 0.61, 0.34, 0.00]
+    blue  = [1.00, 0.84, 0.61, 0.34, 0.00]
+  elif name=="signal":
+    stops = [0.00, 0.34, 0.61, 0.84, 1.00]
+    red   = [1.00, 0.90, 0.60, 0.40, 0.20]
+    green = [0.00, 0.00, 0.00, 0.00, 0.00]
+    blue  = [0.00, 0.00, 0.00, 0.00, 0.00]
     # elif name == "whatever":
-        # (define more palettes)
-    else:
-        # default palette, looks cool
-        stops = [0.00, 0.34, 0.61, 0.84, 1.00]
-        red   = [0.00, 0.00, 0.87, 1.00, 0.51]
-        green = [0.00, 0.81, 1.00, 0.20, 0.00]
-        blue  = [0.51, 1.00, 0.12, 0.00, 0.00]
+    # (define more palettes)
+  else:
+    # default palette, looks cool
+    stops = [0.00, 0.34, 0.61, 0.84, 1.00]
+    red   = [0.00, 0.00, 0.87, 1.00, 0.51]
+    green = [0.00, 0.81, 1.00, 0.20, 0.00]
+    blue  = [0.51, 1.00, 0.12, 0.00, 0.00]
 
-    s = array('d', stops)
-    r = array('d', red)
-    g = array('d', green)
-    b = array('d', blue)
+  s = array('d', stops)
+  r = array('d', red)
+  g = array('d', green)
+  b = array('d', blue)
 
-    npoints = len(s)
-    TColor.CreateGradientColorTable(npoints, s, r, g, b, ncontours)
-    gStyle.SetNumberContours(ncontours)
+  npoints = len(s)
+  TColor.CreateGradientColorTable(npoints, s, r, g, b, ncontours)
+  gStyle.SetNumberContours(ncontours)
 
 
 def createDir(myDir):
   if not os.path.exists(myDir):
-    try:
-      os.makedirs(myDir)
+    try: os.makedirs(myDir)
     except OSError:
-      if os.path.isdir(myDir):
-        pass
-      else:
-        raise
-
+      if os.path.isdir(myDir): pass
+      else: raise
 
 def makeStack(bZip, histDir, histoName, leg, lumi, howToScale, normToScale=None):
   hs = THStack("temp", "Stacked histo")
@@ -249,7 +245,6 @@ def drawAllInFile(f1, name1, bZip, f3, name3, myDir,path, N, howToScale="none", 
       #if k.ReadObj().isFolder(): continue
 
     mainHist = k.ReadObj()
-
 
     histoName = mainHist.GetName()
 
@@ -872,6 +867,34 @@ def effPlots(f1, path):
       leg.SetFillColor(kWhite)
       leg.Draw()
       c1.SaveAs(path+"eff_"+var+".png")
+
+
+
+
+def FBAss(f, s, name, path):
+  c1 = TCanvas("c1","a canvas",600,600);
+  cosCS  = f.Get("Angles/"+name)
+  nBinsX = cosCS.GetNbinsX()
+  nBinsY = cosCS.GetNbinsY()
+  #cosCS.Print()
+  cosCS.Draw()
+  #print "In X: from %.1f to %.1f in %i bins" % (cosCS.GetXaxis().GetBinLowEdge(1), cosCS.GetXaxis().GetBinUpEdge(nBinsX), nBinsX)
+  #print "In Y: from %.1f to %.1f in %i bins" % (cosCS.GetYaxis().GetBinLowEdge(1), cosCS.GetYaxis().GetBinUpEdge(nBinsY), nBinsY)
+  pr = []
+  step = 25
+  histmax = 0
+  #pr.append(cosCS.ProfileX('pr_step_'+str(step), 1, 20))
+  for i in xrange(nBinsY/step):
+    pr.append(cosCS.ProjectionX(s+'pr_step_'+str(i), i*step+1, (i+1)*step))
+    histmax = max(histmax,pr[-1].GetMaximum())
+    #pr[-1].Rebin()
+
+  pr[0].Draw('hist')
+  pr[0].SetMaximum(1.2*histmax)
+  for i in xrange(1,nBinsY/step):
+    pr[i].Draw('same hist')
+    pr[i].SetLineColor(22+i)
+  c1.SaveAs(path+'/'+name+'-projections'+s+'.png')
 
 if __name__ == "__main__":
     print "This is utils.py script"

@@ -24,10 +24,10 @@ parser.add_option("--hjp",dest="hjp",action="store_true", default=False, help="S
 parser.add_option("-s", '--sel', dest="sel", type="string", default='mugamma',
                   help="Selection to be used. Options are: '4mu','2e2mu', 'zee','mugamma', 'elgamma'")
 
-(options, args) = parser.parse_args()
+(opt, args) = parser.parse_args()
 
-mass = options.mass
-sel = options.sel
+mass = opt.mass
+sel = opt.sel
 
 comments = ["These plots are made for z -> J/Psi gamma analysis",
             "MuEG dataset used"]
@@ -42,10 +42,10 @@ if __name__ == "__main__":
 
   ver    = sys.argv[1]
   if 'vv/' in ver: ver = ver[3:].rstrip('/')
-  cut=str(options.cut)
-  doMerge = options.merge
-  period  = options.period
-  doBkg   = options.bkg
+  cut=str(opt.cut)
+  doMerge = opt.merge
+  period  = opt.period
+  doBkg   = opt.bkg
 
   gROOT.ProcessLine(".L ../tdrstyle.C")
   setTDRStyle()
@@ -53,7 +53,7 @@ if __name__ == "__main__":
 
   pathBase = "/uscms_data/d2/andreypz/html/zgamma/dalitz/"+ver+"_cut"+cut
   hPath    = "/eos/uscms/store/user/andreypz/batch_output/zgamma/8TeV/"+ver
-  if options.noeos:
+  if opt.noeos:
     hPath  = "/uscms_data/d2/andreypz/zgamma/"+ver
 
   if '/tthome' in os.getcwd():
@@ -76,7 +76,7 @@ if __name__ == "__main__":
       os.system("hadd "+hPath+"/m_Data_" +sel+"_"+period+".root "+hPath+"/"+sel+"_"+period+"/hhhh_*Run2012D*.root")
     else:
       # os.system("hadd "+hPath+"/m_Data_" +sel+"_"+period+".root "+hPath+"/"+sel+"_"+period+"/hhhh_DoubleMu_Run20*.root")
-      os.system("hadd "+hPath+"/m_Data_" +sel+"_"+period+".root "+hPath+"/"+sel+"_"+period+"/hhhh_MuEG_Run20*.root")
+      os.system("hadd "+hPath+"/m_Data_" +sel+"_"+period+".root "+hPath+"/"+sel+"_"+period+"/hhhh_MuEG_Run2012*.root")
       # os.system("hadd "+hPath+"/m_Data_" +sel+"_"+period+".root "+hPath+"/"+sel+"_"+period+"/hhhh_DoubleElectron_Run20*.root")
 
 
@@ -97,12 +97,12 @@ if __name__ == "__main__":
     #bkgNames.append('DYJets50')
     bkgFiles.append(TFile(hPath+"/"+sel+"_"+period+"/hhhh_ZGDalitz_1.root","OPEN"))
     bkgNames.append('ZGDalitz')
-    bkgFiles.append(TFile(hPath+"/"+sel+"_"+period+"/hhhh_DYJetsDalitz_1.root","OPEN"))
-    bkgNames.append('DYJetsDalitz')
+    #bkgFiles.append(TFile(hPath+"/"+sel+"_"+period+"/hhhh_DYJetsDalitz_1.root","OPEN"))
+    #bkgNames.append('DYJetsDalitz')
     #bkgFiles.append(TFile(hPath+"/m_QCD_"+sel+"_"+period+".root","OPEN"))
     #bkgNames.append('QCD')
 
-    yields_bkg  = u.getYields(bkgFiles[1],bkgNames[1],True)
+    yields_bkg  = u.getYields(bkgFiles[0],bkgNames[0],True)
 
     bkgZip = zip(bkgNames, bkgFiles)
   else: bkgZip = ''
@@ -114,9 +114,9 @@ if __name__ == "__main__":
   sigFileZjp  = TFile(hPath+"/"+sel+"_"+period+"/hhhh_ZtoJPsiGamma_1.root",  "OPEN")
   sigFileHjp  = TFile(hPath+"/"+sel+"_"+period+"/hhhh_HiggsToJPsiGamma_1.root",  "OPEN")
 
-  if options.mcfm:  sigFile = sigFileMCFM
-  elif options.hjp: sigFile = sigFileHjp
-  elif options.zjp: sigFile = sigFileZjp
+  if opt.mcfm:  sigFile = sigFileMCFM
+  elif opt.hjp: sigFile = sigFileHjp
+  elif opt.zjp: sigFile = sigFileZjp
   else:             sigFile = sigFileMAD
 
   dataFile = TFile(hPath+"/m_Data_"+sel+"_"+period+".root","OPEN")
@@ -125,7 +125,7 @@ if __name__ == "__main__":
     u.drawAllInFile(dataFile, "data",bkgZip,None,"",
                     "Zee",  pathBase+"/Zee",  None,"norm")
 
-  if options.zjp:
+  if opt.zjp:
     u.setSelection('mugamma')
 
   yields_data = u.getYields(dataFile)
@@ -148,13 +148,14 @@ if __name__ == "__main__":
 
 
   sigName = '#splitline{1000xSignal}{m_{H}=125 GeV}'
-  if options.zjp: sigName= '#splitline{50xSignal}{Z #rightarrow J/Psi #gamma}'
-  if options.hjp: sigName= '#splitline{100xSignal}{h #rightarrow J/Psi #gamma}'
+  if opt.zjp: sigName= '#splitline{50xSignal}{Z #rightarrow J/Psi #gamma}'
+  if opt.hjp: sigName= '#splitline{100xSignal}{h #rightarrow J/Psi #gamma}'
 
-  if (options.zjp or options.hjp) and cut in ['12']:
+  if (opt.zjp or opt.hjp) and cut in ['12']:
     u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName,  "jpsi",path, cut, "lumi")
 
-  if cut not in ['14','15']:
+  """
+  if cut not in ['14','15'] and not opt.apz:
     #u.drawAllInFile(dataFile, "Data", bkgZip, None, '', "", path, cut, "lumi")
     u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "", path, cut, "norm1")
     u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "Angles", pathBase+'/Angles', cut, "norm1")
@@ -171,7 +172,7 @@ if __name__ == "__main__":
   u.drawAllInFile(dataFile, "data",bkgZip,sigFile,sigName,"Photon-EGamma",pathBase+"/Photon-EGamma/", None, "norm")
   #u.drawAllInFile(dataFile, "data",bkgZip,sigFile,sigName,"Photon-EnergyCorr",pathBase+"/Photon-EnergyCorr/", None, "norm")
 
-  if sel == "mugamma" and not options.zjp:
+  if sel == "mugamma" and not opt.zjp:
     if cut not in ['12','14','15','16']:
       # u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",  "Muons", pathBase+"/Muons", None,"norm")
       u.drawAllInFile(dataFile, "data",bkgZip,sigFile,sigName,"Muons", pathBase+"/Muons/", None, "norm")
@@ -230,9 +231,9 @@ if __name__ == "__main__":
     #u.drawAllInFile(bkgFiles, "DY electrons", sigFile, "Dalitz 2el",  "NewEle-1", pathBase+"/NewEle-1/", None,"norm", isLog=1, )
 
     #sigFileMAD  = TFile(hPath+"/mugamma_"+period+"/hhhh_ggH-mad125_1.root", "OPEN")
-
-  ss = options.sel
-  if options.apz and doMerge:
+  """
+  ss = opt.sel
+  if opt.apz and doMerge:
     if ss in ['4mu','2e2mu']:
       os.system("hadd -f "+hPath+"/m_Data_apz_DoubleMu_"+ss+"_"+period+".root "+hPath+"/"+ss+"_"+period+"/hhhh_DoubleMu_Run20*.root")
 
@@ -244,7 +245,7 @@ if __name__ == "__main__":
   c1 = TCanvas("c4","small canvas",600,600);
 
 
-  if options.apz:
+  if opt.apz:
     if ss in ['4mu','2e2mu']:
       if ss=='2e2mu':
         samples = ['DoubleMu','MuEG','DoubleElectron']
@@ -262,7 +263,7 @@ if __name__ == "__main__":
 
         alphaPiZ2(data, c1, TCut('m12>15 && m12<30 && m34>15 && m34<30 && pt12>20 && pt34>20'),pathBase+"/"+s+"-alphaPiZ-6/")
 
-        alphaPiZ2(data, c1, TCut('m4l>140 && m4l<150'),pathBase+"/"+s+"-alphaPiZ-7/")
+        alphaPiZ2(data, c1, TCut('m4l>110 && m4l<170'),pathBase+"/"+s+"-alphaPiZ-7/")
 
 
         u.drawAllInFile(data, "data",bkgZip,None,"",
@@ -273,6 +274,9 @@ if __name__ == "__main__":
 
       data = TFile(hPath+"/m_Data_mugamma_2012.root","OPEN")
 
+      alphaPiZ2(data, c1, TCut('m123>110 && m123<170 && pt12/m123>0.3 && pt3/m123>0.3'),pathBase+"/"+ss+"-APZ-7/")
+
+      """
       alphaPiZ(data, c1, TCut('ph_pt/m_llg>0.3 && di_pt/m_llg>0.3 && m_llg>100&&m_llg<170'),
                pathBase+"/alphaPiZ-0/")
       alphaPiZ(data, c1, TCut(''),                                                            pathBase+"/alphaPiZ-1/")
@@ -284,103 +288,102 @@ if __name__ == "__main__":
 
       alphaPiZ(data, c1, TCut('ph_pt/m_llg>0.30 && di_pt/m_llg>0.30 && m_llg>121&&m_llg<131'),pathBase+"/alphaPiZ-7/")
       alphaPiZ(data, c1, TCut('ph_pt/m_llg>0.30 && di_pt/m_llg>0.30 && m_llg>85&&m_llg<96'),  pathBase+"/alphaPiZ-8/")
+      """
 
 
-    '''
-    if sel[0]=='none':
-        sigFileMAD  = TFile("hhhh_ggH-mad125_1.root", "OPEN")
+  htmp = sigFileMAD.Get("02_lPt2_pt__cut"+cut)
+  int1 = htmp.Integral()
+  int2 = htmp.Integral(0,10)
+  print '\n Fraction of event with trailing lepton pt<20: \n', float(int2)/int1
 
-        u.createDir(pathBase+"/eff")
-        u.effPlots(sigFileMAD, pathBase+"/eff/")
-        u.effPlots2(sigFileMAD, pathBase+"/eff/")
-
-
-
-    htmp = sigFileMAD.Get("lPt2_pt__cut10")
-    int1 = htmp.Integral()
-    int2 = htmp.Integral(0,10)
-    print '\n Fraction of event with trailing lepton pt<20: \n', float(int2)/int1
-
-    htmp = sigFileMAD.Get("ll_deltaR__cut10")
-    int1 = htmp.Integral()
-    int2 = htmp.Integral(0,10)
-    print '\n Fraction of event with dR(l1,l2)<0.4: \n', float(int2)/int1
-    '''
-    '''
-    c1 = TCanvas("c4","small canvas",600,600);
-    c1.cd()
-    Nev = sigFileMAD.Get("Counts/evt_byCut").GetBinContent(2)
-    cro = u.getCS("ggH-125")
-    lumi = u.getLumi("2012")
-
-    scale = float(lumi*cro)/Nev
-
-    hc7 = sigFileMAD.Get("tri_mass80__cut7").Integral(35,41)*scale
-    hc8 = sigFileMAD.Get("tri_mass80__cut8").Integral(35,41)*scale
-    hc9 = sigFileMAD.Get("tri_mass80__cut9").Integral(35,41)*scale
-    print "Yields in bins that supposed to correspond to [122,128] window:\n",hc7, hc8, hc9
-
-    hc7 = dataFile.Get("tri_mass80__cut7").Integral(36,40)
-    hc8 = dataFile.Get("tri_mass80__cut8").Integral(36,40)
-    hc9 = dataFile.Get("tri_mass80__cut9").Integral(36,40)
-    print "Yields in bins that supposed to correspond to [122,128] window:\n",hc7, hc8, hc9
+  htmp = sigFileMAD.Get("04_ll_deltaR__cut"+cut)
+  int1 = htmp.Integral()
+  int2 = htmp.Integral(0,10)
+  print '\n Fraction of event with dR(l1,l2)<0.4: \n', float(int2)/int1
 
 
-    m1 = 110.
-    m2 = 170.
+  c1 = TCanvas("c4","small canvas",600,600);
+  c1.cd()
+  Nev = sigFileMAD.Get("Counts/evt_byCut").GetBinContent(2)
+  cro  = u.getCS("ggH-125",'mu')
+  lumi = u.getLumi("2012")
 
-    for r in ["0"]:
-        etaCut = TCut("")
-        if r=="EB":
-            etaCut = "fabs(ph_eta)<1"
-        elif r=="EE":
-            etaCut = "fabs(ph_eta)>1"
+  scale = float(lumi*cro)/Nev
 
-        cut = TCut("m_llg>"+str(m1)+"&&m_llg<"+str(m2))
-        cut += etaCut
-        treeda = dataFile.Get("fitTree/fitTree")
-        treeda.Draw("m_llg>>hda", cut)
+  u.FBAss(sigFileZjp, 'signal', 'FB_cosSC-diG_vs_Mllg_cut'+cut, pathBase+'/Angles/')
+  u.FBAss(dataFile,   'data',   'FB_cosSC-diG_vs_Mllg_cut'+cut, pathBase+'/Angles/')
 
-        treesi = sigFile.Get("fitTree/fitTree")
-        treesi.Draw("m_llg>>hsi", cut)
+  #u.FBAss(sigFileMAD, 'signal', 'FB_cosSC-ll_vs_Mll_cut'+cut, pathBase+'/Angles/')
+  #u.FBAss(dataFile,   'data',   'FB_cosSC-ll_vs_Mll_cut'+cut, pathBase+'/Angles/')
 
-        yda = hda.Integral()
-        ysi = hsi.Integral()
-        ysi_sc = ysi*scale
-        print 'yields inside ', m1,m2, ' r=',r, 'data=', yda, 'signal=',ysi_sc
-        print "significance=", ysi_sc/sqrt(ysi_sc+yda)
 
-    '''
-    '''
-    h2da = dataFile.Get("h2D_dalitzPlot_rotation__cut"+cut).ProjectionX("hda_prx")
-    h2si = sigFile.Get("h2D_dalitzPlot_rotation__cut"+cut).ProjectionX("hsi_prx")
+  '''
+  hc7 = sigFileMAD.Get("tri_mass80__cut7").Integral(35,41)*scale
+  hc8 = sigFileMAD.Get("tri_mass80__cut8").Integral(35,41)*scale
+  hc9 = sigFileMAD.Get("tri_mass80__cut9").Integral(35,41)*scale
+  print "Yields in bins that supposed to correspond to [122,128] window:\n",hc7, hc8, hc9
 
-    #u.handleOverflowBins(h2da)
-    #u.handleOverflowBins(h2si)
+  hc7 = dataFile.Get("tri_mass80__cut7").Integral(36,40)
+  hc8 = dataFile.Get("tri_mass80__cut8").Integral(36,40)
+  hc9 = dataFile.Get("tri_mass80__cut9").Integral(36,40)
+  print "Yields in bins that supposed to correspond to [122,128] window:\n",hc7, hc8, hc9
 
-    h2da.Draw("hist")
-    h2si.Draw("same hist")
-    h2si.SetLineColor(kRed+1)
-    h2si.Scale(10*scale)
-    h2da.SetTitle(";projectionX;Events")
-    c1.SaveAs("h2da_dalitz.png")
-    '''
 
-    '''
-    nx = h2da.GetNbinsX()
-    ny = h2da.GetNbinsY()
-    h2da_rot = TH2D("h2da_rot","", nx, )
-    h2si_rot = TH2D("h2si_rot","")
-    for a in nx:
-    for b in ny:
-    fda = h2da.GetBinContent(a,b)
-    fsi = h2si.GetBinContent(a,b)
+  m1 = 110.
+  m2 = 170.
 
-    h2da_rot.SetBinContent(a,b, fda)
-    h2si_rot.SetBinContent(a,b,fda)
-    '''
+  for r in ["0"]:
+      etaCut = TCut("")
+      if r=="EB":
+          etaCut = "fabs(ph_eta)<1"
+      elif r=="EE":
+          etaCut = "fabs(ph_eta)>1"
 
-  if options.zjp and cut=='4':
+      cut = TCut("m_llg>"+str(m1)+"&&m_llg<"+str(m2))
+      cut += etaCut
+      treeda = dataFile.Get("fitTree/fitTree")
+      treeda.Draw("m_llg>>hda", cut)
+
+      treesi = sigFile.Get("fitTree/fitTree")
+      treesi.Draw("m_llg>>hsi", cut)
+
+      yda = hda.Integral()
+      ysi = hsi.Integral()
+      ysi_sc = ysi*scale
+      print 'yields inside ', m1,m2, ' r=',r, 'data=', yda, 'signal=',ysi_sc
+      print "significance=", ysi_sc/sqrt(ysi_sc+yda)
+
+  '''
+  '''
+  h2da = dataFile.Get("h2D_dalitzPlot_rotation__cut"+cut).ProjectionX("hda_prx")
+  h2si = sigFile.Get("h2D_dalitzPlot_rotation__cut"+cut).ProjectionX("hsi_prx")
+
+  #u.handleOverflowBins(h2da)
+  #u.handleOverflowBins(h2si)
+
+  h2da.Draw("hist")
+  h2si.Draw("same hist")
+  h2si.SetLineColor(kRed+1)
+  h2si.Scale(10*scale)
+  h2da.SetTitle(";projectionX;Events")
+  c1.SaveAs("h2da_dalitz.png")
+  '''
+
+  '''
+  nx = h2da.GetNbinsX()
+  ny = h2da.GetNbinsY()
+  h2da_rot = TH2D("h2da_rot","", nx, )
+  h2si_rot = TH2D("h2si_rot","")
+  for a in nx:
+  for b in ny:
+  fda = h2da.GetBinContent(a,b)
+  fsi = h2si.GetBinContent(a,b)
+
+  h2da_rot.SetBinContent(a,b, fda)
+  h2si_rot.SetBinContent(a,b,fda)
+  '''
+
+  if opt.zjp and cut=='4':
     data = TFile(hPath+"/m_Data_"+sel+"_2012.root","OPEN")
 
     ZJPG(data, c1, TCut('pt3/m123>0.3 && pt12/m123>0.3 && m123>110 && m123<170 && dr13>1 && dr23>1'),
@@ -410,10 +413,12 @@ if __name__ == "__main__":
     table_all  = u.yieldsTable([yields_data,yields_bkg,yields_sig], sel)
     #table_all  = u.yieldsTable([yields_data,yields_bkg,yields_sig, yields_ggH,yields_vbf, yields_vh], sel)
   else:
-    if options.zjp or options.hjp:
+    if opt.zjp or opt.hjp:
       table_all = u.yieldsTable([yields_data, yields_hjp, yields_zjp], sel)
-    elif not options.apz:
+    #elif not opt.apz:
+    else:
       table_all  = u.yieldsTable([yields_data,yields_sig, yields_ggH,yields_vbf, yields_vh], sel)
+
 
   u.makeTable(table_all,"all", "html")
   u.makeTable(table_all,"all", "twiki")
@@ -426,7 +431,7 @@ if __name__ == "__main__":
   defaultPage = sel
   if sel=='mugamma' and cut in ['12']: defaultPage = 'jpsi'
   elif cut in ['14','15']: defaultPage = 'apz'
-  #elif options.zjp or options.hjp: defaultPage = 'jp-'+sel
+  #elif opt.zjp or opt.hjp: defaultPage = 'jp-'+sel
   print defaultPage
 
 
