@@ -13,6 +13,8 @@ lumi2012 = float(conf.get("lumi","lumi2012A")) + float(conf.get("lumi","lumi2012
     float(conf.get("lumi","lumi2012C")) + float(conf.get("lumi","lumi2012D"))
 lumi = lumi2012
 
+gROOT.LoadMacro("../CMS_lumi.C")
+
 def setSelection(sel):
   conf.set("selection","sel", sel)
 def getSelection():
@@ -523,11 +525,11 @@ def drawAllInFile(f1, name1, bZip, f3, name3, myDir,path, N, howToScale="none", 
       proc = 'H#rightarrow#gamma*#gamma#rightarrow#mu#mu#gamma'
       #proc = 'Z#rightarrow J/#Psi#gamma#rightarrow#mu#mu#gamma'
       #proc = 'H#rightarrow#J/#Psi#gamma#rightarrow#mu#mu#gamma'
-      # prelim = TLatex(0.15,0.95, "CMS Simulation          H#rightarrow#gamma*#gamma#rightarrow#mu#mu#gamma")
-      prelim = TLatex(0.15,0.95, "CMS Preliminary #sqrt{s} = 8TeV, L = 19.7 fb^{-1}   "+proc)
+      prelim = TLatex(0.15,0.95, proc)
       prelim.SetNDC();
       prelim.SetTextSize(0.035);
       prelim.Draw();
+      CMS_lumi(c1, 2, 11 );
 
       # print "hmax =", hmaxs
 

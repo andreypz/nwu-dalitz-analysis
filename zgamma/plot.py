@@ -48,6 +48,7 @@ if __name__ == "__main__":
   doBkg   = opt.bkg
 
   gROOT.ProcessLine(".L ../tdrstyle.C")
+  #gROOT.ProcessLine(".L tdrstyle.C")
   setTDRStyle()
   TH1.SetDefaultSumw2(kTRUE)
 
@@ -95,12 +96,12 @@ if __name__ == "__main__":
     #bkgNames.append('ZG')
     #bkgFiles.append(TFile(hPath+"/m_DYJets50_"+sel+"_"+period+".root","OPEN"))
     #bkgNames.append('DYJets50')
-    bkgFiles.append(TFile(hPath+"/"+sel+"_"+period+"/hhhh_ZGDalitz_1.root","OPEN"))
-    bkgNames.append('ZGDalitz')
     bkgFiles.append(TFile(hPath+"/"+sel+"_"+period+"/hhhh_DYJetsDalitz_1.root","OPEN"))
     bkgNames.append('DYJetsDalitz')
-    #bkgFiles.append(TFile(hPath+"/m_QCD_"+sel+"_"+period+".root","OPEN"))
-    #bkgNames.append('QCD')
+    bkgFiles.append(TFile(hPath+"/"+sel+"_"+period+"/hhhh_ZGDalitz_1.root","OPEN"))
+    bkgNames.append('ZGDalitz')
+    bkgFiles.append(TFile(hPath+"/m_QCD_"+sel+"_"+period+".root","OPEN"))
+    bkgNames.append('QCD')
 
     yields_bkg  = u.getYields(bkgFiles[0],bkgNames[0],True)
 

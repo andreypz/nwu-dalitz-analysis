@@ -129,12 +129,12 @@ void HistMaker::MakeElectronPlots(const TCElectron& el, string dir)
   hists->fill1DHist(el.TrackerLayersWithMeasurement(), dir+"_el_TrackerLayersWithMeasurement",
 		    ";TrackerLayersWithMeasurement", 20, 0,20,1,dir);
 
-  hists->fill1DHist(el.PassConversionVeto(), dir+"_el_conv_passConv",";pass conv veto",       3, 0, 3, 1, dir);
+  hists->fill1DHist(el.PassConversionVeto(), dir+"_el_conv_passConv",";pass conv veto",  3, 0,  3, 1, dir);
   hists->fill1DHist(el.ConversionMissHits(), dir+"_el_conv_MissHits",";conv miss hits", 10, 0, 10, 1, dir);
 
-  hists->fill1DHist(el.ConversionDist(),   dir+"_el_convDist",  ";conv Dist",   100, 0, 1,      1, dir);
+  hists->fill1DHist(el.ConversionDist(),   dir+"_el_convDist",  ";conv Dist",   100, 0, 1,  1, dir);
   hists->fill1DHist(el.ConversionDcot(),   dir+"_el_convDcot",  ";conv Dcot",   100, -1, 1, 1, dir);
-  hists->fill1DHist(el.ConversionRadius(), dir+"_el_convRadius",";conv Radius", 100, 0, 50,     1, dir);
+  hists->fill1DHist(el.ConversionRadius(), dir+"_el_convRadius",";conv Radius", 100, 0, 50, 1, dir);
 
   hists->fill1DHist(el.GetTracks().size(), dir+"_el_nTracks", ";nTracks", 10, 0,10, 1,dir);
 
@@ -161,7 +161,7 @@ void HistMaker::MakeElectronPlots(const TCElectron& el, string dir)
     hists->fill1DHist(inf.isValid, subdir+Form("_el_conv_%i",i+1)+"_isValid",Form(";isValid trk %i", i+i),3, 0,3, 1,subdir);
     if (inf.isValid){
       hists->fill1DHist(inf.nHitsMax,subdir+Form("_el_conv_%i",i+1)+"_nHitsMax",Form(";nHitsMax trk %i",i+i),  20, 0,20, 1,subdir);
-      hists->fill1DHist(inf.vtxProb, subdir+Form("_el_conv_%i",i+1)+"_vtxProb", Form(";vtxProb trk %i", i+i), 200,0,0.01, 1,subdir);
+      hists->fill1DHist(inf.vtxProb, subdir+Form("_el_conv_%i",i+1)+"_vtxProb", Form(";vtxProb trk %i", i+i), 200,0,0.01,1,subdir);
       //hists->fill1DHist(inf.lxyPV,   subdir+Form("_el_conv_%i",i+1)+"_lxyPV",   Form(";lxyPV trk %i",   i+i), 200, 0,50, 1,subdir);
       hists->fill1DHist(inf.lxyBS,   subdir+Form("_el_conv_%i",i+1)+"_lxyBS",   Form(";lxyBS trk %i",   i+i), 200, 0,50, 1,subdir);
     }
@@ -296,7 +296,7 @@ void HistMaker::FillHistosFull(Int_t num, Double_t weight, string dir)
     hists->fill1DHist(_lPt2.DeltaR(_gamma),Form("04_lPt2_gamma_deltaR_%s_cut%i",d, num),";#Delta R(#gamma,l_{2})",100,0,5, weight,dir);
   }
 
-  hists->fill1DHist(_rhoFactor, Form("rhoFactor_%s_cut%i",     d, num), ";#rho-factor",       100, 0,40, weight, dir);
+  hists->fill1DHist(_rhoFactor, Form("rhoFactor_%s_cut%i",     d, num), ";#rho-factor",     100, 0,40, weight, dir);
   hists->fill1DHist(_nVtx,      Form("vtx_nPV_weight_%s_cut%i",d, num), ";nPV, re-weighted", 40, 0,40, weight, dir);
   hists->fill1DHist(_nVtx,      Form("vtx_nPV_raw_%s_cut%i",   d, num), ";nPV, Raw",         40, 0,40,      1, dir);
   //hists->fill1DHist(nVtxTotal, Form("vtx_nPV_tot_%s_cut%i",   d, num), "vtx_nPV_tot",    40, 0,40, weight, dir);
