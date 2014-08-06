@@ -295,11 +295,14 @@ for year in yearList:
       fitName  = '_'.join([bkgModel,year,lepton,'cat'+cat])
       normName = 'norm'+bkgModel+'_'+suffix
 
+
       hPath    = cf.get("path","base")+"/batch_output/zgamma/8TeV/"+subdir
+      sigFile_hjp  = TFile(hPath+"/jp-mugamma_"+year+"/hhhh_HiggsToJPsiGamma_1.root", "OPEN")
       sigFile_gg   = TFile(hPath+"/mugamma_"+year+"/hhhh_ggH-mad125_1.root", "OPEN")
       sigFile_vbf  = TFile(hPath+"/mugamma_"+year+"/hhhh_vbf-mad125_1.root", "OPEN")
       sigFile_vh   = TFile(hPath+"/mugamma_"+year+"/hhhh_vh-mad125_1.root", "OPEN")
-      fsig= [sigFile_gg,sigFile_vbf,sigFile_vh]
+      #fsig= [sigFile_gg,sigFile_vbf,sigFile_vh]
+      fsig= [sigFile_hjp]
       hsig = []
       for i,f in enumerate(fsig):
         Nev = f.Get("Counts/evt_byCut").GetBinContent(2)
@@ -313,12 +316,12 @@ for year in yearList:
         scale = float(lumi*cro)/Nev
         print f.GetName(), cro,Nev,scale
 
-        hsig.append(f.Get("tri_mass__cut10").Clone())
+        hsig.append(f.Get("00_tri_mass__cut9").Clone())
         hsig[-1].Scale(10*scale)
         #hsig[-1].Print("all")
 
-      hsig[0].Add(hsig[1])
-      hsig[0].Add(hsig[2])
+      #hsig[0].Add(hsig[1])
+      #hsig[0].Add(hsig[2])
 
       print fitName, dataName
       data = myWs.data(dataName)
@@ -364,7 +367,7 @@ for year in yearList:
       fit_ext.plotOn(testFrame, RooFit.Name(bkgModel+"1sigma"),
                      RooFit.VisualizeError(fit_result,1), RooFit.FillColor(kCyan-6), RooFit.LineColor(kBlack))
       fit_ext.plotOn(testFrame, RooFit.Name(bkgModel), RooFit.LineColor(kBlue), RooFit.LineWidth(2))
-      fit_ext.paramOn(testFrame, RooFit.Layout(0.30,0.99,0.9))
+      #fit_ext.paramOn(testFrame, RooFit.Layout(0.30,0.99,0.9))
       #fit_ext.statOn(testFrame)
 
 
@@ -415,7 +418,7 @@ for year in yearList:
       leg.AddEntry(0,'','')
       leg.AddEntry(hsig[0],'Expected signal x10','l')
       leg.SetTextSize(0.045)
-      #leg.Draw()
+      leg.Draw()
 
       leg2  = TLegend(0.55,0.72,0.91,0.8)
       leg2.SetNColumns(2)

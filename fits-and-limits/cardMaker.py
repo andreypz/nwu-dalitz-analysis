@@ -37,9 +37,10 @@ phoID   = '1.006'
 phoTRIG = '1.020'
 PU      = '1.008'
 
-proc = {'gg':'ggH', 'vbf':'qqH','v':'WH'}
+proc = {'gg':'ggH', 'vbf':'qqH','v':'WH','hjp':'hjp'}
 #massList   = ['%.1f'%(a) for a in u.drange(120,150,5)]
-massList   = ['%.1f'%(a) for a in u.drange(120,150,.5)]
+#massList   = ['%.1f'%(a) for a in u.drange(120,150,.5)]
+massList = ['125.0']
 csBR = {}
 
 #for i,m in enumerate(massList):
@@ -81,7 +82,8 @@ def makeCards(subdir):
           sigWs = sigFile.Get('ws_card')
           procList  = [proc[a] for a in sigNameList]
           if options.br:
-            procList=['ggH']
+            procList=['hjp']
+            #procList=['ggH']
 
           nProc = len(procList)
           # print procList
@@ -139,8 +141,9 @@ def makeCards(subdir):
           for s in sigNameList[::-1]:
             cs = 1
             if options.br:
-              cs = fit(float(mass))
-              #print 'from the fit', fit(float(mass))
+              #cs = fit(float(mass))
+              cs = 0.5
+              # print 'from the fit', fit(float(mass))
               # dont use this:: cs = csBR[mass]
               #print 'from csbr:',cs
             print mass, s, cs

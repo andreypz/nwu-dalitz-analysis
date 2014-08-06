@@ -11,10 +11,11 @@ import ConfigParser as cp
 cf = cp.ConfigParser()
 cf.read('config.cfg')
 
-massList   = ['%.1f'%(a) for a in u.drange(120,150,.5)]
+massList   = ['125.0']
+#massList   = ['%.1f'%(a) for a in u.drange(120,150,.5)]
 
-gROOT.ProcessLine(".L ../tdrstyle.C")
-setTDRStyle()
+#gROOT.ProcessLine(".L ../tdrstyle.C")
+#setTDRStyle()
 
 # rounding function for interpolation
 def roundTo5(x, base=5):
@@ -112,10 +113,11 @@ def SignalFitMaker(lep, year, cat, subdir):
           mzg.setRange('fitRegion1',int(massLow)-15,int(massLow)+10)
         sigNameLow = '_'.join(['ds','sig',prod,lep,year,'cat'+cat,'M'+str(massLow)])
         sig_ds_Low = myWs.data(sigNameLow)
-        if massLow == massHi: dsList.append(sig_ds_Low)
+        if massLow == massHi:
+          dsList.append(sig_ds_Low)
 
-        #print massLow
-        #raw_input("Mass low")
+        print massLow, massHi
+        raw_input("Mass low and Hi; hit enter")
         CBG_Low = BuildCrystalBallGauss(year,lep,cat,prod,str(massLow),'Low',mzg,mean = massLow)[0]
 
         CBG_Low.fitTo(sig_ds_Low, RooFit.Range('fitRegion1'), RooFit.SumW2Error(kTRUE), RooFit.Strategy(1), RooFit.NumCPU(4), RooFit.PrintLevel(-1))
@@ -159,8 +161,8 @@ def SignalFitMaker(lep, year, cat, subdir):
 
       CBG_Interp.fitTo(interp_ds, RooFit.Range('fitRegion_'+massString), RooFit.SumW2Error(kTRUE), RooFit.Strategy(1), RooFit.NumCPU(4), RooFit.PrintLevel(-1))
 
-      #print paramList
-      #raw_input("Param List")
+      print paramList
+      raw_input("Param List")
 
       for param in paramList:
         param.setConstant(True)

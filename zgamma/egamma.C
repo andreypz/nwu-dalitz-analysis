@@ -169,7 +169,7 @@ void egamma::Begin(TTree * tree)
       myTrigger = "HLT_Photon26_R9Id85_OR_CaloId10_Iso50_Photon18_R9Id85_OR_CaloId10_Iso50_Mass60_v";
       cut_l1pt = 23;
       cut_l2pt = 4;
-      //cut_gammapt = 30;
+      cut_gammapt = 25;
     }
   else if (trigger=="ee")
     {
@@ -222,7 +222,17 @@ Bool_t egamma::Process(Long64_t entry)
   //cout<<eventNumber<<"  ev rho = "<<rhoFactor<<endl;
   hists->fill1DHist(nPUVerticesTrue, "nPUVerticesTrue",";nPUVerticesTrue",  100, 0,100, 1,"GEN");
   hists->fill1DHist(nPUVertices,     "nPUVertices",";nPUVertices",          100, 0,100, 1,"GEN");
-  HM->Reset(rhoFactor);
+
+  nVtx = primaryVtx->GetSize();
+  HM->Reset(rhoFactor, nVtx);
+
+  // --- Primary vertex ---//
+  if (nVtx<1) return kTRUE;
+  TCPrimaryVtx *mainPrimaryVertex = 0; mainPrimaryVertex   = (TCPrimaryVtx*)(primaryVtx->At(0));
+  TVector3* pvPosition; pvPosition = mainPrimaryVertex;
+
+  HM->SetVtx(*mainPrimaryVertex);
+
 
   // ----------------------//
   // Gen level particles --//
@@ -414,21 +424,6 @@ Bool_t egamma::Process(Long64_t entry)
   CountEvents(2);
 
 
-  nVtx = primaryVtx->GetSize();
-  // --- Primary vertex ---//
-
-  if (primaryVtx->GetSize()<1) return kTRUE;
-  TCPrimaryVtx *mainPrimaryVertex = 0, *secondPrimaryVertex = 0;
-  mainPrimaryVertex   = (TCPrimaryVtx*)(primaryVtx->At(0));
-  TVector3* pvPosition;// = new TVector3();
-
-  nDofVtx1 = mainPrimaryVertex->NDof();
-  if(primaryVtx->GetSize() > 1){
-    secondPrimaryVertex = (TCPrimaryVtx*)(primaryVtx->At(1));
-    nDofVtx2 = secondPrimaryVertex->NDof();
-  }
-  pvPosition = mainPrimaryVertex;
-
   //if (checkTrigger){
   //triggerSelector->SelectTrigger(myTrigger, triggerStatus, hltPrescale, isFound, triggerPass, prescale);
   //if (!triggerPass) return kTRUE;
@@ -489,8 +484,8 @@ Bool_t egamma::Process(Long64_t entry)
 	  HM->MakePhotonEnergyCorrPlots(*thisPhoton, corrPhoEnReco, corrPhoEnSC);
 
 	  //cout<<runNumber<<"  uncor en="<< thisPhoton->E()<<"  cor en = "<<corrPhoEn<<endl;
-	  //Double_t scale = 1;
-	  Double_t scale = corrPhoEnReco/thisPhoton->E();
+	  Double_t scale = 1;
+	  //Double_t scale = corrPhoEnReco/thisPhoton->E();
 	  //Double_t scale = corrPhoEnSC/thisPhoton->E();
 
 	  thisPhoton->SetXYZM(scale*thisPhoton->Px(), scale*thisPhoton->Py(),scale*thisPhoton->Pz(),0);
@@ -561,7 +556,7 @@ Bool_t egamma::Process(Long64_t entry)
 	electrons0.push_back(*thisElec);
       }
 
-      if (thisElec->Pt() > 30.0 && fabs(thisElec->Eta()) < 1.4442 &&
+      if (thisElec->Pt() > 30 && fabs(thisElec->Eta()) < 1.4442 &&
 	  ObjID->PassDalitzEleID(*thisElec, "MVA", DAleMvaScore) ){
 	thisElec->SetIdMap("mvaScore", DAleMvaScore);
 	DAlectrons.push_back(*thisElec);
@@ -640,7 +635,7 @@ Bool_t egamma::Process(Long64_t entry)
 
   if (gamma.Pt() < cut_gammapt) return kTRUE;
   //if (fabs(gamma.Eta()) > 1.444) return kTRUE;
-  if (fabs(gamma.SCEta()) > 1.444) return kTRUE;
+  if (fabs(gamma.SCEta()) > 1.4442) return kTRUE;
 
   if(!isRealData && makeGen){
     hists->fill1DHist(genMll,  "gen_Mll_reco_gamma_iso",  ";gen_Mll",100,0,mllMax, 1,"eff");
@@ -742,10 +737,22 @@ Bool_t egamma::Process(Long64_t entry)
   DALE = DAlectrons[0];
   if (DALE.Pt()<30)
     return kTRUE;
-  if (!DALE.PassConversionVeto())
+  //if (!DALE.PassConversionVeto())
+  //return kTRUE;
+  //if (DALE.ConversionMissHits()!=0)
+  //return kTRUE;
+
+
+  TCTrack::ConversionInfo cI = DALE.GetTracks()[0].GetConversionInfo();
+  if (cI.vtxProb>1e-6 && cI.lxyBS>2 && cI.nHitsMax>1)
     return kTRUE;
-  if (DALE.ConversionMissHits()!=0)
+
+  cI = DALE.GetTracks()[1].GetConversionInfo();
+  if (cI.vtxProb>1e-6 && cI.lxyBS>2 && cI.nHitsMax>1)
     return kTRUE;
+
+
+  fout<<runNumber<<" "<<eventNumber<<" "<<DALE.IdMap("mvaScore")<<endl;
 
   l1 = DALE.GetTracks()[0];
   l2 = DALE.GetTracks()[1];
@@ -754,7 +761,6 @@ Bool_t egamma::Process(Long64_t entry)
     lPt1 = l1; lPt2 = l2;}
   else {lPt1 = l2; lPt2 = l1;}
 
-  //HM->SetLeptons(l1, l2);
   HM->SetLeptons(lPt1, lPt2);
 
   if (DALE.BaseSC()[0].Pt()<DALE.BaseSC()[1].Pt())
@@ -766,7 +772,6 @@ Bool_t egamma::Process(Long64_t entry)
   CountEvents(7);
   HM->MakeElectronPlots(DALE, "DalitzEle-cut7");
 
-  //if (DALE.DeltaR(gamma)<1.0) return kTRUE;
 
   if (lPt1.Pt() < cut_l1pt || lPt2.Pt() < cut_l2pt)   return kTRUE;
 
@@ -781,7 +786,7 @@ Bool_t egamma::Process(Long64_t entry)
   hists->fill1DHist(MdalG-Mllg, Form("00_mllg-diff_cut%i", 8),";m_{e#gamma} - m_{ll#gamma}", 50,-20,20, 1, "");
   hists->fill1DHist(MdalG,      Form("00_mDalG_cut%i",     8),";m_{e#gamma}",              100, 80,200, 1, "");
 
-  //if (MdalG<110 || MdalG>170)
+  if (MdalG<110 || MdalG>170)
   //if (Mllg<70)
 
   if (electrons.size() >=2) {
@@ -806,7 +811,8 @@ Bool_t egamma::Process(Long64_t entry)
   FillHistoCounts(10, eventWeight);
   CountEvents(10);
 
-  if (MdalG<80)
+  if (DALE.DeltaR(gamma)<1.0)
+    //  if (MdalG<80)
     return kTRUE;
 
   HM->FillHistosFull(11, eventWeight, "");
@@ -822,7 +828,7 @@ Bool_t egamma::Process(Long64_t entry)
     return kTRUE;
 
 
-    //TCTrack::ConversionInfo inf = DALE.GetTracks()[0].GetConversionInfo();
+  //TCTrack::ConversionInfo inf = DALE.GetTracks()[0].GetConversionInfo();
   //if (inf.lxyPV > 4 || inf.vtxProb < 1e-6 || inf.nHitsMax > 0 ) return kTRUE;
 
   HM->FillHistosFull(12, eventWeight, "");
@@ -832,13 +838,13 @@ Bool_t egamma::Process(Long64_t entry)
   hists->fill1DHist(MdalG-Mllg, Form("00_mllg-diff_cut%i",12),";m_{e#gamma} - m_{ll#gamma}", 50,-20,20, 1, "");
   hists->fill1DHist(MdalG,      Form("00_mDalG_cut%i",    12),";m_{e#gamma}",              100, 80,200, 1, "");
 
-
-  fout<<"Run/lumi/event = "<<runNumber<<"/"<<lumiSection<<"/"<<eventNumber<<endl;
-  fout<<"MvaID = "<<DALE.IdMap("mvaScore")<<"  "<<DALE<<endl;
+  //fout<<"Run/lumi/event = "<<runNumber<<"/"<<lumiSection<<"/"<<eventNumber<<endl;
+  //fout<<"MvaID = "<<DALE.IdMap("mvaScore")<<"  "<<DALE<<endl;
   //fout<<" SC1 = "<<DALE.BaseSC()[0]<<endl;
   //fout<<" SC2 = "<<DALE.BaseSC()[1]<<endl;
 
-  if (Mllg<122 || Mllg>128) return kTRUE;
+  if (MdalG<122 || MdalG>128) return kTRUE;
+  //if (Mllg<122 || Mllg>128) return kTRUE;
 
   HM->FillHistosFull(13, eventWeight, "");
   FillHistoCounts(13, eventWeight);

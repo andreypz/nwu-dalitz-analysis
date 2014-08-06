@@ -228,8 +228,8 @@ def drawAllInFile(f1, name1, bZip, f3, name3, myDir,path, N, howToScale="none", 
   if f3!=None and howToScale=="lumi": # only assume signal MC for now
     Nev = f3.Get("Counts/evt_byCut_raw").GetBinContent(1)
     print '\n\n Fix ME FIX ME  \n\n'
-    cro = getCS("ZtoJPsiGamma") #
-    print 'need more generic way to get cs by sample'
+    cro = getCS("HtoJPsiGamma") #
+    print ': Need more generic way to get cs by sample\n'
     # cro = getCS("ggH-125")
     scale3 = float(lumi*cro)/Nev
     print Nev, lumi, cro, scale3
@@ -871,7 +871,7 @@ def effPlots(f1, path):
 
 
 
-def FBAss(f, s, name, path):
+def AFB(f, s, name, path):
   c1 = TCanvas("c1","a canvas",600,600);
   cosCS  = f.Get("Angles/"+name)
   nBinsX = cosCS.GetNbinsX()
@@ -880,14 +880,46 @@ def FBAss(f, s, name, path):
   cosCS.Draw()
   #print "In X: from %.1f to %.1f in %i bins" % (cosCS.GetXaxis().GetBinLowEdge(1), cosCS.GetXaxis().GetBinUpEdge(nBinsX), nBinsX)
   #print "In Y: from %.1f to %.1f in %i bins" % (cosCS.GetYaxis().GetBinLowEdge(1), cosCS.GetYaxis().GetBinUpEdge(nBinsY), nBinsY)
+  mMin = cosCS.GetYaxis().GetBinLowEdge(1)
+  mMax = cosCS.GetYaxis().GetBinUpEdge(nBinsY)
+  mBin = (mMax - mMin)/nBinsY
   pr = []
-  step = 25
+  step = 10
+  nSteps = nBinsY/step
+  import numpy as np
+  m   = np.zeros(nSteps,  dtype=np.float)
+  B   = np.zeros(nSteps,  dtype=np.float)
+  F   = np.zeros(nSteps,  dtype=np.float)
+  eB  = np.zeros(nSteps,  dtype=np.float)
+  eF  = np.zeros(nSteps,  dtype=np.float)
+  Afb = np.zeros(nSteps,  dtype=np.float)
+  eA  = np.zeros(nSteps,  dtype=np.float)
+
   histmax = 0
   #pr.append(cosCS.ProfileX('pr_step_'+str(step), 1, 20))
-  for i in xrange(nBinsY/step):
+  for i in xrange(nSteps):
     pr.append(cosCS.ProjectionX(s+'pr_step_'+str(i), i*step+1, (i+1)*step))
     histmax = max(histmax,pr[-1].GetMaximum())
     #pr[-1].Rebin()
+    m[i] = mMin + (i+0.5)*step*mBin
+    e = ROOT.Double()
+    #B[i] = pr[-1].IntegralAndError(1,50, e)
+    eB[i] = e
+    #F[i] = pr[-1].IntegralAndError(51,100,eF[i])
+    if (F[i]+B[i])!=0:
+      Afb[i] = (F[i]-B[i])/(F[i]+B[i])
+      eA[i] = eF[i] + eB[i]
+    else:
+      Afb[i] = 0
+  print 'F, B and  Afb',F,B, Afb
+  gr = TGraphErrors(nSteps, m, Afb, eA, eA)
+  gr.Draw("APL")
+  gr.SetMarkerStyle(23)
+  gr.SetMarkerSize(0.66)
+  gr.SetTitle(';m (GeV); A_{FB}')
+  #gr.Print('all')
+  c1.SaveAs(path+'/'+name+'-AFB-vs-M'+s+'.png')
+
 
   pr[0].Draw('hist')
   pr[0].SetMaximum(1.2*histmax)
@@ -897,4 +929,4 @@ def FBAss(f, s, name, path):
   c1.SaveAs(path+'/'+name+'-projections'+s+'.png')
 
 if __name__ == "__main__":
-    print "This is utils.py script"
+  print "This is utils.py script"

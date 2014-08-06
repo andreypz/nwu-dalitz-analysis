@@ -106,6 +106,7 @@ void jpsiGamma::Begin(TTree * tree)
   histoFile->cd("apzTree");
   if (makeApzTree){
     _apzTree = new TTree("apzTree", "A tree for studying new particles");
+    _apzTree->Branch("weight",&apz_w,"weight/D");
     _apzTree->Branch("dr1234",&apz_dr1234,"dr1234/D");
     _apzTree->Branch("dr12",  &apz_dr12,  "dr12/D");
     _apzTree->Branch("dr13",  &apz_dr13,  "dr13/D");
@@ -206,7 +207,17 @@ Bool_t jpsiGamma::Process(Long64_t entry)
   //cout<<" weight="<<eventWeight<<endl;
   ObjID->SetEventInfo(isRealData, runNumber, eventNumber, rhoFactor);
   //cout<<eventNumber<<"  ev rho = "<<rhoFactor<<endl;
+  float phoMvaScore;
 
+  nVtx = primaryVtx->GetSize();
+  HM->Reset(rhoFactor, nVtx);
+
+  // --- Primary vertex ---//
+  if (nVtx<1) return kTRUE;
+  TCPrimaryVtx *mainPrimaryVertex = 0; mainPrimaryVertex   = (TCPrimaryVtx*)(primaryVtx->At(0));
+  TVector3* pvPosition; pvPosition = mainPrimaryVertex;
+
+  HM->SetVtx(*mainPrimaryVertex);
 
   // ----------------------//
   // Gen level particles --//
@@ -456,25 +467,9 @@ Bool_t jpsiGamma::Process(Long64_t entry)
   FillHistoCounts(2, eventWeight);
   CountEvents(2);
 
-
-  nVtx = primaryVtx->GetSize();
-  // --- Primary vertex ---//
-
-  if (primaryVtx->GetSize()<1) return kTRUE;
-  TCPrimaryVtx *mainPrimaryVertex = 0, *secondPrimaryVertex = 0;
-  mainPrimaryVertex   = (TCPrimaryVtx*)(primaryVtx->At(0));
-  TVector3* pvPosition;// = new TVector3();
-
-  nDofVtx1 = mainPrimaryVertex->NDof();
-  if(primaryVtx->GetSize() > 1){
-    secondPrimaryVertex = (TCPrimaryVtx*)(primaryVtx->At(1));
-    nDofVtx2 = secondPrimaryVertex->NDof();
-  }
-  pvPosition = mainPrimaryVertex;
-
   vector<TCElectron> electrons0, electrons;
   vector<TCMuon> muons0, muons;
-  vector<TCPhoton> photons0, photonsTight, photonsHZG, fake_photons;
+  vector<TCPhoton> photons0, photonsTight, photonsHZG, photonsMVA, fake_photons;
   TCPhysObject l1,l2, lPt1, lPt2;
   TCPhoton gamma0, gamma,gamma2, ufoton, ufelectron;
 
@@ -502,23 +497,7 @@ Bool_t jpsiGamma::Process(Long64_t entry)
       if (isRealData || !makeGen || (sample=="dalitz" && makeGen && gen_gamma.DeltaR(*thisPhoton) < 0.1) )
 	photons0.push_back(*thisPhoton);
 
-      /*
-      Bool_t vetoIt = 0;
-      if (isDYJets)
-	for (UInt_t v = 0; v<vetoPhotons.size(); v++){
-	  if (thisPhoton->DeltaR(vetoPhotons[v]) < 0.2)
-	    {
-	      vetoIt = 1;
-	      break;
-	    }
-	}
-
-      if (vetoIt) continue;
-      */
-
-      if(ObjID->PassPhotonIdAndIso(*thisPhoton, "MVA")
-	 //if(ObjID->PassPhotonIdAndIso(*thisPhoton, "CutBased-MediumWP")
-	 //&& (isRealData || !makeGen || (sample=="dalitz" && makeGen && gen_gamma.DeltaR(*thisPhoton) < 0.2) )
+      if(ObjID->PassPhotonIdAndIso(*thisPhoton, "CutBased-MediumWP", phoMvaScore)                                                                                                  	 //&& (isRealData || !makeGen || (sample=="dalitz" && makeGen && gen_gamma.DeltaR(*thisPhoton) < 0.2) )
 	 )
 	{
 
@@ -530,8 +509,8 @@ Bool_t jpsiGamma::Process(Long64_t entry)
 	  HM->MakePhotonEnergyCorrPlots(*thisPhoton, corrPhoEnReco, corrPhoEnSC);
 
 	  //cout<<runNumber<<"  uncor en="<< thisPhoton->E()<<"  cor en = "<<corrPhoEn<<endl;
-	  //Double_t scale = 1;
-	  Double_t scale = corrPhoEnReco/thisPhoton->E();
+	  Double_t scale = 1;
+	  //Double_t scale = corrPhoEnReco/thisPhoton->E();
 	  //Double_t scale = corrPhoEnSC/thisPhoton->E();
 
 	  thisPhoton->SetXYZM(scale*thisPhoton->Px(), scale*thisPhoton->Py(),scale*thisPhoton->Pz(),0);
@@ -539,14 +518,19 @@ Bool_t jpsiGamma::Process(Long64_t entry)
 	  //cout<<runNumber<<"  uncor en="<< thisPhoton->E()<<"  cor en = "<<corrPhoEn<<endl;
 	  //thisPhoton->SetPtEtaPhiM(corrPhoEnSC/cosh(SCEta()));
 
+	  thisPhoton->SetIdMap("mvaScore", phoMvaScore);
 	  photonsHZG.push_back(*thisPhoton);
 
 	}
-
-      if(ObjID->PassPhotonIdAndIso(*thisPhoton, "CutBased-TightWP")
-	 //&& (isRealData || !makeGen || (sample=="dalitz" && makeGen && gen_gamma.DeltaR(*thisPhoton) < 0.2) )
-	 )
+      if(ObjID->PassPhotonIdAndIso(*thisPhoton, "CutBased-TightWP", phoMvaScore)){
+	thisPhoton->SetIdMap("mvaScore", phoMvaScore);
 	photonsTight.push_back(*thisPhoton);
+      }
+
+      if(ObjID->PassPhotonIdAndIso(*thisPhoton, "MVA", phoMvaScore)){
+	thisPhoton->SetIdMap("mvaScore", phoMvaScore);
+	photonsMVA.push_back(*thisPhoton);
+      }
     }
   }
 
@@ -558,8 +542,8 @@ Bool_t jpsiGamma::Process(Long64_t entry)
 
   //if (fake_photons.size()>1)
   // Abort("Nah, this is too much.");
-  if (fake_photons.size()>=1)
-    ufoton = fake_photons[0];
+  //if (fake_photons.size()>=1)
+  //ufoton = fake_photons[0];
 
   //if (photonsTight.size()<1) return kTRUE;
   //gamma = photonsTight[0];
@@ -580,56 +564,27 @@ Bool_t jpsiGamma::Process(Long64_t entry)
   for (Int_t i = 0; i <  recoElectrons->GetSize(); ++i) {
     TCElectron* thisElec = (TCElectron*) recoElectrons->At(i);
     if (!(fabs(thisElec->Eta()) < 2.5)) continue;
-    if (thisElec->Pt() > 10.0){
-      if(isRealData || !makeGen || ( selection=="el" && makeGen && (gen_l1.DeltaR(*thisElec) < 0.1 || gen_l2.DeltaR(*thisElec)<0.1)  && thisElec->Pt()>10))
-	{
-	  if (thisElec->MvaID() > -0.50 && thisElec->Pt()>20)
-	    electrons.push_back(*thisElec);
-	}
-      if (
-	  //PassElectronIdAndIsoMVA(thisElec)
-	  ObjID->PassElectronIdAndIso(*thisElec, pvPosition, "Loose")
-	  )
-	electrons0.push_back(*thisElec);
 
+    if (thisElec->Pt() > 10.0 &&
+	thisElec->DeltaR(gamma) > 0.2 ) {
+
+      if(isRealData || !makeGen ||
+	 ( selection=="el" && makeGen && (gen_l1.DeltaR(*thisElec) < 0.1 || gen_l2.DeltaR(*thisElec)<0.1)  && thisElec->Pt()>10))
+	{
+	  if (ObjID->PassElectronIdAndIsoMVA(*thisElec)){
+	    thisElec->SetIdMap("mvaScore", 0);
+	    electrons.push_back(*thisElec);
+	  }
+	}
+      if (ObjID->PassElectronIdAndIso(*thisElec, pvPosition, "Loose") &&
+	  thisElec->Pt() > 15.0){
+	thisElec->SetIdMap("mvaScore", 0);
+	electrons0.push_back(*thisElec);
+      }
     }
   }
   sort(electrons0.begin(), electrons0.end(), P4SortCondition);
   sort(electrons.begin(),  electrons.end(),  P4SortCondition);
-
-  if (doZee){
-
-    if (electrons.size()<2 || photons0.size()<2) return kTRUE;
-
-    //cout<<"doing zee.  Enough photons and electrons!"<<endl;
-
-    if (checkTrigger){
-      triggerSelector->SelectTrigger(myTrigger, triggerStatus, hltPrescale, isFound, triggerPass, prescale);
-      if (!triggerPass) return kTRUE;
-    }
-
-    //cout<<"passed the trigger"<<endl;
-
-    Int_t match1 = -1, match2 = -1;
-    for (UInt_t p=0; p<photons0.size(); p++)
-      {
-	if (photons0[p].Pt() < 40 || fabs(photons0[p].SCEta())>1.444) continue;
-	for (UInt_t e=0; e<electrons.size(); e++)
-	  {
-	    if (photons0[p].DeltaR(electrons[e]) < 0.2)
-	      {
-		//cout<<"matched! photon "<<p<<"  to electron "<<e<<endl;
-		if (match1==-1) match1=p;
-		else {match2=p; break;}
-	      }
-	  }
-      }
-
-    if (match1!=-1 && match2!=-1)
-      HM->MakeZeePlots(photons0[match1], photons0[match2]);
-
-    return kTRUE;
-  }
 
 
   for (Int_t i = 0; i < recoMuons->GetSize(); ++ i) {
@@ -639,41 +594,24 @@ Bool_t jpsiGamma::Process(Long64_t entry)
 
     if (!(fabs(thisMuon->Eta()) < 2.4)) continue;
 
-    if(thisMuon->Pt() > 4)
-      for(Int_t ev=0; ev<evSize;ev++){
-	if (eventNumber==hisEVTS[ev]){cout<<"   mu>4 cut ---> "<<eventNumber<<" <--- Found an event after cut "<<endl;
-	  ObjID->MuonDump(*thisMuon, pvPosition);
-	  break;}}
-
-    if(thisMuon->Pt() > 4
-       && ObjID->PassMuonIdAndIso(*thisMuon, pvPosition, "Soft")
-       ) {
-
-
+    if(thisMuon->Pt() > 4 && ObjID->PassMuonId(*thisMuon, pvPosition, "Soft") ) {
       if (doRochCorr){
 	Float_t qter = 1;
-	//cout<<"DBG before rochcor"<<endl;
-	if (isRealData)
-	  roch->momcor_data(*thisMuon, thisMuon->Charge(), 0, qter);
-	else
-	  roch->momcor_mc(*thisMuon,  thisMuon->Charge(), 0, qter );
-
-	//cout<<"DBG after rochcor"<<endl;
+	if (isRealData) roch->momcor_data(*thisMuon, thisMuon->Charge(), 0, qter);
+	else            roch->momcor_mc(  *thisMuon, thisMuon->Charge(), 0, qter );
       }
-
       muons.push_back(*thisMuon);
     }
   }
 
   sort(muons.begin(), muons.end(), P4SortCondition);
 
-
-  hists->fill1DHist(muons.size(),     Form("size_mu_cut%i",  1),";Number of muons",    5,0,5, 1, "Muons");
-  //hists->fill1DHist(electrons.size(), Form("size_el_cut%i",  1),";Number of electrons",5,0,5, 1, "Electrons");
-  //hists->fill1DHist(electrons0.size(),Form("size_el0_cut%i", 1),";Number of electrons",5,0,5, 1, "Electrons");
-  //hists->fill1DHist(photons.size(),   Form("size_ph_cut%i",  1),";Number of photons",  5,0,5, 1, "Photon");
-  //hists->fill1DHist(photons0.size(),  Form("size_ph0_cut%i", 1),";Number of photons",  5,0,5, 1, "Photon");
-
+  hists->fill1DHist(muons.size(),     Form("size_mu_cut%i",  1),";Number of muons",    5,0,5, 1, "N");
+  hists->fill1DHist(electrons.size(), Form("size_el_cut%i",  1),";Number of electrons (HZZ)",   5,0,5, 1, "N");
+  hists->fill1DHist(electrons0.size(),Form("size_el0_cut%i", 1),";Number of electrons (Loose)", 5,0,5, 1, "N");
+  hists->fill1DHist(photonsHZG.size(),   Form("size_phHZG_cut%i",  1),";Number of photons (HZG)",   5,0,5, 1, "N");
+  hists->fill1DHist(photonsTight.size(), Form("size_phTight_cut%i",1),";Number of photons (Tight)", 5,0,5, 1, "N");
+  hists->fill1DHist(photonsMVA.size(),   Form("size_phMVA_cut%i",  1),";Number of photons (MVA)",   5,0,5, 1, "N");
 
   if(!isRealData && makeGen){
     hists->fill1DHist(genMll,  "gen_Mll_reco_gamma",  ";gen_Mll",100,0,mllMax, 1,"eff");
@@ -747,44 +685,6 @@ Bool_t jpsiGamma::Process(Long64_t entry)
 
   if (lPt1.Pt() < cut_l1pt || lPt2.Pt() < cut_l2pt_low)   return kTRUE;
 
-  if (makeApzTree){
-    apz_pt1 = lPt1.Pt();
-    apz_pt2 = lPt2.Pt();
-    apz_pt3 = gamma.Pt();
-    apz_pt4 = -1;
-    if (gamma2.Pt()>3)
-      apz_pt4 = gamma2.Pt();
-    apz_pt12 = (lPt1+lPt2).Pt();
-    apz_pt34 = gamma.Pt();
-
-    apz_dr1234 = (lPt1+lPt2).DeltaR(gamma);
-    apz_dr12 = lPt1.DeltaR(lPt2);
-    apz_dr13 = lPt1.DeltaR(gamma);
-    apz_dr23 = lPt2.DeltaR(gamma);
-    apz_dr34 = -1;
-
-    apz_eta1 = lPt1.Eta();
-    apz_eta2 = lPt2.Eta();
-    apz_eta3 = gamma.Eta();
-    apz_eta4 = -999;
-
-    apz_eta12 = (lPt1+lPt2).Eta();
-    apz_eta34 = gamma.Eta();
-    apz_eta1234 = (lPt1+lPt2+gamma).Eta();
-
-    apz_m12 = (lPt1+lPt2).M();
-    apz_m34 = gamma.M();
-
-    apz_m123 = (lPt1+lPt2+gamma).M();
-
-    apz_m4l = 0;
-    if (gamma2.Pt()>3)
-      apz_m4l = (lPt1+lPt2+gamma+gamma2).M();
-
-    _apzTree->Fill();
-
-  }
-
   //if (!isfinite(eventWeight))
   //cout<<"nan/inf "<<eventWeight<<endl;
   //    if (fabs(eventWeight)>50 || fabs(eventWeight)<0.00001)
@@ -833,6 +733,46 @@ Bool_t jpsiGamma::Process(Long64_t entry)
   CountEvents(6);
 
 
+  if (makeApzTree){
+    apz_w = eventWeight;
+    apz_pt1 = lPt1.Pt();
+    apz_pt2 = lPt2.Pt();
+    apz_pt3 = gamma.Pt();
+    apz_pt4 = -1;
+    if (gamma2.Pt()>3)
+      apz_pt4 = gamma2.Pt();
+    apz_pt12 = (lPt1+lPt2).Pt();
+    apz_pt34 = gamma.Pt();
+
+    apz_dr1234 = (lPt1+lPt2).DeltaR(gamma);
+    apz_dr12 = lPt1.DeltaR(lPt2);
+    apz_dr13 = lPt1.DeltaR(gamma);
+    apz_dr23 = lPt2.DeltaR(gamma);
+    apz_dr34 = -1;
+
+    apz_eta1 = lPt1.Eta();
+    apz_eta2 = lPt2.Eta();
+    apz_eta3 = gamma.Eta();
+    apz_eta4 = -999;
+
+    apz_eta12 = (lPt1+lPt2).Eta();
+    apz_eta34 = gamma.Eta();
+    apz_eta1234 = (lPt1+lPt2+gamma).Eta();
+
+    apz_m12 = (lPt1+lPt2).M();
+    apz_m34 = gamma.M();
+
+    apz_m123 = (lPt1+lPt2+gamma).M();
+
+    apz_m4l = 0;
+    if (gamma2.Pt()>3)
+      apz_m4l = (lPt1+lPt2+gamma+gamma2).M();
+
+    _apzTree->Fill();
+
+  }
+
+
   if (Mll<2.9 || Mll>3.3) return kTRUE; //jpsi and upsilon removeal
 
   HM->FillHistosFull(7, eventWeight, "");
@@ -840,8 +780,8 @@ Bool_t jpsiGamma::Process(Long64_t entry)
   CountEvents(7);
 
   //global_Mll = Mll;
-  HM->MakeMuonPlots(muons[0], pvPosition);
-  HM->MakeMuonPlots(muons[1], pvPosition);
+  HM->MakeMuonPlots(muons[0]);
+  HM->MakeMuonPlots(muons[1]);
 
 
   if (Mllg>76 && Mllg<106){
@@ -924,6 +864,7 @@ Bool_t jpsiGamma::Process(Long64_t entry)
     FillHistoCounts(10, eventWeight);
     CountEvents(10);
   }
+
   if (Mllg>122 && Mllg<128){
     HM->FillHistosFull(11, eventWeight, "");
     FillHistoCounts(11, eventWeight);

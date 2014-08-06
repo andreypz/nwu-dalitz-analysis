@@ -81,10 +81,10 @@ if __name__ == "__main__":
 
 
     if doBkg:
-      os.system("hadd "+hPath+"/m_DYJetsPow20_"+sel+"_"+period+".root "
-                +hPath+"/"+sel+"_"+period+"/hhhh_DYJetsPow20-RD1*.root")
-      os.system("hadd "+hPath+"/m_DYJets50_"+sel+"_"+period+".root "
-                +hPath+"/"+sel+"_"+period+"/hhhh_DYJets50-RD1*.root")
+      #os.system("hadd "+hPath+"/m_DYJetsPow20_"+sel+"_"+period+".root "
+      #          +hPath+"/"+sel+"_"+period+"/hhhh_DYJetsPow20-RD1*.root")
+      #os.system("hadd "+hPath+"/m_DYJets50_"+sel+"_"+period+".root "
+      #          +hPath+"/"+sel+"_"+period+"/hhhh_DYJets50-RD1*.root")
       os.system("hadd "+hPath+"/m_ZG_"+sel+"_"+period+".root "
                 +hPath+"/"+sel+"_"+period+"/hhhh_ZGToLLG-RD1*.root ")
       os.system("hadd "+hPath+"/m_QCD_"+sel+"_"+period+".root "
@@ -97,8 +97,8 @@ if __name__ == "__main__":
     #bkgNames.append('DYJets50')
     bkgFiles.append(TFile(hPath+"/"+sel+"_"+period+"/hhhh_ZGDalitz_1.root","OPEN"))
     bkgNames.append('ZGDalitz')
-    #bkgFiles.append(TFile(hPath+"/"+sel+"_"+period+"/hhhh_DYJetsDalitz_1.root","OPEN"))
-    #bkgNames.append('DYJetsDalitz')
+    bkgFiles.append(TFile(hPath+"/"+sel+"_"+period+"/hhhh_DYJetsDalitz_1.root","OPEN"))
+    bkgNames.append('DYJetsDalitz')
     #bkgFiles.append(TFile(hPath+"/m_QCD_"+sel+"_"+period+".root","OPEN"))
     #bkgNames.append('QCD')
 
@@ -125,7 +125,7 @@ if __name__ == "__main__":
     u.drawAllInFile(dataFile, "data",bkgZip,None,"",
                     "Zee",  pathBase+"/Zee",  None,"norm")
 
-  if opt.zjp:
+  if opt.zjp or opt.hjp:
     u.setSelection('mugamma')
 
   yields_data = u.getYields(dataFile)
@@ -151,31 +151,28 @@ if __name__ == "__main__":
   if opt.zjp: sigName= '#splitline{50xSignal}{Z #rightarrow J/Psi #gamma}'
   if opt.hjp: sigName= '#splitline{100xSignal}{h #rightarrow J/Psi #gamma}'
 
-  if (opt.zjp or opt.hjp) and cut in ['12']:
-    u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName,  "jpsi",path, cut, "lumi")
 
-  """
   if cut not in ['14','15'] and not opt.apz:
     #u.drawAllInFile(dataFile, "Data", bkgZip, None, '', "", path, cut, "lumi")
-    u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "", path, cut, "norm1")
+    u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "", path, cut, "lumi")
     u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "Angles", pathBase+'/Angles', cut, "norm1")
-    #u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "Muons",  pathBase+'/Muons', None, "norm1")
 
+  """
     #u.drawAllInFile(None, "", bkgZip, sigFile, sigName, "GEN", pathBase+'/GEN', None, "norm")
     #u.drawAllInFile(None, "", '', sigFile, sigName, "GEN", pathBase+'/GEN-angles', None, "norm")
     #u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName,  "",path, cut, "norm")
     # u.drawAllInFile(dataFile, "data", bkgZip, sigFile,"50xSignal","EB",pathBase+"/EB", cut, "lumi")
     # u.drawAllInFile(dataFile, "data", bkgZip, sigFile,"50xSignal","EE",pathBase+"/EE", cut, "lumi")
 
-
+  """
   u.drawAllInFile(dataFile, "data",bkgZip,sigFile,sigName,"Photon",pathBase+"/Photon/", None, "norm")
   u.drawAllInFile(dataFile, "data",bkgZip,sigFile,sigName,"Photon-EGamma",pathBase+"/Photon-EGamma/", None, "norm")
   #u.drawAllInFile(dataFile, "data",bkgZip,sigFile,sigName,"Photon-EnergyCorr",pathBase+"/Photon-EnergyCorr/", None, "norm")
 
-  if sel == "mugamma" and not opt.zjp:
+  if sel in ["mugamma","jp-mugamma"]:
     if cut not in ['12','14','15','16']:
       # u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",  "Muons", pathBase+"/Muons", None,"norm")
-      u.drawAllInFile(dataFile, "data",bkgZip,sigFile,sigName,"Muons", pathBase+"/Muons/", None, "norm")
+      u.drawAllInFile(dataFile, "data",bkgZip,sigFile,sigName,"Muons", pathBase+"/Muons/", None, "norm1")
 
     elif cut in ['12']:
       u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"#splitline{Signal}{m_{H}=125 GeV}",
@@ -231,7 +228,7 @@ if __name__ == "__main__":
     #u.drawAllInFile(bkgFiles, "DY electrons", sigFile, "Dalitz 2el",  "NewEle-1", pathBase+"/NewEle-1/", None,"norm", isLog=1, )
 
     #sigFileMAD  = TFile(hPath+"/mugamma_"+period+"/hhhh_ggH-mad125_1.root", "OPEN")
-  """
+
   ss = opt.sel
   if opt.apz and doMerge:
     if ss in ['4mu','2e2mu']:
@@ -290,7 +287,7 @@ if __name__ == "__main__":
       alphaPiZ(data, c1, TCut('ph_pt/m_llg>0.30 && di_pt/m_llg>0.30 && m_llg>85&&m_llg<96'),  pathBase+"/alphaPiZ-8/")
       """
 
-
+  '''
   htmp = sigFileMAD.Get("02_lPt2_pt__cut"+cut)
   int1 = htmp.Integral()
   int2 = htmp.Integral(0,10)
@@ -309,9 +306,10 @@ if __name__ == "__main__":
   lumi = u.getLumi("2012")
 
   scale = float(lumi*cro)/Nev
+  '''
 
-  u.FBAss(sigFileZjp, 'signal', 'FB_cosSC-diG_vs_Mllg_cut'+cut, pathBase+'/Angles/')
-  u.FBAss(dataFile,   'data',   'FB_cosSC-diG_vs_Mllg_cut'+cut, pathBase+'/Angles/')
+  #u.AFB(sigFileZjp, 'signal', 'FB_cosSC-diG_vs_Mllg_cut'+cut, pathBase+'/Angles/')
+  #u.AFB(dataFile,   'data',   'FB_cosSC-diG_vs_Mllg_cut'+cut, pathBase+'/Angles/')
 
   #u.FBAss(sigFileMAD, 'signal', 'FB_cosSC-ll_vs_Mll_cut'+cut, pathBase+'/Angles/')
   #u.FBAss(dataFile,   'data',   'FB_cosSC-ll_vs_Mll_cut'+cut, pathBase+'/Angles/')

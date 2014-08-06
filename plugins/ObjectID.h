@@ -80,6 +80,7 @@ class ObjectID {
   virtual bool PassElectronIdAndIsoMVA(const TCElectron& l);
   virtual bool PassDalitzEleID(const TCElectron& l, TString n, float& m);
   virtual bool HggPreselection(const TCPhoton& ph);
+  virtual bool HggPreselection(const TCElectron& el);
   virtual bool PassPhotonMVA(const TCPhoton& ph, float& m);
 
   TCGenParticle * GetPrimaryAncestor(TCGenParticle *p);

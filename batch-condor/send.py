@@ -90,7 +90,8 @@ test.extend([
     #cfg('ZGDalitz',     DIR+'/nuTuples_v9.8_8TeV/dalitz-mu/DYtoMuMuGamma',     1, 'ZG     '+selection+trig+'  2012 0' + whereWeRun ),
     #cfg('dal-mad120', DIR+'/nuTuples_v9.6_8TeV/dalitz/ggHiggsToMuMuGamma_MH120',1, 'dalitz '+selection+trig+period+gen+whereWeRun),
     #cfg('MuEG_Run2012D',  DIRNATE+'/nuTuples_v9.6_8TeV/Data/MuEG_Run2012D', 15, 'DATA '+selection+' mugamma '+' 2012 0' + whereWeRun),
-    cfg('ggH-mad125', DIR+'/nuTuples_v9.8_8TeV/dalitz-mu/ggHiggsToMuMuGamma_MH125',1, 'dalitz '+selection+trig+period+gen + whereWeRun),
+    #cfg('ggH-mad125', DIR+'/nuTuples_v9.8_8TeV/dalitz-mu/ggHiggsToMuMuGamma_MH125',1, 'dalitz '+selection+trig+period+gen + whereWeRun),
+    cfg('ggH-mad125', DIR+'/nuTuples_v9.8_8TeV/dalitz-el/ggHiggsToEEGamma_MH125', 1, 'dalitz '+selection+trig+period+gen + whereWeRun),
     #cfg('ggH-mad150', DIR+'/nuTuples_v9.8_8TeV/dalitz-mu/ggHiggsToMuMuGamma_MH150',1, 'dalitz '+selection+trig+period+gen + whereWeRun),
     ])
 
@@ -167,11 +168,13 @@ if period =="2012":
         cfg('QCD_EM_Pt_170to250', DIR+'/nuTuples_v9.8_8TeV/MC_skimmed/QCD_Pt_170_250_EMEnriched',15, 'QCD '+selection+trig+'  2012 0' + whereWeRun ),
         cfg('QCD_EM_Pt_250to350', DIR+'/nuTuples_v9.8_8TeV/MC_skimmed/QCD_Pt_250_350_EMEnriched',15, 'QCD '+selection+trig+'  2012 0' + whereWeRun ),
         cfg('QCD_EM_Pt_350',      DIR+'/nuTuples_v9.8_8TeV/MC_skimmed/QCD_Pt_350_EMEnriched',    15, 'QCD '+selection+trig+'  2012 0' + whereWeRun ),
-
-        cfg('QCD_Mu_Pt_30to50',  DIR+'/nuTuples_v9.8_8TeV/MC_skimmed/QCD_Pt_30to50_bEnriched_MuEnrichedPt_14', 15, 'QCD '+selection+trig+'  2012 0' + whereWeRun ),
-        cfg('QCD_Mu_Pt_50to150', DIR+'/nuTuples_v9.8_8TeV/MC_skimmed/QCD_Pt_50to150_bEnriched_MuEnrichedPt_14',15, 'QCD '+selection+trig+'  2012 0' + whereWeRun ),
-        cfg('QCD_Mu_Pt_150',     DIR+'/nuTuples_v9.8_8TeV/MC_skimmed/QCD_Pt_150_bEnriched_MuEnrichedPt_14',    15, 'QCD '+selection+trig+'  2012 0' + whereWeRun ),
         ])
+   if selection in ['mugamma','jp-mugamma']:
+     bg.extend([
+         cfg('QCD_Mu_Pt_30to50',  DIR+'/nuTuples_v9.8_8TeV/MC_skimmed/QCD_Pt_30to50_bEnriched_MuEnrichedPt_14', 15, 'QCD '+selection+trig+'  2012 0' + whereWeRun ),
+         cfg('QCD_Mu_Pt_50to150', DIR+'/nuTuples_v9.8_8TeV/MC_skimmed/QCD_Pt_50to150_bEnriched_MuEnrichedPt_14',15, 'QCD '+selection+trig+'  2012 0' + whereWeRun ),
+         cfg('QCD_Mu_Pt_150',     DIR+'/nuTuples_v9.8_8TeV/MC_skimmed/QCD_Pt_150_bEnriched_MuEnrichedPt_14',    15, 'QCD '+selection+trig+'  2012 0' + whereWeRun ),
+         ])
 
 
 # Signal MC configs

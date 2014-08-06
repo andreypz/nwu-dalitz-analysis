@@ -53,6 +53,7 @@ void HistMaker::MakeEGammaCommonPlots(const TCEGamma& egm, TString n)
 {
   string dir = n.Data();
 
+  hists->fill1DHist(egm.SCEta(),           dir+"-egm_SCEta",        ";SCEta",        100, -2.5, 2.5,  1,dir);
   hists->fill1DHist(egm.R9(),              dir+"-egm_R9",           ";R9",           100,    0.2, 1,  1,dir);
   hists->fill1DHist(egm.E1x3()/egm.E5x5(), dir+"-egm_E1x3OverE5x5", ";E1x3OverE5x5", 100,    0.1, 1,  1,dir);
   hists->fill1DHist(egm.E2x2()/egm.E5x5(), dir+"-egm_E2x2OverE5x5", ";E2x2OverE5x5", 100,    0.1, 1,  1,dir);
@@ -95,7 +96,8 @@ void HistMaker::MakePhotonPlots(const TCPhoton& ph)
   hists->fill1DHist(ph.ConversionVeto(), "ph_ConversionVeto",";ConversionVeto",  3, 0, 3,   1,dir);
   hists->fill1DHist(ph.PfIsoPhoton(),    "ph_PfIsoPhoton",   ";PfIsoPhoton",   100, 0.01,5, 1,dir);
   hists->fill1DHist(ph.PfIsoCharged(),   "ph_PfIsoCharged",  ";PfIsoCharged",  100, 0.01,2, 1,dir);
-  hists->fill1DHist(ph.ESEffSigmaRR()[0],"ph_ESEffSigmaRR_x",";ESEffSigmaRR_x",100, 5e-8,5e-8, 1,dir);
+  hists->fill1DHist(ph.ESEffSigmaRR()[0],"ph_ESEffSigmaRR_x",";ESEffSigmaRR_x",100, -5e-8,5e-8, 1,dir);
+  hists->fill1DHist(ph.ESEffSigmaRR()[1],"ph_ESEffSigmaRR_y",";ESEffSigmaRR_y",100, -5e-8,5e-8, 1,dir);
 
   hists->fill1DHist(ph.IdMap("mvaScore"),"ph_mvaScore",      ";MVA score",     100, -1,1,   1,dir);
 
@@ -242,9 +244,9 @@ void HistMaker::FillHistosFull(Int_t num, Double_t weight, string dir)
   hists->fill1DHist(diLep.M(),   Form("01_diLep_mass_low3_%s_cut%i", d, num),";m_{ll} (GeV)",  30, 8, 20,     weight, dir);
   hists->fill1DHist(diLep.M(),   Form("01_diLep_mass_jpsi_%s_cut%i", d, num),";m_{ll} (GeV)", 100, 2.7,3.5,   weight, dir);
 
-  hists->fill1DHist(TMath::Log10(diLep.M()), Form("01_diLep_mass_log1_%s_cut%i", d, num),";log(m_{ll})", 100,   -1,7, weight, dir);
-  hists->fill1DHist(TMath::Log10(diLep.M()), Form("01_diLep_mass_log2_%s_cut%i", d, num),";log(m_{ll})", 100,   -1,3, weight, dir);
-  hists->fill1DHist(TMath::Log10(diLep.M()), Form("01_diLep_mass_log3_%s_cut%i", d, num),";log(m_{ll})", 100,-0.7,1.3,weight, dir);
+  hists->fill1DHist(TMath::Log10(diLep.M()), Form("01_diLep_mass_log1_%s_cut%i", d, num),";log10(m_{ll})", 100,   -1,7, weight, dir);
+  hists->fill1DHist(TMath::Log10(diLep.M()), Form("01_diLep_mass_log2_%s_cut%i", d, num),";log10(m_{ll})", 100,   -1,3, weight, dir);
+  hists->fill1DHist(TMath::Log10(diLep.M()), Form("01_diLep_mass_log3_%s_cut%i", d, num),";log10(m_{ll})", 100,-0.7,1.3,weight, dir);
 
   hists->fill1DHist(diLep.Pt(),  Form("diLep_pt_%s_cut%i",   d, num),";di-Lepton p_{T}", 50, 0,120, weight, dir);
   hists->fill1DHist(diLep.Eta(), Form("diLep_eta_%s_cut%i",  d, num),";di-Lepton eta",   50, -3.5,3.5, weight, dir);
@@ -338,7 +340,7 @@ void HistMaker::FillHistosFull(Int_t num, Double_t weight, string dir)
     float phi_star   = sin(theta_star)*TMath::Tan(phi_acop/2);
 
     hists->fill1DHist(phi_acop, Form("star_phi_acop_cut%i", num), ";#phi_{acop}",  50, 0, TMath::Pi(), weight,"Angles");
-    hists->fill1DHist(phi_star, Form("star_phi_star_cut%i", num), ";#phi*",        50, 0,          50, weight,"Angles");
+    hists->fill1DHist(phi_star, Form("star_phi_star_cut%i", num), ";#phi*",        50, 0,         150, weight,"Angles");
     hists->fill1DHist(cos(theta_star), Form("star_cos_theta_cut%i", num), ";cos(#theta*)",  50, -1, 1, weight,"Angles");
 
 
