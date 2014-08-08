@@ -37,7 +37,7 @@ def getLumi(period):
 def getCS(sample, mySel=None):
   if mySel==None:
     #sel = conf.get("selection", "sel")[0:2]
-    cs = float(conf.get(sample, "cs"))
+    cs = float(eval(conf.get(sample, "cs")))
   else:
     sel = mySel
     cs = float(conf.get(sample, "cs-"+sel))
@@ -142,6 +142,32 @@ def createDir(myDir):
       if os.path.isdir(myDir): pass
       else: raise
 
+
+def  stackQCD(dic, hName, lumi):
+  qcd_tot = TH1F()
+  isInit = 0
+  for key, f in dic.iteritems():
+    h1 = f.Get(hName)
+    if h1==None: continue
+    else: h = h1.Clone()
+    #print key, f
+
+    Nev = getTotalEvents(f)
+    cro = getCS(key)
+    scale = float(lumi*cro)/Nev
+
+    h.Scale(scale)
+
+    #print key, hName, Nev, lumi, cro, scale
+
+    if not isInit:
+      qcd_tot = h # first non-epty hist
+      isInit  = 1
+    else:
+      qcd_tot.Add(h)
+
+  return qcd_tot
+
 def makeStack(bZip, histDir, histoName, leg, lumi, howToScale, normToScale=None):
   hs = THStack("temp", "Stacked histo")
 
@@ -152,9 +178,13 @@ def makeStack(bZip, histDir, histoName, leg, lumi, howToScale, normToScale=None)
     hName = histoName
 
   for n,f in bZip:
-    print n,f
+    #print n,f
+    if n=='QCD':
+      #raw_input('QCD is here. Hit enter to continue')
+      h1 = stackQCD(f, hName, lumi)
+    else:
+      h1 = f.Get(hName)
 
-    h1 = f.Get(hName)
     if h1==None:
       print 'None histogrammm:',hName
       continue
@@ -166,19 +196,21 @@ def makeStack(bZip, histDir, histoName, leg, lumi, howToScale, normToScale=None)
 
     scale = 1
 
-    h.SetLineColor( int(getColors(n)[0]))
+    h.SetLineColor(int(getColors(n)[0]))
     h.SetLineWidth(2)
 
     normh = h.Integral()
     #print 'norm =', normh, n
     if howToScale == 'lumi':
-      Nev = getTotalEvents(f)
-      cro = getCS(n)
-      scale = float(lumi*cro)/Nev
-      print n, Nev, lumi, cro, scale
+      if n!='QCD':  # The QCD hist is already scaled to lumi
+        Nev = getTotalEvents(f)
+        cro = getCS(n)
+        scale = float(lumi*cro)/Nev
+        print n, Nev, lumi, cro, scale
 
-      h.Scale(scale)
-      # only fill the colors if we are going to stack them (scale to lumi)
+        h.Scale(scale)
+        # only fill the colors if we are going to stack them (scale to lumi)
+
       h.SetFillColor( int(getColors(n)[1]))
     elif howToScale == 'norm':
       if normh!=0: h.Scale(1./normh)
@@ -201,7 +233,7 @@ def makeStack(bZip, histDir, histoName, leg, lumi, howToScale, normToScale=None)
 
 def drawAllInFile(f1, name1, bZip, f3, name3, myDir,path, N, howToScale="none", isLog=False, doRatio=False):
   print 'myDir is ', myDir
-  if f1!=None:
+  if f1!=None and not f1.IsZombie():
     f1.cd(myDir)
   elif bZip!='':
     print bZip[0]
@@ -370,7 +402,7 @@ def drawAllInFile(f1, name1, bZip, f3, name3, myDir,path, N, howToScale="none", 
         leg.SetNColumns(2)
         leg.SetTextSize(0.04)
 
-      if h1!=None:
+      if h1!=None and h1.GetEntries()!=0:
         leg.AddEntry(h1,name1, "lpe")
 
       if bZip!='':

@@ -19,7 +19,7 @@ WeightUtils::WeightUtils(string sampleName, string dataPeriod, string selection,
 
     h2_photonIDSF   = (TH2D*)_phFileID->Get("PhotonIDSF_MediumWP_Jan22rereco_Full2012_"+MC+"_MC_V01");
     h2_photonCSEVSF = (TH2D*)_phFileID->Get("PhotonCSEVSF_MediumWP_Jan22rereco_Full2012_"+MC+"_MC_V01");
-    
+
     //h2_photonIDSF->Print("all");
     //h2_photonCSEVSF->Print("all");
     //for (Int_t i = 1; i < 9; i++)
@@ -33,8 +33,8 @@ WeightUtils::WeightUtils(string sampleName, string dataPeriod, string selection,
     //gr_muonIDSF_eta12 = (TGraph*)_muFileID->Get("DATA_over_MC_Loose_pt_abseta0.9-1.2");
     //gr_muonIDSF_eta21 = (TGraph*)_muFileID->Get("DATA_over_MC_Loose_pt_abseta1.2-2.1");
     //gr_muonIDSF_eta24 = (TGraph*)_muFileID->Get("DATA_over_MC_Loose_pt_abseta2.1-2.4");
-    
-    //Because the scale factors for muons are stupidly saved in TGraphs, we need to know 
+
+    //Because the scale factors for muons are stupidly saved in TGraphs, we need to know
     //the binning beforehand. And it is (for pt bins):
     //10-20-25-30-35-40-50-60-90-140-300
     // This works somehow:
@@ -46,7 +46,7 @@ WeightUtils::WeightUtils(string sampleName, string dataPeriod, string selection,
     //gr_muonIDSF_eta12->Print("all");
     //for (Int_t i = 0; i < 10; i++)
     // cout<<i<<" bin "<<_muonIDSF_eta12[i]<<endl;
-    
+
     /*
     gr_muonIDSF_eta09->Print("all");
     for (Int_t i = 0; i < 10; i++)
@@ -55,11 +55,11 @@ WeightUtils::WeightUtils(string sampleName, string dataPeriod, string selection,
       gr_muonIDSF_eta12->Print("all");
       for (Int_t i = 0; i < 10; i++)
       cout<<i<<" bin "<<_muonIDSF_eta12[i]<<endl;
-    
+
     gr_muonIDSF_eta21->Print("all");
     for (Int_t i = 0; i < 10; i++)
       cout<<i<<" bin "<<_muonIDSF_eta21[i]<<endl;
-    
+
       gr_muonIDSF_eta24->Print("all");
       for (Int_t i = 0; i < 10; i++)
       cout<<i<<" bin "<<_muonIDSF_eta24[i]<<endl;
@@ -79,7 +79,7 @@ WeightUtils::WeightUtils(string sampleName, string dataPeriod, string selection,
     //for (Int_t i = 0; i < 10; i++)
     // cout<<i<<" bin "<<_muonISOSF_eta24[i]<<endl;
 
-    
+
     // Photon weights
     //h1_eGammaPt     = (TH1D*)_inFile->Get("h1_eGammaPtWeightCombined");
     //h1_muGammaPt    = (TH1D*)_inFile->Get("h1_muGammaPtWeightCombined");
@@ -91,7 +91,7 @@ WeightUtils::WeightUtils(string sampleName, string dataPeriod, string selection,
     // PU weights
     h1_puReweight2011  = (TH1D*)_puFile->Get("h1_PU2011");
     h1_puReweight2012  = (TH1D*)_puFile->Get("h1_PU2012");
-  
+
     // Recoil weights
     //h1_recoilLongMuon       = (TH1D*)_inFile->Get("h1_muonRecoilTransWeight");
     //h1_recoilTransMuon      = (TH1D*)_inFile->Get("h1_muonRecoilTransWeight");
@@ -104,14 +104,14 @@ WeightUtils::WeightUtils(string sampleName, string dataPeriod, string selection,
       if (i==0)
 	higgsMass = 125;
       else
-        higgsMass = 200+ 50*(i-1);
-      
+	higgsMass = 200+ 50*(i-1);
+
       TFile *higgsFile = new TFile(Form("../data/Kfactors_%i_AllScales.root", higgsMass), "OPEN");
       TH1D *h1_tmp = (TH1D*)higgsFile->GetDirectory("kfactors")->Get(Form("kfact_mh%i_ren%i_fac%i", higgsMass, higgsMass, higgsMass));
-      
+
       h1_Higgs[i] = (TH1D*)h1_tmp->Clone();
       //higgsFile->Close();
-      
+
     }
 }
 
@@ -179,7 +179,7 @@ float WeightUtils::PhotonSF(TLorentzVector ph)
   myBinPt  = h2_photonCSEVSF->GetXaxis()->FindBin(ph.Pt());
   myBinEta = h2_photonCSEVSF->GetYaxis()->FindBin(fabs(ph.Eta()));
   wCS =  h2_photonCSEVSF->GetBinContent(myBinPt, myBinEta);
-  
+
   //cout<<"Photon pt = "<<ph.Pt()<<"  eta="<<ph.Eta()<<"   IDSF ="<<wID<<"  CSCF="<<wCS<<endl;
   if (!isfinite(wID*wCS))
     cout<<"Photon pt = "<<ph.Pt()<<"  eta="<<ph.Eta()<<"   IDSF ="<<wID<<"  CSCF="<<wCS<<endl;
@@ -199,9 +199,9 @@ float WeightUtils::MuonSF(TLorentzVector mu)
   if (fabs(mu.Eta())<0.9){
     //mySFID  = _muonIDSF_eta09;
     mySFISO = _muonISOSF_eta09;
-  } 
+  }
   else if (fabs(mu.Eta())<1.2){
-    //mySFID  = _muonIDSF_eta12; 
+    //mySFID  = _muonIDSF_eta12;
     mySFISO = _muonISOSF_eta12;
   }
   else if (fabs(mu.Eta())<2.1){
@@ -209,7 +209,7 @@ float WeightUtils::MuonSF(TLorentzVector mu)
     mySFISO = _muonISOSF_eta21;
   }
   else if (fabs(mu.Eta())<2.4){
-    //mySFID  = _muonIDSF_eta24; 
+    //mySFID  = _muonIDSF_eta24;
     mySFISO = _muonISOSF_eta24;
   }
   else return 1.0;
@@ -271,14 +271,14 @@ float WeightUtils::MuonSF(TLorentzVector mu)
       _puWeight   = h1_puReweight2011->GetBinContent(myBin);
       //cout<<"period = "<<_dataPeriod<<"  Pu weight "<<_puWeight<<"  bin = "<<myBin<<endl;
     }
-  else if  (nPUtrue < 60 &&  _dataPeriod == "2012") 
+  else if  (nPUtrue < 60 &&  _dataPeriod == "2012")
     {
       Int_t myBin = h1_puReweight2012->FindBin(nPUtrue);
       _puWeight   = h1_puReweight2012->GetBinContent(myBin);
       //_puWeight = 1;
 
       //cout<<"period = "<<_dataPeriod<<"  Pu weight "<<_puWeight<<"  bin = "<<myBin<<endl;
-    } 
+    }
   else
     _puWeight = 1;
   //cout  <<" PU  weight = "<<_puWeight<<endl;
@@ -287,13 +287,13 @@ float WeightUtils::MuonSF(TLorentzVector mu)
 
 float WeightUtils::RecoWeight(TLorentzVector l1, TLorentzVector l2)
 {
-    if (_selection == "muon") {
-        _triggerWeight = GetMuTriggerEff(l1)*GetMuTriggerEff(l2);
-        _recoWeight    = 1.;
+    if (_selection == "mugamma") {
+	_triggerWeight = GetMuTriggerEff(l1)*GetMuTriggerEff(l2);
+	_recoWeight    = 1.;
     }
-    if (_selection == "electron") {
-        _triggerWeight = 0.995;
-        _recoWeight    = GetElectronEff(l1)*GetElectronEff(l2);
+    if (_selection == "elgamma") {
+	_triggerWeight = 0.995;
+	_recoWeight    = GetElectronEff(l1)*GetElectronEff(l2);
     }
     return _triggerWeight*_recoWeight;
 }
@@ -301,12 +301,12 @@ float WeightUtils::RecoWeight(TLorentzVector l1, TLorentzVector l2)
 float WeightUtils::ZZWeight(TLorentzVector l1, TLorentzVector l2)
 {
     float zPt = (l1 + l2).Pt();
-    _zzWeight = 0.12 + (1.108 + 0.002429*zPt - (1.655e-6)*pow(zPt, 2));  
+    _zzWeight = 0.12 + (1.108 + 0.002429*zPt - (1.655e-6)*pow(zPt, 2));
     return _zzWeight;
 }
 
 
-float WeightUtils::HiggsMassLineShapeWeight(float mass, float m_gen) 
+float WeightUtils::HiggsMassLineShapeWeight(float mass, float m_gen)
 {
   double _w;
   /*
@@ -314,30 +314,30 @@ float WeightUtils::HiggsMassLineShapeWeight(float mass, float m_gen)
   double decay_width;
   int BWflag;
 
-  if(m_gen == 130){    decay_width =   0.00487; 
-  }else if(m_gen == 140){    decay_width =   0.00812; 
-  }else if(m_gen == 150){    decay_width =   0.01730; 
-  }else if(m_gen == 160){    decay_width =   0.08290; 
-  }else if(m_gen == 170){    decay_width =   0.38000; 
-  }else if(m_gen == 180){    decay_width =   0.63000; 
-  }else if(m_gen == 190){    decay_width =   1.04000; 
-  }else if(m_gen == 200){    decay_width =   1.43000; 
-  }else if(m_gen == 250){    decay_width =   4.04000; 
-  }else if(m_gen == 300){    decay_width =   8.43000; 
-  }else if(m_gen == 350){    decay_width =  15.20000; 
-  }else if(m_gen == 400){    decay_width =  29.20000; 
-  }else if(m_gen == 450){    decay_width =  46.95000; 
+  if(m_gen == 130){    decay_width =   0.00487;
+  }else if(m_gen == 140){    decay_width =   0.00812;
+  }else if(m_gen == 150){    decay_width =   0.01730;
+  }else if(m_gen == 160){    decay_width =   0.08290;
+  }else if(m_gen == 170){    decay_width =   0.38000;
+  }else if(m_gen == 180){    decay_width =   0.63000;
+  }else if(m_gen == 190){    decay_width =   1.04000;
+  }else if(m_gen == 200){    decay_width =   1.43000;
+  }else if(m_gen == 250){    decay_width =   4.04000;
+  }else if(m_gen == 300){    decay_width =   8.43000;
+  }else if(m_gen == 350){    decay_width =  15.20000;
+  }else if(m_gen == 400){    decay_width =  29.20000;
+  }else if(m_gen == 450){    decay_width =  46.95000;
   }else if(m_gen == 500){    decay_width =  68.00000;
   }else if(m_gen == 550){    decay_width =  93.15000;
   }else if(m_gen == 600){    decay_width = 123.00000;
   }
 
   mh = m_gen;
-  gh = decay_width; 
+  gh = decay_width;
   mt = 172.5;
   m  = mass;
   BWflag = 0;
-  _w  =  -1;  // invalid initial value                                                                                        
+  _w  =  -1;  // invalid initial value
 
 
   pwhg_cphto_reweight_(&mh, &gh, &mt, &BWflag, &m, &_w);
@@ -349,11 +349,11 @@ c     mh : Higgs boson mass (used in the POWHEG BOX generation)
 c     gh : Higgs boson width (used in the POWHEG BOX generation)
 c     mt : top quark mass
 c     BWflag : 0    if the sample to reweight was produced with fixed Higgs width
-c              1    if the sample to reweight was produced with running Higgs 
+c              1    if the sample to reweight was produced with running Higgs
 c                   width (this is the default in the POWHEG BOX)
 c     m : virtuality of the produced Higgs boson resonance
 c     OUTPUT
-c     w : the reweighting factor 
+c     w : the reweighting factor
 */
 
 //  cout <<"mass= "<<mh<< "  w = " << _w << endl;
@@ -362,7 +362,7 @@ c     w : the reweighting factor
 }
 
 
-float WeightUtils::GluGluHiggsWeight(float higgsPt, int higgsMass) 
+float WeightUtils::GluGluHiggsWeight(float higgsPt, int higgsMass)
 {
   int iMass = 0;
   if (higgsMass==125)
@@ -385,24 +385,24 @@ float WeightUtils::GluGluHiggsWeight(float higgsPt, int higgsMass)
 float WeightUtils::GammaWeight(int nPV, int nJets, TLorentzVector p1)
 {
     if (_selection == "eGamma") {
-        _gammaPtWeight = h1_eGammaPt->GetBinContent(h1_eGammaPt->FindBin(p1.Pt()));
+	_gammaPtWeight = h1_eGammaPt->GetBinContent(h1_eGammaPt->FindBin(p1.Pt()));
 
-        if (h1_eGammaPV->GetBinContent(1) != 1) {
+	if (h1_eGammaPV->GetBinContent(1) != 1) {
 	  _gammaPVWeight = h1_eGammaPV->GetBinContent(nPV);
 	  if (nJets == 0) _gammaJetWeight = 1.0;
 	  if (nJets == 1) _gammaJetWeight = 1.0;
 	}
     }
-    
+
     if (_selection == "muGamma") {
       _gammaPtWeight = h1_muGammaPt->GetBinContent(h1_muGammaPt->FindBin(p1.Pt()));
-      
+
       if (h1_muGammaPV->GetBinContent(1) != 1) {
 	_gammaPVWeight = h1_muGammaPV->GetBinContent(nPV);
 	if (nJets == 0) _gammaJetWeight = 1.0;
 	if (nJets == 1) _gammaJetWeight = 1.0;
       }
-    
+
     }
     return _gammaPtWeight*_gammaPVWeight*_gammaJetWeight;
 }
@@ -418,10 +418,10 @@ float WeightUtils::GetMuTriggerEff(TLorentzVector l1) const
     //};
 
     float mu13_mu8Scale[4][4] = {
-        {0.9753, 0.9751, 0.9746, 0.9745},
-        {0.9627, 0.9568, 0.9563, 0.9575},
-        {0.9490, 0.9482, 0.9503, 0.9462},
-        {0.8594, 0.8614, 0.867, 0.8529}
+	{0.9753, 0.9751, 0.9746, 0.9745},
+	{0.9627, 0.9568, 0.9563, 0.9575},
+	{0.9490, 0.9482, 0.9503, 0.9462},
+	{0.8594, 0.8614, 0.867, 0.8529}
     };
 
     int ptBin = 0;
@@ -431,16 +431,16 @@ float WeightUtils::GetMuTriggerEff(TLorentzVector l1) const
     float weight = 1.;
 
     for (int i = 0; i < 4; ++i) {
-        if (fabs(l1.Eta()) > binningEta[i] && fabs(l1.Eta()) <= binningEta[i+1]) {
-            etaBin = i;
-            break;
-        }
+	if (fabs(l1.Eta()) > binningEta[i] && fabs(l1.Eta()) <= binningEta[i+1]) {
+	    etaBin = i;
+	    break;
+	}
     }
     for (int i = 0; i < 4; ++i) {
-        if (l1.Pt() > binningPt[i] && l1.Pt() <= binningPt[i+1]) {
-            ptBin = i;
-            break;
-        }
+	if (l1.Pt() > binningPt[i] && l1.Pt() <= binningPt[i+1]) {
+	    ptBin = i;
+	    break;
+	}
     }
     weight = mu13_mu8Scale[etaBin][ptBin];
     return weight;
@@ -449,8 +449,8 @@ float WeightUtils::GetMuTriggerEff(TLorentzVector l1) const
 float WeightUtils::GetElectronEff(TLorentzVector l1) const
 {
     float eleScale[2][5] = {
-        {1.0, 0.938, 0.971, 0.980, 0.987},
-        {1.0, 0.967, 0.97, 0.989, 0.989}
+	{1.0, 0.938, 0.971, 0.980, 0.987},
+	{1.0, 0.967, 0.97, 0.989, 0.989}
     };
 
     int ptBin = 0;
@@ -459,16 +459,16 @@ float WeightUtils::GetElectronEff(TLorentzVector l1) const
     float weight = 1.;
 
     if (fabs(l1.Eta()) < 1.479) {
-        etaBin = 0;
+	etaBin = 0;
     } else {
-        etaBin = 1;
+	etaBin = 1;
     }
 
     for (int i = 0; i < 5; ++i) {
-        if (l1.Pt() > binning[i] && l1.Pt() <= binning [i+1]) {
-            ptBin = i;
-            break;
-        }
+	if (l1.Pt() > binning[i] && l1.Pt() <= binning [i+1]) {
+	    ptBin = i;
+	    break;
+	}
     }
     weight = eleScale[etaBin][ptBin];
     return weight;

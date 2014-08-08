@@ -21,7 +21,7 @@ parser.add_option("--test", dest="test", action="store_true", default=False, hel
 parser.add_option("--all",  dest="all",  action="store_true", default=False, help="Run over all the samples!")
 parser.add_option("--gen",  dest="gen",  action="store_true", default=False, help="Do gen-level analysis.")
 
-(options, args) = parser.parse_args()
+(opt, args) = parser.parse_args()
 
 
 if len(args) < 1:
@@ -49,28 +49,28 @@ if '/tthome' in os.getcwd():
   DIRBRIAN    = '/tthome/bpollack/storage'
   outputPath  = '/tthome/andrey/batch_output/zgamma/8TeV'
 
-selection = options.sel
+selection = opt.sel
 if selection not in ['mugamma','elgamma','jp-mugamma','zee','mumu','nate']:
   print 'this selection is not supported:',selection
   sys.exit(0)
 
-trig      = ' '+options.trigger+' '
+trig      = ' '+opt.trigger+' '
 
 version   = args[0]
 period    = '2012'
-doTest    = options.test
-doData    = options.data
-doBG      = options.bkg
-doSignal  = options.sig
-doQCD     = options.qcd
+doTest    = opt.test
+doData    = opt.data
+doBG      = opt.bkg
+doSignal  = opt.sig
+doQCD     = opt.qcd
 
-if options.gen and not options.sig:
+if opt.gen and not doSignal and  not doTest:
   print "We only will do gen level analysis on Signal MC sample for now"
   sys.exit(0)
 gen = " 0"
-if options.gen:
+if opt.gen:
   gen = " gen"
-if options.all:
+if opt.all:
   doData = 1
   doBG   = 1
   doSignal = 1
@@ -90,8 +90,9 @@ test.extend([
     #cfg('ZGDalitz',     DIR+'/nuTuples_v9.8_8TeV/dalitz-mu/DYtoMuMuGamma',     1, 'ZG     '+selection+trig+'  2012 0' + whereWeRun ),
     #cfg('dal-mad120', DIR+'/nuTuples_v9.6_8TeV/dalitz/ggHiggsToMuMuGamma_MH120',1, 'dalitz '+selection+trig+period+gen+whereWeRun),
     #cfg('MuEG_Run2012D',  DIRNATE+'/nuTuples_v9.6_8TeV/Data/MuEG_Run2012D', 15, 'DATA '+selection+' mugamma '+' 2012 0' + whereWeRun),
-    #cfg('ggH-mad125', DIR+'/nuTuples_v9.8_8TeV/dalitz-mu/ggHiggsToMuMuGamma_MH125',1, 'dalitz '+selection+trig+period+gen + whereWeRun),
-    cfg('ggH-mad125', DIR+'/nuTuples_v9.8_8TeV/dalitz-el/ggHiggsToEEGamma_MH125', 1, 'dalitz '+selection+trig+period+gen + whereWeRun),
+    #cfg('ggH-mad125', DIR+'/nuTuples_v9.8_8TeV/dalitz-el/ggHiggsToEEGamma_MH125', 1, 'dalitz '+selection+trig+period+gen + whereWeRun),
+    cfg('ggH-mad125', DIR+'/nuTuples_v9.8_8TeV/dalitz-mu/ggHiggsToMuMuGamma_MH125',1, 'dalitz '+selection+trig+period+gen + whereWeRun),
+    cfg('ggHZG-125',  DIR+'/nuTuples_v9.8_8TeV/MC/ggHZG_M125_RD1',1, 'HZG '+selection+trig+' '+period+gen + whereWeRun),
     #cfg('ggH-mad150', DIR+'/nuTuples_v9.8_8TeV/dalitz-mu/ggHiggsToMuMuGamma_MH150',1, 'dalitz '+selection+trig+period+gen + whereWeRun),
     ])
 

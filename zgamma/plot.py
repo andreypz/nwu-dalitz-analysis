@@ -15,6 +15,7 @@ parser.add_option("-m","--merge", dest="merge",action="store_true", default=Fals
 
 parser.add_option("-p", "--period",dest="period", default="2012",  help="Year period; 2011 or 2012")
 parser.add_option("--bkg",  dest="bkg",  action="store_true", default=False, help="Make plots from bkg sample")
+parser.add_option("--qcd",  dest="qcd",  action="store_true", default=False, help="Include QCD samples")
 parser.add_option("--mcfm", dest="mcfm", action="store_true", default=False, help="Use MCFM  as a signal")
 parser.add_option("--noeos",dest="noeos",action="store_true", default=False, help="Don't use EOS. pick up the files from nobackup area")
 
@@ -73,8 +74,8 @@ if __name__ == "__main__":
   u.setSelection(sel)
 
   if doMerge:
-    if sel =="elgamma":
-      os.system("hadd "+hPath+"/m_Data_" +sel+"_"+period+".root "+hPath+"/"+sel+"_"+period+"/hhhh_*Run2012D*.root")
+    if sel=="elgamma":
+      os.system("hadd "+hPath+"/m_Data_" +sel+"_"+period+".root "+hPath+"/"+sel+"_"+period+"/hhhh_*Run2012A*.root")
     else:
       # os.system("hadd "+hPath+"/m_Data_" +sel+"_"+period+".root "+hPath+"/"+sel+"_"+period+"/hhhh_DoubleMu_Run20*.root")
       os.system("hadd "+hPath+"/m_Data_" +sel+"_"+period+".root "+hPath+"/"+sel+"_"+period+"/hhhh_MuEG_Run2012*.root")
@@ -88,9 +89,32 @@ if __name__ == "__main__":
       #          +hPath+"/"+sel+"_"+period+"/hhhh_DYJets50-RD1*.root")
       os.system("hadd "+hPath+"/m_ZG_"+sel+"_"+period+".root "
                 +hPath+"/"+sel+"_"+period+"/hhhh_ZGToLLG-RD1*.root ")
-      os.system("hadd "+hPath+"/m_QCD_"+sel+"_"+period+".root "
-                +hPath+"/"+sel+"_"+period+"/hhhh_QCD_*.root ")
 
+      os.system("hadd "+hPath+"/m_QCD_EM_Pt_20to30_"+sel+"_"+period+".root "
+                +hPath+"/"+sel+"_"+period+"/hhhh_QCD_EM_Pt_20to30_*.root ")
+      os.system("hadd "+hPath+"/m_QCD_EM_Pt_30to80_"+sel+"_"+period+".root "
+                +hPath+"/"+sel+"_"+period+"/hhhh_QCD_EM_Pt_30to80_*.root ")
+      os.system("hadd "+hPath+"/m_QCD_EM_Pt_80to170_"+sel+"_"+period+".root "
+                +hPath+"/"+sel+"_"+period+"/hhhh_QCD_EM_Pt_80to170_*.root ")
+      os.system("hadd "+hPath+"/m_QCD_EM_Pt_170to250_"+sel+"_"+period+".root "
+                +hPath+"/"+sel+"_"+period+"/hhhh_QCD_EM_Pt_170to250_*.root ")
+      os.system("hadd "+hPath+"/m_QCD_EM_Pt_250to350_"+sel+"_"+period+".root "
+                +hPath+"/"+sel+"_"+period+"/hhhh_QCD_EM_Pt_350_*.root ")
+      os.system("hadd "+hPath+"/m_QCD_EM_Pt_250to350_"+sel+"_"+period+".root "
+                +hPath+"/"+sel+"_"+period+"/hhhh_QCD_EM_Pt_350_*.root ")
+
+      os.system("hadd "+hPath+"/m_QCD_Mu_Pt_20_"+sel+"_"+period+".root "
+                +hPath+"/"+sel+"_"+period+"/hhhh_QCD_Mu_Pt_20_*.root ")
+      os.system("hadd "+hPath+"/m_QCD_Mu_Pt_15to30_"+sel+"_"+period+".root "
+                +hPath+"/"+sel+"_"+period+"/hhhh_QCD_Mu_Pt_5to30_*.root ")
+      os.system("hadd "+hPath+"/m_QCD_Mu_Pt_30to50_"+sel+"_"+period+".root "
+                +hPath+"/"+sel+"_"+period+"/hhhh_QCD_Mu_Pt_30to50_*.root ")
+      os.system("hadd "+hPath+"/m_QCD_Mu_Pt_50to150_"+sel+"_"+period+".root "
+                +hPath+"/"+sel+"_"+period+"/hhhh_QCD_Mu_Pt_50to150_*.root ")
+      os.system("hadd "+hPath+"/m_QCD_Mu_Pt_150_"+sel+"_"+period+".root "
+                +hPath+"/"+sel+"_"+period+"/hhhh_QCD_Mu_Pt_150_*.root ")
+
+  qcdSamples = None
   if doBkg:
     #bkgFiles.append(TFile(hPath+"/m_ZG_"+sel+"_"+period+".root","OPEN"))
     #bkgNames.append('ZG')
@@ -100,8 +124,24 @@ if __name__ == "__main__":
     bkgNames.append('DYJetsDalitz')
     bkgFiles.append(TFile(hPath+"/"+sel+"_"+period+"/hhhh_ZGDalitz_1.root","OPEN"))
     bkgNames.append('ZGDalitz')
-    bkgFiles.append(TFile(hPath+"/m_QCD_"+sel+"_"+period+".root","OPEN"))
-    bkgNames.append('QCD')
+    if opt.qcd:
+      qcdSamples = {'QCD_EM_Pt_20to30':  TFile(hPath+"/m_QCD_EM_Pt_20to30_"  +sel+"_"+period+".root","OPEN"),
+                    'QCD_EM_Pt_30to80':  TFile(hPath+"/m_QCD_EM_Pt_30to80_"  +sel+"_"+period+".root","OPEN"),
+                    'QCD_EM_Pt_80to170': TFile(hPath+"/m_QCD_EM_Pt_80to170_" +sel+"_"+period+".root","OPEN"),
+                    'QCD_EM_Pt_170to250':TFile(hPath+"/m_QCD_EM_Pt_170to250_"+sel+"_"+period+".root","OPEN"),
+                    'QCD_EM_Pt_250to350':TFile(hPath+"/m_QCD_EM_Pt_250to350_"+sel+"_"+period+".root","OPEN"),
+                    'QCD_EM_Pt_250to350':TFile(hPath+"/m_QCD_EM_Pt_250to350_"+sel+"_"+period+".root","OPEN"),
+                    'QCD_EM_Pt_350':     TFile(hPath+"/m_QCD_EM_Pt_350_"     +sel+"_"+period+".root","OPEN"),
+
+                    'QCD_Mu_Pt_20':     TFile(hPath+"/m_QCD_Mu_Pt_20_"      +sel+"_"+period+".root","OPEN"),
+                    'QCD_Mu_Pt_15to30': TFile(hPath+"/m_QCD_Mu_Pt_15to30_"  +sel+"_"+period+".root","OPEN"),
+                    'QCD_Mu_Pt_30to50': TFile(hPath+"/m_QCD_Mu_Pt_30to50_"  +sel+"_"+period+".root","OPEN"),
+                    'QCD_Mu_Pt_50to150':TFile(hPath+"/m_QCD_Mu_Pt_50to150_" +sel+"_"+period+".root","OPEN"),
+                    'QCD_Mu_Pt_150':    TFile(hPath+"/m_QCD_Mu_Pt_150_"     +sel+"_"+period+".root","OPEN")
+                  }
+
+      bkgNames.append('QCD')
+      bkgFiles.append(qcdSamples)
 
     yields_bkg  = u.getYields(bkgFiles[0],bkgNames[0],True)
 
@@ -118,7 +158,7 @@ if __name__ == "__main__":
   if opt.mcfm:  sigFile = sigFileMCFM
   elif opt.hjp: sigFile = sigFileHjp
   elif opt.zjp: sigFile = sigFileZjp
-  else:             sigFile = sigFileMAD
+  else:         sigFile = sigFileMAD
 
   dataFile = TFile(hPath+"/m_Data_"+sel+"_"+period+".root","OPEN")
 
@@ -152,6 +192,12 @@ if __name__ == "__main__":
   if opt.zjp: sigName= '#splitline{50xSignal}{Z #rightarrow J/Psi #gamma}'
   if opt.hjp: sigName= '#splitline{100xSignal}{h #rightarrow J/Psi #gamma}'
 
+
+  ggHZGFile   = TFile(hPath+"/"+sel+"_"+period+"/hhhh_ggHZG-"+str(mass)+"_1.root", "OPEN")
+  hackZip = zip(['ggHZG-125'],[ggHZGFile])
+
+  u.drawAllInFile(None, "", hackZip, sigFileMAD, "Dalitz", "GEN", pathBase+'/GEN-lumi', None, "lumi")
+  u.drawAllInFile(None, "", hackZip, sigFileMAD, "Dalitz", "GEN", pathBase+'/GEN-norm', None, "norm")
 
   if cut not in ['14','15'] and not opt.apz:
     #u.drawAllInFile(dataFile, "Data", bkgZip, None, '', "", path, cut, "lumi")
