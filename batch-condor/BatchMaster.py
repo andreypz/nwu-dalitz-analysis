@@ -106,7 +106,7 @@ class BatchMaster():
           batch_tmp.write('Transfer_Output_Files = out_synch_{0}_{1}.txt, hhhh_{2}_{3}.root\n'.format(
               cfg._dataName,  str(count+1), cfg._dataName,  str(count+1)))
 
-        batch_tmp.write('Requirements = Memory >= 199 &&OpSys == "LINUX"&& (Arch != "DUMMY" )&& Disk > 1000000\n')
+        batch_tmp.write('Requirements = OpSys == "LINUX"&& (Arch != "DUMMY" )\n')
         batch_tmp.write('Notification = Never\n')
         if self._shortQueue:
           batch_tmp.write('+LENGTH = "SHORT"\n')

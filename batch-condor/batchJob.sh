@@ -14,7 +14,7 @@ nwu=$9
 
 echo ${7} and ${8} and ${8}
 
-if [ $nwu == "nwu" ]
+if [ "$nwu" = "nwu" ]
 then
   echo "NWU"
   export OSG_APP=/software/tier3/osg
@@ -24,7 +24,8 @@ then
 else
   source /uscmst1/prod/sw/cms/bashrc prod
   # this is needed just to set-up root:
-  cd /uscmst1/prod/sw/cmssw/slc5_amd64_gcc472/cms/cmssw/CMSSW_6_2_0
+  #cd /uscmst1/prod/sw/cmssw/slc5_amd64_gcc472/cms/cmssw/CMSSW_6_2_0
+  cd /uscmst1/prod/sw/cmssw/slc5_amd64_gcc462/cms/cmssw/CMSSW_5_3_20
 fi
 eval `scramv1 runtime -sh`
 cd -
@@ -37,7 +38,7 @@ cd nwu-my-analysis
 cp ../source.tar.gz .
 tar -xzf source.tar.gz
 
-if [ ${selection} == "nate" ]
+if [ "$selection" = "nate" ]
 then
     cd testAnalyzer
 else
@@ -52,7 +53,7 @@ chmod 755 run.py
 
 echo ${selection} ${trigger}
 
-if [ ${gen} == "gen" ]
+if [ "$gen" = "gen" ]
 then
     ./run.py ${suffix} ${dataName} -s ${selection} -t ${trigger} -p ${period}  --gen -b
 else
