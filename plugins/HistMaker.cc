@@ -200,6 +200,7 @@ void HistMaker::FillHistosFull(Int_t num, Double_t weight, string dir)
     hists->fill1DHist(four.M(), Form("four_massZ_%s_cut%i",d, num),";m_{ll#gamma#gamma}",  100,70,120,  weight, dir);
 
   hists->fill1DHist(tri.M(), Form("00_tri_mass_%s_cut%i",         d, num),";m_{ll#gamma}",  100, 0,200,  weight, dir);
+  hists->fill1DHist(tri.M(), Form("00_tri_mass_3GeVBin_%s_cut%i", d, num),";m_{ll#gamma}",  20,100,160,  weight, dir);
   hists->fill1DHist(tri.M(), Form("00_tri_mass80_%s_cut%i",       d, num),";m_{ll#gamma}",  100,80,200,  weight, dir);
   hists->fill1DHist(tri.M(), Form("00_tri_massZ_%s_cut%i",        d, num),";m_{ll#gamma}",  100,60,120,  weight, dir);
   hists->fill1DHist(tri.M(), Form("00_tri_mass_longTail_%s_cut%i",d, num),";m_{ll#gamma}",  100, 0,400,  weight, dir);

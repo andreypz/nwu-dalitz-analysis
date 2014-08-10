@@ -394,9 +394,8 @@ def drawAllInFile(f1, name1, bZip, f3, name3, myDir,path, N, howToScale="none", 
 
       leg = TLegend(0.63,0.72,0.92,0.90)
       leg.Clear()
-      #leg.SetTextSize(0.05)
       leg.SetTextSize(0.03)
-      if bZip!='': # need more columns if there are backgrounds
+      if bZip!='' and len(bZip)>1: # need more columns if there are backgrounds
         leg = TLegend(0.55,0.7,0.99,0.92)
         leg.Clear()
         leg.SetNColumns(2)

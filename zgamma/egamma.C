@@ -45,7 +45,7 @@ Bool_t doZee = 0;
 Bool_t makeFitTree = 0;
 Bool_t makeApzTree = 0;
 
-const UInt_t hisEVTS[] = {9331};
+const UInt_t hisEVTS[] = {29, 125, 149, 167, 720, 768, 938};
 Int_t evSize = sizeof(hisEVTS)/sizeof(int);
 
 bool P4SortCondition(const TLorentzVector& p1, const TLorentzVector& p2) {return (p1.Pt() > p2.Pt());}
@@ -633,9 +633,16 @@ Bool_t egamma::Process(Long64_t entry)
   }
 
 
+  for(Int_t ev=0; ev<evSize;ev++){
+    if (nEvents[0]-1 == hisEVTS[ev]){cout<<nEvents[0]-1<<" evNumber="<<eventNumber<<" Found an event before photon cuts selection "<<endl;
+      cout<<"gamma: pt = "<<gamma.Pt()<<"  SCEta = "<<gamma.SCEta()<<"  SCPhi = "<<gamma.SCPhi()<<endl;
+      break;}
+  }
+
   if (gamma.Pt() < cut_gammapt) return kTRUE;
   //if (fabs(gamma.Eta()) > 1.444) return kTRUE;
   if (fabs(gamma.SCEta()) > 1.4442) return kTRUE;
+
 
   if(!isRealData && makeGen){
     hists->fill1DHist(genMll,  "gen_Mll_reco_gamma_iso",  ";gen_Mll",100,0,mllMax, 1,"eff");
@@ -644,6 +651,9 @@ Bool_t egamma::Process(Long64_t entry)
 
   FillHistoCounts(4, eventWeight);
   CountEvents(4);
+
+  //fout<<eventNumber<<endl;
+  fout<<nEvents[0]-1<<endl;
 
 
   /*
@@ -752,7 +762,7 @@ Bool_t egamma::Process(Long64_t entry)
     return kTRUE;
 
 
-  fout<<runNumber<<" "<<eventNumber<<" "<<DALE.IdMap("mvaScore")<<endl;
+  //fout<<runNumber<<" "<<eventNumber<<" "<<DALE.IdMap("mvaScore")<<endl;
 
   l1 = DALE.GetTracks()[0];
   l2 = DALE.GetTracks()[1];

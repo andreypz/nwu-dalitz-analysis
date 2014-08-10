@@ -773,7 +773,7 @@ Bool_t jpsiGamma::Process(Long64_t entry)
   }
 
 
-  if (Mll<2.9 || Mll>3.3) return kTRUE; //jpsi and upsilon removeal
+  if (Mll<2.9 || Mll>3.3) return kTRUE;
 
   HM->FillHistosFull(7, eventWeight, "");
   FillHistoCounts(7, eventWeight);
@@ -836,8 +836,8 @@ Bool_t jpsiGamma::Process(Long64_t entry)
 
 
 
-  if ((l1+l2).Pt()/Mllg < 0.30 || gamma.Pt()/Mllg < 0.30)
-    //if ((l1+l2).Pt() < 40 || gamma.Pt() < 40)
+  //if ((l1+l2).Pt()/Mllg < 0.30 || gamma.Pt()/Mllg < 0.30)
+  if ((l1+l2).Pt() < 40 || gamma.Pt() < 40)
     return kTRUE;
 
   HM->FillHistosFull(8, eventWeight, "");

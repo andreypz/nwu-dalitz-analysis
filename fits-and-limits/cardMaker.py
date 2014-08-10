@@ -73,7 +73,8 @@ def makeCards(subdir):
 
         channel = '_'.join([lepton,year,'cat'+cat])
         #bkgParams = ['sigma','mean','tau','norm']
-        bkgParams = ['p1','p2','p3','p4','norm']
+        bkgParams = ['p1','p2','p3','norm']
+        #bkgParams = ['p1','p2','p3','p4','norm']
 
         for mass in massList:
 

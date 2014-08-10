@@ -8,11 +8,13 @@ import utils as u
 import ConfigParser as cp
 gROOT.ProcessLine(".L ../tdrstyle.C")
 setTDRStyle()
+gROOT.LoadMacro("../CMS_lumi.C")
 
 print len(sys.argv), sys.argv
 
 verbose = 0
 doExt   = 0
+hjp = 1
 
 cf = cp.ConfigParser()
 cf.read('config.cfg')
@@ -37,7 +39,7 @@ mzg.setRange('signal',120,130)
 mzg.setRange('r1',110,120)
 mzg.setRange('r2',130,170)
 
-bkgModel = 'Bern4'
+bkgModel = 'Bern3'
 # #######################################
 # prep the background and data card    #
 # we're going to the extend the bg pdf #
@@ -52,7 +54,7 @@ def BackgroundNameFixer(fitName, year, lepton, cat, ws, Ext=True):
   if Ext:
     fitExtName    = '_'.join(['bkgTmp',lepton,year,'cat'+cat])
   else:
-    fitExtName = '_'.join(['Bern4',year,lepton,'cat'+cat])
+    fitExtName = '_'.join([bkgModel,year,lepton,'cat'+cat])
 
   fitExtNameNew = '_'.join(['bkg',lepton,year,'cat'+cat])
 
@@ -290,34 +292,41 @@ for year in yearList:
     for cat in catList:
       dataName = '_'.join(['data',lepton,year,'cat'+cat])
       suffix   = '_'.join([year,lepton,'cat'+cat])
-      print dataName, suffix
+      print cat, dataName, suffix
 
       fitName  = '_'.join([bkgModel,year,lepton,'cat'+cat])
       normName = 'norm'+bkgModel+'_'+suffix
 
 
       hPath    = cf.get("path","base")+"/batch_output/zgamma/8TeV/"+subdir
-      sigFile_hjp  = TFile(hPath+"/jp-mugamma_"+year+"/hhhh_HiggsToJPsiGamma_1.root", "OPEN")
-      sigFile_gg   = TFile(hPath+"/mugamma_"+year+"/hhhh_ggH-mad125_1.root", "OPEN")
-      sigFile_vbf  = TFile(hPath+"/mugamma_"+year+"/hhhh_vbf-mad125_1.root", "OPEN")
-      sigFile_vh   = TFile(hPath+"/mugamma_"+year+"/hhhh_vh-mad125_1.root", "OPEN")
-      #fsig= [sigFile_gg,sigFile_vbf,sigFile_vh]
-      fsig= [sigFile_hjp]
+      if hjp:
+        sigFile_hjp  = TFile(hPath+"/jp-mugamma_"+year+"/hhhh_HiggsToJPsiGamma_1.root", "OPEN")
+        fsig = [sigFile_hjp]
+      else:
+        sigFile_gg   = TFile(hPath+"/mugamma_"+year+"/hhhh_ggH-mad125_1.root", "OPEN")
+        sigFile_vbf  = TFile(hPath+"/mugamma_"+year+"/hhhh_vbf-mad125_1.root", "OPEN")
+        sigFile_vh   = TFile(hPath+"/mugamma_"+year+"/hhhh_vh-mad125_1.root", "OPEN")
+        fsig= [sigFile_gg,sigFile_vbf,sigFile_vh]
+
       hsig = []
       for i,f in enumerate(fsig):
         Nev = f.Get("Counts/evt_byCut").GetBinContent(2)
-        if i==0:
-          cro = u.getCS("ggH-125",mySel='mu')
-        elif i==1:
-          cro = u.getCS("vbfH-125",mySel='mu')
-        elif i==2:
-          cro = u.getCS("vH-125",mySel='mu')
-        lumi = u.getLumi("2012")
+        if hjp:
+          cro = u.getCS("HtoJPsiGamma")
+        else:
+          if i==0:
+            cro = u.getCS("ggH-125",mySel='mu')
+          elif i==1:
+            cro = u.getCS("vbfH-125",mySel='mu')
+          elif i==2:
+            cro = u.getCS("vH-125",mySel='mu')
+        lumi  = u.getLumi("2012")
         scale = float(lumi*cro)/Nev
         print f.GetName(), cro,Nev,scale
 
         hsig.append(f.Get("00_tri_mass__cut9").Clone())
-        hsig[-1].Scale(10*scale)
+        if hjp: hsig[-1].Scale(scale)
+        else:   hsig[-1].Scale(10*scale)
         #hsig[-1].Print("all")
 
       #hsig[0].Add(hsig[1])
@@ -351,8 +360,12 @@ for year in yearList:
 
       fit_result = RooFitResult(fit_ext.fitTo(data,RooFit.Range('DalitzRegion'), RooFit.Save()))
       # fit_ext.fitTo(data,RooFit.Range('DalitzRegion'), RooFit.Save())
-      myBinning = 30
-      binWidth = 2.
+      if hjp:
+        myBinning = 20
+        binWidth  = 2.
+      else:
+        myBinning = 30
+        binWidth  = 2.
 
       testFrame = mzg.frame(RooFit.Range('DalitzRegion'))
       if doBlind:
@@ -399,7 +412,8 @@ for year in yearList:
       else:
         data.plotOn(testFrame, RooFit.Binning(myBinning), RooFit.Name('data'))
 
-      testFrame.SetMaximum(62)
+      if hjp: testFrame.SetMaximum(10)
+      else:   testFrame.SetMaximum(62)
       testFrame.Draw()
       hsig[0].SetAxisRange(115,135,"X")
       hsig[0].SetLineColor(kRed+1)
@@ -409,18 +423,22 @@ for year in yearList:
 
       testFrame.SetTitle(";m_{#mu#mu#gamma} (GeV);Events/"+str(binWidth)+" GeV")
 
-
-      leg  = TLegend(0.53,0.65,0.93,0.87)
+      if hjp: leg  = TLegend(0.53,0.65,0.93,0.87)
+      else:   leg  = TLegend(0.53,0.65,0.93,0.87)
       leg.SetFillColor(0)
       leg.SetBorderSize(1)
+      if hjp:
+        leg.AddEntry(hsig[0],'#splitline{Expected signal}{with #sigma#times BR = 0.5 fb}','l')
+      else:
+        leg.AddEntry(hsig[0],'Expected signal x10','l')
+      #leg.AddEntry(testFrame.findObject(bkgModel+'1sigma'),"Background Model",'f')
       leg.AddEntry(testFrame.findObject(bkgModel),"Background Model",'l')
-      leg.AddEntry(0,'','')
-      leg.AddEntry(0,'','')
-      leg.AddEntry(hsig[0],'Expected signal x10','l')
+      #if not hjp: leg.AddEntry(0,'','')
+      #leg.AddEntry(0,'','')
       leg.SetTextSize(0.045)
       leg.Draw()
 
-      leg2  = TLegend(0.55,0.72,0.91,0.8)
+      leg2  = TLegend(0.55,0.62,0.91,0.7)
       leg2.SetNColumns(2)
       leg2.SetFillColor(0)
       leg2.SetBorderSize(0)
@@ -429,12 +447,14 @@ for year in yearList:
       leg2.SetTextSize(0.045)
       #leg2.Draw()
 
-      prelim = TLatex()
+      #proc = 'H#rightarrow#gamma*#gamma#rightarrow#mu#mu#gamma'
+      #proc = 'Z#rightarrow J/#Psi#gamma#rightarrow#mu#mu#gamma'
+      proc = 'H#rightarrow J/#Psi#gamma#rightarrow#mu#mu#gamma'
+      prelim = TLatex(0.15,0.95, proc)
       prelim.SetNDC();
-      prelim.SetTextSize(0.045)
-      prelim.SetTextFont(62)
-      prelim.DrawLatex(0.15,0.95, ("CMS Preliminary"))
-      prelim.DrawLatex(0.40,0.95, "#sqrt{s} = 8 TeV,  L = 19.7  fb^{-1}  H#rightarrow#gamma*#gamma#rightarrow#mu#mu#gamma")
+      prelim.SetTextSize(0.035);
+      prelim.Draw();
+      CMS_lumi(c, 2, 11)
 
       gPad.RedrawAxis()
       for e in ['.png', '.pdf']:

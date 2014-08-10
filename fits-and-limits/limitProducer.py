@@ -17,9 +17,6 @@ import ConfigParser as cp
 cf = cp.ConfigParser()
 cf.read('config.cfg')
 
-def produceLimits(inputFolder = '', outPutFolder = 'limitOutputs/', mass = '125.0'):
-  print None
-
 if __name__ == "__main__":
 
   #massList   = ['%.1f'%(a) for a in u.drange(120,150,5)]

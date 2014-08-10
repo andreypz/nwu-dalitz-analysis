@@ -117,7 +117,7 @@ def SignalFitMaker(lep, year, cat, subdir):
           dsList.append(sig_ds_Low)
 
         print massLow, massHi
-        raw_input("Mass low and Hi; hit enter")
+        #raw_input("Mass low and Hi; hit enter")
         CBG_Low = BuildCrystalBallGauss(year,lep,cat,prod,str(massLow),'Low',mzg,mean = massLow)[0]
 
         CBG_Low.fitTo(sig_ds_Low, RooFit.Range('fitRegion1'), RooFit.SumW2Error(kTRUE), RooFit.Strategy(1), RooFit.NumCPU(4), RooFit.PrintLevel(-1))
@@ -162,7 +162,7 @@ def SignalFitMaker(lep, year, cat, subdir):
       CBG_Interp.fitTo(interp_ds, RooFit.Range('fitRegion_'+massString), RooFit.SumW2Error(kTRUE), RooFit.Strategy(1), RooFit.NumCPU(4), RooFit.PrintLevel(-1))
 
       print paramList
-      raw_input("Param List")
+      #raw_input("Param List")
 
       for param in paramList:
         param.setConstant(True)
