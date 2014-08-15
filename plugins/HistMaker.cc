@@ -96,10 +96,22 @@ void HistMaker::MakePhotonPlots(const TCPhoton& ph)
   hists->fill1DHist(ph.ConversionVeto(), "ph_ConversionVeto",";ConversionVeto",  3, 0, 3,   1,dir);
   hists->fill1DHist(ph.PfIsoPhoton(),    "ph_PfIsoPhoton",   ";PfIsoPhoton",   100, 0.01,5, 1,dir);
   hists->fill1DHist(ph.PfIsoCharged(),   "ph_PfIsoCharged",  ";PfIsoCharged",  100, 0.01,2, 1,dir);
-  hists->fill1DHist(ph.ESEffSigmaRR()[0],"ph_ESEffSigmaRR_x",";ESEffSigmaRR_x",100, -5e-8,5e-8, 1,dir);
-  hists->fill1DHist(ph.ESEffSigmaRR()[1],"ph_ESEffSigmaRR_y",";ESEffSigmaRR_y",100, -5e-8,5e-8, 1,dir);
-
+  if (fabs(ph.SCEta())>1.6){ //These are only for EE
+    hists->fill1DHist(ph.ESEffSigmaRR()[0],"ph_ESEffSigmaRR_x",";ESEffSigmaRR_x",100, -5e-8,5e-8, 1,dir);
+    hists->fill1DHist(ph.ESEffSigmaRR()[1],"ph_ESEffSigmaRR_y",";ESEffSigmaRR_y",100, -5e-8,5e-8, 1,dir);
+  }
   hists->fill1DHist(ph.IdMap("mvaScore"),"ph_mvaScore",      ";MVA score",     100, -1,1,   1,dir);
+
+  hists->fill1DHist(ph.CiCPF4chgpfIso02()[0],"ph_CiCPF4chgpfIso02", ";ph_CiCPF4chgpfIso02", 100, 0,5, 1,dir);
+
+  if (ph.R9() > 0.9){
+    hists->fill1DHist(ph.IdMap("HadIso_R03")-0.005*ph.Et(), "ph_HadIso_R03_R9high", ";ph_HadIso_R03_R9high", 100, 0, 60, 1,dir);
+    hists->fill1DHist(ph.IdMap("TrkIso_R03")-0.002*ph.Et(), "ph_TrkIso_R03_R9low",  ";ph_HadIso_R03_R9low",  100, 0, 60, 1,dir);
+  }
+  else{
+    hists->fill1DHist(ph.IdMap("HadIso_R03")-0.005*ph.Et(), "ph_HadIso_R03_R9high", ";ph_HadIso_R03_R9high", 100, 0, 6, 1,dir);
+    hists->fill1DHist(ph.IdMap("TrkIso_R03")-0.002*ph.Et(), "ph_TrkIso_R03_R9low", ";ph_HadIso_R03_R9low",   100, 0, 6, 1,dir);
+  }
 
   //hists->fill1DHist(ph.(), "ph_", ";", 100, 0, 100,1, dir);
 }

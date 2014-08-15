@@ -58,5 +58,5 @@ if __name__ == "__main__":
 
   os.system("mv higgsCombineTest."+method+"* "+dir)
   print dir
-  os.system("./limitPlotter.py "+dir)
+  # os.system("./limitPlotter.py "+dir)
   #os.system('combine -M ProfileLikelihood '+sys.argv[1]+ ' -m 125 -t 100')

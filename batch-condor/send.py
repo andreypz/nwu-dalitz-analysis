@@ -91,9 +91,9 @@ test.extend([
     #cfg('ggH-mad125', DIR+'/nuTuples_v9.8.1_8TeV/dalitz-ee/ggHiggsToEEGamma_MH125', 1, 'dalitz '+selection+trig+period+gen + whereWeRun),
     #cfg('ggH-mad125', DIR+'/nuTuples_v9.8.1_8TeV/dalitz-el/ggHiggsToEEGamma_MH125', 1, 'dalitz '+selection+trig+period+gen + whereWeRun),
     #cfg('ggH-mad125', DIR+'/nuTuples_v9.8_8TeV/dalitz-mu/ggHiggsToMuMuGamma_MH125',1, 'dalitz '+selection+trig+period+gen + whereWeRun),
-    #cfg('ggHZG-125',  DIR+'/nuTuples_v9.8_8TeV/MC/ggHZG_M125_RD1',1, 'HZG '+selection+trig+' '+period+gen + whereWeRun),
+    cfg('ggHZG-125',  DIR+'/nuTuples_v9.8_8TeV/MC/ggHZG_M125_RD1',1, 'HZG '+selection+trig+' '+period+gen + whereWeRun),
     #cfg('ggH-mad150', DIR+'/nuTuples_v9.8_8TeV/dalitz-mu/ggHiggsToMuMuGamma_MH150',1, 'dalitz '+selection+trig+period+gen + whereWeRun),
-    cfg('HiggsToJPsiGamma', DIR+'/nuTuples_v9.8_8TeV/dalitz-mu/HiggsToJPsiGamma',      1, 'hjp '+selection+trig+period+gen + whereWeRun),
+    #cfg('HiggsToJPsiGamma', DIR+'/nuTuples_v9.8_8TeV/dalitz-mu/HiggsToJPsiGamma',      1, 'hjp '+selection+trig+period+gen + whereWeRun),
   ])
 
 

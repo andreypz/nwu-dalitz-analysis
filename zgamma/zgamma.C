@@ -77,7 +77,9 @@ void zgamma::Begin(TTree * tree)
 
   histoFile = new TFile(Form("a_%s_higgsHistograms.root", selection.c_str()), "RECREATE");
   histoFile->mkdir("fitTree", "fitTree");
-  histoFile->mkdir("apzTree", "apzTree");                                                                                                                                           hists    = new HistManager(histoFile);
+  histoFile->mkdir("apzTree", "apzTree");
+
+  hists    = new HistManager(histoFile);
   HM       = new HistMaker(hists);
   ObjID    = new ObjectID();
   weighter = new WeightUtils(sample, period, selection, 0);
@@ -249,6 +251,9 @@ Bool_t zgamma::Process(Long64_t entry)
 
 
       //Higgs himself:
+      if (thisParticle->GetPDGId()==23)
+	hists->fill1DHist(thisParticle->M(), "gen_Z_mass",";gen Z mass",  200, 0,200, 1,"GEN");
+
       if (thisParticle->GetPDGId()==25 && thisParticle->GetStatus()==3){
 	gen_higgs = *thisParticle;
 	hists->fill1DHist(thisParticle->M(), "gen_h_mass",";gen mu mass",  200, 124,126, 1,"GEN");
@@ -403,6 +408,7 @@ Bool_t zgamma::Process(Long64_t entry)
     gendR  = gen_l1.DeltaR(gen_l2);
     genMll = (gen_l1+gen_l2).M();
 
+    hists->fill1DHist(genMll,"gen_Mll_low",  ";m_{#mu#mu}",100,0, 50, 1,"GEN");
     hists->fill1DHist(genMll,"gen_Mll_full", ";m_{#mu#mu}",200,0,130, 1,"GEN");
     hists->fill1DHist(genMll,"gen_Mll_inter",";m_{#mu#mu}",100,20,80, 1,"GEN");
 

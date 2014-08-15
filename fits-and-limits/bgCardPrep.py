@@ -428,7 +428,7 @@ for year in yearList:
       leg.SetFillColor(0)
       leg.SetBorderSize(1)
       if hjp:
-        leg.AddEntry(hsig[0],'#splitline{Expected signal}{with #sigma#times BR = 0.5 fb}','l')
+        leg.AddEntry(hsig[0],'#splitline{Expected signal}{with #sigma#times BR = 1.5 fb}','l')
       else:
         leg.AddEntry(hsig[0],'Expected signal x10','l')
       #leg.AddEntry(testFrame.findObject(bkgModel+'1sigma'),"Background Model",'f')

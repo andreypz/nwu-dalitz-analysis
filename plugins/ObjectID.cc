@@ -1,5 +1,8 @@
 #include "ObjectID.h"
 
+bool SCESortCondition(const TCEGamma& p1, const TCEGamma& p2) {return (p1.SCEnergy() > p2.SCEnergy());}
+bool P4SortCondition(const TLorentzVector& p1, const TLorentzVector& p2) {return (p1.Pt() > p2.Pt());}
+
 float _EAPho[7][3] = {
   {0.012,  0.030,   0.148}, //         eta < 1.0
   {0.010,  0.057,   0.130}, // 1.0   < eta < 1.479
@@ -11,7 +14,7 @@ float _EAPho[7][3] = {
 };
 //                EB   EE
 float _phoMvaCuts[2] = {0.08, 0.08};
-float _DAleMvaCut = 0.05;
+float _DAleMvaCut    = 0.05;
 
 ObjectID::ObjectID():
   _isRealData(0),
@@ -195,7 +198,7 @@ bool ObjectID::PassPhotonIdAndIso(const TCPhoton& ph, TString n, float& mvaScore
   CalculatePhotonIso(ph, chIsoCor,nhIsoCor,phIsoCor);
 
   if(
-     (fabs(tmpEta)  < 1.442
+     (fabs(tmpEta)  < 1.4442
       && ph.ConversionVeto()       == cuts.PassedEleSafeVeto[0]
       && ph.HadOverEm()             < cuts.HadOverEm[0]
       && ph.SigmaIEtaIEta()         < cuts.sigmaIetaIeta[0]
@@ -310,16 +313,36 @@ float ObjectID::CalculateElectronIso(const TCElectron& lep)
 
 
 
-bool ObjectID::PassDalitzEleID(const TCElectron& el, TString n, float& mvaScore)
+bool ObjectID::PassDalitzEleID(const TCElectron& el, TVector3 *pv, TString n, float& mvaScore)
 {
   mvaScore = -99;
   if (n=="MVA")
     {
       //bool mvaPass = false;
+
       if (!HggPreselection(el)) return false;
 
-      if (el.GetTracks().size() < 2 || el.BaseSC().size()<2)
+      vector<TCElectron::Track> trk = el.GetTracks();
+      vector<TCEGamma> sc = el.BaseSC();
+
+      //if (_eventNumber == 154245 || _eventNumber == 154245) {
+      //cout<<_eventNumber<<" DBG DAlitz MVA ID "<<trk.size() <<"  "<<sc.size()<<endl;
+
+      //sc[0].Dump();
+      //sc[1].Dump();
+      //sc[2].Dump();
+      //}
+
+      if (trk.size() < 2 || sc.size()<2)
 	return false;
+
+      sort(sc.begin(),  sc.end(),  SCESortCondition);
+      sort(trk.begin(), trk.end(), P4SortCondition);
+
+
+      if (fabs(el.Dxy(pv)) > 0.02 || fabs(el.Dz(pv)) > 0.1)
+	return false;
+
 
       // classification variables
       static Float_t rho2012_, r9_, HoverE_, EoverPt_;
@@ -358,31 +381,32 @@ bool ObjectID::PassDalitzEleID(const TCElectron& el, TString n, float& mvaScore)
 	tmvaDalitz->BookMVA("BDT", "../data/ElectronDalitzMVAID.xml");
       }
 
-	r9_ = el.R9();
-	rho2012_    = _rhoFactor;
-	eleBCS25_1_ = el.BaseSC()[0].E2x5()/el.BaseSC()[0].E5x5();
-	eleBCS25_2_ = el.BaseSC()[1].E2x5()/el.BaseSC()[1].E5x5();
-	eleGSFPt2over1_  = el.GetTracks()[1].Pt()/el.GetTracks()[0].Pt();
-	//eleGSFPt1_  = el.GetTracks()[0].Pt();
-	//eleGSFPt2_  = el.GetTracks()[1].Pt();
-	eleGSFdR_   = el.GetTracks()[0].DeltaR(el.GetTracks()[1]);
-	SCEtaWidth_ = el.SCEtaWidth();
-	SCPhiWidth_ = el.SCPhiWidth();
-	HoverE_     = el.HadOverEm();
-	EoverPt_    = el.SCEnergy()/el.Pt();
-	dEtaAtVtx_  = el.SCDeltaEta();
-	dPhiAtVtx_  = el.SCDeltaPhi();
-	EcalEnPin_  = el.InverseEnergyMomentumDiff(); //| 1/E - 1/Pin |
-	recoSCEta_  = el.SCEta();
-	eleBCSieie1_= el.BaseSC()[0].SigmaIEtaIEta();
-	eleBCSieie2_= el.BaseSC()[1].SigmaIEtaIEta();
-	eleBCS15_2_ = el.BaseSC()[1].E1x5()/el.BaseSC()[1].E5x5();
+      //cout<<"DBG MVA ID "<<trk[0].Pt()<<endl;
+      r9_ = el.R9();
+      rho2012_    = _rhoFactor;
+      eleBCS25_1_ = sc[0].E2x5()/sc[0].E5x5();
+      eleBCS25_2_ = sc[1].E2x5()/sc[1].E5x5();
+      eleGSFPt2over1_  = trk[1].Pt()/trk[0].Pt();
+      //eleGSFPt1_  = el.GetTracks()[0].Pt();
+      //eleGSFPt2_  = el.GetTracks()[1].Pt();
+      eleGSFdR_   = trk[0].DeltaR(trk[1]);
+      SCEtaWidth_ = el.SCEtaWidth();
+      SCPhiWidth_ = el.SCPhiWidth();
+      HoverE_     = el.HadOverEm();
+      EoverPt_    = el.SCEnergy()/(trk[0]+trk[1]).Pt();
+      dEtaAtVtx_  = el.SCDeltaEta();
+      dPhiAtVtx_  = el.SCDeltaPhi();
+      EcalEnPin_  = el.InverseEnergyMomentumDiff(); //| 1/E - 1/Pin |
+      recoSCEta_  = el.SCEta();
+      eleBCSieie1_= sc[0].SigmaIEtaIEta();
+      eleBCSieie2_= sc[1].SigmaIEtaIEta();
+      eleBCS15_2_ = sc[1].E1x5()/sc[1].E5x5();
 
-	mvaScore = tmvaDalitz->EvaluateMVA("BDT");
-	if (mvaScore > _DAleMvaCut)
-	  return true;
-	else
-	  return false;
+      mvaScore = tmvaDalitz->EvaluateMVA("BDT");
+      if (mvaScore > _DAleMvaCut)
+	return true;
+      else
+	return false;
 
     }
   else {

@@ -190,7 +190,7 @@ if __name__ == "__main__":
 
   sigName = '#splitline{1000xSignal}{m_{H}=125 GeV}'
   if opt.zjp: sigName= '#splitline{50xSignal}{Z #rightarrow J/Psi #gamma}'
-  if opt.hjp: sigName= '#splitline{100xSignal}{h #rightarrow J/Psi #gamma}'
+  if opt.hjp: sigName= '#splitline{20xSignal}{h #rightarrow J/Psi #gamma}'
 
 
   #ggHZGFile   = TFile(hPath+"/"+sel+"_"+period+"/hhhh_ggHZG-"+str(mass)+"_1.root", "OPEN")
@@ -198,6 +198,8 @@ if __name__ == "__main__":
 
   #u.drawAllInFile(None, "", hackZip, sigFileMAD, "Dalitz", "GEN", pathBase+'/GEN-lumi', None, "lumi")
   #u.drawAllInFile(None, "", hackZip, sigFileMAD, "Dalitz", "GEN", pathBase+'/GEN-norm', None, "norm")
+
+  u.drawAllInFile(None, "", '', sigFileMAD, "Dalitz", "eff", pathBase+'/eff', None, "norm")
 
   if cut not in ['14','15'] and not opt.apz:
     #u.drawAllInFile(dataFile, "Data", bkgZip, None, '', "", path, cut, "lumi")

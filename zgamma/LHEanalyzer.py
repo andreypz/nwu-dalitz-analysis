@@ -14,27 +14,25 @@ outpath = '/tthome/andrey/html/zgamma/lhe/'
 #outpath = '/uscms_data/d2/andreypz/html/zgamma/lhe/'
 files={}
 
-#files["one"] = ['/uscms_data/d2/andreypz/lhe_vbf_higgs/vbfh_eeg_m125.root']
-#files["two"] = ['/uscms_data/d2/andreypz/lhe_vbf_higgs/vbfh_mumug_m125.root']
-#files["one"] = ['/uscms_data/d2/andreypz/lhe_vh_mumugamma/hmumug_m125.root']
-#files["two"] = ['/uscms_data/d2/andreypz/lhe_higgs_mumugamma_dalitz/hmumug_m120.root']
-#files["one"] = ['/uscms_data/d2/andreypz/lhe_higgs_eegamma_dalitz/heeg_m120.root']
 #files["one"] = ['~/LHE_files/dygamma_dalitz_muonmass_run02.root']
 #files["one"] = ['~/LHE_files/dygamma_dalitz_muonmass_dRll_dRlg_run05.root']
 #files["two"] = ['~/LHE_files/dyjet_dalitz_run09.root']
 #files["two"] = ['~/LHE_files/luisa/dygamma.lhe.root']
-#files["three"] = ['~/LHE_files/hmumug_m120.root']
 
-files["one"]   = ['~/LHE_files/dyJet/dyJet_xcut_03.root']
-files["two"]   = ['~/LHE_files/dyJet/dyJet_xcut_15.root']
-files["three"] = ['~/LHE_files/dyJet/dyJet_xcut_35_verylarge.root']
+#files["one"] = ['~/LHE_files/mcfm_dalitz.root']
+files["one"] = ['~/LHE_files/heeg_m120.root']
+files["two"] = ['~/LHE_files/hmumug_m120.root']
+
+#files["one"]   = ['~/LHE_files/dyJet/dyJet_xcut_03.root']
+#files["two"]   = ['~/LHE_files/dyJet/dyJet_xcut_15.root']
+#files["three"] = ['~/LHE_files/dyJet/dyJet_xcut_35_verylarge.root']
 
 #files["one"] = ['/tthome/andrey/LHE_dalitz_Luisa/dygamma.lhe.root']
 #files["two"] = ['/tthome/andrey/LHE_dalitz_Luisa/dyjet.lhe.root']
-fakeGammaFromJet = 1
+fakeGammaFromJet = 0
 
 MH = 0
-LEPID1 = 13
+LEPID1 = 11
 LEPID2 = 13
 
 print files
@@ -327,6 +325,8 @@ def FillAllHists(files, h):
     h.fill1DHist(lPt1.DeltaR(gamma),     "dR_lPt1_gamma",     ";dR(l1, #gamma)", 50, 0,5, 1, "")
     h.fill1DHist(lPt2.DeltaR(gamma),     "dR_lPt2_gamma",     ";dR(l2, #gamma)", 50, 0,5, 1, "")
     h.fill1DHist(l1.DeltaR(l2),     "dR_l1_l2",     ";dR(l+, l-)",      50, 0,5, 1, "")
+    h.fill1DHist(l1.DeltaR(l2),     "dR_l1_l2_low", ";dR(l+, l-)",      50, 0,1, 1, "")
+    h.fill1DHist(l1.DeltaR(l2),     "dR_l1_l2_vlow",";dR(l+, l-)",      50, 0,0.3, 1, "")
     h.fill1DHist(diLep.DeltaR(l1),  "dR_diLep_l1",  ";dR(diLep, l+)",   50, 0,5, 1, "")
     h.fill1DHist(diLep.DeltaR(l2),  "dR_diLep_l2",  ";dR(diLep, l-)",   50, 0,5, 1, "")
 
@@ -347,7 +347,7 @@ if __name__ == "__main__":
 
   FillAllHists(files["one"],  h1)
   FillAllHists(files["two"],  h2)
-  FillAllHists(files["three"],  h3)
+  #FillAllHists(files["three"],  h3)
 
 
   oneFile.cd()
@@ -362,14 +362,9 @@ if __name__ == "__main__":
   blah = ['LHE files comparison for DY+gamma sample',
           'Luisa\'s vs mine']
 
-  u.drawAllInFile(oneFile, "3 GeV", [('15 GeV',twoFile)],testFile, '35 GeV', '', path, None,"norm", isLog=True)
+  u.drawAllInFile(oneFile, "MAD ele", '', twoFile, 'MAD mu', '', path, None,"norm", isLog=True)
+  #u.drawAllInFile(oneFile, "3 GeV", [('15 GeV',twoFile)],testFile, '35 GeV', '', path, None,"norm", isLog=True)
   #u.drawAllInFile(oneFile, "DYG", [('DYJ',twoFile)],testFile, 'Sig', '', path, None,"norm", isLog=True)
-  #u.drawAllInFile(oneFile, "Mine",'',twoFile, 'Luisa','', path, None,"norm", isLog=True)
-  #u.drawAllInFile(oneFile, "Electrons",'',twoFile, 'Muons','', path, None,"norm", isLog=True)
-  # u.drawAllInFile(oneFile, "MCFM ele", twoFile, "Madgraph mu",None,"","", path, None,"norm")
-  # u.drawAllInFile(oneFile, "vbf ele", twoFile, "vbf mu",None,"","", path, None,"norm", isLog=True)
-  # u.drawAllInFile(oneFile, "MAD-125",None,"", None,"","", path, None,"norm")
-  # u.drawAllInFile(oneFile, "DY-gamma",'', None,"","", path, None,"norm")
 
   '''
     u.createDir(path+"/eff")

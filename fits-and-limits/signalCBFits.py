@@ -154,6 +154,7 @@ def SignalFitMaker(lep, year, cat, subdir):
       yieldName = '_'.join(['sig',prod,'yield',lep,year,'cat'+cat])
       yieldVar = RooRealVar(yieldName,yieldName,sig_ds_Low.sumEntries()*massDiff+sig_ds_Hi.sumEntries()*(1-massDiff))
 
+      print "\n\n Signal Yield?? = ", sig_ds_Low.sumEntries()*massDiff+sig_ds_Hi.sumEntries()*(1-massDiff)
 
       sigNameInterp = '_'.join(['ds','sig',prod,lep,year,'cat'+cat,'M'+str(mass)])
 

@@ -24,6 +24,7 @@ s = cf.get("path","ver")
 # Run with: combine -M Asymptotic datacard.txt  #
 # ################################################
 brTag = ''
+hjp = 1
 
 Ext = options.ext
 
@@ -83,8 +84,10 @@ def makeCards(subdir):
           sigWs = sigFile.Get('ws_card')
           procList  = [proc[a] for a in sigNameList]
           if options.br:
-            procList=['hjp']
-            #procList=['ggH']
+            if hjp:
+              procList=['hjp']
+            else:
+              procList=['ggH']
 
           nProc = len(procList)
           # print procList
@@ -126,12 +129,13 @@ def makeCards(subdir):
           for i in xrange(nProc):
             nSubLine1 +=' {'+str(i+1)+':^15}'
             nSubLine2 +=' {'+str(i+1)+':^5}'
-            #print i, nSubLine
+
+          print i, nSubLine1
 
           nSubLine1 +=' {'+str(i+2)+':^15}\n'
           nSubLine2 +=' {'+str(i+2)+':5} - \n'
 
-          print nSubLine1
+          print 'nSubLine1=', nSubLine1
 
           card.write(nSubLine1.format(*(['bin']+[channel]*(nProc+1))))
           card.write(nSubLine1.format(*(['process']+procList[::-1]+['bkg'])))
@@ -142,11 +146,12 @@ def makeCards(subdir):
           for s in sigNameList[::-1]:
             cs = 1
             if options.br:
-              #cs = fit(float(mass))
-              cs = 0.5
+              if hjp:
+                cs = u.getCS("HtoJPsiGamma")
+              else:
+                cs = fit(float(mass))
               # print 'from the fit', fit(float(mass))
-              # dont use this:: cs = csBR[mass]
-              #print 'from csbr:',cs
+              # print 'from csbr:',cs
             print mass, s, cs
             #sigYields.append(sigWs.var('sig_'+s+'_yield_'+channel).getVal()*cs)
             sigYields.append(sigWs.var('sig_'+s+'_yield_'+channel).getVal() /cs)

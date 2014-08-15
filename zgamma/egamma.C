@@ -45,7 +45,7 @@ Bool_t doZee = 0;
 Bool_t makeFitTree = 0;
 Bool_t makeApzTree = 0;
 
-const UInt_t hisEVTS[] = {29, 125, 149, 167, 720, 768, 938};
+const UInt_t hisEVTS[] = {151, 166, 200, 233, 907, 953};
 Int_t evSize = sizeof(hisEVTS)/sizeof(int);
 
 bool P4SortCondition(const TLorentzVector& p1, const TLorentzVector& p2) {return (p1.Pt() > p2.Pt());}
@@ -109,6 +109,7 @@ void egamma::Begin(TTree * tree)
 
   fout.open("./out_synch_.txt",ofstream::out);
   fout.precision(3); fout.setf(ios::fixed, ios::floatfield);
+  cout.precision(4); //fout.setf(ios::fixed, ios::floatfield);
 
   histoFile->cd("fitTree");
   if (makeFitTree){
@@ -465,12 +466,18 @@ Bool_t egamma::Process(Long64_t entry)
       fake_photons.push_back(*thisPhoton);
 
     //if (!(fabs(thisPhoton->Eta()) < 2.5)) continue;
-    if (fabs(thisPhoton->SCEta()) > 1.8) continue;
+    if (fabs(thisPhoton->SCEta()) > 1.4442) continue;
 
     if(thisPhoton->Pt() > 15){
       if (isRealData || !makeGen || (sample=="dalitz" && makeGen && gen_gamma.DeltaR(*thisPhoton) < 0.1) )
 	photons0.push_back(*thisPhoton);
 
+
+      //for(Int_t ev=0; ev<evSize;ev++){
+      //if (nEvents[0]-1 == hisEVTS[ev]){cout<<nEvents[0]-1<<" evNumber="<<eventNumber<<endl;
+      //  cout<<"gamma: pt = "<<thisPhoton->Pt()<<"  SCEta = "<<thisPhoton->SCEta()<<"  SCPhi = "<<thisPhoton->SCPhi()<<endl;
+      //  break;}
+      //}
 
       if(ObjID->PassPhotonIdAndIso(*thisPhoton, "CutBased-MediumWP", phoMvaScore)
 	 //&& (isRealData || !makeGen || (sample=="dalitz" && makeGen && gen_gamma.DeltaR(*thisPhoton) < 0.2) )
@@ -557,10 +564,30 @@ Bool_t egamma::Process(Long64_t entry)
       }
 
       if (thisElec->Pt() > 30 && fabs(thisElec->Eta()) < 1.4442 &&
-	  ObjID->PassDalitzEleID(*thisElec, "MVA", DAleMvaScore) ){
+	  ObjID->PassDalitzEleID(*thisElec, pvPosition, "MVA", DAleMvaScore) ){
 	thisElec->SetIdMap("mvaScore", DAleMvaScore);
 	DAlectrons.push_back(*thisElec);
       }
+
+      bool idpass = ObjID->PassDalitzEleID(*thisElec, pvPosition, "MVA", DAleMvaScore);
+      thisElec->SetIdMap("mvaScore", DAleMvaScore);
+
+      for(Int_t ev=0; ev<evSize;ev++){
+	if (nEvents[0]-1 == hisEVTS[ev]){cout<<nEvents[0]-1<<" evNumber="<<eventNumber<<endl;
+	  cout<<"gamma: pt = "<<gamma.Pt()<<"  SCEta = "<<gamma.SCEta()<<"  SCPhi = "<<gamma.SCPhi()<<endl;
+	  cout<<"R9 = "<<gamma.R9()<<"  hadoverEm = "<<gamma.HadOverEm()<<endl;
+	  cout<<"Ele  : pt = "<<thisElec->Pt()<<"   SCEta = "<<thisElec->SCEta()<<"  SCPhi = "<<thisElec->SCPhi()<<"  MVA = "<<thisElec->IdMap("mvaScore")<<endl;
+	  const vector<TCElectron::Track> trk0 = thisElec->GetTracks();
+	  cout<<"gsf trk1, pt ="<<trk0[0].Pt()<<"  eta= "<<trk0[0].Eta()<<endl;
+	  cout<<"gsf trk2, pt ="<<trk0[1].Pt()<<"  eta= "<<trk0[1].Eta()<<endl;
+	  //cout<<"SCRawEn = "<<thisElec->SCEnergy()<<"  trk1+trk2 Pt ="<<(trk[0]+trk[1]).Pt()
+	  //  <<" EoverPt = "<<thisElec->SCEnergy()/(trk[0]+trk[1]).Pt()<<endl;
+	  //cout<<"dzy = "<<thisElec->Dxy(pvPosition)<<"  dz = "<<thisElec->Dz(pvPosition)<<endl;
+	  //thisElec->Dump();
+	  break;}
+      }
+
+
     }
 
   }
@@ -633,11 +660,6 @@ Bool_t egamma::Process(Long64_t entry)
   }
 
 
-  for(Int_t ev=0; ev<evSize;ev++){
-    if (nEvents[0]-1 == hisEVTS[ev]){cout<<nEvents[0]-1<<" evNumber="<<eventNumber<<" Found an event before photon cuts selection "<<endl;
-      cout<<"gamma: pt = "<<gamma.Pt()<<"  SCEta = "<<gamma.SCEta()<<"  SCPhi = "<<gamma.SCPhi()<<endl;
-      break;}
-  }
 
   if (gamma.Pt() < cut_gammapt) return kTRUE;
   //if (fabs(gamma.Eta()) > 1.444) return kTRUE;
@@ -653,8 +675,6 @@ Bool_t egamma::Process(Long64_t entry)
   CountEvents(4);
 
   //fout<<eventNumber<<endl;
-  fout<<nEvents[0]-1<<endl;
-
 
   /*
   if (electrons.size()<2) return kTRUE;
@@ -737,6 +757,7 @@ Bool_t egamma::Process(Long64_t entry)
 
   */
 
+
   //HM->FillHistosFull(6, eventWeight, "");
   FillHistoCounts(6, eventWeight);
   CountEvents(6);
@@ -752,20 +773,59 @@ Bool_t egamma::Process(Long64_t entry)
   //if (DALE.ConversionMissHits()!=0)
   //return kTRUE;
 
+  vector<TCElectron::Track> trk = DALE.GetTracks();
+  sort(trk.begin(), trk.end(), P4SortCondition);
 
-  TCTrack::ConversionInfo cI = DALE.GetTracks()[0].GetConversionInfo();
+  float xx[6] = {-1,-1,-1,-1,-1,-1};
+  TCTrack::ConversionInfo cI = trk[0].GetConversionInfo();
   if (cI.vtxProb>1e-6 && cI.lxyBS>2 && cI.nHitsMax>1)
     return kTRUE;
+  xx[0] = cI.vtxProb;
+  xx[1] = cI.lxyBS;
+  xx[2] = cI.nHitsMax;
 
-  cI = DALE.GetTracks()[1].GetConversionInfo();
+  cI = trk[1].GetConversionInfo();
   if (cI.vtxProb>1e-6 && cI.lxyBS>2 && cI.nHitsMax>1)
     return kTRUE;
+  xx[3] = cI.vtxProb;
+  xx[4] = cI.lxyBS;
+  xx[5] = cI.nHitsMax;
+
+
+  for(Int_t ev=0; ev<evSize;ev++){
+    if (nEvents[0]-1 == hisEVTS[ev]){cout<<nEvents[0]-1<<" evNumber="<<eventNumber<<endl;
+      cout<<"gamma: pt = "<<gamma.Pt()<<"  SCEta = "<<gamma.SCEta()<<"  SCPhi = "<<gamma.SCPhi()<<endl;
+      //cout<<"R9 = "<<gamma.R9()<<"  hadoverEm = "<<gamma.HadOverEm()<<endl;
+      cout<<"Ele  : pt = "<<DALE.Pt()<<"   SCEta = "<<DALE.SCEta()<<"  SCPhi = "<<DALE.SCPhi()<<"  MVA = "<<DALE.IdMap("mvaScore")<<endl;
+      cout<<rhoFactor<<endl;
+      //cout<<"Track 1: pt="<<DALE.GetTracks()[0].Pt()<<endl;
+      //cout<<"Track 2: pt="<<DALE.GetTracks()[1].Pt()<<endl;
+      //const vector<TCElectron::Track> trk = DALE.GetTracks();
+      //cout<<"pt2/pt1="<<trk[1].Pt()/trk[0].Pt()
+      //  <<"   dR = "<<trk[1].DeltaR(trk[0])<<endl;
+
+      cout<<"gsf trk1, pt ="<<trk[0].Pt()<<"  eta= "<<trk[0].Eta()<<endl;
+      cout<<"gsf trk2, pt ="<<trk[1].Pt()<<"  eta= "<<trk[1].Eta()<<endl;
+      //cout<<"SCEn = "<<DALE.SCEnergy()<<"  trk1+trk2 Pt ="<<(trk[0]+trk[1]).Pt()
+      //	  <<" EoverPt = "<<DALE.SCEnergy()/(trk[0]+trk[1]).Pt()<<endl;
+      //cout<<"dzy = "<<DALE.Dxy(pvPosition)<<"  dz = "<<DALE.Dz(pvPosition)<<endl;
+      //DALE.Dump();
+
+      cout<<" trk1 prob = "<<xx[0]<<" lxyBS = "<<xx[1]<<" nHits = "<<xx[2]<< endl;
+      cout<<" trk2 prob = "<<xx[3]<<" lxyBS = "<<xx[4]<<" nHits = "<<xx[5]<< endl;
+      //const vector<TCEGamma> sc = DALE.BaseSC();
+      //sc[0].Dump();
+      //sc[1].Dump();
+      //sc[2].Dump();
+      //cout<<"sc0 "<<sc[0].Pt()<<"sc1 "<<sc[1].Pt()<<"sc2 "<<sc[2].Pt()<<endl;
+      break;}
+  }
 
 
   //fout<<runNumber<<" "<<eventNumber<<" "<<DALE.IdMap("mvaScore")<<endl;
 
-  l1 = DALE.GetTracks()[0];
-  l2 = DALE.GetTracks()[1];
+  l1 = trk[0];
+  l2 = trk[1];
 
   if (l1.Pt() > l2.Pt()){
     lPt1 = l1; lPt2 = l2;}
@@ -837,9 +897,7 @@ Bool_t egamma::Process(Long64_t entry)
     //if ((l1+l2).Pt() < 40 || gamma.Pt() < 40)
     return kTRUE;
 
-
-  //TCTrack::ConversionInfo inf = DALE.GetTracks()[0].GetConversionInfo();
-  //if (inf.lxyPV > 4 || inf.vtxProb < 1e-6 || inf.nHitsMax > 0 ) return kTRUE;
+  fout<<nEvents[0]-1<<endl;
 
   HM->FillHistosFull(12, eventWeight, "");
   FillHistoCounts(12, eventWeight);
@@ -1119,12 +1177,13 @@ void egamma::Terminate()
 	<<myTriggers[n]<<endl;;
   }
   */
-
+  /*
   cout<<"\n\n | Trigger efficiency 3              |\t"<<endl;
   for(UInt_t n=0; n<ntrig; n++){
     UInt_t N=7;
     cout<<n<<"  "<<float(nEventsTrig[N][n])/nEvents[N]<<"   "<<myTriggers[n]<<endl;;
   }
+  */
 
   hists->fill1DHist(-1, "evt_byCut",";cut #;weighted events", nC+1,-1,nC, totEvents, "Counts");
   hists->fill1DHist(-1, "evt_byCut_raw", ";cut #;events",     nC+1,-1,nC, totEvents, "Counts");
