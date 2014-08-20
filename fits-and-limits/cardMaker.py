@@ -24,7 +24,7 @@ s = cf.get("path","ver")
 # Run with: combine -M Asymptotic datacard.txt  #
 # ################################################
 brTag = ''
-hjp = 1
+hjp = 0
 
 Ext = options.ext
 
@@ -39,9 +39,8 @@ phoTRIG = '1.020'
 PU      = '1.008'
 
 proc = {'gg':'ggH', 'vbf':'qqH','v':'WH','hjp':'hjp'}
-#massList   = ['%.1f'%(a) for a in u.drange(120,150,5)]
-#massList   = ['%.1f'%(a) for a in u.drange(120,150,.5)]
-massList = ['125.0']
+massList   = ['%.1f'%(a) for a in u.drange(120,150,1.)]
+#massList = ['125.0']
 csBR = {}
 
 #for i,m in enumerate(massList):
@@ -74,8 +73,8 @@ def makeCards(subdir):
 
         channel = '_'.join([lepton,year,'cat'+cat])
         #bkgParams = ['sigma','mean','tau','norm']
-        bkgParams = ['p1','p2','p3','norm']
-        #bkgParams = ['p1','p2','p3','p4','norm']
+        #bkgParams = ['p1','p2','p3','norm']
+        bkgParams = ['p1','p2','p3','p4','norm']
 
         for mass in massList:
 
@@ -122,7 +121,6 @@ def makeCards(subdir):
           card.write('{0:<12} {1}\n'.format('observation',int(bgYield)))
           card.write('------------------------------\n')
 
-          #print "WTF is [::-1] ??? ->"
           #print channel, prefixSigList, prefixSigList[::-1]
           nSubLine1 = '{0:<25}'
           nSubLine2 = '{0:<30}'

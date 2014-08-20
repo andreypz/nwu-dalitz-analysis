@@ -102,7 +102,7 @@ class zgamma : public TSelector {
   Bool_t   fit_isLowPt;
 
   TTree* _apzTree;
-  Double_t apz_dr12, apz_dr13, apz_dr23, apz_dr34, apz_dr1234;
+  Double_t apz_w, apz_dr12, apz_dr13, apz_dr23, apz_dr34, apz_dr1234;
   Double_t apz_pt12, apz_pt34;
   Double_t apz_pt1, apz_pt2, apz_pt3, apz_pt4;
   Double_t apz_m12, apz_m34, apz_m123, apz_m4l;

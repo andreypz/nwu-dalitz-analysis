@@ -492,7 +492,6 @@ Bool_t jpsiGamma::Process(Long64_t entry)
     //if (!(fabs(thisPhoton->SCEta()) < 2.5)) continue;
 
 
-
     if(thisPhoton->Pt() > 15){
       if (isRealData || !makeGen || (sample=="dalitz" && makeGen && gen_gamma.DeltaR(*thisPhoton) < 0.1) )
 	photons0.push_back(*thisPhoton);
@@ -509,8 +508,8 @@ Bool_t jpsiGamma::Process(Long64_t entry)
 	  HM->MakePhotonEnergyCorrPlots(*thisPhoton, corrPhoEnReco, corrPhoEnSC);
 
 	  //cout<<runNumber<<"  uncor en="<< thisPhoton->E()<<"  cor en = "<<corrPhoEn<<endl;
-	  Double_t scale = 1;
-	  //Double_t scale = corrPhoEnReco/thisPhoton->E();
+	  //Double_t scale = 1;
+	  Double_t scale = corrPhoEnReco/thisPhoton->E();
 	  //Double_t scale = corrPhoEnSC/thisPhoton->E();
 
 	  thisPhoton->SetXYZM(scale*thisPhoton->Px(), scale*thisPhoton->Py(),scale*thisPhoton->Pz(),0);
@@ -619,10 +618,10 @@ Bool_t jpsiGamma::Process(Long64_t entry)
   }
 
 
-  //if (checkTrigger){
-  //triggerSelector->SelectTrigger(myTrigger, triggerStatus, hltPrescale, isFound, triggerPass, prescale);
-  //if (!triggerPass) return kTRUE;
-  //}
+  if (checkTrigger){
+    triggerSelector->SelectTrigger(myTrigger, triggerStatus, hltPrescale, isFound, triggerPass, prescale);
+    if (!triggerPass) return kTRUE;
+  }
 
   if (gamma.Pt() < cut_gammapt) return kTRUE;
   //if (fabs(gamma.Eta()) > 1.444) return kTRUE;

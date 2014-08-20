@@ -45,11 +45,11 @@ Bool_t doZee = 0;
 Bool_t makeFitTree = 0;
 Bool_t makeApzTree = 0;
 
-const UInt_t hisEVTS[] = {151, 166, 200, 233, 907, 953};
+const UInt_t hisEVTS[] = {536,233};
 Int_t evSize = sizeof(hisEVTS)/sizeof(int);
 
 bool P4SortCondition(const TLorentzVector& p1, const TLorentzVector& p2) {return (p1.Pt() > p2.Pt());}
-
+bool SCESortCondition(const TCEGamma& p1, const TCEGamma& p2) {return (p1.SCEnergy() > p2.SCEnergy());}
 void egamma::Begin(TTree * tree)
 {
   cout<<"\n***      Begin the Analyzer      ****"<<endl;
@@ -168,9 +168,9 @@ void egamma::Begin(TTree * tree)
   else if (trigger=="pho26")
     {
       myTrigger = "HLT_Photon26_R9Id85_OR_CaloId10_Iso50_Photon18_R9Id85_OR_CaloId10_Iso50_Mass60_v";
-      cut_l1pt = 23;
-      cut_l2pt = 4;
-      cut_gammapt = 25;
+      //cut_l1pt = 23;
+      //cut_l2pt = 4;
+      //cut_gammapt = 25;
     }
   else if (trigger=="ee")
     {
@@ -577,9 +577,17 @@ Bool_t egamma::Process(Long64_t entry)
 	  cout<<"gamma: pt = "<<gamma.Pt()<<"  SCEta = "<<gamma.SCEta()<<"  SCPhi = "<<gamma.SCPhi()<<endl;
 	  cout<<"R9 = "<<gamma.R9()<<"  hadoverEm = "<<gamma.HadOverEm()<<endl;
 	  cout<<"Ele  : pt = "<<thisElec->Pt()<<"   SCEta = "<<thisElec->SCEta()<<"  SCPhi = "<<thisElec->SCPhi()<<"  MVA = "<<thisElec->IdMap("mvaScore")<<endl;
+	  vector<TCEGamma> sc0 = thisElec->BaseSC();
+	  sort(sc0.begin(),  sc0.end(),  SCESortCondition);
 	  const vector<TCElectron::Track> trk0 = thisElec->GetTracks();
-	  cout<<"gsf trk1, pt ="<<trk0[0].Pt()<<"  eta= "<<trk0[0].Eta()<<endl;
-	  cout<<"gsf trk2, pt ="<<trk0[1].Pt()<<"  eta= "<<trk0[1].Eta()<<endl;
+
+	  cout<<" n tracks="<<trk0.size() <<"  N SC="<<sc0.size()<<endl;
+
+	  for (int s = 0; s <sc0.size(); s++)
+	    cout<<"sc "<<s<<"  SCEnergy: "<<sc0[s].SCEnergy()<<"  eta: "<<sc0[s].SCEta()<<" phi: "<<sc0[s].SCPhi()
+		<<"  sieie: "<<sc0[s].SigmaIEtaIEta()<<"  e25/e55: "<<sc0[s].E2x5()/sc0[s].E5x5()<<endl;
+	  //cout<<"gsf trk1, pt ="<<trk0[0].Pt()<<"  eta= "<<trk0[0].Eta()<<endl;
+	  //cout<<"gsf trk2, pt ="<<trk0[1].Pt()<<"  eta= "<<trk0[1].Eta()<<endl;
 	  //cout<<"SCRawEn = "<<thisElec->SCEnergy()<<"  trk1+trk2 Pt ="<<(trk[0]+trk[1]).Pt()
 	  //  <<" EoverPt = "<<thisElec->SCEnergy()/(trk[0]+trk[1]).Pt()<<endl;
 	  //cout<<"dzy = "<<thisElec->Dxy(pvPosition)<<"  dz = "<<thisElec->Dz(pvPosition)<<endl;
@@ -773,6 +781,9 @@ Bool_t egamma::Process(Long64_t entry)
   //if (DALE.ConversionMissHits()!=0)
   //return kTRUE;
 
+  fout<<nEvents[0]-1<<endl;
+
+
   vector<TCElectron::Track> trk = DALE.GetTracks();
   sort(trk.begin(), trk.end(), P4SortCondition);
 
@@ -897,7 +908,6 @@ Bool_t egamma::Process(Long64_t entry)
     //if ((l1+l2).Pt() < 40 || gamma.Pt() < 40)
     return kTRUE;
 
-  fout<<nEvents[0]-1<<endl;
 
   HM->FillHistosFull(12, eventWeight, "");
   FillHistoCounts(12, eventWeight);

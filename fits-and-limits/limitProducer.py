@@ -35,7 +35,7 @@ if __name__ == "__main__":
   for m in massList:
     print "\n**\t Making limits for M=",m,"\t**\n"
     #card = "output_cards/hzg_el_2012_cat0_M"+m+"_Dalitz.txt"
-    card_mu  = dir+"/output_cards/hzg_mu_2012_cat0_M"+m+"_Dalitz_.txt"
+    card_mu  = dir+"/output_cards/hzg_mu_2012_catEB_M"+m+"_Dalitz_.txt"
 
     #card_ele = "./cards_ele2/realistic-counting-experiment_"+m[0:3]+".txt"
     card = ""
@@ -58,5 +58,6 @@ if __name__ == "__main__":
 
   os.system("mv higgsCombineTest."+method+"* "+dir)
   print dir
-  # os.system("./limitPlotter.py "+dir)
+
+  os.system("./limitPlotter.py "+dir)
   #os.system('combine -M ProfileLikelihood '+sys.argv[1]+ ' -m 125 -t 100')

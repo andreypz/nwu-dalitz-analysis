@@ -87,32 +87,33 @@ if __name__ == "__main__":
       #          +hPath+"/"+sel+"_"+period+"/hhhh_DYJetsPow20-RD1*.root")
       #os.system("hadd "+hPath+"/m_DYJets50_"+sel+"_"+period+".root "
       #          +hPath+"/"+sel+"_"+period+"/hhhh_DYJets50-RD1*.root")
-      os.system("hadd "+hPath+"/m_ZG_"+sel+"_"+period+".root "
-                +hPath+"/"+sel+"_"+period+"/hhhh_ZGToLLG-RD1*.root ")
+      #os.system("hadd "+hPath+"/m_ZG_"+sel+"_"+period+".root "
+      #          +hPath+"/"+sel+"_"+period+"/hhhh_ZGToLLG-RD1*.root ")
 
-      os.system("hadd "+hPath+"/m_QCD_EM_Pt_20to30_"+sel+"_"+period+".root "
-                +hPath+"/"+sel+"_"+period+"/hhhh_QCD_EM_Pt_20to30_*.root ")
-      os.system("hadd "+hPath+"/m_QCD_EM_Pt_30to80_"+sel+"_"+period+".root "
-                +hPath+"/"+sel+"_"+period+"/hhhh_QCD_EM_Pt_30to80_*.root ")
-      os.system("hadd "+hPath+"/m_QCD_EM_Pt_80to170_"+sel+"_"+period+".root "
-                +hPath+"/"+sel+"_"+period+"/hhhh_QCD_EM_Pt_80to170_*.root ")
-      os.system("hadd "+hPath+"/m_QCD_EM_Pt_170to250_"+sel+"_"+period+".root "
-                +hPath+"/"+sel+"_"+period+"/hhhh_QCD_EM_Pt_170to250_*.root ")
-      os.system("hadd "+hPath+"/m_QCD_EM_Pt_250to350_"+sel+"_"+period+".root "
-                +hPath+"/"+sel+"_"+period+"/hhhh_QCD_EM_Pt_350_*.root ")
-      os.system("hadd "+hPath+"/m_QCD_EM_Pt_250to350_"+sel+"_"+period+".root "
-                +hPath+"/"+sel+"_"+period+"/hhhh_QCD_EM_Pt_350_*.root ")
+      if opt.qcd:
+        os.system("hadd "+hPath+"/m_QCD_EM_Pt_20to30_"+sel+"_"+period+".root "
+                  +hPath+"/"+sel+"_"+period+"/hhhh_QCD_EM_Pt_20to30_*.root ")
+        os.system("hadd "+hPath+"/m_QCD_EM_Pt_30to80_"+sel+"_"+period+".root "
+                  +hPath+"/"+sel+"_"+period+"/hhhh_QCD_EM_Pt_30to80_*.root ")
+        os.system("hadd "+hPath+"/m_QCD_EM_Pt_80to170_"+sel+"_"+period+".root "
+                  +hPath+"/"+sel+"_"+period+"/hhhh_QCD_EM_Pt_80to170_*.root ")
+        os.system("hadd "+hPath+"/m_QCD_EM_Pt_170to250_"+sel+"_"+period+".root "
+                  +hPath+"/"+sel+"_"+period+"/hhhh_QCD_EM_Pt_170to250_*.root ")
+        os.system("hadd "+hPath+"/m_QCD_EM_Pt_250to350_"+sel+"_"+period+".root "
+                  +hPath+"/"+sel+"_"+period+"/hhhh_QCD_EM_Pt_350_*.root ")
+        os.system("hadd "+hPath+"/m_QCD_EM_Pt_250to350_"+sel+"_"+period+".root "
+                  +hPath+"/"+sel+"_"+period+"/hhhh_QCD_EM_Pt_350_*.root ")
 
-      os.system("hadd "+hPath+"/m_QCD_Mu_Pt_20_"+sel+"_"+period+".root "
-                +hPath+"/"+sel+"_"+period+"/hhhh_QCD_Mu_Pt_20_*.root ")
-      os.system("hadd "+hPath+"/m_QCD_Mu_Pt_15to30_"+sel+"_"+period+".root "
-                +hPath+"/"+sel+"_"+period+"/hhhh_QCD_Mu_Pt_5to30_*.root ")
-      os.system("hadd "+hPath+"/m_QCD_Mu_Pt_30to50_"+sel+"_"+period+".root "
-                +hPath+"/"+sel+"_"+period+"/hhhh_QCD_Mu_Pt_30to50_*.root ")
-      os.system("hadd "+hPath+"/m_QCD_Mu_Pt_50to150_"+sel+"_"+period+".root "
-                +hPath+"/"+sel+"_"+period+"/hhhh_QCD_Mu_Pt_50to150_*.root ")
-      os.system("hadd "+hPath+"/m_QCD_Mu_Pt_150_"+sel+"_"+period+".root "
-                +hPath+"/"+sel+"_"+period+"/hhhh_QCD_Mu_Pt_150_*.root ")
+        # os.system("hadd "+hPath+"/m_QCD_Mu_Pt_20_"+sel+"_"+period+".root "
+        #          +hPath+"/"+sel+"_"+period+"/hhhh_QCD_Mu_Pt_20_*.root ")
+        # os.system("hadd "+hPath+"/m_QCD_Mu_Pt_15to30_"+sel+"_"+period+".root "
+        #          +hPath+"/"+sel+"_"+period+"/hhhh_QCD_Mu_Pt_5to30_*.root ")
+        os.system("hadd "+hPath+"/m_QCD_Mu_Pt_30to50_"+sel+"_"+period+".root "
+                  +hPath+"/"+sel+"_"+period+"/hhhh_QCD_Mu_Pt_30to50_*.root ")
+        os.system("hadd "+hPath+"/m_QCD_Mu_Pt_50to150_"+sel+"_"+period+".root "
+                  +hPath+"/"+sel+"_"+period+"/hhhh_QCD_Mu_Pt_50to150_*.root ")
+        os.system("hadd "+hPath+"/m_QCD_Mu_Pt_150_"+sel+"_"+period+".root "
+                  +hPath+"/"+sel+"_"+period+"/hhhh_QCD_Mu_Pt_150_*.root ")
 
   qcdSamples = None
   if doBkg:
@@ -150,7 +151,7 @@ if __name__ == "__main__":
 
   sigFileMAD  = TFile(hPath+"/"+sel+"_"+period+"/hhhh_ggH-mad"+str(mass)+"_1.root", "OPEN")
   sigFileVBF  = TFile(hPath+"/"+sel+"_"+period+"/hhhh_vbf-mad"+str(mass)+"_1.root", "OPEN")
-  sigFileVH   = TFile(hPath+"/"+sel+"_"+period+"/hhhh_vh-mad"+str(mass)+"_1.root",  "OPEN")
+  sigFileVH   = TFile(hPath+"/"+sel+"_"+period+"/hhhh_vh-mad" +str(mass)+"_1.root", "OPEN")
 
   sigFileZjp  = TFile(hPath+"/"+sel+"_"+period+"/hhhh_ZtoJPsiGamma_1.root",  "OPEN")
   sigFileHjp  = TFile(hPath+"/"+sel+"_"+period+"/hhhh_HiggsToJPsiGamma_1.root",  "OPEN")
@@ -188,7 +189,7 @@ if __name__ == "__main__":
   #path = pathBase+"/"+subdir
 
 
-  sigName = '#splitline{1000xSignal}{m_{H}=125 GeV}'
+  sigName = '#splitline{100xSignal}{m_{H}=125 GeV}'
   if opt.zjp: sigName= '#splitline{50xSignal}{Z #rightarrow J/Psi #gamma}'
   if opt.hjp: sigName= '#splitline{20xSignal}{h #rightarrow J/Psi #gamma}'
 
@@ -199,11 +200,12 @@ if __name__ == "__main__":
   #u.drawAllInFile(None, "", hackZip, sigFileMAD, "Dalitz", "GEN", pathBase+'/GEN-lumi', None, "lumi")
   #u.drawAllInFile(None, "", hackZip, sigFileMAD, "Dalitz", "GEN", pathBase+'/GEN-norm', None, "norm")
 
-  u.drawAllInFile(None, "", '', sigFileMAD, "Dalitz", "eff", pathBase+'/eff', None, "norm")
+  #u.drawAllInFile(None, "", '', sigFileMAD, "Dalitz", "eff", pathBase+'/eff', None, "norm")
 
   if cut not in ['14','15'] and not opt.apz:
     #u.drawAllInFile(dataFile, "Data", bkgZip, None, '', "", path, cut, "lumi")
     u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "", path, cut, "lumi")
+    #u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "", path, cut, "norm1")
     u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "Angles", pathBase+'/Angles', cut, "norm1")
 
   """
@@ -241,40 +243,14 @@ if __name__ == "__main__":
       dirname = dirnameshort+"-cut"+cut
       u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",
                       dirname,  pathBase+"/"+dirnameshort+"/",  None,"norm")
-      u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",
-                      dirname+"-EGamma",  pathBase+"/"+dirnameshort+"-EGamma/",  None,"norm")
-      u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",
-                      dirname+"-BaseSC-1",  pathBase+"/"+dirnameshort+"-BaseSC-1/",  None,"norm")
-      u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",
-                      dirname+"-BaseSC-2",  pathBase+"/"+dirnameshort+"-BaseSC-2/",  None,"norm")
 
-      u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",
-                      dirname+"-track-1",  pathBase+"/"+dirnameshort+"-track-1/",  None,"norm")
-      u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",
-                    dirname+"-track-2",  pathBase+"/"+dirnameshort+"-track-2/",  None,"norm")
-      u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",
-                      dirname+"-track-3",  pathBase+"/"+dirnameshort+"-track-3/",  None,"norm")
+      for n in ['EGamma','BaseSC-1','BaseSC-2',"track-1","track-2","track-3"]:
+        u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",
+                        dirname+"-"+n,  pathBase+"/"+dirnameshort+"-/"+n,  None,"norm")
 
-
-    '''
-    u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",
-                    dirname+"EB",pathBase+"/DalitzEleEB",None,"norm")
-    u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",
-                    dirname+"EE",pathBase+"/DalitzEleEE/",None,"norm")
-
-    u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",
-                    "DalitzEleEB_tracks",pathBase+"/DalitzEleEB_tracks",None,"norm")
-    u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",
-                    "DalitzEleEE_tracks",pathBase+"/DalitzEleEE_tracks",None,"norm")
-    '''
 
     # dataFile.Close()
     #print yields_data
-
-
-    #u.drawAllInFile(sigFileMAD, "signal", bkgZip, None,"","GEN-RECO",pathBase+"/GEN-RECO", None, "lumi")
-
-    #u.drawAllInFile(bkgFiles, "DY electrons", sigFile, "Dalitz 2el",  "NewEle-1", pathBase+"/NewEle-1/", None,"norm", isLog=1, )
 
     #sigFileMAD  = TFile(hPath+"/mugamma_"+period+"/hhhh_ggH-mad125_1.root", "OPEN")
 

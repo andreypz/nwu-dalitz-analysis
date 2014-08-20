@@ -14,7 +14,7 @@ print len(sys.argv), sys.argv
 
 verbose = 0
 doExt   = 0
-hjp = 1
+hjp = 0
 
 cf = cp.ConfigParser()
 cf.read('config.cfg')
@@ -39,7 +39,7 @@ mzg.setRange('signal',120,130)
 mzg.setRange('r1',110,120)
 mzg.setRange('r2',130,170)
 
-bkgModel = 'Bern3'
+bkgModel = 'Bern4'
 # #######################################
 # prep the background and data card    #
 # we're going to the extend the bg pdf #
@@ -58,7 +58,7 @@ def BackgroundNameFixer(fitName, year, lepton, cat, ws, Ext=True):
 
   fitExtNameNew = '_'.join(['bkg',lepton,year,'cat'+cat])
 
-  BernNames = ['Bern3','Bern4','Bern5','Bern6']
+  BernNames = ['Bern2','Bern3','Bern4','Bern5','Bern6']
   for n in BernNames:
     if n in fitName:
       print "renaming " + fitName
@@ -67,8 +67,6 @@ def BackgroundNameFixer(fitName, year, lepton, cat, ws, Ext=True):
       p0Name = 'p0'+n+'_'+suffix
       p1Name = 'p1'+n+'_'+suffix
       p2Name = 'p2'+n+'_'+suffix
-      p3Name = 'p3'+n+'_'+suffix
-      p4Name = 'p4'+n+'_'+suffix
 
       if Ext: print "Normname from renaming:", normName
 
@@ -76,7 +74,6 @@ def BackgroundNameFixer(fitName, year, lepton, cat, ws, Ext=True):
       p0NameNew = '_'.join(['bkg','p0',lepton,year,'cat'+cat])
       p1NameNew = '_'.join(['bkg','p1',lepton,year,'cat'+cat])
       p2NameNew = '_'.join(['bkg','p2',lepton,year,'cat'+cat])
-      p3NameNew = '_'.join(['bkg','p3',lepton,year,'cat'+cat])
 
       if Ext: ws.factory(normNameNew+'[{0},{1},{2}]'.format(ws.function(normName).getVal(),
                                                             ws.function(normName).getMin(), ws.function(normName).getMax()))
@@ -85,13 +82,17 @@ def BackgroundNameFixer(fitName, year, lepton, cat, ws, Ext=True):
                                                   ws.function(p1Name).getMin(),ws.function(p1Name).getMax()))
       ws.factory(p2NameNew+'[{0},{1},{2}]'.format(ws.function(p2Name).getVal(),
                                                   ws.function(p2Name).getMin(),ws.function(p2Name).getMax()))
-      ws.factory(p3NameNew+'[{0},{1},{2}]'.format(ws.function(p3Name).getVal(),
-                                                  ws.function(p3Name).getMin(),ws.function(p3Name).getMax()))
+
+      if n in ['Bern3','Bern4','Bern5','Bern6']:
+        p3Name = 'p3'+n+'_'+suffix
+        p3NameNew = '_'.join(['bkg','p3',lepton,year,'cat'+cat])
+        ws.factory(p3NameNew+'[{0},{1},{2}]'.format(ws.function(p3Name).getVal(),
+                                                    ws.function(p3Name).getMin(),ws.function(p3Name).getMax()))
       if n in ['Bern4','Bern5','Bern6']:
         p4Name = 'p4'+n+'_'+suffix
         p4NameNew = '_'.join(['bkg','p4',lepton,year,'cat'+cat])
         ws.factory(p4NameNew+'[{0},{1},{2}]'.format(ws.function(p4Name).getVal(),
-                                                        ws.function(p4Name).getMin(),ws.function(p4Name).getMax()))
+                                                    ws.function(p4Name).getMin(),ws.function(p4Name).getMax()))
       if n in ['Bern5','Bern6']:
         p5Name = 'p5'+n+'_'+suffix
         p5NameNew = '_'.join(['bkg','p5',lepton,year,'cat'+cat])
@@ -101,7 +102,14 @@ def BackgroundNameFixer(fitName, year, lepton, cat, ws, Ext=True):
         p6Name = 'p6'+n+'_'+suffix
         p6NameNew = '_'.join(['bkg','p6',lepton,year,'cat'+cat])
         ws.factory(p6NameNew+'[{0},{1},{2}]'.format(ws.function(p6Name).getVal(),
-                                                          ws.function(p6Name).getMin(),ws.function(p6Name).getMax()))
+                                                    ws.function(p6Name).getMin(),ws.function(p6Name).getMax()))
+      if n=='Bern2':
+        if Ext:
+          ws.factory('EDIT::'+fitExtNameNew+'('+fitExtName+','+normName+'='+normNameNew+','
+                     +p0Name+'='+p0NameNew+','+p1Name+'='+p1NameNew+','+p2Name+'='+p2NameNew+')')
+        else:
+          ws.factory('EDIT::'+fitExtNameNew+'('+fitExtName+','
+                     +p0Name+'='+p0NameNew+','+p1Name+'='+p1NameNew+','+p2Name+'='+p2NameNew+')')
       if n=='Bern3':
         if Ext:
           ws.factory('EDIT::'+fitExtNameNew+'('+fitExtName+','+normName+'='+normNameNew+','
@@ -305,7 +313,7 @@ for year in yearList:
       else:
         sigFile_gg   = TFile(hPath+"/mugamma_"+year+"/hhhh_ggH-mad125_1.root", "OPEN")
         sigFile_vbf  = TFile(hPath+"/mugamma_"+year+"/hhhh_vbf-mad125_1.root", "OPEN")
-        sigFile_vh   = TFile(hPath+"/mugamma_"+year+"/hhhh_vh-mad125_1.root", "OPEN")
+        sigFile_vh   = TFile(hPath+"/mugamma_"+year+"/hhhh_vh-mad125_1.root",  "OPEN")
         fsig= [sigFile_gg,sigFile_vbf,sigFile_vh]
 
       hsig = []
@@ -324,7 +332,13 @@ for year in yearList:
         scale = float(lumi*cro)/Nev
         print f.GetName(), cro,Nev,scale
 
-        hsig.append(f.Get("00_tri_mass__cut9").Clone())
+        if cat=='0':
+          hsig.append(f.Get("00_tri_mass__cut9").Clone())
+        elif cat=='EB':
+          hsig.append(f.Get("00_tri_mass__cut10").Clone())
+        elif cat=='EE':
+          hsig.append(f.Get("00_tri_mass__cut11").Clone())
+
         if hjp: hsig[-1].Scale(scale)
         else:   hsig[-1].Scale(10*scale)
         #hsig[-1].Print("all")
@@ -430,7 +444,7 @@ for year in yearList:
       if hjp:
         leg.AddEntry(hsig[0],'#splitline{Expected signal}{with #sigma#times BR = 1.5 fb}','l')
       else:
-        leg.AddEntry(hsig[0],'Expected signal x10','l')
+        leg.AddEntry(hsig[0],'Expected signal x10','f')
       #leg.AddEntry(testFrame.findObject(bkgModel+'1sigma'),"Background Model",'f')
       leg.AddEntry(testFrame.findObject(bkgModel),"Background Model",'l')
       #if not hjp: leg.AddEntry(0,'','')
@@ -447,9 +461,11 @@ for year in yearList:
       leg2.SetTextSize(0.045)
       #leg2.Draw()
 
-      #proc = 'H#rightarrow#gamma*#gamma#rightarrow#mu#mu#gamma'
       #proc = 'Z#rightarrow J/#Psi#gamma#rightarrow#mu#mu#gamma'
-      proc = 'H#rightarrow J/#Psi#gamma#rightarrow#mu#mu#gamma'
+      if hjp:
+        proc = 'H#rightarrow J/#Psi#gamma#rightarrow#mu#mu#gamma'
+      else:
+        proc = 'H#rightarrow#gamma*#gamma#rightarrow#mu#mu#gamma'
       prelim = TLatex(0.15,0.95, proc)
       prelim.SetNDC();
       prelim.SetTextSize(0.035);

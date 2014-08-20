@@ -166,9 +166,9 @@ if period =="2012":
         cfg('QCD_EM_Pt_20to30',   DIR+'/nuTuples_v9.8_8TeV/MC_skimmed/QCD_Pt_20_30_EMEnriched',  15, 'QCD '+selection+trig+'  2012 0' + whereWeRun ),
         cfg('QCD_EM_Pt_30to80',   DIR+'/nuTuples_v9.8_8TeV/MC_skimmed/QCD_Pt_30_80_EMEnriched',  15, 'QCD '+selection+trig+'  2012 0' + whereWeRun ),
         cfg('QCD_EM_Pt_80to170',  DIR+'/nuTuples_v9.8_8TeV/MC_skimmed/QCD_Pt_80_170_EMEnriched', 15, 'QCD '+selection+trig+'  2012 0' + whereWeRun ),
-        cfg('QCD_EM_Pt_170to250', DIR+'/nuTuples_v9.8_8TeV/MC_skimmed/QCD_Pt_170_250_EMEnriched',15, 'QCD '+selection+trig+'  2012 0' + whereWeRun ),
-        cfg('QCD_EM_Pt_250to350', DIR+'/nuTuples_v9.8_8TeV/MC_skimmed/QCD_Pt_250_350_EMEnriched',15, 'QCD '+selection+trig+'  2012 0' + whereWeRun ),
-        cfg('QCD_EM_Pt_350',      DIR+'/nuTuples_v9.8_8TeV/MC_skimmed/QCD_Pt_350_EMEnriched',    15, 'QCD '+selection+trig+'  2012 0' + whereWeRun ),
+        cfg('QCD_EM_Pt_170to250', DIR+'/nuTuples_v9.8_8TeV/MC_skimmed/QCD_Pt_170_250_EMEnriched',20, 'QCD '+selection+trig+'  2012 0' + whereWeRun ),
+        cfg('QCD_EM_Pt_250to350', DIR+'/nuTuples_v9.8_8TeV/MC_skimmed/QCD_Pt_250_350_EMEnriched',20, 'QCD '+selection+trig+'  2012 0' + whereWeRun ),
+        cfg('QCD_EM_Pt_350',      DIR+'/nuTuples_v9.8_8TeV/MC_skimmed/QCD_Pt_350_EMEnriched',    20, 'QCD '+selection+trig+'  2012 0' + whereWeRun ),
         ])
    if selection in ['mugamma','jp-mugamma']:
      bg.extend([
@@ -197,6 +197,14 @@ if period =="2012":
         cfg('ggH-mad140', DIR+'/nuTuples_v9.8_8TeV/dalitz-mu/ggHiggsToMuMuGamma_MH140',1, 'dalitz '+selection+trig+period+gen + whereWeRun),
         cfg('ggH-mad145', DIR+'/nuTuples_v9.8_8TeV/dalitz-mu/ggHiggsToMuMuGamma_MH145',1, 'dalitz '+selection+trig+period+gen + whereWeRun),
         cfg('ggH-mad150', DIR+'/nuTuples_v9.8_8TeV/dalitz-mu/ggHiggsToMuMuGamma_MH150',1, 'dalitz '+selection+trig+period+gen + whereWeRun),
+
+        cfg('ggH-mad120-rd1', DIR+'/nuTuples_v9.8_8TeV/dalitz-rd1/ggHiggsToMuMuGamma_MH120',1, 'dalitz '+selection+trig+period+gen + whereWeRun),
+        cfg('ggH-mad125-rd1', DIR+'/nuTuples_v9.8_8TeV/dalitz-rd1/ggHiggsToMuMuGamma_MH125',1, 'dalitz '+selection+trig+period+gen + whereWeRun),
+        cfg('ggH-mad130-rd1', DIR+'/nuTuples_v9.8_8TeV/dalitz-rd1/ggHiggsToMuMuGamma_MH130',1, 'dalitz '+selection+trig+period+gen + whereWeRun),
+        cfg('ggH-mad135-rd1', DIR+'/nuTuples_v9.8_8TeV/dalitz-rd1/ggHiggsToMuMuGamma_MH135',1, 'dalitz '+selection+trig+period+gen + whereWeRun),
+        cfg('ggH-mad140-rd1', DIR+'/nuTuples_v9.8_8TeV/dalitz-rd1/ggHiggsToMuMuGamma_MH140',1, 'dalitz '+selection+trig+period+gen + whereWeRun),
+        cfg('ggH-mad145-rd1', DIR+'/nuTuples_v9.8_8TeV/dalitz-rd1/ggHiggsToMuMuGamma_MH145',1, 'dalitz '+selection+trig+period+gen + whereWeRun),
+        cfg('ggH-mad150-rd1', DIR+'/nuTuples_v9.8_8TeV/dalitz-rd1/ggHiggsToMuMuGamma_MH150',1, 'dalitz '+selection+trig+period+gen + whereWeRun),
 
         cfg('vbf-mad120', DIR+'/nuTuples_v9.8_8TeV/dalitz-mu/vbfHiggsToMuMuGamma_MH120',1, 'dalitz '+selection+trig+period+gen + whereWeRun),
         cfg('vbf-mad125', DIR+'/nuTuples_v9.8_8TeV/dalitz-mu/vbfHiggsToMuMuGamma_MH125',1, 'dalitz '+selection+trig+period+gen + whereWeRun),

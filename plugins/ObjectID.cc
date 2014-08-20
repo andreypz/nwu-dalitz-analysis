@@ -181,7 +181,6 @@ bool ObjectID::PassPhotonIdAndIso(const TCPhoton& ph, TString n, float& mvaScore
   else if (n=="CutBased-TightWP")
     cuts = phIdAndIsoCutsTight;
   else if (n=="MVA")
-    //return HggPreselection(ph);
     return PassPhotonMVA(ph, mvaScore);
   else  {
     cout<<"PhotonID Warning: no such cut or method"<<n<<endl;
@@ -202,18 +201,17 @@ bool ObjectID::PassPhotonIdAndIso(const TCPhoton& ph, TString n, float& mvaScore
       && ph.ConversionVeto()       == cuts.PassedEleSafeVeto[0]
       && ph.HadOverEm()             < cuts.HadOverEm[0]
       && ph.SigmaIEtaIEta()         < cuts.sigmaIetaIeta[0]
-      && max((double)chIsoCor,0.)    < cuts.chIso03[0]
-      && max((double)nhIsoCor,0.)    < cuts.nhIso03[0] + 0.040*ph.Pt()
-      && max((double)phIsoCor,0.)    < cuts.phIso03[0] + 0.005*ph.Pt()
+      && max((double)chIsoCor,0.)   < cuts.chIso03[0]
+      && max((double)nhIsoCor,0.)   < cuts.nhIso03[0] + 0.040*ph.Pt()
+      && max((double)phIsoCor,0.)   < cuts.phIso03[0] + 0.005*ph.Pt()
       ) ||
      (fabs(tmpEta)  > 1.566
       && ph.ConversionVeto()       == cuts.PassedEleSafeVeto[1]
       && ph.HadOverEm()             < cuts.HadOverEm[1]
       && ph.SigmaIEtaIEta()         < cuts.sigmaIetaIeta[1]
-
-      && max((double)chIsoCor,0.)    < cuts.chIso03[1]
-      && max((double)nhIsoCor,0.)    < cuts.nhIso03[1] + 0.040*ph.Pt()
-      && max((double)phIsoCor,0.)    < cuts.phIso03[1] + 0.005*ph.Pt()
+      && max((double)chIsoCor,0.)   < cuts.chIso03[1]
+      && max((double)nhIsoCor,0.)   < cuts.nhIso03[1] + 0.040*ph.Pt()
+      && max((double)phIsoCor,0.)   < cuts.phIso03[1] + 0.005*ph.Pt()
       )
      ) pass = true;
 
@@ -557,16 +555,16 @@ bool ObjectID::HggPreselection(const TCPhoton& ph)
   if (ph.Et() < 15 || ph.Et() > 200) return false;
   if (ph.ConversionVeto() == 0) return false;
 
-  // ECAL barrel
   if (fabs(ph.SCEta()) < 1.479) {
+    // ECAL barrel
     if (ph.SigmaIEtaIEta() > 0.014) return false;
     if (ph.R9() > 0.9) {
       if (ph.HadOverEm() > 0.082) return false;
     } else {
       if (ph.HadOverEm() > 0.075) return false;
     }
-    // ECAL endcaps
   } else {
+    // ECAL endcaps
     if (ph.SigmaIEtaIEta() > 0.034) return false;
     if (ph.HadOverEm() > 0.075) return false;
   }
@@ -593,6 +591,14 @@ bool ObjectID::HggPreselection(const TCElectron& el)
   if (el.Et() < 15 || el.Et() > 200) return false;
   //if (el.ConversionVeto() == 0) return false;
 
+  if (_eventNumber == 154245 || _eventNumber == 154548){
+    cout<<"\t   Hgg preselection DBG for evt: "<<_eventNumber<<endl;
+
+    cout<<"R9 = "<<el.R9()<<"  h/e = "<<el.HadOverEm()<<"   sieie ="<<el.SigmaIEtaIEta()<<endl;
+    cout<<"Hcal iso:  "<< el.IdMap("dr03HcalTowerSumEt") - 0.005 * el.Et()<<"  ET="<<el.Et()<<"  pt="<<el.Pt()<<endl;
+    cout<<"trk  iso:  "<< el.IdMap("dr03TkSumPt") - 0.002 * el.Et()       <<"  ET="<<el.Et()<<"  pt="<<el.Pt()<<endl;
+
+  }
   // ECAL barrel
   if (fabs(el.SCEta()) < 1.479) {
     if (el.SigmaIEtaIEta() > 0.014) return false;

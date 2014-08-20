@@ -20,10 +20,10 @@ class HistMaker {
 
    virtual void FillHistosFull(Int_t n, Double_t w, string s="");
    virtual void SetVtx(TCPrimaryVtx v);
-   virtual void MakeMuonPlots(const TCMuon& mu);
+   virtual void MakeMuonPlots(const TCMuon& mu, string s="Muons");
    virtual void MakeEGammaCommonPlots(const TCEGamma& e, TString n);
    virtual void MakeElectronPlots(const TCElectron& el, string s="");
-   virtual void MakePhotonPlots(const TCPhoton& ph);
+   virtual void MakePhotonPlots(const TCPhoton& ph, string s="Photon");
    virtual void MakeZeePlots(const TCPhoton& , const TCPhoton& );
    virtual void MakePhotonEnergyCorrPlots(const TCPhoton& p, Float_t , Float_t );
    virtual void SetLeptons(TCPhysObject l1, TCPhysObject l2);

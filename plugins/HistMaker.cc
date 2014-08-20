@@ -27,25 +27,26 @@ void HistMaker::SetGamma(TCPhysObject g){
 void HistMaker::SetGamma2(TCPhysObject g){
   _gamma2 = g; _isGamma2Set=1;}
 
-void HistMaker::MakeMuonPlots(const TCMuon& mu)
+void HistMaker::MakeMuonPlots(const TCMuon& mu, string dir)
 {
-  hists->fill1DHist(mu.PixelLayersWithMeasurement(),"mu_PixelLayersWithMeasurement",";PixelLayersWithMeasurement",   15, 0,15, 1, "Muons");
-  hists->fill1DHist(mu.TrackLayersWithMeasurement(),"mu_TrackLayersWithMeasurement",";TrackerLayersWithMeasurement", 30, 0,30, 1, "Muons");
-  hists->fill1DHist(mu.NumberOfMatchedStations(), "mu_NumberOfMatchedStations", ";NumberOfMatchedStations", 10, 0,10, 1, "Muons");
-  hists->fill1DHist(mu.NumberOfValidMuonHits(),   "mu_NumberOfValidMuonHits",   ";NumberOfValidMuonHits",   60, 0,60, 1, "Muons");
-  hists->fill1DHist(mu.NumberOfValidTrackerHits(),"mu_NumberOfValidTrackerHits",";NumberOfValidTrackerHits",40, 0,40, 1, "Muons");
-  hists->fill1DHist(mu.NumberOfValidPixelHits(),  "mu_NumberOfValidPixelHits",  ";NumberOfValidPixelHits",  15, 0,15, 1, "Muons");
-  hists->fill1DHist(mu.NormalizedChi2_tracker(),  "mu_NormalizedChi2_tracker",  ";NormalizedChi2_tracker", 100, 0,4,  1, "Muons");
-  hists->fill1DHist(mu.NormalizedChi2(),          "mu_NormalizedChi2",          ";NormalizedChi2",         100, 0,4,  1, "Muons");
-  hists->fill1DHist(mu.Dxy(&_pv), "mu_dxy", ";dxy", 50, -0.02,0.02, 1, "Muons");
-  hists->fill1DHist(mu.Dz(&_pv),  "mu_dxz", ";dz",  50, -0.1,0.1, 1, "Muons");
-  hists->fill1DHist(mu.PtError()/mu.Pt(), "mu_ptErrorOverPt", ";ptErrorOverPt", 50, 0,0.1, 1, "Muons");
+
+  hists->fill1DHist(mu.PixelLayersWithMeasurement(),dir+"_mu_PixelLayersWithMeasurement",";PixelLayersWithMeasurement",   15, 0,15, 1, dir);
+  hists->fill1DHist(mu.TrackLayersWithMeasurement(),dir+"_mu_TrackLayersWithMeasurement",";TrackerLayersWithMeasurement", 30, 0,30, 1, dir);
+  hists->fill1DHist(mu.NumberOfMatchedStations(), dir+"_mu_NumberOfMatchedStations", ";NumberOfMatchedStations", 10, 0,10, 1, dir);
+  hists->fill1DHist(mu.NumberOfValidMuonHits(),   dir+"_mu_NumberOfValidMuonHits",   ";NumberOfValidMuonHits",   60, 0,60, 1, dir);
+  hists->fill1DHist(mu.NumberOfValidTrackerHits(),dir+"_mu_NumberOfValidTrackerHits",";NumberOfValidTrackerHits",40, 0,40, 1, dir);
+  hists->fill1DHist(mu.NumberOfValidPixelHits(),  dir+"_mu_NumberOfValidPixelHits",  ";NumberOfValidPixelHits",  15, 0,15, 1, dir);
+  hists->fill1DHist(mu.NormalizedChi2_tracker(),  dir+"_mu_NormalizedChi2_tracker",  ";NormalizedChi2_tracker", 100, 0,4,  1, dir);
+  hists->fill1DHist(mu.NormalizedChi2(),          dir+"_mu_NormalizedChi2",          ";NormalizedChi2",         100, 0,4,  1, dir);
+  hists->fill1DHist(mu.Dxy(&_pv), dir+"_mu_dxy", ";dxy", 50, -0.02,0.02, 1, dir);
+  hists->fill1DHist(mu.Dz(&_pv),  dir+"_mu_dxz", ";dz",  50, -0.1,0.1, 1, dir);
+  hists->fill1DHist(mu.PtError()/mu.Pt(), dir+"_mu_ptErrorOverPt", ";ptErrorOverPt", 50, 0,0.1, 1, dir);
 
   //Float_t muIso = ObjID->CalculateMuonIso(&mu);
-  //hists->fill1DHist(muIso, "mu_iso", ";rel isolation, pu corr", 50, 0,0.7, 1, "Muons");
-  //hists->fill2DHist(muIso, global_Mll, "mu_iso_vs_Mll", ";pfIsolationR04;M(l_{1},l_{2})", 50, 0,0.7, 50, 0,20, 1, "Muons");
+  //hists->fill1DHist(muIso, dir+"_mu_iso", ";rel isolation, pu corr", 50, 0,0.7, 1, dir);
+  //hists->fill2DHist(muIso, global_Mll, dir+"_mu_iso_vs_Mll", ";pfIsolationR04;M(l_{1},l_{2})", 50, 0,0.7, 50, 0,20, 1, dir);
   //Float_t iso2 = (mu.IsoMap("pfChargedHadronPt_R04") + mu.IsoMap("pfNeutralHadronEt_R04") + mu.IsoMap("pfPhotonEt_R04"))/mu.Pt();
-  //hists->fill1DHist(iso2, "mu_iso_official", ";pfIsolationR04", 50, 0,0.7, 1, "Muons");
+  //hists->fill1DHist(iso2, dir+"_mu_iso_official", ";pfIsolationR04", 50, 0,0.7, 1, dir);
 
 }
 
@@ -69,10 +70,11 @@ void HistMaker::MakeEGammaCommonPlots(const TCEGamma& egm, TString n)
 
   if (!n.Contains("BaseSC")) {
     hists->fill1DHist(egm.HadOverEm(),       dir+"-egm_HadOverEm",    ";HadOverEm",    100,0.001, 0.05, 1,dir);
-    hists->fill1DHist(egm.PreShowerOverRaw(),dir+"-egm_PreShowerOverRaw",";PreShowerOverRaw",100,0,0.2, 1,dir);
     hists->fill1DHist(egm.SCEtaWidth(),      dir+"-egm_SCEtaWidth",   ";SCEtaWidth",   100, 0,  0.03,   1,dir);
     hists->fill1DHist(egm.SCPhiWidth(),      dir+"-egm_SCPhiWidth",   ";SCPhiWidth",   100, 0,  0.12,   1,dir);
     hists->fill1DHist(egm.SCRawEnergy(),     dir+"-egm_SCRawEnergy",  ";SCRawEnergy",  100, 10, 120,    1,dir);
+    if (fabs(egm.SCEta()) > 1.56)
+      hists->fill1DHist(egm.PreShowerOverRaw(),dir+"-egm_PreShowerOverRaw",";PreShowerOverRaw",100,0,0.2, 1,dir);
   }
 
   if (n.Contains("Ele") && !n.Contains("BaseSC")){ //Not filled for photons
@@ -87,9 +89,9 @@ void HistMaker::MakeEGammaCommonPlots(const TCEGamma& egm, TString n)
 }
 
 
-void HistMaker::MakePhotonPlots(const TCPhoton& ph)
+void HistMaker::MakePhotonPlots(const TCPhoton& ph, string dir)
 {
-  const string dir = "Photon";
+  //cout<<"DBG make photon plots  "<<dir<<endl;
 
   MakeEGammaCommonPlots(ph, dir+"-EGamma");
   hists->fill1DHist(ph.TrackVeto(),      "ph_trackVeto",     ";track veto",      3, 0, 3,   1,dir);
@@ -106,11 +108,11 @@ void HistMaker::MakePhotonPlots(const TCPhoton& ph)
 
   if (ph.R9() > 0.9){
     hists->fill1DHist(ph.IdMap("HadIso_R03")-0.005*ph.Et(), "ph_HadIso_R03_R9high", ";ph_HadIso_R03_R9high", 100, 0, 60, 1,dir);
-    hists->fill1DHist(ph.IdMap("TrkIso_R03")-0.002*ph.Et(), "ph_TrkIso_R03_R9low",  ";ph_HadIso_R03_R9low",  100, 0, 60, 1,dir);
+    hists->fill1DHist(ph.IdMap("TrkIso_R03")-0.002*ph.Et(), "ph_TrkIso_R03_R9high", ";ph_HadIso_R03_R9high", 100, 0, 60, 1,dir);
   }
   else{
-    hists->fill1DHist(ph.IdMap("HadIso_R03")-0.005*ph.Et(), "ph_HadIso_R03_R9high", ";ph_HadIso_R03_R9high", 100, 0, 6, 1,dir);
-    hists->fill1DHist(ph.IdMap("TrkIso_R03")-0.002*ph.Et(), "ph_TrkIso_R03_R9low", ";ph_HadIso_R03_R9low",   100, 0, 6, 1,dir);
+    hists->fill1DHist(ph.IdMap("HadIso_R03")-0.005*ph.Et(), "ph_HadIso_R03_R9low", ";ph_HadIso_R03_R9low", 100, 0, 6, 1,dir);
+    hists->fill1DHist(ph.IdMap("TrkIso_R03")-0.002*ph.Et(), "ph_TrkIso_R03_R9low", ";ph_HadIso_R03_R9low", 100, 0, 6, 1,dir);
   }
 
   //hists->fill1DHist(ph.(), "ph_", ";", 100, 0, 100,1, dir);
@@ -212,7 +214,7 @@ void HistMaker::FillHistosFull(Int_t num, Double_t weight, string dir)
     hists->fill1DHist(four.M(), Form("four_massZ_%s_cut%i",d, num),";m_{ll#gamma#gamma}",  100,70,120,  weight, dir);
 
   hists->fill1DHist(tri.M(), Form("00_tri_mass_%s_cut%i",         d, num),";m_{ll#gamma}",  100, 0,200,  weight, dir);
-  hists->fill1DHist(tri.M(), Form("00_tri_mass_3GeVBin_%s_cut%i", d, num),";m_{ll#gamma}",  20,100,160,  weight, dir);
+  hists->fill1DHist(tri.M(), Form("00_tri_mass_3GeVBin_%s_cut%i", d, num),";m_{ll#gamma}",  20,110,170,  weight, dir);
   hists->fill1DHist(tri.M(), Form("00_tri_mass80_%s_cut%i",       d, num),";m_{ll#gamma}",  100,80,200,  weight, dir);
   hists->fill1DHist(tri.M(), Form("00_tri_massZ_%s_cut%i",        d, num),";m_{ll#gamma}",  100,60,120,  weight, dir);
   hists->fill1DHist(tri.M(), Form("00_tri_mass_longTail_%s_cut%i",d, num),";m_{ll#gamma}",  100, 0,400,  weight, dir);

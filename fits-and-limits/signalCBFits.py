@@ -4,6 +4,10 @@ from ROOT import *
 from rooFitBuilder import *
 gROOT.SetBatch()
 #gSystem.SetIncludePath( "-I$ROOFITSYS/include/" );
+gROOT.ProcessLine(".L ../tdrstyle.C")
+setTDRStyle()
+gROOT.LoadMacro("../CMS_lumi.C")
+
 sys.path.append("../zgamma")
 import utils as u
 from initialFitProducer import AutoVivification
@@ -11,42 +15,45 @@ import ConfigParser as cp
 cf = cp.ConfigParser()
 cf.read('config.cfg')
 
-massList   = ['125.0']
-#massList   = ['%.1f'%(a) for a in u.drange(120,150,.5)]
-
-#gROOT.ProcessLine(".L ../tdrstyle.C")
-#setTDRStyle()
+#massList   = ['125.0']
+massList   = ['%.1f'%(a) for a in u.drange(120,150,1.)]
 
 # rounding function for interpolation
 def roundTo5(x, base=5):
   return int(base * round(float(x)/base))
 
 def SignalNameParamFixer(year,lepton,cat,sig,mass,ws):
+  print 'DBG SignalNameParamFixer'
   fitName    = '_'.join(['CBG',year,lepton,'cat'+cat,sig,mass,'Interp'])
   newFitName = '_'.join(['sig',sig,lepton,year,'cat'+cat])
-  mean       = '_'.join(['meanCBG',   year,lepton,'cat'+cat,sig,mass, 'Interp'])
+  meanG      = '_'.join(['meanGCBG',  year,lepton,'cat'+cat,sig,mass, 'Interp'])
+  meanCB     = '_'.join(['meanCBCBG', year,lepton,'cat'+cat,sig,mass, 'Interp'])
   sigmaCB    = '_'.join(['sigmaCBCBG',year,lepton,'cat'+cat,sig,mass, 'Interp'])
   sigmaG     = '_'.join(['sigmaGCBG', year,lepton,'cat'+cat,sig,mass, 'Interp'])
-  meanNew    = '_'.join(['sig',sig,'mean',   lepton,year,'cat'+cat])
+  meanGNew   = '_'.join(['sig',sig,'meanG',  lepton,year,'cat'+cat])
+  meanCBNew  = '_'.join(['sig',sig,'meanCB', lepton,year,'cat'+cat])
   sigmaCBNew = '_'.join(['sig',sig,'sigmaCB',lepton,year,'cat'+cat])
   sigmaGNew  = '_'.join(['sig',sig,'sigmaG', lepton,year,'cat'+cat])
   mShift     = '_'.join(['sig',sig,'mShift', lepton,year,'cat'+cat])
   sigmaShift = '_'.join(['sig',sig,'sigmaShift',lepton,year,'cat'+cat])
   ws.factory(mShift+'[1]')
   ws.factory(sigmaShift+'[1]')
-  ws.factory('prod::'+meanNew+'('+mean+','+mShift+')')
+  ws.factory('prod::'+meanGNew+'('+meanG+','+mShift+')')
+  ws.factory('prod::'+meanCBNew+'('+meanCB+','+mShift+')')
   ws.factory('prod::'+sigmaCBNew+'('+sigmaCB+','+sigmaShift+')')
   ws.factory('prod::'+sigmaGNew+'('+sigmaG+','+sigmaShift+')')
-  ws.factory('EDIT::'+newFitName+'('+fitName+','+mean+'='+meanNew+','+sigmaCB+'='+sigmaCBNew+','+sigmaG+'='+sigmaGNew+')')
+  ws.factory('EDIT::'+newFitName+'('+fitName+','+meanG+'='+meanGNew+','+meanCB+'='+meanCBNew+','
+             +sigmaCB+'='+sigmaCBNew+','+sigmaG+'='+sigmaGNew+')')
 
 
 def SignalFitMaker(lep, year, cat, subdir):
   #print massList
   #raw_input("Input raws  ")
-
+  u.set_palette()
   # reasd these from a config file:
   #massList        = [a.strip() for a in (cf.get("fits","massList-more")).split(',')]
   sigNameList     = [a.strip() for a in (cf.get("fits","sigNameList")).split(',')]
+  tev = u.yearToTeV(year)
 
   #print massList
   #raw_input()
@@ -83,6 +90,7 @@ def SignalFitMaker(lep, year, cat, subdir):
     oldMassHi = oldMassLow = 0
     for massString in massList:
 
+      fitBuilder = FitBuilder(mzg, year,lep,cat,sig=prod,mass=massString)
       # ############################################
       # Get the high and low mass references      #
       # If the point does not need interpolation, #
@@ -118,9 +126,12 @@ def SignalFitMaker(lep, year, cat, subdir):
 
         print massLow, massHi
         #raw_input("Mass low and Hi; hit enter")
-        CBG_Low = BuildCrystalBallGauss(year,lep,cat,prod,str(massLow),'Low',mzg,mean = massLow)[0]
 
-        CBG_Low.fitTo(sig_ds_Low, RooFit.Range('fitRegion1'), RooFit.SumW2Error(kTRUE), RooFit.Strategy(1), RooFit.NumCPU(4), RooFit.PrintLevel(-1))
+        print
+        fitBuilder.__init__(mzg,year,lep,cat,sig=prod,mass=str(massHi))
+        SigFit_Low = fitBuilder.Build('CBG', piece = 'Low', mean = massLow)[0]
+
+        SigFit_Low.fitTo(sig_ds_Low, RooFit.Range('fitRegion1'), RooFit.SumW2Error(kTRUE), RooFit.Strategy(1), RooFit.NumCPU(4), RooFit.PrintLevel(-1))
 
         ###### fit the hi mass point
         #if massHi<=125:
@@ -131,9 +142,10 @@ def SignalFitMaker(lep, year, cat, subdir):
         sigNameHi = '_'.join(['ds','sig',prod,lep,year,'cat'+cat,'M'+str(massHi)])
         sig_ds_Hi = myWs.data(sigNameHi)
 
-        CBG_Hi = BuildCrystalBallGauss(year,lep,cat,prod,str(massHi),'Hi',mzg,mean = massHi)[0]
+        fitBuilder.__init__(mzg,year,lep,cat,sig=prod,mass=str(massLow))
+        SigFit_Hi = fitBuilder.Build('CBG', piece = 'Hi', mean = massLow)[0]
 
-        CBG_Hi.fitTo(sig_ds_Hi, RooFit.Range('fitRegion2'), RooFit.SumW2Error(kTRUE), RooFit.Strategy(1), RooFit.NumCPU(4), RooFit.PrintLevel(-1))
+        SigFit_Hi.fitTo(sig_ds_Hi, RooFit.Range('fitRegion2'), RooFit.SumW2Error(kTRUE), RooFit.Strategy(1), RooFit.NumCPU(4), RooFit.PrintLevel(-1))
 
       ###### interpolate the two mass points
       massDiff = (massHi - mass)/5.
@@ -148,7 +160,7 @@ def SignalFitMaker(lep, year, cat, subdir):
       else:
         beta.setVal(massDiff)
 
-      interp_pdf = RooIntegralMorph('interp_pdf', 'interp_pdf', CBG_Low, CBG_Hi, mzg, beta)
+      interp_pdf = RooIntegralMorph('interp_pdf', 'interp_pdf', SigFit_Low, SigFit_Hi, mzg, beta)
       interp_ds  = interp_pdf.generate(RooArgSet(mzg), 10000)
       normList.append(sig_ds_Low.sumEntries()*massDiff+sig_ds_Hi.sumEntries()*(1-massDiff))
       yieldName = '_'.join(['sig',prod,'yield',lep,year,'cat'+cat])
@@ -158,20 +170,21 @@ def SignalFitMaker(lep, year, cat, subdir):
 
       sigNameInterp = '_'.join(['ds','sig',prod,lep,year,'cat'+cat,'M'+str(mass)])
 
-      CBG_Interp,paramList = BuildCrystalBallGauss(year,lep,cat,prod,str(mass),'Interp',mzg,mean = mass)
+      fitBuilder.__init__(mzg,year,lep,cat,sig=prod,mass=str(mass))
+      SigFit_Interp,paramList = fitBuilder.Build('CBG', piece = 'Interp', mean = mass)
 
-      CBG_Interp.fitTo(interp_ds, RooFit.Range('fitRegion_'+massString), RooFit.SumW2Error(kTRUE), RooFit.Strategy(1), RooFit.NumCPU(4), RooFit.PrintLevel(-1))
+      SigFit_Interp.fitTo(interp_ds, RooFit.Range('fitRegion_'+massString), RooFit.SumW2Error(kTRUE), RooFit.Strategy(1), RooFit.NumCPU(4), RooFit.PrintLevel(-1))
 
-      print paramList
-      #raw_input("Param List")
+      #print paramList
+      #raw_input("\n ---> Param List. hit enter to continue")
 
       for param in paramList:
         param.setConstant(True)
-      fitList.append(CBG_Interp)
+      fitList.append(SigFit_Interp)
 
       print lep,year,cat,mass, cardDict[lep][year][cat][str(mass)]
 
-      getattr(cardDict[lep][year][cat][str(mass)],'import')(CBG_Interp)
+      getattr(cardDict[lep][year][cat][str(mass)],'import')(SigFit_Interp)
       getattr(cardDict[lep][year][cat][str(mass)],'import')(yieldVar)
       cardDict[lep][year][cat][str(mass)].commitTransaction()
 
@@ -185,15 +198,26 @@ def SignalFitMaker(lep, year, cat, subdir):
       regionName = fit.GetName().split('_')[-1]
       # fit.plotOn(testFrame)
       # fit.plotOn(testFrame, RooFit.NormRange('fitRegion_'+regionName))
-      fit.plotOn(testFrame, RooFit.Normalization(normList[i],RooAbsReal.NumEvent))
-      fit.paramOn(testFrame)
+      fit.plotOn(testFrame, RooFit.Normalization(normList[i],RooAbsReal.NumEvent), RooFit.LineColor(TColor.GetColorPalette(i*20)))
+      # fit.paramOn(testFrame)
       # testFrame.getAttText().SetTextSize(0.02)
       # testFrame.getAttText().SetTextColor(kRed)
       # fit.statOn(testFrame,RooFit.Layout(0.18,0.43,0.87))
+    for i,signal in enumerate(dsList):
+      signal.plotOn(testFrame, RooFit.MarkerStyle(20+i), RooFit.MarkerSize(1), RooFit.Binning(150))
 
-    testFrame.SetMaximum(0.7)
+    if prod == 'gg':
+      testFrame.SetMaximum(0.7)
+    elif prod =='vbf':
+      testFrame.SetMaximum(0.05)
+    elif prod =='v':
+      testFrame.SetMaximum(0.03)
+
+    testFrame.SetMinimum(0.0)
+
     testFrame.Draw()
-    testFrame.SetTitle(";m_{#mu#mu#gamma} (GeV);fit pdf")
+    testFrame.SetTitle(";m_{H} (GeV); Signal shape")
+    CMS_lumi(c, 2, 11)
     c.SaveAs(plotBase+"/"+'_'.join(['sig','fit',prod,lep,year,'cat'+cat])+'.png')
 
   for prod in sigNameList:
@@ -203,8 +227,8 @@ def SignalFitMaker(lep, year, cat, subdir):
       #print cardDict[lep][year][cat][mass]
       #raw_input("RAW INPUT")
 
-    file = TFile("parampampam.root",'recreate')
-    file.cd()
+    #file = TFile("parampampam.root",'recreate')
+    #file.cd()
 
     #mass="121.0"
     #mean  = RooRealVar("mean","mean", 130,120,140)

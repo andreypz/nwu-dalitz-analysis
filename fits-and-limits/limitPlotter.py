@@ -17,6 +17,7 @@ cf.read('config.cfg')
 
 gROOT.ProcessLine(".L ../tdrstyle.C")
 setTDRStyle()
+gROOT.LoadMacro("../CMS_lumi.C")
 gStyle.SetOptTitle(0)
 
 doObs = 1
@@ -154,17 +155,9 @@ if fullCombo:
   prelim = TLatex()
   prelim.SetNDC();
   prelim.SetTextSize(0.04)
-  prelim.DrawLatex(0.20,0.95, "CMS Preliminary")
-  prelim.DrawLatex(0.60,0.8, "H#rightarrow#gamma*#gamma#rightarrow#mu#mu#gamma")
-  prelim.DrawLatex(0.60,0.74, "m_{#mu#mu} < 20 GeV")
-  #  prelim.Draw()
+  prelim.DrawLatex(0.20,0.96, "H#rightarrow#gamma*#gamma#rightarrow#mu#mu#gamma      m_{#mu#mu} < 20 GeV")
 
-  sqrt = TLatex(0.50,0.95, "#sqrt{s} = 8 Tev  #it{L_{int}}  =  19.7  fb^{-1}")
-  sqrt.SetNDC();
-  sqrt.SetTextSize(0.04);
-  sqrt.Draw();
-
-  leg = TLegend(0.25,0.7,0.50,0.88)
+  leg = TLegend(0.40,0.68,0.65,0.88)
   if doObs:
     leg.AddEntry(observed,"Observed", "l")
   leg.AddEntry(expected,"Expected", "l")
@@ -204,6 +197,7 @@ if fullCombo:
     leg.AddEntry(g,"10#timesSM", "l")
 
   for e in ['.png', '.pdf']:
+    CMS_lumi(c, 2, 11)
     c.SaveAs(plotBase+'/Limits'+e)
 
   out.cd()

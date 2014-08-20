@@ -5,6 +5,7 @@ from array import *
 from ROOT import *
 gROOT.SetBatch()
 TH1.SetDefaultSumw2(kTRUE)
+gROOT.LoadMacro("../CMS_lumi.C")
 
 import ConfigParser as cp
 conf = cp.ConfigParser()
@@ -13,7 +14,10 @@ lumi2012 = float(conf.get("lumi","lumi2012A")) + float(conf.get("lumi","lumi2012
     float(conf.get("lumi","lumi2012C")) + float(conf.get("lumi","lumi2012D"))
 lumi = lumi2012
 
-gROOT.LoadMacro("../CMS_lumi.C")
+def yearToTeV(y):
+  if y=='2011': return '7TeV'
+  elif y=='2012': return '8TeV'
+  else: return '0TeV'
 
 def setSelection(sel):
   conf.set("selection","sel", sel)
@@ -248,7 +252,7 @@ def drawAllInFile(f1, name1, bZip, f3, name3, myDir,path, N, howToScale="none", 
   # dirList.Print()
   createDir(path)
   split = os.path.split(path.rstrip("/"))
-  print "Split lit lit", split[0], split[1]
+  print "Split the path:", split[0], split[1]
 
   doOverflow = 0
   if doRatio:
@@ -262,9 +266,9 @@ def drawAllInFile(f1, name1, bZip, f3, name3, myDir,path, N, howToScale="none", 
   if f3!=None and howToScale=="lumi": # only assume signal MC for now
     Nev = f3.Get("Counts/evt_byCut_raw").GetBinContent(1)
     print '\n\n Fix ME FIX ME  \n\n'
-    cro = getCS("HtoJPsiGamma") #
+    #cro = getCS("HtoJPsiGamma") #
     print ': Need more generic way to get cs by sample\n'
-    # cro = getCS("ggH-125")
+    cro = getCS("ggH-125",'mu')
     scale3 = float(lumi*cro)/Nev
     print Nev, lumi, cro, scale3
 
@@ -304,7 +308,7 @@ def drawAllInFile(f1, name1, bZip, f3, name3, myDir,path, N, howToScale="none", 
 
       h3.Scale(float(scale3))
 
-    print "drawing", histoName
+    print "\t Drawing", histoName
 
     if mainHist.InheritsFrom("TH2"):
       createDir(split[0]+"/TH2_"+split[1])
@@ -418,9 +422,9 @@ def drawAllInFile(f1, name1, bZip, f3, name3, myDir,path, N, howToScale="none", 
         h3.SetLineColor(kBlue+2)
         # h3.SetFillColor(kYellow-9)
         extract_from_name = re.findall(r'\d+', name3)
-        # print extract_from_name
-        if len(extract_from_name) == 1:
-          h3.Scale(int(extract_from_name[0]))
+        #print "extract from name =", extract_from_name
+        #if len(extract_from_name) == 1:
+        h3.Scale(int(extract_from_name[0]))
         norm3 = h3.Integral()
         if howToScale=="norm" and  norm3!=0:
           h3.Scale(1./norm3)
@@ -467,7 +471,7 @@ def drawAllInFile(f1, name1, bZip, f3, name3, myDir,path, N, howToScale="none", 
         # if howToScale=='lumi': h1.Draw("same e1p hist")
         # else: h1.Draw("same hist")
       if h3!=None:
-        h3.Draw("same hist")
+        h3.Draw("sames hist")
 
       if len(hmaxs)>0:
         m = max(hmaxs)
@@ -527,6 +531,28 @@ def drawAllInFile(f1, name1, bZip, f3, name3, myDir,path, N, howToScale="none", 
         leg.SetY1(0.85)
         leg.SetY2(0.7)
       '''
+      if 'diLep_mass_jpsi_' in histoName:
+        gStyle.SetOptStat(1111)
+        h1.SetName("Data")
+        h3.SetName("h #rightarrow J/#Psi#gamma")
+        # h2.Print("all")
+        stats1 = h1.GetListOfFunctions().FindObject("stats");
+        stats2 = h3.GetListOfFunctions().FindObject("stats");
+        stats2.Print()
+        stats1.SetX1NDC(0.7)
+        stats1.SetX2NDC(0.95)
+        stats1.SetY1NDC(0.9)
+        stats1.SetY2NDC(0.7)
+        stats2.SetX1NDC(0.7)
+        stats2.SetX2NDC(0.95)
+        stats2.SetY1NDC(0.7)
+        stats2.SetY2NDC(0.5)
+        stats2.SetTextColor(kBlue+1)
+        leg.SetX1(0.19)
+        leg.SetX2(0.46)
+        leg.SetY1(0.85)
+        leg.SetY2(0.7)
+
 
       if "zee_" in histoName:
         gStyle.SetOptStat(1111)
