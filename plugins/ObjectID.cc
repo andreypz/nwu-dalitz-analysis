@@ -187,7 +187,7 @@ bool ObjectID::PassPhotonIdAndIso(const TCPhoton& ph, TString n, float& mvaScore
     return false;
   }
 
-  if (!HggPreselection(ph)) return false;
+  //if (!HggPreselection(ph)) return false;
 
   bool pass = false;
   //Float_t phoISO = 0;
@@ -318,7 +318,7 @@ bool ObjectID::PassDalitzEleID(const TCElectron& el, TVector3 *pv, TString n, fl
     {
       //bool mvaPass = false;
 
-      if (!HggPreselection(el)) return false;
+      //if (!HggPreselection(el)) return false;
 
       vector<TCElectron::Track> trk = el.GetTracks();
       vector<TCEGamma> sc = el.BaseSC();
@@ -476,7 +476,7 @@ bool ObjectID::PassElectronIdAndIso(const TCElectron& lep, TVector3 *pv, TString
 
   //Float_t eleISO = CalculateElectronIso(lep);
 
-  if(((fabs(lep.Eta()) < 1.442
+  if(((fabs(lep.Eta()) < 1.4442
        && lep.PtError()/lep.Pt() < cuts.ptErrorOverPt[0]
        && lep.SigmaIEtaIEta()    < cuts.sigmaIetaIeta[0]
        && fabs(lep.SCDeltaPhi()) < cuts.dPhiIn[0]
@@ -486,7 +486,7 @@ bool ObjectID::PassElectronIdAndIso(const TCElectron& lep, TVector3 *pv, TString
        && fabs(lep.Dz(pv))  < cuts.dz[0]
        //&& eleISO < cuts.pfIso04[0]
        )||
-      (fabs(lep.Eta()) > 1.556
+      (fabs(lep.Eta()) > 1.566
        && lep.PtError()/lep.Pt() < cuts.ptErrorOverPt[1]
        && lep.SigmaIEtaIEta()    < cuts.sigmaIetaIeta[1]
        && fabs(lep.SCDeltaPhi()) < cuts.dPhiIn[1]
@@ -552,8 +552,17 @@ bool ObjectID::HggPreselection(const TCPhoton& ph)
    * Returns true if candidate passes the preselection or false otherwise.
    */
 
+  /*if (_eventNumber == 154245 || _eventNumber == 154548){
+    cout<<"\t   Hgg preselection DBG for evt: "<<_eventNumber<<endl;
+
+    cout<<"R9 = "<<ph.R9()<<"  h/e = "<<ph.HadOverEm()<<"   sieie ="<<ph.SigmaIEtaIEta()<<"  convVeto: "<<ph.ConversionVeto()<<endl;
+    cout<<"Hcal iso:  "<< ph.IdMap("HadIso_R03") - 0.005 * ph.Et()<<"  ET="<<ph.Et()<<"  pt="<<ph.Pt()<<endl;
+    cout<<"trk  iso:  "<< ph.IdMap("TrkIso_R03") - 0.002 * ph.Et()<<"  ET="<<ph.Et()<<"  pt="<<ph.Pt()<<endl;
+    cout<<"CiC: "<<ph.CiCPF4chgpfIso02()[0]<<endl;
+    }*/
+
   if (ph.Et() < 15 || ph.Et() > 200) return false;
-  if (ph.ConversionVeto() == 0) return false;
+  //if (ph.ConversionVeto() == 0) return false;
 
   if (fabs(ph.SCEta()) < 1.479) {
     // ECAL barrel
@@ -591,14 +600,6 @@ bool ObjectID::HggPreselection(const TCElectron& el)
   if (el.Et() < 15 || el.Et() > 200) return false;
   //if (el.ConversionVeto() == 0) return false;
 
-  if (_eventNumber == 154245 || _eventNumber == 154548){
-    cout<<"\t   Hgg preselection DBG for evt: "<<_eventNumber<<endl;
-
-    cout<<"R9 = "<<el.R9()<<"  h/e = "<<el.HadOverEm()<<"   sieie ="<<el.SigmaIEtaIEta()<<endl;
-    cout<<"Hcal iso:  "<< el.IdMap("dr03HcalTowerSumEt") - 0.005 * el.Et()<<"  ET="<<el.Et()<<"  pt="<<el.Pt()<<endl;
-    cout<<"trk  iso:  "<< el.IdMap("dr03TkSumPt") - 0.002 * el.Et()       <<"  ET="<<el.Et()<<"  pt="<<el.Pt()<<endl;
-
-  }
   // ECAL barrel
   if (fabs(el.SCEta()) < 1.479) {
     if (el.SigmaIEtaIEta() > 0.014) return false;
@@ -634,7 +635,7 @@ bool ObjectID::PassPhotonMVA(const TCPhoton& ph, float& mvaScore){
   mvaScore = -99;
 
   bool mvaPass = false;
-  if (!HggPreselection(ph)) return false;
+  //if (!HggPreselection(ph)) return false;
 
   // classification variables
   static Float_t phoEt_, phoEta_, phoPhi_, phoR9_;
@@ -753,7 +754,7 @@ void ObjectID::PhotonDump(const TCPhoton& pho, phIdAndIsoCuts cuts)
   cout  << _runNumber << " " << _eventNumber << " " << pho.Pt() << " " << pho.Eta() << " " << pho.SCEta() <<endl;
   cout<<"conv:"<<pho.ConversionVeto()<<"  hoem:"<< pho.HadOverEm() <<"  sieie:"<<pho.SigmaIEtaIEta()<<endl;
   cout  <<"\n iso: ch:" << chIsoCor<< "  nh:" << nhIsoCor <<  " ph:"<<phIsoCor<<endl;
-  if (fabs(tmpEta)  < 1.442){
+  if (fabs(tmpEta)  < 1.4442){
     cout<<"\n cuts: "<<cuts.chIso03[0] <<"  "<<cuts.nhIso03[0] + 0.040*pho.Pt()<<"  "<<cuts.phIso03[0] + 0.005*pho.Pt()<<endl;
     cout<<"conv:"<<cuts.PassedEleSafeVeto[0]<<"  hoem:"<< cuts.HadOverEm[0]<<"  sieie:"<<cuts.sigmaIetaIeta[0]<<endl;
   }
@@ -761,5 +762,41 @@ void ObjectID::PhotonDump(const TCPhoton& pho, phIdAndIsoCuts cuts)
     cout<<"\n cuts: "<<cuts.chIso03[1] <<"  "<<cuts.nhIso03[1] + 0.040*pho.Pt()<<"  "<<cuts.phIso03[1] + 0.005*pho.Pt()<<endl;
     cout<<"conv:"<<cuts.PassedEleSafeVeto[1]<<"  hoem:"<< cuts.HadOverEm[1]<<"  sieie:"<<cuts.sigmaIetaIeta[1]<<endl;
   }
+
+}
+
+void ObjectID::ElectronDump(const TCElectron& el)
+{
+
+  vector<TCElectron::Track> trk = el.GetTracks();
+  vector<TCEGamma> sc = el.BaseSC();
+
+  if (trk.size() < 2 || sc.size()<2)
+    return;
+
+  sort(sc.begin(),  sc.end(),  SCESortCondition);
+  sort(trk.begin(), trk.end(), P4SortCondition);
+
+  cout<<"rho         "<<_rhoFactor<<endl;
+  cout<<"eleBCS25_1: "<< sc[0].E2x5()/sc[0].E5x5()<<endl;
+  cout<<"eleBCS25_2: "<<sc[1].E2x5()/sc[1].E5x5()<<endl;
+  cout<<"eleGSFPt2over1: "<<trk[1].Pt()/trk[0].Pt()<<endl;
+  cout<<"eleGSFPt2:  "<<trk[1].Pt()<<endl;
+  cout<<"eleGSFPt1:  "<<trk[0].Pt()<<endl;
+  cout<<"eleGSFdR:   "<<trk[0].DeltaR(trk[1])<<endl;
+  cout<<"r9:         "<<el.R9()<<endl;
+  cout<<"SCEtaWidth: "<<el.SCEtaWidth()<<endl;
+  cout<<"SCPhiWidth: "<<el.SCPhiWidth()<<endl;
+  cout<<"HoverE:     "<<el.HadOverEm()<<endl;
+  cout<<"EoverPt:    "<<el.SCEnergy()/(trk[0]+trk[1]).Pt()<<endl;
+  cout<<"E, Pt: "<< el.SCEnergy() <<" "<<(trk[0]+trk[1]).Pt()<<endl;
+  cout<<"dEtaAtVtx   "<<el.SCDeltaEta()<<endl;
+  cout<<"dPhiAtVtx:  "<<el.SCDeltaPhi()<<endl;
+  cout<<"EcalEnPin:  "<<el.InverseEnergyMomentumDiff()<<endl;
+  cout<<"recoSCEta:  "<<el.SCEta()<<endl;
+  cout<<"eleBCS15_2: "<<sc[1].E1x5()/sc[1].E5x5()<<endl;
+  cout<<"eleBCSieie1:"<<sc[0].SigmaIEtaIEta()<<endl;
+  cout<<"eleBCSieie2:"<<sc[1].SigmaIEtaIEta()<<endl;
+  cout<<"=== BDT: "<<el.IdMap("mvaScore")<<endl;
 
 }

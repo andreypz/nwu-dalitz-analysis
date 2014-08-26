@@ -279,7 +279,7 @@ def drawAllInFile(f1, name1, bZip, f3, name3, myDir,path, N, howToScale="none", 
     if k.GetName() in ["eff"]: continue
     if N!=None:
       if not ("cut"+N) in k.GetName(): continue
-      if "DalitzEle" in k.GetName(): continue
+      if "DalitzEle"   in k.GetName(): continue
       #if k.ReadObj().isFolder(): continue
 
     mainHist = k.ReadObj()
@@ -297,6 +297,7 @@ def drawAllInFile(f1, name1, bZip, f3, name3, myDir,path, N, howToScale="none", 
       else:
         h1 = f1.Get(histoName)
       if h1==None: continue
+    else: h1=None
 
     if f3!=None:
       if myDir!="":
@@ -400,12 +401,14 @@ def drawAllInFile(f1, name1, bZip, f3, name3, myDir,path, N, howToScale="none", 
       leg.Clear()
       leg.SetTextSize(0.03)
       if bZip!='' and len(bZip)>1: # need more columns if there are backgrounds
-        leg = TLegend(0.55,0.7,0.99,0.92)
+        leg = TLegend(0.6,0.7,0.93,0.92)
+        #leg = TLegend(0.55,0.7,0.99,0.92)
         leg.Clear()
         leg.SetNColumns(2)
         leg.SetTextSize(0.04)
 
       if h1!=None and h1.GetEntries()!=0:
+        #print 'DBG lpe option in legentry', h1, h1.GetEntries()
         leg.AddEntry(h1,name1, "lpe")
 
       if bZip!='':
@@ -423,8 +426,8 @@ def drawAllInFile(f1, name1, bZip, f3, name3, myDir,path, N, howToScale="none", 
         # h3.SetFillColor(kYellow-9)
         extract_from_name = re.findall(r'\d+', name3)
         #print "extract from name =", extract_from_name
-        #if len(extract_from_name) == 1:
-        h3.Scale(int(extract_from_name[0]))
+        if len(extract_from_name) != 0:
+          h3.Scale(int(extract_from_name[0]))
         norm3 = h3.Integral()
         if howToScale=="norm" and  norm3!=0:
           h3.Scale(1./norm3)
@@ -458,14 +461,14 @@ def drawAllInFile(f1, name1, bZip, f3, name3, myDir,path, N, howToScale="none", 
 
           pad1.cd();
 
-
       mainHist.Draw('hist')
       if bZip!='':
         if howToScale=='lumi':
           stack.Draw('same hist')
+          hmaxs.append(stack.GetMaximum())
         else:
           stack.Draw('same nostack hist')
-        hmaxs.append(stack.GetMaximum())
+
       if h1!=None:
         h1.Draw("same e1p hist")
         # if howToScale=='lumi': h1.Draw("same e1p hist")
@@ -506,8 +509,12 @@ def drawAllInFile(f1, name1, bZip, f3, name3, myDir,path, N, howToScale="none", 
         #h3.Rebin(2)
         mainHist.SetXTitle("m_{#mu#mu} (GeV)")
         mainHist.SetMaximum(1.2*h1.GetMaximum())
-
         doPdf=1
+
+      if histoName in ['gen_co3','gen_phi']:
+        mainHist.SetMaximum(0.04)
+        mainHist.SetMinimum(0)
+
 
       '''
       if "ph_energyCorrection" in histoName:

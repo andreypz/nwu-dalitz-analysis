@@ -14,14 +14,11 @@ outpath = '/tthome/andrey/html/zgamma/lhe/'
 #outpath = '/uscms_data/d2/andreypz/html/zgamma/lhe/'
 files={}
 
-#files["one"] = ['~/LHE_files/dygamma_dalitz_muonmass_run02.root']
-#files["one"] = ['~/LHE_files/dygamma_dalitz_muonmass_dRll_dRlg_run05.root']
-#files["two"] = ['~/LHE_files/dyjet_dalitz_run09.root']
 #files["two"] = ['~/LHE_files/luisa/dygamma.lhe.root']
 
 #files["one"] = ['~/LHE_files/mcfm_dalitz.root']
-files["one"] = ['~/LHE_files/heeg_m120.root']
-files["two"] = ['~/LHE_files/hmumug_m120.root']
+files["one"] = ['~/LHE_files/hmumug_m120.root']
+files["two"] = ['~/LHE_files/13TeV_hmumug_m125.root']
 
 #files["one"]   = ['~/LHE_files/dyJet/dyJet_xcut_03.root']
 #files["two"]   = ['~/LHE_files/dyJet/dyJet_xcut_15.root']
@@ -31,8 +28,8 @@ files["two"] = ['~/LHE_files/hmumug_m120.root']
 #files["two"] = ['/tthome/andrey/LHE_dalitz_Luisa/dyjet.lhe.root']
 fakeGammaFromJet = 0
 
-MH = 0
-LEPID1 = 11
+MH = 125
+LEPID1 = 13
 LEPID2 = 13
 
 print files
@@ -71,10 +68,10 @@ def FillAllHists(files, h):
     # fChain.Print()
     print f
 
-  dcount = 0
+  dcount  = 0
   wpcount = 0
   wmcount = 0
-  zcount = 0
+  zcount  = 0
 
   for evt in fChain:
     g1 = TLorentzVector(0)
@@ -88,7 +85,7 @@ def FillAllHists(files, h):
     diLep = TLorentzVector(0)
     trueHiggs = TLorentzVector(0)
 
-    hasZ = 0
+    hasZ  = 0
     hasWp = 0
     hasWm = 0
     hasGlu3=0
@@ -168,7 +165,7 @@ def FillAllHists(files, h):
     if hasZ:
       zcount +=1
 
-  # f not hasGamma: continue
+    # if not hasGamma: continue
 
     dcount += 1
     #if dcount > 20: break
@@ -362,7 +359,8 @@ if __name__ == "__main__":
   blah = ['LHE files comparison for DY+gamma sample',
           'Luisa\'s vs mine']
 
-  u.drawAllInFile(oneFile, "MAD ele", '', twoFile, 'MAD mu', '', path, None,"norm", isLog=True)
+  u.drawAllInFile(oneFile, "ggH to eeg", '', twoFile, 'VH to eeg', '', path, None,"norm", isLog=True)
+  #u.drawAllInFile(oneFile, "MAD ele", '', twoFile, 'MAD mu', '', path, None,"norm", isLog=True)
   #u.drawAllInFile(oneFile, "3 GeV", [('15 GeV',twoFile)],testFile, '35 GeV', '', path, None,"norm", isLog=True)
   #u.drawAllInFile(oneFile, "DYG", [('DYJ',twoFile)],testFile, 'Sig', '', path, None,"norm", isLog=True)
 

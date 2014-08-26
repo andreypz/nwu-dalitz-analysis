@@ -83,10 +83,11 @@ class ObjectID {
   virtual bool HggPreselection(const TCElectron& el);
   virtual bool PassPhotonMVA(const TCPhoton& ph, float& m);
 
-  TCGenParticle * GetPrimaryAncestor(TCGenParticle *p);
+  TCGenParticle* GetPrimaryAncestor(TCGenParticle *p);
   virtual void DiscoverGeneology(TCGenParticle *p);
   virtual void MuonDump(const TCMuon& mu, TVector3 *pv);
   virtual void PhotonDump(const TCPhoton& pho,  phIdAndIsoCuts c);
+  virtual void ElectronDump(const TCElectron& el);
 
  private:
    Bool_t    _isRealData;

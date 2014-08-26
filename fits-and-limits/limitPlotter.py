@@ -9,7 +9,8 @@ import utils as u
 from optparse import OptionParser
 parser = OptionParser(usage="usage: %prog  [options]")
 parser.add_option("--br",dest="br", action="store_true", default=False, help="Do the limit on BR*cs instead of the mu")
-(options, args) = parser.parse_args()
+parser.add_option("--cat",dest="cat",  default='0', help="category: 0, EB, EE, etc")
+(opt, args) = parser.parse_args()
 
 import ConfigParser as cp
 cf = cp.ConfigParser()
@@ -20,19 +21,20 @@ setTDRStyle()
 gROOT.LoadMacro("../CMS_lumi.C")
 gStyle.SetOptTitle(0)
 
-doObs = 1
 
 s = cf.get("path","ver")
 method = 'Asymptotic'
 #method = 'ProfileLikelihood'
-out = TFile(s+"/limit-data.root","recreate")
+out = TFile(s+"/limit-data-cat"+opt.cat+".root","recreate")
 
 plotBase = cf.get("path","htmlbase")+'/html/zgamma/dalitz/fits-'+s
 u.createDir(plotBase)
 
 fullCombo = True
-massList   = [float(a) for a in (cf.get("fits","massList-more")).split(',')]
-#massList        = [float(a) for a in u.drange(120,150,5)]
+#massList   = [float(a) for a in (cf.get("fits","massList-more")).split(',')]
+massList        = [float(a) for a in u.drange(120,150,1)]
+doBlind    = int(cf.get("fits","blind"))
+doObs = not doBlind
 
 print massList
 
@@ -49,14 +51,14 @@ if fullCombo:
   exp2SigLow = []
   fileListTmp = os.listdir(s)
   fileList = filter(lambda fileName: 'higgsCombineTest.'+method in fileName,fileListTmp)
-  print fileList
+  # print fileList
   for mass in massList:
     #print str(mass)
-    if str(mass)[4] == "0": # nasty trick
-      mass = int(mass)
+    #if str(mass)[4] == "0": # nasty trick
+    #  mass = int(mass)
       #print 'we are her'
     #print mass
-    thisFile = filter(lambda fileName: str(mass)+'.root' in fileName,fileList)[0]
+    thisFile = filter(lambda fileName: str(mass)+'_cat'+opt.cat+'.root' in fileName,fileList)[0]
     print thisFile
     xAxis.append(float(mass))
     f = TFile(s+"/"+thisFile,"open")
@@ -96,8 +98,8 @@ if fullCombo:
 
   print '2 sig low:',exp2SigLowErr
   print '1 sig low:',exp1SigLowErr
-  print '1 sig hi:',exp1SigHiErr
-  print '2 sig hi:',exp2SigHiErr
+  print '1 sig hi:', exp1SigHiErr
+  print '2 sig hi:', exp2SigHiErr
 
   xAxis_Array = np.array(xAxis)
   obs_Array = np.array(obs)
@@ -144,18 +146,21 @@ if fullCombo:
   mg.Draw('AL3')
   mg.GetXaxis().SetTitle('m_{H} (GeV)')
   mg.GetXaxis().SetLimits(massList[0],massList[-1]);
-  if options.br:
+  if opt.br:
     mg.GetYaxis().SetTitle('#sigma(gg #rightarrow a)#timesBR(a#rightarrow#mu#mu#gamma) (fb)')
     mg.SetMaximum(21)
   else:
     mg.GetYaxis().SetTitle('95% CL limit on #sigma#timesBR/#sigma_{SM}#times BR_{SM}')
-    mg.SetMaximum(31)
+    if opt.cat in ['EB','Combo']:
+      mg.SetMaximum(31)
+    elif opt.cat in ['EE']:
+      mg.SetMaximum(150)
   gPad.RedrawAxis()
 
   prelim = TLatex()
   prelim.SetNDC();
   prelim.SetTextSize(0.04)
-  prelim.DrawLatex(0.20,0.96, "H#rightarrow#gamma*#gamma#rightarrow#mu#mu#gamma      m_{#mu#mu} < 20 GeV")
+  prelim.DrawLatex(0.20,0.95, "H#rightarrow#gamma*#gamma#rightarrow#mu#mu#gamma")
 
   leg = TLegend(0.40,0.68,0.65,0.88)
   if doObs:
@@ -178,7 +183,7 @@ if fullCombo:
   leg.SetTextSize(0.04)
   leg.SetFillColor(kWhite)
   leg.Draw()
-  if options.br:
+  if opt.br:
     f = TFile('../data/Dalitz_BR50.root','READ')
     g = f.Get('csbr_mu')
     for i in range(g.GetN()):
@@ -195,10 +200,15 @@ if fullCombo:
     gStyle.SetOptFit(0)
     leg.SetY1NDC(0.64)
     leg.AddEntry(g,"10#timesSM", "l")
+  else:
+    l = TLine(110, 5, 150, 10)
+    l.SetLineColor(kRed+2)
+    l.SetLineStyle(21)
+    l.Draw()
 
   for e in ['.png', '.pdf']:
     CMS_lumi(c, 2, 11)
-    c.SaveAs(plotBase+'/Limits'+e)
+    c.SaveAs(plotBase+'/Limits_cat'+opt.cat+e)
 
   out.cd()
   observed.Write("observed")

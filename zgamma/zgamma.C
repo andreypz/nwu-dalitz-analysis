@@ -230,8 +230,12 @@ Bool_t zgamma::Process(Long64_t entry)
   TCPhysObject gen_gamma, gen_l1, gen_l2, gen_lPt1, gen_lPt2;
   TCPhysObject gen_higgs, gen_gamma_st1;
 
-  Float_t genMll =0;
-  Float_t gendR  =0;
+  //ZGAnlgles:
+  double gen_co1,gen_co2,gen_phi,gen_co3;
+
+  Float_t genMll  = 0;
+  Float_t gendR   = 0;
+  Float_t genMllg = 0;
 
 
   if(!isRealData && makeGen){
@@ -250,16 +254,14 @@ Bool_t zgamma::Process(Long64_t entry)
 
       //Higgs himself:
       if (thisParticle->GetPDGId()==23)
-	hists->fill1DHist(thisParticle->M(), "gen_Z_mass",";gen Z mass",  200, 0,200, 1,"GEN");
+	hists->fill1DHist(thisParticle->M(), "gen_Z_mass",";m_{Z}^{gen} (GeV)",  200, 0,200, 1,"GEN");
 
-      if (thisParticle->GetPDGId()==25 && thisParticle->GetStatus()==3){
+      if (thisParticle->GetPDGId()==25 && (thisParticle->GetStatus()==3 || thisParticle->GetStatus()==22)){
 	gen_higgs = *thisParticle;
-	hists->fill1DHist(thisParticle->M(), "gen_h_mass",";gen mu mass",  200, 124,126, 1,"GEN");
 	h++;
       }
 
       //GEN MUONS
-      //This GEN selection is only valid for a sample with LHE from MCFM
       if (abs(thisParticle->GetPDGId()) == 13 && thisParticle->GetStatus()==1) {
 	if (ObjID->GetPrimaryAncestor(thisParticle)->GetPDGId()==A)
 	  {
@@ -274,6 +276,7 @@ Bool_t zgamma::Process(Long64_t entry)
 	    //cout<<"   --- this one --->>>"<<endl;
 	    //ObjID->DiscoverGeneology(thisParticle);
 	    //cout<<"   <<--- this one"<<endl;
+
 	    hists->fill1DHist(thisParticle->M(), "gen_mu_mass",";gen mu mass",  200, -1,1, 1,"GEN");
 	    gen_mu.push_back(*thisParticle);
 	  }
@@ -289,14 +292,24 @@ Bool_t zgamma::Process(Long64_t entry)
 	  gen_el.push_back(*thisParticle);
       }
 
+      //if (thisParticle->GetPDGId()==22 && thisParticle->Pt()>2)
+      //	ObjID->DiscoverGeneology(thisParticle);
 
       //PHOTON from the Higgs
-      if (thisParticle->GetPDGId()==22 && thisParticle->GetStatus()==1
-	  //&& ObjID->GetPrimaryAncestor(thisParticle)->GetPDGId()==A
-	  && thisParticle->Mother() &&  abs(thisParticle->Mother()->GetPDGId())!=13 && abs(thisParticle->Mother()->GetPDGId())!=11)
+      if (thisParticle->GetPDGId()==22 && (thisParticle->GetStatus()==1 || thisParticle->GetStatus()==23)
+	  && thisParticle->Mother() &&  abs(thisParticle->Mother()->GetPDGId())!=11 && abs(thisParticle->Mother()->GetPDGId())!=13
+	  && abs(thisParticle->Mother()->GetPDGId())!=15)
 	{
-	  gen_gamma = *thisParticle;
-	  ph++;
+	  //cout<<"  DBG gen particles. Ancestorr = "<<ObjID->GetPrimaryAncestor(thisParticle)->GetPDGId()<<endl;
+	  if (ObjID->GetPrimaryAncestor(thisParticle)->GetPDGId()==A || thisParticle->Mother()->GetPDGId()==A){
+	    gen_gamma = *thisParticle;
+	    ph++;
+	  }
+	  else if (h==0 && ObjID->GetPrimaryAncestor(thisParticle)->GetPDGId() == thisParticle->GetPDGId()) {
+	    gen_gamma = *thisParticle;
+	    ph++;
+	  }
+
 	}
       else if (sample=="DY" &&
 	       thisParticle->GetPDGId()==22 && thisParticle->GetStatus()==1 && ObjID->GetPrimaryAncestor(thisParticle)->GetPDGId()==23)
@@ -312,8 +325,10 @@ Bool_t zgamma::Process(Long64_t entry)
 	  && selection=="mugamma" && abs(thisParticle->Mother()->GetPDGId())==13
 	  )
 	{
-	  hists->fill1DHist(thisParticle->Pt(), "gen_fsr_pho_pt",";gen fsr photon pt",  200, 0,50, 1,"GEN");
+	  hists->fill1DHist(thisParticle->Pt(), "gen_fsr_pho_pt",";gen fsr photon pt",  200, 0,30, 1,"GEN");
 	  // if (ObjID->GetPrimaryAncestor(thisParticle)->GetPDGId()!=A)
+
+	  //if (thisParticle->Pt() > 30)
 	  //ObjID->DiscoverGeneology(thisParticle);
 
 	  Float_t preFSR_pt = thisParticle->Mother()->Pt();
@@ -323,13 +338,13 @@ Bool_t zgamma::Process(Long64_t entry)
 	       && fsr->Mother() == thisParticle->Mother()){
 
 	      //cout<<"   0--- this one --->>>"<<endl;
-	      //ObjID->DiscoverGeneology(fsr, eventNumber);
+	      //ObjID->DiscoverGeneology(fsr);
 	      //cout<<"   <<---0 this one"<<endl;
 
-	      hists->fill1DHist((preFSR_pt - fsr->Pt())/preFSR_pt, "gen_fsr_mu_dPt",";gen mu (Pt_preFSR - Pt_afterFSR)/pt",  200, -1,1, 1,"GEN");
+	      hists->fill1DHist((preFSR_pt - fsr->Pt())/preFSR_pt, "gen_fsr_mu_dPt",";gen mu (Pt_preFSR - Pt_afterFSR)/pt",  200, -0.4,1, 1,"GEN");
 
 	      if(thisParticle->Pt() > 1)
-		hists->fill1DHist((preFSR_pt - fsr->Pt())/preFSR_pt, "gen_fsr_mu_dPt_photonPt1",";gen mu (Pt_preFSR - Pt_afterFSR)/pt",  200, -1,1, 1,"GEN");
+		hists->fill1DHist((preFSR_pt - fsr->Pt())/preFSR_pt, "gen_fsr_mu_dPt_photonPt1",";gen mu (Pt_preFSR - Pt_afterFSR)/pt",  200, -0.4,1, 1,"GEN");
 	      fsr_mu_count++;
 	    }
 	  }
@@ -337,7 +352,7 @@ Bool_t zgamma::Process(Long64_t entry)
     }// end of genparticles loop
 
 
-    if (ph!=1 && sample=="dalitz")
+    if (ph!=1 && (sample=="dalitz" || sample =="HZG"))
       Abort(Form("ev #%i NONONO There has to be exactly one photon from the Higgs! \n \t\t but there is %i",
 		 (int)eventNumber, (int)ph));
     //if (h!=1 && sample=="dalitz")
@@ -388,23 +403,21 @@ Bool_t zgamma::Process(Long64_t entry)
       Abort(Form("%i: No gen gamma in an event? that sounds bad",(int)eventNumber));//return kTRUE;
 
 
-    //ZGAnlgles:
-    double co1,co2,phi,co3;
-
     if (sample=="dalitz" || sample=="HZG"){
-      ang->GetAngles(gen_l1, gen_l2, gen_gamma, co1,co2,phi,co3);
-      //cout<<eventNumber<<" gen Angles: c1= "<<co1<<"  c2="<<co2<<"   phi="<<phi<<"   coTh="<<co3<<endl;
-      hists->fill1DHist(co1, "gen_co1",";gen cos_lp",  100,-1,1, 1,"GEN");
-      hists->fill1DHist(co2, "gen_co2",";gen cos_lm",  100,-1,1, 1,"GEN");
-      hists->fill1DHist(co3, "gen_co3",";gen cosTheta",100,-1,1, 1,"GEN");
-      hists->fill1DHist(phi, "gen_phi",";gen phi lp",  100, -TMath::Pi(), TMath::Pi(), 1,"GEN");
+      ang->GetAngles(gen_l1, gen_l2, gen_gamma, gen_co1,gen_co2,gen_phi,gen_co3);
+      //cout<<eventNumber<<" gen Angles: c1= "<<co1<<"  c2="<<co2<<"   gen_phi="<<gen_phi<<"   coTh="<<co3<<endl;
+      hists->fill1DHist(gen_co1, "gen_co1",";gen cos_lp",  100,-1,1, 1,"GEN");
+      hists->fill1DHist(gen_co2, "gen_co2",";gen cos_lm",  100,-1,1, 1,"GEN");
+      hists->fill1DHist(gen_co3, "gen_co3",";gen cosTheta",100,-1,1, 1,"GEN");
+      hists->fill1DHist(gen_phi, "gen_phi",";gen phi lp",  100, -TMath::Pi(), TMath::Pi(), 1,"GEN");
     }
 
     FillHistoCounts(1, eventWeight);
     CountEvents(1);
 
-    gendR  = gen_l1.DeltaR(gen_l2);
-    genMll = (gen_l1+gen_l2).M();
+    gendR   = gen_l1.DeltaR(gen_l2);
+    genMll  = (gen_l1+gen_l2).M();
+    genMllg = (gen_l1+gen_l2+gen_gamma).M();
 
     hists->fill1DHist(genMll,"gen_Mll_low",  ";m_{#mu#mu}",100,0, 50, 1,"GEN");
     hists->fill1DHist(genMll,"gen_Mll_full", ";m_{#mu#mu}",200,0,130, 1,"GEN");
@@ -434,20 +447,19 @@ Bool_t zgamma::Process(Long64_t entry)
     else if (accCut)
       return kTRUE;
 
-    if (sample == "dalitz"){
-      hists->fill1DHist(gen_l1.DeltaR(gen_gamma),"gen_l1gamma_deltaR","gen_l1gamma_deltaR",100,0,5, 1,"GEN");
-      hists->fill1DHist(gen_l2.DeltaR(gen_gamma),"gen_l2gamma_deltaR","gen_l2gamma_deltaR",100,0,5, 1,"GEN");
+    if (sample == "dalitz" || sample=="HZG"){
+      hists->fill1DHist(gen_l1.DeltaR(gen_gamma),"gen_l1gamma_deltaR",";#Delta R(#mu_{1}, #gamma)",100,0,5, 1,"GEN");
+      hists->fill1DHist(gen_l2.DeltaR(gen_gamma),"gen_l2gamma_deltaR",";#Delta R(#mu_{2}, #gamma)",100,0,5, 1,"GEN");
 
-      hists->fill1DHist(gen_higgs.Pt(),     "gen_higgs_pt",  "Pt of higgs",   100, 0,150,  1, "GEN");
-      hists->fill1DHist(gen_higgs.M(),      "gen_higgs_mass","Mass of higgs", 100, 50,180, 1, "GEN");
-      hists->fill1DHist(gen_gamma.Pt(),     "gen_gamma_pt",  "Pt of gamma",   50, 0,150,   1, "GEN");
-      hists->fill1DHist(gen_gamma.Eta(),    "gen_gamma_eta", "Eta of gamma",  50, -3,3,    1, "GEN");
+      hists->fill1DHist(gen_higgs.Pt(),  "gen_higgs_pt",  ";p_{T}^{H} (GeV)",   100, 0,150,  1, "GEN");
+      hists->fill1DHist(gen_higgs.M(),   "gen_higgs_mass",";m_{H} (GeV)",    100, 50,180, 1, "GEN");
+      hists->fill1DHist(gen_gamma.Pt(),  "gen_gamma_pt",  ";p_{T}^{#gamma}",  50, 0,150,  1, "GEN");
+      hists->fill1DHist(gen_gamma.Eta(), "gen_gamma_eta", ";#eta^{#gamma}",   50, -3,3,   1, "GEN");
+
       //hists->fill1DHist(gen_gamma_st1.Pt(), "gen_gamma_st1_pt","Pt of gamma",   50, 0,150,  1, "");
       //hists->fill1DHist(gen_gamma_st1.Eta(),"gen_gamma_st1_eta","Eta of gamma", 50, -3,3,  1, "");
     }
 
-    /*
-    */
   }
 
   FillHistoCounts(2, eventWeight);
@@ -696,8 +708,10 @@ Bool_t zgamma::Process(Long64_t entry)
   }
 
   Double_t Mll = (l1+l2).M();
+  Double_t Mllg = (l1+l2+gamma).M();
+  Double_t dR   = l1.DeltaR(l2);
 
-  hists->fill1DHist(Mll,  Form("diLep_mass_low_cut%i", 3), ";M(ll)", 50, 0,20,  1, "");
+  hists->fill1DHist(Mll,  Form("diLep_mass_low_cut%i",  3),";M(ll)", 50, 0,20,  1, "");
   hists->fill1DHist(Mll,  Form("diLep_mass_high_cut%i", 3),";M(ll)", 50, 0,120, 1, "");
 
 
@@ -725,6 +739,36 @@ Bool_t zgamma::Process(Long64_t entry)
   if(!isRealData && makeGen){
     hists->fill1DHist(genMll,  "gen_Mll_two_lep_reco", ";gen_Mll",100,0,mllMax, 1,"eff");
     hists->fill1DHist(gendR,   "gen_dR_two_lep_reco",  ";gen_dR", 50, 0,0.3,    1,"eff");
+
+
+    double co1,co2,phi,co3;
+
+    if (sample=="dalitz" || sample=="HZG"){
+      ang->GetAngles(l1, l2, gamma, co1,co2,phi,co3);
+      //cout<<eventNumber<<" gen Angles: c1= "<<co1<<"  c2="<<co2<<"   phi="<<phi<<"   coTh="<<co3<<endl;
+      hists->fill1DHist((gen_co1 - co1)/gen_co1, "res_co1",";Resolution on cos(#vec{l-},#vec{Z})",  100, -0.2,0.2, 1,"GEN");
+      hists->fill1DHist((gen_co2 - co2)/gen_co2, "res_co2",";Resolution on cos(#vec{l+},#vec{Z})",  100, -0.2,0.2, 1,"GEN");
+      hists->fill1DHist((gen_co3 - co3)/gen_co3, "res_co3",";Resolution on cos(#Theta)",  100, -0.2,0.2, 1,"GEN");
+      hists->fill1DHist((gen_phi - phi)/gen_phi, "res_phi",";Resolution on #phi(l+)",     100, -0.2,0.2, 1,"GEN");
+    }
+
+
+    if (fabs(gamma.SCEta()) < 1.4442){
+      hists->fill1DHist((genMll - Mll)/genMll, "res_EB_Mll",
+			";(m_{#mu#mu}^{gen} - m_{#mu#mu}^{reco})/m_{#mu#mu}^{gen}",                  100, -0.2,0.2, 1,"GEN");
+      hists->fill1DHist((genMllg - Mllg)/genMllg, "res_EB_Mllg",
+			";(m_{#mu#mu#gamma}^{gen} - m_{#mu#mu#gamma}^{reco})/m_{#mu#mu#gamma}^{gen}",100, -0.2,0.2, 1,"GEN");
+      hists->fill1DHist((gendR - dR)/gendR,    "res_EB_dR",
+			";(dR_{#mu#mu}^{gen} - dR_{#mu#mu}^{reco})/dR_{#mu#mu}^{gen}",               100, -0.2,0.2, 1,"GEN");
+    }
+    else if  (fabs(gamma.SCEta()) > 1.566){
+      hists->fill1DHist((genMll - Mll)/genMll, "res_EE_Mll",
+			";(m_{#mu#mu}^{gen} - m_{#mu#mu}^{reco})/m_{#mu#mu}^{gen}",                  100, -0.2,0.2, 1,"GEN");
+      hists->fill1DHist((genMllg - Mllg)/genMllg, "res_EE_Mllg",
+			";(m_{#mu#mu#gamma}^{gen} - m_{#mu#mu#gamma}^{reco})/m_{#mu#mu#gamma}^{gen}",100, -0.2,0.2, 1,"GEN");
+      hists->fill1DHist((gendR - dR)/gendR,    "res_EE_dR",
+			";(dR_{#mu#mu}^{gen} - dR_{#mu#mu}^{reco})/dR_{#mu#mu}^{gen}",               100, -0.2,0.2, 1,"GEN");
+    }
   }
 
   HM->SetLeptons(lPt1, lPt2);
@@ -777,7 +821,6 @@ Bool_t zgamma::Process(Long64_t entry)
   //  break;}
   //}
 
-  Float_t Mllg = (l1+l2+gamma).M();
 
 
   //if (Mllg<50 || Mllg>140)
@@ -858,6 +901,7 @@ Bool_t zgamma::Process(Long64_t entry)
 
 
   if ( (Mll>2.9 && Mll<3.3) || (Mll>9.3 && Mll<9.7)) return kTRUE; //jpsi and upsilon removeal
+  //if ( Mll>2.9 && Mll<3.3 ) return kTRUE; //just jpsi
   HM->FillHistosFull(8, eventWeight, "");
   FillHistoCounts(8, eventWeight);
   CountEvents(8);

@@ -423,11 +423,14 @@ for year in yearList:
       if doBlind:
         data.plotOn(testFrame, RooFit.Binning(myBinning), RooFit.Name('data'), RooFit.CutRange('r1'))
         data.plotOn(testFrame, RooFit.Binning(myBinning), RooFit.Name('data'), RooFit.CutRange('r2'))
+        testFrame.SetMinimum(0.1)
       else:
         data.plotOn(testFrame, RooFit.Binning(myBinning), RooFit.Name('data'))
 
-      if hjp: testFrame.SetMaximum(10)
-      else:   testFrame.SetMaximum(62)
+      if hjp:        testFrame.SetMaximum(10)
+      elif cat=='0': testFrame.SetMaximum(82)
+      else:          testFrame.SetMaximum(62)
+
       testFrame.Draw()
       hsig[0].SetAxisRange(115,135,"X")
       hsig[0].SetLineColor(kRed+1)

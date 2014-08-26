@@ -64,7 +64,7 @@ doBG      = opt.bkg
 doSignal  = opt.sig
 doQCD     = opt.qcd
 
-if opt.gen and not doSignal and  not doTest:
+if opt.gen and not doSignal and not doTest:
   print "We only will do gen level analysis on Signal MC sample for now"
   sys.exit(0)
 gen = " 0"

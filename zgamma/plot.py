@@ -149,9 +149,17 @@ if __name__ == "__main__":
     bkgZip = zip(bkgNames, bkgFiles)
   else: bkgZip = ''
 
-  sigFileMAD  = TFile(hPath+"/"+sel+"_"+period+"/hhhh_ggH-mad"+str(mass)+"_1.root", "OPEN")
-  sigFileVBF  = TFile(hPath+"/"+sel+"_"+period+"/hhhh_vbf-mad"+str(mass)+"_1.root", "OPEN")
-  sigFileVH   = TFile(hPath+"/"+sel+"_"+period+"/hhhh_vh-mad" +str(mass)+"_1.root", "OPEN")
+  sigGG  = {}
+  sigVBF = {}
+  sigVH  = {}
+  for m in ['120','125','130','135','140','145','150']:
+    sigGG[m]  = TFile(hPath+"/"+sel+"_"+period+"/hhhh_ggH-mad"+m+"_1.root", "OPEN")
+    sigVBF[m] = TFile(hPath+"/"+sel+"_"+period+"/hhhh_vbf-mad"+m+"_1.root", "OPEN")
+    sigVH[m]  = TFile(hPath+"/"+sel+"_"+period+"/hhhh_vh-mad"+ m+"_1.root", "OPEN")
+
+  sigFileGG   = sigGG['125']
+  sigFileVBF  = sigVBF['125']
+  sigFileVH   = sigVH['125']
 
   sigFileZjp  = TFile(hPath+"/"+sel+"_"+period+"/hhhh_ZtoJPsiGamma_1.root",  "OPEN")
   sigFileHjp  = TFile(hPath+"/"+sel+"_"+period+"/hhhh_HiggsToJPsiGamma_1.root",  "OPEN")
@@ -159,7 +167,7 @@ if __name__ == "__main__":
   if opt.mcfm:  sigFile = sigFileMCFM
   elif opt.hjp: sigFile = sigFileHjp
   elif opt.zjp: sigFile = sigFileZjp
-  else:         sigFile = sigFileMAD
+  else:         sigFile = sigFileGG
 
   dataFile = TFile(hPath+"/m_Data_"+sel+"_"+period+".root","OPEN")
 
@@ -194,13 +202,18 @@ if __name__ == "__main__":
   if opt.hjp: sigName= '#splitline{20xSignal}{h #rightarrow J/Psi #gamma}'
 
 
-  #ggHZGFile   = TFile(hPath+"/"+sel+"_"+period+"/hhhh_ggHZG-"+str(mass)+"_1.root", "OPEN")
+  ggHZGFile   = TFile(hPath+"/"+sel+"_"+period+"/hhhh_ggHZG-"+str(mass)+"_1.root", "OPEN")
+  hackZip = zip(['120','130','135','140','145','150'],
+                [sigGG['120'],sigGG['130'],sigGG['135'], sigGG['140'],sigGG['145'],sigGG['150']])
   #hackZip = zip(['ggHZG-125'],[ggHZGFile])
 
-  #u.drawAllInFile(None, "", hackZip, sigFileMAD, "Dalitz", "GEN", pathBase+'/GEN-lumi', None, "lumi")
-  #u.drawAllInFile(None, "", hackZip, sigFileMAD, "Dalitz", "GEN", pathBase+'/GEN-norm', None, "norm")
+  #u.drawAllInFile(None, "", hackZip, None, '', "GEN", pathBase+'/GEN-lumi', None, "lumi")
 
-  #u.drawAllInFile(None, "", '', sigFileMAD, "Dalitz", "eff", pathBase+'/eff', None, "norm")
+  #u.drawAllInFile(None, "", hackZip, sigGG['125'], '125', "GEN", pathBase+'/GEN-norm', None, "norm")
+  #u.drawAllInFile(None, "", '', sigFileGG, "h", "GEN", pathBase+'/GEN-norm', None, "norm")
+  # u.drawAllInFile(None, "", '', ggHZGFile, "h", "GEN", pathBase+'/GEN-norm', None, "norm")
+
+  #u.drawAllInFile(None, "", '', sigFileGG, "Dalitz", "eff", pathBase+'/eff', None, "norm")
 
   if cut not in ['14','15'] and not opt.apz:
     #u.drawAllInFile(dataFile, "Data", bkgZip, None, '', "", path, cut, "lumi")
@@ -208,14 +221,11 @@ if __name__ == "__main__":
     #u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "", path, cut, "norm1")
     u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "Angles", pathBase+'/Angles', cut, "norm1")
 
-  """
+
     #u.drawAllInFile(None, "", bkgZip, sigFile, sigName, "GEN", pathBase+'/GEN', None, "norm")
     #u.drawAllInFile(None, "", '', sigFile, sigName, "GEN", pathBase+'/GEN-angles', None, "norm")
     #u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName,  "",path, cut, "norm")
-    # u.drawAllInFile(dataFile, "data", bkgZip, sigFile,"50xSignal","EB",pathBase+"/EB", cut, "lumi")
-    # u.drawAllInFile(dataFile, "data", bkgZip, sigFile,"50xSignal","EE",pathBase+"/EE", cut, "lumi")
 
-  """
   u.drawAllInFile(dataFile, "data",bkgZip,sigFile,sigName,"Photon",pathBase+"/Photon/", None, "norm")
   u.drawAllInFile(dataFile, "data",bkgZip,sigFile,sigName,"Photon-EGamma",pathBase+"/Photon-EGamma/", None, "norm")
   #u.drawAllInFile(dataFile, "data",bkgZip,sigFile,sigName,"Photon-EnergyCorr",pathBase+"/Photon-EnergyCorr/", None, "norm")
@@ -252,7 +262,7 @@ if __name__ == "__main__":
     # dataFile.Close()
     #print yields_data
 
-    #sigFileMAD  = TFile(hPath+"/mugamma_"+period+"/hhhh_ggH-mad125_1.root", "OPEN")
+    #sigFileGG  = TFile(hPath+"/mugamma_"+period+"/hhhh_ggH-mad125_1.root", "OPEN")
 
   ss = opt.sel
   if opt.apz and doMerge:
@@ -313,12 +323,12 @@ if __name__ == "__main__":
       """
 
   '''
-  htmp = sigFileMAD.Get("02_lPt2_pt__cut"+cut)
+  htmp = sigFileGG.Get("02_lPt2_pt__cut"+cut)
   int1 = htmp.Integral()
   int2 = htmp.Integral(0,10)
   print '\n Fraction of event with trailing lepton pt<20: \n', float(int2)/int1
 
-  htmp = sigFileMAD.Get("04_ll_deltaR__cut"+cut)
+  htmp = sigFileGG.Get("04_ll_deltaR__cut"+cut)
   int1 = htmp.Integral()
   int2 = htmp.Integral(0,10)
   print '\n Fraction of event with dR(l1,l2)<0.4: \n', float(int2)/int1
@@ -326,7 +336,7 @@ if __name__ == "__main__":
 
   c1 = TCanvas("c4","small canvas",600,600);
   c1.cd()
-  Nev = sigFileMAD.Get("Counts/evt_byCut").GetBinContent(2)
+  Nev = sigFileGG.Get("Counts/evt_byCut").GetBinContent(2)
   cro  = u.getCS("ggH-125",'mu')
   lumi = u.getLumi("2012")
 
@@ -336,14 +346,14 @@ if __name__ == "__main__":
   #u.AFB(sigFileZjp, 'signal', 'FB_cosSC-diG_vs_Mllg_cut'+cut, pathBase+'/Angles/')
   #u.AFB(dataFile,   'data',   'FB_cosSC-diG_vs_Mllg_cut'+cut, pathBase+'/Angles/')
 
-  #u.FBAss(sigFileMAD, 'signal', 'FB_cosSC-ll_vs_Mll_cut'+cut, pathBase+'/Angles/')
+  #u.FBAss(sigFileGG, 'signal', 'FB_cosSC-ll_vs_Mll_cut'+cut, pathBase+'/Angles/')
   #u.FBAss(dataFile,   'data',   'FB_cosSC-ll_vs_Mll_cut'+cut, pathBase+'/Angles/')
 
 
   '''
-  hc7 = sigFileMAD.Get("tri_mass80__cut7").Integral(35,41)*scale
-  hc8 = sigFileMAD.Get("tri_mass80__cut8").Integral(35,41)*scale
-  hc9 = sigFileMAD.Get("tri_mass80__cut9").Integral(35,41)*scale
+  hc7 = sigFileGG.Get("tri_mass80__cut7").Integral(35,41)*scale
+  hc8 = sigFileGG.Get("tri_mass80__cut8").Integral(35,41)*scale
+  hc9 = sigFileGG.Get("tri_mass80__cut9").Integral(35,41)*scale
   print "Yields in bins that supposed to correspond to [122,128] window:\n",hc7, hc8, hc9
 
   hc7 = dataFile.Get("tri_mass80__cut7").Integral(36,40)

@@ -50,7 +50,7 @@ verbose    = 0
 noSFweight = 0
 rootrace   = False
 
-EBetaCut = 1.444
+EBetaCut = 1.4442
 EEetaCut = 1.566
 ptMllgCut  = 0.30
 ptGammaCut = 0

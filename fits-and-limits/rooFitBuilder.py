@@ -52,6 +52,7 @@ class FitBuilder:
         'Bern4': self.BuildBern4,
         'Bern5': self.BuildBern5,
         'CBG': self.BuildCrystalBallGauss,
+        'CBGM': self.BuildCrystalBallGaussM,
         'TripG': self.BuildTripleGauss}
 
     self.FitColorDict = {
@@ -622,10 +623,10 @@ class FitBuilder:
     suffix = self.suffix+'_'+piece
     meanG = meanCB = mean
 
-    if meanGLow is -1:   meanGLow = meanG-5
-    if meanGHigh is -1:  meanGHigh = meanG+5
-    if meanCBLow is -1:  meanCBLow = meanCB-5
-    if meanCBHigh is -1: meanCBHigh = meanCB+5
+    if meanGLow   == -1: meanGLow   = meanG-5
+    if meanGHigh  == -1: meanGHigh  = meanG+5
+    if meanCBLow  == -1: meanCBLow  = meanCB-5
+    if meanCBHigh == -1: meanCBHigh = meanCB+5
     meanGVar   = RooRealVar('meanGCBG_'  +suffix,'meanGCBG_'  +suffix, meanG, meanGLow, meanGHigh)
     meanCBVar  = RooRealVar('meanCBCBG_' +suffix,'meanCBCBG_' +suffix, meanCB, meanCBLow, meanCBHigh)
     sigmaCBVar = RooRealVar('sigmaCBCBG_'+suffix,'sigmaCBCBG_'+suffix, sigmaCB,sigmaCBLow,sigmaCBHigh)
@@ -635,7 +636,7 @@ class FitBuilder:
     fracVar    = RooRealVar('fracCBG_'   +suffix,'fracCBG_'   +suffix, frac,fracLow,fracHigh)
 
     crystal = RooCBShape('crystalCBG_'+suffix,'crystalCBG_'+suffix,self.mzg,meanCBVar,sigmaCBVar,alphaVar,nVar)
-    gauss   = RooGaussian('gaussCBG_'+suffix,'gaussCBG_'+suffix,self.mzg,meanGVar,sigmaGVar)
+    gauss   = RooGaussian('gaussCBG_' +suffix,'gaussCBG_'  +suffix,self.mzg,meanGVar, sigmaGVar)
     cbArgs  = RooArgList(gauss,crystal)
     fracArg = RooArgList(fracVar)
     CBG = RooAddPdf('CBG_'+suffix,'CBG_'+suffix,cbArgs,fracArg,True)
@@ -653,9 +654,43 @@ class FitBuilder:
     return CBG, paramList
 
 
+
+  def BuildCrystalBallGaussM(self, piece, mean = 125, meanG = -1, meanGLow = -1, meanGHigh = -1, meanCB = -1, meanCBLow = -1, meanCBHigh = -1,
+                            sigmaCB = 1.5, sigmaCBLow = 0.3, sigmaCBHigh = 20, alpha = 1, alphaLow = 0.5, alphaHigh = 10,
+                            n = 4, nLow = 0.5, nHigh = 50, sigmaG = 2, sigmaGLow = 0.3, sigmaGHigh = 20, frac = 0.1, fracLow = 0.0, fracHigh = 1.0):
+
+    suffix = self.suffix+'_'+piece
+    meanG = meanCB = mean
+
+    if meanGLow  == -1: meanGLow  = meanG-5
+    if meanGHigh == -1: meanGHigh = meanG+5
+    meanVar    = RooRealVar('meanCBG_'   +suffix,'meanCBG_'   +suffix, meanG, meanGLow, meanGHigh)
+    sigmaCBVar = RooRealVar('sigmaCBCBG_'+suffix,'sigmaCBCBG_'+suffix, sigmaCB,sigmaCBLow,sigmaCBHigh)
+    alphaVar   = RooRealVar('alphaCBG_'  +suffix,'alphaCBG_'  +suffix, alpha,alphaLow,alphaHigh)
+    nVar       = RooRealVar('nCBG_'      +suffix,'nCBG_'      +suffix, n,nLow,nHigh)
+    sigmaGVar  = RooRealVar('sigmaGCBG_' +suffix,'sigmaGCBG_' +suffix, sigmaG,sigmaGLow,sigmaGHigh)
+    fracVar    = RooRealVar('fracCBG_'   +suffix,'fracCBG_'   +suffix, frac,fracLow,fracHigh)
+
+    crystal = RooCBShape('crystalCBG_'+suffix,'crystalCBG_'+suffix,self.mzg,meanVar,sigmaCBVar,alphaVar,nVar)
+    gauss   = RooGaussian('gaussCBG_' +suffix,'gaussCBG_'  +suffix,self.mzg,meanVar, sigmaGVar)
+    cbArgs  = RooArgList(gauss,crystal)
+    fracArg = RooArgList(fracVar)
+    CBG = RooAddPdf('CBG_'+suffix,'CBG_'+suffix,cbArgs,fracArg,True)
+
+    SetOwnership(meanVar,0)
+    SetOwnership(sigmaCBVar,0)
+    SetOwnership(alphaVar,0)
+    SetOwnership(nVar,0)
+    SetOwnership(sigmaGVar,0)
+    SetOwnership(fracVar,0)
+    SetOwnership(crystal,0)
+    SetOwnership(gauss,0)
+    paramList = [meanVar,sigmaCBVar,alphaVar,nVar,sigmaGVar,fracVar]
+    return CBG, paramList
+
   def BuildTripleGauss(self, piece, mean = 125, mean1 = -1, mean1Low = -1, mean1High = -1, sigma1 = 2, sigma1Low = 1, sigma1High = 8,
-      delta21 = 0, delta21Low = -2, delta21High = 2, s21 = 3, s21Low = 1, s21High = 30, delta31 = 0, delta31Low = -2, delta31High = 2,
-      s32 = 3, s32Low = 1, s32High = 30, frac23 = 0.9, frac23Low = 0, frac23High = 1, frac123 = 0.9, frac123Low = 0, frac123High = 1):
+                       delta21 = 0, delta21Low = -2, delta21High = 2, s21 = 3, s21Low = 1, s21High = 30, delta31 = 0, delta31Low = -2, delta31High = 2,
+                       s32 = 3, s32Low = 1, s32High = 30, frac23 = 0.9, frac23Low = 0, frac23High = 1, frac123 = 0.9, frac123Low = 0, frac123High = 1):
 
     suffix = self.suffix+'_'+piece
     mean1 = mean

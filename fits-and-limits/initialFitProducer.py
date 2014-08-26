@@ -545,7 +545,7 @@ if __name__=="__main__":
 
   print len(sys.argv)
   print sys.argv
-  if len(sys.argv) != 3:
+  if len(sys.argv) != 2:
     sys.exit()
 
   s = sys.argv[1]

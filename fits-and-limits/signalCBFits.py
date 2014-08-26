@@ -16,20 +16,24 @@ cf = cp.ConfigParser()
 cf.read('config.cfg')
 
 #massList   = ['125.0']
-massList   = ['%.1f'%(a) for a in u.drange(120,150,1.)]
+massList   = ['%.1f'%(a) for a in u.drange(120,150,0.5)]
+
+myFunc = 'CBGM' #Crystall-Ball + Gauss (with same Mean)
 
 # rounding function for interpolation
 def roundTo5(x, base=5):
   return int(base * round(float(x)/base))
 
-def SignalNameParamFixer(year,lepton,cat,sig,mass,ws):
-  print 'DBG SignalNameParamFixer'
+def SignalNameParamFixer(year,lepton,cat,sig,mass,ws, sameMean=True):
+  # print 'DBG SignalNameParamFixer'
   fitName    = '_'.join(['CBG',year,lepton,'cat'+cat,sig,mass,'Interp'])
   newFitName = '_'.join(['sig',sig,lepton,year,'cat'+cat])
+  mean       = '_'.join(['meanCBG',   year,lepton,'cat'+cat,sig,mass, 'Interp'])
   meanG      = '_'.join(['meanGCBG',  year,lepton,'cat'+cat,sig,mass, 'Interp'])
   meanCB     = '_'.join(['meanCBCBG', year,lepton,'cat'+cat,sig,mass, 'Interp'])
   sigmaCB    = '_'.join(['sigmaCBCBG',year,lepton,'cat'+cat,sig,mass, 'Interp'])
   sigmaG     = '_'.join(['sigmaGCBG', year,lepton,'cat'+cat,sig,mass, 'Interp'])
+  meanNew    = '_'.join(['sig',sig,'mean',   lepton,year,'cat'+cat])
   meanGNew   = '_'.join(['sig',sig,'meanG',  lepton,year,'cat'+cat])
   meanCBNew  = '_'.join(['sig',sig,'meanCB', lepton,year,'cat'+cat])
   sigmaCBNew = '_'.join(['sig',sig,'sigmaCB',lepton,year,'cat'+cat])
@@ -38,12 +42,19 @@ def SignalNameParamFixer(year,lepton,cat,sig,mass,ws):
   sigmaShift = '_'.join(['sig',sig,'sigmaShift',lepton,year,'cat'+cat])
   ws.factory(mShift+'[1]')
   ws.factory(sigmaShift+'[1]')
-  ws.factory('prod::'+meanGNew+'('+meanG+','+mShift+')')
-  ws.factory('prod::'+meanCBNew+'('+meanCB+','+mShift+')')
-  ws.factory('prod::'+sigmaCBNew+'('+sigmaCB+','+sigmaShift+')')
-  ws.factory('prod::'+sigmaGNew+'('+sigmaG+','+sigmaShift+')')
-  ws.factory('EDIT::'+newFitName+'('+fitName+','+meanG+'='+meanGNew+','+meanCB+'='+meanCBNew+','
-             +sigmaCB+'='+sigmaCBNew+','+sigmaG+'='+sigmaGNew+')')
+
+  if sameMean:
+    ws.factory('prod::'+meanNew+'('+mean+','+mShift+')')
+    ws.factory('prod::'+sigmaCBNew+'('+sigmaCB+','+sigmaShift+')')
+    ws.factory('prod::'+sigmaGNew+'('+sigmaG+','+sigmaShift+')')
+    ws.factory('EDIT::'+newFitName+'('+fitName+','+mean+'='+meanNew+','+sigmaCB+'='+sigmaCBNew+','+sigmaG+'='+sigmaGNew+')')
+  else:
+    ws.factory('prod::'+meanGNew+'('+meanG+','+mShift+')')
+    ws.factory('prod::'+meanCBNew+'('+meanCB+','+mShift+')')
+    ws.factory('prod::'+sigmaCBNew+'('+sigmaCB+','+sigmaShift+')')
+    ws.factory('prod::'+sigmaGNew+'('+sigmaG+','+sigmaShift+')')
+    ws.factory('EDIT::'+newFitName+'('+fitName+','+meanG+'='+meanGNew+','+meanCB+'='+meanCBNew+','
+               +sigmaCB+'='+sigmaCBNew+','+sigmaG+'='+sigmaGNew+')')
 
 
 def SignalFitMaker(lep, year, cat, subdir):
@@ -127,9 +138,8 @@ def SignalFitMaker(lep, year, cat, subdir):
         print massLow, massHi
         #raw_input("Mass low and Hi; hit enter")
 
-        print
         fitBuilder.__init__(mzg,year,lep,cat,sig=prod,mass=str(massHi))
-        SigFit_Low = fitBuilder.Build('CBG', piece = 'Low', mean = massLow)[0]
+        SigFit_Low = fitBuilder.Build(myFunc, piece = 'Low', mean = massLow)[0]
 
         SigFit_Low.fitTo(sig_ds_Low, RooFit.Range('fitRegion1'), RooFit.SumW2Error(kTRUE), RooFit.Strategy(1), RooFit.NumCPU(4), RooFit.PrintLevel(-1))
 
@@ -143,7 +153,7 @@ def SignalFitMaker(lep, year, cat, subdir):
         sig_ds_Hi = myWs.data(sigNameHi)
 
         fitBuilder.__init__(mzg,year,lep,cat,sig=prod,mass=str(massLow))
-        SigFit_Hi = fitBuilder.Build('CBG', piece = 'Hi', mean = massLow)[0]
+        SigFit_Hi = fitBuilder.Build(myFunc, piece = 'Hi', mean = massLow)[0]
 
         SigFit_Hi.fitTo(sig_ds_Hi, RooFit.Range('fitRegion2'), RooFit.SumW2Error(kTRUE), RooFit.Strategy(1), RooFit.NumCPU(4), RooFit.PrintLevel(-1))
 
@@ -171,7 +181,7 @@ def SignalFitMaker(lep, year, cat, subdir):
       sigNameInterp = '_'.join(['ds','sig',prod,lep,year,'cat'+cat,'M'+str(mass)])
 
       fitBuilder.__init__(mzg,year,lep,cat,sig=prod,mass=str(mass))
-      SigFit_Interp,paramList = fitBuilder.Build('CBG', piece = 'Interp', mean = mass)
+      SigFit_Interp,paramList = fitBuilder.Build(myFunc, piece = 'Interp', mean = mass)
 
       SigFit_Interp.fitTo(interp_ds, RooFit.Range('fitRegion_'+massString), RooFit.SumW2Error(kTRUE), RooFit.Strategy(1), RooFit.NumCPU(4), RooFit.PrintLevel(-1))
 
@@ -198,7 +208,7 @@ def SignalFitMaker(lep, year, cat, subdir):
       regionName = fit.GetName().split('_')[-1]
       # fit.plotOn(testFrame)
       # fit.plotOn(testFrame, RooFit.NormRange('fitRegion_'+regionName))
-      fit.plotOn(testFrame, RooFit.Normalization(normList[i],RooAbsReal.NumEvent), RooFit.LineColor(TColor.GetColorPalette(i*20)))
+      fit.plotOn(testFrame, RooFit.Normalization(normList[i],RooAbsReal.NumEvent), RooFit.LineColor(TColor.GetColorPalette(i*10)))
       # fit.paramOn(testFrame)
       # testFrame.getAttText().SetTextSize(0.02)
       # testFrame.getAttText().SetTextColor(kRed)
@@ -206,17 +216,21 @@ def SignalFitMaker(lep, year, cat, subdir):
     for i,signal in enumerate(dsList):
       signal.plotOn(testFrame, RooFit.MarkerStyle(20+i), RooFit.MarkerSize(1), RooFit.Binning(150))
 
+    m = testFrame.GetMaximum()
+
+    testFrame.SetMaximum(1.1*m)
+    '''
     if prod == 'gg':
-      testFrame.SetMaximum(0.7)
+      testFrame.SetMaximum(1.1*m)
     elif prod =='vbf':
       testFrame.SetMaximum(0.05)
     elif prod =='v':
       testFrame.SetMaximum(0.03)
-
+    '''
     testFrame.SetMinimum(0.0)
 
     testFrame.Draw()
-    testFrame.SetTitle(";m_{H} (GeV); Signal shape")
+    testFrame.SetTitle(";m_{#mu#mu#gamma} (GeV);Signal shape")
     CMS_lumi(c, 2, 11)
     c.SaveAs(plotBase+"/"+'_'.join(['sig','fit',prod,lep,year,'cat'+cat])+'.png')
 

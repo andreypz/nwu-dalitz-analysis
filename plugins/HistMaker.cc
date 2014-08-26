@@ -345,7 +345,7 @@ void HistMaker::FillHistosFull(Int_t num, Double_t weight, string dir)
       hists->fill1DHist(co1, Form("co1_cut%i", num), ";cos(#vec{l-},#vec{Z}) in CM", 100,-1,1, weight,"Angles");
       hists->fill1DHist(co2, Form("co2_cut%i", num), ";cos(#vec{l+},#vec{Z}) in CM", 100,-1,1, weight,"Angles");
       hists->fill1DHist(co3, Form("co3_cut%i", num), ";cos(#Theta)",                 100,-1,1, weight,"Angles");
-      hists->fill1DHist(phi, Form("phi_cut%i", num), ";#phi(l-)",50, -TMath::Pi(), TMath::Pi(),weight,"Angles");
+      hists->fill1DHist(phi, Form("phi_cut%i", num), ";#phi(l+)",50, -TMath::Pi(), TMath::Pi(),weight,"Angles");
     }
 
     //Phi* variable

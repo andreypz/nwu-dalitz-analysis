@@ -45,7 +45,7 @@ Bool_t doZee = 0;
 Bool_t makeFitTree = 0;
 Bool_t makeApzTree = 0;
 
-const UInt_t hisEVTS[] = {536,233};
+const UInt_t hisEVTS[] = {192, 696, 907};
 Int_t evSize = sizeof(hisEVTS)/sizeof(int);
 
 bool P4SortCondition(const TLorentzVector& p1, const TLorentzVector& p2) {return (p1.Pt() > p2.Pt());}
@@ -109,7 +109,7 @@ void egamma::Begin(TTree * tree)
 
   fout.open("./out_synch_.txt",ofstream::out);
   fout.precision(3); fout.setf(ios::fixed, ios::floatfield);
-  cout.precision(4); //fout.setf(ios::fixed, ios::floatfield);
+  cout.precision(5); //fout.setf(ios::fixed, ios::floatfield);
 
   histoFile->cd("fitTree");
   if (makeFitTree){
@@ -491,9 +491,9 @@ Bool_t egamma::Process(Long64_t entry)
 	  HM->MakePhotonEnergyCorrPlots(*thisPhoton, corrPhoEnReco, corrPhoEnSC);
 
 	  //cout<<runNumber<<"  uncor en="<< thisPhoton->E()<<"  cor en = "<<corrPhoEn<<endl;
-	  Double_t scale = 1;
+	  //Double_t scale = 1;
 	  //Double_t scale = corrPhoEnReco/thisPhoton->E();
-	  //Double_t scale = corrPhoEnSC/thisPhoton->E();
+	  Double_t scale = corrPhoEnSC/thisPhoton->E();
 
 	  thisPhoton->SetXYZM(scale*thisPhoton->Px(), scale*thisPhoton->Py(),scale*thisPhoton->Pz(),0);
 
@@ -563,20 +563,42 @@ Bool_t egamma::Process(Long64_t entry)
 	electrons0.push_back(*thisElec);
       }
 
+      TCPhoton match;
+      Bool_t isMatched = 0;
+      for(UInt_t p=0; p<photons0.size(); p++)
+	{
+	  if (fabs(thisElec->SCEta()-photons0[p].SCEta()) < 0.0001){
+	    match = photons0[p];
+	    isMatched = 1;
+	    //cout<<" Ele matched to photon! \t ev="<<nEvents[0]-1<<endl;
+	    //cout<<"Ph:  pt = "<<match.Pt()<<"  SCEta = "<<match.SCEta()<<"  SCPhi = "<<match.SCPhi()<<endl;
+	    //cout<<"Ele: pt = "<<thisElec->Pt()<<"   SCEta = "<<thisElec->SCEta()<<"  SCPhi = "<<thisElec->SCPhi()<<endl;
+	    break;
+	  }
+	}
+
       if (thisElec->Pt() > 30 && fabs(thisElec->Eta()) < 1.4442 &&
 	  ObjID->PassDalitzEleID(*thisElec, pvPosition, "MVA", DAleMvaScore) ){
 	thisElec->SetIdMap("mvaScore", DAleMvaScore);
-	DAlectrons.push_back(*thisElec);
+
+	//cout<<"reco ele: "<<i<<endl;
+	if (isMatched && ObjID->HggPreselection(match))
+	  DAlectrons.push_back(*thisElec);
+
+
       }
 
       bool idpass = ObjID->PassDalitzEleID(*thisElec, pvPosition, "MVA", DAleMvaScore);
       thisElec->SetIdMap("mvaScore", DAleMvaScore);
 
+
       for(Int_t ev=0; ev<evSize;ev++){
-	if (nEvents[0]-1 == hisEVTS[ev]){cout<<nEvents[0]-1<<" evNumber="<<eventNumber<<endl;
+	if (nEvents[0]-1 == hisEVTS[ev]){cout<<nEvents[0]-1<<" evNumber = "<<eventNumber<<endl;
 	  cout<<"gamma: pt = "<<gamma.Pt()<<"  SCEta = "<<gamma.SCEta()<<"  SCPhi = "<<gamma.SCPhi()<<endl;
-	  cout<<"R9 = "<<gamma.R9()<<"  hadoverEm = "<<gamma.HadOverEm()<<endl;
+	  cout<<"\t R9 = "<<gamma.R9()<<"  hadoverEm = "<<gamma.HadOverEm()<<endl;
 	  cout<<"Ele  : pt = "<<thisElec->Pt()<<"   SCEta = "<<thisElec->SCEta()<<"  SCPhi = "<<thisElec->SCPhi()<<"  MVA = "<<thisElec->IdMap("mvaScore")<<endl;
+	  cout<<"\t R9 = "<<thisElec->R9()<<"  hadoverEm = "<<thisElec->HadOverEm()<<endl;
+	  cout<<"\t matched to pho: "<<isMatched<<"  pass Hgg pre: "<<ObjID->HggPreselection(match)<<endl;
 	  vector<TCEGamma> sc0 = thisElec->BaseSC();
 	  sort(sc0.begin(),  sc0.end(),  SCESortCondition);
 	  const vector<TCElectron::Track> trk0 = thisElec->GetTracks();
@@ -592,6 +614,8 @@ Bool_t egamma::Process(Long64_t entry)
 	  //  <<" EoverPt = "<<thisElec->SCEnergy()/(trk[0]+trk[1]).Pt()<<endl;
 	  //cout<<"dzy = "<<thisElec->Dxy(pvPosition)<<"  dz = "<<thisElec->Dz(pvPosition)<<endl;
 	  //thisElec->Dump();
+	  //ObjID->ElectronDump(*thisElec);
+
 	  break;}
       }
 
@@ -789,15 +813,15 @@ Bool_t egamma::Process(Long64_t entry)
 
   float xx[6] = {-1,-1,-1,-1,-1,-1};
   TCTrack::ConversionInfo cI = trk[0].GetConversionInfo();
-  if (cI.vtxProb>1e-6 && cI.lxyBS>2 && cI.nHitsMax>1)
-    return kTRUE;
+  //if (cI.vtxProb>1e-6 && cI.lxyBS>2 && cI.nHitsMax>1)
+  //return kTRUE;
   xx[0] = cI.vtxProb;
   xx[1] = cI.lxyBS;
   xx[2] = cI.nHitsMax;
 
   cI = trk[1].GetConversionInfo();
-  if (cI.vtxProb>1e-6 && cI.lxyBS>2 && cI.nHitsMax>1)
-    return kTRUE;
+  //if (cI.vtxProb>1e-6 && cI.lxyBS>2 && cI.nHitsMax>1)
+  //return kTRUE;
   xx[3] = cI.vtxProb;
   xx[4] = cI.lxyBS;
   xx[5] = cI.nHitsMax;
@@ -808,7 +832,7 @@ Bool_t egamma::Process(Long64_t entry)
       cout<<"gamma: pt = "<<gamma.Pt()<<"  SCEta = "<<gamma.SCEta()<<"  SCPhi = "<<gamma.SCPhi()<<endl;
       //cout<<"R9 = "<<gamma.R9()<<"  hadoverEm = "<<gamma.HadOverEm()<<endl;
       cout<<"Ele  : pt = "<<DALE.Pt()<<"   SCEta = "<<DALE.SCEta()<<"  SCPhi = "<<DALE.SCPhi()<<"  MVA = "<<DALE.IdMap("mvaScore")<<endl;
-      cout<<rhoFactor<<endl;
+      cout<<"rho = "<<rhoFactor<<endl;
       //cout<<"Track 1: pt="<<DALE.GetTracks()[0].Pt()<<endl;
       //cout<<"Track 2: pt="<<DALE.GetTracks()[1].Pt()<<endl;
       //const vector<TCElectron::Track> trk = DALE.GetTracks();
@@ -829,6 +853,8 @@ Bool_t egamma::Process(Long64_t entry)
       //sc[1].Dump();
       //sc[2].Dump();
       //cout<<"sc0 "<<sc[0].Pt()<<"sc1 "<<sc[1].Pt()<<"sc2 "<<sc[2].Pt()<<endl;
+
+
       break;}
   }
 

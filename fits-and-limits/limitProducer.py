@@ -17,47 +17,84 @@ import ConfigParser as cp
 cf = cp.ConfigParser()
 cf.read('config.cfg')
 
+method = "Asymptotic"
+if options.prof:
+  method = "ProfileLikelihood"
+
 if __name__ == "__main__":
 
-  #massList   = ['%.1f'%(a) for a in u.drange(120,150,5)]
-  massList   = [a.strip() for a in (cf.get("fits","massList-more")).split(',')]
+  massList   = ['%.1f'%(a) for a in u.drange(120,150,1)]
+  #massList   = [a.strip() for a in (cf.get("fits","massList-more")).split(',')]
+  catList    = [a.strip() for a in (cf.get("fits","catList")).split(',')]
+
+  catList = ['EB','el']
 
   s = cf.get("path","ver")
-  dir = s
+  myDir = s
+
   if options.noSyst:
-    dir = s.replace("/","")+"-noSyst"
-    print s, dir
-    os.system("cp -r "+s+"  "+dir)
-    cf.set("path","ver", dir)
+    myDir = s.replace("/","")+"-noSyst"
+    print s, myDir
+    os.system("cp -r "+s+"  "+myDir)
+    cf.set("path","ver", myDir)
     with open(r'config.cfg', 'wb') as configfile:
       cf.write(configfile)
 
   for m in massList:
-    print "\n**\t Making limits for M=",m,"\t**\n"
-    #card = "output_cards/hzg_el_2012_cat0_M"+m+"_Dalitz.txt"
-    card_mu  = dir+"/output_cards/hzg_mu_2012_catEB_M"+m+"_Dalitz_.txt"
+    cardNames = ''
+    for cat in catList:
+      print "\n**\t Making limits for M=",m,"  cat = ",cat, "\t**\n"
+      # card = "output_cards/hzg_el_2012_cat0_M"+m+"_Dalitz.txt"
+      card_mu  = myDir+"/output_cards/hzg_mu_2012_cat"+cat+"_M"+m+"_Dalitz_.txt"
+      card_el  = myDir+"/Dalitz_electron2/datacard_hzg_eeg_cat12_8TeV_"+m[:3]+".txt"
 
-    #card_ele = "./cards_ele2/realistic-counting-experiment_"+m[0:3]+".txt"
-    card = ""
+      if cat in ['EB']:
+        cardNames = cardNames+' '+card_mu
+      if cat in ['el']:
+        cardNames = cardNames+' '+card_el
+      # card_ele = "./cards_ele2/realistic-counting-experiment_"+m[0:3]+".txt"
+      card = ""
 
-    if options.comb:
-      print "not yet"
+      if options.comb:
+        print "not yet"
+      elif cat in ['el']:
+        card = card_el
+      else:
+        card = card_mu
+
+      print 'Using CARD = \n',card
+
+      if options.noSyst:
+        os.system('combine -M '+method+' '+card + ' -m '+m+' -S 0')
+      else:
+        print 'not doing it now'
+        #os.system('combine -M '+method+' '+card + ' -m '+m)
+
+      if m[-1]=='5':
+        fname = "higgsCombineTest."+method+".mH"+m
+        os.system("mv "+fname+".root "+myDir+'/'+fname+'_cat'+cat+'.root')
+      else:
+        fname = "higgsCombineTest."+method+".mH"+m[0:3]
+        os.system("mv "+fname+".root "+myDir+'/'+fname+'.0_cat'+cat+'.root')
+
+    print '\t Combining the cards: \n', cardNames
+    comboName = myDir+'/output_cards/combo_mH'+m+'.txt'
+    os.system('combineCards.py '+cardNames+' > '+comboName)
+    os.system("sed -i 's:"+myDir+"/output_cards/"+s[:3]+":"+s[:3]+":g' "+comboName)
+
+    os.system('combine -M '+method+' '+comboName + ' -m '+m)
+
+    if m[-1]=='5':
+      fname = "higgsCombineTest."+method+".mH"+m
+      os.system("mv "+fname+".root "+myDir+'/'+fname+'_catCombo.root')
     else:
-      card = card_mu
+      fname = "higgsCombineTest."+method+".mH"+m[0:3]
+      os.system("mv "+fname+".root "+myDir+'/'+fname+'.0_catCombo.root')
 
-    print 'Using CARD = \n',card
 
+    print myDir, s[:3]
 
-    method = "Asymptotic"
-    if options.prof:
-      method = "ProfileLikelihood"
-    if options.noSyst:
-      os.system('combine -M '+method+' '+card + ' -m '+m+' -S 0')
-    else:
-      os.system('combine -M '+method+' '+card + ' -m '+m)
-
-  os.system("mv higgsCombineTest."+method+"* "+dir)
-  print dir
-
-  os.system("./limitPlotter.py "+dir)
-  #os.system('combine -M ProfileLikelihood '+sys.argv[1]+ ' -m 125 -t 100')
+  for cat in catList:
+    os.system("./limitPlotter.py "+myDir+" --cat="+cat)
+  os.system("./limitPlotter.py "+myDir+" --cat=Combo")
+    # os.system('combine -M ProfileLikelihood '+sys.argv[1]+ ' -m 125 -t 100')

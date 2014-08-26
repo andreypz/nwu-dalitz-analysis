@@ -624,8 +624,7 @@ Bool_t jpsiGamma::Process(Long64_t entry)
   }
 
   if (gamma.Pt() < cut_gammapt) return kTRUE;
-  //if (fabs(gamma.Eta()) > 1.444) return kTRUE;
-  if (fabs(gamma.SCEta()) > 1.444) return kTRUE;
+  if (fabs(gamma.SCEta()) > 1.4442) return kTRUE;
 
   if(!isRealData && makeGen){
     hists->fill1DHist(genMll,  "gen_Mll_reco_gamma_iso",  ";gen_Mll",100,0,mllMax, 1,"eff");
