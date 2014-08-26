@@ -49,6 +49,8 @@
 #include "../plugins/HistManager.h"
 #include "../plugins/PhotonScaleCorrections.hh"
 
+#include "../plugins/MuScleFitCorrector.h"
+
 //#include "../plugins/PhosphorCorrectorFunctor.hh"
 // Header file for the classes stored in the TTree if any.
 
@@ -71,6 +73,7 @@ class jpsiGamma : public TSelector {
   rochcor2012 *roch;
   ObjectID *ObjID;
   HistMaker *HM;
+  MuScleFitCorrector *muScle;
 
   UInt_t nEvents[nC];
   UInt_t totEvents;

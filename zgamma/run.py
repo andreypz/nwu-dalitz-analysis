@@ -64,9 +64,9 @@ gROOT.LoadMacro("HistManager.cc+")
 gROOT.LoadMacro("ZGAngles.cc+")
 gROOT.LoadMacro("WeightUtils.cc+")
 gROOT.LoadMacro("TriggerSelector.cc+")
-
 gROOT.LoadMacro("rochcor2012v2.C+")
-#gSystem.Load("lib/libShapeLine.so")
+if selection=='jp-mugamma':
+  gROOT.LoadMacro("MuScleFitCorrector.h+")
 gROOT.LoadMacro("TCPhysObject.cc+")
 gROOT.LoadMacro("TCJet.cc+")
 gROOT.LoadMacro("TCMET.cc+")

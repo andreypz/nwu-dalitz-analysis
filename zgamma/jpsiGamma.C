@@ -13,6 +13,8 @@ string myTriggers[ntrig] = {
   "HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v"
 };
 
+TString fitParametersFile = "../data/MuScleFitCorrector_v4_3/MuScleFit_2011_MC_42X.txt";
+
 UInt_t nEventsTrig[nC][ntrig];
 
 string  myTrigger = "";
@@ -25,7 +27,8 @@ Float_t mllMax = 25;
 Bool_t checkTrigger = kTRUE;
 //Float_t global_Mll = 0;
 //Bool_t applyPhosphor = 0;
-Bool_t doRochCorr = 1;
+Bool_t doRochCorr = 0;
+Bool_t doMuScle = 1;
 Bool_t doZee = 0;
 Bool_t isMugamma = 0;
 Bool_t makeApzTree = 1;
@@ -89,6 +92,8 @@ void jpsiGamma::Begin(TTree * tree)
   roch     = new rochcor2012();
   triggerSelector = new TriggerSelector("", period, *triggerNames);
   myRandom = new TRandom3();
+
+  muScle = new MuScleFitCorrector(fitParametersFile);
 
   for (Int_t n1=0; n1<nC; n1++){
     nEvents[n1]=0;
@@ -594,11 +599,17 @@ Bool_t jpsiGamma::Process(Long64_t entry)
     if (!(fabs(thisMuon->Eta()) < 2.4)) continue;
 
     if(thisMuon->Pt() > 4 && ObjID->PassMuonId(*thisMuon, pvPosition, "Soft") ) {
-      if (doRochCorr){
+      if (doRochCorr && !doMuScle){
 	Float_t qter = 1;
 	if (isRealData) roch->momcor_data(*thisMuon, thisMuon->Charge(), 0, qter);
 	else            roch->momcor_mc(  *thisMuon, thisMuon->Charge(), 0, qter );
       }
+      else if(!doRochCorr && doMuScle){
+	muScle->applyPtCorrection(*thisMuon,thisMuon->Charge());
+      }
+      else
+	Abort("Only one set of Muon corrections allowd: rochcor or muscle...");
+
       muons.push_back(*thisMuon);
     }
   }
