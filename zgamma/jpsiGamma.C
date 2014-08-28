@@ -13,7 +13,7 @@ string myTriggers[ntrig] = {
   "HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v"
 };
 
-TString fitParametersFile = "../data/MuScleFitCorrector_v4_3/MuScleFit_2011_MC_42X.txt";
+TString fitParametersFile = "none";
 
 UInt_t nEventsTrig[nC][ntrig];
 
@@ -52,11 +52,17 @@ void jpsiGamma::Begin(TTree * tree)
   gen       = (string)((TObjString*)args->At(3))->GetString();
   period    = "2012";
 
-
   const size_t last = string::npos;
   if (sample.find("DYJets")!=last)
     isDYJets = 1;
   cout<<"is DYJets sample !? "<<isDYJets<<endl;
+
+  if (sample.find("Run2012")!=last)
+    fitParametersFile = "../data/MuScleFitCorrector_v4_3/MuScleFit_2012ABC_DATA_ReReco_53X.txt";
+  if (sample.find("Run2012D")!=last)
+    fitParametersFile = "../data/MuScleFitCorrector_v4_3/MuScleFit_2012D_DATA_ReReco_53X.txt";
+  else
+    fitParametersFile = "../data/MuScleFitCorrector_v4_3/MuScleFit_2012_MC_53X_smearReReco.txt";
 
   if (selection.find("zee")!=last) {
     doZee = true;
@@ -607,8 +613,8 @@ Bool_t jpsiGamma::Process(Long64_t entry)
       else if(!doRochCorr && doMuScle){
 	muScle->applyPtCorrection(*thisMuon,thisMuon->Charge());
       }
-      else
-	Abort("Only one set of Muon corrections allowd: rochcor or muscle...");
+      else if (doRochCorr && doMuScle)
+	Abort("Only one set of Muon corrections allowed: rochcor or muscle...");
 
       muons.push_back(*thisMuon);
     }

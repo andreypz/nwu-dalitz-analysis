@@ -14,6 +14,19 @@ lumi2012 = float(conf.get("lumi","lumi2012A")) + float(conf.get("lumi","lumi2012
     float(conf.get("lumi","lumi2012C")) + float(conf.get("lumi","lumi2012D"))
 lumi = lumi2012
 
+
+# The rooFit stuff is for resolution fits and j/psi mass fits
+gSystem.Load("libRooFit")
+mll = RooRealVar("mll","mll",2.5,3.7)
+res = RooRealVar("res","res",-1,1)
+mean_mll  = RooRealVar("#mu",   "mean", 3.0, 0.0, 20.0)
+width_mll = RooRealVar("#Delta","width",0.0, 0.0, 0.02)
+sigma_mll = RooRealVar("#sigma","sigma",1.0, 0.0, 10.0)
+mean_res  = RooRealVar("mean_res", "mean_res", 3.0, 0.0, 20.0)
+sigma_res = RooRealVar("sigma_res","sigma_res",1.0, 0.0, 10.0)
+gauss = RooGaussian("gauss","gauss",res,mean_res,sigma_res)
+
+
 def yearToTeV(y):
   if y=='2011': return '7TeV'
   elif y=='2012': return '8TeV'
@@ -147,7 +160,7 @@ def createDir(myDir):
       else: raise
 
 
-def  stackQCD(dic, hName, lumi):
+def stackQCD(dic, hName, lumi):
   qcd_tot = TH1F()
   isInit = 0
   for key, f in dic.iteritems():
@@ -235,7 +248,7 @@ def makeStack(bZip, histDir, histoName, leg, lumi, howToScale, normToScale=None)
   return hs
 
 
-def drawAllInFile(f1, name1, bZip, f3, name3, myDir,path, N, howToScale="none", isLog=False, doRatio=False):
+def drawAllInFile(f1, name1, bZip, f3, name3, myDir,path, N, howToScale="none", isLog=False, doRatio=False, doFits=False):
   print 'myDir is ', myDir
   if f1!=None and not f1.IsZombie():
     f1.cd(myDir)
@@ -369,6 +382,7 @@ def drawAllInFile(f1, name1, bZip, f3, name3, myDir,path, N, howToScale="none", 
         hmaxs.append(h1.GetMaximum())
 
         mainHist = h1
+
 
 
         if "phi" in histoName:
@@ -538,11 +552,52 @@ def drawAllInFile(f1, name1, bZip, f3, name3, myDir,path, N, howToScale="none", 
         leg.SetY1(0.85)
         leg.SetY2(0.7)
       '''
+      if doFits:
+        if 'diLep_mass_jpsi_' in histoName:
+          mllFrame = mll.frame()
+          if h1!=None and h3!=None:
+            mll.setRange('fitRange',2.9,3.3)
+
+            dh1 = RooDataHist("dh1","dh1", RooArgList(mll), h1)
+            voigt1 = RooVoigtian("voigt1","voigt1",mll,mean_mll,width_mll,sigma_mll)
+            filt1  = RooFitResult(voigt1.fitTo(dh1, RooFit.Range('fitRange'), RooFit.Save()))
+            dh1.plotOn(mllFrame, RooFit.Name('data'))
+            voigt1.plotOn(mllFrame, RooFit.LineColor(kGreen+3))
+            voigt1.paramOn(mllFrame, RooFit.Label("Data"), RooFit.Layout(0.095,0.45,0.65))
+
+            dh3 = RooDataHist("dh3","dh3", RooArgList(mll), h3)
+            voigt3 = RooVoigtian("voigt3","voigt3",mll,mean_mll,width_mll,sigma_mll)
+            filt3  = RooFitResult(voigt1.fitTo(dh3, RooFit.Range('fitRange'),  RooFit.Save()))
+
+            dh3.plotOn(mllFrame, RooFit.Name('sig'), RooFit.MarkerStyle(23), RooFit.MarkerColor(kBlue), RooFit.LineColor(kBlue))
+            voigt3.plotOn(mllFrame)
+            voigt3.paramOn(mllFrame, RooFit.FillColor(kGreen), RooFit.Label("Signal MC"), RooFit.Layout(0.65, 1.0,0.65))
+
+            mllFrame.SetTitle(';m_{#mu#mu} (GeV);Events')
+            mllFrame.Draw()
+            mllFrame.SetMinimum(0.1)
+            leg.Clear()
+            leg.AddEntry(mllFrame.findObject('data'),'Data','e1p')
+            leg.AddEntry(mllFrame.findObject('sig'),'h#rightarrow J/#Psi#gamma#rightarrow#mu#mu#gamma','pl')
+
+        if 'res_' in histoName:
+          gStyle.SetOptFit(0)
+          func = TF1("func", "gaus", -0.1, 0.1);
+          func.SetLineColor(kGreen+2)
+          func.SetLineWidth(2)
+          r = h3.Fit('func','RS', 'sames')
+          h3.Draw('sames')
+          lat = TLatex()
+          lat.SetNDC()
+          lat.DrawLatex(0.2,0.67, '#color[8]{Gaus fit}:')
+          lat.DrawLatex(0.2,0.62, '#mu = %.3f'%(r.Parameter(1)))
+          lat.DrawLatex(0.2,0.57, '#sigma = %.3f'%(r.Parameter(2)))
+          lat.DrawLatex(0.2,0.50, '#chi^{2} = %.0f'%(r.Chi2()))
+          # print ' Fit parameters: ', r.Parameter(1), r.Parameter(2)
+
+      '''
       if 'diLep_mass_jpsi_' in histoName:
         gStyle.SetOptStat(1111)
-        h1.SetName("Data")
-        h3.SetName("h #rightarrow J/#Psi#gamma")
-        # h2.Print("all")
         stats1 = h1.GetListOfFunctions().FindObject("stats");
         stats2 = h3.GetListOfFunctions().FindObject("stats");
         stats2.Print()
@@ -555,11 +610,12 @@ def drawAllInFile(f1, name1, bZip, f3, name3, myDir,path, N, howToScale="none", 
         stats2.SetY1NDC(0.7)
         stats2.SetY2NDC(0.5)
         stats2.SetTextColor(kBlue+1)
+
         leg.SetX1(0.19)
         leg.SetX2(0.46)
         leg.SetY1(0.85)
         leg.SetY2(0.7)
-
+      '''
 
       if "zee_" in histoName:
         gStyle.SetOptStat(1111)
@@ -582,7 +638,6 @@ def drawAllInFile(f1, name1, bZip, f3, name3, myDir,path, N, howToScale="none", 
         leg.SetX2(0.46)
         leg.SetY1(0.85)
         leg.SetY2(0.7)
-
 
       gPad.RedrawAxis()
 

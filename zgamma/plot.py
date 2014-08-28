@@ -205,11 +205,10 @@ if __name__ == "__main__":
   ggHZGFile   = TFile(hPath+"/"+sel+"_"+period+"/hhhh_ggHZG-"+str(mass)+"_1.root", "OPEN")
   hackZip = zip(['120','130','135','140','145','150'],
                 [sigGG['120'],sigGG['130'],sigGG['135'], sigGG['140'],sigGG['145'],sigGG['150']])
-  #hackZip = zip(['ggHZG-125'],[ggHZGFile])
 
   #u.drawAllInFile(None, "", hackZip, None, '', "GEN", pathBase+'/GEN-lumi', None, "lumi")
 
-  #u.drawAllInFile(None, "", hackZip, sigGG['125'], '125', "GEN", pathBase+'/GEN-norm', None, "norm")
+  u.drawAllInFile(None, "", hackZip, sigGG['125'], '125', "GEN", pathBase+'/GEN-norm', None, "norm", doFits=True)
   #u.drawAllInFile(None, "", '', sigFileGG, "h", "GEN", pathBase+'/GEN-norm', None, "norm")
   # u.drawAllInFile(None, "", '', ggHZGFile, "h", "GEN", pathBase+'/GEN-norm', None, "norm")
 
@@ -217,15 +216,15 @@ if __name__ == "__main__":
 
   if cut not in ['14','15'] and not opt.apz:
     #u.drawAllInFile(dataFile, "Data", bkgZip, None, '', "", path, cut, "lumi")
-    u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "", path, cut, "lumi")
-    #u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "", path, cut, "norm1")
+    #u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "", path, cut, "lumi")
+    u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "", path, cut, "norm1", doFits=True)
     u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "Angles", pathBase+'/Angles', cut, "norm1")
 
 
     #u.drawAllInFile(None, "", bkgZip, sigFile, sigName, "GEN", pathBase+'/GEN', None, "norm")
     #u.drawAllInFile(None, "", '', sigFile, sigName, "GEN", pathBase+'/GEN-angles', None, "norm")
     #u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName,  "",path, cut, "norm")
-
+  '''
   u.drawAllInFile(dataFile, "data",bkgZip,sigFile,sigName,"Photon",pathBase+"/Photon/", None, "norm")
   u.drawAllInFile(dataFile, "data",bkgZip,sigFile,sigName,"Photon-EGamma",pathBase+"/Photon-EGamma/", None, "norm")
   #u.drawAllInFile(dataFile, "data",bkgZip,sigFile,sigName,"Photon-EnergyCorr",pathBase+"/Photon-EnergyCorr/", None, "norm")
@@ -263,7 +262,7 @@ if __name__ == "__main__":
     #print yields_data
 
     #sigFileGG  = TFile(hPath+"/mugamma_"+period+"/hhhh_ggH-mad125_1.root", "OPEN")
-
+  '''
   ss = opt.sel
   if opt.apz and doMerge:
     if ss in ['4mu','2e2mu']:
