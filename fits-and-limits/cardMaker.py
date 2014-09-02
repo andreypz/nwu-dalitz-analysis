@@ -39,7 +39,7 @@ phoTRIG = '1.020'
 PU      = '1.008'
 
 proc = {'gg':'ggH', 'vbf':'qqH','v':'WH','hjp':'hjp'}
-massList   = ['%.1f'%(a) for a in u.drange(120,150,0.5)]
+massList   = ['%.1f'%(a) for a in u.drange(120,150,1.0)]
 #massList = ['125.0']
 csBR = {}
 

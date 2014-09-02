@@ -17,8 +17,10 @@ files={}
 #files["two"] = ['~/LHE_files/luisa/dygamma.lhe.root']
 
 #files["one"] = ['~/LHE_files/mcfm_dalitz.root']
-files["one"] = ['~/LHE_files/hmumug_m120.root']
-files["two"] = ['~/LHE_files/13TeV_hmumug_m125.root']
+#files["one"] = ['~/LHE_files/hmumug_m120.root']
+files["one"]   = ['~/LHE_files/13TeV_ggHeeg_mll0to2.root']
+files["two"]   = ['~/LHE_files/13TeV_ggHeeg_mll2to5.root']
+files["three"] = ['~/LHE_files/13TeV_ggHeeg_mll5to20.root']
 
 #files["one"]   = ['~/LHE_files/dyJet/dyJet_xcut_03.root']
 #files["two"]   = ['~/LHE_files/dyJet/dyJet_xcut_15.root']
@@ -29,8 +31,8 @@ files["two"] = ['~/LHE_files/13TeV_hmumug_m125.root']
 fakeGammaFromJet = 0
 
 MH = 125
-LEPID1 = 13
-LEPID2 = 13
+LEPID1 = 11
+LEPID2 = 11
 
 print files
 #gSystem.Load("/home/andreypz/workspace/MadGraph5/ExRootAnalysis/lib/libExRootAnalysis.so")
@@ -344,7 +346,7 @@ if __name__ == "__main__":
 
   FillAllHists(files["one"],  h1)
   FillAllHists(files["two"],  h2)
-  #FillAllHists(files["three"],  h3)
+  FillAllHists(files["three"],  h3)
 
 
   oneFile.cd()
@@ -359,7 +361,9 @@ if __name__ == "__main__":
   blah = ['LHE files comparison for DY+gamma sample',
           'Luisa\'s vs mine']
 
-  u.drawAllInFile(oneFile, "ggH to eeg", '', twoFile, 'VH to eeg', '', path, None,"norm", isLog=True)
+  myzip = zip(['5<mll<20'],[testFile])
+  u.drawAllInFile(oneFile, "0<mll<2", myzip, twoFile, '2<mll<5', '', path, None,"norm", isLog=True)
+  #u.drawAllInFile(oneFile, "ggH to eeg", '', twoFile, 'VH to eeg', '', path, None,"norm", isLog=True)
   #u.drawAllInFile(oneFile, "MAD ele", '', twoFile, 'MAD mu', '', path, None,"norm", isLog=True)
   #u.drawAllInFile(oneFile, "3 GeV", [('15 GeV',twoFile)],testFile, '35 GeV', '', path, None,"norm", isLog=True)
   #u.drawAllInFile(oneFile, "DYG", [('DYJ',twoFile)],testFile, 'Sig', '', path, None,"norm", isLog=True)

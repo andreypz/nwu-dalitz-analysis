@@ -5,11 +5,13 @@ from array import *
 from ROOT import *
 import utils as u
 from apz import *
+sys.path.append("../scripts")
 import makeHTML as ht
+
 gROOT.SetBatch()
 
 parser = OptionParser(usage="usage: %prog ver [options -c, -e, -p, -m]")
-parser.add_option("-c","--cut",   dest="cut", type="int", default=4,    help="Plots after a certain cut")
+parser.add_option("-c","--cut",   dest="cut", type="int", default=6, help="Plots after a certain cut")
 parser.add_option("--mass", dest="mass", type="int", default=125,    help="Signal sample (mass)")
 parser.add_option("-m","--merge", dest="merge",action="store_true", default=False, help="Do merging?")
 
@@ -19,6 +21,7 @@ parser.add_option("--qcd",  dest="qcd",  action="store_true", default=False, hel
 parser.add_option("--mcfm", dest="mcfm", action="store_true", default=False, help="Use MCFM  as a signal")
 parser.add_option("--noeos",dest="noeos",action="store_true", default=False, help="Don't use EOS. pick up the files from nobackup area")
 
+parser.add_option("--fit",dest="fit",action="store_true", default=False, help="Do the various fits")
 parser.add_option("--apz",dest="apz",action="store_true", default=False, help="Discover new particle (requires apzTree produced)")
 parser.add_option("--zjp",dest="zjp",action="store_true", default=False, help="Study J/Psi region and more (requires apzTree)")
 parser.add_option("--hjp",dest="hjp",action="store_true", default=False, help="Study J/Psi region and more (requires apzTree)")
@@ -30,7 +33,8 @@ parser.add_option("-s", '--sel', dest="sel", type="string", default='mugamma',
 mass = opt.mass
 sel = opt.sel
 
-comments = ["These plots are made for z -> J/Psi gamma analysis",
+comments = ["These plots are made for h -> mu mu gamma",
+#comments = ["These plots are made for z -> J/Psi gamma analysis",
             "MuEG dataset used"]
 
 if __name__ == "__main__":
@@ -75,7 +79,7 @@ if __name__ == "__main__":
 
   if doMerge:
     if sel=="elgamma":
-      os.system("hadd "+hPath+"/m_Data_" +sel+"_"+period+".root "+hPath+"/"+sel+"_"+period+"/hhhh_*Run2012A*.root")
+      os.system("hadd "+hPath+"/m_Data_" +sel+"_"+period+".root "+hPath+"/"+sel+"_"+period+"/hhhh_*Run2012*.root")
     else:
       # os.system("hadd "+hPath+"/m_Data_" +sel+"_"+period+".root "+hPath+"/"+sel+"_"+period+"/hhhh_DoubleMu_Run20*.root")
       os.system("hadd "+hPath+"/m_Data_" +sel+"_"+period+".root "+hPath+"/"+sel+"_"+period+"/hhhh_MuEG_Run2012*.root")
@@ -197,7 +201,7 @@ if __name__ == "__main__":
   #path = pathBase+"/"+subdir
 
 
-  sigName = '#splitline{100xSignal}{m_{H}=125 GeV}'
+  sigName = '#splitline{20xSignal}{m_{H}=125 GeV}'
   if opt.zjp: sigName= '#splitline{50xSignal}{Z #rightarrow J/Psi #gamma}'
   if opt.hjp: sigName= '#splitline{20xSignal}{h #rightarrow J/Psi #gamma}'
 
@@ -208,40 +212,36 @@ if __name__ == "__main__":
 
   #u.drawAllInFile(None, "", hackZip, None, '', "GEN", pathBase+'/GEN-lumi', None, "lumi")
 
-  u.drawAllInFile(None, "", hackZip, sigGG['125'], '125', "GEN", pathBase+'/GEN-norm', None, "norm", doFits=True)
+  #u.drawAllInFile(None, "", hackZip, sigGG['125'], '125', "GEN", pathBase+'/GEN-norm', None, "norm", doFits=True)
   #u.drawAllInFile(None, "", '', sigFileGG, "h", "GEN", pathBase+'/GEN-norm', None, "norm")
   # u.drawAllInFile(None, "", '', ggHZGFile, "h", "GEN", pathBase+'/GEN-norm', None, "norm")
 
   #u.drawAllInFile(None, "", '', sigFileGG, "Dalitz", "eff", pathBase+'/eff', None, "norm")
 
-  if cut not in ['14','15'] and not opt.apz:
-    #u.drawAllInFile(dataFile, "Data", bkgZip, None, '', "", path, cut, "lumi")
-    #u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "", path, cut, "lumi")
-    u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "", path, cut, "norm1", doFits=True)
-    u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "Angles", pathBase+'/Angles', cut, "norm1")
+  if not opt.apz:
+    # u.drawAllInFile(None, "", bkgZip, sigFile, sigName, "GEN", pathBase+'/GEN', None, "norm")
+    # u.drawAllInFile(None, "", '', sigFile, sigName, "GEN", pathBase+'/GEN-angles', None, "norm")
+    # u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName,  "",path, cut, "norm")
+    u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "", path, cut, "lumi")
+    # u.drawAllInFile(dataFile, "Data", bkgZip, None, '', "", path, cut, "lumi")
+    # u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "", path, cut, "norm1", doFits=opt.fit)
+    """
+    for n in ['Angles']:
+      u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal", n, pathBase+"/"+n, cut, "norm1")
 
+    if cut in ['6','8']:
+      for n in ['Photon','Photon-EGamma','N']:
+        u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal", n, pathBase+"/"+n, None, "norm1")
 
-    #u.drawAllInFile(None, "", bkgZip, sigFile, sigName, "GEN", pathBase+'/GEN', None, "norm")
-    #u.drawAllInFile(None, "", '', sigFile, sigName, "GEN", pathBase+'/GEN-angles', None, "norm")
-    #u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName,  "",path, cut, "norm")
-  '''
-  u.drawAllInFile(dataFile, "data",bkgZip,sigFile,sigName,"Photon",pathBase+"/Photon/", None, "norm")
-  u.drawAllInFile(dataFile, "data",bkgZip,sigFile,sigName,"Photon-EGamma",pathBase+"/Photon-EGamma/", None, "norm")
-  #u.drawAllInFile(dataFile, "data",bkgZip,sigFile,sigName,"Photon-EnergyCorr",pathBase+"/Photon-EnergyCorr/", None, "norm")
+      if sel in ["mugamma","jp-mugamma"]:
+        for n in ['Muons','Mu-after']:
+          u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal", n, pathBase+"/"+n, None, "norm1")
+    """
+  elif cut in ['14','15','16']:
+    u.drawAllInFile(dataFile, "data",bkgZip,None,"",
+                    "AlphaPiZ",pathBase+"/apz/", cut,"norm2")
 
-  if sel in ["mugamma","jp-mugamma"]:
-    if cut not in ['12','14','15','16']:
-      # u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",  "Muons", pathBase+"/Muons", None,"norm")
-      u.drawAllInFile(dataFile, "data",bkgZip,sigFile,sigName,"Muons", pathBase+"/Muons/", None, "norm1")
-
-    elif cut in ['12']:
-      u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"#splitline{Signal}{m_{H}=125 GeV}",
-                      "jpsi",pathBase+"/jpsi/", cut,"norm2")
-    elif cut in ['14','15','16']:
-      u.drawAllInFile(dataFile, "data",bkgZip,None,"",
-                      "AlphaPiZ",pathBase+"/apz/", cut,"norm2")
-
-  elif sel == "elgamma":
+  if sel == "elgamma":
     #u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",
     #                "AnElectron",  pathBase+"/AnElectron/",  None,"norm")
     #u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",
@@ -262,7 +262,7 @@ if __name__ == "__main__":
     #print yields_data
 
     #sigFileGG  = TFile(hPath+"/mugamma_"+period+"/hhhh_ggH-mad125_1.root", "OPEN")
-  '''
+
   ss = opt.sel
   if opt.apz and doMerge:
     if ss in ['4mu','2e2mu']:
@@ -432,6 +432,14 @@ if __name__ == "__main__":
     comments.append('ZtoJPsiGamma-3: pt3/m123>0.3 && pt12/m123>0.3 && m12<30 && dr1234>1 ')
 
 
+
+
+  if sel in ['jp-mugamma']:
+    u.setCutListFile(hPath+"/"+sel+"_"+period+"/out_cutlist_ZtoJPsiGamma_1.txt")
+  else:
+    u.setCutListFile(hPath+"/"+sel+"_"+period+"/out_cutlist_ggH-mad120_1.txt")
+
+
   plot_types =[]
   list = os.listdir(pathBase)
   for d in list:
@@ -446,10 +454,12 @@ if __name__ == "__main__":
     #table_all  = u.yieldsTable([yields_data,yields_bkg,yields_sig, yields_ggH,yields_vbf, yields_vh], sel)
   else:
     if opt.zjp or opt.hjp:
-      table_all = u.yieldsTable([yields_data, yields_hjp, yields_zjp], sel)
+      names = ['Data','H to J/Psi &gamma;','Z to J/Psi &gamma;']
+      table_all = u.yieldsTable([yields_data, yields_hjp, yields_zjp], names)
     #elif not opt.apz:
     else:
-      table_all  = u.yieldsTable([yields_data,yields_sig, yields_ggH,yields_vbf, yields_vh], sel)
+      names = ['Data','Sig: total','ggH','vbfH','VH']
+      table_all  = u.yieldsTable([yields_data,yields_sig, yields_ggH,yields_vbf, yields_vh], names)
 
 
   u.makeTable(table_all,"all", "html")
@@ -461,8 +471,8 @@ if __name__ == "__main__":
   #os.system("cat yields_all.tex    > yields.html")
 
   defaultPage = sel
-  if sel=='mugamma' and cut in ['12']: defaultPage = 'jpsi'
-  elif cut in ['14','15']: defaultPage = 'apz'
+  #if sel=='mugamma' and cut in ['12']: defaultPage = 'jpsi'
+  #elif cut in ['14','15']: defaultPage = 'apz'
   #elif opt.zjp or opt.hjp: defaultPage = 'jp-'+sel
   print defaultPage
 

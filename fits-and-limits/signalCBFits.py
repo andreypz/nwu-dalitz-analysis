@@ -16,7 +16,7 @@ cf = cp.ConfigParser()
 cf.read('config.cfg')
 
 #massList   = ['125.0']
-massList   = ['%.1f'%(a) for a in u.drange(120,150,0.5)]
+massList   = ['%.1f'%(a) for a in u.drange(120,150,1.0)]
 
 myFunc = 'CBGM' #Crystall-Ball + Gauss (with same Mean)
 
@@ -62,7 +62,6 @@ def SignalFitMaker(lep, year, cat, subdir):
   #raw_input("Input raws  ")
   u.set_palette()
   # reasd these from a config file:
-  #massList        = [a.strip() for a in (cf.get("fits","massList-more")).split(',')]
   sigNameList     = [a.strip() for a in (cf.get("fits","sigNameList")).split(',')]
   tev = u.yearToTeV(year)
 

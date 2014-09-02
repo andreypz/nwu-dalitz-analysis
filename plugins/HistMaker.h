@@ -26,6 +26,7 @@ class HistMaker {
    virtual void MakePhotonPlots(const TCPhoton& ph, string s="Photon");
    virtual void MakeZeePlots(const TCPhoton& , const TCPhoton& );
    virtual void MakePhotonEnergyCorrPlots(const TCPhoton& p, Float_t , Float_t );
+   virtual void MakeNPlots(Int_t , Int_t , Int_t , Int_t , Int_t , Int_t , Int_t, Int_t, Double_t w);
    virtual void SetLeptons(TCPhysObject l1, TCPhysObject l2);
    virtual void SetGamma(TCPhysObject g);
    virtual void SetGamma2(TCPhysObject g);

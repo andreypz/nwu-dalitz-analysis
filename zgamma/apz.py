@@ -316,7 +316,6 @@ def alphaPiZ2(f1, c1, globalCut, path):
   c1.SaveAs(path+"/"+name+".png")
 
 
-
   name = 'h07-pt12'
   mllCut = TCut('')
   m1 = '0'
@@ -370,6 +369,19 @@ def alphaPiZ2(f1, c1, globalCut, path):
   c1.SaveAs(path+"/"+name+".png")
 
 
+  name = 'h20-m123'
+  mllCut = TCut('')
+  m1 = '100'
+  m2 = '180'
+  mllCut = TCut('m12<20 && m12>15')
+  nBins = 20/binDownSize
+  binWidth = (float(m2)-float(m1))/float(nBins)
+  t.Draw('m123>>'+name+'('+str(nBins)+','+m1+','+m2+')',  mllCut+globalCut, opt)
+  h = gDirectory.Get(name)
+  h.Draw("same e1p")
+  h.SetTitle(name+';m_{#mu#mu#gamma} (GeV);Events/%.2f GeV' % binWidth)
+  h.UseCurrentStyle()
+  c1.SaveAs(path+"/"+name+".png")
 
 def alphaPiZ(f1, c1, globalCut, path):
   print "study alpha/piz particle"

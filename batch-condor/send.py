@@ -103,10 +103,10 @@ if period =="2012":
 
   if selection in ['4mu', '2e2mu','mumu','nate']:
     data.extend([
-        cfg('DoubleMu_Run2012A',  DIR+'/nuTuples_v9.8_8TeV/Data/DoubleMu_Run2012A',   5, 'DATA '+selection+' mumu '+' 2012 0' + whereWeRun),
-        cfg('DoubleMu_Run2012B',  DIR+'/nuTuples_v9.8_8TeV/Data/DoubleMu_Run2012B',   8, 'DATA '+selection+' mumu '+' 2012 0' + whereWeRun),
-        cfg('DoubleMu_Run2012C',  DIR+'/nuTuples_v9.8_8TeV/Data/DoubleMu_Run2012C',  12, 'DATA '+selection+' mumu '+' 2012 0' + whereWeRun),
-        cfg('DoubleMu_Run2012D',  DIR+'/nuTuples_v9.8_8TeV/Data/DoubleMu_Run2012D',  16, 'DATA '+selection+' mumu '+' 2012 0' + whereWeRun),
+        cfg('DoubleMu_Run2012A',  DIR+'/nuTuples_v9.8_8TeV/Data/DoubleMu_Run2012A',   5, 'DATA '+selection+' mumu '+' 2012A 0' + whereWeRun),
+        cfg('DoubleMu_Run2012B',  DIR+'/nuTuples_v9.8_8TeV/Data/DoubleMu_Run2012B',   8, 'DATA '+selection+' mumu '+' 2012B 0' + whereWeRun),
+        cfg('DoubleMu_Run2012C',  DIR+'/nuTuples_v9.8_8TeV/Data/DoubleMu_Run2012C',  12, 'DATA '+selection+' mumu '+' 2012C 0' + whereWeRun),
+        cfg('DoubleMu_Run2012D',  DIR+'/nuTuples_v9.8_8TeV/Data/DoubleMu_Run2012D',  16, 'DATA '+selection+' mumu '+' 2012D 0' + whereWeRun),
         ])
 
   if selection in ['zee','2e2mu']:
@@ -128,10 +128,10 @@ if period =="2012":
 
   if selection in ['mugamma','jp-mugamma','2e2mu']:
     data.extend([
-        cfg('MuEG_Run2012A',  DIR+'/nuTuples_v9.8_8TeV/Data/MuEG_Run2012A',  5, 'DATA '+selection+' mugamma '+' 2012 0' + whereWeRun),
-        cfg('MuEG_Run2012B',  DIR+'/nuTuples_v9.8_8TeV/Data/MuEG_Run2012B',  8, 'DATA '+selection+' mugamma '+' 2012 0' + whereWeRun),
-        cfg('MuEG_Run2012C',  DIR+'/nuTuples_v9.8_8TeV/Data/MuEG_Run2012C', 12, 'DATA '+selection+' mugamma '+' 2012 0' + whereWeRun),
-        cfg('MuEG_Run2012D',  DIR+'/nuTuples_v9.8_8TeV/Data/MuEG_Run2012D', 15, 'DATA '+selection+' mugamma '+' 2012 0' + whereWeRun),
+        cfg('MuEG_Run2012A', DIR+'/nuTuples_v9.8_8TeV/Data/MuEG_Run2012A',  5, 'DATA '+selection+' mugamma '+' 2012A 0'+ whereWeRun),
+        cfg('MuEG_Run2012B', DIR+'/nuTuples_v9.8_8TeV/Data/MuEG_Run2012B',  8, 'DATA '+selection+' mugamma '+' 2012B 0'+ whereWeRun),
+        cfg('MuEG_Run2012C', DIR+'/nuTuples_v9.8_8TeV/Data/MuEG_Run2012C', 12, 'DATA '+selection+' mugamma '+' 2012C 0'+ whereWeRun),
+        cfg('MuEG_Run2012D', DIR+'/nuTuples_v9.8_8TeV/Data/MuEG_Run2012D', 15, 'DATA '+selection+' mugamma '+' 2012D 0'+ whereWeRun),
         ])
 
 # Background configs

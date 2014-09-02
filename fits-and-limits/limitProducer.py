@@ -23,11 +23,11 @@ if options.prof:
 
 if __name__ == "__main__":
 
-  massList   = ['%.1f'%(a) for a in u.drange(120,150,1)]
-  #massList   = [a.strip() for a in (cf.get("fits","massList-more")).split(',')]
+  #massList   = ['%.1f'%(a) for a in u.drange(120,150,1)]
+  massList   = [a.strip() for a in (cf.get("fits","massList-more")).split(',')]
   catList    = [a.strip() for a in (cf.get("fits","catList")).split(',')]
 
-  catList = ['EB','el']
+  catList = ['EB','EE','mll50']
 
   s = cf.get("path","ver")
   myDir = s
@@ -48,7 +48,7 @@ if __name__ == "__main__":
       card_mu  = myDir+"/output_cards/hzg_mu_2012_cat"+cat+"_M"+m+"_Dalitz_.txt"
       card_el  = myDir+"/Dalitz_electron2/datacard_hzg_eeg_cat12_8TeV_"+m[:3]+".txt"
 
-      if cat in ['EB']:
+      if cat in ['EB','EE','mll50']:
         cardNames = cardNames+' '+card_mu
       if cat in ['el']:
         cardNames = cardNames+' '+card_el
@@ -68,7 +68,7 @@ if __name__ == "__main__":
         os.system('combine -M '+method+' '+card + ' -m '+m+' -S 0')
       else:
         print 'not doing it now'
-        #os.system('combine -M '+method+' '+card + ' -m '+m)
+        os.system('combine -M '+method+' '+card + ' -m '+m)
 
       if m[-1]=='5':
         fname = "higgsCombineTest."+method+".mH"+m

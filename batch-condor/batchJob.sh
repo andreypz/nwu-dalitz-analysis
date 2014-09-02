@@ -64,8 +64,10 @@ echo 'ls in analysis directory'
 ls -l
 
 echo "Done. Will copy the files to " $outDir
-# for EOS:
+# for storage space (EOS at FNAL):
 cp hhhh_${dataName}.root $outDir/hhhh_${dataName}_${count}.root
+cp out_cutlist.txt $outDir/out_cutlist_${dataName}_${count}.txt
+
 # For condor internal output:
 cp hhhh_${dataName}.root ../../hhhh_${dataName}_${count}.root
 cp out_synch_.txt ../../out_synch_${dataName}_${count}.txt

@@ -14,21 +14,18 @@ lumi2012 = float(conf.get("lumi","lumi2012A")) + float(conf.get("lumi","lumi2012
     float(conf.get("lumi","lumi2012C")) + float(conf.get("lumi","lumi2012D"))
 lumi = lumi2012
 
-
 # The rooFit stuff is for resolution fits and j/psi mass fits
 gSystem.Load("libRooFit")
 mll = RooRealVar("mll","mll",2.5,3.7)
-res = RooRealVar("res","res",-1,1)
-mean_mll  = RooRealVar("#mu",   "mean", 3.0, 0.0, 20.0)
-width_mll = RooRealVar("#Delta","width",0.0, 0.0, 0.02)
+mean_mll  = RooRealVar("m",     "mean", 3.0, 0.0, 20.0)
+width_mll = RooRealVar("#Delta","width",0.0, 0.0, 0.01)
 sigma_mll = RooRealVar("#sigma","sigma",1.0, 0.0, 10.0)
-mean_res  = RooRealVar("mean_res", "mean_res", 3.0, 0.0, 20.0)
-sigma_res = RooRealVar("sigma_res","sigma_res",1.0, 0.0, 10.0)
-gauss = RooGaussian("gauss","gauss",res,mean_res,sigma_res)
-
+#res = RooRealVar("res","res",-1,1)
+#mean_res  = RooRealVar("mean_res", "mean_res", 3.0, 0.0, 20.0)
+#sigma_res = RooRealVar("sigma_res","sigma_res",1.0, 0.0, 10.0)
 
 def yearToTeV(y):
-  if y=='2011': return '7TeV'
+  if   y=='2011': return '7TeV'
   elif y=='2012': return '8TeV'
   else: return '0TeV'
 
@@ -37,10 +34,22 @@ def setSelection(sel):
 def getSelection():
   conf.get("selection","sel")
 
-def getCuts(cp, name="cuts-mu"):
-  cuts = []
-  for key, cut in sorted(cp.items(name)):
-    cuts.append(cut)
+def setCutListFile(fname):
+  conf.set("selection","cutlist", fname)
+
+def getCuts():
+  fcuts = conf.get("selection","cutlist")
+  with open(fcuts) as f:
+    lines = f.read().splitlines()
+
+  cuts = ['']*20
+
+  for l in lines:
+    n = int(l[0:2])
+    c = l[2:].lstrip()
+    #print n, c
+    cuts[n] = c
+
   return cuts
 # print key, cut
 
@@ -492,7 +501,7 @@ def drawAllInFile(f1, name1, bZip, f3, name3, myDir,path, N, howToScale="none", 
 
       if len(hmaxs)>0:
         m = max(hmaxs)
-        mainHist.SetMaximum(1.1*m)
+        mainHist.SetMaximum(1.2*m)
         if isLog:
           mainHist.SetMaximum(10*m)
       if howToScale == "norm":
@@ -641,14 +650,15 @@ def drawAllInFile(f1, name1, bZip, f3, name3, myDir,path, N, howToScale="none", 
 
       gPad.RedrawAxis()
 
-      proc = 'H#rightarrow#gamma*#gamma#rightarrow#mu#mu#gamma'
-      #proc = 'Z#rightarrow J/#Psi#gamma#rightarrow#mu#mu#gamma'
-      #proc = 'H#rightarrow#J/#Psi#gamma#rightarrow#mu#mu#gamma'
-      prelim = TLatex(0.15,0.95, proc)
-      prelim.SetNDC();
-      prelim.SetTextSize(0.035);
-      prelim.Draw();
-      CMS_lumi(c1, 2, 11 );
+      lat = TLatex()
+      lat.SetNDC()
+      lat.SetTextSize(0.035)
+      if 'J/Psi' in name3:
+        lat.DrawLatex(0.18,0.95, 'H #rightarrow J/#Psi#gamma#rightarrow#mu#mu#gamma')
+      else:
+        lat.DrawLatex(0.18,0.95, 'H #rightarrow#gamma*#gamma#rightarrow#mu#mu#gamma')
+
+      CMS_lumi(c1, 2, 11)
 
       # print "hmax =", hmaxs
 
@@ -666,16 +676,16 @@ def drawAllInFile(f1, name1, bZip, f3, name3, myDir,path, N, howToScale="none", 
 
     c1.SetLogy(0)
 
-def yieldsTable(yieldList, sel, num=True):
-  print sel
+def yieldsTable(yieldList, names, num=True):
+  #print sel
   print yieldList
   t = []
-  cuts =  getCuts(conf, "cuts-"+sel[0:2])
+  cuts =  getCuts()
 
-  l1 = ["Cut/trigger"]
+  l1 = ["Cut"]
   if num:
     l1.insert(0,"")
-  l1.extend(len(yieldList)*[sel])
+  l1.extend(names)
 
   # print 'First line in yieldsTable:', l1
 
@@ -685,7 +695,9 @@ def yieldsTable(yieldList, sel, num=True):
     #print line, cuts[line]
     if num:
       l.append(str((line-1)))
-    l.append(cuts[line])
+
+    if line==0:l.append('Initial Events')
+    else:      l.append(cuts[line-1])
 
     for yi in yieldList:
       #print line, yi
@@ -719,7 +731,7 @@ def makeTable(table, name, opt="tex"):
 
 
     if opt=="html":
-      beginTable = '<table border = "10"    cellpadding="5">'
+      beginTable = '<table border = "10" cellpadding="5">'
       endTable = '</table>'
 
       beginLine  = '\n<tr>\n<td>'
@@ -741,13 +753,13 @@ def makeTable(table, name, opt="tex"):
       myTable+=beginLine
       for c in range(n_col):
         val = table[l][c]
-        if not isinstance(val,str):
+        if isinstance(val,float):
           if c==2:
             myTable+="%.0f" % (val)
           else:
             myTable+="%.2f" % (val)
         else:
-          myTable+=val
+          myTable+=str(val)
         if c!=n_col-1:
           myTable+=separator
 
@@ -766,7 +778,7 @@ def getYields(f, sample='ggH-125', doLumiScale=False):
   print 'Calculating yields for ',sample
   ev   = f.Get("Counts/evt_byCut")
   sel  = conf.get("selection", "sel")[0:2]
-  cuts = getCuts(conf, "cuts-"+sel)
+  cuts = getCuts()
   if ev==None: return len(cuts)*[0]
 
   y = []

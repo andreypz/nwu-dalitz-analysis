@@ -42,10 +42,9 @@ Bool_t checkTrigger = kTRUE;
 //Bool_t applyPhosphor = 0;
 Bool_t doRochCorr = 1;
 Bool_t doZee = 0;
-Bool_t makeFitTree = 0;
-Bool_t makeApzTree = 0;
+Bool_t makeApzTree = 1;
 
-const UInt_t hisEVTS[] = {192, 696, 907};
+const UInt_t hisEVTS[] = {635,907};
 Int_t evSize = sizeof(hisEVTS)/sizeof(int);
 
 bool P4SortCondition(const TLorentzVector& p1, const TLorentzVector& p2) {return (p1.Pt() > p2.Pt());}
@@ -88,7 +87,6 @@ void egamma::Begin(TTree * tree)
   //for (unsigned i = 0; i < triggerNames->size(); ++i) cout << triggerNames->at(i) << endl;
 
   histoFile = new TFile(Form("a_%s_higgsHistograms.root", selection.c_str()), "RECREATE");
-  histoFile->mkdir("fitTree", "fitTree");
   histoFile->mkdir("apzTree", "apzTree");
   hists    = new HistManager(histoFile);
   HM       = new HistMaker(hists);
@@ -107,25 +105,15 @@ void egamma::Begin(TTree * tree)
   //Angles class:
   ang = new ZGAngles();
 
+  fcuts.open("./out_cutlist.txt", ofstream::out);
   fout.open("./out_synch_.txt",ofstream::out);
   fout.precision(3); fout.setf(ios::fixed, ios::floatfield);
   cout.precision(5); //fout.setf(ios::fixed, ios::floatfield);
 
-  histoFile->cd("fitTree");
-  if (makeFitTree){
-    _fitTree = new TTree("fitTree", "Mllg tree for fitting");
-    _fitTree->Branch("m_llg",  &fit_m_llg, "m_llg/D");
-    _fitTree->Branch("m_ll",   &fit_m_ll,  "m_ll/D");
-    _fitTree->Branch("ph_eta", &fit_phEta, "m_phEta/D");
-    _fitTree->Branch("ph_pt",  &fit_phPt,  "m_phPt/D");
-    _fitTree->Branch("di_pt",  &fit_diPt,  "m_diPt/D");
-    _fitTree->Branch("isLowPt",&fit_isLowPt,"isLowPt/O");
-    _fitTree->Branch("weight", &fit_weight,"weight/D");
-  }
-  histoFile->cd();
   histoFile->cd("apzTree");
   if (makeApzTree){
     _apzTree = new TTree("apzTree", "A tree for studying new particles");
+    _apzTree->Branch("weight",&apz_w,     "weight/D");
     _apzTree->Branch("dr1234",&apz_dr1234,"dr1234/D");
     _apzTree->Branch("dr12",  &apz_dr12,  "dr12/D");
     _apzTree->Branch("dr13",  &apz_dr13,  "dr13/D");
@@ -191,7 +179,7 @@ void egamma::SlaveBegin(TTree * /*tree*/)
 Bool_t egamma::Process(Long64_t entry)
 {
   GetEntry(entry);
-  CountEvents(0);
+  CountEvents(0, "Ntuple events",fcuts);
   FillHistoCounts(0, 1);
   if (nEvents[0] % (int)5e4 == 0) cout<<nEvents[4]<<" events passed of "<<nEvents[0]<<" checked!"<<endl;
 
@@ -378,7 +366,7 @@ Bool_t egamma::Process(Long64_t entry)
 
 
     FillHistoCounts(1, eventWeight);
-    CountEvents(1);
+    CountEvents(1,"Pass Gen acceptance",fcuts);
 
     gendR  = gen_l1.DeltaR(gen_l2);
     genMll = (gen_l1+gen_l2).M();
@@ -422,7 +410,7 @@ Bool_t egamma::Process(Long64_t entry)
   }
 
   FillHistoCounts(2, eventWeight);
-  CountEvents(2);
+  CountEvents(2, "Acceptance", fcuts);
 
 
   //if (checkTrigger){
@@ -441,7 +429,7 @@ Bool_t egamma::Process(Long64_t entry)
   }
 
   FillHistoCounts(3, eventWeight);
-  CountEvents(3);
+  CountEvents(3,"Pass Trigger",fcuts);
 
 
   vector<TCElectron> electrons0, electrons, DAlectrons, fake_electrons0;
@@ -491,9 +479,9 @@ Bool_t egamma::Process(Long64_t entry)
 	  HM->MakePhotonEnergyCorrPlots(*thisPhoton, corrPhoEnReco, corrPhoEnSC);
 
 	  //cout<<runNumber<<"  uncor en="<< thisPhoton->E()<<"  cor en = "<<corrPhoEn<<endl;
-	  //Double_t scale = 1;
+	  Double_t scale = 1;
 	  //Double_t scale = corrPhoEnReco/thisPhoton->E();
-	  Double_t scale = corrPhoEnSC/thisPhoton->E();
+	  //Double_t scale = corrPhoEnSC/thisPhoton->E();
 
 	  thisPhoton->SetXYZM(scale*thisPhoton->Px(), scale*thisPhoton->Py(),scale*thisPhoton->Pz(),0);
 
@@ -569,10 +557,11 @@ Bool_t egamma::Process(Long64_t entry)
 	{
 	  if (fabs(thisElec->SCEta()-photons0[p].SCEta()) < 0.0001){
 	    match = photons0[p];
+	    thisElec->SetSCRawEnergy(match.SCRawEnergy());
 	    isMatched = 1;
 	    //cout<<" Ele matched to photon! \t ev="<<nEvents[0]-1<<endl;
-	    //cout<<"Ph:  pt = "<<match.Pt()<<"  SCEta = "<<match.SCEta()<<"  SCPhi = "<<match.SCPhi()<<endl;
-	    //cout<<"Ele: pt = "<<thisElec->Pt()<<"   SCEta = "<<thisElec->SCEta()<<"  SCPhi = "<<thisElec->SCPhi()<<endl;
+	    //cout<<"PHo: SCEne = "<<match.SCEnergy()<<" pt = "<<match.Pt()<<"  SCEta = "<<match.SCEta()<<"  SCPhi = "<<match.SCPhi()<<endl;
+	    //cout<<"Ele: SCEne = "<<thisElec->SCEnergy()<<" pt = "<<thisElec->Pt()<<"   SCEta = "<<thisElec->SCEta()<<"  SCPhi = "<<thisElec->SCPhi()<<endl;
 	    break;
 	  }
 	}
@@ -584,7 +573,6 @@ Bool_t egamma::Process(Long64_t entry)
 	//cout<<"reco ele: "<<i<<endl;
 	if (isMatched && ObjID->HggPreselection(match))
 	  DAlectrons.push_back(*thisElec);
-
 
       }
 
@@ -598,6 +586,7 @@ Bool_t egamma::Process(Long64_t entry)
 	  cout<<"\t R9 = "<<gamma.R9()<<"  hadoverEm = "<<gamma.HadOverEm()<<endl;
 	  cout<<"Ele  : pt = "<<thisElec->Pt()<<"   SCEta = "<<thisElec->SCEta()<<"  SCPhi = "<<thisElec->SCPhi()<<"  MVA = "<<thisElec->IdMap("mvaScore")<<endl;
 	  cout<<"\t R9 = "<<thisElec->R9()<<"  hadoverEm = "<<thisElec->HadOverEm()<<endl;
+	  cout<<"\t SCEnergy: "<<thisElec->SCEnergy()<<"   SCRaw energy: "<<thisElec->SCRawEnergy()<<endl;
 	  cout<<"\t matched to pho: "<<isMatched<<"  pass Hgg pre: "<<ObjID->HggPreselection(match)<<endl;
 	  vector<TCEGamma> sc0 = thisElec->BaseSC();
 	  sort(sc0.begin(),  sc0.end(),  SCESortCondition);
@@ -704,7 +693,7 @@ Bool_t egamma::Process(Long64_t entry)
   }
 
   FillHistoCounts(4, eventWeight);
-  CountEvents(4);
+  CountEvents(4,"Photon pt>30; |eta|<1.4442",fcuts);
 
   //fout<<eventNumber<<endl;
 
@@ -763,9 +752,6 @@ Bool_t egamma::Process(Long64_t entry)
   if (electrons0[0].Pt()<30)
     return kTRUE;
 
-  FillHistoCounts(4, eventWeight);
-  CountEvents(4);
-
   if (electrons0[0].GetTracks().size()<2) return kTRUE;
 
   l1 = electrons0[0].GetTracks()[0];
@@ -775,7 +761,7 @@ Bool_t egamma::Process(Long64_t entry)
 
   HM->FillHistosFull(5, eventWeight, "");
   FillHistoCounts(5, eventWeight);
-  CountEvents(5);
+  CountEvents(5,"",fcuts);
 
   //if (fabs(DAlectrons[0].Eta()) < 1.44)
   //HM->MakeElectronPlots(DAlectrons[0], "DalitzEleEB");
@@ -790,10 +776,6 @@ Bool_t egamma::Process(Long64_t entry)
   */
 
 
-  //HM->FillHistosFull(6, eventWeight, "");
-  FillHistoCounts(6, eventWeight);
-  CountEvents(6);
-
   if (DAlectrons.size()<1)
     return kTRUE;
 
@@ -805,7 +787,9 @@ Bool_t egamma::Process(Long64_t entry)
   //if (DALE.ConversionMissHits()!=0)
   //return kTRUE;
 
-  fout<<nEvents[0]-1<<endl;
+  //HM->FillHistosFull(6, eventWeight, "");
+  FillHistoCounts(6, eventWeight);
+  CountEvents(6,"DALectron selectin",fcuts);
 
 
   vector<TCElectron::Track> trk = DALE.GetTracks();
@@ -876,15 +860,19 @@ Bool_t egamma::Process(Long64_t entry)
 
   HM->FillHistosFull(7, eventWeight, "");
   FillHistoCounts(7, eventWeight);
-  CountEvents(7);
+  CountEvents(7,"Conv. Veto etc",fcuts);
   HM->MakeElectronPlots(DALE, "DalitzEle-cut7");
 
 
-  if (lPt1.Pt() < cut_l1pt || lPt2.Pt() < cut_l2pt)   return kTRUE;
+  if (lPt1.Pt() + lPt2.Pt() < 48)   return kTRUE;
+  //if (lPt1.Pt() < cut_l1pt || lPt2.Pt() < cut_l2pt)   return kTRUE;
 
   HM->FillHistosFull(8, eventWeight, "");
   FillHistoCounts(8, eventWeight);
-  CountEvents(8);
+  CountEvents(8,"pt1+pt2 > 48",fcuts);
+
+  Double_t scale = DALE.SCEnergy()/DALE.E();
+  DALE.SetPxPyPzE(scale*DALE.Px(), scale*DALE.Py(),scale*DALE.Pz(), DALE.SCEnergy());
 
   Float_t MdalG = (DALE+gamma).M();
   Float_t Mllg  = (l1+l2+gamma).M();
@@ -892,6 +880,45 @@ Bool_t egamma::Process(Long64_t entry)
 
   hists->fill1DHist(MdalG-Mllg, Form("00_mllg-diff_cut%i", 8),";m_{e#gamma} - m_{ll#gamma}", 50,-20,20, 1, "");
   hists->fill1DHist(MdalG,      Form("00_mDalG_cut%i",     8),";m_{e#gamma}",              100, 80,200, 1, "");
+
+
+ if (makeApzTree){
+    apz_w = eventWeight;
+    apz_pt1 = lPt1.Pt();
+    apz_pt2 = lPt2.Pt();
+    apz_pt3 = gamma.Pt();
+    apz_pt4 = -1;
+    apz_pt12 = DALE.Pt();
+    apz_pt34 = gamma.Pt();
+
+    apz_dr1234 = DALE.DeltaR(gamma);
+    apz_dr12 = lPt1.DeltaR(lPt2);
+    apz_dr13 = lPt1.DeltaR(gamma);
+    apz_dr23 = lPt2.DeltaR(gamma);
+    apz_dr34 = -1;
+
+    apz_eta1 = lPt1.Eta();
+    apz_eta2 = lPt2.Eta();
+    apz_eta3 = gamma.Eta();
+    apz_eta4 = -999;
+
+    apz_eta12 = DALE.Eta();
+    apz_eta34 = gamma.Eta();
+    apz_eta1234 = (DALE+gamma).Eta();
+
+    apz_m12 = (lPt1+lPt2).M();
+    apz_m34 = gamma.M();
+
+    apz_m123 = (DALE+gamma).M();
+    //apz_m123 = (lPt1+lPt2+gamma).M();
+
+    apz_m4l = 0;
+
+    _apzTree->Fill();
+
+  }
+
+
 
   if (MdalG<110 || MdalG>170)
   //if (Mllg<70)
@@ -908,7 +935,7 @@ Bool_t egamma::Process(Long64_t entry)
 
   HM->FillHistosFull(9, eventWeight, "");
   FillHistoCounts(9, eventWeight);
-  CountEvents(9);
+  CountEvents(9,"110 < m(e,g) < 170",fcuts);
   HM->MakeElectronPlots(DALE, "DalitzEle-cut9");
 
 
@@ -916,7 +943,7 @@ Bool_t egamma::Process(Long64_t entry)
   //if (Mll > mllMax) return kTRUE;
   HM->FillHistosFull(10, eventWeight, "");
   FillHistoCounts(10, eventWeight);
-  CountEvents(10);
+  CountEvents(10,"m(ll) < 20 GeV",fcuts);
 
   if (DALE.DeltaR(gamma)<1.0)
     //  if (MdalG<80)
@@ -924,20 +951,21 @@ Bool_t egamma::Process(Long64_t entry)
 
   HM->FillHistosFull(11, eventWeight, "");
   FillHistoCounts(11, eventWeight);
-  CountEvents(11);
+  CountEvents(11,"dR(g,e) > 1",fcuts);
   HM->MakeElectronPlots(DALE, "DalitzEle-cut11");
   hists->fill1DHist(MdalG-Mllg, Form("00_mllg-diff_cut%i",11),";m_{e#gamma} - m_{ll#gamma}", 50,-20,20, 1, "");
   hists->fill1DHist(MdalG,      Form("00_mDalG_cut%i",    11),";m_{e#gamma}",              100, 80,200, 1, "");
 
   //if (DALE.Pt()/Mllg < 0.30 || gamma.Pt()/Mllg < 0.30)
-  if ((l1+l2).Pt()/MdalG < 0.30 || gamma.Pt()/MdalG < 0.30)
+  if (DALE.Pt()/MdalG < 0.30 || gamma.Pt()/MdalG < 0.30)
     //if ((l1+l2).Pt() < 40 || gamma.Pt() < 40)
     return kTRUE;
 
+  fout<<nEvents[0]-1<<endl;
 
   HM->FillHistosFull(12, eventWeight, "");
   FillHistoCounts(12, eventWeight);
-  CountEvents(12);
+  CountEvents(12,"DALE.Pt/m(e,g) > 0.3 and g.Pt/M(e,g) > 0.3",fcuts);
   HM->MakeElectronPlots(DALE, "DalitzEle-cut12");
   hists->fill1DHist(MdalG-Mllg, Form("00_mllg-diff_cut%i",12),";m_{e#gamma} - m_{ll#gamma}", 50,-20,20, 1, "");
   hists->fill1DHist(MdalG,      Form("00_mDalG_cut%i",    12),";m_{e#gamma}",              100, 80,200, 1, "");
@@ -952,70 +980,11 @@ Bool_t egamma::Process(Long64_t entry)
 
   HM->FillHistosFull(13, eventWeight, "");
   FillHistoCounts(13, eventWeight);
-  CountEvents(13);
+  CountEvents(13,"122 < m(e,g) < 128",fcuts);
+
+
 
   /*
-  if (makeApzTree){
-    apz_pt1 = lPt1.Pt();
-    apz_pt2 = lPt2.Pt();
-    apz_pt3 = gamma.Pt();
-    apz_pt4 = -1;
-    apz_pt12 = (lPt1+lPt2).Pt();
-    apz_pt34 = gamma.Pt();
-
-    apz_dr1234 = (lPt1+lPt2).DeltaR(gamma);
-    apz_dr12 = lPt1.DeltaR(lPt2);
-    apz_dr13 = lPt1.DeltaR(gamma);
-    apz_dr23 = lPt2.DeltaR(gamma);
-    apz_dr34 = -1;
-
-    apz_eta1 = lPt1.Eta();
-    apz_eta2 = lPt2.Eta();
-    apz_eta3 = gamma.Eta();
-    apz_eta4 = -999;
-
-    apz_eta12 = (lPt1+lPt2).Eta();
-    apz_eta34 = gamma.Eta();
-    apz_eta1234 = (lPt1+lPt2+gamma).Eta();
-
-    apz_m12 = (lPt1+lPt2).M();
-    apz_m34 = gamma.M();
-
-    apz_m123 = (lPt1+lPt2+gamma).M();
-
-    apz_m4l = 0;
-
-    _apzTree->Fill();
-
-  }
-
-  //if (!isfinite(eventWeight))
-  //cout<<"nan/inf "<<eventWeight<<endl;
-  //    if (fabs(eventWeight)>50 || fabs(eventWeight)<0.00001)
-
-  if (!isRealData){
-    eventWeight *= weighter->MuonSF(lPt1);
-    eventWeight *= weighter->MuonSF(lPt2);
-  }
-
-  if (!isfinite(eventWeight))
-    cout<<"nan after muon sf  "<<eventWeight<<endl;
-
-  if(!isRealData && makeGen){
-    hists->fill1DHist(genMll,  "gen_Mll_two_lep_reco", ";gen_Mll",100,0,mllMax, 1,"eff");
-    hists->fill1DHist(gendR,   "gen_dR_two_lep_reco",  ";gen_dR", 50, 0,0.3,    1,"eff");
-  }
-
-
-
-  //for(Int_t ev=0; ev<evSize;ev++){
-  //if (eventNumber==hisEVTS[ev]){cout<<eventNumber<<" Found an event after lept selection "<<endl;
-  //  cout<<"Mll = "<<Mll<<endl;
-  //  break;}
-  //}
-
-
-
   for (UInt_t i =0; i<ntrig; i++){
     triggerSelector->SelectTrigger(myTriggers[i], triggerStatus, hltPrescale, isFound, triggerPass, prescale);
     if(triggerPass) nEventsTrig[7][i]++;
@@ -1023,151 +992,8 @@ Bool_t egamma::Process(Long64_t entry)
     if (!isFound)
       cout<<"TRG **** Warning ***\n The trigger name "<<myTriggers[i]<<" is not in the list of trigger names"<<endl;
   }
-
-
-  if(!isRealData && makeGen && sample=="dalitz"){
-    hists->fill1DHist(gen_l1.DeltaR(l1),"reco_gen_l1_deltaR","reco_gen_l1_deltaR",100,0,5, 1,"");
-    hists->fill1DHist(gen_l2.DeltaR(l2),"reco_gen_l2_deltaR","reco_gen_l2_deltaR",100,0,5, 1,"");
-
-    hists->fill2DHist(gen_l1.DeltaR(l1), gen_l2.DeltaR(l2),      "reco_gen_2D_ll_deltaR",     "reco_gen_2D_ll_deltaR",     100,0,5, 100,0,5, 1,"");
-    hists->fill2DHist(gen_l1.DeltaR(l1), gen_gamma.DeltaR(gamma),"reco_gen_2D_l1gamma_deltaR","reco_gen_2D_l1gamma_deltaR",100,0,5, 100,0,5, 1,"");
-
-    hists->fill1DHist(gen_gamma.DeltaR(gamma),"reco_gen_gamma_deltaR","reco_gen_gamma_deltaR",100,0,5, 1,"");
-  }
-
-
-
-  if (Mllg>122 && Mllg<128){
-    HM->FillHistosFull(13, eventWeight, "");
-    FillHistoCounts(13, eventWeight);
-    CountEvents(13);
-  }
-
-
-  if ( (Mll>2.9 && Mll<3.3) || (Mll>9.3 && Mll<9.7)) return kTRUE; //jpsi and upsilon removeal
-
-
-
-  if (makeFitTree){
-    fit_m_llg   = Mllg;
-    fit_m_ll    = Mll;
-    fit_weight  = eventWeight;
-    fit_phEta   = gamma.SCEta();
-    fit_phPt   = gamma.Pt();
-    fit_diPt   = (l1+l2).Pt();
-    fit_isLowPt = false;
-
-    if (lPt2.Pt() < cut_l2pt)
-      fit_isLowPt = true;
-
-    _fitTree->Fill();
-  }
-
-
-  HM->FillHistosFull(9, eventWeight, "");
-  FillHistoCounts(9, eventWeight);
-  CountEvents(9);
-
-
-
-  //if (checkTrigger){
-  //triggerSelector->SelectTrigger(myTrigger, triggerStatus, hltPrescale, isFound, triggerPass, prescale);
-  //if (!triggerPass) return kTRUE;
-  ////  else Abort("Event trigger should mu or el");
-  //}
-
-  if (NoiseFilters_isScraping ||
-      NoiseFilters_isNoiseHcalHBHE || NoiseFilters_isNoiseHcalLaser
-      )
-    return kTRUE;
-
-  FillHistoCounts(14, eventWeight);
-  CountEvents(14);
-
-
-  if (NoiseFilters_isNoiseEcalTP || NoiseFilters_isNoiseEcalBE || NoiseFilters_isNoiseEEBadSc
-      )
-    return kTRUE;
-
-  FillHistoCounts(15, eventWeight);
-  CountEvents(15);
-
-
-  if (NoiseFilters_isCSCTightHalo //|| NoiseFilters_isCSCLooseHalo
-      )
-    return kTRUE;
-  FillHistoCounts(16, eventWeight);
-  CountEvents(16);
-
-  if (NoiseFilters_isNoiseTracking ||
-      !NoiseFilters_isNoisetrkPOG1 || !NoiseFilters_isNoisetrkPOG2 || !NoiseFilters_isNoisetrkPOG3
-      )
-    return kTRUE;
-  FillHistoCounts(17, eventWeight);
-  CountEvents(17);
-
   */
 
-  /*
-  HM->FillHistosFull(10, eventWeight, "");
-  FillHistoCounts(10, eventWeight);
-  CountEvents(10);
-
-
-  */
-
-
-  /*
-  for (UInt_t i =0; i<ntrig; i++){
-    triggerSelector->SelectTrigger(myTriggers[i], triggerStatus, hltPrescale, isFound, triggerPass, prescale);
-    if(triggerPass) nEventsTrig[3][i]++;
-  }
-
-
-  if (Mll < 20){
-    for (UInt_t i=0; i<ntrig; i++){
-      triggerSelector->SelectTrigger(myTriggers[i], triggerStatus, hltPrescale, isFound, triggerPass, prescale);
-      if(triggerPass) nEventsTrig[4][i]++;
-    }
-  }
-
-  for (UInt_t i =0; i<ntrig; i++){
-    triggerSelector->SelectTrigger(myTriggers[i], triggerStatus, hltPrescale, isFound, triggerPass, prescale);
-    if(triggerPass) nEventsTrig[5][i]++;
-
-    Bool_t pa  = 1;
-    Bool_t fo  = 0;
-    Int_t  pr  = 99;
-    triggerSelector->SelectTrigger("HLT_Mu22_Photon22_CaloIdL_v", triggerStatus, hltPrescale, fo, pa, pr);
-
-    if(triggerPass || pa) nEventsTrig[6][i]++;
-  }
-  */
-  /* single ele trigger study
-  for (UInt_t i =0; i<ntrig; i++)
-    {
-      triggerSelector->SelectTrigger(myTriggers[i], triggerStatus, hltPrescale, isFound, triggerPass, prescale);
-
-      Bool_t pa  = 1;
-      Bool_t fo  = 0;
-      Int_t  pr  = 99;
-      triggerSelector->SelectTrigger("HLT_Ele27_WP80_v", triggerStatus, hltPrescale, fo, pa, pr);
-
-
-      //if(nEvents[0]==0)
-      //cout<<i<<"   "<<myTriggers[i]<<"   is Found = "<<isFound<<"   ispassed = "<<triggerPass<<"  prescale = "<<prescale<<endl;
-      if(triggerPass) nEventsTrig[2][i]++;
-      if(triggerPass || pa) nEventsTrig[5][i]++;
-    }
-  */
-
-  /*
-  for (UInt_t i =0; i<ntrig; i++) {
-      triggerSelector->SelectTrigger(myTriggers[i], triggerStatus, hltPrescale, isFound, triggerPass, prescale);
-      if(triggerPass) nEventsTrig[3][i]++;
-    }
-
-  */
 
   return kTRUE;
 
@@ -1177,42 +1003,33 @@ void egamma::SlaveTerminate() {}
 
 void egamma::Terminate()
 {
-  cout<<" ** FOR PAS **"<<endl;
-  cout<<"| CUT DESCRIPTION            |\t"<< "\t|"<<endl;
-  cout<<"| 0: initial                 |\t"<< nEvents[0]  <<"\t|"<<float(nEvents[0])/nEvents[0]<<"\t|"<<endl;
-  cout<<"| 1: n/a                     |\t"<< nEvents[1]  <<"\t|"<<float(nEvents[1])/nEvents[0]<<"\t|"<<endl;
-  cout<<"| 2: n/a                     |\t"<< nEvents[2]  <<"\t|"<<float(nEvents[2])/nEvents[1]<<"\t|"<<endl;
-  cout<<"| 3: trigger  selection      |\t"<< nEvents[3]  <<"\t|"<<float(nEvents[3])/nEvents[2]<<"\t|"<<endl;
-  cout<<"| 4: reco gamma Cut based    |\t"<< nEvents[4]  <<"\t|"<<float(nEvents[4])/nEvents[3]<<"\t|"<<endl;
-  cout<<"| 5:                         |\t"<< nEvents[5]  <<"\t|"<<float(nEvents[5])/nEvents[4]<<"\t|"<<endl;
-  cout<<"| 6:                       |\t"<< nEvents[6]  <<"\t|"<<float(nEvents[6])/nEvents[5]<<"\t|"<<endl;
-  cout<<"| 7: Dalectron (pass ID)     |\t"<< nEvents[7]  <<"\t|"<<float(nEvents[7])/nEvents[6]<<"\t|"<<endl;
-  cout<<"| 8: pt1 and pt2 cuts        |\t"<< nEvents[8]  <<"\t|"<<float(nEvents[8])/nEvents[7]<<"\t|"<<endl;
-  cout<<"| 9: events with 2 ele cut   |\t"<< nEvents[9]  <<"\t|"<<float(nEvents[9])/nEvents[8]<<"\t|"<<endl;
-  cout<<"| 10: mll-gsf < 20           |\t"<< nEvents[10] <<"\t|"<<float(nEvents[10])/nEvents[9]<<"\t|"<<endl;
-  cout<<"| 11: m(fal, g) > 70         |\t"<< nEvents[11] <<"\t|"<<float(nEvents[11])/nEvents[10]<<"\t|"<<endl;
-  cout<<"| 12: pt/mllg > 0.3          |\t"<< nEvents[12] <<"\t|"<<float(nEvents[12])/nEvents[11]<<"\t|"<<endl;
-  cout<<"| 13: 122< Mllg<128  |\t"<< nEvents[13] <<"\t|"<<float(nEvents[13])/nEvents[12]<<"\t|"<<endl;
-  cout<<"| 14: 122< Mllg<128          |\t"<< nEvents[14] <<"\t|"<<float(nEvents[14])/nEvents[13]<<"\t|"<<endl;
 
+  cout<<" ***  Terminating... **"<<endl;
+  fout.close();
+  fcuts.close();
 
-  /*
-  cout<<"\n\n | Trigger efficiency 2              |\t"<<endl;
-  for(UInt_t n=0; n<ntrig; n++){
-    //UInt_t N=3;
-    //cout<<n<<"  "<<float(nEventsTrig[N][n])/nEvents[N]<<"   "<<myTriggers[n]<<endl;;
-    cout<<n<<"  "<<float(nEventsTrig[0][n])/nEvents[0]<<"   after sel: "
-      //<<nEventsTrig[N][n]<<"/"<<nEvents[N]<<"="
-	<<float(nEventsTrig[1][n])/nEvents[1]<<"   "
-	<<float(nEventsTrig[2][n])/nEvents[2]<<"   "
-	<<float(nEventsTrig[3][n])/nEvents[3]<<"   "
-	<<float(nEventsTrig[4][n])/nEvents[4]<<"   "
-	<<float(nEventsTrig[5][n])/nEvents[5]<<"   "
-	<<float(nEventsTrig[6][n])/nEvents[5]<<"   "
-
-	<<myTriggers[n]<<endl;;
+  string allCuts[nC];
+  string line;
+  ifstream myfile("./out_cutlist.txt");
+  if (myfile.is_open()){
+    while (! myfile.eof() ){
+      getline (myfile,line);
+      Int_t n = atoi(line.substr(0,2).c_str());
+      allCuts[n] = line;
+      //cout << n<<"  "<<allCuts[n]<< endl;
+    }
+    myfile.close();
   }
-  */
+
+  cout<<"n |"<<setw(45)<<" CUT DESCRIPTION \t|"<<" events \t"<< "eff\t|"<<endl;
+  for (Int_t n=0; n<nC; n++){
+    if (n==0)
+      cout<<  "0 |"<<setw(45)<<allCuts[0]<<"\t |"<< nEvents[0]  <<"\t|"<<float(nEvents[0])/nEvents[0]<<"\t|"<<endl;
+    else
+      cout<<n<<" |"<<setw(45)<<allCuts[n]<<"\t |"<< nEvents[n]  <<"\t|"<<float(nEvents[n])/nEvents[n-1]<<"\t|"<<endl;
+  }
+
+
   /*
   cout<<"\n\n | Trigger efficiency 3              |\t"<<endl;
   for(UInt_t n=0; n<ntrig; n++){
@@ -1232,18 +1049,11 @@ void egamma::Terminate()
 }
 
 
-void egamma::CountEvents(Int_t num)
+void egamma::CountEvents(Int_t num, string cutName, ofstream& s)
 {
+  if (nEvents[num]==0)
+    s<<num<<" "<<cutName<<endl;
   nEvents[num]++;
-  /*
-    if(!isNoiseHcal)        nEventsPassNoiseFilter[1][num]++;
-    if(!isDeadEcalCluster)  nEventsPassNoiseFilter[2][num]++;
-    if(!isScraping)         nEventsPassNoiseFilter[3][num]++;
-    if(!isCSCTightHalo)     nEventsPassNoiseFilter[4][num]++;
-    if(!isCSCLooseHalo)     nEventsPassNoiseFilter[5][num]++;
-    if(!isNoiseHcal && !isDeadEcalCluster && !isScraping && !isCSCTightHalo)
-    nEventsPassNoiseFilter[0][num]++;
-  */
 }
 
 

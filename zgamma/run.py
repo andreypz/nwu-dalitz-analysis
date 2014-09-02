@@ -101,7 +101,7 @@ print nfiles, " files added!"
 timer = TStopwatch()
 timer.Start()
 
-fChain.Process(ana+".C+", "%s %s %s %s" % (sample,selection,trigger,str(options.gen).lower()))
+fChain.Process(ana+".C+", "%s %s %s %s %s" % (sample,selection,trigger,str(options.gen).lower(), period))
 
 os.system('mv a_'+selection+'_higgsHistograms.root hhhh_'+sourcefilename+'.root')
 

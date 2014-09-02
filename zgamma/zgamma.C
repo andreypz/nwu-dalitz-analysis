@@ -96,6 +96,7 @@ void zgamma::Begin(TTree * tree)
   //Angles class:
   ang = new ZGAngles();
 
+  fcuts.open("./out_cutlist.txt", ofstream::out);
   fout.open("./out_synch_.txt",ofstream::out);
   fout.precision(3); fout.setf(ios::fixed, ios::floatfield);
 
@@ -114,7 +115,7 @@ void zgamma::Begin(TTree * tree)
   histoFile->cd("apzTree");
   if (makeApzTree){
     _apzTree = new TTree("apzTree", "A tree for studying new particles");
-    _apzTree->Branch("weight",&apz_w,"weight/D");
+    _apzTree->Branch("weight",&apz_w,     "weight/D");
     _apzTree->Branch("dr1234",&apz_dr1234,"dr1234/D");
     _apzTree->Branch("dr12",  &apz_dr12,  "dr12/D");
     _apzTree->Branch("dr13",  &apz_dr13,  "dr13/D");
@@ -181,7 +182,7 @@ void zgamma::SlaveBegin(TTree * /*tree*/)
 Bool_t zgamma::Process(Long64_t entry)
 {
   GetEntry(entry);
-  CountEvents(0);
+  CountEvents(0, "Ntuple events",fcuts);
   FillHistoCounts(0, 1);
   if (nEvents[0] % (int)5e4 == 0) cout<<nEvents[4]<<" events passed of "<<nEvents[0]<<" checked!"<<endl;
 
@@ -413,7 +414,7 @@ Bool_t zgamma::Process(Long64_t entry)
     }
 
     FillHistoCounts(1, eventWeight);
-    CountEvents(1);
+    CountEvents(1,"Pass Gen acceptance",fcuts);
 
     gendR   = gen_l1.DeltaR(gen_l2);
     genMll  = (gen_l1+gen_l2).M();
@@ -463,7 +464,7 @@ Bool_t zgamma::Process(Long64_t entry)
   }
 
   FillHistoCounts(2, eventWeight);
-  CountEvents(2);
+  CountEvents(2, "Acceptance", fcuts);
 
 
   vector<TCElectron> electrons0, electrons;
@@ -644,13 +645,6 @@ Bool_t zgamma::Process(Long64_t entry)
   sort(muons.begin(), muons.end(), P4SortCondition);
 
 
-  hists->fill1DHist(muons.size(),     Form("size_mu_cut%i",  1),";Number of muons",    5,0,5, 1, "N");
-  hists->fill1DHist(electrons.size(), Form("size_el_cut%i",  1),";Number of electrons (HZZ)",   5,0,5, 1, "N");
-  hists->fill1DHist(electrons0.size(),Form("size_el0_cut%i", 1),";Number of electrons (Loose)", 5,0,5, 1, "N");
-  hists->fill1DHist(photonsHZG.size(),   Form("size_phHZG_cut%i",  1),";Number of photons (HZG)",   5,0,5, 1, "N");
-  hists->fill1DHist(photonsTight.size(), Form("size_phTight_cut%i",1),";Number of photons (Tight)", 5,0,5, 1, "N");
-  hists->fill1DHist(photonsMVA.size(),   Form("size_phMVA_cut%i",  1),";Number of photons (MVA)",   5,0,5, 1, "N");
-
   if(!isRealData && makeGen){
     hists->fill1DHist(genMll,  "gen_Mll_reco_gamma",  ";gen_Mll",100,0,mllMax, 1,"eff");
     hists->fill1DHist(gendR,   "gen_dR_reco_gamma",   ";gen_dR", 50, 0,0.3,    1,"eff");
@@ -671,7 +665,8 @@ Bool_t zgamma::Process(Long64_t entry)
   }
 
   FillHistoCounts(3, eventWeight);
-  CountEvents(3);
+  CountEvents(3,"Pass Trigger and Photon reco selection",fcuts);
+  HM->MakeNPlots(3,muons.size(), electrons.size(), electrons0.size(), photonsHZG.size(), photonsTight.size(), photonsMVA.size(), 0, eventWeight);
 
   if (muons.size()<2) return kTRUE;
 
@@ -775,6 +770,15 @@ Bool_t zgamma::Process(Long64_t entry)
   HM->SetGamma(gamma);
 
 
+  HM->FillHistosFull(4, eventWeight, "");
+  FillHistoCounts(4, eventWeight);
+  CountEvents(4, "Two muons selected", fcuts);
+  HM->MakeNPlots(4,muons.size(), electrons.size(), electrons0.size(), photonsHZG.size(), photonsTight.size(), photonsMVA.size(), 0, eventWeight);
+
+
+  if (Mll > 50)
+    return kTRUE;
+
   if (makeApzTree){
     apz_w = eventWeight;
     apz_pt1 = lPt1.Pt();
@@ -810,55 +814,101 @@ Bool_t zgamma::Process(Long64_t entry)
 
   }
 
-  HM->FillHistosFull(4, eventWeight, "");
-  FillHistoCounts(4, eventWeight);
-  CountEvents(4);
-
-
   //for(Int_t ev=0; ev<evSize;ev++){
   //if (eventNumber==hisEVTS[ev]){cout<<eventNumber<<" Found an event after lept selection "<<endl;
   //  cout<<"Mll = "<<Mll<<endl;
   //  break;}
   //}
 
-
-
-  //if (Mllg<50 || Mllg>140)
   if (Mllg<110 || Mllg>170)
     return kTRUE;
 
   HM->FillHistosFull(5, eventWeight, "");
   FillHistoCounts(5, eventWeight);
-  CountEvents(5);
+  CountEvents(5, "110 < m(llg) < 170; m(ll) < 50", fcuts);
 
-  if (Mll > 20) return kTRUE;
-  //if (Mll > mllMax) return kTRUE;
-
+  if (lPt1.DeltaR(gamma)<1.0 || lPt2.DeltaR(gamma)<1.0) return kTRUE;
+  if ( (Mll>2.9 && Mll<3.3) || (Mll>9.3 && Mll<9.7)) return kTRUE; //jpsi and upsilon removeal
 
   HM->FillHistosFull(6, eventWeight, "");
   FillHistoCounts(6, eventWeight);
-  CountEvents(6);
+  CountEvents(6, "dR(l,g) > 1; removed J/Psi, Ups", fcuts);
+  HM->MakeNPlots(6,muons.size(), electrons.size(), electrons0.size(), photonsHZG.size(), photonsTight.size(), photonsMVA.size(), 0, eventWeight);
 
-  global_Mll = Mll;
-  HM->MakeMuonPlots(muons[0]);
-  HM->MakeMuonPlots(muons[1]);
 
-  if (Mll>2.9 && Mll<3.3){ //jpsi window
-    HM->FillHistosFull(12, eventWeight, "jpsi");
-    FillHistoCounts(12, eventWeight);
-    CountEvents(12);
-    //return kTRUE;
+  if (Mll < 20) {
+    HM->FillHistosFull(7, eventWeight, "");
+    FillHistoCounts(7, eventWeight);
+    CountEvents(7, "m(ll) < 20 GeV", fcuts);
+    HM->MakeNPlots(7,muons.size(), electrons.size(), electrons0.size(), photonsHZG.size(), photonsTight.size(), photonsMVA.size(), 0, eventWeight);
+
+    HM->MakeMuonPlots(muons[0]);
+    HM->MakeMuonPlots(muons[1]);
+
+    if (fabs(gamma.SCEta()) < 1.4442){
+
+      HM->FillHistosFull(8, eventWeight, "");
+      FillHistoCounts(8, eventWeight);
+      CountEvents(8, "gamma eta < 1.4442", fcuts);
+
+      if ((l1+l2).Pt()/Mllg > 0.30 && gamma.Pt()/Mllg > 0.30) {
+	HM->FillHistosFull(9, eventWeight, "");
+	FillHistoCounts(9, eventWeight);
+	CountEvents(9, "pT/m(llg) > 0.3", fcuts);
+	HM->MakeNPlots(9,muons.size(), electrons.size(), electrons0.size(), photonsHZG.size(), photonsTight.size(), photonsMVA.size(), 0, eventWeight);
+
+	HM->MakePhotonPlots(gamma, "Pho-after");
+	HM->MakeMuonPlots(muons[0],"Mu-after");
+	HM->MakeMuonPlots(muons[1],"Mu-after");
+
+	if (Mllg>122 && Mllg<128){
+	  HM->FillHistosFull(10, eventWeight, "");
+	  FillHistoCounts(10, eventWeight);
+	  CountEvents(10, "122 GeV < m(llg) < 128 GeV", fcuts);
+	}
+      }
+    }
+    else if (fabs(gamma.SCEta()) > 1.566) {
+      HM->FillHistosFull(11, eventWeight, "");
+      FillHistoCounts(11, eventWeight);
+      CountEvents(11, "gamma eta > 1.566", fcuts);
+
+      if ((l1+l2).Pt()/Mllg > 0.30 && gamma.Pt()/Mllg > 0.30) {
+	HM->FillHistosFull(12, eventWeight, "");
+	FillHistoCounts(12, eventWeight);
+	CountEvents(12, "pT/m(llg) > 0.3", fcuts);
+
+	if (Mllg>122 && Mllg<128){
+	  HM->FillHistosFull(13, eventWeight, "");
+	  FillHistoCounts(13, eventWeight);
+	  CountEvents(13, "122 GeV < m(llg) < 128 GeV", fcuts);
+	}
+      }
+    }
+  }
+  else if (Mll < 50 && fabs(gamma.SCEta()) < 1.4442){
+
+    HM->FillHistosFull(14, eventWeight, "");
+    FillHistoCounts(14, eventWeight);
+    CountEvents(14, "20 GeV < m(ll) < 50 GeV; EB only", fcuts);
+
+    if ((l1+l2).Pt()/Mllg > 0.30 && gamma.Pt()/Mllg > 0.30) {
+      HM->FillHistosFull(15, eventWeight, "");
+      FillHistoCounts(15, eventWeight);
+      CountEvents(15, "pT/m(llg) > 0.3", fcuts);
+
+      if (Mllg>122 && Mllg<128){
+	HM->FillHistosFull(16, eventWeight, "");
+	FillHistoCounts(16, eventWeight);
+	CountEvents(16, "122 GeV < m(llg) < 128 GeV", fcuts);
+      }
+    }
   }
 
 
-  if (lPt1.DeltaR(gamma)<1.0 || lPt2.DeltaR(gamma)<1.0) return kTRUE;
-  HM->FillHistosFull(7, eventWeight, "");
-  FillHistoCounts(7, eventWeight);
-  CountEvents(7);
-
-  for (UInt_t i =0; i<ntrig; i++){
+  for (UInt_t i=0; i<ntrig; i++){
     triggerSelector->SelectTrigger(myTriggers[i], triggerStatus, hltPrescale, isFound, triggerPass, prescale);
-    if(triggerPass) nEventsTrig[7][i]++;
+    if(triggerPass) nEventsTrig[6][i]++;
 
     if (!isFound)
       cout<<"TRG **** Warning ***\n The trigger name "<<myTriggers[i]<<" is not in the list of trigger names"<<endl;
@@ -877,11 +927,6 @@ Bool_t zgamma::Process(Long64_t entry)
 
 
 
-  if (Mllg>122 && Mllg<128){
-    HM->FillHistosFull(13, eventWeight, "");
-    FillHistoCounts(13, eventWeight);
-    CountEvents(13);
-  }
 
   if(!isRealData && makeGen){
     for (Int_t i = 1; i<=6; i++){
@@ -900,52 +945,6 @@ Bool_t zgamma::Process(Long64_t entry)
 
 
 
-  if ( (Mll>2.9 && Mll<3.3) || (Mll>9.3 && Mll<9.7)) return kTRUE; //jpsi and upsilon removeal
-  //if ( Mll>2.9 && Mll<3.3 ) return kTRUE; //just jpsi
-  HM->FillHistosFull(8, eventWeight, "");
-  FillHistoCounts(8, eventWeight);
-  CountEvents(8);
-
-
-  if ((l1+l2).Pt()/Mllg < 0.30 || gamma.Pt()/Mllg < 0.30)
-    //if ((l1+l2).Pt() < 40 || gamma.Pt() < 40)
-    return kTRUE;
-
-
-  HM->MakePhotonPlots(gamma, "Pho-after");
-  HM->MakeMuonPlots(muons[0],"Mu-after");
-  HM->MakeMuonPlots(muons[1],"Mu-after");
-
-  if (makeFitTree){
-    fit_m_llg   = Mllg;
-    fit_m_ll    = Mll;
-    fit_weight  = eventWeight;
-    fit_phEta   = gamma.SCEta();
-    fit_phPt    = gamma.Pt();
-    fit_diPt    = (l1+l2).Pt();
-    fit_isLowPt = false;
-
-    if (lPt2.Pt() < cut_l2pt)
-      fit_isLowPt = true;
-
-    _fitTree->Fill();
-  }
-
-
-  HM->FillHistosFull(9, eventWeight, "");
-  FillHistoCounts(9, eventWeight);
-  CountEvents(9);
-
-  if (fabs(gamma.SCEta())<1.4442){
-    HM->FillHistosFull(10, eventWeight, "");
-    FillHistoCounts(10, eventWeight);
-    CountEvents(10);
-  }
-  else if (fabs(gamma.SCEta())>1.566){
-    HM->FillHistosFull(11, eventWeight, "");
-    FillHistoCounts(11, eventWeight);
-    CountEvents(11);
-  }
 
   //if (checkTrigger){
   //triggerSelector->SelectTrigger(myTrigger, triggerStatus, hltPrescale, isFound, triggerPass, prescale);
@@ -971,26 +970,20 @@ Bool_t zgamma::Process(Long64_t entry)
       )
     return kTRUE;
 
-  FillHistoCounts(14, eventWeight);
-  CountEvents(14);
+  FillHistoCounts(17, eventWeight);
+  CountEvents(17, "noise filters, after cuts #6",fcuts);
 
 
+  /*
   if (lPt1.Phi() > -1.8 && lPt1.Phi() < -1.6){
     HM->FillHistosFull(18, eventWeight, "");
-    FillHistoCounts(18, eventWeight);
-    CountEvents(18);
+    //FillHistoCounts(18, eventWeight);
+    //CountEvents(18);
     fout<<" nEvt = "<<nEvents[0]<<" : Run/lumi/event = "<<runNumber<<"/"<<lumiSection<<"/"<<eventNumber<<endl;
     fout<<"lPt1:   "<<&lPt1<<endl;
     fout<<"dilep phi = "<<(lPt1+lPt2).Phi()<<endl;
   }
-
-  if (Mllg<122 || Mllg>128) return kTRUE;
-
-  HM->FillHistosFull(15, eventWeight, "");
-  FillHistoCounts(15, eventWeight);
-  CountEvents(15);
-
-
+  */
 
   /*
   for (UInt_t i =0; i<ntrig; i++){
@@ -1052,62 +1045,36 @@ void zgamma::SlaveTerminate() {}
 
 void zgamma::Terminate()
 {
-  cout<<" ** FOR PAS **"<<endl;
-  cout<<"| CUT DESCRIPTION            |\t"<< "\t|"<<endl;
-  cout<<"| 0: initial                 |\t"<< nEvents[0]  <<"\t|"<<float(nEvents[0])/nEvents[0]<<"\t|"<<endl;
-  cout<<"| 1: gen selections          |\t"<< nEvents[1]  <<"\t|"<<float(nEvents[1])/nEvents[0]<<"\t|"<<endl;
-  cout<<"| 2: gen accept              |\t"<< nEvents[2]  <<"\t|"<<float(nEvents[2])/nEvents[1]<<"\t|"<<endl;
-  cout<<"| 3: trigger & reco gamma iso|\t"<< nEvents[3]  <<"\t|"<<float(nEvents[3])/nEvents[2]<<"\t|"<<endl;
-  cout<<"| 4: reco muons, and pt      |\t"<< nEvents[4]  <<"\t|"<<float(nEvents[4])/nEvents[3]<<"\t|"<<endl;
-  cout<<"| 5: 110<mllg<170            |\t"<< nEvents[5]  <<"\t|"<<float(nEvents[5])/nEvents[4]<<"\t|"<<endl;
-  cout<<"| 6: Mll < 20                |\t"<< nEvents[6]  <<"\t|"<<float(nEvents[6])/nEvents[5]<<"\t|"<<endl;
-  cout<<"| 7:  dR (l,g) > 1           |\t"<< nEvents[7]  <<"\t|"<<float(nEvents[7])/nEvents[6]<<"\t|"<<endl;
-  cout<<"| 8: jpsi/Upsi veto          |\t"<< nEvents[8]  <<"\t|"<<float(nEvents[8])/nEvents[7]<<"\t|"<<endl;
-  cout<<"| 9: pT/Mllg > 0.30          |\t"<< nEvents[9]  <<"\t|"<<float(nEvents[9])/nEvents[8]<<"\t|"<<endl;
-  cout<<"| 10:  gamma eta < 1.444     |\t"<< nEvents[10] <<"\t|"<<float(nEvents[10])/nEvents[9]<<"\t|"<<endl;
-  cout<<"| 11: 122<mllg<128           |\t"<< nEvents[11] <<"\t|"<<float(nEvents[11])/nEvents[10]<<"\t|"<<endl;
-  cout<<"| 12: in Jpsi before #7      |\t"<< nEvents[12] <<"\t|"<<float(nEvents[12])/nEvents[6]<<"\t|"<<endl;
-  cout<<"| 13: before pT/Mllg in [122,128]|\t"<< nEvents[13] <<"\t|"<<float(nEvents[13])/nEvents[7]<<"\t|"<<endl;
+  cout<<" ***  Terminating... **"<<endl;
+  fout.close();
+  fcuts.close();
 
-  /*
-  cout<<"| CUT DESCRIPTION             |\t"<< "\t|"<<endl;
-  cout<<"| 0: initial          |\t"<< nEvents[0]  <<"\t|"<<float(nEvents[0])/nEvents[0]<<"\t|"<<endl;
-  cout<<"| 1: gen matching     |\t"<< nEvents[1]  <<"\t|"<<float(nEvents[1])/nEvents[0]<<"\t|"<<endl;
-  cout<<"| 2: al in acc        |\t"<< nEvents[2]  <<"\t|"<<float(nEvents[2])/nEvents[1]<<"\t|"<<endl;
-  cout<<"| 3: reco gamma iso   |\t"<< nEvents[3]  <<"\t|"<<float(nEvents[3])/nEvents[2]<<"\t|"<<endl;
-  cout<<"| 4: reco lep         |\t"<< nEvents[4]  <<"\t|"<<float(nEvents[4])/nEvents[3]<<"\t|"<<endl;
-  cout<<"| 5: mll <20          |\t"<< nEvents[5]  <<"\t|"<<float(nEvents[5])/nEvents[4]<<"\t|"<<endl;
-  cout<<"| 6: dR(l,g)>1        |\t"<< nEvents[6]  <<"\t|"<<float(nEvents[6])/nEvents[5]<<"\t|"<<endl;
-  cout<<"| 7: pT/Mllg > 0.30  |\t"<< nEvents[7]  <<"\t|"<<float(nEvents[7])/nEvents[6]<<"\t|"<<endl;
-  cout<<"| 8: no jpsi/Ups      |\t"<< nEvents[8]  <<"\t|"<<float(nEvents[8])/nEvents[7]<<"\t|"<<endl;
-  cout<<"| 9:  trigger         |\t"<< nEvents[9]  <<"\t|"<<float(nEvents[9])/nEvents[7]<<"\t|"<<endl;
-  cout<<"| 10: pTll+pTg>95     |\t"<< nEvents[10] <<"\t|"<<float(nEvents[10])/nEvents[7]<<"\t|"<<endl;
-  cout<<"| 11: 100<mH<150      |\t"<< nEvents[11] <<"\t|"<<float(nEvents[11])/nEvents[7]<<"\t|"<<endl;
-  cout<<"| 12: jpsi            |\t"<< nEvents[12] <<"\t|"<<float(nEvents[12])/nEvents[7]<<"\t|"<<endl;
-  */
-  //cout<<"dal = "<<dal<<"   nodal = "<<nodal<<"   tot="<<dal+nodal<<endl;
-
-  /*
-  cout<<"\n\n | Trigger efficiency 2              |\t"<<endl;
-  for(UInt_t n=0; n<ntrig; n++){
-    //UInt_t N=3;
-    //cout<<n<<"  "<<float(nEventsTrig[N][n])/nEvents[N]<<"   "<<myTriggers[n]<<endl;;
-    cout<<n<<"  "<<float(nEventsTrig[0][n])/nEvents[0]<<"   after sel: "
-      //<<nEventsTrig[N][n]<<"/"<<nEvents[N]<<"="
-	<<float(nEventsTrig[1][n])/nEvents[1]<<"   "
-	<<float(nEventsTrig[2][n])/nEvents[2]<<"   "
-	<<float(nEventsTrig[3][n])/nEvents[3]<<"   "
-	<<float(nEventsTrig[4][n])/nEvents[4]<<"   "
-	<<float(nEventsTrig[5][n])/nEvents[5]<<"   "
-	<<float(nEventsTrig[6][n])/nEvents[5]<<"   "
-
-	<<myTriggers[n]<<endl;;
+  string allCuts[nC];
+  string line;
+  ifstream myfile("./out_cutlist.txt");
+  if (myfile.is_open()){
+    while (! myfile.eof() ){
+      getline (myfile,line);
+      Int_t n = atoi(line.substr(0,2).c_str());
+      allCuts[n] = line;
+      //cout << n<<"  "<<allCuts[n]<< endl;
+    }
+    myfile.close();
   }
-  */
+
+  cout<<" ** FOR PAS **"<<endl;
+  cout<<"n |"<<setw(45)<<" CUT DESCRIPTION \t|"<<" events \t"<< "eff\t|"<<endl;
+  for (Int_t n=0; n<nC; n++){
+    if (n==0)
+      cout<<  "0 |"<<setw(45)<<allCuts[0]<<"\t |"<< nEvents[0]  <<"\t|"<<float(nEvents[0])/nEvents[0]<<"\t|"<<endl;
+    else
+      cout<<n<<" |"<<setw(45)<<allCuts[n]<<"\t |"<< nEvents[n]  <<"\t|"<<float(nEvents[n])/nEvents[n-1]<<"\t|"<<endl;
+  }
+
 
   cout<<"\n\n | Trigger efficiency 3              |\t"<<endl;
   for(UInt_t n=0; n<ntrig; n++){
-    UInt_t N=7;
+    UInt_t N=6;
     cout<<n<<"  "<<float(nEventsTrig[N][n])/nEvents[N]<<"   "<<myTriggers[n]<<endl;;
   }
 
@@ -1128,8 +1095,10 @@ void zgamma::Terminate()
 }
 
 
-void zgamma::CountEvents(Int_t num)
+void zgamma::CountEvents(Int_t num, string cutName, ofstream& s)
 {
+  if (nEvents[num]==0)
+    s<<num<<" "<<cutName<<endl;
   nEvents[num]++;
   /*
     if(!isNoiseHcal)        nEventsPassNoiseFilter[1][num]++;

@@ -18,7 +18,7 @@ cf.read('config.cfg')
 
 gROOT.ProcessLine(".L ../tdrstyle.C")
 setTDRStyle()
-gROOT.LoadMacro("../CMS_lumi.C")
+#gROOT.LoadMacro("../CMS_lumi.C")
 gStyle.SetOptTitle(0)
 
 

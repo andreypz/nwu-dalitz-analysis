@@ -1,0 +1,52 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>{TITLE}</title>
+    <link rel="stylesheet" type="text/css" href="style.css" />
+
+    <script>
+      /*
+      * When the iframe is on a different subdomain, uncomment the following line
+      * and change "example.com" to your domain.
+      */
+      // document.domain = "example.com";
+      function setIframeHeight(iframe) {
+      if (iframe) {
+      var iframeWin = iframe.contentWindow || iframe.contentDocument.parentWindow;
+      if (iframeWin.document.body) {
+      iframe.height = iframeWin.document.documentElement.scrollHeight || iframeWin.document.body.scrollHeight;
+      }
+      }
+      };
+
+
+      window.onload = function () {
+      setIframeHeight(document.getElementById('external-frame'));
+      };
+      window.onclick = function () {
+      setIframeHeight(document.getElementById('external-frame'));
+      };
+
+      </script>
+
+  </head>
+
+  <body style="font: Verdana">
+
+    <a href="../">parent dir ../</a>
+    <nav>
+      <ul>
+	{MENU}
+      </ul>
+    </nav>
+    <section id="plots">
+    <iframe src="{IFRAMEA}.html" name="iframe_a" frameborder="0" width = "100%" id="external-frame"></iframe>
+    </section>
+    <aside>
+      <h2>{TITLE} &nbsp; &nbsp;</h2>
+      This page is created on {DATE}<br/>
+      {ASIDEMESSAGE}
+    </aside>
+  </body>
+</html>

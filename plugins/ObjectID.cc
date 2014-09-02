@@ -14,7 +14,7 @@ float _EAPho[7][3] = {
 };
 //                EB   EE
 float _phoMvaCuts[2] = {0.08, 0.08};
-float _DAleMvaCut    = 0.05;
+float _DAleMvaCut    = 0.12;
 
 ObjectID::ObjectID():
   _isRealData(0),
@@ -391,7 +391,8 @@ bool ObjectID::PassDalitzEleID(const TCElectron& el, TVector3 *pv, TString n, fl
       SCEtaWidth_ = el.SCEtaWidth();
       SCPhiWidth_ = el.SCPhiWidth();
       HoverE_     = el.HadOverEm();
-      EoverPt_    = el.SCEnergy()/(trk[0]+trk[1]).Pt();
+      EoverPt_    = el.SCRawEnergy()/(trk[0]+trk[1]).Pt();
+      //EoverPt_    = el.SCEnergy()/(trk[0]+trk[1]).Pt();
       dEtaAtVtx_  = el.SCDeltaEta();
       dPhiAtVtx_  = el.SCDeltaPhi();
       EcalEnPin_  = el.InverseEnergyMomentumDiff(); //| 1/E - 1/Pin |

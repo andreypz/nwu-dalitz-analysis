@@ -94,28 +94,27 @@ void HistMaker::MakePhotonPlots(const TCPhoton& ph, string dir)
   //cout<<"DBG make photon plots  "<<dir<<endl;
 
   MakeEGammaCommonPlots(ph, dir+"-EGamma");
-  hists->fill1DHist(ph.TrackVeto(),      "ph_trackVeto",     ";track veto",      3, 0, 3,   1,dir);
-  hists->fill1DHist(ph.ConversionVeto(), "ph_ConversionVeto",";ConversionVeto",  3, 0, 3,   1,dir);
-  hists->fill1DHist(ph.PfIsoPhoton(),    "ph_PfIsoPhoton",   ";PfIsoPhoton",   100, 0.01,5, 1,dir);
-  hists->fill1DHist(ph.PfIsoCharged(),   "ph_PfIsoCharged",  ";PfIsoCharged",  100, 0.01,2, 1,dir);
+  hists->fill1DHist(ph.TrackVeto(),      dir+"ph_trackVeto",     ";track veto",      3, 0, 3,   1,dir);
+  hists->fill1DHist(ph.ConversionVeto(), dir+"ph_ConversionVeto",";ConversionVeto",  3, 0, 3,   1,dir);
+  hists->fill1DHist(ph.PfIsoPhoton(),    dir+"ph_PfIsoPhoton",   ";PfIsoPhoton",   100, 0.01,5, 1,dir);
+  hists->fill1DHist(ph.PfIsoCharged(),   dir+"ph_PfIsoCharged",  ";PfIsoCharged",  100, 0.01,2, 1,dir);
   if (fabs(ph.SCEta())>1.6){ //These are only for EE
-    hists->fill1DHist(ph.ESEffSigmaRR()[0],"ph_ESEffSigmaRR_x",";ESEffSigmaRR_x",100, -5e-8,5e-8, 1,dir);
-    hists->fill1DHist(ph.ESEffSigmaRR()[1],"ph_ESEffSigmaRR_y",";ESEffSigmaRR_y",100, -5e-8,5e-8, 1,dir);
+    hists->fill1DHist(ph.ESEffSigmaRR()[0],dir+"ph_ESEffSigmaRR_x",";ESEffSigmaRR_x",100, -5e-8,5e-8, 1,dir);
+    hists->fill1DHist(ph.ESEffSigmaRR()[1],dir+"ph_ESEffSigmaRR_y",";ESEffSigmaRR_y",100, -5e-8,5e-8, 1,dir);
   }
-  hists->fill1DHist(ph.IdMap("mvaScore"),"ph_mvaScore",      ";MVA score",     100, -1,1,   1,dir);
-
-  hists->fill1DHist(ph.CiCPF4chgpfIso02()[0],"ph_CiCPF4chgpfIso02", ";ph_CiCPF4chgpfIso02", 100, 0,5, 1,dir);
+  hists->fill1DHist(ph.IdMap("mvaScore"),    dir+"ph_mvaScore",      ";MVA score",     100, -1,1,   1,dir);
+  hists->fill1DHist(ph.CiCPF4chgpfIso02()[0],dir+"ph_CiCPF4chgpfIso02", ";ph_CiCPF4chgpfIso02", 100, 0,5, 1,dir);
 
   if (ph.R9() > 0.9){
-    hists->fill1DHist(ph.IdMap("HadIso_R03")-0.005*ph.Et(), "ph_HadIso_R03_R9high", ";ph_HadIso_R03_R9high", 100, 0, 60, 1,dir);
-    hists->fill1DHist(ph.IdMap("TrkIso_R03")-0.002*ph.Et(), "ph_TrkIso_R03_R9high", ";ph_HadIso_R03_R9high", 100, 0, 60, 1,dir);
+    hists->fill1DHist(ph.IdMap("HadIso_R03")-0.005*ph.Et(), dir+"ph_HadIso_R03_R9high", ";ph_HadIso_R03_R9high", 100, 0, 60, 1,dir);
+    hists->fill1DHist(ph.IdMap("TrkIso_R03")-0.002*ph.Et(), dir+"ph_TrkIso_R03_R9high", ";ph_HadIso_R03_R9high", 100, 0, 60, 1,dir);
   }
   else{
-    hists->fill1DHist(ph.IdMap("HadIso_R03")-0.005*ph.Et(), "ph_HadIso_R03_R9low", ";ph_HadIso_R03_R9low", 100, 0, 6, 1,dir);
-    hists->fill1DHist(ph.IdMap("TrkIso_R03")-0.002*ph.Et(), "ph_TrkIso_R03_R9low", ";ph_HadIso_R03_R9low", 100, 0, 6, 1,dir);
+    hists->fill1DHist(ph.IdMap("HadIso_R03")-0.005*ph.Et(), dir+"ph_HadIso_R03_R9low", ";ph_HadIso_R03_R9low", 100, 0, 6, 1,dir);
+    hists->fill1DHist(ph.IdMap("TrkIso_R03")-0.002*ph.Et(), dir+"ph_TrkIso_R03_R9low", ";ph_HadIso_R03_R9low", 100, 0, 6, 1,dir);
   }
 
-  //hists->fill1DHist(ph.(), "ph_", ";", 100, 0, 100,1, dir);
+  //hists->fill1DHist(ph.(), dir+"ph_", ";", 100, 0, 100,1, dir);
 }
 
 
@@ -215,6 +214,8 @@ void HistMaker::FillHistosFull(Int_t num, Double_t weight, string dir)
 
   hists->fill1DHist(tri.M(), Form("00_tri_mass_%s_cut%i",         d, num),";m_{ll#gamma}",  100, 0,200,  weight, dir);
   hists->fill1DHist(tri.M(), Form("00_tri_mass_3GeVBin_%s_cut%i", d, num),";m_{ll#gamma}",  20,110,170,  weight, dir);
+
+  hists->fill1DHist(tri.M(), Form("00_tri_mass125_%s_cut%i",      d, num),";m_{ll#gamma}",  30,110,140,  weight, dir);
   hists->fill1DHist(tri.M(), Form("00_tri_mass80_%s_cut%i",       d, num),";m_{ll#gamma}",  100,80,200,  weight, dir);
   hists->fill1DHist(tri.M(), Form("00_tri_massZ_%s_cut%i",        d, num),";m_{ll#gamma}",  100,60,120,  weight, dir);
   hists->fill1DHist(tri.M(), Form("00_tri_mass_longTail_%s_cut%i",d, num),";m_{ll#gamma}",  100, 0,400,  weight, dir);
@@ -252,12 +253,15 @@ void HistMaker::FillHistosFull(Int_t num, Double_t weight, string dir)
 		      ";di-Lepton p_{T}/m_{ll#gamma}",100, 0,1, weight, dir);
   }
 
-  hists->fill1DHist(diLep.M(),   Form("01__diLep_mass_low_%s_cut%i", d, num),";m_{#mu#mu} (GeV)", 100, 0,20,  weight, dir);
-  hists->fill1DHist(diLep.M(),   Form("01_diLep_mass_high_%s_cut%i", d, num),";m_{#mu#mu} (GeV)", 100, 0,120, weight, dir);
-  hists->fill1DHist(diLep.M(),   Form("01_diLep_mass_low1_%s_cut%i", d, num),";m_{ll} (GeV)",  50, 0,1.5,     weight, dir);
-  hists->fill1DHist(diLep.M(),   Form("01_diLep_mass_low2_%s_cut%i", d, num),";m_{ll} (GeV)", 100, 1.5,8,     weight, dir);
-  hists->fill1DHist(diLep.M(),   Form("01_diLep_mass_low3_%s_cut%i", d, num),";m_{ll} (GeV)",  30, 8, 20,     weight, dir);
-  hists->fill1DHist(diLep.M(),   Form("01_diLep_mass_jpsi_%s_cut%i", d, num),";m_{ll} (GeV)", 100, 2.7,3.5,   weight, dir);
+  hists->fill1DHist(diLep.M(), Form("01_diLep_mass_20_%s_cut%i",   d, num),";m_{#mu#mu} (GeV)", 100, 0,20,  weight, dir);
+  hists->fill1DHist(diLep.M(), Form("01_diLep_mass_50_%s_cut%i",   d, num),";m_{#mu#mu} (GeV)", 100, 0,50,  weight, dir);
+  hists->fill1DHist(diLep.M(), Form("01_diLep_mass_full_%s_cut%i", d, num),";m_{#mu#mu} (GeV)", 100, 0,120, weight, dir);
+  hists->fill1DHist(diLep.M(), Form("01_diLep_mass_low1_%s_cut%i", d, num),";m_{ll} (GeV)",  50,   0,1.5,   weight, dir);
+  hists->fill1DHist(diLep.M(), Form("01_diLep_mass_low2_%s_cut%i", d, num),";m_{ll} (GeV)", 100, 1.5,  8,   weight, dir);
+  hists->fill1DHist(diLep.M(), Form("01_diLep_mass_low3_%s_cut%i", d, num),";m_{ll} (GeV)",  30,   8, 20,   weight, dir);
+  hists->fill1DHist(diLep.M(), Form("01_diLep_mass_bump1_%s_cut%i",d, num),";m_{ll} (GeV)",  40,  15, 35,   weight, dir);
+  hists->fill1DHist(diLep.M(), Form("01_diLep_mass_bump2_%s_cut%i",d, num),";m_{ll} (GeV)",  30,  35, 50,   weight, dir);
+  hists->fill1DHist(diLep.M(), Form("01_diLep_mass_jpsi_%s_cut%i", d, num),";m_{ll} (GeV)",  50, 2.7,3.5,   weight, dir);
 
   hists->fill1DHist(TMath::Log10(diLep.M()), Form("01_diLep_mass_log1_%s_cut%i", d, num),";log10(m_{ll})", 100,   -1,7, weight, dir);
   hists->fill1DHist(TMath::Log10(diLep.M()), Form("01_diLep_mass_log2_%s_cut%i", d, num),";log10(m_{ll})", 100,   -1,3, weight, dir);
@@ -295,11 +299,11 @@ void HistMaker::FillHistosFull(Int_t num, Double_t weight, string dir)
       hists->fill2DHist(diLep.Pt(),_gamma.Pt(),Form("h2D_diLep_vs_gamma_%s_cut%i",d, num),
 			";q_{T}^{ll} (GeV); p_{T}^{#gamma} (GeV)", 50, 0,100, 50,0,100, weight, dir);
       hists->fill2DHist(diLep.Pt()/tri.M(),_gamma.Pt()/tri.M(),Form("h2D_diLep_vs_gamma_ptOverMllg_%s_cut%i",d, num),
-		    ";q_{T}^{ll}/M_{ll#gamma}; p_{T}^{#gamma}/M_{ll#gamma}",  100, 0,1, 100,0,1, weight, dir);
+			";q_{T}^{ll}/M_{ll#gamma}; p_{T}^{#gamma}/M_{ll#gamma}",  100, 0,1, 100,0,1, weight, dir);
       hists->fill2DHist(gammaCM.E(), _gamma.Pt(),Form("h2D_gamma_Ecom_vs_Pt_%s_cut%i",  d, num),
 			";E_{#gamma} in CoM; p_{T}(#gamma)", 50, 0,100, 50,0,100, weight, dir);
       hists->fill2DHist(gammaCM.E(), tri.M(),   Form("h2D_gamma_Ecom_vs_triM_%s_cut%i",d, num),
-		    ";E_{#gamma} in CoM; m_{ll#gamma}",   50, 0,100, 50,0,200, weight, dir);
+			";E_{#gamma} in CoM; m_{ll#gamma}",   50, 0,100, 50,0,200, weight, dir);
       hists->fill2DHist(diLep.Eta()-_gamma.Eta(), _gamma.Pt(), Form("h2D_deltaEta_vs_gammaPt_deltaEta_%s_cut%i",d, num),
 			";#Delta#eta(ll, #gamma);p_{T} of #gamma", 100, -5,5, 100,0,130, weight, dir);
     }
@@ -441,5 +445,16 @@ void HistMaker::MakeZeePlots(const TCPhoton& p1, const TCPhoton& p2)
 
   //hists->fill1DHist(mZ, "zee_M",";", 200, 60, 130, 1, "Zee");
   //hists->fill1DHist(mZ, "zee_M",";", 200, 60, 130, 1, "Zee");
+}
 
+
+void HistMaker::MakeNPlots(Int_t num, Int_t nmu, Int_t nele1, Int_t nele2, Int_t nphoHZG, Int_t nphoTight, Int_t nphoMVA, Int_t nJets, Double_t w)
+{
+  hists->fill1DHist(nmu,       Form("size_mu_cut%i",  num), ";Number of muons",              5,0,5, w, "N");
+  hists->fill1DHist(nele1,     Form("size_el_cut%i",  num), ";Number of electrons (HZZ)",    5,0,5, w, "N");
+  hists->fill1DHist(nele2,     Form("size_el0_cut%i", num), ";Number of electrons (Loose)",  5,0,5, w, "N");
+  hists->fill1DHist(nphoHZG,   Form("size_phHZG_cut%i",  num), ";Number of photons (HZG)",   5,0,5, w, "N");
+  hists->fill1DHist(nphoTight, Form("size_phTight_cut%i",num), ";Number of photons (Tight)", 5,0,5, w, "N");
+  hists->fill1DHist(nphoMVA,   Form("size_phMVA_cut%i",  num), ";Number of photons (MVA)",   5,0,5, w, "N");
+  hists->fill1DHist(nJets,     Form("size_jets_cut%i",   num), ";Number of Jets",            5,0,5, w, "N");
 }

@@ -25,6 +25,8 @@ class AutoVivification(dict):
 import ConfigParser as cp
 cf = cp.ConfigParser()
 cf.read('config.cfg')
+
+#massList   = ['125']
 massList        = [a.strip()[0:3] for a in (cf.get("fits","massList")).split(',')]
 yearList        = [a.strip() for a in (cf.get("fits","yearList")).split(',')]
 leptonList      = [a.strip() for a in (cf.get("fits","leptonList")).split(',')]
@@ -77,19 +79,21 @@ def LumiXSWeighter(mH, prod, sel, Nev=None):
   return sc
 
 
-
 def LoopOverTree(myTree, cat, mzg, args, ds, lumiWeight):
   for i in myTree:
+    if cat=='mll50':
+      if i.m12<20 or i.m12>50: continue
+      if fabs(i.eta3)>EBetaCut: continue  # only EB in 20 to 50 region
+
+    else:
+      if i.m12>20: continue
     if   cat=="EB" and fabs(i.eta3)>EBetaCut: continue
     elif cat=="EE" and fabs(i.eta3)<EEetaCut: continue
-
-    #if fabs(i.eta3) > EBetaCut: continue
 
     if i.pt3/i.m123 < ptMllgCut or i.pt12/i.m123 < ptMllgCut: continue
     if i.pt3 < ptGammaCut or i.pt12 < ptDiLepCut: continue
 
     if i.dr13<1 or i.dr23<1: continue
-    if i.m12>20 : continue
 
     if hjp: #select j/psi
       if i.m12<2.9 or i.m12>3.3: continue
@@ -289,7 +293,7 @@ def doInitialFits(subdir):
             # sigma_dh[year][mass][lepton][cat] = [signalListDH[-1].GetRMS(), signalListDH[-1].GetRMSError()]
 
 
-          print '\n\n Now make some ploOns!\n'
+          print '\n\n Now make some plots!\n'
           testFrame = mzg.frame()
           for i,signal in enumerate(signalListPDF):
             signalListDH[i].plotOn(testFrame)

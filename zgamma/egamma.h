@@ -83,7 +83,7 @@ class egamma : public TSelector {
   UInt_t totEvents;
 
   TRandom3 *myRandom;
-  ofstream fout;
+  ofstream fout, fcuts;
 
   //auto_ptr<ammagz::PhosphorCorrectionFunctor> phoCorrector;
 
@@ -95,14 +95,8 @@ class egamma : public TSelector {
   Int_t nVtx, nVtxTotal;
   Float_t nDofVtx1, nDofVtx2;
 
-  TTree* _fitTree;
-  Double_t fit_m_llg, fit_m_ll, fit_phEta, fit_weight;
-  Double_t fit_m_4l, fit_m_ll2;
-  Double_t fit_phPt, fit_diPt;
-  Bool_t   fit_isLowPt;
-
   TTree* _apzTree;
-  Double_t apz_dr12, apz_dr13, apz_dr23, apz_dr34, apz_dr1234;
+  Double_t apz_w, apz_dr12, apz_dr13, apz_dr23, apz_dr34, apz_dr1234;
   Double_t apz_pt12, apz_pt34;
   Double_t apz_pt1, apz_pt2, apz_pt3, apz_pt4;
   Double_t apz_m12, apz_m34, apz_m123, apz_m4l;
@@ -204,7 +198,8 @@ class egamma : public TSelector {
    virtual void    SlaveTerminate();
    virtual void    Terminate();
 
-   virtual void CountEvents(Int_t);
+   //virtual void CountEvents(Int_t);
+   virtual void CountEvents(Int_t , string , ofstream& s);
    virtual void FillHistoCounts(Int_t n, Double_t w);
 
    ClassDef(egamma,1);

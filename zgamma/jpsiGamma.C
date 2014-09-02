@@ -50,19 +50,22 @@ void jpsiGamma::Begin(TTree * tree)
   selection = (string)((TObjString*)args->At(1))->GetString();
   trigger   = (string)((TObjString*)args->At(2))->GetString();
   gen       = (string)((TObjString*)args->At(3))->GetString();
-  period    = "2012";
+  period    = (string)((TObjString*)args->At(4))->GetString();
 
   const size_t last = string::npos;
   if (sample.find("DYJets")!=last)
     isDYJets = 1;
   cout<<"is DYJets sample !? "<<isDYJets<<endl;
 
-  if (sample.find("Run2012")!=last)
-    fitParametersFile = "../data/MuScleFitCorrector_v4_3/MuScleFit_2012ABC_DATA_ReReco_53X.txt";
-  if (sample.find("Run2012D")!=last)
-    fitParametersFile = "../data/MuScleFitCorrector_v4_3/MuScleFit_2012D_DATA_ReReco_53X.txt";
-  else
-    fitParametersFile = "../data/MuScleFitCorrector_v4_3/MuScleFit_2012_MC_53X_smearReReco.txt";
+  if (doMuScle){
+    if (sample.find("DATA")!=last){
+      fitParametersFile = "../data/MuScleFitCorrector_v4_3/MuScleFit_2012ABC_DATA_ReReco_53X.txt";
+      if (period.find("2012D")!=last)
+	fitParametersFile = "../data/MuScleFitCorrector_v4_3/MuScleFit_2012D_DATA_ReReco_53X.txt";
+    }
+    else
+      fitParametersFile = "../data/MuScleFitCorrector_v4_3/MuScleFit_2012_MC_53X_smearReReco.txt";
+  }
 
   if (selection.find("zee")!=last) {
     doZee = true;
@@ -99,7 +102,8 @@ void jpsiGamma::Begin(TTree * tree)
   triggerSelector = new TriggerSelector("", period, *triggerNames);
   myRandom = new TRandom3();
 
-  muScle = new MuScleFitCorrector(fitParametersFile);
+  if (doMuScle)
+    muScle = new MuScleFitCorrector(fitParametersFile);
 
   for (Int_t n1=0; n1<nC; n1++){
     nEvents[n1]=0;

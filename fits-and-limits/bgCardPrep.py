@@ -8,7 +8,7 @@ import utils as u
 import ConfigParser as cp
 gROOT.ProcessLine(".L ../tdrstyle.C")
 setTDRStyle()
-gROOT.LoadMacro("../CMS_lumi.C")
+#gROOT.LoadMacro("../CMS_lumi.C")
 
 print len(sys.argv), sys.argv
 
@@ -305,7 +305,6 @@ for year in yearList:
       fitName  = '_'.join([bkgModel,year,lepton,'cat'+cat])
       normName = 'norm'+bkgModel+'_'+suffix
 
-
       hPath    = cf.get("path","base")+"/batch_output/zgamma/8TeV/"+subdir
       if hjp:
         sigFile_hjp  = TFile(hPath+"/jp-mugamma_"+year+"/hhhh_HiggsToJPsiGamma_1.root", "OPEN")
@@ -314,7 +313,7 @@ for year in yearList:
         sigFile_gg   = TFile(hPath+"/mugamma_"+year+"/hhhh_ggH-mad125_1.root", "OPEN")
         sigFile_vbf  = TFile(hPath+"/mugamma_"+year+"/hhhh_vbf-mad125_1.root", "OPEN")
         sigFile_vh   = TFile(hPath+"/mugamma_"+year+"/hhhh_vh-mad125_1.root",  "OPEN")
-        fsig= [sigFile_gg,sigFile_vbf,sigFile_vh]
+        fsig = [sigFile_gg, sigFile_vbf, sigFile_vh]
 
       hsig = []
       for i,f in enumerate(fsig):
@@ -330,21 +329,28 @@ for year in yearList:
             cro = u.getCS("vH-125",mySel='mu')
         lumi  = u.getLumi("2012")
         scale = float(lumi*cro)/Nev
-        print f.GetName(), cro,Nev,scale
+        print i, 'File:', str(f.GetName())[-50:], cro, Nev, scale
 
         if cat=='0':
-          hsig.append(f.Get("00_tri_mass__cut9").Clone())
+          hsig.append(f.Get("00_tri_mass__cut9"))
         elif cat=='EB':
-          hsig.append(f.Get("00_tri_mass__cut10").Clone())
+          hsig.append(f.Get("00_tri_mass__cut9"))
         elif cat=='EE':
-          hsig.append(f.Get("00_tri_mass__cut11").Clone())
+          hsig.append(f.Get("00_tri_mass__cut12"))
+        elif cat=='mll50':
+          hsig.append(f.Get("00_tri_mass__cut15"))
 
         if hjp: hsig[-1].Scale(scale)
         else:   hsig[-1].Scale(10*scale)
-        #hsig[-1].Print("all")
+      # print len(hsig), cat
 
-      #hsig[0].Add(hsig[1])
-      #hsig[0].Add(hsig[2])
+      #hsig[-1].Print("all")
+      #print hsig
+      if not hjp:
+        print 'hsig0, scaled events:', hsig[0].Integral(), hsig[1].Integral(), hsig[2].Integral()
+        #print 'hsigs:', hsig[0], hsig[1], hsig[2]
+        hsig[0].Add(hsig[1])
+        hsig[0].Add(hsig[2])
 
       print fitName, dataName
       data = myWs.data(dataName)
@@ -366,11 +372,9 @@ for year in yearList:
       fitExtName    = '_'.join(['bkgTmp',lepton,year,'cat'+cat])
       fit_ext       = RooExtendPdf(fitExtName,fitExtName, fit,norm)
 
-
       if verbose:
         print norm.getVal(), norm.getError()
         raw_input("norm.getVal(), norm.getError()")
-
 
       fit_result = RooFitResult(fit_ext.fitTo(data,RooFit.Range('DalitzRegion'), RooFit.Save()))
       # fit_ext.fitTo(data,RooFit.Range('DalitzRegion'), RooFit.Save())
@@ -399,12 +403,12 @@ for year in yearList:
 
 
       if verbose:
-        print 'have unit norm?? ', sigP.haveUnitNorm()
+        #print 'have unit norm?? ', sigP.haveUnitNorm()
         chi2 = testFrame.chiSquare(bkgModel,'data')
         chi2_4 = testFrame.chiSquare(4)
         print ' chiSquare=', chi2, chi2_4
         # print "Figuring out norms of PDFs",sigP.getVal(), sigP.analyticalIntegral()
-        raw_input("pdf norm / chi2  ")
+        #raw_input("pdf norm / chi2  ")
 
 
       '''
@@ -427,9 +431,12 @@ for year in yearList:
       else:
         data.plotOn(testFrame, RooFit.Binning(myBinning), RooFit.Name('data'))
 
-      if hjp:        testFrame.SetMaximum(10)
-      elif cat=='0': testFrame.SetMaximum(82)
-      else:          testFrame.SetMaximum(62)
+      if hjp:
+        testFrame.SetMaximum(10)
+      elif cat in ['0']:
+        testFrame.SetMaximum(82)
+      else:
+        testFrame.SetMaximum(62)
 
       testFrame.Draw()
       hsig[0].SetAxisRange(115,135,"X")
