@@ -187,7 +187,7 @@ bool ObjectID::PassPhotonIdAndIso(const TCPhoton& ph, TString n, float& mvaScore
     return false;
   }
 
-  //if (!HggPreselection(ph)) return false;
+  if (!HggPreselection(ph)) return false;
 
   bool pass = false;
   //Float_t phoISO = 0;

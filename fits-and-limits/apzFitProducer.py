@@ -26,14 +26,15 @@ import ConfigParser as cp
 cf = cp.ConfigParser()
 cf.read('config.cfg')
 
-#massList   = ['125']
-massList        = [a.strip()[0:3] for a in (cf.get("fits","massList")).split(',')]
-yearList        = [a.strip() for a in (cf.get("fits","yearList")).split(',')]
-leptonList      = [a.strip() for a in (cf.get("fits","leptonList")).split(',')]
-catList         = [a.strip() for a in (cf.get("fits","catList")).split(',')]
-sigNameList     = [a.strip() for a in (cf.get("fits","sigNameList")).split(',')]
-
-hjp = 0
+massList   = ['125']
+#massList      = [a.strip()[0:3] for a in (cf.get("fits","massList")).split(',')]
+yearList      = [a.strip() for a in (cf.get("fits","yearList")).split(',')]
+leptonList    = [a.strip() for a in (cf.get("fits","leptonList")).split(',')]
+catList       = [a.strip() for a in (cf.get("fits","catList")).split(',')]
+#sigNameList  = [a.strip() for a in (cf.get("fits","sigNameList")).split(',')]
+sigNameList = ['hjp']
+hjp = 1
+doBlind    = int(cf.get("fits","blind"))
 
 colors = {}
 for f,col in cf.items("colors"):
@@ -47,19 +48,19 @@ for f,col in cf.items("colors"):
 TH1.SetDefaultSumw2(kTRUE)
 gStyle.SetOptTitle(0)
 
-debugPlots = True
+debugPlots = 0
 verbose    = 0
 noSFweight = 0
-rootrace   = False
+rootrace   = 0
 
 EBetaCut = 1.4442
 EEetaCut = 1.566
-ptMllgCut  = 0.30
-ptGammaCut = 0
-ptDiLepCut = 0
+ptMllgCut  = 0.00
+ptGammaCut = 40
+ptDiLepCut = 40
 
 lowCutOff  = 110
-highCutOff = 170
+highCutOff = 150
 
 # OK listen, we're gunna need to do some bullshit just to get a uniform RooRealVar name for our data objects.
 # So we'll loop through the Branch, set mzg to the event value (if it's in range), and add that to our RooDataSet.
@@ -114,8 +115,7 @@ def LoopOverTree(myTree, cat, mzg, args, ds, lumiWeight):
 def doInitialFits(subdir):
   print '\t Loading up the files'
 
-  plotBase = cf.get("path","htmlbase")+'/html/zgamma/dalitz/fits-'+subdir+'/init/'
-  u.createDir(plotBase)
+  plotBase1 = cf.get("path","htmlbase")+'/html/zgamma/dalitz/fits-'+subdir+'/init'
   basePath1 = cf.get("path","base")+'/batch_output/zgamma/8TeV/'+subdir+'/'
   basePath2 = cf.get("path","base")+'/zgamma/v34-ele2/'
 
@@ -176,6 +176,8 @@ def doInitialFits(subdir):
   mzg.setRange('DalitzRegion', lowCutOff, highCutOff)
   mzg.setRange('SignalRegion', 122, 128)
   mzg.setBins(50000,'cache')
+  mzg.setRange('r1',110,120)
+  mzg.setRange('r2',130,170)
 
   c = TCanvas("c","c",0,0,500,400)
   c.cd()
@@ -194,6 +196,8 @@ def doInitialFits(subdir):
   for year in yearList:
     for lepton in leptonList:
       for cat in catList:
+        plotBase = plotBase1+'_'.join([year,lepton,'cat'+cat])+'/'
+        u.createDir(plotBase)
         if rootrace:
           print "rootrace"
           RooTrace.dump()
@@ -293,26 +297,29 @@ def doInitialFits(subdir):
             # sigma_dh[year][mass][lepton][cat] = [signalListDH[-1].GetRMS(), signalListDH[-1].GetRMSError()]
 
 
-          print '\n\n Now make some plots!\n'
-          testFrame = mzg.frame()
-          for i,signal in enumerate(signalListPDF):
-            signalListDH[i].plotOn(testFrame)
-            signal.plotOn(testFrame)
-            # signal.paramOn(testFrame)
-            # signal.statOn(testFrame)
-            # mzg_argS.writeToFile('myargset.txt')
-            print i,signal
-            testFrame.Draw()
-          # raw_input("All DONE. INPUT NEEDED")
-          CMS_lumi(c, 2, 11)
-          c.SaveAs(plotBase+'_'.join(['signals',prod,year,lepton,'cat'+cat])+'.png')
+          if debugPlots:
+            print '\n\n Now make some plots!\n'
+            testFrame = mzg.frame()
+            for i,signal in enumerate(signalListPDF):
+              sigName = 'sig-'+str(i)
+              signalListDH[i].plotOn(testFrame)
+              signal.plotOn(testFrame, RooFit.Name(sigName))
+              # signal.paramOn(testFrame)
+              # signal.statOn(testFrame)
+              # print i,signal
+              testFrame.SetTitle(';m_{#mu#mu#gamma} (GeV);Events')
+              testFrame.SetMinimum(0.0001)
+              testFrame.Draw()
+            CMS_lumi(c, 2, 11)
+            c.SaveAs(plotBase+'_'.join(['signals',prod,year,lepton,'cat'+cat])+'.png')
 
-          testFrame = mzg.frame()
-          for signal in signalListDS:
-            signal.plotOn(testFrame, RooFit.DrawOption('pl'))
-            testFrame.Draw()
-          CMS_lumi(c, 2, 11)
-          c.SaveAs(plotBase+'_'.join(['ds','sig',prod,year,lepton,'cat'+cat])+'.png')
+
+            # testFrame = mzg.frame()
+            for signal in signalListDS:
+              signal.plotOn(testFrame, RooFit.DrawOption('pl'))
+              testFrame.Draw()
+            CMS_lumi(c, 2, 11)
+            c.SaveAs(plotBase+'_'.join(['ds_sig',year,lepton,'cat'+cat])+'.png')
 
         del signalTree
 
@@ -341,7 +348,7 @@ def doInitialFits(subdir):
 
           testFrame.Draw()
           CMS_lumi(c, 2, 11)
-          c.SaveAs(plotBase+'_'.join(['data',year,lepton,'cat'+cat,'M'+mass])+'.png')
+          c.SaveAs(plotBase+'_'.join(['data',year,lepton,'cat'+cat])+'.png')
 
         getattr(ws,'import')(data_ds)
 
@@ -353,10 +360,14 @@ def doInitialFits(subdir):
         if verbose: '\t\t *** Starting BKG fits ***\n'
 
         fitBuilder = FitBuilder(mzg, year, lepton, cat)
-        bgFitList = ['Exp','Pow','Bern2','Bern3','Bern4','Bern5']
+        bgFitList = ['Exp','Pow','Bern2','Bern3','Bern4','Bern5','Laurent']
 
         testFrame = mzg.frame(RooFit.Range('DalitzRegion'))
-        data_ds.plotOn(testFrame, RooFit.Binning(binning),RooFit.Name('data'))
+        if doBlind:
+          data_ds.plotOn(testFrame, RooFit.Binning(binning),RooFit.Name('data'),RooFit.CutRange('r1'))
+          data_ds.plotOn(testFrame, RooFit.Binning(binning),RooFit.Name('data'),RooFit.CutRange('r2'))
+        else:
+          data_ds.plotOn(testFrame, RooFit.Binning(binning),RooFit.Name('data'))
 
         leg = TLegend(0.63,0.6,0.91,0.88)
         leg.SetFillColor(0)
@@ -377,10 +388,12 @@ def doInitialFits(subdir):
           testFrame.Draw()
           chi2 = testFrame.chiSquare(fitName,'data',ndof)
 
-          leg.AddEntry(testFrame.findObject(fitName),fitName+' #chi2 = {0:.3f}'.format(chi2),'l')
+          leg.AddEntry(testFrame.findObject(fitName),fitName+'   #chi2 = {0:.3f}'.format(chi2),'l')
           getattr(ws,'import')(fit)
 
 
+        if doBlind:
+          testFrame.SetMinimum(0.1)
         testFrame.SetTitle(";m_{#mu#mu#gamma} (GeV);Events/"+str(binWidth)+" GeV")
         leg.Draw()
         CMS_lumi(c, 2, 11)
@@ -392,8 +405,6 @@ def doInitialFits(subdir):
 
         yi_da0[year][lepton][cat] = data_ds.sumEntries()
         yi_da1[year][lepton][cat] = data_ds.sumEntries('1','SignalRegion')
-
-
 
   u.createDir(subdir)
   ws.writeToFile(subdir+'/testRooFitOut_Dalitz.root')

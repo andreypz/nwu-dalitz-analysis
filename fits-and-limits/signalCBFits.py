@@ -7,6 +7,8 @@ gROOT.SetBatch()
 gROOT.ProcessLine(".L ../tdrstyle.C")
 setTDRStyle()
 gROOT.LoadMacro("../CMS_lumi.C")
+gROOT.SetMacroPath(".:../plugins/")
+gROOT.LoadMacro("HistManager.cc+")
 
 sys.path.append("../zgamma")
 import utils as u
@@ -15,10 +17,14 @@ import ConfigParser as cp
 cf = cp.ConfigParser()
 cf.read('config.cfg')
 
-#massList   = ['125.0']
-massList   = ['%.1f'%(a) for a in u.drange(120,150,1.0)]
+#massList0  = ['120','125','130','135','140','145','150']
+massList0  = ['125']
+massList   = ['125.0']
+#massList   = ['%.1f'%(a) for a in u.drange(120,150,1.0)]
 
 myFunc = 'CBGM' #Crystall-Ball + Gauss (with same Mean)
+
+lumi = u.getLumi()
 
 # rounding function for interpolation
 def roundTo5(x, base=5):
@@ -58,6 +64,14 @@ def SignalNameParamFixer(year,lepton,cat,sig,mass,ws, sameMean=True):
 
 
 def SignalFitMaker(lep, year, cat, subdir):
+
+  f = TFile('../data/Dalitz_BR50.root','READ')
+  g = f.Get('csbr_mu')
+  xsBr = g.GetFunction('pol4')
+  #g.Print('all')
+
+  hfile = TFile('hists.root','recreate')
+  hists = HistManager(hfile)
   #print massList
   #raw_input("Input raws  ")
   u.set_palette()
@@ -68,8 +82,9 @@ def SignalFitMaker(lep, year, cat, subdir):
   #print massList
   #raw_input()
 
-  plotBase = cf.get("path","htmlbase")+"/html/zgamma/dalitz/fits-"+subdir
+  plotBase = cf.get("path","htmlbase")+"/html/zgamma/dalitz/fits-"+subdir+'/init' + '_'.join([year,lep,'cat'+cat])+'/'
   u.createDir(plotBase)
+
   rooWsFile = TFile(subdir+'/testRooFitOut_Dalitz.root')
   myWs = rooWsFile.Get('ws')
   #myWs.Print()
@@ -79,28 +94,77 @@ def SignalFitMaker(lep, year, cat, subdir):
   c = TCanvas("c","c",0,0,500,400)
   c.cd()
   mzg = myWs.var('CMS_hzg_mass')
+  paraNames = {}
   cardDict = AutoVivification()
   for mass in massList:
     cardDict[lep][year][cat][mass] = RooWorkspace('ws_card')
 
     print cardDict[lep][year][cat][mass]
 
-    # we need crystal ball + gaussian fits for all mass points, and for all production methods.
-    # we also need to interpolate the distributions for 0.5 mass bins, so we use some tricks
-    # in order to create new fits out of the existing 5GeV steps
+  # we need crystal ball + gaussian fits for all mass points, and for all production methods.
+  # we also need to interpolate the distributions for 0.5 mass bins, so we use some tricks
+  # in order to create new fits out of the existing 5GeV steps
 
-    # ##################
-    # Start the Loop! #
-    # ##################
+  # ##################
+  # Start the Loop! #
+  # ##################
 
   for prod in sigNameList:
+    # First of all make the fits to the existing MC samples
+    SigFits = {'0':None} # Format 'mass': fit-function
+
     dsList   = []
+    for m in massList0:
+      fitBuilder = FitBuilder(mzg, year,lep,cat,sig=prod, mass=m+'.0')
+      #fitBuilder.__init__(mzg,year,lep,cat,sig=prod,mass=m)
+      mzg.setRange('fitRegion1',int(m)-11,int(m)+11)
+
+      sigName = '_'.join(['ds','sig',prod,lep,year,'cat'+cat,'M'+m])
+      sig_ds = myWs.data(sigName)
+      dsList.append(sig_ds)
+
+      SigFits[m],paramList = fitBuilder.Build(myFunc, piece = 'Interp', mean = float(m))
+      SigFits[m].fitTo(sig_ds, RooFit.Range('fitRegion1'), RooFit.SumW2Error(kTRUE),
+                       RooFit.Strategy(1), RooFit.NumCPU(4), RooFit.PrintLevel(-1))
+
+      # print paramList
+      # raw_input("\n ---> Param List. hit enter to continue")
+
+      paraNames[prod] = []
+      for param in paramList:
+        param.setConstant(True)
+        print param.GetName(), param.getVal()
+
+        if 'sigmaCBCBG' in param.GetName():
+          n = '_'.join(['sigmaCBCBG',year,lep,'cat'+cat,prod])
+          hists.fill1DHist(param.getVal(), n,";sigmaCB", 50, 0,5, 1, '')
+        elif 'fracCBG' in param.GetName():
+          n = '_'.join(['fracCBS',year,lep,'cat'+cat,prod])
+          hists.fill1DHist(param.getVal(), n,";fracCBG", 50, 0,1, 1, '')
+        elif 'mean' in param.GetName():
+          n = '_'.join(['mean',year,lep,'cat'+cat,prod])
+          hists.fill1DHist(param.getVal(), n,";mean", 160, 115,155, 1, '')
+        elif 'sigmaGCBG' in param.GetName():
+          n = '_'.join(['sigmaGCBS',year,lep,'cat'+cat,prod])
+          hists.fill1DHist(param.getVal(), n,";sigmaGCBG", 50, 0,5, 1, '')
+        else:
+          n = None
+        paraNames[prod].append(n)
+
+      #r.Print()
+      #a = r.floatParsFinal()
+      #a[0].Print()
+      #print a[0].GetName(), a[0].getVal()
+
+      #raw_input('RooFitResults above.')
+
     fitList  = []
     normList = []
     oldMassHi = oldMassLow = 0
     for massString in massList:
 
       fitBuilder = FitBuilder(mzg, year,lep,cat,sig=prod,mass=massString)
+      #fitBuilder.__init__(mzg,year,lep,cat,sig=prod,mass=str(massLow))
       # ############################################
       # Get the high and low mass references      #
       # If the point does not need interpolation, #
@@ -125,81 +189,100 @@ def SignalFitMaker(lep, year, cat, subdir):
         oldMassHi  = massHi
 
         ###### fit the low mass point
-        if massLow<=125:
-          mzg.setRange('fitRegion1',110,int(massLow)+10)
-        else:
-          mzg.setRange('fitRegion1',int(massLow)-15,int(massLow)+10)
-        sigNameLow = '_'.join(['ds','sig',prod,lep,year,'cat'+cat,'M'+str(massLow)])
-        sig_ds_Low = myWs.data(sigNameLow)
-        if massLow == massHi:
-          dsList.append(sig_ds_Low)
 
-        print massLow, massHi
+        print 'massLow and massHi=', massLow, massHi
         #raw_input("Mass low and Hi; hit enter")
 
-        fitBuilder.__init__(mzg,year,lep,cat,sig=prod,mass=str(massHi))
-        SigFit_Low = fitBuilder.Build(myFunc, piece = 'Low', mean = massLow)[0]
-
-        SigFit_Low.fitTo(sig_ds_Low, RooFit.Range('fitRegion1'), RooFit.SumW2Error(kTRUE), RooFit.Strategy(1), RooFit.NumCPU(4), RooFit.PrintLevel(-1))
-
-        ###### fit the hi mass point
-        #if massHi<=125:
-        if massHi<=100:
-          mzg.setRange('fitRegion2',115,int(massHi)+10)
-        else:
-          mzg.setRange('fitRegion2',int(massHi)-15,int(massHi)+10)
-        sigNameHi = '_'.join(['ds','sig',prod,lep,year,'cat'+cat,'M'+str(massHi)])
-        sig_ds_Hi = myWs.data(sigNameHi)
-
-        fitBuilder.__init__(mzg,year,lep,cat,sig=prod,mass=str(massLow))
-        SigFit_Hi = fitBuilder.Build(myFunc, piece = 'Hi', mean = massLow)[0]
-
-        SigFit_Hi.fitTo(sig_ds_Hi, RooFit.Range('fitRegion2'), RooFit.SumW2Error(kTRUE), RooFit.Strategy(1), RooFit.NumCPU(4), RooFit.PrintLevel(-1))
-
-      ###### interpolate the two mass points
       massDiff = (massHi - mass)/5.
-      #if mass<=125:
-      if mass<=100:
-        mzg.setRange('fitRegion_'+massString,115,mass+10)
+
+      sigName = '_'.join(['ds','sig',prod,lep,year,'cat'+cat,'M'+str(massLow)])
+      sig_ds_Low = myWs.data(sigName)
+      sigName = '_'.join(['ds','sig',prod,lep,year,'cat'+cat,'M'+str(massHi)])
+      sig_ds_Hi = myWs.data(sigName)
+
+      if massHi==massLow:
+        # No interpolateion needed, just take the existing fit
+        SigFit_Interp = SigFits[str(mass)[:3]]
       else:
-        mzg.setRange('fitRegion_'+massString,mass-15,mass+15)
-      beta = RooRealVar('beta','beta', 0.5, 0., 1.)
-      if massHi == massLow:
-        beta.setVal(1);
-      else:
+        # ##### interpolate the two mass points
+        # print 'massdiff=',massDiff
+        # raw_input('Massdiff...')
+
+        mzg.setRange('fitRegion_'+massString,mass-11,mass+11)
+        beta = RooRealVar('beta','beta', 0.5, 0., 1.)
         beta.setVal(massDiff)
 
-      interp_pdf = RooIntegralMorph('interp_pdf', 'interp_pdf', SigFit_Low, SigFit_Hi, mzg, beta)
-      interp_ds  = interp_pdf.generate(RooArgSet(mzg), 10000)
+        SigFit_Low = SigFits[str(massLow)]
+        SigFit_Hi  = SigFits[str(massHi)]
+
+        interp_pdf = RooIntegralMorph('interp_pdf', 'interp_pdf', SigFit_Low, SigFit_Hi, mzg, beta)
+        interp_ds  = interp_pdf.generate(RooArgSet(mzg), 10000)
+
+        fitBuilder.__init__(mzg,year,lep,cat,sig=prod,mass=str(mass))
+        SigFit_Interp,paramList = fitBuilder.Build(myFunc, piece = 'Interp', mean = mass)
+
+        SigFit_Interp.fitTo(interp_ds, RooFit.Range('fitRegion_'+massString), RooFit.SumW2Error(kTRUE),
+                            RooFit.Strategy(1), RooFit.NumCPU(4), RooFit.PrintLevel(-1))
+
+
+        # r.Print()
+        # raw_input('RooFitResults above.')
+
+        for param in paramList:
+          param.setConstant(True)
+
+          if 'sigmaCBCBG' in param.GetName():
+            n = '_'.join(['sigmaCBCBG',year,lep,'cat'+cat,prod])
+            hists.fill1DHist(param.getVal(), n,";sigmaCB", 50, 0.5,2.5, 1, '')
+          elif 'fracCBG' in param.GetName():
+            n = '_'.join(['fracCBS',year,lep,'cat'+cat,prod])
+            hists.fill1DHist(param.getVal(), n,";fracCBG", 50, 0,0.5, 1, '')
+          elif 'sigmaGCBG' in param.GetName():
+            n = '_'.join(['sigmaGCBS',year,lep,'cat'+cat,prod])
+            hists.fill1DHist(param.getVal(), n,";sigmaGCBG", 50, 0,5, 1, '')
+          else:
+            n = None
+
+
       normList.append(sig_ds_Low.sumEntries()*massDiff+sig_ds_Hi.sumEntries()*(1-massDiff))
+
+      #acceff_low = (sig_ds_Low.sumEntries()/(xsBr(massLow)*lumi))
+      #acceff_Hi  = (sig_ds_Hi.sumEntries()/(xsBr(massHi)*lumi))
+      #yie_calc   = xsBr(mass)*lumi*(massDiff*acceff_low + (1-massDiff)*acceff_Hi)
+
+      #print lep,year,cat,mass, cardDict[lep][year][cat][str(mass)]
+      #print "\n\n Signal Yield?? = ", normList[-1], yie_calc
+      #print "Low and Hi, sumentries:",  sig_ds_Low.sumEntries(), sig_ds_Hi.sumEntries()
+      #print 'Low and Hi acc*eff:', acceff_low, acceff_Hi
+      #if massLow!=massHi:
+      #  raw_input('Yields for signals ')
+
       yieldName = '_'.join(['sig',prod,'yield',lep,year,'cat'+cat])
-      yieldVar = RooRealVar(yieldName,yieldName,sig_ds_Low.sumEntries()*massDiff+sig_ds_Hi.sumEntries()*(1-massDiff))
+      #yieldVar  = RooRealVar(yieldName,yieldName, yie_calc)
+      yieldVar  = RooRealVar(yieldName,yieldName, normList[-1])
 
-      print "\n\n Signal Yield?? = ", sig_ds_Low.sumEntries()*massDiff+sig_ds_Hi.sumEntries()*(1-massDiff)
+      # sigNameInterp = '_'.join(['ds','sig',prod,lep,year,'cat'+cat,'M'+str(mass)])
 
-      sigNameInterp = '_'.join(['ds','sig',prod,lep,year,'cat'+cat,'M'+str(mass)])
-
-      fitBuilder.__init__(mzg,year,lep,cat,sig=prod,mass=str(mass))
-      SigFit_Interp,paramList = fitBuilder.Build(myFunc, piece = 'Interp', mean = mass)
-
-      SigFit_Interp.fitTo(interp_ds, RooFit.Range('fitRegion_'+massString), RooFit.SumW2Error(kTRUE), RooFit.Strategy(1), RooFit.NumCPU(4), RooFit.PrintLevel(-1))
-
-      #print paramList
-      #raw_input("\n ---> Param List. hit enter to continue")
-
-      for param in paramList:
-        param.setConstant(True)
       fitList.append(SigFit_Interp)
-
-      print lep,year,cat,mass, cardDict[lep][year][cat][str(mass)]
 
       getattr(cardDict[lep][year][cat][str(mass)],'import')(SigFit_Interp)
       getattr(cardDict[lep][year][cat][str(mass)],'import')(yieldVar)
       cardDict[lep][year][cat][str(mass)].commitTransaction()
 
-      testFrame = mzg.frame(float(massList[0])-10,float(massList[-1])+10)
+    gStyle.SetOptStat(1)
+    for n in paraNames[prod]:
+      if n==None: continue
+      s = hfile.Get(n)
+      #s.Print()
+      #raw_input('s print')
+      s.Draw('hist')
+      c.SaveAs(plotBase+'params_'+n+'.png')
+    gStyle.SetOptStat(1)
+
+    testFrame = mzg.frame(float(massList[0])-10,float(massList[-1])+10)
+
     for signal in dsList:
-      signal.plotOn(testFrame)
+      signal.plotOn(testFrame, RooFit.MarkerStyle(6))
       # print signal.mean(mzg)
       # raw_input("Mean of the fit ")
 
@@ -207,7 +290,7 @@ def SignalFitMaker(lep, year, cat, subdir):
       regionName = fit.GetName().split('_')[-1]
       # fit.plotOn(testFrame)
       # fit.plotOn(testFrame, RooFit.NormRange('fitRegion_'+regionName))
-      fit.plotOn(testFrame, RooFit.Normalization(normList[i],RooAbsReal.NumEvent), RooFit.LineColor(TColor.GetColorPalette(i*10)))
+      fit.plotOn(testFrame, RooFit.NormRange('fitRegion_'+regionName), RooFit.Normalization(normList[i],RooAbsReal.NumEvent), RooFit.LineColor(TColor.GetColorPalette(i*10)))
       # fit.paramOn(testFrame)
       # testFrame.getAttText().SetTextSize(0.02)
       # testFrame.getAttText().SetTextColor(kRed)
@@ -226,12 +309,12 @@ def SignalFitMaker(lep, year, cat, subdir):
     elif prod =='v':
       testFrame.SetMaximum(0.03)
     '''
-    testFrame.SetMinimum(0.0)
+    testFrame.SetMinimum(1e-4)
 
     testFrame.Draw()
     testFrame.SetTitle(";m_{#mu#mu#gamma} (GeV);Signal shape")
     CMS_lumi(c, 2, 11)
-    c.SaveAs(plotBase+"/"+'_'.join(['sig','fit',prod,lep,year,'cat'+cat])+'.png')
+    c.SaveAs(plotBase+'_'.join(['sig','fit',prod,lep,year,'cat'+cat])+'.png')
 
   for prod in sigNameList:
     for mass in massList:

@@ -31,7 +31,7 @@ parser.add_option("-s", '--sel', dest="sel", type="string", default='mugamma',
 (opt, args) = parser.parse_args()
 
 mass = opt.mass
-sel = opt.sel
+sel  = opt.sel
 
 comments = ["These plots are made for h -> mu mu gamma",
 #comments = ["These plots are made for z -> J/Psi gamma analysis",
@@ -52,9 +52,8 @@ if __name__ == "__main__":
   period  = opt.period
   doBkg   = opt.bkg
 
-  gROOT.ProcessLine(".L ../tdrstyle.C")
-  #gROOT.ProcessLine(".L tdrstyle.C")
-  setTDRStyle()
+  #gROOT.ProcessLine(".L ../tdrstyle.C")
+  #setTDRStyle()
   TH1.SetDefaultSumw2(kTRUE)
 
   pathBase = "/uscms_data/d2/andreypz/html/zgamma/dalitz/"+ver+"_cut"+cut
@@ -201,9 +200,9 @@ if __name__ == "__main__":
   #path = pathBase+"/"+subdir
 
 
-  sigName = '#splitline{20xSignal}{m_{H}=125 GeV}'
-  if opt.zjp: sigName= '#splitline{50xSignal}{Z #rightarrow J/Psi #gamma}'
-  if opt.hjp: sigName= '#splitline{20xSignal}{h #rightarrow J/Psi #gamma}'
+  sigName = '#splitline{XX x Signal}{m_{H}=125 GeV}'
+  if opt.zjp: sigName= '#splitline{50 x Signal}{Z #rightarrow J/Psi #gamma}'
+  if opt.hjp: sigName= 'h #rightarrow J/Psi #gamma'
 
 
   ggHZGFile   = TFile(hPath+"/"+sel+"_"+period+"/hhhh_ggHZG-"+str(mass)+"_1.root", "OPEN")
@@ -221,10 +220,15 @@ if __name__ == "__main__":
   if not opt.apz:
     # u.drawAllInFile(None, "", bkgZip, sigFile, sigName, "GEN", pathBase+'/GEN', None, "norm")
     # u.drawAllInFile(None, "", '', sigFile, sigName, "GEN", pathBase+'/GEN-angles', None, "norm")
-    # u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName,  "",path, cut, "norm")
-    u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "", path, cut, "lumi")
-    # u.drawAllInFile(dataFile, "Data", bkgZip, None, '', "", path, cut, "lumi")
-    # u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "", path, cut, "norm1", doFits=opt.fit)
+
+    if opt.hjp:
+      u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "", path, cut, "toData")
+    else:
+      # u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "", path, cut, "lumi")
+      u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "", path, cut, "toDataInt")
+      # u.drawAllInFile(dataFile, "Data", bkgZip, None, '', "", path, cut, "lumi")
+      # u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "", path, cut, "norm", doFits=opt.fit)
+
     """
     for n in ['Angles']:
       u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal", n, pathBase+"/"+n, cut, "norm1")
@@ -435,14 +439,18 @@ if __name__ == "__main__":
 
 
   if sel in ['jp-mugamma']:
-    u.setCutListFile(hPath+"/"+sel+"_"+period+"/out_cutlist_ZtoJPsiGamma_1.txt")
+    if opt.hjp:
+      print None
+      #u.setCutListFile(hPath+"/"+sel+"_"+period+"/out_cutlist_HiggsToJPsiGamma_1.txt")
+    if opt.zjp:
+      u.setCutListFile(hPath+"/"+sel+"_"+period+"/out_cutlist_ZtoJPsiGamma_1.txt")
   else:
     u.setCutListFile(hPath+"/"+sel+"_"+period+"/out_cutlist_ggH-mad120_1.txt")
 
 
   plot_types =[]
-  list = os.listdir(pathBase)
-  for d in list:
+  dirlist = os.listdir(pathBase)
+  for d in dirlist:
     if os.path.isdir(pathBase+"/"+d):
       plot_types.append(d)
 

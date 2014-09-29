@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import sys
-sys.argv.append('-b')
 from ROOT import *
+gROOT.SetBatch()
 
 def makeToyStucts():
   print 'making TOYDATA..'
@@ -10,6 +10,36 @@ def makeToyStucts():
     Int_t totalData;\
     Int_t sigWindowData;\
   };')
+
+  print 'making GEN...'
+  gROOT.ProcessLine(
+  'struct GEN{\
+    Double_t totBkg;\
+    Double_t yieldBkg;\
+    Double_t yieldBkgErr;\
+    Double_t yieldSig;\
+    Double_t yieldSigErr;\
+    Double_t edm;\
+    Double_t minNll;\
+    Int_t statusAll;\
+    Int_t statusMIGRAD;\
+    Int_t statusHESSE;\
+    Int_t covQual;\
+    Int_t numInvalidNLL;\
+  };')
+
+
+
+  print 'making TRUTH'
+  gROOT.ProcessLine(
+  'struct TRUTH{\
+    Double_t totBkg;\
+    Double_t yieldBkg;\
+    Double_t yieldBkgErr;\
+    Double_t yieldSig;\
+    Double_t yieldSigErr;\
+  };')
+
 
   print 'making BERN2...'
   gROOT.ProcessLine(
@@ -132,7 +162,7 @@ def makeToyStucts():
   };')
 
 
-
+  '''
   print 'making GAUSSBERN3...'
   gROOT.ProcessLine(
   'struct GAUSSBERN3{\
@@ -250,32 +280,4 @@ def makeToyStucts():
     Int_t covQual;\
     Int_t numInvalidNLL;\
   };')
-
-
-  print 'making GEN...'
-  gROOT.ProcessLine(
-  'struct GEN{\
-    Double_t yieldBkg;\
-    Double_t yieldBkgErr;\
-    Double_t yieldSig;\
-    Double_t yieldSigErr;\
-    Double_t edm;\
-    Double_t minNll;\
-    Int_t statusAll;\
-    Int_t statusMIGRAD;\
-    Int_t statusHESSE;\
-    Int_t covQual;\
-    Int_t numInvalidNLL;\
-  };')
-
-
-
-  print 'making TRUTH'
-  gROOT.ProcessLine(
-  'struct TRUTH{\
-    Double_t yieldBkg;\
-    Double_t yieldBkgErr;\
-    Double_t yieldSig;\
-    Double_t yieldSigErr;\
-  };')
-
+  '''

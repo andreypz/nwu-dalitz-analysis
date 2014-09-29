@@ -11,7 +11,7 @@ def createDir(dir):
       else:
         raise
 
-def makeHTML(title, htmlDir, plot_types, description, IFRAMEA):
+def makeHTML(title, htmlDir, plot_types, description, IFRAMEA, doYields=True):
 
     print "\n\n ******** Now making HTML pages ******** \n"
     menu=""
@@ -57,7 +57,8 @@ def makeHTML(title, htmlDir, plot_types, description, IFRAMEA):
 
       menu = menu+"<li><a href=\""+x+".html\" target=\"iframe_a\">"+x+"</a></li>"
 
-    menu += "<li><a href=\"yields.html\" target=\"iframe_a\">yields</a></li>"
+    if doYields:
+      menu += "<li><a href=\"yields.html\" target=\"iframe_a\">yields</a></li>"
 
     today = datetime.date.today()
     print today
@@ -66,8 +67,9 @@ def makeHTML(title, htmlDir, plot_types, description, IFRAMEA):
     message+='<ul>'
     for d in description:
       message += "<li>"+d+" </li>"
-    message += "<li><a href=\"yields_all.twiki\">twiki</a></li>"
-    message += "<li><a href=\"yields_all.tex\">tex</a></li>"
+    if doYields:
+      message += "<li><a href=\"yields_all.twiki\">twiki</a></li>"
+      message += "<li><a href=\"yields_all.tex\">tex</a></li>"
     message+='</ul>'
 
     tempfile = open("../scripts/indextemplate.html","r")
@@ -85,8 +87,10 @@ def makeHTML(title, htmlDir, plot_types, description, IFRAMEA):
     ifile.close()
 
     os.system("cp ../scripts/style.css "+htmlDir)
-    os.system("cp yields* "+htmlDir)
-    os.system("rm yields*")
+    if doYields:
+
+      os.system("cp yields* "+htmlDir)
+      os.system("rm yields*")
 
     print "\n\n *** End of  making HTML pages - all done *** \n"
 

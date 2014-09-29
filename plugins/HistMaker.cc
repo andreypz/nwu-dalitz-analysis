@@ -207,7 +207,7 @@ void HistMaker::FillHistosFull(Int_t num, Double_t weight, string dir)
   if (_isLepSet)
     diLepCM.Boost(b1);
 
-  hists->fill1DHist(weight,  Form("weight_%s_cut%i",         d, num),";weight",  200, 0,3, 1, dir);
+  hists->fill1DHist(weight, Form("weight_%s_cut%i", d, num), ";weight", 200, 0,3, 1, dir);
 
   if (_isGammaSet && _isGamma2Set)
     hists->fill1DHist(four.M(), Form("four_massZ_%s_cut%i",d, num),";m_{ll#gamma#gamma}",  100,70,120,  weight, dir);
@@ -253,8 +253,9 @@ void HistMaker::FillHistosFull(Int_t num, Double_t weight, string dir)
 		      ";di-Lepton p_{T}/m_{ll#gamma}",100, 0,1, weight, dir);
   }
 
-  hists->fill1DHist(diLep.M(), Form("01_diLep_mass_20_%s_cut%i",   d, num),";m_{#mu#mu} (GeV)", 100, 0,20,  weight, dir);
-  hists->fill1DHist(diLep.M(), Form("01_diLep_mass_50_%s_cut%i",   d, num),";m_{#mu#mu} (GeV)", 100, 0,50,  weight, dir);
+  hists->fill1DHist(diLep.M(), Form("01_diLep_mass_0to20_%s_cut%i",    d, num),";m_{#mu#mu} (GeV)", 100, 0,20,  weight, dir);
+  hists->fill1DHist(diLep.M(), Form("01_diLep_mass_0to20_b50_%s_cut%i",d, num),";m_{#mu#mu} (GeV)",  50, 0,20,  weight, dir);
+  hists->fill1DHist(diLep.M(), Form("01_diLep_mass_0to50_%s_cut%i",    d, num),";m_{#mu#mu} (GeV)", 100, 0,50,  weight, dir);
   hists->fill1DHist(diLep.M(), Form("01_diLep_mass_full_%s_cut%i", d, num),";m_{#mu#mu} (GeV)", 100, 0,120, weight, dir);
   hists->fill1DHist(diLep.M(), Form("01_diLep_mass_low1_%s_cut%i", d, num),";m_{ll} (GeV)",  50,   0,1.5,   weight, dir);
   hists->fill1DHist(diLep.M(), Form("01_diLep_mass_low2_%s_cut%i", d, num),";m_{ll} (GeV)", 100, 1.5,  8,   weight, dir);
@@ -267,10 +268,10 @@ void HistMaker::FillHistosFull(Int_t num, Double_t weight, string dir)
   hists->fill1DHist(TMath::Log10(diLep.M()), Form("01_diLep_mass_log2_%s_cut%i", d, num),";log10(m_{ll})", 100,   -1,3, weight, dir);
   hists->fill1DHist(TMath::Log10(diLep.M()), Form("01_diLep_mass_log3_%s_cut%i", d, num),";log10(m_{ll})", 100,-0.7,1.3,weight, dir);
 
-  hists->fill1DHist(diLep.Pt(),  Form("diLep_pt_%s_cut%i",   d, num),";di-Lepton p_{T}", 50, 0,120, weight, dir);
-  hists->fill1DHist(diLep.Eta(), Form("diLep_eta_%s_cut%i",  d, num),";di-Lepton eta",   50, -3.5,3.5, weight, dir);
-  hists->fill1DHist(diLep.Phi(), Form("diLep_phi_%s_cut%i",  d, num),";di-Lepton phi",   50, -TMath::Pi(),TMath::Pi(), weight, dir);
-  hists->fill1DHist(diLepCM.E(), Form("diLep_Ecom_%s_cut%i", d, num),";E(ll) in CoM",    50, 0,200,  weight, dir);
+  hists->fill1DHist(diLep.Pt(),  Form("011_diLep_pt_%s_cut%i",   d, num),";di-Lepton p_{T}", 50, 0,120, weight, dir);
+  hists->fill1DHist(diLep.Eta(), Form("011_diLep_eta_%s_cut%i",  d, num),";di-Lepton eta",   50, -3.5,3.5, weight, dir);
+  hists->fill1DHist(diLep.Phi(), Form("011_diLep_phi_%s_cut%i",  d, num),";di-Lepton phi",   50, -TMath::Pi(),TMath::Pi(), weight, dir);
+  hists->fill1DHist(diLepCM.E(), Form("011_diLep_Ecom_%s_cut%i", d, num),";E(ll) in CoM",    50, 0,200,  weight, dir);
 
 
   hists->fill1DHist(_lPt1.Pt(),  Form("02_lPt1_pt_%s_cut%i", d, num), ";Leading lepton p_{T} (GeV)", 50, 0,100,    weight, dir);
@@ -289,9 +290,10 @@ void HistMaker::FillHistosFull(Int_t num, Double_t weight, string dir)
   if(_isGammaSet)
     {
       hists->fill1DHist(_gamma.Pt()/tri.M(), Form("03_gamma_ptOverMllg_%s_cut%i",   d, num),
-			";Photon p_{T}/M_{ll#gamma}",  100, 0,1, weight, dir);
+			";Photon p_{T}/m_{ll#gamma}",  100, 0,1, weight, dir);
       hists->fill1DHist(gammaCM.E(), Form("03_gamma_Ecom_%s_cut%i",d, num),";Photon Energy in CoM",50, 0,120, weight, dir);
       hists->fill1DHist(_gamma.E(),  Form("03_gamma_E_%s_cut%i",   d, num),";Photon Energy",       50, 0,200, weight, dir);
+      hists->fill1DHist(_gamma.E(),  Form("03_gamma_E_hi_%s_cut%i",d, num),";Photon Energy",       50, 0,400, weight, dir);
       hists->fill1DHist(_gamma.Pt(), Form("03_gamma_pt_%s_cut%i",  d, num),";Photon p_{T} (GeV)",  50, 0,120, weight, dir);
       hists->fill1DHist(_gamma.Eta(),Form("03_gamma_eta_%s_cut%i", d, num),";Photon eta", 50, -3.5,3.5,       weight, dir);
       hists->fill1DHist(_gamma.Phi(),Form("03_gamma_phi_%s_cut%i", d, num),";Photon phi", 50, -TMath::Pi(),TMath::Pi(), weight, dir);

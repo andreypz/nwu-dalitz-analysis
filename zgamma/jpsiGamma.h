@@ -79,7 +79,7 @@ class jpsiGamma : public TSelector {
   UInt_t totEvents;
 
   TRandom3 *myRandom;
-  ofstream fout;
+  ofstream fout, fcuts;
 
   //auto_ptr<ammagz::PhosphorCorrectionFunctor> phoCorrector;
 
@@ -194,7 +194,7 @@ class jpsiGamma : public TSelector {
    virtual void    SlaveTerminate();
    virtual void    Terminate();
 
-   virtual void CountEvents(Int_t);
+   virtual void CountEvents(Int_t , string , ofstream& s);
    virtual void FillHistoCounts(Int_t n, Double_t w);
 
    ClassDef(jpsiGamma,1);

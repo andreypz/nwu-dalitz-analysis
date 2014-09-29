@@ -24,7 +24,7 @@ s = cf.get("path","ver")
 # Run with: combine -M Asymptotic datacard.txt  #
 # ################################################
 brTag = ''
-hjp = 0
+hjp = 1
 
 Ext = options.ext
 
@@ -40,7 +40,7 @@ PU      = '1.008'
 
 proc = {'gg':'ggH', 'vbf':'qqH','v':'WH','hjp':'hjp'}
 massList   = ['%.1f'%(a) for a in u.drange(120,150,1.0)]
-#massList = ['125.0']
+massList = ['125.0']
 csBR = {}
 
 #for i,m in enumerate(massList):
@@ -73,8 +73,10 @@ def makeCards(subdir):
 
         channel = '_'.join([lepton,year,'cat'+cat])
         #bkgParams = ['sigma','mean','tau','norm']
-        #bkgParams = ['p1','p2','p3','norm']
-        bkgParams = ['p1','p2','p3','p4','norm']
+        if hjp:
+          bkgParams = ['p1','p2','norm']
+        else:
+          bkgParams = ['p1','p2','p3','p4','norm']
 
         for mass in massList:
 
@@ -201,8 +203,6 @@ def makeCards(subdir):
 if __name__=="__main__":
 
   print len(sys.argv), sys.argv
-
-
 
   mmm = massList[0]
   for m in massList[1:]:

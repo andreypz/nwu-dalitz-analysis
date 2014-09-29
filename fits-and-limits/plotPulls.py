@@ -8,39 +8,50 @@ cf = cp.ConfigParser()
 cf.read('config.cfg')
 s = cf.get("path","ver")
 
+from optparse import OptionParser
+parser = OptionParser(usage="usage: %prog subdir")
+parser.add_option("--copy", dest="copy",  default=None,
+                  help="Directory where the results from Batch are stored. Will copy them in a better place.")
+(opt, args) = parser.parse_args()
+
 gROOT.ProcessLine(".L ~/tdrstyle.C")
 setTDRStyle()
-#plotBase = '/uscms_data/d2/andreypz/html/zgamma/dalitz/fits-'+s+'/toyFits/'
-plotBase = '/tthome/andrey/html/zgamma/bias-mar11/'
-toysDir = '../biasToys-mar11'
+plotBase = cf.get("path","htmlbase")+'/html/zgamma/dalitz/fits-'+s+'/Pulls'
+#plotBase = '/tthome/andrey/html/zgamma/bias-mar11/'
+toysDir = '../biasToys-2014-Sep23'
 
 def loopThruPulls():
-  #massList  = ['120','125','130']
+  #massList  = ['140','145','150']
   massList     = [a.strip()[0:3] for a in (cf.get("fits","massList")).split(',')]
   sigNameList  = [a.strip() for a in (cf.get("fits","sigNameList")).split(',')]
   yearList     = [a.strip() for a in (cf.get("fits","yearList")).split(',')]
-  leptonList   = [a.strip() for a in (cf.get("fits","leptonList")).split(',')] 
-  catList = ['0']
+  leptonList   = [a.strip() for a in (cf.get("fits","leptonList")).split(',')]
+  catList = ['EB']
 
-  genFuncList = ['Exp','Pow','Bern3']
+  genFuncList = ['Exp','Pow','Laurent']
   #genFuncList = ['GaussPow','GaussExp','SechPow','SechExp']
   for year in yearList:
-    for lepton in leptonList:
+    for lep in leptonList:
       for genFunc in genFuncList:
         for cat in catList:
           for mass in massList:
-            makePullPlots(year,lepton,genFunc,cat,mass)
+            if opt.copy!=None:
+              bdir = opt.copy
+              toyFileName  = toysDir+'_'.join(['/biasToys',year,lep,'cat'+cat,genFunc,mass])+'.root'
+              toyFileNameJ = bdir   +'_'.join(['/biasToys',year,lep,'cat'+cat,genFunc,mass])+'_job*.root'
+              os.system(' '.join(['../scripts/ahadd.py', toyFileName, toyFileNameJ]))
+            makePullPlots(year,lep,genFunc,cat,mass)
 
-def makePullPlots(year='2012', lepton='mu', genFunc='Exp', cat='0', mass='125'):
+def makePullPlots(year='2012', lepton='mu', genFunc='Exp', cat='EB', mass='125'):
 
   #get the toy file and tree
-  toyFileName = toysDir+'/toys_'+genFunc+'_m'+mass+'.root'
+  toyFileName  = toysDir+'_'.join(['/biasToys',year,lepton,'cat'+cat,genFunc,mass])+'.root'
   print toyFileName
   toyFile = TFile(toyFileName)
   toyTree = toyFile.Get('toys')
 
   #toyTree.Print()
-  
+
   gStyle.SetOptStat(0)
   gStyle.SetTitleFontSize(2.7)
   gStyle.SetTitleH(0.06) # Set the height of the title box
@@ -110,39 +121,38 @@ def makePullPlots(year='2012', lepton='mu', genFunc='Exp', cat='0', mass='125'):
 
         if dist == 'sigPull':
           toyTree.Draw('('+fitFunc+'.yieldSig/'+fitFunc+'.yieldSigErr)>>'+dist+'_'+fitFunc ,cutStr,'goff')
-          tmpHist.GetXaxis().SetTitle('nSig/#sigma(nSig)')
+          tmpHist.SetTitle(mass+';nSig/#sigma(nSig);A.U.')
 
         elif dist == 'bgPull':
           toyTree.Draw('(('+fitFunc+'.yieldBkg - truth.yieldBkg)/'+fitFunc+'.yieldBkgErr)>>'+dist+'_'+fitFunc ,cutStr,'goff')
-          tmpHist.GetXaxis().SetTitle('(nBG-nTrue)/#sigma(nBG)')
+          tmpHist.SetTitle(mass+';(nBG-nTrue)/#sigma(nBG);A.U.')
         elif dist == 'bgPull-2':
           toyTree.Draw('(('+fitFunc+'.yieldBkg - truth.yieldBkg)/sqrt(truth.yieldBkg))>>'+dist+'_'+fitFunc ,cutStr,'goff')
-          tmpHist.GetXaxis().SetTitle('(nBG-nTrue)/#sqrt{nTrue}')
+          tmpHist.SetTitle(mass+';(nBG-nTrue)/#sqrt{nTrue};A.U.')
         elif dist == 'bgPull-3':
           toyTree.Draw('(('+fitFunc+'.yieldBkg - truth.yieldBkg)/sqrt('+fitFunc+'.yieldBkg))>>'+dist+'_'+fitFunc ,cutStr,'goff')
-          tmpHist.GetXaxis().SetTitle('(nBG-nTrue)/#sqrt{nBG}')
+          tmpHist.SetTitle(mass+';(nBG-nTrue)/#sqrt{nBG};A.U.')
 
         elif dist == 'nSig':
           toyTree.Draw('('+fitFunc+'.yieldSig)>>'+dist+'_'+fitFunc ,cutStr,'goff')
-          tmpHist.GetXaxis().SetTitle('nSig')
+          tmpHist.SetTitle(mass+';nSig;A.U.')
 
         elif dist == 'nBG':
           toyTree.Draw('('+fitFunc+'.yieldBkg)>>'+dist+'_'+fitFunc ,cutStr,'goff')
-          tmpHist.GetXaxis().SetTitle('nBG')
+          tmpHist.SetTitle(mass+';nBG;A.U.')
 
         elif dist == 'sigErr':
           toyTree.Draw('('+fitFunc+'.yieldSigErr)>>'+dist+'_'+fitFunc ,cutStr,'goff')
-          tmpHist.GetXaxis().SetTitle('#sigma(nSig)')
+          tmpHist.SetTitle(mass+';#sigma(nSig);A.U.')
 
         elif dist == 'bgErr':
           toyTree.Draw('('+fitFunc+'.yieldBkgErr)>>'+dist+'_'+fitFunc ,cutStr,'goff')
-          tmpHist.GetXaxis().SetTitle('#sigma(nBG)')
+          tmpHist.SetTitle(mass+';#sigma(nBG);A.U.')
 
         elif dist == 'typeA':
           toyTree.Draw('('+fitFunc+'.yieldSig/'+fitFunc+'.yieldBkgErr)>>'+dist+'_'+fitFunc ,cutStr,'goff')
-          tmpHist.GetXaxis().SetTitle('nSig/#sigma(nBG)')
+          tmpHist.SetTitle(mass+';nSig/#sigma(nBG);A.U.')
 
-        tmpHist.GetYaxis().SetTitle('A.U.')
         tmpHist.GetYaxis().CenterTitle()
 
         print fitFunc,dist, tmpHist.GetEntries(), tmpHist.GetMean()
@@ -155,12 +165,14 @@ def makePullPlots(year='2012', lepton='mu', genFunc='Exp', cat='0', mass='125'):
 
   #make the plots
 
-  newPath = plotBase+'/biasPulls/'+lepton+'_'+year+'/'+genFunc
+
+  newPath = plotBase+'-'.join(['',year,lepton,'cat'+cat,genFunc])
+
   if not os.path.isdir(newPath):
     os.makedirs(newPath)
 
   #get a txt file ready for the latex
-  f = open(plotBase+'/biasPulls/'+lepton+'_'+year+'/'+lepton+'_'+year+'_'+genFunc+'_cat'+cat+'_mH'+mass+'.txt', 'w')
+  f = open(plotBase+'-'+'-'.join([year,lepton,'cat'+cat,genFunc,'mH'+mass+'.txt']), 'w')
   for i,dist in enumerate(distList):
     canList[i].cd()
 
@@ -174,7 +186,7 @@ def makePullPlots(year='2012', lepton='mu', genFunc='Exp', cat='0', mass='125'):
       #if dist in ['sigPull','typeA'] and j==len(histListDict[dist])-1: continue
       histListDict[dist][j].Draw('same')
     legList[i].Draw('same')
-    canList[i].SaveAs(plotBase+'/biasPulls/'+lepton+'_'+year+'/'+genFunc+'/'+dist+'_'+lepton+'_'+year+'_'+genFunc+'_cat'+cat+'_mH'+mass+'.png')
+    canList[i].SaveAs(newPath+'/'+dist+'_'+lepton+'_'+year+'_'+genFunc+'_cat'+cat+'_mH'+mass+'.png')
 
     if dist == 'typeA':
       f.write('typeA:\n')
@@ -199,7 +211,7 @@ if __name__=="__main__":
   #mass = options.mass
   #makePullPlots(mass=mass)
   loopThruPulls()
-  
+
 
 
 

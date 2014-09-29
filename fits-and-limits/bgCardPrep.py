@@ -1,10 +1,12 @@
 #!/usr/bin/env python
-import sys
+import sys,os
 from ROOT import *
 gROOT.SetBatch()
 #from rooFitBuilder import *
 sys.path.append("../zgamma")
+sys.path.append("../scripts")
 import utils as u
+import makeHTML as ht
 import ConfigParser as cp
 gROOT.ProcessLine(".L ../tdrstyle.C")
 setTDRStyle()
@@ -14,7 +16,7 @@ print len(sys.argv), sys.argv
 
 verbose = 0
 doExt   = 0
-hjp = 0
+hjp = 1
 
 cf = cp.ConfigParser()
 cf.read('config.cfg')
@@ -23,10 +25,11 @@ yearList   = [a.strip() for a in (cf.get("fits","yearList")).split(',')]
 leptonList = [a.strip() for a in (cf.get("fits","leptonList")).split(',')]
 catList    = [a.strip() for a in (cf.get("fits","catList")).split(',')]
 doBlind    = int(cf.get("fits","blind"))
+catList = ['EB']
 
 plotBase = cf.get("path","htmlbase")+"/html/zgamma/dalitz/fits-"+subdir
+u.createDir(plotBase+'/BestFits')
 
-u.createDir(plotBase)
 rooWsFile = TFile(subdir+'/testRooFitOut_Dalitz.root')
 myWs    = rooWsFile.Get('ws')
 card_ws = RooWorkspace('ws_card')
@@ -39,7 +42,7 @@ mzg.setRange('signal',120,130)
 mzg.setRange('r1',110,120)
 mzg.setRange('r2',130,170)
 
-bkgModel = 'Bern4'
+bkgModel = 'Bern2'
 # #######################################
 # prep the background and data card    #
 # we're going to the extend the bg pdf #
@@ -295,6 +298,10 @@ def doBandsFit(onesigma, twosigma, hmass, cpdf, nomcurve, datanorm, plot, year, 
 
   raw_input('Enter ')
 
+
+### This is the beginning of an actual code
+# Need to put __main__ function in here...
+
 for year in yearList:
   for lepton in leptonList:
     for cat in catList:
@@ -319,7 +326,7 @@ for year in yearList:
       for i,f in enumerate(fsig):
         Nev = f.Get("Counts/evt_byCut").GetBinContent(2)
         if hjp:
-          cro = u.getCS("HtoJPsiGamma")
+          cro = u.getCS("HtoJPsiGamma")/100
         else:
           if i==0:
             cro = u.getCS("ggH-125",mySel='mu')
@@ -327,6 +334,7 @@ for year in yearList:
             cro = u.getCS("vbfH-125",mySel='mu')
           elif i==2:
             cro = u.getCS("vH-125",mySel='mu')
+
         lumi  = u.getLumi("2012")
         scale = float(lumi*cro)/Nev
         print i, 'File:', str(f.GetName())[-50:], cro, Nev, scale
@@ -334,14 +342,16 @@ for year in yearList:
         if cat=='0':
           hsig.append(f.Get("00_tri_mass__cut9"))
         elif cat=='EB':
-          hsig.append(f.Get("00_tri_mass__cut9"))
+          if hjp: hsig.append(f.Get("00_tri_mass__cut8"))
+          else:   hsig.append(f.Get("00_tri_mass__cut9"))
         elif cat=='EE':
           hsig.append(f.Get("00_tri_mass__cut12"))
         elif cat=='mll50':
           hsig.append(f.Get("00_tri_mass__cut15"))
 
-        if hjp: hsig[-1].Scale(scale)
-        else:   hsig[-1].Scale(10*scale)
+        if hjp: factor = 500
+        else:   factor = 10
+        hsig[-1].Scale(factor*scale)
       # print len(hsig), cat
 
       #hsig[-1].Print("all")
@@ -447,14 +457,11 @@ for year in yearList:
 
       testFrame.SetTitle(";m_{#mu#mu#gamma} (GeV);Events/"+str(binWidth)+" GeV")
 
-      if hjp: leg  = TLegend(0.53,0.65,0.93,0.87)
-      else:   leg  = TLegend(0.53,0.65,0.93,0.87)
+      if hjp: leg  = TLegend(0.45,0.65,0.91,0.87)
+      else:   leg  = TLegend(0.53,0.65,0.91,0.87)
       leg.SetFillColor(0)
       leg.SetBorderSize(1)
-      if hjp:
-        leg.AddEntry(hsig[0],'#splitline{Expected signal}{with #sigma#times BR = 1.5 fb}','l')
-      else:
-        leg.AddEntry(hsig[0],'Expected signal x10','f')
+      leg.AddEntry(hsig[0],'Expected signal x'+str(factor),'f')
       #leg.AddEntry(testFrame.findObject(bkgModel+'1sigma'),"Background Model",'f')
       leg.AddEntry(testFrame.findObject(bkgModel),"Background Model",'l')
       #if not hjp: leg.AddEntry(0,'','')
@@ -484,7 +491,7 @@ for year in yearList:
 
       gPad.RedrawAxis()
       for e in ['.png', '.pdf']:
-        c.SaveAs(plotBase+'/'+'_'.join(['best_fit',year,lepton,'cat'+cat])+e)
+        c.SaveAs(plotBase+'/BestFits/'+'_'.join(['best_fit',year,lepton,'cat'+cat])+e)
 
       ###### Import the fit and data, and rename them to the card convention
       dataNameNew = '_'.join(['data','obs',lepton,year,'cat'+cat])
@@ -516,3 +523,13 @@ for year in yearList:
       print "\n * The end * \n"
 
 card_ws.writeToFile(subdir+'/testCardBackground_Dalitz.root')
+
+comments = ['Limits and fits']
+defaultPage = 'BestFits'
+
+plot_types =[]
+dirlist = os.listdir(plotBase)
+for d in dirlist:
+  if os.path.isdir(plotBase+"/"+d):
+    plot_types.append(d)
+ht.makeHTML("h &rarr; dalitz decay plots", plotBase, plot_types, comments, defaultPage, doYields=False)

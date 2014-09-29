@@ -149,9 +149,9 @@ void egamma::Begin(TTree * tree)
   if (trigger=="pho")
     {
       myTrigger = "HLT_Photon36_R9Id85_OR_CaloId10_Iso50_Photon22_R9Id85_OR_CaloId10_Iso50_v";
-      cut_l1pt = 20;
-      cut_l2pt = 1;
-      cut_gammapt = 38;
+      //cut_l1pt = 20;
+      //cut_l2pt = 1;
+      //cut_gammapt = 38;
     }
   else if (trigger=="pho26")
     {
@@ -439,10 +439,9 @@ Bool_t egamma::Process(Long64_t entry)
   TCPhoton gamma0, gamma, ufoton, ufelectron;
   TCElectron DALE;
 
-  if (nVtx>50){
-    fout<<runNumber<<" "<<lumiSection<<"  "<<eventNumber<<"   "<<nVtx<<endl;
-    cout<<runNumber<<" "<<lumiSection<<"  "<<eventNumber<<"   "<<nVtx<<endl;
-  }
+  //if (nVtx>50){
+  //fout<<runNumber<<" "<<lumiSection<<"  "<<eventNumber<<"   "<<nVtx<<endl;
+  //}
 
   for (Int_t i = 0; i < recoPhotons->GetSize(); ++i) {
     //cout<<"new photon!!!!!!!"<<endl;
@@ -579,7 +578,7 @@ Bool_t egamma::Process(Long64_t entry)
       bool idpass = ObjID->PassDalitzEleID(*thisElec, pvPosition, "MVA", DAleMvaScore);
       thisElec->SetIdMap("mvaScore", DAleMvaScore);
 
-
+      /*
       for(Int_t ev=0; ev<evSize;ev++){
 	if (nEvents[0]-1 == hisEVTS[ev]){cout<<nEvents[0]-1<<" evNumber = "<<eventNumber<<endl;
 	  cout<<"gamma: pt = "<<gamma.Pt()<<"  SCEta = "<<gamma.SCEta()<<"  SCPhi = "<<gamma.SCPhi()<<endl;
@@ -607,7 +606,7 @@ Bool_t egamma::Process(Long64_t entry)
 
 	  break;}
       }
-
+      */
 
     }
 
@@ -683,7 +682,6 @@ Bool_t egamma::Process(Long64_t entry)
 
 
   if (gamma.Pt() < cut_gammapt) return kTRUE;
-  //if (fabs(gamma.Eta()) > 1.444) return kTRUE;
   if (fabs(gamma.SCEta()) > 1.4442) return kTRUE;
 
 
@@ -782,10 +780,6 @@ Bool_t egamma::Process(Long64_t entry)
   DALE = DAlectrons[0];
   if (DALE.Pt()<30)
     return kTRUE;
-  //if (!DALE.PassConversionVeto())
-  //return kTRUE;
-  //if (DALE.ConversionMissHits()!=0)
-  //return kTRUE;
 
   //HM->FillHistosFull(6, eventWeight, "");
   FillHistoCounts(6, eventWeight);
@@ -975,12 +969,36 @@ Bool_t egamma::Process(Long64_t entry)
   //fout<<" SC1 = "<<DALE.BaseSC()[0]<<endl;
   //fout<<" SC2 = "<<DALE.BaseSC()[1]<<endl;
 
+
+  if (!DALE.PassConversionVeto())
+    return kTRUE;
+  //if (DALE.ConversionMissHits()!=0)
+  //return kTRUE;
+
+  FillHistoCounts(13, eventWeight);
+  CountEvents(13,"Conv gsf Ele",fcuts);
+
+  cI = trk[0].GetConversionInfo();
+  if (cI.vtxProb>1e-6 && cI.lxyBS>2 && cI.nHitsMax>1)
+    return kTRUE;
+
+  FillHistoCounts(14, eventWeight);
+  CountEvents(14,"Conv gsf trk 1",fcuts);
+
+  cI = trk[1].GetConversionInfo();
+  if (cI.vtxProb>1e-6 && cI.lxyBS>2 && cI.nHitsMax>1)
+    return kTRUE;
+
+  FillHistoCounts(15, eventWeight);
+  CountEvents(15,"Conv gsf trk 2",fcuts);
+
+
   if (MdalG<122 || MdalG>128) return kTRUE;
   //if (Mllg<122 || Mllg>128) return kTRUE;
 
-  HM->FillHistosFull(13, eventWeight, "");
-  FillHistoCounts(13, eventWeight);
-  CountEvents(13,"122 < m(e,g) < 128",fcuts);
+  HM->FillHistosFull(16, eventWeight, "");
+  FillHistoCounts(16, eventWeight);
+  CountEvents(16,"122 < m(e,g) < 128",fcuts);
 
 
 

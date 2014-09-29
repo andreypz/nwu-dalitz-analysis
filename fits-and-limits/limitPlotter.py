@@ -16,11 +16,10 @@ import ConfigParser as cp
 cf = cp.ConfigParser()
 cf.read('config.cfg')
 
-gROOT.ProcessLine(".L ../tdrstyle.C")
-setTDRStyle()
+#gROOT.ProcessLine(".L ../tdrstyle.C")
+#setTDRStyle()
 #gROOT.LoadMacro("../CMS_lumi.C")
 gStyle.SetOptTitle(0)
-
 
 s = cf.get("path","ver")
 method = 'Asymptotic'
@@ -28,7 +27,7 @@ method = 'Asymptotic'
 out = TFile(s+"/limit-data-cat"+opt.cat+".root","recreate")
 
 plotBase = cf.get("path","htmlbase")+'/html/zgamma/dalitz/fits-'+s
-u.createDir(plotBase)
+u.createDir(plotBase+'/Limits')
 
 fullCombo = True
 #massList   = [float(a) for a in (cf.get("fits","massList-more")).split(',')]
@@ -51,13 +50,13 @@ if fullCombo:
   exp2SigLow = []
   fileListTmp = os.listdir(s)
   fileList = filter(lambda fileName: 'higgsCombineTest.'+method in fileName,fileListTmp)
-  # print fileList
+  #print fileList
   for mass in massList:
     #print str(mass)
     #if str(mass)[4] == "0": # nasty trick
     #  mass = int(mass)
       #print 'we are her'
-    #print mass
+    print mass
     thisFile = filter(lambda fileName: str(mass)+'_cat'+opt.cat+'.root' in fileName,fileList)[0]
     print thisFile
     xAxis.append(float(mass))
@@ -201,14 +200,14 @@ if fullCombo:
     leg.SetY1NDC(0.64)
     leg.AddEntry(g,"10#timesSM", "l")
   else:
-    l = TLine(110, 5, 150, 10)
+    l = TLine(120, 1, 150, 1)
     l.SetLineColor(kRed+2)
     l.SetLineStyle(21)
     l.Draw()
 
   for e in ['.png', '.pdf']:
     CMS_lumi(c, 2, 11)
-    c.SaveAs(plotBase+'/Limits_cat'+opt.cat+e)
+    c.SaveAs(plotBase+'/Limits/Limits_cat'+opt.cat+e)
 
   out.cd()
   observed.Write("observed")

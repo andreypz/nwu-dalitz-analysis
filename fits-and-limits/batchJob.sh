@@ -1,8 +1,8 @@
 #!/bin/bash
 
-echo 'condor option=' ${5}
+echo 'condor option=' ${6}
 
-if [ ${5}=="nwu" ]
+if [ ${6}=="nwu" ]
 then
   echo "NWU"
   export OSG_APP=/software/tier3/osg
@@ -21,6 +21,7 @@ outDir=$1
 jobNumber=$2
 nTrials=$3  # trials per job
 mass=$4
+cat=$5
 
 mkdir nwu-my-analysis
 cd nwu-my-analysis
@@ -35,7 +36,7 @@ echo "lsing in fits-and-limits"
 ls
 
 echo "$outDir $jobNumber $nTrials"
-./biasStudy_toyMaker.py -v ${outDir} -j $jobNumber -t $nTrials -m $mass
+./biasStudy_toyMaker.py -v ${outDir} -j $jobNumber -t $nTrials -m $mass --cat=$cat
 
 
 echo "Done. Will copy the files to " $outDir

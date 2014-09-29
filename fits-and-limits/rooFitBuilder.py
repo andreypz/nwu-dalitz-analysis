@@ -47,6 +47,7 @@ class FitBuilder:
         'Exp2': self.BuildExp2,
         'ExpSum': self.BuildExpSum,
         'Laurent': self.BuildLaurent,
+        'LaurentHZG': self.BuildLaurentHZG,
         'Bern2': self.BuildBern2,
         'Bern3': self.BuildBern3,
         'Bern4': self.BuildBern4,
@@ -70,6 +71,7 @@ class FitBuilder:
       'Exp2':kOrange,
       'ExpSum':kGreen+2,
       'Laurent':kMagenta,
+      'LaurentHZG':kMagenta,
       'Pow':kCyan,
       'Bern2':kViolet,
       'Bern3':kPink,
@@ -93,7 +95,8 @@ class FitBuilder:
       'Exp':1,
       'Exp2':2,
       'ExpSum':2,
-      'Laurent':1,
+      'Laurent':0,
+      'LaurentHZG':1,
       'Pow':2,
       'Bern2':2,
       'Bern3':3,
@@ -523,15 +526,35 @@ class FitBuilder:
     SetOwnership(p3Var,0)
     return ExpSum
 
-  def BuildLaurent(self,p1 = 1, p1Low = -20, p1High = 20):
+  def BuildLaurentHZG(self,p1 = 1, p1Low = -20, p1High = 20):
 
-    p1Var = RooRealVar('p1Laurent_'+self.suffix,'p1Laurent_'+self.suffix,p1,p1Low,p1High)
+    p1Var   = RooRealVar('p1Laurent_'+ self.suffix,'p1Laurent_'+self.suffix,p1,p1Low,p1High)
     Laurent = RooGenericPdf('Laurent_'+self.suffix,'Laurent_'+self.suffix,'(1-@1)*@0^(-4)+@1*@0^(-5)',RooArgList(self.mzg,p1Var))
     SetOwnership(p1Var,0)
     return Laurent
 
+  def BuildLaurent(self, order = 1):
+    # This is an implementation similar to h2gglobe.
+    # Zeroth order is power -4
+
+    if order>=1:
+      p1Var   = RooRealVar('p1Laurent_'+ self.suffix,'p1Laurent_'+self.suffix, 0.25/order, 0.00001,0.99999)
+      Laurent = RooGenericPdf('Laurent_'+self.suffix,'Laurent_'+self.suffix,'(1-@1)*@0^(-4)+@1*@0^(-5)',RooArgList(self.mzg,p1Var))
+
+      SetOwnership(p1Var,0)
+    if order==2:
+      p2Var   = RooRealVar('p2Laurent_'+ self.suffix,'p2Laurent_'+self.suffix, 0.25/order, 0.00001,0.99999)
+      Laurent = RooGenericPdf('Laurent_'+self.suffix,'Laurent_'+self.suffix,'(1-@1-@2)*@0^(-3)+@1*@0^(-4)+@2*@0^(-5)',RooArgList(self.mzg,p1Var,p2Var))
+      SetOwnership(p2Var,0)
+    if order>2:
+      print '\n \t\t Error only orders 1 and 2 are supported for Laurent polynomials! \n'
+      sys.exit(0)
+
+    self.FitNdofDict['Laurent'] = order
+    return Laurent
+
   def BuildBern2(self,p0 = 1 ,p1 = 5, p1Low = -1e-6, p1High = 30, p2 = 5, p2Low = -1e-6, p2High = 30):
-#def BuildBern2(self,p0 = 1 ,p1 = 5, p1Low =1e-3, p1High = 30, p2 = 5, p2Low =1e-3, p2High = 30):
+    # def BuildBern2(self,p0 = 1 ,p1 = 5, p1Low =1e-3, p1High = 30, p2 = 5, p2Low =1e-3, p2High = 30):
 
     p0Var = RooRealVar('p0Bern2_'+self.suffix, 'p0Bern2_'+self.suffix,p0)
     p1Var = RooRealVar('p1Bern2_'+self.suffix, 'p1Bern2_'+self.suffix,p1,p1Low,p1High)
@@ -616,9 +639,11 @@ class FitBuilder:
     SetOwnership(sigmaVar,0)
     return gauss
 
-  def BuildCrystalBallGauss(self, piece, mean = 125, meanG = -1, meanGLow = -1, meanGHigh = -1, meanCB = -1, meanCBLow = -1, meanCBHigh = -1,
+  def BuildCrystalBallGauss(self, piece, mean = 125, meanG = -1, meanGLow = -1, meanGHigh = -1,
+                            meanCB = -1, meanCBLow = -1, meanCBHigh = -1,
                             sigmaCB = 1.5, sigmaCBLow = 0.3, sigmaCBHigh = 20, alpha = 1, alphaLow = 0.5, alphaHigh = 10,
-                            n = 4, nLow = 0.5, nHigh = 50, sigmaG = 2, sigmaGLow = 0.3, sigmaGHigh = 20, frac = 0.1, fracLow = 0.0, fracHigh = 1.0):
+                            n = 4, nLow = 0.5, nHigh = 50, sigmaG = 2, sigmaGLow = 0.3, sigmaGHigh = 20,
+                            frac = 0.1, fracLow = 0.0, fracHigh = 1.0):
 
     suffix = self.suffix+'_'+piece
     meanG = meanCB = mean
@@ -655,9 +680,11 @@ class FitBuilder:
 
 
 
-  def BuildCrystalBallGaussM(self, piece, mean = 125, meanG = -1, meanGLow = -1, meanGHigh = -1, meanCB = -1, meanCBLow = -1, meanCBHigh = -1,
-                             sigmaCB = 1.5, sigmaCBLow = 0.3, sigmaCBHigh = 20, alpha = 1, alphaLow = 0.5, alphaHigh = 10,
-                             n = 4, nLow = 0.5, nHigh = 50, sigmaG = 2, sigmaGLow = 0.3, sigmaGHigh = 20, frac = 0.1, fracLow = 0.0, fracHigh = 0.3):
+  def BuildCrystalBallGaussM(self, piece, mean = 125, meanG = -1, meanGLow = -1, meanGHigh = -1,
+                             meanCB = -1, meanCBLow = -1, meanCBHigh = -1,
+                             sigmaCB = 1.5, sigmaCBLow = 0.3, sigmaCBHigh = 7, alpha = 1, alphaLow = 0.5, alphaHigh = 10,
+                             n = 4, nLow = 0.5, nHigh = 50, sigmaG = 2, sigmaGLow = 0.3, sigmaGHigh = 7,
+                             frac = 0.1, fracLow = 0.05, fracHigh = 0.4):
 
     suffix = self.suffix+'_'+piece
     meanG = meanCB = mean

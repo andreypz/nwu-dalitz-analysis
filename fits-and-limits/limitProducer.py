@@ -22,12 +22,13 @@ if options.prof:
   method = "ProfileLikelihood"
 
 if __name__ == "__main__":
-
+  massList = ['125.0']
   #massList   = ['%.1f'%(a) for a in u.drange(120,150,1)]
-  massList   = [a.strip() for a in (cf.get("fits","massList-more")).split(',')]
+  #massList   = [a.strip() for a in (cf.get("fits","massList-more")).split(',')]
   catList    = [a.strip() for a in (cf.get("fits","catList")).split(',')]
 
-  catList = ['EB','EE','mll50']
+  catList = ['EB']
+  #catList = ['EB','EE','mll50']
 
   s = cf.get("path","ver")
   myDir = s

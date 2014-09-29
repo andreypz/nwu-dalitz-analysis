@@ -1,26 +1,30 @@
 #!/usr/bin/env python
 from optparse import OptionParser
 import sys,os,re
+from ROOT import *
 import ConfigParser as cp
 cf = cp.ConfigParser()
 cf.read('config.cfg')
 s = cf.get("path","ver")
 verbose = 0
 
-from ROOT import *
 from toyStructs import makeToyStucts
 gSystem.SetIncludePath( "-I$ROOFITSYS/include/" );
 #gROOT.ProcessLine('.x RooStepBernstein.cxx+')
 #gROOT.ProcessLine('.x RooGaussStepBernstein.cxx+')
+#sys.path.append("../zgamma")
+#import utils as u
+
 
 gROOT.SetBatch()
 
 parser = OptionParser(usage="usage: %prog [options -v version]")
-parser.add_option("-v", "--ver",dest="ver", default="none", help="version - a subdir name where the input files are stored.")
+parser.add_option("-v", "--ver",dest="ver", default=None, help="version - a subdir name where the input files are stored.")
 parser.add_option("-b", dest="bullshit", action="store_true",default=False, help="Ys it is true")
 parser.add_option("-j", dest="job",    default=0,     help="Job number")
 parser.add_option("-t", dest="trials", default=5,     help="Number of trials")
 parser.add_option("-m", dest="mass",   default='125', help="Number of trials")
+parser.add_option("-c", "--cat", dest="cat",   default='EB', help="Category")
 
 (options, args) = parser.parse_args()
 
@@ -29,12 +33,13 @@ for f,col in cf.items("colors"): colors[f] = int(col)
 
 fileBase = './'
 plotBase = './'
-if options.ver=='none':
+if options.ver==None:
   fileBase = s
-  plotBase = '/uscms_data/d2/andreypz/html/zgamma/dalitz/fits-'+s
+  subdir = s
 else:
   fileBase = options.ver
-  plotBase = options.ver
+  subdir = options.ver
+plotBase = cf.get("path","htmlbase")+'/html/zgamma/dalitz/fits-'+subdir+'/BiasToys'
 
 
 def doBiasStudy(year = '2012', lepton = 'mu', cat = '0', genFunc = 'Bern3', mass = '125', trials = 5, job = 0, plotEvery = 50):
@@ -51,7 +56,7 @@ def doBiasStudy(year = '2012', lepton = 'mu', cat = '0', genFunc = 'Bern3', mass
     print 'DBG bias ', fileBase
     print '  RAW INPUT HERE:'
     raw_input()
-  
+
   rooWsFile = TFile(fileBase.replace('/','')+'/testRooFitOut_Dalitz.root','r')
   myWs = rooWsFile.Get('ws')
   sigRangeName = '_'.join(['range',lepton,year,'cat'+cat,'M'+mass])
@@ -64,7 +69,7 @@ def doBiasStudy(year = '2012', lepton = 'mu', cat = '0', genFunc = 'Bern3', mass
     print sigRangeName, mzg.getMin(sigRangeName), mzg.getMax(sigRangeName)
     #print " RAW  INPUT NEEDED HERE"
     #raw_input()
-    
+
   # get the data
   dataName = '_'.join(['data',lepton,year,'cat'+cat])
   data = myWs.data(dataName)
@@ -110,7 +115,7 @@ def doBiasStudy(year = '2012', lepton = 'mu', cat = '0', genFunc = 'Bern3', mass
     if verbose:
       print fitName
       testPdfs[-1].Print()
-      
+
     testBkgNorms.append(RooRealVar(   'norm'+fitName,'norm'   +fitName,bkgInSigWin,0,5*bkgInSigWin))
     testPdfs_ext.append(RooExtendPdf(  'ext'+fitName,'ext'    +fitName,testPdfs[-1],testBkgNorms[-1], sigRangeName))
     testSigNorms.append(RooRealVar('normSig'+fitName,'normSig'+fitName,0,-80,80))
@@ -121,7 +126,7 @@ def doBiasStudy(year = '2012', lepton = 'mu', cat = '0', genFunc = 'Bern3', mass
     #testSig_ext[-1].plotOn(testFrame)
     ##testFrame.Draw()
     #c.SaveAs(s+'/pdfs.png')
-    
+
     if func=='gen':
       testModels.append(testPdfs_ext[-1])
     else:
@@ -147,10 +152,10 @@ def doBiasStudy(year = '2012', lepton = 'mu', cat = '0', genFunc = 'Bern3', mass
   toyDataStruct = TOYDATA()
   tree.Branch('toyData', toyDataStruct, 'totalData/I:sigWindowData')
   truthStruct = TRUTH()
-  tree.Branch('truth',truthStruct, 'yieldBkg/D:yieldBkgErr:yieldSig:yieldSigErr')
+  tree.Branch('truth',truthStruct, 'totBkg/D:yieldBkg/D:yieldBkgErr:yieldSig:yieldSigErr')
 
 
-  from ROOT import GEN
+  #from ROOT import GEN
   for n,func in enumerate(testFuncs):
     print n,func
 
@@ -161,7 +166,7 @@ def doBiasStudy(year = '2012', lepton = 'mu', cat = '0', genFunc = 'Bern3', mass
 
     if func=='gen':
       genStruct = GEN()
-      tree.Branch('gen',genStruct, 'yieldBkg/D:yieldBkgErr:yieldSig:yieldSigErr:edm:minNll:statusAll/I:statusMIGRAD:statusHESSE:covQual:numInvalidNLL')
+      tree.Branch('gen',genStruct, 'totBkg/D:yieldBkg/D:yieldBkgErr:yieldSig:yieldSigErr:edm:minNll:statusAll/I:statusMIGRAD:statusHESSE:covQual:numInvalidNLL')
     elif func=='Bern2':
       from ROOT import BERN2
       Bern2Struct = BERN2()
@@ -182,7 +187,10 @@ def doBiasStudy(year = '2012', lepton = 'mu', cat = '0', genFunc = 'Bern3', mass
       from ROOT import BERN6
       Bern6Struct = BERN6()
       tree.Branch('Bern6',Bern6Struct,'yieldBkg/D:yieldBkgErr:yieldSig:yieldSigErr:paramP1:paramP1Err:paramP2:paramP2Err:paramP3:paramP3Err:paramP4:paramP4Err:paramP5:paramP5Err:paramP6:paramP6Err:edm:minNll:statusAll/I:statusMIGRAD:statusHESSE:covQual:numInvalidNLL')
+    else:
+      print "No struct exists for ", func
 
+    '''
     elif func=='GaussBern3':
       from ROOT import GAUSSBERN3
       GaussBern3Struct = GAUSSBERN3()
@@ -200,38 +208,37 @@ def doBiasStudy(year = '2012', lepton = 'mu', cat = '0', genFunc = 'Bern3', mass
       from ROOT import GAUSSBERN6
       GaussBern6Struct = GAUSSBERN6()
       tree.Branch('GaussBern6',GaussBern6Struct,'yieldBkg/D:yieldBkgErr:yieldSig:yieldSigErr:paramSigma:paramSigmaErr:paramStep:paramStepErr:paramP1:paramP1Err:paramP2:paramP2Err:paramP3:paramP3Err:paramP4:paramP4Err:paramP5:paramP5Err:paramP6:paramP6Err:edm:minNll:statusAll/I:statusMIGRAD:statusHESSE:covQual:numInvalidNLL')
-    else:
-      print "No struct exists for ", func
+    '''
 
   structDict = dict(zip(testFuncs,[Bern2Struct,Bern3Struct,Bern4Struct,Bern5Struct, genStruct]))
   #structDict = dict(zip(testFuncs,[GaussBern4Struct,GaussBern5Struct,GaussBern6Struct]))
   print structDict
   #print "  RAW INPUT HERE "
   #raw_input()
-  
+
   r = TRandom3(1024+31*job)
   RooRandom.randomGenerator().SetSeed(1024+31*job)
-
 
   ############################
   # time to throw some toys! #
   ############################
-
+  genBkgYield = data.numEntries()
   for i in range(0,trials):
     print 'doing trial:',i
 
-    genBkgYield = r.Poisson(data.numEntries())
+    #genBkgYield = r.Poisson(data.numEntries())
     toyData = genFit.generate(RooArgSet(mzg),genBkgYield)
     #toyData = genFit.generate(RooArgSet(mzg), RooFit.Extended(kTRUE))
     bkg_est = toyData.sumEntries('1',sigRangeName)
     if verbose: print 'bkg_est',bkg_est
     #print "RAW INPUT"
     #raw_input()
+    truthStruct.totBkg   = genBkgYield
     truthStruct.yieldBkg = bkg_est
     truthStruct.yieldBkgErr = sqrt(bkg_est)
     truthStruct.yieldSig = 0
     truthStruct.yieldSigErr = 0
-    
+
     for func in testFuncs:
       testSigNormsDict[func].setVal(0)
       testBkgNormsDict[func].setVal(bkg_est)
@@ -243,7 +250,7 @@ def doBiasStudy(year = '2012', lepton = 'mu', cat = '0', genFunc = 'Bern3', mass
       m.hesse()
       resHesse = m.save()
 
-      res = testModelsDict[func].fitTo(toyData,RooFit.Save(),RooFit.PrintLevel(-1))
+      res = testModelsDict[func].fitTo(toyData,RooFit.Save(),RooFit.PrintLevel(-1),RooFit.Silence())
 
       statusAll    = res.status()
       statusMIGRAD = resMigrad.status()
@@ -310,12 +317,12 @@ def doBiasStudy(year = '2012', lepton = 'mu', cat = '0', genFunc = 'Bern3', mass
     toyDataStruct.totalData = toyData.numEntries()
     toyDataStruct.sigWindowData = bkg_est
 
-    if i%plotEvery==0:
+    if i%plotEvery==0 and job%20==0:
       testFrame = mzg.frame()
       toyData.plotOn(testFrame)
-      testFrame.SetTitle(";m_{H} (GeV);Events/1 GeV")
+      testFrame.SetTitle("m_{H} = "+mass+";m_{#mu#mu#gamma} (GeV);Events/1 GeV")
       genFit.plotOn(testFrame, RooFit.Name(genFunc))
-                                    
+
       legendTmp = TLegend(0.6,0.65,0.9,0.9)
       legendTmp.SetFillColor(0)
       #legendTmp.SetFillStyle(0)
@@ -325,7 +332,7 @@ def doBiasStudy(year = '2012', lepton = 'mu', cat = '0', genFunc = 'Bern3', mass
       for func in testFuncs:
         testModelsDict[func].plotOn(testFrame, RooFit.LineColor(colors[func.lower()]), RooFit.Range('fullRange'), RooFit.Name(func))
         legendTmp.AddEntry(testFrame.findObject(func), func ,'l')  # trick to get the colors on the legend
-        
+
       testFrame.Draw()
       legendTmp.Draw()
 
@@ -337,16 +344,17 @@ def doBiasStudy(year = '2012', lepton = 'mu', cat = '0', genFunc = 'Bern3', mass
   tree.Write()
   outFile.Close()
 
-  print 'so many toys!'
-  
-  
+  print '\n\t\t So many toys! And all done!\n'
+
+
 if __name__=="__main__":
   print len(sys.argv), sys.argv
-  
+
   job = int(options.job)
   trials = int(options.trials)
   mass = str(options.mass)
-  
-  for f in ['Exp','Pow','Bern3']:
+  cat = options.cat
+
+  for f in ['Exp','Laurent','Pow','Bern3']:
     print 'Starting'
-    doBiasStudy(trials = trials, genFunc=f, job=job, mass=mass)
+    doBiasStudy(trials = trials, cat=cat,genFunc=f, job=job, mass=mass)
