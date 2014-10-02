@@ -12,11 +12,13 @@ TH1.SetDefaultSumw2(kTRUE)
 
 import ConfigParser as cp
 conf = cp.ConfigParser()
+conf.optionxform = str
 conf.read('../zgamma/config.cfg')
 lumi2012 = float(conf.get("lumi","lumi2012A")) + float(conf.get("lumi","lumi2012B"))+\
     float(conf.get("lumi","lumi2012C")) + float(conf.get("lumi","lumi2012D"))
 lumi = lumi2012
 
+roundTo = 50
 # The rooFit stuff is for resolution fits and j/psi mass fits
 gSystem.Load("libRooFit")
 mll = RooRealVar("mll","mll",2.5,3.7)
@@ -26,6 +28,8 @@ sigma_mll = RooRealVar("#sigma","sigma",1.0, 0.0, 10.0)
 #res = RooRealVar("res","res",-1,1)
 #mean_res  = RooRealVar("mean_res", "mean_res", 3.0, 0.0, 20.0)
 #sigma_res = RooRealVar("sigma_res","sigma_res",1.0, 0.0, 10.0)
+noOverflowList  = [a.strip() for a in (conf.get("selection","noOverflowList")).split(',')]
+print noOverflowList
 
 def yearToTeV(y):
   if   y=='2011': return '7TeV'
@@ -35,7 +39,7 @@ def yearToTeV(y):
 def setSelection(sel):
   conf.set("selection","sel", sel)
 def getSelection():
-  conf.get("selection","sel")
+  return conf.get("selection","sel")
 
 def setCutListFile(fname):
   conf.set("selection","cutlist", fname)
@@ -77,9 +81,9 @@ def getColors(sample):
   l = 45
   f = 0
   if conf.has_option(sample,'line'):
-    l = conf.get(sample, "line")
+    l = eval(conf.get(sample, "line"))
   if conf.has_option(sample,'fill'):
-    f = conf.get(sample, "fill")
+    f = eval(conf.get(sample, "fill"))
 
   return [l,f]
 
@@ -221,9 +225,6 @@ def makeStack(bZip, histDir, histoName, leg, lumi, howToScale, normToScale=None)
     else:
       h = h1.Clone()
 
-    # if doOverflow:
-    # handleOverflowBins(h)
-
     scale = 1
 
     h.SetLineColor(int(getColors(n)[0]))
@@ -280,7 +281,6 @@ def drawAllInFile(f1, name1, bZip, f3, name3, myDir, path, N, howToScale="none",
   split = os.path.split(path.rstrip("/"))
   print "Split the path:", split[0], split[1]
 
-  doOverflow = 0
   if doRatio:
     c1 = TCanvas("c2","big canvas",600,700);
   else:
@@ -312,6 +312,12 @@ def drawAllInFile(f1, name1, bZip, f3, name3, myDir, path, N, howToScale="none",
     mainHist = k.ReadObj()
 
     histoName = mainHist.GetName()
+
+    doOverflow = 1
+    # Do overflow or do not overflow, that's the question!
+    if any(x in histoName for x in noOverflowList):
+      doOverflow = 0
+    # print 'Do Overflow??', doOverflow
 
     h1 = TH1F()
     h3 = TH1F()
@@ -454,8 +460,9 @@ def drawAllInFile(f1, name1, bZip, f3, name3, myDir, path, N, howToScale="none",
         h3.Draw("sames hist")
         h3.SetLineWidth(2)
         #h3.SetLineColor(kRed-9)
-        h3.SetLineColor(kViolet-5)
-        h3.SetFillColor(kBlue-10)
+        col = getColors('signal')
+        h3.SetLineColor(col[0])
+        h3.SetFillColor(col[1])
         #h3.SetFillColor(kCyan-10)
         #h3.SetFillColor(kYellow-9)
 
@@ -472,7 +479,7 @@ def drawAllInFile(f1, name1, bZip, f3, name3, myDir, path, N, howToScale="none",
         elif howToScale=="toData" and  norm3!=0:
           h3.Scale(norm1/norm3)
         elif howToScale=="toDataInt" and  norm3!=0:
-          scale = int(norm1/norm3/20)*20
+          scale = int(norm1/norm3/roundTo)*roundTo
           h3.Scale(scale)
 
         print howToScale, norm1, norm3, scale
@@ -537,11 +544,14 @@ def drawAllInFile(f1, name1, bZip, f3, name3, myDir, path, N, howToScale="none",
       else:
         mainHist.GetYaxis().SetTitle("Events")
 
+      mainHist.SetMinimum(0)
       # Here we consider particular cases (histograms) that need special care
       # if "tri_mass_longTail" in histoName and howToScale=="lumi":
       # h1.SetMaximum(750)
       if 'tri_mass' in histoName:
         blindIt(h1, 3)
+      if '_mDalG_' in histoName:
+        blindIt(h1, 4)
 
       if histoName in ['LHE_diLep_mass_low', 'LHE_diLep_mass',
                        'LHE_dR_l1_l2','LHE_dR_l1_l2_low', 'LHE_dR_l1_l2_vlow']:
@@ -556,8 +566,8 @@ def drawAllInFile(f1, name1, bZip, f3, name3, myDir, path, N, howToScale="none",
         doPdf=1
 
       if "diLep_mass_low_" in histoName:
-        h1.Rebin(2)
-        h3.Rebin(2)
+        #h1.Rebin(2)
+        #h3.Rebin(2)
         #mainHist.SetXTitle("m_{#mu#mu} (GeV)")
         mainHist.SetMaximum(1.2*h1.GetMaximum())
         doPdf=1
@@ -683,7 +693,10 @@ def drawAllInFile(f1, name1, bZip, f3, name3, myDir, path, N, howToScale="none",
       if 'J/Psi' in name3:
         lat.DrawLatex(0.18,0.95, 'H #rightarrow J/#Psi#gamma#rightarrow#mu#mu#gamma')
       else:
-        lat.DrawLatex(0.18,0.95, 'H #rightarrow#gamma*#gamma#rightarrow#mu#mu#gamma')
+        if 'el' in getSelection():
+          lat.DrawLatex(0.18,0.95, 'H #rightarrow#gamma*#gamma#rightarrow ee#gamma')
+        else:
+          lat.DrawLatex(0.18,0.95, 'H #rightarrow#gamma*#gamma#rightarrow#mu#mu#gamma')
 
       CMS_lumi(c1, 2, 11)
 
@@ -753,7 +766,8 @@ def makeTable(table, name, opt="tex"):
       endTable   = '\\end{tabular} \n'
 
       beginLine  = ''
-      endLine    = ' \\\\ \\hline \n'
+      endLine    = ' \\\\ \n'
+      #endLine    = ' \\\\ \\hline \n'
       separator  = ' & '
 
 

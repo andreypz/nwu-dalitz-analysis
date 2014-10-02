@@ -11,7 +11,7 @@ import makeHTML as ht
 gROOT.SetBatch()
 
 parser = OptionParser(usage="usage: %prog ver [options -c, -e, -p, -m]")
-parser.add_option("-c","--cut",   dest="cut", type="int", default=6, help="Plots after a certain cut")
+parser.add_option("-c","--cut",   dest="cut", type="int", default=8, help="Plots after a certain cut")
 parser.add_option("--mass", dest="mass", type="int", default=125,    help="Signal sample (mass)")
 parser.add_option("-m","--merge", dest="merge",action="store_true", default=False, help="Do merging?")
 
@@ -19,7 +19,6 @@ parser.add_option("-p", "--period",dest="period", default="2012",  help="Year pe
 parser.add_option("--bkg",  dest="bkg",  action="store_true", default=False, help="Make plots from bkg sample")
 parser.add_option("--qcd",  dest="qcd",  action="store_true", default=False, help="Include QCD samples")
 parser.add_option("--mcfm", dest="mcfm", action="store_true", default=False, help="Use MCFM  as a signal")
-parser.add_option("--noeos",dest="noeos",action="store_true", default=False, help="Don't use EOS. pick up the files from nobackup area")
 
 parser.add_option("--fit",dest="fit",action="store_true", default=False, help="Do the various fits")
 parser.add_option("--apz",dest="apz",action="store_true", default=False, help="Discover new particle (requires apzTree produced)")
@@ -33,7 +32,7 @@ parser.add_option("-s", '--sel', dest="sel", type="string", default='mugamma',
 mass = opt.mass
 sel  = opt.sel
 
-comments = ["These plots are made for h -> mu mu gamma",
+comments = ["These plots are made for h -> ll gamma",
 #comments = ["These plots are made for z -> J/Psi gamma analysis",
             "MuEG dataset used"]
 
@@ -58,8 +57,6 @@ if __name__ == "__main__":
 
   pathBase = "/uscms_data/d2/andreypz/html/zgamma/dalitz/"+ver+"_cut"+cut
   hPath    = "/eos/uscms/store/user/andreypz/batch_output/zgamma/8TeV/"+ver
-  if opt.noeos:
-    hPath  = "/uscms_data/d2/andreypz/zgamma/"+ver
 
   if '/tthome' in os.getcwd():
     pathBase = "/tthome/andrey/html/zgamma/dalitz/"+ver+"_cut"+cut
@@ -192,7 +189,7 @@ if __name__ == "__main__":
   print 'ggH yi', yields_ggH
   print 'sig yi', yields_sig
 
-  subdir = sel
+  subdir = 'Main'
   path = pathBase+"/"+subdir
   #if doBkg:
   #  path = pathBase+"/bkg_"+subdir
@@ -222,44 +219,45 @@ if __name__ == "__main__":
     # u.drawAllInFile(None, "", '', sigFile, sigName, "GEN", pathBase+'/GEN-angles', None, "norm")
 
     if opt.hjp:
-      u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "", path, cut, "toData")
+      u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "Main", path, cut, "toData")
     else:
       # u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "", path, cut, "lumi")
-      u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "", path, cut, "toDataInt")
+      u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "Main", path, cut, "toDataInt")
       # u.drawAllInFile(dataFile, "Data", bkgZip, None, '', "", path, cut, "lumi")
       # u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "", path, cut, "norm", doFits=opt.fit)
 
     """
     for n in ['Angles']:
-      u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal", n, pathBase+"/"+n, cut, "norm1")
+      u.drawAllInFile(dataFile, "Data",bkgZip,sigFile,"signal", n, pathBase+"/"+n, cut, "norm1")
 
     if cut in ['6','8']:
       for n in ['Photon','Photon-EGamma','N']:
-        u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal", n, pathBase+"/"+n, None, "norm1")
+        u.drawAllInFile(dataFile, "Data",bkgZip,sigFile,"signal", n, pathBase+"/"+n, None, "norm1")
 
       if sel in ["mugamma","jp-mugamma"]:
         for n in ['Muons','Mu-after']:
-          u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal", n, pathBase+"/"+n, None, "norm1")
+          u.drawAllInFile(dataFile, "Data",bkgZip,sigFile,"signal", n, pathBase+"/"+n, None, "norm1")
     """
   elif cut in ['14','15','16']:
     u.drawAllInFile(dataFile, "data",bkgZip,None,"",
                     "AlphaPiZ",pathBase+"/apz/", cut,"norm2")
 
   if sel == "elgamma":
-    #u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",
-    #                "AnElectron",  pathBase+"/AnElectron/",  None,"norm")
+    u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "Main-Dale", pathBase+'/Dale/', cut, "toDataInt")
+    u.drawAllInFile(dataFile, "Data",bkgZip,sigFile,"signal",
+                    "AnElectron",  pathBase+"/AnElectron/",  None,"norm")
     #u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",
     #                "AnElectron-EGamma",  pathBase+"/AnElectron-EGamma/",  None,"norm")
 
-    if cut in ['7','9','12']:
+    if cut in ['9','12','15']:
       dirnameshort = "DalitzEle"
       dirname = dirnameshort+"-cut"+cut
-      u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",
+      u.drawAllInFile(dataFile, "Data",bkgZip,sigFile,"signal",
                       dirname,  pathBase+"/"+dirnameshort+"/",  None,"norm")
 
       for n in ['EGamma','BaseSC-1','BaseSC-2',"track-1","track-2","track-3"]:
-        u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",
-                        dirname+"-"+n,  pathBase+"/"+dirnameshort+"-/"+n,  None,"norm")
+        u.drawAllInFile(dataFile, "Data",bkgZip,sigFile,"signal",
+                        dirname+"-"+n,  pathBase+"/"+dirnameshort+"-"+n,  None,"norm")
 
 
     # dataFile.Close()
@@ -478,11 +476,11 @@ if __name__ == "__main__":
   #os.system("cat yields_all.twiki  > yields.html")
   #os.system("cat yields_all.tex    > yields.html")
 
-  defaultPage = sel
+  defaultPage = 'Main'
   #if sel=='mugamma' and cut in ['12']: defaultPage = 'jpsi'
   #elif cut in ['14','15']: defaultPage = 'apz'
   #elif opt.zjp or opt.hjp: defaultPage = 'jp-'+sel
-  print defaultPage
+  #print defaultPage
 
 
   ht.makeHTML("h &rarr; dalitz decay plots",pathBase, plot_types, comments, defaultPage)

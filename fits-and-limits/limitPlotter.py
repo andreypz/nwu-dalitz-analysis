@@ -16,9 +16,6 @@ import ConfigParser as cp
 cf = cp.ConfigParser()
 cf.read('config.cfg')
 
-#gROOT.ProcessLine(".L ../tdrstyle.C")
-#setTDRStyle()
-#gROOT.LoadMacro("../CMS_lumi.C")
 gStyle.SetOptTitle(0)
 
 s = cf.get("path","ver")

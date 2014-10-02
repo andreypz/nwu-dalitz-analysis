@@ -773,11 +773,11 @@ Bool_t jpsiGamma::Process(Long64_t entry)
 
     apz_eta1 = lPt1.Eta();
     apz_eta2 = lPt2.Eta();
-    apz_eta3 = gamma.Eta();
+    apz_eta3 = gamma.SCEta();
     apz_eta4 = -999;
 
     apz_eta12 = (lPt1+lPt2).Eta();
-    apz_eta34 = gamma.Eta();
+    apz_eta34 = gamma.SCEta();
     apz_eta1234 = (lPt1+lPt2+gamma).Eta();
 
     apz_m12 = (lPt1+lPt2).M();

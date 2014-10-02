@@ -11,12 +11,9 @@ import ConfigParser as cp
 gROOT.ProcessLine(".L ../tdrstyle.C")
 setTDRStyle()
 #gROOT.LoadMacro("../CMS_lumi.C")
-
 print len(sys.argv), sys.argv
-
 verbose = 0
 doExt   = 0
-hjp = 1
 
 cf = cp.ConfigParser()
 cf.read('config.cfg')
@@ -24,8 +21,11 @@ subdir = cf.get("path","ver")
 yearList   = [a.strip() for a in (cf.get("fits","yearList")).split(',')]
 leptonList = [a.strip() for a in (cf.get("fits","leptonList")).split(',')]
 catList    = [a.strip() for a in (cf.get("fits","catList")).split(',')]
+sigNameList   = [a.strip() for a in (cf.get("fits","sigNameList")).split(',')]
 doBlind    = int(cf.get("fits","blind"))
-catList = ['EB']
+#catList = ['EB']
+hjp = 0
+if 'hjp' in sigNameList:  hjp = 1
 
 plotBase = cf.get("path","htmlbase")+"/html/zgamma/dalitz/fits-"+subdir
 u.createDir(plotBase+'/BestFits')
@@ -42,7 +42,7 @@ mzg.setRange('signal',120,130)
 mzg.setRange('r1',110,120)
 mzg.setRange('r2',130,170)
 
-bkgModel = 'Bern2'
+bkgModel = 'Bern4'
 # #######################################
 # prep the background and data card    #
 # we're going to the extend the bg pdf #
@@ -329,30 +329,30 @@ for year in yearList:
           cro = u.getCS("HtoJPsiGamma")/100
         else:
           if i==0:
-            cro = u.getCS("ggH-125",mySel='mu')
+            cro = u.getCS("ggH-125", mySel=lepton)
           elif i==1:
-            cro = u.getCS("vbfH-125",mySel='mu')
+            cro = u.getCS("vbfH-125",mySel=lepton)
           elif i==2:
-            cro = u.getCS("vH-125",mySel='mu')
+            cro = u.getCS("vH-125",  mySel=lepton)
 
         lumi  = u.getLumi("2012")
         scale = float(lumi*cro)/Nev
         print i, 'File:', str(f.GetName())[-50:], cro, Nev, scale
 
         if cat=='0':
-          hsig.append(f.Get("00_tri_mass__cut9"))
+          hsig.append(f.Get("Main/00_tri_mass_Main_cut9"))
         elif cat=='EB':
-          if hjp: hsig.append(f.Get("00_tri_mass__cut8"))
-          else:   hsig.append(f.Get("00_tri_mass__cut9"))
+          if hjp: hsig.append(f.Get("Main/00_tri_mass_Main_cut8"))
+          else:   hsig.append(f.Get("Main/00_tri_mass_Main_cut9"))
         elif cat=='EE':
-          hsig.append(f.Get("00_tri_mass__cut12"))
+          hsig.append(f.Get("Main/00_tri_mass_Main_cut12"))
         elif cat=='mll50':
-          hsig.append(f.Get("00_tri_mass__cut15"))
+          hsig.append(f.Get("Main/00_tri_mass_Main_cut15"))
 
         if hjp: factor = 500
         else:   factor = 10
+        print len(hsig), hsig, cat
         hsig[-1].Scale(factor*scale)
-      # print len(hsig), cat
 
       #hsig[-1].Print("all")
       #print hsig
@@ -442,11 +442,11 @@ for year in yearList:
         data.plotOn(testFrame, RooFit.Binning(myBinning), RooFit.Name('data'))
 
       if hjp:
-        testFrame.SetMaximum(10)
+        testFrame.SetMaximum(12)
       elif cat in ['0']:
         testFrame.SetMaximum(82)
       else:
-        testFrame.SetMaximum(62)
+        testFrame.SetMaximum(65)
 
       testFrame.Draw()
       hsig[0].SetAxisRange(115,135,"X")
@@ -457,15 +457,15 @@ for year in yearList:
 
       testFrame.SetTitle(";m_{#mu#mu#gamma} (GeV);Events/"+str(binWidth)+" GeV")
 
-      if hjp: leg  = TLegend(0.45,0.65,0.91,0.87)
-      else:   leg  = TLegend(0.53,0.65,0.91,0.87)
+      if hjp: leg  = TLegend(0.45,0.62,0.91,0.87)
+      else:   leg  = TLegend(0.51,0.62,0.91,0.87)
       leg.SetFillColor(0)
       leg.SetBorderSize(1)
       leg.AddEntry(hsig[0],'Expected signal x'+str(factor),'f')
       #leg.AddEntry(testFrame.findObject(bkgModel+'1sigma'),"Background Model",'f')
-      leg.AddEntry(testFrame.findObject(bkgModel),"Background Model",'l')
+      leg.AddEntry(testFrame.findObject(bkgModel),"Background Model",'le')
       #if not hjp: leg.AddEntry(0,'','')
-      #leg.AddEntry(0,'','')
+      leg.AddEntry(data,'Data','lep')
       leg.SetTextSize(0.045)
       leg.Draw()
 
@@ -479,14 +479,16 @@ for year in yearList:
       #leg2.Draw()
 
       #proc = 'Z#rightarrow J/#Psi#gamma#rightarrow#mu#mu#gamma'
+      lat = TLatex()
+      lat.SetNDC()
+      lat.SetTextSize(0.035)
       if hjp:
-        proc = 'H#rightarrow J/#Psi#gamma#rightarrow#mu#mu#gamma'
+        lat.DrawLatex(0.18,0.95, 'H #rightarrow J/#Psi#gamma#rightarrow#mu#mu#gamma')
       else:
-        proc = 'H#rightarrow#gamma*#gamma#rightarrow#mu#mu#gamma'
-      prelim = TLatex(0.15,0.95, proc)
-      prelim.SetNDC();
-      prelim.SetTextSize(0.035);
-      prelim.Draw();
+        if lepton=='el':
+          lat.DrawLatex(0.18,0.95, 'H #rightarrow#gamma*#gamma#rightarrow ee#gamma')
+        else:
+          lat.DrawLatex(0.18,0.95, 'H #rightarrow#gamma*#gamma#rightarrow#mu#mu#gamma')
       CMS_lumi(c, 2, 11)
 
       gPad.RedrawAxis()

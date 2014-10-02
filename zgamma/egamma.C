@@ -757,7 +757,7 @@ Bool_t egamma::Process(Long64_t entry)
 
   HM->SetLeptons(l1, l2);
 
-  HM->FillHistosFull(5, eventWeight, "");
+  HM->FillHistosFull(5, eventWeight);
   FillHistoCounts(5, eventWeight);
   CountEvents(5,"",fcuts);
 
@@ -781,9 +781,10 @@ Bool_t egamma::Process(Long64_t entry)
   if (DALE.Pt()<30)
     return kTRUE;
 
-  //HM->FillHistosFull(6, eventWeight, "");
+  HM->SetDalectron(DALE);
+  //HM->FillHistosFull(6, eventWeight);
   FillHistoCounts(6, eventWeight);
-  CountEvents(6,"DALectron selectin",fcuts);
+  CountEvents(6,"DALectron selection",fcuts);
 
 
   vector<TCElectron::Track> trk = DALE.GetTracks();
@@ -805,6 +806,7 @@ Bool_t egamma::Process(Long64_t entry)
   xx[5] = cI.nHitsMax;
 
 
+  /*
   for(Int_t ev=0; ev<evSize;ev++){
     if (nEvents[0]-1 == hisEVTS[ev]){cout<<nEvents[0]-1<<" evNumber="<<eventNumber<<endl;
       cout<<"gamma: pt = "<<gamma.Pt()<<"  SCEta = "<<gamma.SCEta()<<"  SCPhi = "<<gamma.SCPhi()<<endl;
@@ -835,7 +837,7 @@ Bool_t egamma::Process(Long64_t entry)
 
       break;}
   }
-
+  */
 
   //fout<<runNumber<<" "<<eventNumber<<" "<<DALE.IdMap("mvaScore")<<endl;
 
@@ -852,18 +854,18 @@ Bool_t egamma::Process(Long64_t entry)
     cout<<"Warinng SC are  not ordered in pt!"<<endl;
 
 
-  HM->FillHistosFull(7, eventWeight, "");
+  HM->FillHistosFull(7, eventWeight);
   FillHistoCounts(7, eventWeight);
   CountEvents(7,"Conv. Veto etc",fcuts);
-  HM->MakeElectronPlots(DALE, "DalitzEle-cut7");
 
 
   if (lPt1.Pt() + lPt2.Pt() < 48)   return kTRUE;
   //if (lPt1.Pt() < cut_l1pt || lPt2.Pt() < cut_l2pt)   return kTRUE;
 
-  HM->FillHistosFull(8, eventWeight, "");
+  HM->FillHistosFull(8, eventWeight);
   FillHistoCounts(8, eventWeight);
   CountEvents(8,"pt1+pt2 > 48",fcuts);
+  HM->MakeElectronPlots(DALE, "DalitzEle-cut8");
 
   Double_t scale = DALE.SCEnergy()/DALE.E();
   DALE.SetPxPyPzE(scale*DALE.Px(), scale*DALE.Py(),scale*DALE.Pz(), DALE.SCEnergy());
@@ -871,9 +873,6 @@ Bool_t egamma::Process(Long64_t entry)
   Float_t MdalG = (DALE+gamma).M();
   Float_t Mllg  = (l1+l2+gamma).M();
   Float_t Mll   = (l1+l2).M();
-
-  hists->fill1DHist(MdalG-Mllg, Form("00_mllg-diff_cut%i", 8),";m_{e#gamma} - m_{ll#gamma}", 50,-20,20, 1, "");
-  hists->fill1DHist(MdalG,      Form("00_mDalG_cut%i",     8),";m_{e#gamma}",              100, 80,200, 1, "");
 
 
  if (makeApzTree){
@@ -893,11 +892,11 @@ Bool_t egamma::Process(Long64_t entry)
 
     apz_eta1 = lPt1.Eta();
     apz_eta2 = lPt2.Eta();
-    apz_eta3 = gamma.Eta();
+    apz_eta3 = gamma.SCEta();
     apz_eta4 = -999;
 
     apz_eta12 = DALE.Eta();
-    apz_eta34 = gamma.Eta();
+    apz_eta34 = gamma.SCEta();
     apz_eta1234 = (DALE+gamma).Eta();
 
     apz_m12 = (lPt1+lPt2).M();
@@ -927,7 +926,7 @@ Bool_t egamma::Process(Long64_t entry)
     return kTRUE;
   }
 
-  HM->FillHistosFull(9, eventWeight, "");
+  HM->FillHistosFull(9, eventWeight);
   FillHistoCounts(9, eventWeight);
   CountEvents(9,"110 < m(e,g) < 170",fcuts);
   HM->MakeElectronPlots(DALE, "DalitzEle-cut9");
@@ -935,7 +934,7 @@ Bool_t egamma::Process(Long64_t entry)
 
   if (Mll > 20) return kTRUE;
   //if (Mll > mllMax) return kTRUE;
-  HM->FillHistosFull(10, eventWeight, "");
+  HM->FillHistosFull(10, eventWeight);
   FillHistoCounts(10, eventWeight);
   CountEvents(10,"m(ll) < 20 GeV",fcuts);
 
@@ -943,12 +942,10 @@ Bool_t egamma::Process(Long64_t entry)
     //  if (MdalG<80)
     return kTRUE;
 
-  HM->FillHistosFull(11, eventWeight, "");
+  HM->FillHistosFull(11, eventWeight);
   FillHistoCounts(11, eventWeight);
   CountEvents(11,"dR(g,e) > 1",fcuts);
   HM->MakeElectronPlots(DALE, "DalitzEle-cut11");
-  hists->fill1DHist(MdalG-Mllg, Form("00_mllg-diff_cut%i",11),";m_{e#gamma} - m_{ll#gamma}", 50,-20,20, 1, "");
-  hists->fill1DHist(MdalG,      Form("00_mDalG_cut%i",    11),";m_{e#gamma}",              100, 80,200, 1, "");
 
   //if (DALE.Pt()/Mllg < 0.30 || gamma.Pt()/Mllg < 0.30)
   if (DALE.Pt()/MdalG < 0.30 || gamma.Pt()/MdalG < 0.30)
@@ -957,12 +954,10 @@ Bool_t egamma::Process(Long64_t entry)
 
   fout<<nEvents[0]-1<<endl;
 
-  HM->FillHistosFull(12, eventWeight, "");
+  HM->FillHistosFull(12, eventWeight);
   FillHistoCounts(12, eventWeight);
   CountEvents(12,"DALE.Pt/m(e,g) > 0.3 and g.Pt/M(e,g) > 0.3",fcuts);
   HM->MakeElectronPlots(DALE, "DalitzEle-cut12");
-  hists->fill1DHist(MdalG-Mllg, Form("00_mllg-diff_cut%i",12),";m_{e#gamma} - m_{ll#gamma}", 50,-20,20, 1, "");
-  hists->fill1DHist(MdalG,      Form("00_mDalG_cut%i",    12),";m_{e#gamma}",              100, 80,200, 1, "");
 
   //fout<<"Run/lumi/event = "<<runNumber<<"/"<<lumiSection<<"/"<<eventNumber<<endl;
   //fout<<"MvaID = "<<DALE.IdMap("mvaScore")<<"  "<<DALE<<endl;
@@ -972,16 +967,19 @@ Bool_t egamma::Process(Long64_t entry)
 
   if (!DALE.PassConversionVeto())
     return kTRUE;
+
   //if (DALE.ConversionMissHits()!=0)
   //return kTRUE;
 
   FillHistoCounts(13, eventWeight);
   CountEvents(13,"Conv gsf Ele",fcuts);
+  HM->MakeElectronPlots(DALE, "DalitzEle-cut13");
 
   cI = trk[0].GetConversionInfo();
   if (cI.vtxProb>1e-6 && cI.lxyBS>2 && cI.nHitsMax>1)
     return kTRUE;
 
+  HM->FillHistosFull(14, eventWeight);
   FillHistoCounts(14, eventWeight);
   CountEvents(14,"Conv gsf trk 1",fcuts);
 
@@ -989,16 +987,19 @@ Bool_t egamma::Process(Long64_t entry)
   if (cI.vtxProb>1e-6 && cI.lxyBS>2 && cI.nHitsMax>1)
     return kTRUE;
 
+  HM->FillHistosFull(15, eventWeight);
   FillHistoCounts(15, eventWeight);
   CountEvents(15,"Conv gsf trk 2",fcuts);
+  HM->MakeElectronPlots(DALE, "DalitzEle-cut15");
 
 
   if (MdalG<122 || MdalG>128) return kTRUE;
   //if (Mllg<122 || Mllg>128) return kTRUE;
 
-  HM->FillHistosFull(16, eventWeight, "");
+  HM->FillHistosFull(16, eventWeight);
   FillHistoCounts(16, eventWeight);
   CountEvents(16,"122 < m(e,g) < 128",fcuts);
+  HM->MakeElectronPlots(DALE, "DalitzEle-cut16");
 
 
 

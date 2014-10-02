@@ -65,7 +65,7 @@
 #include <TVector3.h>
 
 
-#define nC 20
+#define nC 22
 class zgamma : public TSelector {
  private:
   TFile* histoFile;
@@ -95,18 +95,13 @@ class zgamma : public TSelector {
   Int_t nVtx, nVtxTotal;
   //Float_t nDofVtx1, nDofVtx2;
 
-  //TTree* _fitTree;
-  //Double_t fit_m_llg, fit_m_ll, fit_phEta, fit_weight;
-  //Double_t fit_m_4l, fit_m_ll2;
-  //Double_t fit_phPt, fit_diPt;
-  //Bool_t   fit_isLowPt;
-
   TTree* _apzTree;
   Double_t apz_w, apz_dr12, apz_dr13, apz_dr23, apz_dr34, apz_dr1234;
   Double_t apz_pt12, apz_pt34;
   Double_t apz_pt1, apz_pt2, apz_pt3, apz_pt4;
   Double_t apz_m12, apz_m34, apz_m123, apz_m4l;
   Double_t apz_eta1234, apz_eta12, apz_eta34, apz_eta1, apz_eta2, apz_eta3, apz_eta4;
+  Bool_t apz_vbf;
 
   string period;
   string sample;

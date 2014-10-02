@@ -7,6 +7,7 @@
 #include "../interface/TCElectron.h"
 #include "../interface/TCPhoton.h"
 #include "../interface/TCMuon.h"
+#include "../interface/TCJet.h"
 #include "../interface/TCGenParticle.h"
 
 #include "TMVA/Reader.h"
@@ -56,10 +57,16 @@ struct phIdAndIsoCuts{
   float nhIso03[2];
   float phIso03[2];
 };
+struct jetIdCuts{
+  float betaStarC[2];
+  float dR2Mean[4];
+  string cutName;
+};
 
 muIdAndIsoCuts muIdAndIsoCutsTight, muIdAndIsoCutsLoose, muIdAndIsoCutsSoft;
 elIdAndIsoCuts elIdAndIsoCutsTight, elIdAndIsoCutsLoose;
 phIdAndIsoCuts phIdAndIsoCutsHZG,   phIdAndIsoCutsTight, phIdAndIsoCutsLoose;
+jetIdCuts jetIdCutsVBF;
 
 class ObjectID {
  public:
@@ -82,12 +89,15 @@ class ObjectID {
   virtual bool HggPreselection(const TCPhoton& ph);
   virtual bool HggPreselection(const TCElectron& el);
   virtual bool PassPhotonMVA(const TCPhoton& ph, float& m);
+  virtual bool PassJetID(const TCJet& j, int nVtx);
+  float Zeppenfeld(const TLorentzVector& p, const TLorentzVector& pj1, const TLorentzVector& pj2);
 
   TCGenParticle* GetPrimaryAncestor(TCGenParticle *p);
   virtual void DiscoverGeneology(TCGenParticle *p);
   virtual void MuonDump(const TCMuon& mu, TVector3 *pv);
   virtual void PhotonDump(const TCPhoton& pho,  phIdAndIsoCuts c);
   virtual void ElectronDump(const TCElectron& el);
+  virtual void JetDump(const TCJet& j);
 
  private:
    Bool_t    _isRealData;

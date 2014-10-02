@@ -116,6 +116,13 @@ ObjectID::ObjectID():
   phIdAndIsoCutsHZG.nhIso03[1] = 1.5;
   phIdAndIsoCutsHZG.phIso03[1] = 1.0;
 
+  jetIdCutsVBF.betaStarC[0] = 0.2;
+  jetIdCutsVBF.dR2Mean[0] = 0.06;
+  jetIdCutsVBF.betaStarC[1] = 0.3;
+  jetIdCutsVBF.dR2Mean[1] = 0.05;
+  jetIdCutsVBF.dR2Mean[2] = 0.05;
+  jetIdCutsVBF.dR2Mean[3] = 0.055;
+
 }
 
 ObjectID::~ObjectID(){}
@@ -178,6 +185,10 @@ bool ObjectID::PassPhotonIdAndIso(const TCPhoton& ph, TString n, float& mvaScore
 
   if (n=="CutBased-MediumWP")
     cuts = phIdAndIsoCutsHZG;
+  else if (n=="CutBased-MediumWP-El"){
+    if (!HggPreselection(ph)) return false;
+    cuts = phIdAndIsoCutsHZG;
+  }
   else if (n=="CutBased-TightWP")
     cuts = phIdAndIsoCutsTight;
   else if (n=="MVA")
@@ -186,8 +197,6 @@ bool ObjectID::PassPhotonIdAndIso(const TCPhoton& ph, TString n, float& mvaScore
     cout<<"PhotonID Warning: no such cut or method"<<n<<endl;
     return false;
   }
-
-  if (!HggPreselection(ph)) return false;
 
   bool pass = false;
   //Float_t phoISO = 0;
@@ -800,4 +809,48 @@ void ObjectID::ElectronDump(const TCElectron& el)
   cout<<"eleBCSieie2:"<<sc[1].SigmaIEtaIEta()<<endl;
   cout<<"=== BDT: "<<el.IdMap("mvaScore")<<endl;
 
+}
+
+bool ObjectID::PassJetID(const TCJet& jet, int nVtx){
+  jetIdCuts cuts = jetIdCutsVBF;
+  bool idPass = false;
+  if (fabs(jet.Eta()) < 2.5){
+    if(
+       jet.BetaStarClassic()/log(nVtx-0.64) < cuts.betaStarC[0]
+       && jet.DR2Mean() < cuts.dR2Mean[0]
+       ) idPass = true;
+  }else if (fabs(jet.Eta()) < 2.75){
+    if(
+       jet.BetaStarClassic()/log(nVtx-0.64) < cuts.betaStarC[1]
+       && jet.DR2Mean() < cuts.dR2Mean[1]
+       ) idPass = true;
+  }else if (fabs(jet.Eta()) < 3.0){
+    if(
+       jet.DR2Mean() < cuts.dR2Mean[2]
+       ) idPass = true;
+  }else{
+    if(
+       jet.DR2Mean() < cuts.dR2Mean[3]
+       ) idPass = true;
+  }
+  return idPass;
+}
+
+float ObjectID::Zeppenfeld(const TLorentzVector& p, const TLorentzVector& pj1, const TLorentzVector& pj2)
+{
+  float zep = p.Eta()-(pj1.Eta()+pj2.Eta())/2.;
+  return zep;
+}
+
+void ObjectID::JetDump(const TCJet& jet)
+{
+  cout << "pt\t:" << jet.Pt() << endl;
+  cout << "eta\t:" << jet.Eta() << endl;
+  cout << "number of constituents\t:" << jet.NumConstit() << endl;
+  cout << "neutral hadronic\t:" << jet.NeuHadFrac() << endl;
+  cout << "neutral em fraction\t:" << jet.NeuEmFrac() << endl;
+  cout << "charged hadronic\t:" << jet.ChHadFrac() << endl;
+  cout << "number of charged\t:" << jet.NumChPart() << endl;
+  cout << "charged EM fraction\t:" << jet.ChEmFrac() << endl;
+  //cout << "CSV b-jet discriminator\t:" << jet.BDiscriminatorMap("CSV") << endl;
 }

@@ -8,8 +8,8 @@ gROOT.SetBatch()
 sys.path.append("../zgamma")
 gSystem.SetIncludePath( "-I$ROOFITSYS/include/" );
 gROOT.ProcessLine(".L ../tdrstyle.C")
-setTDRStyle()
-gROOT.LoadMacro("../CMS_lumi.C")
+#setTDRStyle()
+#gROOT.LoadMacro("../CMS_lumi.C")
 
 import utils as u
 
@@ -31,14 +31,15 @@ massList   = ['125']
 yearList      = [a.strip() for a in (cf.get("fits","yearList")).split(',')]
 leptonList    = [a.strip() for a in (cf.get("fits","leptonList")).split(',')]
 catList       = [a.strip() for a in (cf.get("fits","catList")).split(',')]
-#sigNameList  = [a.strip() for a in (cf.get("fits","sigNameList")).split(',')]
-sigNameList = ['hjp']
-hjp = 1
+sigNameList   = [a.strip() for a in (cf.get("fits","sigNameList")).split(',')]
+
 doBlind    = int(cf.get("fits","blind"))
+hjp=0
+if 'hjp' in sigNameList: hjp = 1
 
 colors = {}
 for f,col in cf.items("colors"):
-  colors[f] = int(col)
+  colors[f] = eval(col)
 
 #print colors
 #print yearList, leptonList, catList, massList, sigNameList
@@ -48,19 +49,20 @@ for f,col in cf.items("colors"):
 TH1.SetDefaultSumw2(kTRUE)
 gStyle.SetOptTitle(0)
 
+verbose    = 1
+
 debugPlots = 0
-verbose    = 0
 noSFweight = 0
 rootrace   = 0
 
 EBetaCut = 1.4442
 EEetaCut = 1.566
-ptMllgCut  = 0.00
-ptGammaCut = 40
-ptDiLepCut = 40
+ptMllgCut  = 0.30
+ptGammaCut = 0
+ptDiLepCut = 0
 
 lowCutOff  = 110
-highCutOff = 150
+highCutOff = 170
 
 # OK listen, we're gunna need to do some bullshit just to get a uniform RooRealVar name for our data objects.
 # So we'll loop through the Branch, set mzg to the event value (if it's in range), and add that to our RooDataSet.
@@ -246,11 +248,11 @@ def doInitialFits(subdir):
             signalTree = signalDict[prod+"_"+lepton+year+"_M"+mass].Get(treeName)
 
 
-            if verbose: print 'signal mass loop', mass
-            print 'in gg   INPUT ', cat, prod,mass
-            # raw_input()
-
             if verbose:
+              print 'signal mass loop', mass
+              print 'in gg   INPUT ', cat, prod,mass
+              # raw_input()
+
               print histName
               signalTree.Print()
               print
@@ -409,26 +411,27 @@ def doInitialFits(subdir):
   u.createDir(subdir)
   ws.writeToFile(subdir+'/testRooFitOut_Dalitz.root')
 
-  ws.Print()
+  if verbose:
+    ws.Print()
 
-  print '*** Some yields from data'
-  print 'Full range:', yi_da0
-  print 'in 122-128:', yi_da1
+    print '*** Some yields from data'
+    print 'Full range:', yi_da0
+    if not doBlind:
+      print 'in 122-128:', yi_da1
 
-  print '*** Some yields from ggH'
-  print 'Full range:', yi_sig0
-  print 'in 122-128:', yi_sig1
+    print '*** Some yields from ggH'
+    print 'Full range:', yi_sig0
+    print 'in 122-128:', yi_sig1
 
+    print "\n ** You should also notice that EBeta cut was: ", EBetaCut
+    print "And that the range was from ", lowCutOff, 'to', highCutOff
 
-  print "\n ** You should also notice that EBeta cut was: ", EBetaCut
-  print "And that the range was from ", lowCutOff, 'to', highCutOff
+    print "\n Mean from dataset: ", mean_sig
+    print "\n Sigma DS:", sigma_sig
 
-  print "\n Mean from dataset: ", mean_sig
-  print "\n Sigma DS:", sigma_sig
-
-  #print "\n Mean from Datahist:", mean_gg0_dh
-  #print "\n Sigma DH:", sigma_gg0_dh
-
+    # print "\n Mean from Datahist:", mean_gg0_dh
+    # print "\n Sigma DH:", sigma_gg0_dh
+    raw_input('Enter')
 
   for year in yearList:
     for lepton in leptonList:
@@ -476,23 +479,9 @@ if __name__=="__main__":
     cf.set("path","base", '/eos/uscms/store/user/andreypz')
     cf.set("path","htmlbase", '/uscms_data/d2/andreypz/')
 
-  cf.set("colors","bern2",kCyan+1)
-  cf.set("colors","bern3",kOrange)
-  cf.set("colors","bern4",kGreen+1)
-  cf.set("colors","bern5",kBlue+1)
-  cf.set("colors","bern6",kRed+1)
-
-  cf.set("colors","gaussbern3",kSpring-1)
-  cf.set("colors","gaussbern4",kGreen-1)
-  cf.set("colors","gaussbern5",kBlue-1)
-  cf.set("colors","gaussbern6",kRed-1)
-
-  cf.set("colors","gaussexp",kGray)
-  cf.set("colors","gausspow",kGray+1)
-
   with open(r'config.cfg', 'wb') as configfile:
     cf.write(configfile)
 
-  print 'start'
+  print '\t \t start \n'
   doInitialFits(s)
-  print "done"
+  print "\n \t \t done"

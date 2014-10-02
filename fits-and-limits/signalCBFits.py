@@ -9,18 +9,17 @@ setTDRStyle()
 gROOT.LoadMacro("../CMS_lumi.C")
 gROOT.SetMacroPath(".:../plugins/")
 gROOT.LoadMacro("HistManager.cc+")
-
 sys.path.append("../zgamma")
 import utils as u
-from initialFitProducer import AutoVivification
+from apzFitProducer import AutoVivification
 import ConfigParser as cp
 cf = cp.ConfigParser()
 cf.read('config.cfg')
 
-#massList0  = ['120','125','130','135','140','145','150']
-massList0  = ['125']
-massList   = ['125.0']
-#massList   = ['%.1f'%(a) for a in u.drange(120,150,1.0)]
+#massList0  = ['125']
+#massList   = ['125.0']
+massList0  = ['120','125','130','135','140','145','150']
+massList   = ['%.1f'%(a) for a in u.drange(120,150,1.0)]
 
 myFunc = 'CBGM' #Crystall-Ball + Gauss (with same Mean)
 
@@ -290,7 +289,8 @@ def SignalFitMaker(lep, year, cat, subdir):
       regionName = fit.GetName().split('_')[-1]
       # fit.plotOn(testFrame)
       # fit.plotOn(testFrame, RooFit.NormRange('fitRegion_'+regionName))
-      fit.plotOn(testFrame, RooFit.NormRange('fitRegion_'+regionName), RooFit.Normalization(normList[i],RooAbsReal.NumEvent), RooFit.LineColor(TColor.GetColorPalette(i*10)))
+      fit.plotOn(testFrame, RooFit.NormRange('fitRegion_'+regionName), RooFit.Normalization(normList[i],RooAbsReal.NumEvent),
+                 RooFit.LineColor(TColor.GetColorPalette(i*10)))
       # fit.paramOn(testFrame)
       # testFrame.getAttText().SetTextSize(0.02)
       # testFrame.getAttText().SetTextColor(kRed)

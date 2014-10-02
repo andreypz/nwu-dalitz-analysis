@@ -24,7 +24,7 @@ s = cf.get("path","ver")
 # Run with: combine -M Asymptotic datacard.txt  #
 # ################################################
 brTag = ''
-hjp = 1
+hjp = 0
 
 Ext = options.ext
 
@@ -40,9 +40,9 @@ PU      = '1.008'
 
 proc = {'gg':'ggH', 'vbf':'qqH','v':'WH','hjp':'hjp'}
 massList   = ['%.1f'%(a) for a in u.drange(120,150,1.0)]
-massList = ['125.0']
-csBR = {}
+#massList = ['125.0']
 
+#csBR = {}
 #for i,m in enumerate(massList):
 #  # for now this numbers are retrieved from systematics.py file
 #  ccc = cs_tot[i]*BR_mu[i]*1000
