@@ -32,6 +32,7 @@ class HistMaker {
    virtual void SetGamma2(TCPhysObject );
    virtual void SetJet1(TCPhysObject );
    virtual void SetJet2(TCPhysObject );
+   virtual void SetMet(TVector2 );
    virtual void SetDalectron(TCPhysObject );
    virtual void Reset(float r, UInt_t n);
    float Zeppenfeld(const TLorentzVector& p, const TLorentzVector& pj1, const TLorentzVector& pj2);
@@ -40,6 +41,7 @@ class HistMaker {
   HistManager * hists;
 
   TCPhysObject _lPt1, _lPt2, _gamma, _gamma2, _dale, _jet1, _jet2;
+  TVector2 _met;
   TCPrimaryVtx _pv;
   Bool_t _isVtxSet;
   Bool_t _isLepSet;
@@ -48,6 +50,7 @@ class HistMaker {
   Bool_t _isDaleSet;
   Bool_t _isJet1Set;
   Bool_t _isJet2Set;
+  Bool_t _isMetSet;
   Float_t _rhoFactor;
   UInt_t _nVtx;
   ZGAngles *angles;

@@ -90,7 +90,6 @@ class ObjectID {
   virtual bool HggPreselection(const TCElectron& el);
   virtual bool PassPhotonMVA(const TCPhoton& ph, float& m);
   virtual bool PassJetID(const TCJet& j, int nVtx);
-  float Zeppenfeld(const TLorentzVector& p, const TLorentzVector& pj1, const TLorentzVector& pj2);
 
   TCGenParticle* GetPrimaryAncestor(TCGenParticle *p);
   virtual void DiscoverGeneology(TCGenParticle *p);

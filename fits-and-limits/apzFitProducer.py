@@ -49,7 +49,7 @@ for f,col in cf.items("colors"):
 TH1.SetDefaultSumw2(kTRUE)
 gStyle.SetOptTitle(0)
 
-verbose    = 1
+verbose    = 0
 
 debugPlots = 0
 noSFweight = 0

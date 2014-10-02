@@ -453,6 +453,8 @@ if __name__ == "__main__":
       plot_types.append(d)
 
     #plot_types
+
+  print ' Signal yields: '
   print yields_sig
 
   if doBkg:
@@ -473,15 +475,8 @@ if __name__ == "__main__":
   u.makeTable(table_all,"all", "tex")
 
   os.system("cat yields_all.html   > yields.html")
-  #os.system("cat yields_all.twiki  > yields.html")
-  #os.system("cat yields_all.tex    > yields.html")
 
   defaultPage = 'Main'
-  #if sel=='mugamma' and cut in ['12']: defaultPage = 'jpsi'
-  #elif cut in ['14','15']: defaultPage = 'apz'
-  #elif opt.zjp or opt.hjp: defaultPage = 'jp-'+sel
-  #print defaultPage
-
 
   ht.makeHTML("h &rarr; dalitz decay plots",pathBase, plot_types, comments, defaultPage)
 

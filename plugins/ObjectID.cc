@@ -836,12 +836,6 @@ bool ObjectID::PassJetID(const TCJet& jet, int nVtx){
   return idPass;
 }
 
-float ObjectID::Zeppenfeld(const TLorentzVector& p, const TLorentzVector& pj1, const TLorentzVector& pj2)
-{
-  float zep = p.Eta()-(pj1.Eta()+pj2.Eta())/2.;
-  return zep;
-}
-
 void ObjectID::JetDump(const TCJet& jet)
 {
   cout << "pt\t:" << jet.Pt() << endl;

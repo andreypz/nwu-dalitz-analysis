@@ -11,6 +11,7 @@ HistMaker::HistMaker(HistManager *h):
   _isDaleSet(false),
   _isJet1Set(false),
   _isJet2Set(false),
+  _isMetSet(false),
   _rhoFactor(-1),
   _nVtx(0)
 {
@@ -38,6 +39,8 @@ void HistMaker::SetJet1(TCPhysObject j){
   _jet1 = j; _isJet1Set=1;}
 void HistMaker::SetJet2(TCPhysObject j){
   _jet2 = j; _isJet2Set=1;}
+void HistMaker::SetMet(TVector2 m){
+  _met = m; _isMetSet=1;}
 
 void HistMaker::MakeMuonPlots(const TCMuon& mu, string dir)
 {
@@ -270,8 +273,6 @@ void HistMaker::FillHistosFull(Int_t num, Double_t weight, string dir)
     hists->fill2DHist(Mllg, Mll, Form("h2D_tri_vs_diLep_mass3_%s_cut%i",  d, num),
 		      ";m_{ll#gamma} (GeV);m_{ll} (GeV)", nBins1,0,200, nBins1, 8,20,  weight, dir);
 
-    hists->fill1DHist(diLep.Pt()/Mllg,  Form("diLep_ptOverMllg_%s_cut%i",   d, num),
-		      ";di-Lepton p_{T}/m_{ll#gamma}",100, 0,1, weight, dir);
   }
 
   hists->fill1DHist(Mll, Form("01_diLep_mass_0to20_%s_cut%i",    d, num),";m_{#mu#mu} (GeV)", 100, 0,20,  weight, dir);
@@ -293,6 +294,8 @@ void HistMaker::FillHistosFull(Int_t num, Double_t weight, string dir)
   hists->fill1DHist(diLep.Eta(), Form("011_diLep_eta_%s_cut%i",  d, num),";di-Lepton eta",   50, -3.5,3.5, weight, dir);
   hists->fill1DHist(diLep.Phi(), Form("011_diLep_phi_%s_cut%i",  d, num),";di-Lepton phi",   50, -TMath::Pi(),TMath::Pi(), weight, dir);
   hists->fill1DHist(diLepCM.E(), Form("011_diLep_Ecom_%s_cut%i", d, num),";E(ll) in CoM",    50, 0,200,  weight, dir);
+  hists->fill1DHist(diLep.Pt()/Mllg,  Form("011_diLep_ptOverMllg_%s_cut%i",   d, num),
+		      ";di-Lepton p_{T}/m_{ll#gamma}",100, 0,1, weight, dir);
 
 
   hists->fill1DHist(_lPt1.Pt(),  Form("02_lPt1_pt_%s_cut%i", d, num), ";Leading lepton p_{T} (GeV)", 50, 0,100,    weight, dir);
@@ -369,38 +372,54 @@ void HistMaker::FillHistosFull(Int_t num, Double_t weight, string dir)
   }
 
   if (_isJet1Set){
-    hists->fill1DHist(_jet1.Pt(),  Form("050_jet1_pt_%s_cut%i",  d, num), ";p_{T}^{jet1}", 50,0,100,  weight,dir);
-    hists->fill1DHist(_jet1.Eta(), Form("050_jet1_eta_%s_cut%i", d, num), ";#eta^{jet1}",  50, -5,5,  weight,dir);
+    hists->fill1DHist(_jet1.Pt(),  Form("050_jet1_pt_%s_cut%i",  d, num), ";p_{T}^{jet1} (GeV)", 50,0,200,  weight,dir);
+    hists->fill1DHist(_jet1.Eta(), Form("050_jet1_eta_%s_cut%i", d, num), ";#eta^{jet1}",        50, -5,5,  weight,dir);
 
     hists->fill1DHist(_jet1.DeltaR(diLep), Form("051_jet1_deltaR_diLep_%s_cut%i", d, num),
-		      ";#Delta R(j_{1}, di-Lepton)", 50,0,4,  weight,dir);
+		      ";#Delta R(j_{1}, di-Lepton)", 50,0,6,  weight,dir);
     if(_isGammaSet)
       hists->fill1DHist(_jet1.DeltaR(_gamma), Form("051_jet1_deltaR_gamma_%s_cut%i", d, num),
-			";#Delta R(j_{1}, #gamma)", 50,0,4,  weight,dir);
+			";#Delta R(j_{1}, #gamma)", 50,0,6,  weight,dir);
   }
 
   if (_isJet2Set){
-    hists->fill1DHist(_jet2.Pt(),  Form("050_jet2_pt_%s_cut%i",  d, num), ";p_{T}^{jet2}", 50,0,100,  weight,dir);
-    hists->fill1DHist(_jet2.Eta(), Form("050_jet2_eta_%s_cut%i", d, num), ";#eta^{jet2}",  50, -5,5,  weight,dir);
+    hists->fill1DHist(_jet2.Pt(),  Form("050_jet2_pt_%s_cut%i",  d, num), ";p_{T}^{jet2} (GeV)", 50,0,200,  weight,dir);
+    hists->fill1DHist(_jet2.Eta(), Form("050_jet2_eta_%s_cut%i", d, num), ";#eta^{jet2}",        50, -5,5,  weight,dir);
 
     hists->fill1DHist(_jet2.DeltaR(diLep), Form("051_jet2_deltaR_diLep_%s_cut%i", d, num),
-		      ";#Delta R(j_{1}, di-Lepton)", 50,0,4,  weight,dir);
+		      ";#Delta R(j_{2}, di-Lepton)", 50,0,6,  weight,dir);
     if(_isGammaSet)
       hists->fill1DHist(_jet2.DeltaR(_gamma), Form("051_jet2_deltaR_gamma_%s_cut%i", d, num),
-			";#Delta R(j_{2}, #gamma)", 50,0,4,  weight,dir);
+			";#Delta R(j_{2}, #gamma)", 50,0,6,  weight,dir);
   }
 
   if (_isJet1Set && _isJet2Set){
     hists->fill1DHist(fabs(_jet1.Eta() -_jet2.Eta()), Form("052_deltaEta_j1_j2_%s_cut%i", d, num),
-		      ";#Delta #eta(j_{1}, j_{2})", 50,0,6,  weight,dir);
+		      ";|#Delta #eta(j_{1}, j_{2})|", 50,0,7,  weight,dir);
+    hists->fill1DHist(_jet1.DeltaR(_jet2), Form("052_deltaR_j1_j2_%s_cut%i", d, num),
+		      ";#Delta R(j_{1}, j_{2})",    50,0,7,  weight,dir);
     hists->fill1DHist((_jet1+_jet2).M(), Form("052_mass_j1j2_%s_cut%i", d, num),
-		      ";m(j_{1}, j_{2})", 50,0,700,  weight,dir);
+		      ";m(j_{1}, j_{2}) (GeV)", 50,0,700,  weight,dir);
     if (_isGammaSet){
       float zep = Zeppenfeld((_lPt1+_lPt2+_gamma),_jet1,_jet2);
-      hists->fill1DHist(zep, Form("052_zep_%s_cut%i", d, num), ";Zeppenfeld", 50,-5,5,  weight,dir);
+      hists->fill1DHist(zep, Form("052_zep_%s_cut%i", d, num),
+			";Zeppenfeld: #eta_{ll#gamma} - #frac{1}{2}(#eta_{j1} + #eta_{j2})", 50,-6,6,  weight,dir);
       hists->fill1DHist((_jet1+_jet2).DeltaPhi(_lPt1+_lPt2+_gamma), Form("052_dPhi_diJet_higgs_%s_cut%i", d, num),
-	";#Delta#phi(di-Jet, ll#gamma)", 50,0,3,  weight,dir);
+			";#Delta#phi(di-Jet, ll#gamma)", 50,0,3,  weight,dir);
+
     }
+  }
+  if (_isMetSet){
+    hists->fill1DHist(_met.Mod(), Form("06_met_Et_%s_cut%i",  d, num),";E_{T}^{miss} (GeV)", 50,0,200,  weight,dir);
+    hists->fill1DHist(_met.Phi(), Form("06_met_phi_%s_cut%i", d, num),";#phi(E_{T}^{miss})", 50,-4,4,  weight,dir);
+
+    if (_isJet1Set)
+      hists->fill1DHist(fabs(_met.Phi() -_jet1.Phi()), Form("06_met_dPhiJet1_%s_cut%i", d, num),
+			";#Delta#phi(E_{T}^{miss}, j_{1})", 50,0,4,  weight,dir);
+    if (_isJet2Set)
+      hists->fill1DHist(fabs(_met.Phi() -_jet1.Phi()), Form("06_met_dPhiJet2_%s_cut%i", d, num),
+			";#Delta#phi(E_{T}^{miss}, j_{2})", 50,0,4,  weight,dir);
+
   }
 
   hists->fill1DHist(_rhoFactor, Form("rhoFactor_%s_cut%i",     d, num), ";#rho-factor",     100, 0,40, weight, dir);

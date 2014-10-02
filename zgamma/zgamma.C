@@ -570,6 +570,9 @@ Bool_t zgamma::Process(Long64_t entry)
   sort(electrons.begin(),  electrons.end(),  P4SortCondition);
 
   if (doZee){
+    //----------------------//
+    //------ Z->ee STUDY ---//
+    //----------------------//
 
     if (electrons.size()<2 || photons0.size()<2) return kTRUE;
 
@@ -637,38 +640,6 @@ Bool_t zgamma::Process(Long64_t entry)
 
   sort(muons.begin(), muons.end(), P4SortCondition);
 
-  //------------------------//
-  //------JET SELECTION ---//
-  //-----------------------//
-
-  for (Int_t i = 0; i < recoJets->GetSize(); ++i) {
-    TCJet* thisJ = (TCJet*) recoJets->At(i);
-    if (thisJ->Pt() < 30 || fabs(thisJ->Eta())>4.7) continue;
-    if (ObjID->PassJetID(*thisJ, nVtx))
-      jets.push_back(*thisJ);
-  }
-
-  sort(jets.begin(), jets.end(), P4SortCondition);
-
-  if (jets.size()>=1){
-    jet1 = jets[0];
-    HM->SetJet1(jet1);
-  }
-
-  Bool_t isVBF = 0;
-
-  if (jets.size()>=2){
-    jet2 = jets[1];
-    HM->SetJet2(jet2);
-
-    //----- VBF SELECTION ------//
-    if (fabs(jet1.Eta() - jet2.Eta()) > 3.5
-	&& (jet1+jet2).M() > 500
-	&& HM->Zeppenfeld((lPt1+lPt2+gamma),jet1,jet2) < 2.5
-	//&& (jet1+jet2).DeltaPhi(lPt1+lPt2+gamma)) > 0.1
-	)
-    isVBF = 1;
-  }
 
   if(!isRealData && makeGen){
     hists->fill1DHist(genMll,  "gen_Mll_reco_gamma",  ";gen_Mll",100,0,mllMax, 1,"eff");
@@ -691,10 +662,14 @@ Bool_t zgamma::Process(Long64_t entry)
 
   FillHistoCounts(3, eventWeight);
   CountEvents(3,"Pass Trigger and Photon reco selection",fcuts);
-  HM->MakeNPlots(3,muons.size(), electrons.size(), electrons0.size(), photonsHZG.size(), photonsTight.size(), photonsMVA.size(), 0, eventWeight);
+  HM->MakeNPlots(3,muons.size(), electrons.size(), electrons0.size(), photonsHZG.size(),
+		 photonsTight.size(), photonsMVA.size(), jets.size(), eventWeight);
 
   if (muons.size()<2) return kTRUE;
 
+  //------------------------//
+  //------ PICK THE Muons --//
+  //------------------------//
   Float_t tmpMll = 99999;
   if (muons.size()==2){
     lPt1 = muons[0];
@@ -727,7 +702,56 @@ Bool_t zgamma::Process(Long64_t entry)
     return kTRUE;//Abort("reco * They are the same charge!");
   }
 
-  Double_t Mll = (l1+l2).M();
+  //------------------------//
+  //------JET SELECTION ---//
+  //-----------------------//
+
+  for (Int_t i = 0; i < recoJets->GetSize(); ++i) {
+    TCJet* thisJ = (TCJet*) recoJets->At(i);
+    if (thisJ->Pt() < 30 || fabs(thisJ->Eta())>4.7) continue;
+    if (thisJ->DeltaR(gamma) < 0.4) continue;
+    if (thisJ->DeltaR(lPt1) < 0.3 || thisJ->DeltaR(lPt2) < 0.3) continue;
+
+    if (ObjID->PassJetID(*thisJ, nVtx))
+      jets.push_back(*thisJ);
+  }
+
+  sort(jets.begin(), jets.end(), P4SortCondition);
+
+  if (jets.size()>=1){
+    jet1 = jets[0];
+    HM->SetJet1(jet1);
+  }
+
+  Bool_t isVBF = 0;
+
+  if (jets.size()>=2){
+    jet2 = jets[1];
+    HM->SetJet2(jet2);
+
+    //--------------------------//
+    //----- VBF SELECTION ------//
+    //--------------------------//
+    if (fabs(jet1.Eta() - jet2.Eta()) > 3.
+	&& (jet1+jet2).M() > 450
+	&& fabs(HM->Zeppenfeld((lPt1+lPt2+gamma),jet1,jet2)) < 4
+	//&& (jet1+jet2).DeltaPhi(lPt1+lPt2+gamma)) > 0.1
+	)
+    isVBF = 1;
+  }
+
+  //-------------------------//
+  //------MISSING ENERGY ---//
+  //------------------------//
+
+  HM->SetMet(*recoMET);
+  //cout<<"MET: "<<recoMET->Mod()<<endl;
+
+  //---------------------------------//
+  //------ KINEMATIC SELECTION ------//
+  //---------------------------------//
+
+  Double_t Mll  = (l1+l2).M();
   Double_t Mllg = (l1+l2+gamma).M();
   Double_t dR   = l1.DeltaR(l2);
 
@@ -799,7 +823,7 @@ Bool_t zgamma::Process(Long64_t entry)
   FillHistoCounts(4, eventWeight);
   CountEvents(4, "Two muons selected", fcuts);
   HM->MakeNPlots(4,muons.size(), electrons.size(), electrons0.size(), photonsHZG.size(),
-		 photonsTight.size(), photonsMVA.size(), 0, eventWeight);
+		 photonsTight.size(), photonsMVA.size(), jets.size(), eventWeight);
 
 
   if (Mll > 50)
@@ -861,14 +885,14 @@ Bool_t zgamma::Process(Long64_t entry)
   FillHistoCounts(6, eventWeight);
   CountEvents(6, "dR(l,g) > 1; removed J/Psi, Ups", fcuts);
   HM->MakeNPlots(6,muons.size(), electrons.size(), electrons0.size(), photonsHZG.size(),
-		 photonsTight.size(), photonsMVA.size(), 0, eventWeight);
+		 photonsTight.size(), photonsMVA.size(), jets.size(), eventWeight);
 
   if (Mll < 20) {
     HM->FillHistosFull(7, eventWeight);
     FillHistoCounts(7, eventWeight);
     CountEvents(7, "m(ll) < 20 GeV", fcuts);
     HM->MakeNPlots(7,muons.size(), electrons.size(), electrons0.size(), photonsHZG.size(),
-		   photonsTight.size(), photonsMVA.size(), 0, eventWeight);
+		   photonsTight.size(), photonsMVA.size(), jets.size(), eventWeight);
 
     HM->MakeMuonPlots(muons[0]);
     HM->MakeMuonPlots(muons[1]);
@@ -884,7 +908,7 @@ Bool_t zgamma::Process(Long64_t entry)
 	FillHistoCounts(9, eventWeight);
 	CountEvents(9, "pT/m(llg) > 0.3", fcuts);
 	HM->MakeNPlots(9,muons.size(), electrons.size(), electrons0.size(), photonsHZG.size(),
-		       photonsTight.size(), photonsMVA.size(), 0, eventWeight);
+		       photonsTight.size(), photonsMVA.size(), jets.size(), eventWeight);
 
 	HM->MakePhotonPlots(gamma, "Pho-after");
 	HM->MakeMuonPlots(muons[0],"Mu-after");

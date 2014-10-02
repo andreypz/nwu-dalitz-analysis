@@ -49,7 +49,7 @@ def getCuts():
   with open(fcuts) as f:
     lines = f.read().splitlines()
 
-  cuts = ['']*20
+  cuts = ['']*23
 
   for l in lines:
     n = int(l[0:2])
