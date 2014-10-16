@@ -32,6 +32,18 @@ yearList      = [a.strip() for a in (cf.get("fits","yearList")).split(',')]
 leptonList    = [a.strip() for a in (cf.get("fits","leptonList")).split(',')]
 catList       = [a.strip() for a in (cf.get("fits","catList")).split(',')]
 sigNameList   = [a.strip() for a in (cf.get("fits","sigNameList")).split(',')]
+mllBins = u.mllBins()
+
+EBetaCut = 1.4442
+EEetaCut = 1.566
+ptMllgCut  = 0.30
+ptGammaCut = 0
+ptDiLepCut = 0
+ptSumLep   = 0
+
+lowCutOff  = 110
+highCutOff = 170
+verbose    = 0
 
 doBlind    = int(cf.get("fits","blind"))
 hjp=0
@@ -49,20 +61,9 @@ for f,col in cf.items("colors"):
 TH1.SetDefaultSumw2(kTRUE)
 gStyle.SetOptTitle(0)
 
-verbose    = 0
-
 debugPlots = 0
 noSFweight = 0
 rootrace   = 0
-
-EBetaCut = 1.4442
-EEetaCut = 1.566
-ptMllgCut  = 0.30
-ptGammaCut = 0
-ptDiLepCut = 0
-
-lowCutOff  = 110
-highCutOff = 170
 
 # OK listen, we're gunna need to do some bullshit just to get a uniform RooRealVar name for our data objects.
 # So we'll loop through the Branch, set mzg to the event value (if it's in range), and add that to our RooDataSet.
@@ -87,9 +88,12 @@ def LoopOverTree(myTree, cat, mzg, args, ds, lumiWeight):
     if cat=='mll50':
       if i.m12<20 or i.m12>50: continue
       if fabs(i.eta3)>EBetaCut: continue  # only EB in 20 to 50 region
-
+    elif cat in ['m1','m2','m3','m4','m5','m6','m7']:
+      if fabs(i.eta3)>EBetaCut: continue
+      if i.m12<mllBins[int(cat[1])-1][0] or i.m12>mllBins[int(cat[1])][0]: continue
     else:
       if i.m12>20: continue
+      if i.pt1+i.pt2 < ptSumLep: continue
     if   cat=="EB" and fabs(i.eta3)>EBetaCut: continue
     elif cat=="EE" and fabs(i.eta3)<EEetaCut: continue
 
@@ -433,29 +437,31 @@ def doInitialFits(subdir):
     # print "\n Sigma DH:", sigma_gg0_dh
     raw_input('Enter')
 
-  for year in yearList:
-    for lepton in leptonList:
-      for cat in catList:
-        t_mean = []
-        t_sigma = []
-        for mass in massList:
-          l_mean = []
-          l_sigma = []
-          l_mean.append(mass)
-          l_sigma.append(mass)
-          for prod in sigNameList:
-            print year, lepton, cat, prod
-            print mean_sig[year][mass][lepton][cat][prod]
-            print sigma_sig[year][mass][lepton][cat][prod]
-            #a,b = mean_sig[year][mass][lepton][cat][prod]
-            #l.append("%.2f &pm; %.2f"%(a,b))
-            l_mean.append( "%.3f &pm; %.3f"%(mean_sig[year][mass][lepton][cat][prod][0], mean_sig[year][mass][lepton][cat][prod][1]))
-            l_sigma.append("%.3f &pm; %.3f"%(sigma_sig[year][mass][lepton][cat][prod][0],sigma_sig[year][mass][lepton][cat][prod][1]))
-            #print l
-          t_mean.append(l_mean)
-          t_sigma.append(l_sigma)
-        u.makeTable(t_mean,  "mean",  opt="twiki")
-        u.makeTable(t_sigma, "sigma", opt="twiki")
+
+  if verbose:
+    for year in yearList:
+      for lepton in leptonList:
+        for cat in catList:
+          t_mean = []
+          t_sigma = []
+          for mass in massList:
+            l_mean = []
+            l_sigma = []
+            l_mean.append(mass)
+            l_sigma.append(mass)
+            for prod in sigNameList:
+              print year, lepton, cat, prod
+              print mean_sig[year][mass][lepton][cat][prod]
+              print sigma_sig[year][mass][lepton][cat][prod]
+              # a,b = mean_sig[year][mass][lepton][cat][prod]
+              # l.append("%.2f &pm; %.2f"%(a,b))
+              l_mean.append("%.3f&pm;%.3f"%(mean_sig[year][mass][lepton][cat][prod][0], mean_sig[year][mass][lepton][cat][prod][1]))
+              l_sigma.append("%.3f&pm;%.3f"%(sigma_sig[year][mass][lepton][cat][prod][0],sigma_sig[year][mass][lepton][cat][prod][1]))
+              # print l
+              t_mean.append(l_mean)
+              t_sigma.append(l_sigma)
+          u.makeTable(t_mean,  "mean",  opt="twiki")
+          u.makeTable(t_sigma, "sigma", opt="twiki")
 
   print '\n \t we did it!\t'
 

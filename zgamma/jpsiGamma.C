@@ -489,12 +489,6 @@ Bool_t jpsiGamma::Process(Long64_t entry)
   TCPhysObject l1,l2, lPt1, lPt2;
   TCPhoton gamma0, gamma,gamma2, ufoton, ufelectron;
 
-
-  if (nVtx>50){
-    fout<<runNumber<<" "<<lumiSection<<"  "<<eventNumber<<"   "<<nVtx<<endl;
-    cout<<runNumber<<" "<<lumiSection<<"  "<<eventNumber<<"   "<<nVtx<<endl;
-  }
-
   for (Int_t i = 0; i < recoPhotons->GetSize(); ++i) {
     //cout<<"new photon!!!!!!!"<<endl;
     TCPhoton* thisPhoton = (TCPhoton*) recoPhotons->At(i);
@@ -727,7 +721,7 @@ Bool_t jpsiGamma::Process(Long64_t entry)
   if (gamma2.Pt()>3)
     HM->SetGamma2(gamma2);
 
-  HM->FillHistosFull(4, eventWeight, "");
+  HM->FillHistosFull(4, eventWeight);
   FillHistoCounts(4, eventWeight);
   CountEvents(4, "Two muons selected", fcuts);
 
@@ -743,13 +737,13 @@ Bool_t jpsiGamma::Process(Long64_t entry)
   if (Mll > 20) return kTRUE;
   //if (Mll > mllMax) return kTRUE;
 
-  HM->FillHistosFull(5, eventWeight, "");
+  HM->FillHistosFull(5, eventWeight);
   FillHistoCounts(5, eventWeight);
   CountEvents(5, "m(ll) < 20 GeV", fcuts);
 
 
   if (lPt1.DeltaR(gamma)<1.0 || lPt2.DeltaR(gamma)<1.0) return kTRUE;
-  HM->FillHistosFull(6, eventWeight, "");
+  HM->FillHistosFull(6, eventWeight);
   FillHistoCounts(6, eventWeight);
   CountEvents(6, "dR(l, gamma) < 1", fcuts);
 
@@ -796,7 +790,7 @@ Bool_t jpsiGamma::Process(Long64_t entry)
 
   if (Mll<2.9 || Mll>3.3) return kTRUE;
 
-  HM->FillHistosFull(7, eventWeight, "");
+  HM->FillHistosFull(7, eventWeight);
   FillHistoCounts(7, eventWeight);
   CountEvents(7, "J/Psi mass", fcuts);
 
@@ -806,13 +800,13 @@ Bool_t jpsiGamma::Process(Long64_t entry)
 
 
   if (Mllg>76 && Mllg<106){
-    HM->FillHistosFull(12, eventWeight, "");
+    HM->FillHistosFull(12, eventWeight);
     FillHistoCounts(12, eventWeight);
     CountEvents(12, "76 < mllg < 106", fcuts);
   }
 
   if (Mllg>122 && Mllg<128){
-    HM->FillHistosFull(13, eventWeight, "");
+    HM->FillHistosFull(13, eventWeight);
     FillHistoCounts(13, eventWeight);
     CountEvents(13, "122 < mllg < 128", fcuts);
   }
@@ -861,7 +855,7 @@ Bool_t jpsiGamma::Process(Long64_t entry)
   if ((l1+l2).Pt() < 40 || gamma.Pt() < 40)
     return kTRUE;
 
-  HM->FillHistosFull(8, eventWeight, "");
+  HM->FillHistosFull(8, eventWeight);
   FillHistoCounts(8, eventWeight);
   CountEvents(8, "pT > 40 and qT > 40", fcuts);
 
@@ -872,7 +866,7 @@ Bool_t jpsiGamma::Process(Long64_t entry)
 
   }
 
-  HM->FillHistosFull(9, eventWeight, "");
+  HM->FillHistosFull(9, eventWeight);
   FillHistoCounts(9, eventWeight);
   CountEvents(9, "trigger", fcuts);
 
@@ -881,13 +875,13 @@ Bool_t jpsiGamma::Process(Long64_t entry)
 
 
   if (Mllg>76 && Mllg<106){
-    HM->FillHistosFull(10, eventWeight, "");
+    HM->FillHistosFull(10, eventWeight);
     FillHistoCounts(10, eventWeight);
     CountEvents(10, "76 < mllg < 106", fcuts);
   }
 
   if (Mllg>122 && Mllg<128){
-    HM->FillHistosFull(11, eventWeight, "");
+    HM->FillHistosFull(11, eventWeight);
     FillHistoCounts(11, eventWeight);
     CountEvents(11, "122 < mllg < 128", fcuts);
   }

@@ -171,7 +171,7 @@ def FillAllHists(files, h):
     # if not hasGamma: continue
 
     dcount += 1
-    # if dcount > 20: break
+    # if dcount > 5000: break
 
 
     tri = diLep + gamma
@@ -259,6 +259,7 @@ def FillAllHists(files, h):
         #h.fill1DHist(l2.Phi(),   "l2_phi", ";l- phi",   50, -TMath.Pi(),TMath.Pi(), 1, "")
 
     h.fill1DHist(diLep.M(),   "LHE_diLep_mass",     ";m_{ll} (GeV)", 100, 0,60,  1, "")
+    h.fill1DHist(diLep.M(),   "LHE_diLep_mass_bins",";m_{ll} (GeV)", 5000,0,55,  1, "")
     h.fill1DHist(diLep.M(),   "LHE_diLep_mass_full",";m_{ll} (GeV)", 100, 0,130, 1, "")
     h.fill1DHist(diLep.M(),   "LHE_diLep_mass_low", ";m_{ll} (GeV)", 100, 0,1,   1, "")
     h.fill1DHist(tri.M(),     "LHE_h_mass",    ";m_{ll#gamma} (GeV)",100, 80,180,1, "")
@@ -291,7 +292,7 @@ def FillAllHists(files, h):
     h.fill1DHist(diLepCM.E(), "diLep_Ecom",";E^{com}_{ll}, GeV", 50, 0,100,  1, "")
 
 
-    h.fill1DHist(diLep.Pt(),  "LHE_diLep_pt", ";diLep_pt, GeV",    50, 0,100, 1, "")
+    h.fill1DHist(diLep.Pt(), "LHE_diLep_pt",  ";diLep_pt, GeV",    50, 0,100, 1, "")
     h.fill1DHist(diLep.Eta(),"LHE_diLep_eta", ";diLep_eta",     50, -3.5,3.5, 1, "")
     h.fill1DHist(diLep.Phi(),"LHE_diLep_phi", ";diLep_phi",   50, -TMath.Pi(),TMath.Pi(), 1, "")
     h.fill1DHist(gamma.E(),  "LHE_gamma_E",   ";E_{#gamma}, GeV", 50, 0,200, 1, "")
@@ -316,11 +317,10 @@ def FillAllHists(files, h):
                  ";p_{T}_{#gamma}; #Delta#eta(ll, #gamma)",    50, 0,100, 50,-5,5, 1, "")
 
 
-    h.fill1DHist(diLep.DeltaR(gamma),               "LHE_dR_diLep_gamma", ";dR(ll, #gamma)",         50, 0,10, 1, "")
-    h.fill1DHist(fabs(diLep.Eta() - gamma.Eta()),   "LHE_dEta_diLep_gamma", ";|dEta(ll, #gamma)|",   50, 0,10, 1, "")
-    h.fill1DHist((diLep.Vect()+gamma.Vect()).Pt(),  "LHE_diff_diLep_gamma_pt", ";four vector sum (diLep+#gamma).Pt()", 50, -20,20, 1, "")
-
-    h.fill1DHist(TVector2.Phi_mpi_pi(diLep.Phi()-gamma.Phi()), "LHE_dPhi_diLep_gamma", ";dPhi(ll, #gamma)",            50, -10,10, 1, "")
+    h.fill1DHist(diLep.DeltaR(gamma),              "LHE_dR_diLep_gamma", ";dR(ll, #gamma)",         50, 0,10, 1, "")
+    h.fill1DHist(fabs(diLep.Eta() - gamma.Eta()),  "LHE_dEta_diLep_gamma", ";|dEta(ll, #gamma)|",   50, 0,10, 1, "")
+    h.fill1DHist((diLep.Vect()+gamma.Vect()).Pt(), "LHE_diff_diLep_gamma_pt", ";(diLep+#gamma).Pt()", 50, -20,20, 1, "")
+    h.fill1DHist(TVector2.Phi_mpi_pi(diLep.Phi()-gamma.Phi()), "LHE_dPhi_diLep_gamma", ";#Delta#phi(ll, #gamma)", 50, -10,10, 1, "")
 
     h.fill1DHist(lPt1.DeltaR(gamma),"LHE_dR_lPt1_gamma",";#Delta R(l_{1}, #gamma)",  50, 0,6, 1, "")
     h.fill1DHist(lPt2.DeltaR(gamma),"LHE_dR_lPt2_gamma",";#Delta R(l_{2}, #gamma)",  50, 0,6, 1, "")
@@ -367,23 +367,62 @@ if __name__ == "__main__":
   #myzip = zip(['5<mll<20'],[testFile])
   #u.drawAllInFile(oneFile, "0<mll<2", myzip, twoFile, '2<mll<5', '', path, None,"norm", isLog=True)
   #u.drawAllInFile(oneFile, "ggH to eeg", '', twoFile, 'VH to eeg', '', path, None,"norm", isLog=True)
-  u.drawAllInFile(oneFile, "h #rightarrow ee#gamma", '', twoFile, 'h #rightarrow #mu#mu#gamma', '', path, None,"norm", isLog=True)
+  u.drawAllInFile(oneFile, "h #rightarrow ee#gamma", '', twoFile, 'h #rightarrow #mu#mu#gamma', '', path, None,"norm", isLog=False)
   #u.drawAllInFile(oneFile, "3 GeV", [('15 GeV',twoFile)],testFile, '35 GeV', '', path, None,"norm", isLog=True)
   #u.drawAllInFile(oneFile, "DYG", [('DYJ',twoFile)],testFile, 'Sig', '', path, None,"norm", isLog=True)
 
+
+  u.createDir(pathBase+"/csBR")
+  c1 = TCanvas("c1","c1", 600,500)
+  h = twoFile.Get("LHE_diLep_mass_bins")
+  #h.Print('all')
+  h.Draw()
+  c1.SaveAs(pathBase+"/csBR/dilepmass.png")
+
+  xsbr = 1
+  # xsbr = 0.754
+  tot  = h.Integral()
+  bin0 = h.FindBin(0)
+  bin1 = h.FindBin(0.)
+  bin2 = h.FindBin(0.5)
+  bin3 = h.FindBin(1)
+  bin4 = h.FindBin(2)
+  bin5 = h.FindBin(4)
+  bin6 = h.FindBin(9)
+  bin7 = h.FindBin(20)
+  bin8 = h.FindBin(50)
+  part1 = h.Integral(bin0, bin1)
+  part2 = h.Integral(bin1, bin2)
+  part3 = h.Integral(bin2, bin3)
+  part4 = h.Integral(bin3, bin4)
+  part5 = h.Integral(bin4, bin5)
+  part6 = h.Integral(bin5, bin6)
+  part7 = h.Integral(bin6, bin7)
+  part8 = h.Integral(bin7, bin8)
+  print 'bin 1 content = ', h.GetBinContent(1),
+  print "Integrals: tot = %.3f; part1 = %.3f"%(tot, part1)
+  print "In cs: 0-50:  %.3f"%(xsbr)
+  print "In cs: x: %.4f"%(xsbr*part1/tot)
+  print "In cs: x: %.4f"%(xsbr*part2/tot), bin2
+  print "In cs: x: %.4f"%(xsbr*part3/tot), bin3
+  print "In cs: x: %.4f"%(xsbr*part4/tot), bin4
+  print "In cs: x: %.4f"%(xsbr*part5/tot), bin5
+  print "In cs: x: %.4f"%(xsbr*part6/tot), bin6
+  print "In cs: x: %.4f"%(xsbr*part7/tot), bin7
+  print "In cs: x: %.4f"%(xsbr*part8/tot), bin8
+
   '''
-    u.createDir(path+"/eff")
-    c1 = TCanvas("c1","c1", 600,500)
-    c1.cd()
-    hh = []
-    ra = []
-    for n in xrange(0,39):
+  u.createDir(path+"/eff")
+  c1.cd()
+  hh = []
+  ra = []
+  for n in xrange(0,39):
       print n
       hh.append(oneFile.Get("gen_Mll_"+str(n)))
       ra.append(hh[-1].Clone())
       ra[-1].Divide(hh[0])
 
-    ra[3].Draw("hist")
+      ra[3].Draw("hist")
     ra[3].SetMinimum(0)
     ra[3].SetMaximum(1)
     ra[3].SetTitle(";Mll gen at LHE; acc")

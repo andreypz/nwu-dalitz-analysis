@@ -40,7 +40,8 @@ PU      = '1.008'
 
 proc = {'gg':'ggH', 'vbf':'qqH','v':'WH','hjp':'hjp'}
 massList   = ['%.1f'%(a) for a in u.drange(120,150,1.0)]
-#massList = ['125.0']
+massList = ['125.0']
+mllBins = u.mllBins()
 
 #csBR = {}
 #for i,m in enumerate(massList):
@@ -50,6 +51,10 @@ massList   = ['%.1f'%(a) for a in u.drange(120,150,1.0)]
 #  ## this is wrong really, cant use total cross section..
 #  ## don't use this
 #  csBR[m] = ccc
+
+introMessage = ('# This is a card produced by a cardMaker.py script using the information from a workspace in a root file\n#'\
+                  ' That file containes PDFs for Data model and the signals\' shapes. \n# Normalization (yields) for the signal are taken from that workspace.\n')
+
 
 if options.br:
   f = TFile('../data/Dalitz_BR50.root','READ')
@@ -102,8 +107,7 @@ def makeCards(subdir):
           u.createDir(subdir+'/output_cards/')
           card = open(subdir+'/output_cards/'+'_'.join(['hzg',lepton,year,'cat'+cat,'M'+mass,'Dalitz',brTag])+'.txt','w')
 
-          card.write('# This is a card produced by a cardMaker.py script using the information from a workspace in a root file \n# That file containes PDFs for Data model and the signals\' shapes. \n# Normalization (yields) for the signal are taken from that workspace.\n')
-
+          card.write(introMessage)
           card.write('imax *\n')
           card.write('jmax *\n')
           card.write('kmax *\n')
@@ -132,7 +136,7 @@ def makeCards(subdir):
 
           print i, nSubLine1
 
-          nSubLine1 +=' {'+str(i+2)+':^15}\n'
+          nSubLine1 +=' {'+str(i+2)+':^15} \n'
           nSubLine2 +=' {'+str(i+2)+':5} - \n'
 
           print 'nSubLine1=', nSubLine1
@@ -150,20 +154,24 @@ def makeCards(subdir):
                 cs = u.getCS("HtoJPsiGamma")
               else:
                 cs = fit(float(mass))
-              # print 'from the fit', fit(float(mass))
-              # print 'from csbr:',cs
+                if cat in ['m1','m2','m3','m4','m5','m6','m7']:
+                  cs = cs*mllBins[int(cat[1])][1]
+                  print '\t Category:', cat, '  signal:', s
+                  print 'from the fit', fit(float(mass))
+                  print 'from csbr:', cs
+
             print mass, s, cs
             #sigYields.append(sigWs.var('sig_'+s+'_yield_'+channel).getVal()*cs)
-            sigYields.append(sigWs.var('sig_'+s+'_yield_'+channel).getVal() /cs)
+            sigYields.append(round(sigWs.var('sig_'+s+'_yield_'+channel).getVal() /cs, 4))
 
-          print 'mh=',mass, sigYields
+          print 'mh =', mass, sigYields
           sigRate = sigYields
           card.write(nSubLine1.format(*(['rate']+sigRate+[bkgRate])))
 
           card.write('-------------------------------------------------------------\n')
           card.write(' \n')
 
-          card.write(nSubLine2.format(*(['lumi_8TeV',      'lnN']+nProc*[lumi])))
+          card.write(nSubLine2.format(*(['lumi_8TeV', 'lnN']+nProc*[lumi])))
           mmm = mass
 
           if float(mass)>140:

@@ -4,9 +4,9 @@ from ROOT import *
 from rooFitBuilder import *
 gROOT.SetBatch()
 #gSystem.SetIncludePath( "-I$ROOFITSYS/include/" );
-gROOT.ProcessLine(".L ../tdrstyle.C")
-setTDRStyle()
-gROOT.LoadMacro("../CMS_lumi.C")
+#gROOT.ProcessLine(".L ../tdrstyle.C")
+#setTDRStyle()
+#gROOT.LoadMacro("../CMS_lumi.C")
 gROOT.SetMacroPath(".:../plugins/")
 gROOT.LoadMacro("HistManager.cc+")
 sys.path.append("../zgamma")
@@ -16,10 +16,10 @@ import ConfigParser as cp
 cf = cp.ConfigParser()
 cf.read('config.cfg')
 
-#massList0  = ['125']
-#massList   = ['125.0']
-massList0  = ['120','125','130','135','140','145','150']
-massList   = ['%.1f'%(a) for a in u.drange(120,150,1.0)]
+massList0  = ['125']
+massList   = ['125.0']
+#massList0  = ['120','125','130','135','140','145','150']
+#massList   = ['%.1f'%(a) for a in u.drange(120,150,1.0)]
 
 myFunc = 'CBGM' #Crystall-Ball + Gauss (with same Mean)
 
@@ -352,9 +352,9 @@ def SignalFitMaker(lep, year, cat, subdir):
 if __name__=="__main__":
   print len(sys.argv), sys.argv
 
-  yearList        = [a.strip() for a in (cf.get("fits","yearList")).split(',')]
-  leptonList      = [a.strip() for a in (cf.get("fits","leptonList")).split(',')]
-  catList         = [a.strip() for a in (cf.get("fits","catList")).split(',')]
+  yearList   = [a.strip() for a in (cf.get("fits","yearList")).split(',')]
+  leptonList = [a.strip() for a in (cf.get("fits","leptonList")).split(',')]
+  catList    = [a.strip() for a in (cf.get("fits","catList")).split(',')]
 
   ver = cf.get("path","ver")
 

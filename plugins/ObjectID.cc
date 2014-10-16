@@ -350,7 +350,6 @@ bool ObjectID::PassDalitzEleID(const TCElectron& el, TVector3 *pv, TString n, fl
       if (fabs(el.Dxy(pv)) > 0.02 || fabs(el.Dz(pv)) > 0.1)
 	return false;
 
-
       // classification variables
       static Float_t rho2012_, r9_, HoverE_, EoverPt_;
       static Float_t eleBCS25_1_, eleBCS25_2_, eleGSFPt2over1_, eleGSFdR_;// eleGSFPt1_, eleGSFPt2_;

@@ -406,12 +406,10 @@ Bool_t egamma::Process(Long64_t entry)
       //hists->fill1DHist(gen_gamma_st1.Pt(), "gen_gamma_st1_pt","Pt of gamma",   50, 0,150,  1, "");
       //hists->fill1DHist(gen_gamma_st1.Eta(),"gen_gamma_st1_eta","Eta of gamma", 50, -3,3,  1, "");
     }
-
   }
 
   FillHistoCounts(2, eventWeight);
-  CountEvents(2, "Acceptance", fcuts);
-
+  CountEvents(2, "VTX and after GEN", fcuts);
 
   //if (checkTrigger){
   //triggerSelector->SelectTrigger(myTrigger, triggerStatus, hltPrescale, isFound, triggerPass, prescale);
@@ -431,7 +429,6 @@ Bool_t egamma::Process(Long64_t entry)
   FillHistoCounts(3, eventWeight);
   CountEvents(3,"Pass Trigger",fcuts);
 
-
   vector<TCElectron> electrons0, electrons, DAlectrons, fake_electrons0;
   vector<TCMuon> muons0, muons;
   vector<TCPhoton> photons0, photonsTight, photonsHZG, photonsMVA, fake_photons;
@@ -439,9 +436,169 @@ Bool_t egamma::Process(Long64_t entry)
   TCPhoton gamma0, gamma, ufoton, ufelectron;
   TCElectron DALE;
 
-  //if (nVtx>50){
-  //fout<<runNumber<<" "<<lumiSection<<"  "<<eventNumber<<"   "<<nVtx<<endl;
-  //}
+
+  for (Int_t i = 0; i < recoPhotons->GetSize(); ++i) {
+    TCPhoton* thisPhoton = (TCPhoton*) recoPhotons->At(i);
+    if (fabs(thisPhoton->SCEta()) > 1.5) continue;
+
+    if(thisPhoton->Pt() > 15){
+      if (isRealData || !makeGen || (sample=="dalitz" && makeGen && gen_gamma.DeltaR(*thisPhoton) < 0.1) )
+	photons0.push_back(*thisPhoton);
+    }
+  }
+
+  sort(photons0.begin(), photons0.end(), P4SortCondition);
+
+
+  for (Int_t i = 0; i < recoElectrons->GetSize(); ++i) {
+    TCElectron* thisElec = (TCElectron*) recoElectrons->At(i);
+    if (!(fabs(thisElec->Eta()) < 2.5)) continue;
+    if (thisElec->Pt() > 15.0) {
+      //thisElec->DeltaR(gamma) > 0.2 ) {
+
+      if(isRealData || !makeGen ||
+	 ( selection=="el" && makeGen && (gen_l1.DeltaR(*thisElec) < 0.1 || gen_l2.DeltaR(*thisElec)<0.1)  && thisElec->Pt()>10))
+	{
+	  if (ObjID->PassElectronIdAndIsoMVA(*thisElec)){
+	    thisElec->SetIdMap("mvaScore", 0);
+	    electrons.push_back(*thisElec);
+	  }
+	}
+      if (ObjID->PassElectronIdAndIso(*thisElec, pvPosition, "Loose") &&
+	  thisElec->Pt() > 15.0){
+	thisElec->SetIdMap("mvaScore", 0);
+	electrons0.push_back(*thisElec);
+      }
+
+      TCPhoton match;
+      Bool_t isMatched = 0;
+      for(UInt_t p=0; p<photons0.size(); p++)
+	{
+	  if (fabs(thisElec->SCEta()-photons0[p].SCEta()) < 0.0001){
+	    match = photons0[p];
+	    thisElec->SetSCRawEnergy(match.SCRawEnergy());
+	    isMatched = 1;
+	    //cout<<" Ele matched to photon! \t ev="<<nEvents[0]-1<<endl;
+	    //cout<<"PHo: SCEne = "<<match.SCEnergy()<<" pt = "<<match.Pt()<<"  SCEta = "<<match.SCEta()<<"  SCPhi = "<<match.SCPhi()<<endl;
+	    //cout<<"Ele: SCEne = "<<thisElec->SCEnergy()<<" pt = "<<thisElec->Pt()<<"   SCEta = "<<thisElec->SCEta()<<"  SCPhi = "<<thisElec->SCPhi()<<endl;
+	    break;
+	  }
+	}
+
+      if (thisElec->Pt() > 30 && fabs(thisElec->Eta()) < 1.4442 &&
+	  ObjID->PassDalitzEleID(*thisElec, pvPosition, "MVA", DAleMvaScore) ){
+	thisElec->SetIdMap("mvaScore", DAleMvaScore);
+
+	//cout<<"reco ele: "<<i<<endl;
+	if (isMatched && ObjID->HggPreselection(match))
+	  DAlectrons.push_back(*thisElec);
+      }
+
+      bool idpass = ObjID->PassDalitzEleID(*thisElec, pvPosition, "MVA", DAleMvaScore);
+      thisElec->SetIdMap("mvaScore", DAleMvaScore);
+
+      /*
+      for(Int_t ev=0; ev<evSize;ev++){
+	if (nEvents[0]-1 == hisEVTS[ev]){cout<<nEvents[0]-1<<" evNumber = "<<eventNumber<<endl;
+	  cout<<"gamma: pt = "<<gamma.Pt()<<"  SCEta = "<<gamma.SCEta()<<"  SCPhi = "<<gamma.SCPhi()<<endl;
+	  cout<<"\t R9 = "<<gamma.R9()<<"  hadoverEm = "<<gamma.HadOverEm()<<endl;
+	  cout<<"Ele  : pt = "<<thisElec->Pt()<<"   SCEta = "<<thisElec->SCEta()<<"  SCPhi = "<<thisElec->SCPhi()<<"  MVA = "<<thisElec->IdMap("mvaScore")<<endl;
+	  cout<<"\t R9 = "<<thisElec->R9()<<"  hadoverEm = "<<thisElec->HadOverEm()<<endl;
+	  cout<<"\t SCEnergy: "<<thisElec->SCEnergy()<<"   SCRaw energy: "<<thisElec->SCRawEnergy()<<endl;
+	  cout<<"\t matched to pho: "<<isMatched<<"  pass Hgg pre: "<<ObjID->HggPreselection(match)<<endl;
+	  vector<TCEGamma> sc0 = thisElec->BaseSC();
+	  sort(sc0.begin(),  sc0.end(),  SCESortCondition);
+	  const vector<TCElectron::Track> trk0 = thisElec->GetTracks();
+
+	  cout<<" n tracks="<<trk0.size() <<"  N SC="<<sc0.size()<<endl;
+
+	  for (int s = 0; s <sc0.size(); s++)
+	    cout<<"sc "<<s<<"  SCEnergy: "<<sc0[s].SCEnergy()<<"  eta: "<<sc0[s].SCEta()<<" phi: "<<sc0[s].SCPhi()
+		<<"  sieie: "<<sc0[s].SigmaIEtaIEta()<<"  e25/e55: "<<sc0[s].E2x5()/sc0[s].E5x5()<<endl;
+	  //cout<<"gsf trk1, pt ="<<trk0[0].Pt()<<"  eta= "<<trk0[0].Eta()<<endl;
+	  //cout<<"gsf trk2, pt ="<<trk0[1].Pt()<<"  eta= "<<trk0[1].Eta()<<endl;
+	  //cout<<"SCRawEn = "<<thisElec->SCEnergy()<<"  trk1+trk2 Pt ="<<(trk[0]+trk[1]).Pt()
+	  //  <<" EoverPt = "<<thisElec->SCEnergy()/(trk[0]+trk[1]).Pt()<<endl;
+	  //cout<<"dzy = "<<thisElec->Dxy(pvPosition)<<"  dz = "<<thisElec->Dz(pvPosition)<<endl;
+	  //thisElec->Dump();
+	  //ObjID->ElectronDump(*thisElec);
+
+	  break;}
+      }
+      */
+
+    }
+
+  }
+
+  sort(electrons0.begin(), electrons0.end(), P4SortCondition);
+  sort(electrons.begin(),  electrons.end(),  P4SortCondition);
+  sort(DAlectrons.begin(), DAlectrons.end(), P4SortCondition);
+
+  if (electrons0.size()>0)
+    HM->MakeElectronPlots(electrons0[0], "AnElectron");
+
+  if (DAlectrons.size()<1)
+    return kTRUE;
+
+  DALE = DAlectrons[0];
+  if (DALE.Pt()<30)
+    return kTRUE;
+
+  HM->SetDalectron(DALE);
+  FillHistoCounts(4, eventWeight);
+  CountEvents(4,"DALectron selection",fcuts);
+
+  vector<TCElectron::Track> trk = DALE.GetTracks();
+  sort(trk.begin(), trk.end(), P4SortCondition);
+
+  float xx[6] = {-1,-1,-1,-1,-1,-1};
+  TCTrack::ConversionInfo cI = trk[0].GetConversionInfo();
+  //if (cI.vtxProb>1e-6 && cI.lxyBS>2 && cI.nHitsMax>1)
+  //return kTRUE;
+  xx[0] = cI.vtxProb;
+  xx[1] = cI.lxyBS;
+  xx[2] = cI.nHitsMax;
+
+  cI = trk[1].GetConversionInfo();
+  //if (cI.vtxProb>1e-6 && cI.lxyBS>2 && cI.nHitsMax>1)
+  //return kTRUE;
+  xx[3] = cI.vtxProb;
+  xx[4] = cI.lxyBS;
+  xx[5] = cI.nHitsMax;
+
+
+  l1 = trk[0];
+  l2 = trk[1];
+
+  if (l1.Pt() > l2.Pt()){
+    lPt1 = l1; lPt2 = l2;}
+  else {lPt1 = l2; lPt2 = l1;}
+
+  HM->SetLeptons(lPt1, lPt2);
+
+  if (DALE.BaseSC()[0].Pt()<DALE.BaseSC()[1].Pt())
+    cout<<"Warinng SC are  not ordered in pt!"<<endl;
+
+  if (!l1.IdMap("GSF_PassConv")) return kTRUE;
+  if (!l2.IdMap("GSF_PassConv")) return kTRUE;
+
+  //if (l1.IdMap("GSF_MissHits")!=0) return kTRUE;
+  //if (l2.IdMap("GSF_MissHits")!=0) return kTRUE;
+
+  FillHistoCounts(5, eventWeight);
+  CountEvents(5,"Conv. Veto etc",fcuts);
+
+  if (lPt1.Pt() + lPt2.Pt() < 44) return kTRUE;
+  //if (lPt1.Pt() < cut_l1pt || lPt2.Pt() < cut_l2pt)   return kTRUE;
+
+  FillHistoCounts(6, eventWeight);
+  CountEvents(6,"pt1+pt2 > 44",fcuts);
+  HM->MakeElectronPlots(DALE, "DalitzEle-cut6");
+
+  Double_t scale = DALE.SCEnergy()/DALE.E();
+  DALE.SetPxPyPzE(scale*DALE.Px(), scale*DALE.Py(),scale*DALE.Pz(), DALE.SCEnergy());
+
 
   for (Int_t i = 0; i < recoPhotons->GetSize(); ++i) {
     //cout<<"new photon!!!!!!!"<<endl;
@@ -454,12 +611,9 @@ Bool_t egamma::Process(Long64_t entry)
 
     //if (!(fabs(thisPhoton->Eta()) < 2.5)) continue;
     if (fabs(thisPhoton->SCEta()) > 1.4442) continue;
+    if (DALE.DeltaR(*thisPhoton) < 0.2) continue;
 
     if(thisPhoton->Pt() > 15){
-      if (isRealData || !makeGen || (sample=="dalitz" && makeGen && gen_gamma.DeltaR(*thisPhoton) < 0.1) )
-	photons0.push_back(*thisPhoton);
-
-
       //for(Int_t ev=0; ev<evSize;ev++){
       //if (nEvents[0]-1 == hisEVTS[ev]){cout<<nEvents[0]-1<<" evNumber="<<eventNumber<<endl;
       //  cout<<"gamma: pt = "<<thisPhoton->Pt()<<"  SCEta = "<<thisPhoton->SCEta()<<"  SCPhi = "<<thisPhoton->SCPhi()<<endl;
@@ -503,7 +657,6 @@ Bool_t egamma::Process(Long64_t entry)
     }
   }
 
-  sort(photons0.begin(),     photons0.end(),     P4SortCondition);
   sort(photonsTight.begin(), photonsTight.end(), P4SortCondition);
   sort(photonsHZG.begin(),   photonsHZG.end(),   P4SortCondition);
   sort(photonsMVA.begin(),   photonsMVA.end(),   P4SortCondition);
@@ -520,6 +673,9 @@ Bool_t egamma::Process(Long64_t entry)
   if (photonsHZG.size()<1) return kTRUE;
   gamma = photonsHZG[0];
 
+  HM->MakePhotonPlots(gamma);
+  HM->SetGamma(gamma);
+
   //if (photonsMVA.size()<1) return kTRUE;
   //gamma = photonsMVA[0];
 
@@ -530,90 +686,27 @@ Bool_t egamma::Process(Long64_t entry)
   //gamma0 = photons0[0];
   //if (gamma0.Pt() < cut_gammapt) return kTRUE;
 
-  for (Int_t i = 0; i <  recoElectrons->GetSize(); ++i) {
-    TCElectron* thisElec = (TCElectron*) recoElectrons->At(i);
-    if (!(fabs(thisElec->Eta()) < 2.5)) continue;
-    if (thisElec->Pt() > 10.0 &&
-	thisElec->DeltaR(gamma) > 0.2 ) {
+  if (gamma.Pt() < cut_gammapt) return kTRUE;
+  if (fabs(gamma.SCEta()) > 1.4442) return kTRUE;
 
-      if(isRealData || !makeGen ||
-	 ( selection=="el" && makeGen && (gen_l1.DeltaR(*thisElec) < 0.1 || gen_l2.DeltaR(*thisElec)<0.1)  && thisElec->Pt()>10))
-	{
-	  if (ObjID->PassElectronIdAndIsoMVA(*thisElec)){
-	    thisElec->SetIdMap("mvaScore", 0);
-	    electrons.push_back(*thisElec);
-	  }
-	}
-      if (ObjID->PassElectronIdAndIso(*thisElec, pvPosition, "Loose") &&
-	  thisElec->Pt() > 15.0){
-	thisElec->SetIdMap("mvaScore", 0);
-	electrons0.push_back(*thisElec);
-      }
 
-      TCPhoton match;
-      Bool_t isMatched = 0;
-      for(UInt_t p=0; p<photons0.size(); p++)
-	{
-	  if (fabs(thisElec->SCEta()-photons0[p].SCEta()) < 0.0001){
-	    match = photons0[p];
-	    thisElec->SetSCRawEnergy(match.SCRawEnergy());
-	    isMatched = 1;
-	    //cout<<" Ele matched to photon! \t ev="<<nEvents[0]-1<<endl;
-	    //cout<<"PHo: SCEne = "<<match.SCEnergy()<<" pt = "<<match.Pt()<<"  SCEta = "<<match.SCEta()<<"  SCPhi = "<<match.SCPhi()<<endl;
-	    //cout<<"Ele: SCEne = "<<thisElec->SCEnergy()<<" pt = "<<thisElec->Pt()<<"   SCEta = "<<thisElec->SCEta()<<"  SCPhi = "<<thisElec->SCPhi()<<endl;
-	    break;
-	  }
-	}
-
-      if (thisElec->Pt() > 30 && fabs(thisElec->Eta()) < 1.4442 &&
-	  ObjID->PassDalitzEleID(*thisElec, pvPosition, "MVA", DAleMvaScore) ){
-	thisElec->SetIdMap("mvaScore", DAleMvaScore);
-
-	//cout<<"reco ele: "<<i<<endl;
-	if (isMatched && ObjID->HggPreselection(match))
-	  DAlectrons.push_back(*thisElec);
-
-      }
-
-      bool idpass = ObjID->PassDalitzEleID(*thisElec, pvPosition, "MVA", DAleMvaScore);
-      thisElec->SetIdMap("mvaScore", DAleMvaScore);
-
-      /*
-      for(Int_t ev=0; ev<evSize;ev++){
-	if (nEvents[0]-1 == hisEVTS[ev]){cout<<nEvents[0]-1<<" evNumber = "<<eventNumber<<endl;
-	  cout<<"gamma: pt = "<<gamma.Pt()<<"  SCEta = "<<gamma.SCEta()<<"  SCPhi = "<<gamma.SCPhi()<<endl;
-	  cout<<"\t R9 = "<<gamma.R9()<<"  hadoverEm = "<<gamma.HadOverEm()<<endl;
-	  cout<<"Ele  : pt = "<<thisElec->Pt()<<"   SCEta = "<<thisElec->SCEta()<<"  SCPhi = "<<thisElec->SCPhi()<<"  MVA = "<<thisElec->IdMap("mvaScore")<<endl;
-	  cout<<"\t R9 = "<<thisElec->R9()<<"  hadoverEm = "<<thisElec->HadOverEm()<<endl;
-	  cout<<"\t SCEnergy: "<<thisElec->SCEnergy()<<"   SCRaw energy: "<<thisElec->SCRawEnergy()<<endl;
-	  cout<<"\t matched to pho: "<<isMatched<<"  pass Hgg pre: "<<ObjID->HggPreselection(match)<<endl;
-	  vector<TCEGamma> sc0 = thisElec->BaseSC();
-	  sort(sc0.begin(),  sc0.end(),  SCESortCondition);
-	  const vector<TCElectron::Track> trk0 = thisElec->GetTracks();
-
-	  cout<<" n tracks="<<trk0.size() <<"  N SC="<<sc0.size()<<endl;
-
-	  for (int s = 0; s <sc0.size(); s++)
-	    cout<<"sc "<<s<<"  SCEnergy: "<<sc0[s].SCEnergy()<<"  eta: "<<sc0[s].SCEta()<<" phi: "<<sc0[s].SCPhi()
-		<<"  sieie: "<<sc0[s].SigmaIEtaIEta()<<"  e25/e55: "<<sc0[s].E2x5()/sc0[s].E5x5()<<endl;
-	  //cout<<"gsf trk1, pt ="<<trk0[0].Pt()<<"  eta= "<<trk0[0].Eta()<<endl;
-	  //cout<<"gsf trk2, pt ="<<trk0[1].Pt()<<"  eta= "<<trk0[1].Eta()<<endl;
-	  //cout<<"SCRawEn = "<<thisElec->SCEnergy()<<"  trk1+trk2 Pt ="<<(trk[0]+trk[1]).Pt()
-	  //  <<" EoverPt = "<<thisElec->SCEnergy()/(trk[0]+trk[1]).Pt()<<endl;
-	  //cout<<"dzy = "<<thisElec->Dxy(pvPosition)<<"  dz = "<<thisElec->Dz(pvPosition)<<endl;
-	  //thisElec->Dump();
-	  //ObjID->ElectronDump(*thisElec);
-
-	  break;}
-      }
-      */
-
-    }
-
+  if(!isRealData && makeGen){
+    hists->fill1DHist(genMll,  "gen_Mll_reco_gamma",  ";gen_Mll",100,0,mllMax, 1,"eff");
+    hists->fill1DHist(gendR,   "gen_dR_reco_gamma",   ";gen_dR", 50, 0,0.3,    1,"eff");
   }
-  sort(electrons0.begin(), electrons0.end(), P4SortCondition);
-  sort(electrons.begin(),  electrons.end(),  P4SortCondition);
-  sort(DAlectrons.begin(), DAlectrons.end(), P4SortCondition);
+
+  if(!isRealData && makeGen){
+    hists->fill1DHist(genMll,  "gen_Mll_reco_gamma_iso",  ";gen_Mll",100,0,mllMax, 1,"eff");
+    hists->fill1DHist(gendR,   "gen_dR_reco_gamma_iso",   ";gen_dR", 50, 0,0.3,    1,"eff");
+  }
+
+  HM->FillHistosFull(7, eventWeight);
+  FillHistoCounts(7, eventWeight);
+  CountEvents(7,"Photon pt>30; |eta|<1.4442",fcuts);
+
+  FillHistoCounts(8, eventWeight);
+  CountEvents(8,"Eight",fcuts);
+
 
 
   if (doZee){
@@ -674,24 +767,7 @@ Bool_t egamma::Process(Long64_t entry)
   hists->fill1DHist(photonsTight.size(), Form("size_phTight_cut%i",1),";Number of photons (Tight)", 5,0,5, 1, "N");
   hists->fill1DHist(photonsMVA.size(),   Form("size_phMVA_cut%i",  1),";Number of photons (MVA)",   5,0,5, 1, "N");
 
-  if(!isRealData && makeGen){
-    hists->fill1DHist(genMll,  "gen_Mll_reco_gamma",  ";gen_Mll",100,0,mllMax, 1,"eff");
-    hists->fill1DHist(gendR,   "gen_dR_reco_gamma",   ";gen_dR", 50, 0,0.3,    1,"eff");
-  }
 
-
-
-  if (gamma.Pt() < cut_gammapt) return kTRUE;
-  if (fabs(gamma.SCEta()) > 1.4442) return kTRUE;
-
-
-  if(!isRealData && makeGen){
-    hists->fill1DHist(genMll,  "gen_Mll_reco_gamma_iso",  ";gen_Mll",100,0,mllMax, 1,"eff");
-    hists->fill1DHist(gendR,   "gen_dR_reco_gamma_iso",   ";gen_dR", 50, 0,0.3,    1,"eff");
-  }
-
-  FillHistoCounts(4, eventWeight);
-  CountEvents(4,"Photon pt>30; |eta|<1.4442",fcuts);
 
   //fout<<eventNumber<<endl;
 
@@ -738,11 +814,6 @@ Bool_t egamma::Process(Long64_t entry)
   */
 
 
-  HM->MakePhotonPlots(gamma);
-  HM->SetGamma(gamma);
-
-  if (electrons0.size()>0)
-    HM->MakeElectronPlots(electrons0[0], "AnElectron");
 
   /*
     //if (DAlectrons.size()<1)
@@ -773,37 +844,6 @@ Bool_t egamma::Process(Long64_t entry)
 
   */
 
-
-  if (DAlectrons.size()<1)
-    return kTRUE;
-
-  DALE = DAlectrons[0];
-  if (DALE.Pt()<30)
-    return kTRUE;
-
-  HM->SetDalectron(DALE);
-  //HM->FillHistosFull(6, eventWeight);
-  FillHistoCounts(6, eventWeight);
-  CountEvents(6,"DALectron selection",fcuts);
-
-
-  vector<TCElectron::Track> trk = DALE.GetTracks();
-  sort(trk.begin(), trk.end(), P4SortCondition);
-
-  float xx[6] = {-1,-1,-1,-1,-1,-1};
-  TCTrack::ConversionInfo cI = trk[0].GetConversionInfo();
-  //if (cI.vtxProb>1e-6 && cI.lxyBS>2 && cI.nHitsMax>1)
-  //return kTRUE;
-  xx[0] = cI.vtxProb;
-  xx[1] = cI.lxyBS;
-  xx[2] = cI.nHitsMax;
-
-  cI = trk[1].GetConversionInfo();
-  //if (cI.vtxProb>1e-6 && cI.lxyBS>2 && cI.nHitsMax>1)
-  //return kTRUE;
-  xx[3] = cI.vtxProb;
-  xx[4] = cI.lxyBS;
-  xx[5] = cI.nHitsMax;
 
 
   /*
@@ -841,41 +881,11 @@ Bool_t egamma::Process(Long64_t entry)
 
   //fout<<runNumber<<" "<<eventNumber<<" "<<DALE.IdMap("mvaScore")<<endl;
 
-  l1 = trk[0];
-  l2 = trk[1];
-
-  if (l1.Pt() > l2.Pt()){
-    lPt1 = l1; lPt2 = l2;}
-  else {lPt1 = l2; lPt2 = l1;}
-
-  HM->SetLeptons(lPt1, lPt2);
-
-  if (DALE.BaseSC()[0].Pt()<DALE.BaseSC()[1].Pt())
-    cout<<"Warinng SC are  not ordered in pt!"<<endl;
-
-
-  HM->FillHistosFull(7, eventWeight);
-  FillHistoCounts(7, eventWeight);
-  CountEvents(7,"Conv. Veto etc",fcuts);
-
-
-  if (lPt1.Pt() + lPt2.Pt() < 48)   return kTRUE;
-  //if (lPt1.Pt() < cut_l1pt || lPt2.Pt() < cut_l2pt)   return kTRUE;
-
-  HM->FillHistosFull(8, eventWeight);
-  FillHistoCounts(8, eventWeight);
-  CountEvents(8,"pt1+pt2 > 48",fcuts);
-  HM->MakeElectronPlots(DALE, "DalitzEle-cut8");
-
-  Double_t scale = DALE.SCEnergy()/DALE.E();
-  DALE.SetPxPyPzE(scale*DALE.Px(), scale*DALE.Py(),scale*DALE.Pz(), DALE.SCEnergy());
-
   Float_t MdalG = (DALE+gamma).M();
   Float_t Mllg  = (l1+l2+gamma).M();
   Float_t Mll   = (l1+l2).M();
 
-
- if (makeApzTree){
+  if (makeApzTree){
     apz_w = eventWeight;
     apz_pt1 = lPt1.Pt();
     apz_pt2 = lPt2.Pt();
@@ -913,8 +923,13 @@ Bool_t egamma::Process(Long64_t entry)
 
 
 
-  if (MdalG<110 || MdalG>170)
+  if (MdalG<110 || MdalG>170) return kTRUE;
   //if (Mllg<70)
+  HM->FillHistosFull(9, eventWeight);
+  FillHistoCounts(9, eventWeight);
+  CountEvents(9,"110 < m(e,g) < 170",fcuts);
+  HM->MakeElectronPlots(DALE, "DalitzEle-cut9");
+
 
   if (electrons.size() >=2) {
     //this is second category, where two good electrons are reconstructed;
@@ -923,13 +938,8 @@ Bool_t egamma::Process(Long64_t entry)
     hists->fill1DHist(DALE.DeltaR(electrons[0]), Form("00_dR_DALE-El1_cut%i", 9),";dR(Dale, el1)", 100, 0,4, 1, "");
     hists->fill1DHist(DALE.DeltaR(electrons[1]), Form("00_dR_DALE-El2_cut%i", 9),";dR(Dale, el2)", 100, 0,4, 1, "");
     hists->fill1DHist(electrons[0].DeltaR(electrons[1]), Form("00_dR_Ele1-El2_cut%i", 9),";dR(el1, el2)", 100, 0,4, 1, "");
-    return kTRUE;
+    //return kTRUE;
   }
-
-  HM->FillHistosFull(9, eventWeight);
-  FillHistoCounts(9, eventWeight);
-  CountEvents(9,"110 < m(e,g) < 170",fcuts);
-  HM->MakeElectronPlots(DALE, "DalitzEle-cut9");
 
 
   if (Mll > 20) return kTRUE;
@@ -1009,8 +1019,8 @@ Bool_t egamma::Process(Long64_t entry)
     if(triggerPass) nEventsTrig[7][i]++;
 
     if (!isFound)
-      cout<<"TRG **** Warning ***\n The trigger name "<<myTriggers[i]<<" is not in the list of trigger names"<<endl;
-  }
+    cout<<"TRG **** Warning ***\n The trigger name "<<myTriggers[i]<<" is not in the list of trigger names"<<endl;
+    }
   */
 
 

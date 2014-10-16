@@ -10,15 +10,17 @@ parser.add_option("--comb", dest="comb",action="store_true", default=False,
                   help="Combine with electrons")
 parser.add_option("--prof", dest="prof",action="store_true", default=False,
                   help="Use -M ProfileLikelihood instead of Asymptotic")
+parser.add_option("--plot", dest="plot",action="store_true", default=False,
+                  help="Run the plotter script")
 
-(options, args) = parser.parse_args()
+(opt, args) = parser.parse_args()
 
 import ConfigParser as cp
 cf = cp.ConfigParser()
 cf.read('config.cfg')
 
 method = "Asymptotic"
-if options.prof:
+if opt.prof:
   method = "ProfileLikelihood"
 
 if __name__ == "__main__":
@@ -30,7 +32,7 @@ if __name__ == "__main__":
   s = cf.get("path","ver")
   myDir = s
 
-  if options.noSyst:
+  if opt.noSyst:
     myDir = s.replace("/","")+"-noSyst"
     print s, myDir
     os.system("cp -r "+s+"  "+myDir)
@@ -46,6 +48,8 @@ if __name__ == "__main__":
       card_mu  = myDir+"/output_cards/hzg_mu_2012_cat"+cat+"_M"+m+"_Dalitz_.txt"
       card_el  = myDir+"/Dalitz_electron2/datacard_hzg_eeg_cat12_8TeV_"+m[:3]+".txt"
 
+      if cat in ['m1','m2','m3','m4','m5','m6']:
+        cardNames = cardNames+' '+card_mu
       if cat in ['EB','EE','mll50']:
         cardNames = cardNames+' '+card_mu
       if cat in ['el']:
@@ -53,7 +57,7 @@ if __name__ == "__main__":
       # card_ele = "./cards_ele2/realistic-counting-experiment_"+m[0:3]+".txt"
       card = ""
 
-      if options.comb:
+      if opt.comb:
         print "not yet"
       elif cat in ['el']:
         card = card_el
@@ -62,7 +66,7 @@ if __name__ == "__main__":
 
       print 'Using CARD = \n',card
 
-      if options.noSyst:
+      if opt.noSyst:
         os.system('combine -M '+method+' '+card + ' -m '+m+' -S 0')
       else:
         print 'not doing it now'
@@ -92,7 +96,8 @@ if __name__ == "__main__":
 
     print myDir, s[:3]
 
-  for cat in catList:
-    os.system("./limitPlotter.py "+myDir+" --cat="+cat)
-  os.system("./limitPlotter.py "+myDir+" --cat=Combo")
+  if opt.plot:
+    for cat in catList:
+      os.system("./limitPlotter.py "+myDir+" --cat="+cat)
+    os.system("./limitPlotter.py "+myDir+" --cat=Combo")
     # os.system('combine -M ProfileLikelihood '+sys.argv[1]+ ' -m 125 -t 100')

@@ -244,8 +244,8 @@ void HistMaker::FillHistosFull(Int_t num, Double_t weight, string dir)
 
   TLorentzVector lPt1Gamma = _lPt1+_gamma;
   TLorentzVector lPt2Gamma = _lPt2+_gamma;
-  hists->fill1DHist(lPt1Gamma.M(), Form("lPt1Gamma_%s_cut%i",d, num),";M(l1#gamma)",  100, 0,400,  weight, dir);
-  hists->fill1DHist(lPt2Gamma.M(), Form("lPt2Gamma_%s_cut%i",d, num),";M(l2#gamma)",  100, 0,400,  weight, dir);
+  hists->fill1DHist(lPt1Gamma.M(), Form("lPt1Gamma_%s_cut%i",d, num),";M(l1#gamma)",  100,60,160,  weight, dir);
+  hists->fill1DHist(lPt2Gamma.M(), Form("lPt2Gamma_%s_cut%i",d, num),";M(l2#gamma)",  100, 0,150,  weight, dir);
 
   hists->fill2DHist(diLep.M2(), lPt2Gamma.M2(), Form("h2D_dalitzPlot_ll_vs_gl_%s_cut%i",  d, num),
 		    ";m^{2}_{ll} (GeV^{2});m^{2}_{l_{2}#gamma} (GeV^{2})", 100,0,20000, 100, 0,10000,  weight, dir);
@@ -397,32 +397,33 @@ void HistMaker::FillHistosFull(Int_t num, Double_t weight, string dir)
     hists->fill1DHist(fabs(_jet1.Eta() -_jet2.Eta()), Form("052_deltaEta_j1_j2_%s_cut%i", d, num),
 		      ";|#Delta #eta(j_{1}, j_{2})|", 50,0,7,  weight,dir);
     hists->fill1DHist(_jet1.DeltaR(_jet2), Form("052_deltaR_j1_j2_%s_cut%i", d, num),
-		      ";#Delta R(j_{1}, j_{2})",    50,0,7,  weight,dir);
+		      ";#Delta R(j_{1}, j_{2})",   50,0,7,  weight,dir);
     hists->fill1DHist((_jet1+_jet2).M(), Form("052_mass_j1j2_%s_cut%i", d, num),
-		      ";m(j_{1}, j_{2}) (GeV)", 50,0,700,  weight,dir);
+		      ";m(j_{1}, j_{2}) (GeV)", 100,0,800,  weight,dir);
     if (_isGammaSet){
       float zep = Zeppenfeld((_lPt1+_lPt2+_gamma),_jet1,_jet2);
       hists->fill1DHist(zep, Form("052_zep_%s_cut%i", d, num),
 			";Zeppenfeld: #eta_{ll#gamma} - #frac{1}{2}(#eta_{j1} + #eta_{j2})", 50,-6,6,  weight,dir);
-      hists->fill1DHist((_jet1+_jet2).DeltaPhi(_lPt1+_lPt2+_gamma), Form("052_dPhi_diJet_higgs_%s_cut%i", d, num),
+      hists->fill1DHist(fabs((_jet1+_jet2).DeltaPhi(_lPt1+_lPt2+_gamma)), Form("052_dPhi_diJet_higgs_%s_cut%i", d, num),
 			";#Delta#phi(di-Jet, ll#gamma)", 50,0,3,  weight,dir);
 
     }
   }
   if (_isMetSet){
-    hists->fill1DHist(_met.Mod(), Form("06_met_Et_%s_cut%i",  d, num),";E_{T}^{miss} (GeV)", 50,0,200,  weight,dir);
-    hists->fill1DHist(_met.Phi(), Form("06_met_phi_%s_cut%i", d, num),";#phi(E_{T}^{miss})", 50,-4,4,  weight,dir);
+    hists->fill1DHist(_met.Mod(), Form("06_met_Et_%s_cut%i",  d, num),";E_{T}^{miss} (GeV)", 50,0,100,  weight,dir);
+    hists->fill1DHist(_met.Phi()-TMath::Pi(), Form("06_met_phi_%s_cut%i", d, num),
+		      ";#phi(E_{T}^{miss})", 50,-TMath::Pi(),TMath::Pi(),  weight,dir);
 
     if (_isJet1Set)
-      hists->fill1DHist(fabs(_met.Phi() -_jet1.Phi()), Form("06_met_dPhiJet1_%s_cut%i", d, num),
-			";#Delta#phi(E_{T}^{miss}, j_{1})", 50,0,4,  weight,dir);
+      hists->fill1DHist(fabs(_met.DeltaPhi(_jet1.Vect().XYvector())), Form("06_met_dPhiJet1_%s_cut%i", d, num),
+			";#Delta#phi(E_{T}^{miss}, j_{1})", 50,0,TMath::Pi(),  weight,dir);
     if (_isJet2Set)
-      hists->fill1DHist(fabs(_met.Phi() -_jet1.Phi()), Form("06_met_dPhiJet2_%s_cut%i", d, num),
-			";#Delta#phi(E_{T}^{miss}, j_{2})", 50,0,4,  weight,dir);
+      hists->fill1DHist(fabs(_met.DeltaPhi(_jet2.Vect().XYvector())), Form("06_met_dPhiJet2_%s_cut%i", d, num),
+			";#Delta#phi(E_{T}^{miss}, j_{2})", 50,0,TMath::Pi(),  weight,dir);
 
   }
 
-  hists->fill1DHist(_rhoFactor, Form("rhoFactor_%s_cut%i",     d, num), ";#rho-factor",     100, 0,40, weight, dir);
+  hists->fill1DHist(_rhoFactor, Form("rhoFactor_%s_cut%i",     d, num), ";#rho-factor",     100, 0,35, weight, dir);
   hists->fill1DHist(_nVtx,      Form("vtx_nPV_weight_%s_cut%i",d, num), ";nPV, re-weighted", 40, 0,40, weight, dir);
   hists->fill1DHist(_nVtx,      Form("vtx_nPV_raw_%s_cut%i",   d, num), ";nPV, Raw",         40, 0,40,      1, dir);
   //hists->fill1DHist(nVtxTotal, Form("vtx_nPV_tot_%s_cut%i",   d, num), "vtx_nPV_tot",    40, 0,40, weight, dir);

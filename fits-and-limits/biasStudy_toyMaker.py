@@ -2,43 +2,37 @@
 from optparse import OptionParser
 import sys,os,re
 from ROOT import *
+from toyStructs import makeToyStucts
 import ConfigParser as cp
 cf = cp.ConfigParser()
 cf.read('config.cfg')
 s = cf.get("path","ver")
-verbose = 0
-
-from toyStructs import makeToyStucts
-gSystem.SetIncludePath( "-I$ROOFITSYS/include/" );
-#gROOT.ProcessLine('.x RooStepBernstein.cxx+')
-#gROOT.ProcessLine('.x RooGaussStepBernstein.cxx+')
-#sys.path.append("../zgamma")
-#import utils as u
-
-
 gROOT.SetBatch()
-
+gSystem.SetIncludePath( "-I$ROOFITSYS/include/" );
 parser = OptionParser(usage="usage: %prog [options -v version]")
 parser.add_option("-v", "--ver",dest="ver", default=None, help="version - a subdir name where the input files are stored.")
-parser.add_option("-b", dest="bullshit", action="store_true",default=False, help="Ys it is true")
+parser.add_option("-b", dest="bullshit", action="store_true",default=False, help="Yes it is true")
 parser.add_option("-j", dest="job",    default=0,     help="Job number")
 parser.add_option("-t", dest="trials", default=5,     help="Number of trials")
-parser.add_option("-m", dest="mass",   default='125', help="Number of trials")
+parser.add_option("-m", dest="mass",   default='125', help="Mass of thie higgs")
 parser.add_option("-c", "--cat", dest="cat",   default='EB', help="Category")
 
-(options, args) = parser.parse_args()
+(opt, args) = parser.parse_args()
 
 colors = {}
-for f,col in cf.items("colors"): colors[f] = int(col)
+for f,col in cf.items("colors"): colors[f] = eval(col)
+
+verbose = 0
+toyFuncs =  ['Exp','Laurent','Pow','Bern3']
 
 fileBase = './'
 plotBase = './'
-if options.ver==None:
+if opt.ver==None:
   fileBase = s
   subdir = s
 else:
-  fileBase = options.ver
-  subdir = options.ver
+  fileBase = opt.ver
+  subdir = opt.ver
 plotBase = cf.get("path","htmlbase")+'/html/zgamma/dalitz/fits-'+subdir+'/BiasToys'
 
 
@@ -52,23 +46,19 @@ def doBiasStudy(year = '2012', lepton = 'mu', cat = '0', genFunc = 'Bern3', mass
     os.makedirs(plotBase)
     print 'bias.py: making directory',plotBase
 
-  if verbose:
-    print 'DBG bias ', fileBase
-    print '  RAW INPUT HERE:'
-    raw_input()
-
   rooWsFile = TFile(fileBase.replace('/','')+'/testRooFitOut_Dalitz.root','r')
   myWs = rooWsFile.Get('ws')
   sigRangeName = '_'.join(['range',lepton,year,'cat'+cat,'M'+mass])
 
-  myWs.Print()
   # get the x-axis
   mzg = myWs.var('CMS_hzg_mass')
   if verbose:
+    print 'DBG bias ', fileBase
+    myWs.Print()
     mzg.Print()
     print sigRangeName, mzg.getMin(sigRangeName), mzg.getMax(sigRangeName)
-    #print " RAW  INPUT NEEDED HERE"
-    #raw_input()
+    raw_input('\t Hit Enter to continue\n')
+
 
   # get the data
   dataName = '_'.join(['data',lepton,year,'cat'+cat])
@@ -78,21 +68,19 @@ def doBiasStudy(year = '2012', lepton = 'mu', cat = '0', genFunc = 'Bern3', mass
   if verbose: data.Print()
   if verbose: print 'total data:', realDataYield, 'total data2:', data.numEntries(),'total data in sig window:', bkgInSigWin
 
-
   # get the gen pdf
   genFitName = '_'.join([genFunc,year,lepton,'cat'+cat])
-  genFit = myWs.pdf(genFitName)
+  genFit = myWs.pdf(genFitName).Clone()  # apparently, need to clone it, according to mr Brover
   if verbose:
     print genFitName
     genFit.Print()
-
   # get the signal
   sigName = '_'.join(['pdf','sig_gg',lepton,year,'cat'+cat,'M'+mass])
   sig = myWs.pdf(sigName)
   if verbose:
     print sigName
     sig.Print()
-    raw_input("DO raw input here ")
+    raw_input('\t Hit Enter to continue\n')
 
   # get the test functions, turn them into extended pdfs with signal models.  Also include the gen function for closure tests
   testPdfs     = []
@@ -116,7 +104,7 @@ def doBiasStudy(year = '2012', lepton = 'mu', cat = '0', genFunc = 'Bern3', mass
       print fitName
       testPdfs[-1].Print()
 
-    testBkgNorms.append(RooRealVar(   'norm'+fitName,'norm'   +fitName,bkgInSigWin,0,5*bkgInSigWin))
+    testBkgNorms.append(RooRealVar(   'norm'+fitName,'norm'   +fitName,bkgInSigWin,0,3*bkgInSigWin))
     testPdfs_ext.append(RooExtendPdf(  'ext'+fitName,'ext'    +fitName,testPdfs[-1],testBkgNorms[-1], sigRangeName))
     testSigNorms.append(RooRealVar('normSig'+fitName,'normSig'+fitName,0,-80,80))
     testSig_ext.append(RooExtendPdf('extSig'+fitName,'ext'    +fitName,sig,testSigNorms[-1]))
@@ -159,11 +147,6 @@ def doBiasStudy(year = '2012', lepton = 'mu', cat = '0', genFunc = 'Bern3', mass
   for n,func in enumerate(testFuncs):
     print n,func
 
-    if verbose:
-      print "RAW INPUT"
-      raw_input()
-
-
     if func=='gen':
       genStruct = GEN()
       tree.Branch('gen',genStruct, 'totBkg/D:yieldBkg/D:yieldBkgErr:yieldSig:yieldSigErr:edm:minNll:statusAll/I:statusMIGRAD:statusHESSE:covQual:numInvalidNLL')
@@ -188,33 +171,13 @@ def doBiasStudy(year = '2012', lepton = 'mu', cat = '0', genFunc = 'Bern3', mass
       Bern6Struct = BERN6()
       tree.Branch('Bern6',Bern6Struct,'yieldBkg/D:yieldBkgErr:yieldSig:yieldSigErr:paramP1:paramP1Err:paramP2:paramP2Err:paramP3:paramP3Err:paramP4:paramP4Err:paramP5:paramP5Err:paramP6:paramP6Err:edm:minNll:statusAll/I:statusMIGRAD:statusHESSE:covQual:numInvalidNLL')
     else:
-      print "No struct exists for ", func
-
-    '''
-    elif func=='GaussBern3':
-      from ROOT import GAUSSBERN3
-      GaussBern3Struct = GAUSSBERN3()
-      tree.Branch('GaussBern3',GaussBern3Struct,'yieldBkg/D:yieldBkgErr:yieldSig:yieldSigErr:paramSigma:paramSigmaErr:paramStep:paramStepErr:paramP1:paramP1Err:paramP2:paramP2Err:paramP3:paramP3Err:edm:minNll:statusAll/I:statusMIGRAD:statusHESSE:covQual:numInvalidNLL')
-    elif func=='GaussBern4':
-      from ROOT import GAUSSBERN4
-      GaussBern4Struct = GAUSSBERN4()
-      tree.Branch('GaussBern4',GaussBern4Struct,'yieldBkg/D:yieldBkgErr:yieldSig:yieldSigErr:paramSigma:paramSigmaErr:paramStep:paramStepErr:paramP1:paramP1Err:paramP2:paramP2Err:paramP3:paramP3Err:paramP4:paramP4Err:edm:minNll:statusAll/I:statusMIGRAD:statusHESSE:covQual:numInvalidNLL')
-    elif func=='GaussBern5':
-      from ROOT import GAUSSBERN5
-      GaussBern5Struct = GAUSSBERN5()
-      tree.Branch('GaussBern5',GaussBern5Struct,'yieldBkg/D:yieldBkgErr:yieldSig:yieldSigErr:paramSigma:paramSigmaErr:paramStep:paramStepErr:paramP1:paramP1Err:paramP2:paramP2Err:paramP3:paramP3Err:paramP4:paramP4Err:paramP5:paramP5Err:edm:minNll:statusAll/I:statusMIGRAD:statusHESSE:covQual:numInvalidNLL')
-    elif func=='GaussBern6':
-      # for now just use the same as Bern5, fix it later
-      from ROOT import GAUSSBERN6
-      GaussBern6Struct = GAUSSBERN6()
-      tree.Branch('GaussBern6',GaussBern6Struct,'yieldBkg/D:yieldBkgErr:yieldSig:yieldSigErr:paramSigma:paramSigmaErr:paramStep:paramStepErr:paramP1:paramP1Err:paramP2:paramP2Err:paramP3:paramP3Err:paramP4:paramP4Err:paramP5:paramP5Err:paramP6:paramP6Err:edm:minNll:statusAll/I:statusMIGRAD:statusHESSE:covQual:numInvalidNLL')
-    '''
+      raise Exception('No struct exists for {0}'.format(func))
 
   structDict = dict(zip(testFuncs,[Bern2Struct,Bern3Struct,Bern4Struct,Bern5Struct, genStruct]))
   #structDict = dict(zip(testFuncs,[GaussBern4Struct,GaussBern5Struct,GaussBern6Struct]))
-  print structDict
-  #print "  RAW INPUT HERE "
-  #raw_input()
+  if verbose:
+    print structDict
+    raw_input('\t Hit Enter to continue\n')
 
   r = TRandom3(1024+31*job)
   RooRandom.randomGenerator().SetSeed(1024+31*job)
@@ -224,15 +187,16 @@ def doBiasStudy(year = '2012', lepton = 'mu', cat = '0', genFunc = 'Bern3', mass
   ############################
   genBkgYield = data.numEntries()
   for i in range(0,trials):
-    print 'doing trial:',i
+    print '\n \t Doing trial:',i
 
-    #genBkgYield = r.Poisson(data.numEntries())
+    genBkgYield = r.Poisson(data.numEntries())
     toyData = genFit.generate(RooArgSet(mzg),genBkgYield)
     #toyData = genFit.generate(RooArgSet(mzg), RooFit.Extended(kTRUE))
     bkg_est = toyData.sumEntries('1',sigRangeName)
-    if verbose: print 'bkg_est',bkg_est
-    #print "RAW INPUT"
-    #raw_input()
+    if verbose:
+      print 'bkg_est',bkg_est
+      raw_input('\t Hit Enter to continue\n')
+
     truthStruct.totBkg   = genBkgYield
     truthStruct.yieldBkg = bkg_est
     truthStruct.yieldBkgErr = sqrt(bkg_est)
@@ -250,7 +214,7 @@ def doBiasStudy(year = '2012', lepton = 'mu', cat = '0', genFunc = 'Bern3', mass
       m.hesse()
       resHesse = m.save()
 
-      res = testModelsDict[func].fitTo(toyData,RooFit.Save(),RooFit.PrintLevel(-1),RooFit.Silence())
+      res = testModelsDict[func].fitTo(toyData,RooFit.Save(),RooFit.PrintLevel(-1),RooFit.Strategy(1))
 
       statusAll    = res.status()
       statusMIGRAD = resMigrad.status()
@@ -298,10 +262,10 @@ def doBiasStudy(year = '2012', lepton = 'mu', cat = '0', genFunc = 'Bern3', mass
         structDict[func].paramP6    = testModelsDict[func].getParameters(toyData)['p6'+suffix].getVal()
         structDict[func].paramP6Err = testModelsDict[func].getParameters(toyData)['p6'+suffix].getError()
       if func in ['GaussBern3','GaussBern4','GaussBern5','GaussBern6']:
-          structDict[func].paramSigma    = testModelsDict[func].getParameters(toyData)['sigma'+suffix].getVal()
-          structDict[func].paramSigmaErr = testModelsDict[func].getParameters(toyData)['sigma'+suffix].getError()
-          structDict[func].paramStep     = testModelsDict[func].getParameters(toyData)['step'+suffix].getVal()
-          structDict[func].paramStepErr  = testModelsDict[func].getParameters(toyData)['step'+suffix].getError()
+        structDict[func].paramSigma    = testModelsDict[func].getParameters(toyData)['sigma'+suffix].getVal()
+        structDict[func].paramSigmaErr = testModelsDict[func].getParameters(toyData)['sigma'+suffix].getError()
+        structDict[func].paramStep     = testModelsDict[func].getParameters(toyData)['step'+suffix].getVal()
+        structDict[func].paramStepErr  = testModelsDict[func].getParameters(toyData)['step'+suffix].getError()
 
 
       structDict[func].statusAll     = statusAll
@@ -350,11 +314,11 @@ def doBiasStudy(year = '2012', lepton = 'mu', cat = '0', genFunc = 'Bern3', mass
 if __name__=="__main__":
   print len(sys.argv), sys.argv
 
-  job = int(options.job)
-  trials = int(options.trials)
-  mass = str(options.mass)
-  cat = options.cat
+  job = int(opt.job)
+  trials = int(opt.trials)
+  mass = str(opt.mass)
+  cat = opt.cat
 
-  for f in ['Exp','Laurent','Pow','Bern3']:
-    print 'Starting'
+  for f in toyFuncs:
+    print '\n\n \t =========== Starting the toys for ', f,'===========\n\n'
     doBiasStudy(trials = trials, cat=cat,genFunc=f, job=job, mass=mass)

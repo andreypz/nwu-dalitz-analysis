@@ -23,16 +23,13 @@ executable  = 'batchJob.sh'
 version    = args[0].strip('/')
 outputPath = version
 #outputPath = version+'-bias'
+masses = ['140','145','150']
+categories = ['EB','EE','mll50']
 
 inputSamples = []
-inputSamples.append(cfg('None', 'None', int(options.jobs), str(options.trials) +' 120 EB '+whereWeRun))
-inputSamples.append(cfg('None', 'None', int(options.jobs), str(options.trials) +' 125 EB '+whereWeRun))
-inputSamples.append(cfg('None', 'None', int(options.jobs), str(options.trials) +' 130 EB '+whereWeRun))
-inputSamples.append(cfg('None', 'None', int(options.jobs), str(options.trials) +' 135 EB '+whereWeRun))
-inputSamples.append(cfg('None', 'None', int(options.jobs), str(options.trials) +' 140 EB '+whereWeRun))
-inputSamples.append(cfg('None', 'None', int(options.jobs), str(options.trials) +' 145 EB '+whereWeRun))
-inputSamples.append(cfg('None', 'None', int(options.jobs), str(options.trials) +' 150 EB '+whereWeRun))
-
+for m in masses:
+  for c in categories:
+    inputSamples.append(cfg('None', 'None', int(options.jobs), ' '.join([str(options.trials),m,c,whereWeRun])))
 
 batcher = b.BatchMaster(inputSamples, outputPath, shortQueue = False, stageDir = '../StageBatch_'+version,
                         executable = executable, prefix = '', bias=True)

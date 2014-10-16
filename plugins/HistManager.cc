@@ -3,16 +3,16 @@
 HistManager::HistManager(TFile* myFile){
   theFile = myFile;
   //theFile -> Print();
-  
+
 }
 
 
-HistManager::~HistManager(){  
+HistManager::~HistManager(){
 }
-    
-/*    
+
+/*
   void HistManager::writeHists(TFile* myFile){
-  
+
     myFile->cd();
     std::map<std::string,TH1F*>::const_iterator mapit1;
     std::map<std::string,TH2F*>::const_iterator mapit2;
@@ -28,19 +28,19 @@ HistManager::~HistManager(){
     }
     myFile->cd();
     myFile->Close();
-    
+
     }
-*/  
+*/
 void HistManager:: makeDirectory(std::string folder){
   //If the requested folder doesn't exist, we should create it first:
   if (!theFile->GetDirectory(folder.c_str()))
     theFile->mkdir(folder.c_str(), folder.c_str());
-  
+
 }
 
 void HistManager::fill1DHist(float x, std::string name, std::string title,
-                             int bins, float xmin, float xmax, float weight, std::string folder){
-  
+			     int bins, float xmin, float xmax, float weight, std::string folder){
+
   std::map<std::string,TH1F*>::iterator it;
   it = the1DMap.find(name);
   //cout<<"fill 1d  "<<name<<endl;
@@ -56,34 +56,30 @@ void HistManager::fill1DHist(float x, std::string name, std::string title,
     the1DMap[name] = new TH1F(name.c_str(),title.c_str(),bins,xmin,xmax);
     theFile->cd();
   }
-  
+
   the1DMap[name]->Fill(x,weight);
-  
+
 }
 
 void HistManager::fill1DHistUnevenBins(float x, std::string name, std::string title,
-                                       int bins, float *binEdges, float weight, std::string folder){
+				       int bins, float *binEdges, float weight, std::string folder){
   std::map<std::string,TH1F*>::iterator it;
   it = the1DMap.find(name);
   if (it == the1DMap.end()){
-    
+    HistManager::makeDirectory(folder);
     theFile->cd(folder.c_str());
     the1DMap[name] = new TH1F(name.c_str(),title.c_str(),bins,binEdges);
     theFile->cd();
   }
-  
-  
+
   the1DMap[name]->Fill(x,weight);
-  
 }
 
 
-
-
 void HistManager::fill2DHist(float x, float y, std::string name, std::string title,
-                             int binsx, float xmin, float xmax,
-                             int binsy, float ymin, float ymax, float weight, std::string folder){
-  
+			     int binsx, float xmin, float xmax,
+			     int binsy, float ymin, float ymax, float weight, std::string folder){
+
   std::map<std::string,TH2F*>::iterator it;
   it = the2DMap.find(name);
   if (it == the2DMap.end()){
@@ -92,32 +88,31 @@ void HistManager::fill2DHist(float x, float y, std::string name, std::string tit
     the2DMap[name] = new TH2F(name.c_str(),title.c_str(),binsx,xmin,xmax,binsy,ymin,ymax);
     theFile->cd();
   }
-  
+
   the2DMap[name]->Fill(x,y,weight);
-  
 }
 
 void HistManager::fill2DHistUnevenBins(float x, float y, std::string name, std::string title,
-                                       int binsx, float *binEdgesx,
-                                       int binsy, float *binEdgesy, float weight,  std::string folder){
-  
+				       int binsx, float *binEdgesx,
+				       int binsy, float *binEdgesy, float weight,  std::string folder){
+
   std::map<std::string,TH2F*>::iterator it;
   it = the2DMap.find(name);
   if (it == the2DMap.end()){
+    HistManager::makeDirectory(folder);
     theFile->cd(folder.c_str());
     the2DMap[name] = new TH2F(name.c_str(),title.c_str(),binsx,binEdgesx,binsy,binEdgesy);
     theFile->cd();
   }
-  
-  
+
   the2DMap[name]->Fill(x,y,weight);
 }
 
 
 void HistManager::fillProfile(float x, float y, std::string name, std::string title,
-                              int binsx, float xmin, float xmax,
-                              float ymin, float ymax, float weight,  std::string folder){
-  
+			      int binsx, float xmin, float xmax,
+			      float ymin, float ymax, float weight,  std::string folder){
+
   std::map<std::string,TProfile*>::iterator it;
   it = theProfMap.find(name);
   if (it == theProfMap.end()){
@@ -126,9 +121,9 @@ void HistManager::fillProfile(float x, float y, std::string name, std::string ti
     theProfMap[name] = new TProfile(name.c_str(),title.c_str(),binsx,xmin,xmax,ymin,ymax);
     theFile->cd();
   }
-  
+
   theProfMap[name]->Fill(x,y,weight);
-  
+
 }
 
 

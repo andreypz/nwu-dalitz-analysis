@@ -553,9 +553,7 @@ class FitBuilder:
     self.FitNdofDict['Laurent'] = order
     return Laurent
 
-  def BuildBern2(self,p0 = 1 ,p1 = 5, p1Low = -1e-6, p1High = 30, p2 = 5, p2Low = -1e-6, p2High = 30):
-    # def BuildBern2(self,p0 = 1 ,p1 = 5, p1Low =1e-3, p1High = 30, p2 = 5, p2Low =1e-3, p2High = 30):
-
+  def BuildBern2(self,p0 = 1 ,p1 = 0.1, p1Low = 1e-3, p1High = 1, p2 = 0.1, p2Low = 1e-3, p2High = 1):
     p0Var = RooRealVar('p0Bern2_'+self.suffix, 'p0Bern2_'+self.suffix,p0)
     p1Var = RooRealVar('p1Bern2_'+self.suffix, 'p1Bern2_'+self.suffix,p1,p1Low,p1High)
     p2Var = RooRealVar('p2Bern2_'+self.suffix, 'p2Bern2_'+self.suffix,p2,p2Low,p2High)
@@ -565,9 +563,7 @@ class FitBuilder:
     SetOwnership(p2Var,0)
     return Bern2
 
-  #def BuildBern3(self,p0 = 1 ,p1 = 5, p1Low = -1e-6, p1High = 30, p2 = 5, p2Low = -1e-6, p2High = 30, p3 = 5, p3Low = -1e-6, p3High = 30):
-  def BuildBern3(self,p0 = 1 ,p1 = 5, p1Low =1e-3, p1High = 30, p2 = 5, p2Low =1e-3, p2High = 30, p3 = 5, p3Low =1e-3, p3High = 30):
-
+  def BuildBern3(self,p0 = 1 ,p1 = 0.1, p1Low =1e-3, p1High = 1, p2 = 0.1, p2Low =1e-3, p2High = 1, p3 = 0.1, p3Low =1e-3, p3High = 1):
     p0Var = RooRealVar('p0Bern3_'+self.suffix, 'p0Bern3_'+self.suffix,p0)
     p1Var = RooRealVar('p1Bern3_'+self.suffix, 'p1Bern3_'+self.suffix,p1,p1Low,p1High)
     p2Var = RooRealVar('p2Bern3_'+self.suffix, 'p2Bern3_'+self.suffix,p2,p2Low,p2High)
@@ -582,22 +578,8 @@ class FitBuilder:
     SetOwnership(p3Var,0)
     return Bern3
 
-  def BuildPoly3(self,p0 = 1 ,p1 = 5, p1Low = -3000, p1High = 3000, p2 = 5, p2Low = -3000, p2High = 3000, p3 = 5, p3Low = -3000, p3High = 3000):
-#def BuildPoly3(self,p0 = 1 ,p1 = 5, p1Low =1e-3, p1High = 30, p2 = 5, p2Low =1e-3, p2High = 30, p3 = 5, p3Low =1e-3, p3High = 30):
-
-    p0Var = RooRealVar('p0Poly3_'+self.suffix, 'p0Poly3_'+self.suffix,p0)
-    p1Var = RooRealVar('p1Poly3_'+self.suffix, 'p1Poly3_'+self.suffix,p1,p1Low,p1High)
-    p2Var = RooRealVar('p2Poly3_'+self.suffix, 'p2Poly3_'+self.suffix,p2,p2Low,p2High)
-    p3Var = RooRealVar('p3Poly3_'+self.suffix, 'p3Poly3_'+self.suffix,p3,p3Low,p3High)
-    Poly3 = RooPolynomial('Poly3_'+self.suffix,'Poly3_'+self.suffix,self.mzg,RooArgList(p0Var,p1Var,p2Var, p3Var))
-    SetOwnership(p0Var,0)
-    SetOwnership(p1Var,0)
-    SetOwnership(p2Var,0)
-    SetOwnership(p3Var,0)
-    return Poly3
-
-  def BuildBern4(self,p0 = 1 ,p1 = 5, p1Low = -1e-6, p1High = 30, p2 = 5, p2Low = -1e-6, p2High = 30, p3 = 5, p3Low = -1e-6, p3High = 30, p4 = 5, p4Low = -1e-6, p4High = 30):
-#def BuildBern4(self,p0 = 1 ,p1 = 5, p1Low =1e-3, p1High = 30, p2 = 5, p2Low =1e-3, p2High = 30, p3 = 5, p3Low =1e-3, p3High = 30, p4 = 5, p4Low =1e-3, p4High = 30):
+  def BuildBern4(self,p0 = 1 ,p1 = 0.1, p1Low = 1e-3, p1High = 1, p2 = 0.1, p2Low = 1e-3, p2High = 1, p3 = 0.1, p3Low = 1e-3, p3High = 1,
+                 p4 = 0.1, p4Low = 1e-3, p4High = 1):
 
     p0Var = RooRealVar('p0Bern4_'+self.suffix, 'p0Bern4_'+self.suffix,p0)
     p1Var = RooRealVar('p1Bern4_'+self.suffix, 'p1Bern4_'+self.suffix,p1,p1Low,p1High)
@@ -612,8 +594,8 @@ class FitBuilder:
     SetOwnership(p4Var,0)
     return Bern4
 
-  def BuildBern5(self,p0 = 1 ,p1 = 5, p1Low = -1e-6, p1High = 30, p2 = 5, p2Low = -1e-6, p2High = 30, p3 = 5, p3Low = -1e-6, p3High = 30, p4 = 5, p4Low = -1e-6, p4High = 30, p5 = 5, p5Low = -1e-6, p5High = 30):
-#def BuildBern5(self,p0 = 1 ,p1 = 5, p1Low =1e-3, p1High = 30, p2 = 5, p2Low =1e-3, p2High = 30, p3 = 5, p3Low =1e-3, p3High = 30, p4 = 5, p4Low =1e-3, p4High = 30, p5 = 5, p5Low =1e-3, p5High = 30):
+  def BuildBern5(self,p0 = 1 ,p1 = 0.1, p1Low = 1e-3, p1High = 1, p2 = 0.1, p2Low = 1e-3, p2High = 1, p3 = 0.1, p3Low = 1e-3, p3High = 1,
+                 p4 = 0.1, p4Low = 1e-3, p4High = 1, p5 = 0.1, p5Low = 1e-3, p5High = 1):
 
     p0Var = RooRealVar('p0Bern5_'+self.suffix, 'p0Bern5_'+self.suffix,p0)
     p1Var = RooRealVar('p1Bern5_'+self.suffix, 'p1Bern5_'+self.suffix,p1,p1Low,p1High)
@@ -629,6 +611,18 @@ class FitBuilder:
     SetOwnership(p4Var,0)
     SetOwnership(p5Var,0)
     return Bern5
+
+  def BuildPoly3(self,p0 = 1 ,p1 = 5, p1Low = -3000, p1High = 3000, p2 = 5, p2Low = -3000, p2High = 3000, p3 = 5, p3Low = -3000, p3High = 3000):
+    p0Var = RooRealVar('p0Poly3_'+self.suffix, 'p0Poly3_'+self.suffix,p0)
+    p1Var = RooRealVar('p1Poly3_'+self.suffix, 'p1Poly3_'+self.suffix,p1,p1Low,p1High)
+    p2Var = RooRealVar('p2Poly3_'+self.suffix, 'p2Poly3_'+self.suffix,p2,p2Low,p2High)
+    p3Var = RooRealVar('p3Poly3_'+self.suffix, 'p3Poly3_'+self.suffix,p3,p3Low,p3High)
+    Poly3 = RooPolynomial('Poly3_'+self.suffix,'Poly3_'+self.suffix,self.mzg,RooArgList(p0Var,p1Var,p2Var, p3Var))
+    SetOwnership(p0Var,0)
+    SetOwnership(p1Var,0)
+    SetOwnership(p2Var,0)
+    SetOwnership(p3Var,0)
+    return Poly3
 
   def BuildRooGaussian(self, mean = 125,meanLow = 100, meanHigh = 150, sigma = 1.5, sigmaLow = 0.3, sigmaHigh = 70):
 

@@ -804,6 +804,19 @@ Bool_t zgamma::Process(Long64_t entry)
 			";(m_{#mu#mu#gamma}^{gen} - m_{#mu#mu#gamma}^{reco})/m_{#mu#mu#gamma}^{gen}",100, -0.2,0.2, 1,"GEN");
       hists->fill1DHist((gendR - dR)/gendR,    "res_EB_dR",
 			";(dR_{#mu#mu}^{gen} - dR_{#mu#mu}^{reco})/dR_{#mu#mu}^{gen}",               100, -0.2,0.2, 1,"GEN");
+
+      float mllBins[9] = {0,0.2,0.5,1,2,4,9,20,50};
+      hists->fill2DHistUnevenBins(genMll,Mll , "res_2D_EB_Mll", ";m_{#mu#mu}^{gen};m_{#mu#mu}^{reco}", 8,mllBins, 8,mllBins, 1,"GEN");
+
+      for(int m=1; m<8; m++){
+	if (Mll > mllBins[m-1] && Mll < mllBins[m]){
+
+	  hists->fill1DHist((genMll - Mll)/genMll, Form("res_EB_Mll_%.1fto%.1f",mllBins[m-1],mllBins[m]),
+			    ";(m_{#mu#mu}^{gen} - m_{#mu#mu}^{reco})/m_{#mu#mu}^{gen}", 100, -0.1,0.1, 1,"GEN");
+	  hists->fill1DHist((genMllg - Mllg)/genMllg, Form("res_EB_Mllg_%.1fto%.1f",mllBins[m-1],mllBins[m]),
+			    ";(m_{#mu#mu#gamma}^{gen} - m_{#mu#mu#gamma}^{reco})/m_{#mu#mu#gamma}^{gen}",100, -0.1,0.1, 1,"GEN");
+	}
+      }
     }
     else if  (fabs(gamma.SCEta()) > 1.566){
       hists->fill1DHist((genMll - Mll)/genMll, "res_EE_Mll",
@@ -812,6 +825,8 @@ Bool_t zgamma::Process(Long64_t entry)
 			";(m_{#mu#mu#gamma}^{gen} - m_{#mu#mu#gamma}^{reco})/m_{#mu#mu#gamma}^{gen}",100, -0.2,0.2, 1,"GEN");
       hists->fill1DHist((gendR - dR)/gendR,    "res_EE_dR",
 			";(dR_{#mu#mu}^{gen} - dR_{#mu#mu}^{reco})/dR_{#mu#mu}^{gen}",               100, -0.2,0.2, 1,"GEN");
+
+
     }
   }
 
@@ -914,17 +929,25 @@ Bool_t zgamma::Process(Long64_t entry)
 	HM->MakeMuonPlots(muons[0],"Mu-after");
 	HM->MakeMuonPlots(muons[1],"Mu-after");
 
-	if (isVBF){
+	if (Mllg>122 && Mllg<128){
 	  HM->FillHistosFull(10, eventWeight);
 	  FillHistoCounts(10, eventWeight);
-	  CountEvents(10, "VBF ID", fcuts);
+	  CountEvents(10, "122 GeV < m(llg) < 128 GeV", fcuts);
 	}
 
-	if (Mllg>122 && Mllg<128){
+	if (isVBF){
 	  HM->FillHistosFull(11, eventWeight);
 	  FillHistoCounts(11, eventWeight);
-	  CountEvents(11, "122 GeV < m(llg) < 128 GeV", fcuts);
+	  CountEvents(11, "VBF ID", fcuts);
 	}
+
+	if ((lPt1.Pt()+lPt2.Pt()) > 40){
+	  HM->FillHistosFull(12, eventWeight);
+	  FillHistoCounts(12, eventWeight);
+	  CountEvents(12, "ptl1+ptl2 > 40 GeV", fcuts);
+	}
+
+
       }
     }
     else if (fabs(gamma.SCEta()) > 1.566) {

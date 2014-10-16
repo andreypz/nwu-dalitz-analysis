@@ -29,7 +29,11 @@ sigma_mll = RooRealVar("#sigma","sigma",1.0, 0.0, 10.0)
 #mean_res  = RooRealVar("mean_res", "mean_res", 3.0, 0.0, 20.0)
 #sigma_res = RooRealVar("sigma_res","sigma_res",1.0, 0.0, 10.0)
 noOverflowList  = [a.strip() for a in (conf.get("selection","noOverflowList")).split(',')]
-print noOverflowList
+print 'No overflow list = ', noOverflowList
+
+def mllBins():
+  """First number is the mLL cut threshold, second number is the fraction of the cross section"""
+  return [(0.200,0), (0.5, 0.145), (1, 0.138),(2, 0.138),(4, 0.134), (9, 0.157), (20, 0.149), (50,0.139)]
 
 def yearToTeV(y):
   if   y=='2011': return '7TeV'
@@ -290,7 +294,7 @@ def drawAllInFile(f1, name1, bZip, f3, name3, myDir, path, N, howToScale="none",
   #c1.UseCurrentStyle()
 
   scale3 = 1
-  if f3!=None:
+  if f3!=None and howToScale in ['lumi','toData','toDataInt']:
     Nev = f3.Get("Counts/evt_byCut_raw").GetBinContent(1)
     if conf.get("selection","jp")=='1':
       cro = getCS("HtoJPsiGamma")
