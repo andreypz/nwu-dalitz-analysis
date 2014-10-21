@@ -75,7 +75,7 @@ if __name__ == "__main__":
 
   if doMerge:
     if sel=="elgamma":
-      os.system("hadd "+hPath+"/m_Data_" +sel+"_"+period+".root "+hPath+"/"+sel+"_"+period+"/hhhh_*Run2012A*.root")
+      os.system("hadd "+hPath+"/m_Data_" +sel+"_"+period+".root "+hPath+"/"+sel+"_"+period+"/hhhh_*Run2012*.root")
     else:
       # os.system("hadd "+hPath+"/m_Data_" +sel+"_"+period+".root "+hPath+"/"+sel+"_"+period+"/hhhh_DoubleMu_Run20*.root")
       os.system("hadd "+hPath+"/m_Data_" +sel+"_"+period+".root "+hPath+"/"+sel+"_"+period+"/hhhh_MuEG_Run2012*.root")
@@ -161,8 +161,8 @@ if __name__ == "__main__":
   sigFileVBF  = sigVBF['125']
   sigFileVH   = sigVH['125']
 
-  sigFileZjp  = TFile(hPath+"/"+sel+"_"+period+"/hhhh_ZtoJPsiGamma_1.root",  "OPEN")
-  sigFileHjp  = TFile(hPath+"/"+sel+"_"+period+"/hhhh_HiggsToJPsiGamma_1.root",  "OPEN")
+  sigFileZjp  = TFile(hPath+"/"+sel+"_"+period+"/hhhh_ZtoJPsiGamma_1.root",     "OPEN")
+  sigFileHjp  = TFile(hPath+"/"+sel+"_"+period+"/hhhh_HiggsToJPsiGamma_1.root", "OPEN")
 
   if opt.mcfm:  sigFile = sigFileMCFM
   elif opt.hjp: sigFile = sigFileHjp
@@ -178,12 +178,13 @@ if __name__ == "__main__":
   if opt.zjp or opt.hjp:
     u.setSelection('mugamma')
 
+  doLumiScale = 1
   yields_data = u.getYields(dataFile)
-  yields_zjp  = u.getYields(sigFileZjp, 'ZtoJPsiGamma',  True)
-  yields_hjp  = u.getYields(sigFileHjp, 'HtoJPsiGamma',  True)
-  yields_ggH  = u.getYields(sigFile,    'ggH-125',  True)
-  yields_vbf  = u.getYields(sigFileVBF, 'vbfH-125', True)
-  yields_vh   = u.getYields(sigFileVH,  'vH-125',   True)
+  yields_zjp  = u.getYields(sigFileZjp, 'ZtoJPsiGamma',  doLumiScale)
+  yields_hjp  = u.getYields(sigFileHjp, 'HtoJPsiGamma',  doLumiScale)
+  yields_ggH  = u.getYields(sigFileGG,  'ggH-125',  doLumiScale)
+  yields_vbf  = u.getYields(sigFileVBF, 'vbfH-125', doLumiScale)
+  yields_vh   = u.getYields(sigFileVH,  'vH-125',   doLumiScale)
   yields_sig  = [sum(x) for x in zip(yields_ggH,yields_vbf,yields_vh)]
 
   print 'ggH yi', yields_ggH
@@ -219,12 +220,12 @@ if __name__ == "__main__":
     # u.drawAllInFile(None, "", '', sigFile, sigName, "GEN", pathBase+'/GEN-angles', None, "norm")
 
     if opt.hjp:
-      u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "Main", path, cut, "toData")
+      u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "Main", path, cut, "toDataInt", doFits=opt.fit)
+      #u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "Main", path, cut, "toDataInt", doFits=opt.fit)
     else:
       # u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "", path, cut, "lumi")
-      u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "Main", path, cut, "toDataInt")
+      u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "Main", path, cut, "toDataInt", doFits=opt.fit)
       # u.drawAllInFile(dataFile, "Data", bkgZip, None, '', "", path, cut, "lumi")
-      # u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "", path, cut, "norm", doFits=opt.fit)
 
     """
     for n in ['Angles']:
@@ -439,7 +440,7 @@ if __name__ == "__main__":
   if sel in ['jp-mugamma']:
     if opt.hjp:
       print None
-      #u.setCutListFile(hPath+"/"+sel+"_"+period+"/out_cutlist_HiggsToJPsiGamma_1.txt")
+      u.setCutListFile(hPath+"/"+sel+"_"+period+"/out_cutlist_HiggsToJPsiGamma_1.txt")
     if opt.zjp:
       u.setCutListFile(hPath+"/"+sel+"_"+period+"/out_cutlist_ZtoJPsiGamma_1.txt")
   else:
@@ -462,8 +463,8 @@ if __name__ == "__main__":
     #table_all  = u.yieldsTable([yields_data,yields_bkg,yields_sig, yields_ggH,yields_vbf, yields_vh], sel)
   else:
     if opt.zjp or opt.hjp:
-      names = ['Data','H to J/Psi &gamma;','Z to J/Psi &gamma;']
-      table_all = u.yieldsTable([yields_data, yields_hjp, yields_zjp], names)
+      names = ['Data','H to J/Psi &gamma;','Z to J/Psi &gamma;', 'ggH-125']
+      table_all = u.yieldsTable([yields_data, yields_hjp, yields_zjp, yields_ggH], names)
     #elif not opt.apz:
     else:
       names = ['Data','Sig: total','ggH','vbfH','VH']

@@ -8,9 +8,8 @@ gROOT.SetBatch()
 sys.path.append("../zgamma")
 gSystem.SetIncludePath( "-I$ROOFITSYS/include/" );
 gROOT.ProcessLine(".L ../tdrstyle.C")
-#setTDRStyle()
-#gROOT.LoadMacro("../CMS_lumi.C")
-
+TH1.SetDefaultSumw2(kTRUE)
+gStyle.SetOptTitle(0)
 import utils as u
 
 class AutoVivification(dict):
@@ -26,6 +25,7 @@ import ConfigParser as cp
 cf = cp.ConfigParser()
 cf.read('config.cfg')
 
+verbose    = 0
 massList   = ['125']
 #massList      = [a.strip()[0:3] for a in (cf.get("fits","massList")).split(',')]
 yearList      = [a.strip() for a in (cf.get("fits","yearList")).split(',')]
@@ -36,14 +36,13 @@ mllBins = u.mllBins()
 
 EBetaCut = 1.4442
 EEetaCut = 1.566
-ptMllgCut  = 0.30
-ptGammaCut = 0
-ptDiLepCut = 0
+ptMllgCut  = 0.0
+ptGammaCut = 40
+ptDiLepCut = 40
 ptSumLep   = 0
 
 lowCutOff  = 110
-highCutOff = 170
-verbose    = 0
+highCutOff = 150
 
 doBlind    = int(cf.get("fits","blind"))
 hjp=0
@@ -53,24 +52,16 @@ colors = {}
 for f,col in cf.items("colors"):
   colors[f] = eval(col)
 
-#print colors
-#print yearList, leptonList, catList, massList, sigNameList
-#print "Begin, INPUT"
-#raw_input()
-
-TH1.SetDefaultSumw2(kTRUE)
-gStyle.SetOptTitle(0)
 
 debugPlots = 0
 noSFweight = 0
 rootrace   = 0
+if rootrace: RooTrace.active(kTRUE)
+proc = {'gg':'ggH', 'vbf':'qqH','v':'WH','hjp':'hjp'}
 
 # OK listen, we're gunna need to do some bullshit just to get a uniform RooRealVar name for our data objects.
 # So we'll loop through the Branch, set mzg to the event value (if it's in range), and add that to our RooDataSet.
 # This way, we make a RooDataSet that uses our 'CMS_hzg_mass' variable.
-
-TH1.SetDefaultSumw2(kTRUE)
-if rootrace: RooTrace.active(kTRUE)
 
 def LumiXSWeighter(mH, prod, sel, Nev=None):
   if prod == 'hjp':
@@ -122,54 +113,27 @@ def doInitialFits(subdir):
   print '\t Loading up the files'
 
   plotBase1 = cf.get("path","htmlbase")+'/html/zgamma/dalitz/fits-'+subdir+'/init'
-  basePath1 = cf.get("path","base")+'/batch_output/zgamma/8TeV/'+subdir+'/'
-  basePath2 = cf.get("path","base")+'/zgamma/v34-ele2/'
-
-  if not os.path.exists(basePath1):
+  basePath  = cf.get("path","base")+'/batch_output/zgamma/8TeV/'+subdir+'/'
+  if not os.path.exists(basePath):
     print basePath1, "does not exist!"
     sys.exit(0)
-  if not os.path.exists(basePath1):
-    print basePath2, "does not exist!"
-    sys.exit(0)
 
-  #musel = "mumu"
+  print "\t ==== All the input files are initialized into these dictionaries ===="""
+  dataDict = {}
+  signalDict = {}
   if hjp:
-    musel = "jp-mugamma"
+    signalDict = {'hjp_mu2012_M125':TFile(basePath+'jp-mugamma_2012/hhhh_HiggsToJPsiGamma_1.root','r')}
+    dataDict['mu2012'] = TFile(basePath+'m_Data_jp-mugamma_2012.root','r')
   else:
-    musel = "mugamma"
-
-  dataDict   = {'mu2012':TFile(basePath1+'m_Data_'+musel+'_2012.root','r'),
-                'el2012':TFile(basePath2+'m_Data_electron_2012.root','r')}
-
-  if hjp:
-    signalDict = {'hjp_mu2012_M125':TFile(basePath1+musel+'_2012/hhhh_HiggsToJPsiGamma_1.root','r')}
-  else:
-    signalDict = {'gg_mu2012_M120':TFile(basePath1+musel+'_2012/hhhh_ggH-mad120_1.root','r'),
-                  'gg_mu2012_M125':TFile(basePath1+musel+'_2012/hhhh_ggH-mad125_1.root','r'),
-                  'gg_mu2012_M130':TFile(basePath1+musel+'_2012/hhhh_ggH-mad130_1.root','r'),
-                  'gg_mu2012_M135':TFile(basePath1+musel+'_2012/hhhh_ggH-mad135_1.root','r'),
-                  'gg_mu2012_M140':TFile(basePath1+musel+'_2012/hhhh_ggH-mad140_1.root','r'),
-                  'gg_mu2012_M145':TFile(basePath1+musel+'_2012/hhhh_ggH-mad145_1.root','r'),
-                  'gg_mu2012_M150':TFile(basePath1+musel+'_2012/hhhh_ggH-mad150_1.root','r'),
-
-                  'vbf_mu2012_M120':TFile(basePath1+musel+'_2012/hhhh_vbf-mad120_1.root','r'),
-                  'vbf_mu2012_M125':TFile(basePath1+musel+'_2012/hhhh_vbf-mad125_1.root','r'),
-                  'vbf_mu2012_M130':TFile(basePath1+musel+'_2012/hhhh_vbf-mad130_1.root','r'),
-                  'vbf_mu2012_M135':TFile(basePath1+musel+'_2012/hhhh_vbf-mad135_1.root','r'),
-                  'vbf_mu2012_M140':TFile(basePath1+musel+'_2012/hhhh_vbf-mad140_1.root','r'),
-                  'vbf_mu2012_M145':TFile(basePath1+musel+'_2012/hhhh_vbf-mad145_1.root','r'),
-                  'vbf_mu2012_M150':TFile(basePath1+musel+'_2012/hhhh_vbf-mad150_1.root','r'),
-
-                  'v_mu2012_M120':TFile(basePath1+musel+'_2012/hhhh_vh-mad120_1.root','r'),
-                  'v_mu2012_M125':TFile(basePath1+musel+'_2012/hhhh_vh-mad125_1.root','r'),
-                  'v_mu2012_M130':TFile(basePath1+musel+'_2012/hhhh_vh-mad130_1.root','r'),
-                  'v_mu2012_M135':TFile(basePath1+musel+'_2012/hhhh_vh-mad135_1.root','r'),
-                  'v_mu2012_M140':TFile(basePath1+musel+'_2012/hhhh_vh-mad140_1.root','r'),
-                  'v_mu2012_M145':TFile(basePath1+musel+'_2012/hhhh_vh-mad145_1.root','r'),
-                  'v_mu2012_M150':TFile(basePath1+musel+'_2012/hhhh_vh-mad150_1.root','r')
-
-                  #'gg_el2012_M125':TFile(basePath2+'electron_2012/hhhh_dal-mad125_1.root','r')
-                  }
+    for y in yearList:
+      for l in leptonList:
+        if l == 'mu': tag = 'mugamma'
+        if l == 'el': tag = 'elgamma'
+        dataDict[l+y] = TFile(basePath+'m_Data_'+tag+'_'+y+'.root','r')
+        for s in sigNameList:
+          for m in massList:
+            signalDict[s+'_'+l+y+'_M'+m] = TFile(basePath+tag+'_'+y+'/hhhh_'+proc[s]+'-mad'+m+'_1.root','r')
+  print "\t ===  All files are set === \n"
 
   treeName = 'apzTree/apzTree'
 

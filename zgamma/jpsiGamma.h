@@ -49,7 +49,7 @@
 #include "../plugins/HistManager.h"
 #include "../plugins/PhotonScaleCorrections.hh"
 
-#include "../plugins/MuScleFitCorrector.h"
+//#include "../plugins/MuScleFitCorrector.h"
 
 //#include "../plugins/PhosphorCorrectorFunctor.hh"
 // Header file for the classes stored in the TTree if any.
@@ -60,7 +60,7 @@
 #include <TVector3.h>
 
 
-#define nC 16
+#define nC 22
 class jpsiGamma : public TSelector {
  private:
   TFile* histoFile;
@@ -73,7 +73,7 @@ class jpsiGamma : public TSelector {
   rochcor2012 *roch;
   ObjectID *ObjID;
   HistMaker *HM;
-  MuScleFitCorrector *muScle;
+  //MuScleFitCorrector *muScle;
 
   UInt_t nEvents[nC];
   UInt_t totEvents;
@@ -89,7 +89,7 @@ class jpsiGamma : public TSelector {
   Float_t mva_SCEta, mva_R9, mva_HadOverEm, mva_ome1x5oe5x5;
   */
   Int_t nVtx, nVtxTotal;
-  Float_t nDofVtx1, nDofVtx2;
+  //Float_t nDofVtx1, nDofVtx2;
 
   TTree* _apzTree;
   Double_t apz_w, apz_dr12, apz_dr13, apz_dr23, apz_dr34, apz_dr1234;
@@ -273,18 +273,15 @@ Bool_t jpsiGamma::Notify()
   TFile   *inFile     = thisTree->GetCurrentFile();
   TTree   *jobTree    = (TTree*)inFile->Get("ntupleProducer/jobTree");
   TBranch *eventsInFile    =  jobTree->GetBranch("nEvents");
-
   eventsInFile->SetAddress(&initEvents);
   eventsInFile->GetEntry(0);
 
+  //cout<<" Total event from previous files: "<<totEvents<<endl;
   totEvents += initEvents;
   cout<<"  Opened file: \n"<<inFile->GetName()<<endl;
   cout<<" Events in file: "<<initEvents<<"  total processed: "<<totEvents<<endl;
 
-  //FillHistosBasic(0, initEvents);
-
-
-   return kTRUE;
+  return kTRUE;
 }
 
 #endif // #ifdef jpsiGamma_cxx

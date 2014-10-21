@@ -12,7 +12,7 @@ import ConfigParser as cp
 gROOT.ProcessLine(".L ../tdrstyle.C")
 setTDRStyle()
 print len(sys.argv), sys.argv
-verbose = 1
+verbose = 0
 doExt   = 0
 
 cf = cp.ConfigParser()
@@ -43,7 +43,11 @@ mzg.setRange('signal',120,130)
 mzg.setRange('r1',110,120)
 mzg.setRange('r2',130,170)
 
-bkgModel = 'Bern3'
+if hjp:
+  bkgModel = 'Bern2'
+else:
+  bkgModel = 'Bern4'
+
 # #######################################
 # prep the background and data card    #
 # we're going to the extend the bg pdf #
@@ -316,10 +320,15 @@ if __name__=="__main__":
           sigFile_hjp  = TFile(hPath+"/jp-mugamma_"+year+"/hhhh_HiggsToJPsiGamma_1.root", "OPEN")
           fsig = [sigFile_hjp]
         else:
-          sigFile_gg   = TFile(hPath+"/mugamma_"+year+"/hhhh_ggH-mad125_1.root", "OPEN")
-          sigFile_vbf  = TFile(hPath+"/mugamma_"+year+"/hhhh_vbf-mad125_1.root", "OPEN")
-          sigFile_vh   = TFile(hPath+"/mugamma_"+year+"/hhhh_vh-mad125_1.root",  "OPEN")
-          fsig = [sigFile_gg, sigFile_vbf, sigFile_vh]
+          if lepton == 'mu': tag = 'mugamma'
+          if lepton == 'el': tag = 'elgamma'
+          sigFile_gg   = TFile(hPath+"/"+tag+"_"+year+"/hhhh_ggH-mad125_1.root", "OPEN")
+          sigFile_vbf  = TFile(hPath+"/"+tag+"_"+year+"/hhhh_vbf-mad125_1.root", "OPEN")
+          sigFile_vh   = TFile(hPath+"/"+tag+"_"+year+"/hhhh_vh-mad125_1.root",  "OPEN")
+          if lepton == 'mu':
+            fsig = [sigFile_gg, sigFile_vbf, sigFile_vh]
+          if lepton == 'el':
+            fsig = [sigFile_gg]
 
         hsig = []
         for i,f in enumerate(fsig):
@@ -342,7 +351,7 @@ if __name__=="__main__":
           if cat=='0':
             hsig.append(f.Get("Main/00_tri_mass_Main_cut9"))
           elif cat=='EB':
-            if hjp: hsig.append(f.Get("Main/00_tri_mass_Main_cut8"))
+            if hjp: hsig.append(f.Get("Main/00_tri_mass_Main_cut10"))
             else:   hsig.append(f.Get("Main/00_tri_mass_Main_cut9"))
           elif cat=='EE':
             hsig.append(f.Get("Main/00_tri_mass_Main_cut16"))
@@ -361,7 +370,7 @@ if __name__=="__main__":
 
         #hsig[-1].Print("all")
         #print hsig
-        if not hjp:
+        if not hjp and lepton=='mu':
           print 'hsig0, scaled events:', hsig[0].Integral(), hsig[1].Integral(), hsig[2].Integral()
           #print 'hsigs:', hsig[0], hsig[1], hsig[2]
           hsig[0].Add(hsig[1])

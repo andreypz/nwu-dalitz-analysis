@@ -199,7 +199,6 @@ class zgamma : public TSelector {
    virtual void    SlaveTerminate();
    virtual void    Terminate();
 
-   //virtual void CountEvents(Int_t);
    virtual void CountEvents(Int_t , string , ofstream& s);
    virtual void FillHistoCounts(Int_t n, Double_t w);
 
@@ -286,11 +285,7 @@ Bool_t zgamma::Notify()
   totEvents += initEvents;
   cout<<"  Opened file: \n"<<inFile->GetName()<<endl;
   cout<<" Events in file: "<<initEvents<<"  total processed: "<<totEvents<<endl;
-
-  //FillHistosBasic(0, initEvents);
-
-
-   return kTRUE;
+  return kTRUE;
 }
 
 #endif // #ifdef zgamma_cxx

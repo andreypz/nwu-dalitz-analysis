@@ -44,25 +44,16 @@ if __name__ == "__main__":
     cardNames = ''
     for cat in catList:
       print "\n**\t Making limits for M=",m,"  cat = ",cat, "\t**\n"
-      # card = "output_cards/hzg_el_2012_cat0_M"+m+"_Dalitz.txt"
-      card_mu  = myDir+"/output_cards/hzg_mu_2012_cat"+cat+"_M"+m+"_Dalitz_.txt"
-      card_el  = myDir+"/Dalitz_electron2/datacard_hzg_eeg_cat12_8TeV_"+m[:3]+".txt"
+      card  = myDir+"/output_cards/hzg_mu_2012_cat"+cat+"_M"+m+"_Dalitz_.txt"
+      #card  = myDir+"/output_cards/hzg_el_2012_cat"+cat+"_M"+m+"_Dalitz_.txt"
 
       if cat in ['m1','m2','m3','m4','m5','m6']:
-        cardNames = cardNames+' '+card_mu
+        cardNames = cardNames+' '+card
       if cat in ['EB','EE','mll50']:
-        cardNames = cardNames+' '+card_mu
-      if cat in ['el']:
-        cardNames = cardNames+' '+card_el
-      # card_ele = "./cards_ele2/realistic-counting-experiment_"+m[0:3]+".txt"
-      card = ""
+        cardNames = cardNames+' '+card
 
       if opt.comb:
         print "not yet"
-      elif cat in ['el']:
-        card = card_el
-      else:
-        card = card_mu
 
       print 'Using CARD = \n',card
 

@@ -13,7 +13,7 @@ string myTriggers[ntrig] = {
   "HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v"
 };
 
-TString fitParametersFile = "none";
+TString muScleFitParametersFile = "none";
 
 UInt_t nEventsTrig[nC][ntrig];
 
@@ -33,6 +33,7 @@ Bool_t doZee = 0;
 Bool_t isMugamma = 0;
 Bool_t makeApzTree = 1;
 bool isDYJets = 0;
+Bool_t doJPsiScale = 0;
 
 const UInt_t hisEVTS[] = {9331};
 Int_t evSize = sizeof(hisEVTS)/sizeof(int);
@@ -59,12 +60,12 @@ void jpsiGamma::Begin(TTree * tree)
 
   if (doMuScle){
     if (sample.find("DATA")!=last){
-      fitParametersFile = "../data/MuScleFitCorrector_v4_3/MuScleFit_2012ABC_DATA_ReReco_53X.txt";
+      muScleFitParametersFile = "../data/MuScleFitCorrector_v4_3/MuScleFit_2012ABC_DATA_ReReco_53X.txt";
       if (period.find("2012D")!=last)
-	fitParametersFile = "../data/MuScleFitCorrector_v4_3/MuScleFit_2012D_DATA_ReReco_53X.txt";
+	muScleFitParametersFile = "../data/MuScleFitCorrector_v4_3/MuScleFit_2012D_DATA_ReReco_53X.txt";
     }
     else
-      fitParametersFile = "../data/MuScleFitCorrector_v4_3/MuScleFit_2012_MC_53X_smearReReco.txt";
+      muScleFitParametersFile = "../data/MuScleFitCorrector_v4_3/MuScleFit_2012_MC_53X_smearReReco.txt";
   }
 
   if (selection.find("zee")!=last) {
@@ -102,8 +103,8 @@ void jpsiGamma::Begin(TTree * tree)
   triggerSelector = new TriggerSelector("", period, *triggerNames);
   myRandom = new TRandom3();
 
-  if (doMuScle)
-    muScle = new MuScleFitCorrector(fitParametersFile);
+  //if (doMuScle)
+  //muScle = new MuScleFitCorrector(muScleFitParametersFile);
 
   for (Int_t n1=0; n1<nC; n1++){
     nEvents[n1]=0;
@@ -260,7 +261,6 @@ Bool_t jpsiGamma::Process(Long64_t entry)
     for (int i = 0; i < genParticles->GetSize(); ++i) {
       TCGenParticle* thisParticle = (TCGenParticle*) genParticles->At(i);
 
-
       //Higgs himself:
       if (thisParticle->GetPDGId()==25 && thisParticle->GetStatus()==3){
 	gen_higgs = *thisParticle;
@@ -317,8 +317,6 @@ Bool_t jpsiGamma::Process(Long64_t entry)
 	       thisParticle->GetPDGId()==22 && thisParticle->GetStatus()==1 && ObjID->GetPrimaryAncestor(thisParticle)->GetPDGId()==23)
 	gen_gamma = *thisParticle;
 
-
-
       // DYJets sample will be combined with ZGamma, need to remove
 
       //if (isDYJets && thisParticle->GetPDGId()==22
@@ -352,10 +350,12 @@ Bool_t jpsiGamma::Process(Long64_t entry)
 	      //ObjID->DiscoverGeneology(fsr, eventNumber);
 	      //cout<<"   <<---0 this one"<<endl;
 
-	      hists->fill1DHist((preFSR_pt - fsr->Pt())/preFSR_pt, "gen_fsr_mu_dPt",";gen mu (Pt_preFSR - Pt_afterFSR)/pt",  200, -1,1, 1,"GEN");
+	      hists->fill1DHist((preFSR_pt - fsr->Pt())/preFSR_pt, "gen_fsr_mu_dPt",
+				";gen mu (Pt_preFSR - Pt_afterFSR)/pt",  200, -1,1, 1,"GEN");
 
 	      if(thisParticle->Pt() > 1)
-		hists->fill1DHist((preFSR_pt - fsr->Pt())/preFSR_pt, "gen_fsr_mu_dPt_photonPt1GeV",";gen mu (Pt_preFSR - Pt_afterFSR)/pt",  200, -1,1, 1,"GEN");
+		hists->fill1DHist((preFSR_pt - fsr->Pt())/preFSR_pt, "gen_fsr_mu_dPt_photonPt1GeV",
+				  ";gen mu (Pt_preFSR - Pt_afterFSR)/pt",  200, -1,1, 1,"GEN");
 	      fsr_mu_count++;
 	    }
 	  }
@@ -373,7 +373,6 @@ Bool_t jpsiGamma::Process(Long64_t entry)
     }// end of genparticles loop
 
 
-
     sort(gen_el.begin(), gen_el.end(), P4SortCondition);
     sort(gen_mu.begin(), gen_mu.end(), P4SortCondition);
 
@@ -382,9 +381,9 @@ Bool_t jpsiGamma::Process(Long64_t entry)
 
 
     if(selection=="mu" && makeGen){
-
       if (gen_mu.size()!=2) return kTRUE;
-      //Abort(Form("ev #%i NONONO There has to be exactly 2 muons from the Higgs! \n \t\t but there are %i", eventNumber, (int)gen_mu.size()));
+      //Abort(Form("ev #%i NONONO There has to be exactly 2 muons from the Higgs! \n \t\t but there are %i",
+      //eventNumber, (int)gen_mu.size()));
 
 
       gen_lPt1 = gen_mu[0];
@@ -407,8 +406,6 @@ Bool_t jpsiGamma::Process(Long64_t entry)
       //cout<<"\t\t event = "<<eventNumber<<"  "<<endl;
       //cout<<" charge = "<<gen_l1.Charge()<<" pt = "<<gen_l1.Pt()<<" eta="<<gen_l1.Eta()<<" phi="<<gen_l1.Phi()<<endl;
       //cout<<" charge = "<<gen_l2.Charge()<<" pt = "<<gen_l2.Pt()<<" eta="<<gen_l2.Eta()<<" phi="<<gen_l2.Phi()<<endl;
-
-
 
 
       if (gen_el.size()!=2 && gen_mu.size()!=2)
@@ -498,15 +495,14 @@ Bool_t jpsiGamma::Process(Long64_t entry)
     if (isRealData || !makeGen || (makeGen &&gen_lPt1.DeltaR(*thisPhoton) < 0.1 && thisPhoton->Pt()>20))
       fake_photons.push_back(*thisPhoton);
 
-    if (!(fabs(thisPhoton->Eta()) < 2.5)) continue;
-    //if (!(fabs(thisPhoton->SCEta()) < 2.5)) continue;
-
+    if (!(fabs(thisPhoton->SCEta()) < 1.5)) continue;
 
     if(thisPhoton->Pt() > 15){
       if (isRealData || !makeGen || (sample=="dalitz" && makeGen && gen_gamma.DeltaR(*thisPhoton) < 0.1) )
 	photons0.push_back(*thisPhoton);
 
-      if(ObjID->PassPhotonIdAndIso(*thisPhoton, "CutBased-MediumWP", phoMvaScore)                                                                                                  	 //&& (isRealData || !makeGen || (sample=="dalitz" && makeGen && gen_gamma.DeltaR(*thisPhoton) < 0.2) )
+      if(ObjID->PassPhotonIdAndIso(*thisPhoton, "CutBased-MediumWP", phoMvaScore)
+	 //&& (isRealData || !makeGen || (sample=="dalitz" && makeGen && gen_gamma.DeltaR(*thisPhoton) < 0.2) )
 	 )
 	{
 
@@ -609,9 +605,9 @@ Bool_t jpsiGamma::Process(Long64_t entry)
 	if (isRealData) roch->momcor_data(*thisMuon, thisMuon->Charge(), 0, qter);
 	else            roch->momcor_mc(  *thisMuon, thisMuon->Charge(), 0, qter );
       }
-      else if(!doRochCorr && doMuScle){
-	muScle->applyPtCorrection(*thisMuon,thisMuon->Charge());
-      }
+      //else if(!doRochCorr && doMuScle){
+      //muScle->applyPtCorrection(*thisMuon,thisMuon->Charge());
+      //}
       else if (doRochCorr && doMuScle)
 	Abort("Only one set of Muon corrections allowed: rochcor or muscle...");
 
@@ -640,7 +636,7 @@ Bool_t jpsiGamma::Process(Long64_t entry)
   }
 
   if (gamma.Pt() < cut_gammapt) return kTRUE;
-  if (fabs(gamma.SCEta()) > 1.4442) return kTRUE;
+  if (fabs(gamma.SCEta()) > 1.444) return kTRUE;
 
   if(!isRealData && makeGen){
     hists->fill1DHist(genMll,  "gen_Mll_reco_gamma_iso",  ";gen_Mll",100,0,mllMax, 1,"eff");
@@ -747,6 +743,14 @@ Bool_t jpsiGamma::Process(Long64_t entry)
   FillHistoCounts(6, eventWeight);
   CountEvents(6, "dR(l, gamma) < 1", fcuts);
 
+  if (Mll>2.9 && Mll<3.3){
+    HM->FillHistosFull(7, eventWeight);
+    FillHistoCounts(7, eventWeight);
+    CountEvents(7, "With in J/Psi peak", fcuts);
+  }
+
+  //if (doJPsiScale && !isRealData)
+  //eventWeight *= weighter->JPsiMuMuWeight(Mll);
 
   if (makeApzTree){
     apz_w = eventWeight;
@@ -784,41 +788,31 @@ Bool_t jpsiGamma::Process(Long64_t entry)
       apz_m4l = (lPt1+lPt2+gamma+gamma2).M();
 
     _apzTree->Fill();
-
   }
 
 
   if (Mll<2.9 || Mll>3.3) return kTRUE;
 
-  HM->FillHistosFull(7, eventWeight);
-  FillHistoCounts(7, eventWeight);
-  CountEvents(7, "J/Psi mass", fcuts);
+  HM->FillHistosFull(8, eventWeight);
+  FillHistoCounts(8, eventWeight);
+  CountEvents(8, "After JPsi MC scale", fcuts);
 
   //global_Mll = Mll;
   HM->MakeMuonPlots(muons[0]);
   HM->MakeMuonPlots(muons[1]);
 
-
   if (Mllg>76 && Mllg<106){
-    HM->FillHistosFull(12, eventWeight);
-    FillHistoCounts(12, eventWeight);
-    CountEvents(12, "76 < mllg < 106", fcuts);
+    HM->FillHistosFull(15, eventWeight);
+    FillHistoCounts(15, eventWeight);
+    CountEvents(15, "76 < mllg < 106", fcuts);
   }
 
   if (Mllg>122 && Mllg<128){
-    HM->FillHistosFull(13, eventWeight);
-    FillHistoCounts(13, eventWeight);
-    CountEvents(13, "122 < mllg < 128", fcuts);
+    HM->FillHistosFull(16, eventWeight);
+    FillHistoCounts(16, eventWeight);
+    CountEvents(16, "122 < mllg < 128", fcuts);
   }
 
-
-  for (UInt_t i =0; i<ntrig; i++){
-    triggerSelector->SelectTrigger(myTriggers[i], triggerStatus, hltPrescale, isFound, triggerPass, prescale);
-    if(triggerPass) nEventsTrig[7][i]++;
-
-    if (!isFound)
-      cout<<"TRG **** Warning ***\n The trigger name "<<myTriggers[i]<<" is not in the list of trigger names"<<endl;
-  }
 
 
   if(!isRealData && makeGen && sample=="dalitz"){
@@ -850,14 +844,22 @@ Bool_t jpsiGamma::Process(Long64_t entry)
 
 
 
-
   //if ((l1+l2).Pt()/Mllg < 0.30 || gamma.Pt()/Mllg < 0.30)
+
   if ((l1+l2).Pt() < 40 || gamma.Pt() < 40)
     return kTRUE;
+  HM->FillHistosFull(10, eventWeight);
+  FillHistoCounts(10, eventWeight);
+  CountEvents(10, "pT > 40 and qT > 40", fcuts);
 
-  HM->FillHistosFull(8, eventWeight);
-  FillHistoCounts(8, eventWeight);
-  CountEvents(8, "pT > 40 and qT > 40", fcuts);
+
+  for (UInt_t i =0; i<ntrig; i++){
+    triggerSelector->SelectTrigger(myTriggers[i], triggerStatus, hltPrescale, isFound, triggerPass, prescale);
+    if(triggerPass) nEventsTrig[10][i]++;
+
+    if (!isFound)
+      cout<<"TRG **** Warning ***\n The trigger name "<<myTriggers[i]<<" is not in the list of trigger names"<<endl;
+  }
 
   if (checkTrigger){
     triggerSelector->SelectTrigger(myTrigger, triggerStatus, hltPrescale, isFound, triggerPass, prescale);
@@ -866,24 +868,24 @@ Bool_t jpsiGamma::Process(Long64_t entry)
 
   }
 
-  HM->FillHistosFull(9, eventWeight);
-  FillHistoCounts(9, eventWeight);
-  CountEvents(9, "trigger", fcuts);
+  HM->FillHistosFull(12, eventWeight);
+  FillHistoCounts(12, eventWeight);
+  CountEvents(12, "trigger", fcuts);
 
   //fout<<" nEvt = "<<nEvents[0]<<" : Run/lumi/event = "<<runNumber<<"/"<<lumiSection<<"/"<<eventNumber<<endl;
 
 
 
   if (Mllg>76 && Mllg<106){
-    HM->FillHistosFull(10, eventWeight);
-    FillHistoCounts(10, eventWeight);
-    CountEvents(10, "76 < mllg < 106", fcuts);
+    HM->FillHistosFull(13, eventWeight);
+    FillHistoCounts(13, eventWeight);
+    CountEvents(13, "76 < mllg < 106", fcuts);
   }
 
   if (Mllg>122 && Mllg<128){
-    HM->FillHistosFull(11, eventWeight);
-    FillHistoCounts(11, eventWeight);
-    CountEvents(11, "122 < mllg < 128", fcuts);
+    HM->FillHistosFull(14, eventWeight);
+    FillHistoCounts(14, eventWeight);
+    CountEvents(14, "122 < mllg < 128", fcuts);
   }
 
 
@@ -976,7 +978,7 @@ void jpsiGamma::Terminate()
 
   cout<<"\n\n | Trigger efficiency 3              |\t"<<endl;
   for(UInt_t n=0; n<ntrig; n++){
-    UInt_t N=6;
+    UInt_t N=10;
     cout<<n<<"  "<<float(nEventsTrig[N][n])/nEvents[N]<<"   "<<myTriggers[n]<<endl;;
   }
 

@@ -596,8 +596,8 @@ Bool_t egamma::Process(Long64_t entry)
   CountEvents(6,"pt1+pt2 > 44",fcuts);
   HM->MakeElectronPlots(DALE, "DalitzEle-cut6");
 
-  Double_t scale = DALE.SCEnergy()/DALE.E();
-  DALE.SetPxPyPzE(scale*DALE.Px(), scale*DALE.Py(),scale*DALE.Pz(), DALE.SCEnergy());
+  Double_t scale1 = DALE.SCEnergy()/DALE.E();
+  DALE.SetPxPyPzE(scale1*DALE.Px(), scale1*DALE.Py(),scale1*DALE.Pz(), DALE.SCEnergy());
 
 
   for (Int_t i = 0; i < recoPhotons->GetSize(); ++i) {
@@ -975,8 +975,9 @@ Bool_t egamma::Process(Long64_t entry)
   //fout<<" SC2 = "<<DALE.BaseSC()[1]<<endl;
 
 
-  if (!DALE.PassConversionVeto())
-    return kTRUE;
+
+  //if (!DALE.PassConversionVeto())
+  //  return kTRUE;
 
   //if (DALE.ConversionMissHits()!=0)
   //return kTRUE;
@@ -986,16 +987,16 @@ Bool_t egamma::Process(Long64_t entry)
   HM->MakeElectronPlots(DALE, "DalitzEle-cut13");
 
   cI = trk[0].GetConversionInfo();
-  if (cI.vtxProb>1e-6 && cI.lxyBS>2 && cI.nHitsMax>1)
-    return kTRUE;
+  //if (cI.vtxProb>1e-6 && cI.lxyBS>2 && cI.nHitsMax>1)
+  // return kTRUE;
 
   HM->FillHistosFull(14, eventWeight);
   FillHistoCounts(14, eventWeight);
   CountEvents(14,"Conv gsf trk 1",fcuts);
 
   cI = trk[1].GetConversionInfo();
-  if (cI.vtxProb>1e-6 && cI.lxyBS>2 && cI.nHitsMax>1)
-    return kTRUE;
+  //if (cI.vtxProb>1e-6 && cI.lxyBS>2 && cI.nHitsMax>1)
+  //   return kTRUE;
 
   HM->FillHistosFull(15, eventWeight);
   FillHistoCounts(15, eventWeight);

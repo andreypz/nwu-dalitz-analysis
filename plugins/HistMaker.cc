@@ -299,11 +299,11 @@ void HistMaker::FillHistosFull(Int_t num, Double_t weight, string dir)
 
 
   hists->fill1DHist(_lPt1.Pt(),  Form("02_lPt1_pt_%s_cut%i", d, num), ";Leading lepton p_{T} (GeV)", 50, 0,100,    weight, dir);
-  hists->fill1DHist(_lPt1.Eta(), Form("02_lPt1_eta_%s_cut%i",d, num), ";Leading lepton eta",   50, -3.5,3.5, weight, dir);
-  hists->fill1DHist(_lPt1.Phi(), Form("02_lPt1_phi_%s_cut%i",d, num), ";Leading lepton phi",   50, -TMath::Pi(),TMath::Pi(), weight, dir);
+  hists->fill1DHist(_lPt1.Eta(), Form("02_lPt1_eta_%s_cut%i",d, num), ";Leading lepton eta", 50, -3.5,3.5, weight, dir);
+  hists->fill1DHist(_lPt1.Phi(), Form("02_lPt1_phi_%s_cut%i",d, num), ";Leading lepton phi", 50, -TMath::Pi(),TMath::Pi(), weight, dir);
   hists->fill1DHist(_lPt2.Pt(),  Form("02_lPt2_pt_%s_cut%i", d, num), ";Trailing lepton p_{T} (GeV)",50, 0,100,    weight, dir);
-  hists->fill1DHist(_lPt2.Eta(), Form("02_lPt2_eta_%s_cut%i",d, num), ";Trailing lepton eta",  50, -3.5,3.5, weight, dir);
-  hists->fill1DHist(_lPt2.Phi(), Form("02_lPt2_phi_%s_cut%i",d, num), ";Trailing lepton phi",  50, -TMath::Pi(),TMath::Pi(), weight, dir);
+  hists->fill1DHist(_lPt2.Eta(), Form("02_lPt2_eta_%s_cut%i",d, num), ";Trailing lepton eta", 50, -3.5,3.5, weight, dir);
+  hists->fill1DHist(_lPt2.Phi(), Form("02_lPt2_phi_%s_cut%i",d, num), ";Trailing lepton phi", 50, -TMath::Pi(),TMath::Pi(), weight, dir);
 
 
   //hists->fill2DHist(l1.Pt(),   l2.Pt(),   Form("h2D_l1_vs_l2_%s_cut%i",  d, num),
@@ -485,7 +485,8 @@ void HistMaker::FillHistosFull(Int_t num, Double_t weight, string dir)
       cosCS = sign*2*(diLep.Pz()*_gamma.E() - _gamma.Pz()*diLep.E())/(m*sqrt(m + pow(tri.Pt(),2)));
 
       hists->fill1DHist(cosCS, Form("FB_cosSC-diG_cut%i", num), ";cosCS(diLep,#gamma)",  100, -1, 1, weight,"Angles");
-      hists->fill2DHist(cosCS, m, Form("FB_cosSC-diG_vs_Mllg_cut%i", num), ";cosCS(diLep,#gamma);m_{ll#gamma}",  100, -1,1, 100,50,140, weight,"Angles");
+      hists->fill2DHist(cosCS, m, Form("FB_cosSC-diG_vs_Mllg_cut%i", num),
+			";cosCS(diLep,#gamma);m_{ll#gamma}",  100, -1,1, 100,50,140, weight,"Angles");
 
       float cosJ = _gamma.Dot(l1-l2)/_gamma.Dot(l1+l2);
       hists->fill1DHist(cosJ, Form("FB_cosJ_cut%i", num), ";cosJ",  100, -1, 1, weight,"Angles");

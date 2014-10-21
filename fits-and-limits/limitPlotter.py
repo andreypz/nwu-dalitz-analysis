@@ -29,7 +29,6 @@ plotBase = cf.get("path","htmlbase")+'/html/zgamma/dalitz/fits-'+s
 u.createDir(plotBase+'/Limits')
 
 massList  = [float(a) for a in (cf.get("fits","massList-more")).split(',')]
-#massList = [float(a) for a in u.drange(120,150,1)]
 doBlind   = int(cf.get("fits","blind"))
 doObs = not doBlind
 mllBins = u.mllBins()
@@ -73,6 +72,7 @@ if __name__ == "__main__":
 
       SM.append(10*SMtot*mllBins[int(mbin[1])][1]/dmScale)
       print '10x SM prediction:', SM[-1]
+
       f = TFile(s+"/"+thisFile,"open")
       # f.Print()
       tree = f.Get("limit")
@@ -137,7 +137,7 @@ if __name__ == "__main__":
   print '1 sig hi:', exp1SigHiErr
   print '2 sig hi:', exp2SigHiErr
 
-  print '\n 10x SM predict\n',SM
+  if opt.mll: print '\n 10x SM prediction \n',SM
 
   zeros_Array = np.zeros(len(xAxis),dtype = float)
   xAxis_Array = np.array(xAxis)
@@ -152,7 +152,7 @@ if __name__ == "__main__":
   exp1SigHiErr_Array  = np.array(exp1SigHiErr)
   exp2SigHiErr_Array  = np.array(exp2SigHiErr)
 
-  SM_Array = np.array(SM)
+  if opt.mll: SM_Array = np.array(SM)
 
   mg = TMultiGraph()
   mg.SetTitle('')
@@ -163,9 +163,10 @@ if __name__ == "__main__":
   twoSigma = TGraphAsymmErrors(nPoints,xAxis_Array,exp_Array,xErr_Array,xErr_Array,exp2SigLowErr_Array,exp2SigHiErr_Array)
   observed = TGraphAsymmErrors(nPoints,xAxis_Array,obs_Array,zeros_Array,zeros_Array,zeros_Array,zeros_Array)
 
-  standardM = TGraphAsymmErrors(nPoints,xAxis_Array,SM_Array,xErr_Array,xErr_Array,zeros_Array,zeros_Array)
+  if opt.mll:
+    standardM = TGraphAsymmErrors(nPoints,xAxis_Array,SM_Array,xErr_Array,xErr_Array,zeros_Array,zeros_Array)
 
-  expected.Print("all")
+  #expected.Print("all")
   if opt.mll:
     oneSigma.SetFillColor(kCyan-10)
     twoSigma.SetFillColor(kOrange-4)
@@ -183,14 +184,20 @@ if __name__ == "__main__":
   observed.SetLineWidth(2)
   observed.SetMarkerStyle(kFullCircle)
 
-  standardM.SetFillColor(kRed+1)
-  standardM.SetLineColor(kRed+1)
-  standardM.SetLineWidth(2)
-  #standardM.SetMarkerStyle(24)
+  if opt.mll:
+    standardM.SetFillColor(kRed+1)
+    standardM.SetLineColor(kRed+1)
+    standardM.SetLineWidth(2)
+    # standardM.SetMarkerStyle(24)
 
-  mg.Add(twoSigma,'P2')
-  mg.Add(oneSigma,'P2')
-  mg.Add(expected,'P')
+    mg.Add(twoSigma,'P2')
+    mg.Add(oneSigma,'P2')
+    mg.Add(expected,'P')
+  else:
+    mg.Add(twoSigma)
+    mg.Add(oneSigma)
+    mg.Add(expected)
+
   if doObs:
     mg.Add(observed)
   if opt.mll:
@@ -198,13 +205,14 @@ if __name__ == "__main__":
 
   mg.SetMinimum(0)
 
-  mg.Draw('A')
   if opt.mll:
+    mg.Draw('A')
     mg.GetXaxis().SetTitle('m_{#mu#mu} (GeV)')
     mg.GetXaxis().SetLimits(0, 80)
     c.SetLogx()
     #c.SetLogy()
   else:
+    mg.Draw('AL3')
     mg.GetXaxis().SetTitle('m_{H} (GeV)')
     mg.GetXaxis().SetLimits(massList[0],massList[-1])
   if opt.br:
@@ -221,6 +229,8 @@ if __name__ == "__main__":
     mg.GetYaxis().SetTitle('95% CL limit on #sigma#timesBR/#sigma_{SM}#times BR_{SM}')
     if opt.cat in ['EB','Combo']:
       mg.SetMaximum(31)
+      if 'el' in s:
+        mg.SetMaximum(81)
     elif opt.cat in ['EE','mll50']:
       mg.SetMaximum(150)
   gPad.RedrawAxis()
@@ -289,6 +299,7 @@ if __name__ == "__main__":
   elif opt.mll:
     leg.SetY1NDC(0.64)
     leg.AddEntry(standardM,"10 #times SM Higgs", "lp")
+
 
   for e in ['.png', '.pdf']:
     CMS_lumi(c, 2, 11)

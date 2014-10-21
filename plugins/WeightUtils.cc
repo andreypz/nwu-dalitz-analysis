@@ -11,6 +11,9 @@ WeightUtils::WeightUtils(string sampleName, string dataPeriod, string selection,
     rnGen   = new TRandom3();
     _puFile = new TFile("../data/puReweight.root", "OPEN");
 
+    //_jpsiFile = new TFile("../data/JPsiMuMu_MCReScale.root", "OPEN");
+    //h1_jpsi = (TH1D*)_jpsiFile->Get("jpsi");
+
     TString MC("S10");
     //TString MC("RD1");
     _phFileID = new TFile("../data/Photon_ID_CSEV_SF_Jan22rereco_Full2012_"+MC+"_MC_V01.root", "OPEN");
@@ -132,22 +135,22 @@ void WeightUtils::Initialize()
 
 void WeightUtils::SetDataBit(bool isRealData)
 {
-    _isRealData = isRealData;
+  _isRealData = isRealData;
 }
 
 void WeightUtils::SetDataPeriod(string dataPeriod)
 {
-    _dataPeriod = dataPeriod;
+  _dataPeriod = dataPeriod;
 }
 
 void WeightUtils::SetSampleName(string sampleName)
 {
-    _sampleName = sampleName;
+  _sampleName = sampleName;
 }
 
 void WeightUtils::SetSelection(string selection)
 {
-    _selection = selection;
+  _selection = selection;
 }
 
 float WeightUtils::GetTotalWeight(float nPV, int nJets, TLorentzVector l1, TLorentzVector l2)
@@ -164,6 +167,18 @@ float WeightUtils::GetTotalWeight(float nPV, int nJets, TLorentzVector l1, TLore
       //weight *= GammaWeight(nPV, nJets, l1);
     }
     return weight;
+}
+
+float WeightUtils::JPsiMuMuWeight(float m)
+{
+  float wJP = 1;
+  return wJP;
+
+  //if (_isRealData)
+  //return wJP;
+  //else
+  //wJP = h1_jpsi->GetBinContent(h1_jpsi->FindBin(m));
+  //return wJP;
 }
 
 
@@ -265,13 +280,15 @@ float WeightUtils::MuonSF(TLorentzVector mu)
 {
   if (_isRealData) return 1;
 
-  if (nPUtrue < 60 && (_dataPeriod == "2011" || _dataPeriod == "2011A" || _dataPeriod == "2011B"))
+  const size_t last = string::npos;
+
+  if (nPUtrue < 60 && _dataPeriod.find("2011")!=last)
     {
       Int_t myBin = h1_puReweight2011->FindBin(nPUtrue);
       _puWeight   = h1_puReweight2011->GetBinContent(myBin);
       //cout<<"period = "<<_dataPeriod<<"  Pu weight "<<_puWeight<<"  bin = "<<myBin<<endl;
     }
-  else if  (nPUtrue < 60 &&  _dataPeriod == "2012")
+  else if  (nPUtrue < 60 && _dataPeriod.find("2012")!=last)
     {
       Int_t myBin = h1_puReweight2012->FindBin(nPUtrue);
       _puWeight   = h1_puReweight2012->GetBinContent(myBin);
@@ -280,7 +297,7 @@ float WeightUtils::MuonSF(TLorentzVector mu)
       //cout<<"period = "<<_dataPeriod<<"  Pu weight "<<_puWeight<<"  bin = "<<myBin<<endl;
     }
   else
-    _puWeight = 1;
+    _puWeight = 0;
   //cout  <<" PU  weight = "<<_puWeight<<endl;
   return _puWeight;
 }

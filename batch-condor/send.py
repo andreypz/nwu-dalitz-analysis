@@ -193,9 +193,8 @@ if period =="2012":
         cfg('HiggsToJPsiGamma', DIR+'/nuTuples_v9.8_8TeV/dalitz-mu/HiggsToJPsiGamma',      1, 'hjp '+params),
         cfg('JPsiToMuMu-S10',   DIR+'/nuTuples_v9.8_8TeV/dalitz-mu/JPsiToMuMu_S10',        1,  'jp '+params),
         cfg('JPsiToMuMu_Pt20',  DIR+'/nuTuples_v9.8_8TeV/dalitz-mu/JPsiToMuMu_Pt20_RD2',   1,  'jp '+params),
-
         ])
-  if selection in ['mugamma']:
+
     params = 'dalitz '+selection+trig+period+gen + whereWeRun;
     signal.extend([
         cfg('ggH-mad120', DIR+'/nuTuples_v9.8_8TeV/dalitz-mu/ggHiggsToMuMuGamma_MH120',1, params),

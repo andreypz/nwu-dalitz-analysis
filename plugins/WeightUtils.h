@@ -33,7 +33,9 @@ class WeightUtils: public TObject {
   void  SetDataPeriod(string dataPeriod);
   void  SetSampleName(string sampleName);
   void  SetSelection(string selection);
-  
+
+  float JPsiMuMuWeight(float m);
+
   //Used in zgamma
   float PhotonSF(TLorentzVector ph);
   float MuonSF(TLorentzVector mu);
@@ -46,29 +48,30 @@ class WeightUtils: public TObject {
   //float VBFHiggsWeight(float genMass, int higgsMass);
   //float RecoilWeight(TLorentzVector recoilP4, TLorentzVector ZP4);
   float GetTotalWeight(float nPV, int nJets, TLorentzVector l1, TLorentzVector l2);
-  
+
   float HiggsMassLineShapeWeight(float, float);
   float GetElectronEff(TLorentzVector l1) const;
   float GetMuTriggerEff(TLorentzVector l1) const;
   float GetPhotonMass() const;
-  
+
   float GetGammaPtWeight() {return _gammaPtWeight;}
-  
-  ClassDef(WeightUtils, 0);
-  
+
+  ClassDef(WeightUtils, 1);
+
  private:
   //input parameters
   string _dataPeriod;
   string _sampleName;
   string _selection;
   bool   _isRealData;
-  
+
   //sources
   TFile *_puFile;
   TFile *_phFileID;
   //TFile *_muFileID;
   TFile *_muFileISO;
- 
+  TFile *_jpsiFile;
+
   TH2D * h2_photonIDSF;
   TH2D * h2_photonCSEVSF;
 
@@ -90,17 +93,18 @@ class WeightUtils: public TObject {
   TGraph * gr_muonISOSF_eta21;
   TGraph * gr_muonISOSF_eta24;
 
- //TH1D  *h1_eGammaPt;   
-  //TH1D  *h1_muGammaPt;  
-  //TH1D  *h1_eGammaPV;   
-  //TH1D  *h1_muGammaPV;  
-  //TH1D  *h1_eGammaMass; 
+ //TH1D  *h1_eGammaPt;
+  //TH1D  *h1_muGammaPt;
+  //TH1D  *h1_eGammaPV;
+  //TH1D  *h1_muGammaPV;
+  //TH1D  *h1_eGammaMass;
   //TH1D  *h1_muGammaMass;
+  TH1D  *h1_jpsi;
   TH1D  *h1_puReweight2011;
   TH1D  *h1_puReweight2012;
-  
+
   TH1D  *h1_Higgs[8];
-  
+
   //weights
   float _photonIDWeight;
   float _puWeight;
@@ -114,7 +118,7 @@ class WeightUtils: public TObject {
   float _gammaJetWeight;
   float _recoilLongWeight;
   float _recoilTransWeight;
-  
+
   //Misc
   TRandom3* rnGen;
 };

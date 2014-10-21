@@ -23,24 +23,27 @@ s = cf.get("path","ver")
 # Pull the info out, make the cards, write them #
 # Run with: combine -M Asymptotic datacard.txt  #
 # ################################################
+
+#massList   = ['%.1f'%(a) for a in u.drange(120,150,1.0)]
+massList = ['125.0']
+
 brTag = ''
-hjp = 0
 
 Ext = options.ext
 
 brLLG = '1.10'
 # Unsertainities to be put in the datacard:
-lumi    = '1.026'
-muID    = '1.110'
-muISO   = '1.003'
-muTRIG  = '1.040'
-phoID   = '1.006'
-phoTRIG = '1.020'
-PU      = '1.008'
+lumi     = '1.026'
+muID     = '1.110'
+muISO    = '1.003'
+muTRIG   = '1.040'
+phoID    = '1.006'
+phoTRIG  = '1.020'
+PU       = '1.008'
+meanUnc  = '0.005'
+sigmaUnc = '0.100'
 
 proc = {'gg':'ggH', 'vbf':'qqH','v':'WH','hjp':'hjp'}
-massList   = ['%.1f'%(a) for a in u.drange(120,150,1.0)]
-massList = ['125.0']
 mllBins = u.mllBins()
 
 #csBR = {}
@@ -67,6 +70,8 @@ def makeCards(subdir):
   leptonList = [a.strip() for a in (cf.get("fits","leptonList")).split(',')]
   catList    = [a.strip() for a in (cf.get("fits","catList")).split(',')]
   sigNameList= [a.strip() for a in (cf.get("fits","signameList")).split(',')]
+  hjp = 0
+  if 'hjp' in sigNameList:  hjp = 1
 
   for year in yearList:
     for lepton in leptonList:
@@ -195,8 +200,8 @@ def makeCards(subdir):
           card.write(nSubLine2.format(*(['CMS_hllg_PU',    'lnN']+nProc*[PU])))
 
           for sig in sigNameList:
-            card.write('{0:<40} {1:<10} {2:^10} {3:^10}\n'.format('sig_'+sig+'_mShift_'    +channel,'param', 1, 0.005))
-            card.write('{0:<40} {1:<10} {2:^10} {3:^10}\n'.format('sig_'+sig+'_sigmaShift_'+channel,'param', 1, 0.05))
+            card.write('{0:<40} {1:<10} {2:^10} {3:^10}\n'.format('sig_'+sig+'_mShift_'    +channel,'param', 1, meanUnc))
+            card.write('{0:<40} {1:<10} {2:^10} {3:^10}\n'.format('sig_'+sig+'_sigmaShift_'+channel,'param', 1, sigmaUnc))
 
           for param in bkgParams[:-1]:
             card.write('{0:<45} {1:<15}\n'.format('bkg_'+param+'_'+channel,'flatParam'))
