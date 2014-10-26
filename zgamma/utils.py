@@ -30,7 +30,7 @@ lamb = RooRealVar("lamb","lamb",-0.5, -20,1)
 #mean_res  = RooRealVar("mean_res", "mean_res", 3.0, 0.0, 20.0)
 #sigma_res = RooRealVar("sigma_res","sigma_res",1.0, 0.0, 10.0)
 noOverflowList  = [a.strip() for a in (conf.get("selection","noOverflowList")).split(',')]
-print 'No overflow list = ', noOverflowList
+print 'No-Overflow list = ', noOverflowList
 
 def mllBins():
   """First number is the mLL cut threshold, second number is the fraction of the cross section"""
@@ -94,7 +94,7 @@ def getColors(sample):
 
 def getTotalEvents(f):
   ev = f.Get("Counts/evt_byCut")
-  Nev = ev.GetBinContent(2)
+  Nev = ev.GetBinContent(1)
   return Nev
 
 
@@ -271,7 +271,7 @@ def drawAllInFile(f1, name1, bZip, f3, name3, myDir, path, N, howToScale="none",
   print 'myDir is ', myDir
   if f1!=None and not f1.IsZombie():
     f1.cd(myDir)
-  elif bZip!='':
+  elif bZip!=None:
     print bZip[0]
     bZip[0][1].cd(myDir)
   elif f3!=None:
@@ -417,20 +417,27 @@ def drawAllInFile(f1, name1, bZip, f3, name3, myDir, path, N, howToScale="none",
           else:
             h1.SetMinimum(0)
         if "ll_deltaR_" in histoName:
-          # h1.SetAxisRange(0,1,"X")
-          h1.SetXTitle("#DeltaR(#mu_{1}, #mu_{2})")
+          if not 'el' in getSelection():
+            h1.SetXTitle("#DeltaR(#mu_{1}, #mu_{2})")
           doPdf=1
-        if "gamma_pt__" in histoName:
+        if "ptDaleOverGamma" in histoName:
+          doPdf=1
+        if "dale_pt" in histoName:
+          doPdf=1
+        if "gamma_pt_" in histoName:
           h1.SetXTitle("Photon p_{T} (GeV)")
           doPdf=1
-        if "lPt1_pt__" in histoName:
-          h1.SetXTitle("Leading muon p_{T} (GeV)")
+        if "lPt1_pt_" in histoName:
+          if not 'el' in getSelection():
+            h1.SetXTitle("Leading muon p_{T} (GeV)")
           doPdf=1
-        if "lPt2_pt__" in histoName:
-          h1.SetXTitle("Trailing muon p_{T} (GeV)")
+        if "gamma_deltaR" in histoName:
+          h1.SetAxisRange(1,5,"X")
+          doPdf=1
+        if "deltaR_dale_gamma" in histoName:
+          h1.SetAxisRange(1,5,"X")
           doPdf=1
 
-        # doPdf = 1
       #if "tri_mass" in k1.GetName() and name1 not in ["madgra","mcfm"]:
       #
       #if "h_mass" in k1.GetName():
@@ -443,9 +450,9 @@ def drawAllInFile(f1, name1, bZip, f3, name3, myDir, path, N, howToScale="none",
 
       leg.Clear()
       leg.SetTextSize(0.03)
-      if bZip!='' and len(bZip)>1: # need more columns if there are backgrounds
-        leg = TLegend(0.6,0.7,0.93,0.92)
-        #leg = TLegend(0.55,0.7,0.99,0.92)
+      if bZip!=None and len(bZip)>1: # need more columns if there are backgrounds
+        leg = TLegend(0.6,0.7,0.99,0.92)
+        leg.SetTextSize(0.02)
         leg.Clear()
         leg.SetNColumns(2)
         leg.SetTextSize(0.04)
@@ -454,7 +461,7 @@ def drawAllInFile(f1, name1, bZip, f3, name3, myDir, path, N, howToScale="none",
         #print 'DBG lpe option in legentry', h1, h1.GetEntries()
         leg.AddEntry(h1,name1, "lpe")
 
-      if bZip!='':
+      if bZip!=None:
         #print ' if bZip!=None'
         #print bZip
         stack = makeStack(bZip, myDir, histoName, leg, lumi, howToScale, norm1)
@@ -465,7 +472,7 @@ def drawAllInFile(f1, name1, bZip, f3, name3, myDir, path, N, howToScale="none",
         h3.Draw("sames hist")
         h3.SetLineWidth(2)
         #h3.SetLineColor(kRed-9)
-        col = getColors('signal-'+getSelection())
+        col = getColors('signal-'+getSelection()[0:2])
         if 'J/Psi' in name3:
           col = getColors('signal-jp')
         h3.SetLineColor(col[0])
@@ -478,7 +485,8 @@ def drawAllInFile(f1, name1, bZip, f3, name3, myDir, path, N, howToScale="none",
         if howToScale=="lumi":
           # print "extract from name =", extract_from_name
           if len(extract_scale_from_name) != 0:
-            h3.Scale(int(extract_scale_from_name[0]))
+            scale = int(extract_scale_from_name[0])
+            h3.Scale(scale)
         elif howToScale=="norm" and norm3!=0:
           h3.Scale(1./norm3)
         elif howToScale=="toData" and norm3!=0:
@@ -525,7 +533,7 @@ def drawAllInFile(f1, name1, bZip, f3, name3, myDir, path, N, howToScale="none",
 
       # mainHist.Draw('hist')
       mainHist.Draw('e1p')
-      if bZip!='':
+      if bZip!=None:
         if howToScale=='lumi':
           stack.Draw('same hist')
           hmaxs.append(stack.GetMaximum())
@@ -574,10 +582,14 @@ def drawAllInFile(f1, name1, bZip, f3, name3, myDir, path, N, howToScale="none",
         mainHist.SetNdivisions(505,'X')
         doPdf=1
 
-      if "diLep_mass_low_" in histoName:
-        #h1.Rebin(2)
-        #h3.Rebin(2)
-        #mainHist.SetXTitle("m_{#mu#mu} (GeV)")
+      if "diLep_mass_0to20" in histoName:
+        mainHist.SetMaximum(1.2*h1.GetMaximum())
+        doPdf=1
+      if "diLep_mass_jpsi" in histoName:
+        mainHist.SetMaximum(1.1*h1.GetMaximum())
+        doPdf=1
+      if "diLep_mass_low" in histoName:
+        mainHist.SetXTitle("m_{ee} (GeV)")
         mainHist.SetMaximum(1.2*h1.GetMaximum())
         doPdf=1
 
@@ -699,6 +711,13 @@ def drawAllInFile(f1, name1, bZip, f3, name3, myDir, path, N, howToScale="none",
           lat.DrawLatex(0.2,0.50, '#chi^{2} = %.0f'%(r.Chi2()))
           # print ' Fit parameters: ', r.Parameter(1), r.Parameter(2)
 
+      if "lPt2_pt_" in histoName:
+        if not 'el' in getSelection():
+          h1.SetXTitle("Trailing muon p_{T} (GeV)")
+        mm = h1.GetMaximum()
+        h1.SetMaximum(1.2*mm)
+        h1.SetAxisRange(0,60,"X")
+        doPdf=1
       '''
       if 'diLep_mass_jpsi_' in histoName:
         gStyle.SetOptStat(1111)
@@ -806,7 +825,7 @@ def yieldsTable(yieldList, names, num=True):
   # print t
   return t
 
-def makeTable(table, name, opt="tex"):
+def makeTable(table, name, opt="tex", precision='%.2f'):
     print "Making sure that the list is alright"
     n_row = len(table)
     if n_row==0: return
@@ -856,7 +875,7 @@ def makeTable(table, name, opt="tex"):
           if c==2:
             myTable+="%.0f" % (val)
           else:
-            myTable+="%.2f" % (val)
+            myTable+=precision % (val)
         else:
           myTable+=str(val)
         if c!=n_col-1:
@@ -883,9 +902,7 @@ def getYields(f, sample='ggH-125', doLumiScale=False):
   y = []
   scale=1
   if doLumiScale: # only assume signal MC for now
-    print '\n ***** FIXME FIXME *****'
     Nev = getTotalEvents(f)
-    # it is supposed to be bin 1 for total event. Not working for some reason!
 
     if any(substring in sample for substring in ['ggH','vbfH','vH']):
       cro = getCS(sample, sel)

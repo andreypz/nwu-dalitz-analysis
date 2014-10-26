@@ -305,7 +305,6 @@ Bool_t zgamma::Process(Long64_t entry)
 	gen_gamma = *thisParticle;
 
 
-
       // **** Find FSR PHOTONS *** //
 
       if (thisParticle->GetPDGId()==22 //&& thisParticle->GetStatus()==1
@@ -886,12 +885,14 @@ Bool_t zgamma::Process(Long64_t entry)
   //  break;}
   //}
 
+  //if (Mllg<60 || Mllg>120)
   if (Mllg<110 || Mllg>170)
     return kTRUE;
 
   HM->FillHistosFull(5, eventWeight);
   FillHistoCounts(5, eventWeight);
-  CountEvents(5, "110 < m(llg) < 170; m(ll) < 50", fcuts);
+  CountEvents(5, "76 < m(llg) < 106; m(ll) < 50", fcuts);
+  //CountEvents(5, "110 < m(llg) < 170; m(ll) < 50", fcuts);
 
   if (lPt1.DeltaR(gamma)<1.0 || lPt2.DeltaR(gamma)<1.0) return kTRUE;
   if ( (Mll>2.9 && Mll<3.3) || (Mll>9.3 && Mll<9.7)) return kTRUE; //jpsi and upsilon removeal

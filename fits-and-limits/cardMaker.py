@@ -24,8 +24,8 @@ s = cf.get("path","ver")
 # Run with: combine -M Asymptotic datacard.txt  #
 # ################################################
 
-#massList   = ['%.1f'%(a) for a in u.drange(120,150,1.0)]
-massList = ['125.0']
+massList   = ['%.1f'%(a) for a in u.drange(120,150,1.0)]
+#massList = ['125.0']
 
 brTag = ''
 
@@ -60,7 +60,7 @@ introMessage = ('# This is a card produced by a cardMaker.py script using the in
 
 
 if options.br:
-  f = TFile('../data/Dalitz_BR50.root','READ')
+  f = TFile('../data/Dalitz_BR20.root','READ')
   g = f.Get('csbr_mu')
   fit = g.GetFunction('pol4')
   #g.Print('all')

@@ -332,12 +332,11 @@ bool ObjectID::PassDalitzEleID(const TCElectron& el, TVector3 *pv, TString n, fl
       vector<TCElectron::Track> trk = el.GetTracks();
       vector<TCEGamma> sc = el.BaseSC();
 
-      //if (_eventNumber == 154245 || _eventNumber == 154245) {
+      //if (_eventNumber == 131810 || _eventNumber == 131886) {
       //cout<<_eventNumber<<" DBG DAlitz MVA ID "<<trk.size() <<"  "<<sc.size()<<endl;
-
-      //sc[0].Dump();
-      //sc[1].Dump();
-      //sc[2].Dump();
+	//sc[0].Dump();
+	//sc[1].Dump();
+	//sc[2].Dump();
       //}
 
       if (trk.size() < 2 || sc.size()<2)
@@ -387,7 +386,6 @@ bool ObjectID::PassDalitzEleID(const TCElectron& el, TVector3 *pv, TString n, fl
 	tmvaDalitz->BookMVA("BDT", "../data/ElectronDalitzMVAID.xml");
       }
 
-      //cout<<"DBG MVA ID "<<trk[0].Pt()<<endl;
       r9_ = el.R9();
       rho2012_    = _rhoFactor;
       eleBCS25_1_ = sc[0].E2x5()/sc[0].E5x5();
@@ -410,6 +408,8 @@ bool ObjectID::PassDalitzEleID(const TCElectron& el, TVector3 *pv, TString n, fl
       eleBCS15_2_ = sc[1].E1x5()/sc[1].E5x5();
 
       mvaScore = tmvaDalitz->EvaluateMVA("BDT");
+
+      //cout<<"\t *** DBG MVA ID score: "<<mvaScore<<"  gsf1 pt="<<trk[0].Pt()<<endl;
       if (mvaScore > _DAleMvaCut)
 	return true;
       else
@@ -797,8 +797,8 @@ void ObjectID::ElectronDump(const TCElectron& el)
   cout<<"SCEtaWidth: "<<el.SCEtaWidth()<<endl;
   cout<<"SCPhiWidth: "<<el.SCPhiWidth()<<endl;
   cout<<"HoverE:     "<<el.HadOverEm()<<endl;
-  cout<<"EoverPt:    "<<el.SCEnergy()/(trk[0]+trk[1]).Pt()<<endl;
-  cout<<"E, Pt: "<< el.SCEnergy() <<" "<<(trk[0]+trk[1]).Pt()<<endl;
+  cout<<"EoverPt:    "<<el.SCRawEnergy()/(trk[0]+trk[1]).Pt()<<endl;
+  cout<<"E, ERaw Pt: "<<el.SCEnergy() <<" "<<el.SCRawEnergy()<<" "<<(trk[0]+trk[1]).Pt()<<endl;
   cout<<"dEtaAtVtx   "<<el.SCDeltaEta()<<endl;
   cout<<"dPhiAtVtx:  "<<el.SCDeltaPhi()<<endl;
   cout<<"EcalEnPin:  "<<el.InverseEnergyMomentumDiff()<<endl;

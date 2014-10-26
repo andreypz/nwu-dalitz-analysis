@@ -36,13 +36,13 @@ mllBins = u.mllBins()
 
 EBetaCut = 1.4442
 EEetaCut = 1.566
-ptMllgCut  = 0.0
-ptGammaCut = 40
-ptDiLepCut = 40
+ptMllgCut  = 0.3
+ptGammaCut = 0
+ptDiLepCut = 0
 ptSumLep   = 0
 
 lowCutOff  = 110
-highCutOff = 150
+highCutOff = 170
 
 doBlind    = int(cf.get("fits","blind"))
 hjp=0
@@ -57,8 +57,8 @@ debugPlots = 0
 noSFweight = 0
 rootrace   = 0
 if rootrace: RooTrace.active(kTRUE)
-proc = {'gg':'ggH', 'vbf':'qqH','v':'WH','hjp':'hjp'}
-
+proc = {'ggH':'ggH', 'vbf':'qqH','vh':'WH','hjp':'hjp'}
+proc2 = {'gg':'ggH', 'vbf':'vbf','v':'vh','hjp':'hjp'}
 # OK listen, we're gunna need to do some bullshit just to get a uniform RooRealVar name for our data objects.
 # So we'll loop through the Branch, set mzg to the event value (if it's in range), and add that to our RooDataSet.
 # This way, we make a RooDataSet that uses our 'CMS_hzg_mass' variable.
@@ -132,7 +132,7 @@ def doInitialFits(subdir):
         dataDict[l+y] = TFile(basePath+'m_Data_'+tag+'_'+y+'.root','r')
         for s in sigNameList:
           for m in massList:
-            signalDict[s+'_'+l+y+'_M'+m] = TFile(basePath+tag+'_'+y+'/hhhh_'+proc[s]+'-mad'+m+'_1.root','r')
+            signalDict[s+'_'+l+y+'_M'+m] = TFile(basePath+tag+'_'+y+'/hhhh_'+proc2[s]+'-mad'+m+'_1.root','r')
   print "\t ===  All files are set === \n"
 
   treeName = 'apzTree/apzTree'
@@ -193,11 +193,10 @@ def doInitialFits(subdir):
             sig_argSW = RooArgSet(mzg,weight)
             sig_ds    = RooDataSet(sigName,sigName,sig_argSW,'Weight')
 
+            print signalTree, "A signal tree", prod, '  categ=',cat, "mass =", mass
             Nev = u.getTotalEvents(signalDict[prod+"_"+lepton+year+"_M"+mass])
             lumiWeight = LumiXSWeighter(int(mass), prod, lepton, Nev)
-            print signalTree, "A signal tree", prod, '  categ=',cat, "mass =", mass
-
-
+            print 'Nev = ', Nev
             LoopOverTree(signalTree, cat, mzg, sig_argSW, sig_ds, lumiWeight)
 
             #raw_input()

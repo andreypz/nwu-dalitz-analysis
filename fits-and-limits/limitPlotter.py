@@ -230,7 +230,7 @@ if __name__ == "__main__":
     if opt.cat in ['EB','Combo']:
       mg.SetMaximum(31)
       if 'el' in s:
-        mg.SetMaximum(81)
+        mg.SetMaximum(62)
     elif opt.cat in ['EE','mll50']:
       mg.SetMaximum(150)
   gPad.RedrawAxis()

@@ -16,10 +16,10 @@ import ConfigParser as cp
 cf = cp.ConfigParser()
 cf.read('config.cfg')
 
-massList0  = ['125']
-massList   = ['125.0']
-#massList0  = ['120','125','130','135','140','145','150']
-#massList   = ['%.1f'%(a) for a in u.drange(120,150,1.0)]
+#massList0  = ['125']
+#massList   = ['125.0']
+massList0  = ['120','125','130','135','140','145','150']
+massList   = ['%.1f'%(a) for a in u.drange(120,150,1.0)]
 
 myFunc = 'CBGM' #Crystall-Ball + Gauss (with same Mean)
 

@@ -20,6 +20,7 @@ parser.add_option("--bkg",  dest="bkg",  action="store_true", default=False, hel
 parser.add_option("--qcd",  dest="qcd",  action="store_true", default=False, help="Include QCD samples")
 parser.add_option("--mcfm", dest="mcfm", action="store_true", default=False, help="Use MCFM  as a signal")
 
+parser.add_option("-e","--extra",dest="extra",action="store_true", default=False, help="Make all extra plots")
 parser.add_option("--fit",dest="fit",action="store_true", default=False, help="Do the various fits")
 parser.add_option("--apz",dest="apz",action="store_true", default=False, help="Discover new particle (requires apzTree)")
 parser.add_option("--zjp",dest="zjp",action="store_true", default=False, help="Study J/Psi region and more (requires apzTree)")
@@ -144,10 +145,12 @@ if __name__ == "__main__":
       bkgNames.append('QCD')
       bkgFiles.append(qcdSamples)
 
-    yields_bkg  = u.getYields(bkgFiles[0],bkgNames[0],True)
+    yields_bkg = []
+    for b in xrange(len(bkgNames)):
+      yields_bkg.append(u.getYields(bkgFiles[b],bkgNames[b],True))
 
     bkgZip = zip(bkgNames, bkgFiles)
-  else: bkgZip = ''
+  else: bkgZip = None
 
   sigGG  = {}
   sigVBF = {}
@@ -198,7 +201,7 @@ if __name__ == "__main__":
   #path = pathBase+"/"+subdir
 
 
-  sigName = '#splitline{XX x Signal}{m_{H}=125 GeV}'
+  sigName = '#splitline{20 x Signal}{m_{H}=125 GeV}'
   if opt.zjp: sigName= '#splitline{50 x Signal}{Z #rightarrow J/Psi #gamma}'
   if opt.hjp: sigName= 'h #rightarrow J/Psi #gamma'
 
@@ -221,24 +224,25 @@ if __name__ == "__main__":
 
     if opt.hjp:
       u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "Main", path, cut, "toDataInt", doFits=opt.fit)
-      #u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "Main", path, cut, "toDataInt", doFits=opt.fit)
     else:
-      # u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "", path, cut, "lumi")
-      u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "Main", path, cut, "toDataInt", doFits=opt.fit)
-      # u.drawAllInFile(dataFile, "Data", bkgZip, None, '', "", path, cut, "lumi")
+      if opt.bkg:
+        u.drawAllInFile(dataFile, "Data", bkgZip, None, sigName, "Main", path, cut, "lumi")
+        #u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "Main", path, cut, "lumi")
+      else:
+        u.drawAllInFile(dataFile, "Data", None, sigFile, sigName, "Main", path, cut, "toDataInt", doFits=opt.fit)
 
-    """
-    for n in ['Angles']:
-      u.drawAllInFile(dataFile, "Data",bkgZip,sigFile,"signal", n, pathBase+"/"+n, cut, "norm1")
+    if opt.extra:
+      for n in ['Angles','N']:
+        u.drawAllInFile(dataFile, "Data",bkgZip,sigFile,"signal", n, pathBase+"/"+n, cut, "lumi")
 
-    if cut in ['6','8']:
-      for n in ['Photon','Photon-EGamma','N']:
-        u.drawAllInFile(dataFile, "Data",bkgZip,sigFile,"signal", n, pathBase+"/"+n, None, "norm1")
+      if cut in ['8','9']:
+        for n in ['Photon','Photon-EGamma']:
+          u.drawAllInFile(dataFile, "Data",bkgZip,sigFile,"signal", n, pathBase+"/"+n, None, "norm")
 
-      if sel in ["mugamma","jp-mugamma"]:
-        for n in ['Muons','Mu-after']:
-          u.drawAllInFile(dataFile, "Data",bkgZip,sigFile,"signal", n, pathBase+"/"+n, None, "norm1")
-    """
+        if sel in ["mugamma","jp-mugamma"]:
+          for n in ['Muons','Mu-after']:
+            u.drawAllInFile(dataFile, "Data",bkgZip,sigFile,"signal", n, pathBase+"/"+n, None, "norm")
+
   elif cut in ['14','15','16']:
     u.drawAllInFile(dataFile, "data",bkgZip,None,"",
                     "AlphaPiZ",pathBase+"/apz/", cut,"norm2")
@@ -310,7 +314,6 @@ if __name__ == "__main__":
 
       alphaPiZ2(data, c1, TCut('m123>110 && m123<170 && pt12/m123>0.3 && pt3/m123>0.3'),pathBase+"/"+ss+"-APZ-7/")
 
-      """
       alphaPiZ(data, c1, TCut('ph_pt/m_llg>0.3 && di_pt/m_llg>0.3 && m_llg>100&&m_llg<170'),
                pathBase+"/alphaPiZ-0/")
       alphaPiZ(data, c1, TCut(''),                                                            pathBase+"/alphaPiZ-1/")
@@ -322,7 +325,6 @@ if __name__ == "__main__":
 
       alphaPiZ(data, c1, TCut('ph_pt/m_llg>0.30 && di_pt/m_llg>0.30 && m_llg>121&&m_llg<131'),pathBase+"/alphaPiZ-7/")
       alphaPiZ(data, c1, TCut('ph_pt/m_llg>0.30 && di_pt/m_llg>0.30 && m_llg>85&&m_llg<96'),  pathBase+"/alphaPiZ-8/")
-      """
 
   '''
   htmp = sigFileGG.Get("02_lPt2_pt__cut"+cut)
@@ -362,31 +364,6 @@ if __name__ == "__main__":
   hc8 = dataFile.Get("tri_mass80__cut8").Integral(36,40)
   hc9 = dataFile.Get("tri_mass80__cut9").Integral(36,40)
   print "Yields in bins that supposed to correspond to [122,128] window:\n",hc7, hc8, hc9
-
-
-  m1 = 110.
-  m2 = 170.
-
-  for r in ["0"]:
-      etaCut = TCut("")
-      if r=="EB":
-          etaCut = "fabs(ph_eta)<1"
-      elif r=="EE":
-          etaCut = "fabs(ph_eta)>1"
-
-      cut = TCut("m_llg>"+str(m1)+"&&m_llg<"+str(m2))
-      cut += etaCut
-      treeda = dataFile.Get("fitTree/fitTree")
-      treeda.Draw("m_llg>>hda", cut)
-
-      treesi = sigFile.Get("fitTree/fitTree")
-      treesi.Draw("m_llg>>hsi", cut)
-
-      yda = hda.Integral()
-      ysi = hsi.Integral()
-      ysi_sc = ysi*scale
-      print 'yields inside ', m1,m2, ' r=',r, 'data=', yda, 'signal=',ysi_sc
-      print "significance=", ysi_sc/sqrt(ysi_sc+yda)
 
   '''
   '''
@@ -438,13 +415,9 @@ if __name__ == "__main__":
 
 
   if sel in ['jp-mugamma']:
-    if opt.hjp:
-      print None
-      u.setCutListFile(hPath+"/"+sel+"_"+period+"/out_cutlist_HiggsToJPsiGamma_1.txt")
-    if opt.zjp:
-      u.setCutListFile(hPath+"/"+sel+"_"+period+"/out_cutlist_ZtoJPsiGamma_1.txt")
-  else:
-    u.setCutListFile(hPath+"/"+sel+"_"+period+"/out_cutlist_ggH-mad120_1.txt")
+    if opt.hjp: u.setCutListFile(hPath+"/"+sel+"_"+period+"/out_cutlist_HiggsToJPsiGamma_1.txt")
+    if opt.zjp: u.setCutListFile(hPath+"/"+sel+"_"+period+"/out_cutlist_ZtoJPsiGamma_1.txt")
+  else:         u.setCutListFile(hPath+"/"+sel+"_"+period+"/out_cutlist_ggH-mad120_1.txt")
 
 
   plot_types =[]
@@ -453,13 +426,13 @@ if __name__ == "__main__":
     if os.path.isdir(pathBase+"/"+d):
       plot_types.append(d)
 
-    #plot_types
 
   print ' Signal yields: '
   print yields_sig
 
   if doBkg:
-    table_all  = u.yieldsTable([yields_data,yields_bkg,yields_sig], sel)
+    names = ['Data','ZG','ZJet', 'Signal @125']
+    table_all  = u.yieldsTable([yields_data,yields_bkg[0], yields_bkg[1],yields_sig], names)
     #table_all  = u.yieldsTable([yields_data,yields_bkg,yields_sig, yields_ggH,yields_vbf, yields_vh], sel)
   else:
     if opt.zjp or opt.hjp:
@@ -471,7 +444,7 @@ if __name__ == "__main__":
       table_all  = u.yieldsTable([yields_data,yields_sig, yields_ggH,yields_vbf, yields_vh], names)
 
 
-  u.makeTable(table_all,"all", "html")
+  u.makeTable(table_all,"all", "html", precision='%.2f')
   u.makeTable(table_all,"all", "twiki")
   u.makeTable(table_all,"all", "tex")
 

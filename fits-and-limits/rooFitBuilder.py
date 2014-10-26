@@ -553,49 +553,49 @@ class FitBuilder:
     self.FitNdofDict['Laurent'] = order
     return Laurent
 
-  def BuildBern2(self,p0 = 1 ,p1 = 0.1, p1Low = 1e-3, p1High = 1, p2 = 0.1, p2Low = 1e-3, p2High = 1):
-    p0Var = RooRealVar('p0Bern2_'+self.suffix, 'p0Bern2_'+self.suffix,p0)
+  def BuildBern2(self, p1 = 0.1, p1Low = 1e-3, p1High = 1, p2 = 0.1, p2Low = 1e-3, p2High = 1):
+    #p0Var = RooRealVar('p0Bern2_'+self.suffix, 'p0Bern2_'+self.suffix,p0)
     p1Var = RooRealVar('p1Bern2_'+self.suffix, 'p1Bern2_'+self.suffix,p1,p1Low,p1High)
     p2Var = RooRealVar('p2Bern2_'+self.suffix, 'p2Bern2_'+self.suffix,p2,p2Low,p2High)
-    Bern2 = RooBernstein('Bern2_'+self.suffix,'Bern2_'+self.suffix,self.mzg,RooArgList(p0Var,p1Var,p2Var))
-    SetOwnership(p0Var,0)
+    Bern2 = RooBernstein('Bern2_'+self.suffix,'Bern2_'+self.suffix,
+                         self.mzg,RooArgList(RooFit.RooConst(1.0),p1Var,p2Var))
+    #SetOwnership(p0Var,0)
     SetOwnership(p1Var,0)
     SetOwnership(p2Var,0)
     return Bern2
 
-  def BuildBern3(self,p0 = 1 ,p1 = 0.1, p1Low =1e-3, p1High = 1, p2 = 0.1, p2Low =1e-3, p2High = 1, p3 = 0.1, p3Low =1e-3, p3High = 1):
-    p0Var = RooRealVar('p0Bern3_'+self.suffix, 'p0Bern3_'+self.suffix,p0)
+  def BuildBern3(self, p1 = 0.1, p1Low =1e-3, p1High = 1, p2 = 0.1, p2Low =1e-3, p2High = 1,
+                 p3 = 0.1, p3Low =1e-3, p3High = 1):
+    #p0Var = RooRealVar('p0Bern3_'+self.suffix, 'p0Bern3_'+self.suffix,p0)
     p1Var = RooRealVar('p1Bern3_'+self.suffix, 'p1Bern3_'+self.suffix,p1,p1Low,p1High)
     p2Var = RooRealVar('p2Bern3_'+self.suffix, 'p2Bern3_'+self.suffix,p2,p2Low,p2High)
     p3Var = RooRealVar('p3Bern3_'+self.suffix, 'p3Bern3_'+self.suffix,p3,p3Low,p3High)
-    #p1Var = RooRealVar('p1Bern3_'+self.suffix, 'p1Bern3_'+self.suffix,p1)
-    #p2Var = RooRealVar('p2Bern3_'+self.suffix, 'p2Bern3_'+self.suffix,p2)
-    #p3Var = RooRealVar('p3Bern3_'+self.suffix, 'p3Bern3_'+self.suffix,p3)
-    Bern3 = RooBernstein('Bern3_'+self.suffix,'Bern3_'+self.suffix,self.mzg,RooArgList(p0Var,p1Var,p2Var, p3Var))
-    SetOwnership(p0Var,0)
+    Bern3 = RooBernstein('Bern3_'+self.suffix,'Bern3_'+self.suffix,
+                         self.mzg,RooArgList(RooFit.RooConst(1.0),p1Var,p2Var, p3Var))
+    #SetOwnership(p0Var,0)
     SetOwnership(p1Var,0)
     SetOwnership(p2Var,0)
     SetOwnership(p3Var,0)
     return Bern3
 
-  def BuildBern4(self,p0 = 1 ,p1 = 0.1, p1Low = 1e-3, p1High = 1, p2 = 0.1, p2Low = 1e-3, p2High = 1, p3 = 0.1, p3Low = 1e-3, p3High = 1,
-                 p4 = 0.1, p4Low = 1e-3, p4High = 1):
-
-    p0Var = RooRealVar('p0Bern4_'+self.suffix, 'p0Bern4_'+self.suffix,p0)
+  def BuildBern4(self, p1 = 0.1, p1Low = 1e-3, p1High = 1, p2 = 0.1, p2Low = 1e-3, p2High = 1,
+                 p3 = 0.1, p3Low = 1e-3, p3High = 1, p4 = 0.1, p4Low = 1e-3, p4High = 1):
+    #p0Var = RooRealVar('p0Bern4_'+self.suffix, 'p0Bern4_'+self.suffix,p0)
     p1Var = RooRealVar('p1Bern4_'+self.suffix, 'p1Bern4_'+self.suffix,p1,p1Low,p1High)
     p2Var = RooRealVar('p2Bern4_'+self.suffix, 'p2Bern4_'+self.suffix,p2,p2Low,p2High)
     p3Var = RooRealVar('p3Bern4_'+self.suffix, 'p3Bern4_'+self.suffix,p3,p3Low,p3High)
     p4Var = RooRealVar('p4Bern4_'+self.suffix, 'p4Bern4_'+self.suffix,p4,p4Low,p4High)
-    Bern4 = RooBernstein('Bern4_'+self.suffix,'Bern4_'+self.suffix,self.mzg,RooArgList(p0Var,p1Var,p2Var, p3Var, p4Var))
-    SetOwnership(p0Var,0)
+    Bern4 = RooBernstein('Bern4_'+self.suffix,'Bern4_'+self.suffix,
+                         self.mzg,RooArgList(RooFit.RooConst(1.0),p1Var,p2Var, p3Var, p4Var))
+    #SetOwnership(p0Var,0)
     SetOwnership(p1Var,0)
     SetOwnership(p2Var,0)
     SetOwnership(p3Var,0)
     SetOwnership(p4Var,0)
     return Bern4
 
-  def BuildBern5(self,p0 = 1 ,p1 = 0.1, p1Low = 1e-3, p1High = 1, p2 = 0.1, p2Low = 1e-3, p2High = 1, p3 = 0.1, p3Low = 1e-3, p3High = 1,
-                 p4 = 0.1, p4Low = 1e-3, p4High = 1, p5 = 0.1, p5Low = 1e-3, p5High = 1):
+  def BuildBern5(self,p0 = 1 ,p1 = 0.1, p1Low = 1e-3, p1High = 1, p2 = 0.1, p2Low = 1e-3, p2High = 1,
+                 p3 = 0.1, p3Low = 1e-3, p3High = 1, p4 = 0.1, p4Low = 1e-3, p4High = 1, p5 = 0.1, p5Low = 1e-3, p5High = 1):
 
     p0Var = RooRealVar('p0Bern5_'+self.suffix, 'p0Bern5_'+self.suffix,p0)
     p1Var = RooRealVar('p1Bern5_'+self.suffix, 'p1Bern5_'+self.suffix,p1,p1Low,p1High)
@@ -710,8 +710,9 @@ class FitBuilder:
     return CBG, paramList
 
   def BuildTripleGauss(self, piece, mean = 125, mean1 = -1, mean1Low = -1, mean1High = -1, sigma1 = 2, sigma1Low = 1, sigma1High = 8,
-                       delta21 = 0, delta21Low = -2, delta21High = 2, s21 = 3, s21Low = 1, s21High = 30, delta31 = 0, delta31Low = -2, delta31High = 2,
-                       s32 = 3, s32Low = 1, s32High = 30, frac23 = 0.9, frac23Low = 0, frac23High = 1, frac123 = 0.9, frac123Low = 0, frac123High = 1):
+                       delta21 = 0, delta21Low = -2, delta21High = 2, s21 = 3, s21Low = 1, s21High = 30,
+                       delta31 = 0, delta31Low = -2, delta31High = 2, s32 = 3, s32Low = 1, s32High = 30,
+                       frac23 = 0.9, frac23Low = 0, frac23High = 1, frac123 = 0.9, frac123Low = 0, frac123High = 1):
 
     suffix = self.suffix+'_'+piece
     mean1 = mean

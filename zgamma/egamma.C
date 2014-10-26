@@ -44,7 +44,7 @@ Bool_t doRochCorr = 1;
 Bool_t doZee = 0;
 Bool_t makeApzTree = 1;
 
-const UInt_t hisEVTS[] = {635,907};
+const UInt_t hisEVTS[] = {15,134,202};
 Int_t evSize = sizeof(hisEVTS)/sizeof(int);
 
 bool P4SortCondition(const TLorentzVector& p1, const TLorentzVector& p2) {return (p1.Pt() > p2.Pt());}
@@ -460,13 +460,13 @@ Bool_t egamma::Process(Long64_t entry)
 	 ( selection=="el" && makeGen && (gen_l1.DeltaR(*thisElec) < 0.1 || gen_l2.DeltaR(*thisElec)<0.1)  && thisElec->Pt()>10))
 	{
 	  if (ObjID->PassElectronIdAndIsoMVA(*thisElec)){
-	    thisElec->SetIdMap("mvaScore", 0);
+	    thisElec->SetIdMap("mvaScore", -99);
 	    electrons.push_back(*thisElec);
 	  }
 	}
       if (ObjID->PassElectronIdAndIso(*thisElec, pvPosition, "Loose") &&
 	  thisElec->Pt() > 15.0){
-	thisElec->SetIdMap("mvaScore", 0);
+	thisElec->SetIdMap("mvaScore", -99);
 	electrons0.push_back(*thisElec);
       }
 
@@ -480,13 +480,15 @@ Bool_t egamma::Process(Long64_t entry)
 	    isMatched = 1;
 	    //cout<<" Ele matched to photon! \t ev="<<nEvents[0]-1<<endl;
 	    //cout<<"PHo: SCEne = "<<match.SCEnergy()<<" pt = "<<match.Pt()<<"  SCEta = "<<match.SCEta()<<"  SCPhi = "<<match.SCPhi()<<endl;
+	    //cout<<"HadOverEm = "<<match.HadOverEm()<<endl;
 	    //cout<<"Ele: SCEne = "<<thisElec->SCEnergy()<<" pt = "<<thisElec->Pt()<<"   SCEta = "<<thisElec->SCEta()<<"  SCPhi = "<<thisElec->SCPhi()<<endl;
-	    break;
+	   break;
 	  }
 	}
 
-      if (thisElec->Pt() > 30 && fabs(thisElec->Eta()) < 1.4442 &&
+      if (thisElec->Pt() > 30 && fabs(thisElec->SCEta()) < 1.4442 &&
 	  ObjID->PassDalitzEleID(*thisElec, pvPosition, "MVA", DAleMvaScore) ){
+
 	thisElec->SetIdMap("mvaScore", DAleMvaScore);
 
 	//cout<<"reco ele: "<<i<<endl;
@@ -494,23 +496,27 @@ Bool_t egamma::Process(Long64_t entry)
 	  DAlectrons.push_back(*thisElec);
       }
 
-      bool idpass = ObjID->PassDalitzEleID(*thisElec, pvPosition, "MVA", DAleMvaScore);
-      thisElec->SetIdMap("mvaScore", DAleMvaScore);
+      //bool idpass = ObjID->PassDalitzEleID(*thisElec, pvPosition, "MVA", DAleMvaScore);
+      //thisElec->SetIdMap("mvaScore", DAleMvaScore);
 
-      /*
       for(Int_t ev=0; ev<evSize;ev++){
 	if (nEvents[0]-1 == hisEVTS[ev]){cout<<nEvents[0]-1<<" evNumber = "<<eventNumber<<endl;
-	  cout<<"gamma: pt = "<<gamma.Pt()<<"  SCEta = "<<gamma.SCEta()<<"  SCPhi = "<<gamma.SCPhi()<<endl;
-	  cout<<"\t R9 = "<<gamma.R9()<<"  hadoverEm = "<<gamma.HadOverEm()<<endl;
+	  //cout<<"gamma: pt = "<<gamma.Pt()<<"  SCEta = "<<gamma.SCEta()<<"  SCPhi = "<<gamma.SCPhi()<<endl;
+	  //cout<<"\t R9 = "<<gamma.R9()<<"  hadoverEm = "<<gamma.HadOverEm()<<endl;
 	  cout<<"Ele  : pt = "<<thisElec->Pt()<<"   SCEta = "<<thisElec->SCEta()<<"  SCPhi = "<<thisElec->SCPhi()<<"  MVA = "<<thisElec->IdMap("mvaScore")<<endl;
 	  cout<<"\t R9 = "<<thisElec->R9()<<"  hadoverEm = "<<thisElec->HadOverEm()<<endl;
 	  cout<<"\t SCEnergy: "<<thisElec->SCEnergy()<<"   SCRaw energy: "<<thisElec->SCRawEnergy()<<endl;
 	  cout<<"\t matched to pho: "<<isMatched<<"  pass Hgg pre: "<<ObjID->HggPreselection(match)<<endl;
 	  vector<TCEGamma> sc0 = thisElec->BaseSC();
 	  sort(sc0.begin(),  sc0.end(),  SCESortCondition);
-	  const vector<TCElectron::Track> trk0 = thisElec->GetTracks();
+	  vector<TCElectron::Track> trk0 = thisElec->GetTracks();
+	  sort(trk0.begin(), trk0.end(), P4SortCondition);
 
 	  cout<<" n tracks="<<trk0.size() <<"  N SC="<<sc0.size()<<endl;
+
+	  for (int t = 0; t < trk0.size(); t++)
+	    cout<<t<<" Conversion veto on GSF = "<<trk0[t].IdMap("GSF_PassConv")
+		<<"   Pt = "<<trk0[t].Pt()<<" Miss hits = "<<trk0[t].IdMap("GSF_MissHits")<<endl;
 
 	  for (int s = 0; s <sc0.size(); s++)
 	    cout<<"sc "<<s<<"  SCEnergy: "<<sc0[s].SCEnergy()<<"  eta: "<<sc0[s].SCEta()<<" phi: "<<sc0[s].SCPhi()
@@ -521,11 +527,10 @@ Bool_t egamma::Process(Long64_t entry)
 	  //  <<" EoverPt = "<<thisElec->SCEnergy()/(trk[0]+trk[1]).Pt()<<endl;
 	  //cout<<"dzy = "<<thisElec->Dxy(pvPosition)<<"  dz = "<<thisElec->Dz(pvPosition)<<endl;
 	  //thisElec->Dump();
-	  //ObjID->ElectronDump(*thisElec);
-
+	  ObjID->ElectronDump(*thisElec);
 	  break;}
       }
-      */
+
 
     }
 
@@ -589,6 +594,13 @@ Bool_t egamma::Process(Long64_t entry)
   FillHistoCounts(5, eventWeight);
   CountEvents(5,"Conv. Veto etc",fcuts);
 
+  for(Int_t ev=0; ev<evSize;ev++){
+  if (nEvents[0]-1 == hisEVTS[ev]){cout<<nEvents[0]-1<<" evNumber="<<eventNumber<<endl;
+    cout<<"\t\t  Event is passed that cut!! \n"<<endl;
+    break;}
+  }
+
+
   if (lPt1.Pt() + lPt2.Pt() < 44) return kTRUE;
   //if (lPt1.Pt() < cut_l1pt || lPt2.Pt() < cut_l2pt)   return kTRUE;
 
@@ -636,7 +648,7 @@ Bool_t egamma::Process(Long64_t entry)
 	  //Double_t scale = corrPhoEnReco/thisPhoton->E();
 	  //Double_t scale = corrPhoEnSC/thisPhoton->E();
 
-	  thisPhoton->SetXYZM(scale*thisPhoton->Px(), scale*thisPhoton->Py(),scale*thisPhoton->Pz(),0);
+	  thisPhoton->SetXYZM(scale*thisPhoton->Px(), scale*thisPhoton->Py(), scale*thisPhoton->Pz(),0);
 
 	  //cout<<runNumber<<"  uncor en="<< thisPhoton->E()<<"  cor en = "<<corrPhoEn<<endl;
 	  //thisPhoton->SetPtEtaPhiM(corrPhoEnSC/cosh(SCEta()));
@@ -699,6 +711,8 @@ Bool_t egamma::Process(Long64_t entry)
     hists->fill1DHist(genMll,  "gen_Mll_reco_gamma_iso",  ";gen_Mll",100,0,mllMax, 1,"eff");
     hists->fill1DHist(gendR,   "gen_dR_reco_gamma_iso",   ";gen_dR", 50, 0,0.3,    1,"eff");
   }
+
+  fout<<nEvents[0]-1<<endl;
 
   HM->FillHistosFull(7, eventWeight);
   FillHistoCounts(7, eventWeight);
@@ -767,9 +781,6 @@ Bool_t egamma::Process(Long64_t entry)
   hists->fill1DHist(photonsTight.size(), Form("size_phTight_cut%i",1),";Number of photons (Tight)", 5,0,5, 1, "N");
   hists->fill1DHist(photonsMVA.size(),   Form("size_phMVA_cut%i",  1),";Number of photons (MVA)",   5,0,5, 1, "N");
 
-
-
-  //fout<<eventNumber<<endl;
 
   /*
   if (electrons.size()<2) return kTRUE;
@@ -843,8 +854,6 @@ Bool_t egamma::Process(Long64_t entry)
   //else if (lPt1.DeltaR(gamma)<1.0 || lPt2.DeltaR(gamma)<1.0) return kTRUE;
 
   */
-
-
 
   /*
   for(Int_t ev=0; ev<evSize;ev++){
@@ -961,8 +970,6 @@ Bool_t egamma::Process(Long64_t entry)
   if (DALE.Pt()/MdalG < 0.30 || gamma.Pt()/MdalG < 0.30)
     //if ((l1+l2).Pt() < 40 || gamma.Pt() < 40)
     return kTRUE;
-
-  fout<<nEvents[0]-1<<endl;
 
   HM->FillHistosFull(12, eventWeight);
   FillHistoCounts(12, eventWeight);

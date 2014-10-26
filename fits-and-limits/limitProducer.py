@@ -44,8 +44,8 @@ if __name__ == "__main__":
     cardNames = ''
     for cat in catList:
       print "\n**\t Making limits for M=",m,"  cat = ",cat, "\t**\n"
-      card  = myDir+"/output_cards/hzg_mu_2012_cat"+cat+"_M"+m+"_Dalitz_.txt"
-      #card  = myDir+"/output_cards/hzg_el_2012_cat"+cat+"_M"+m+"_Dalitz_.txt"
+      #card  = myDir+"/output_cards/hzg_mu_2012_cat"+cat+"_M"+m+"_Dalitz_.txt"
+      card  = myDir+"/output_cards/hzg_el_2012_cat"+cat+"_M"+m+"_Dalitz_.txt"
 
       if cat in ['m1','m2','m3','m4','m5','m6']:
         cardNames = cardNames+' '+card

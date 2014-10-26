@@ -12,7 +12,7 @@ import ConfigParser as cp
 gROOT.ProcessLine(".L ../tdrstyle.C")
 setTDRStyle()
 print len(sys.argv), sys.argv
-verbose = 0
+verbose = 1
 doExt   = 0
 
 cf = cp.ConfigParser()
@@ -72,20 +72,20 @@ def BackgroundNameFixer(fitName, year, lepton, cat, ws, Ext=True):
       print "renaming " + fitName
       suffix = '_'.join([year,lepton,'cat'+cat])
       if Ext: normName  = 'norm'+n+'_'+suffix
-      p0Name = 'p0'+n+'_'+suffix
+      #p0Name = 'p0'+n+'_'+suffix
       p1Name = 'p1'+n+'_'+suffix
       p2Name = 'p2'+n+'_'+suffix
 
       if Ext: print "Normname from renaming:", normName
 
       if Ext: normNameNew  = '_'.join(['bkg',lepton,year,'cat'+cat,'norm'])
-      p0NameNew = '_'.join(['bkg','p0',lepton,year,'cat'+cat])
+      #p0NameNew = '_'.join(['bkg','p0',lepton,year,'cat'+cat])
       p1NameNew = '_'.join(['bkg','p1',lepton,year,'cat'+cat])
       p2NameNew = '_'.join(['bkg','p2',lepton,year,'cat'+cat])
 
       if Ext: ws.factory(normNameNew+'[{0},{1},{2}]'.format(ws.function(normName).getVal(),
                                                             ws.function(normName).getMin(), ws.function(normName).getMax()))
-      ws.factory(p0NameNew+'[{0}]'.format(ws.function(p0Name).getVal()))
+      #ws.factory(p0NameNew+'[{0}]'.format(ws.function(p0Name).getVal()))
       ws.factory(p1NameNew+'[{0},{1},{2}]'.format(ws.function(p1Name).getVal(),
                                                   ws.function(p1Name).getMin(),ws.function(p1Name).getMax()))
       ws.factory(p2NameNew+'[{0},{1},{2}]'.format(ws.function(p2Name).getVal(),
@@ -114,46 +114,46 @@ def BackgroundNameFixer(fitName, year, lepton, cat, ws, Ext=True):
       if n=='Bern2':
         if Ext:
           ws.factory('EDIT::'+fitExtNameNew+'('+fitExtName+','+normName+'='+normNameNew+','
-                     +p0Name+'='+p0NameNew+','+p1Name+'='+p1NameNew+','+p2Name+'='+p2NameNew+')')
+                     +p1Name+'='+p1NameNew+','+p2Name+'='+p2NameNew+')')
         else:
           ws.factory('EDIT::'+fitExtNameNew+'('+fitExtName+','
-                     +p0Name+'='+p0NameNew+','+p1Name+'='+p1NameNew+','+p2Name+'='+p2NameNew+')')
+                     +p1Name+'='+p1NameNew+','+p2Name+'='+p2NameNew+')')
       if n=='Bern3':
         if Ext:
           ws.factory('EDIT::'+fitExtNameNew+'('+fitExtName+','+normName+'='+normNameNew+','
-                     +p0Name+'='+p0NameNew+','+p1Name+'='+p1NameNew+','+p2Name+'='+p2NameNew+','
+                     +p1Name+'='+p1NameNew+','+p2Name+'='+p2NameNew+','
                      +p3Name+'='+p3NameNew+')')
         else:
           ws.factory('EDIT::'+fitExtNameNew+'('+fitExtName+','
-                     +p0Name+'='+p0NameNew+','+p1Name+'='+p1NameNew+','+p2Name+'='+p2NameNew+','
+                     +p1Name+'='+p1NameNew+','+p2Name+'='+p2NameNew+','
                      +p3Name+'='+p3NameNew+')')
       if n=='Bern4':
         if Ext:
           ws.factory('EDIT::'+fitExtNameNew+'('+fitExtName+','+normName+'='+normNameNew+','
-                     +p0Name+'='+p0NameNew+','+p1Name+'='+p1NameNew+','+p2Name+'='+p2NameNew+','
+                     +p1Name+'='+p1NameNew+','+p2Name+'='+p2NameNew+','
                      +p3Name+'='+p3NameNew+','+p4Name+'='+p4NameNew+')')
         else:
           ws.factory('EDIT::'+fitExtNameNew+'('+fitExtName+','
-                     +p0Name+'='+p0NameNew+','+p1Name+'='+p1NameNew+','+p2Name+'='+p2NameNew+','
+                     +p1Name+'='+p1NameNew+','+p2Name+'='+p2NameNew+','
                      +p3Name+'='+p3NameNew+','+p4Name+'='+p4NameNew+')')
 
       elif n =='Bern5':
         if Ext:
           ws.factory('EDIT::'+fitExtNameNew+'('+fitExtName+','+normName+'='+normNameNew+','
-                     +p0Name+'='+p0NameNew+','+p1Name+'='+p1NameNew+','+p2Name+'='+p2NameNew+','
+                     +p1Name+'='+p1NameNew+','+p2Name+'='+p2NameNew+','
                      +p3Name+'='+p3NameNew+','+p4Name+'='+p4NameNew+','+p5Name+'='+p5NameNew+')')
         else:
           ws.factory('EDIT::'+fitExtNameNew+'('+fitExtName+','
-                     +p0Name+'='+p0NameNew+','+p1Name+'='+p1NameNew+','+p2Name+'='+p2NameNew+','
+                     +p1Name+'='+p1NameNew+','+p2Name+'='+p2NameNew+','
                      +p3Name+'='+p3NameNew+','+p4Name+'='+p4NameNew+','+p5Name+'='+p5NameNew+')')
       elif n =='Bern6':
         if Ext:
           ws.factory('EDIT::'+fitExtNameNew+'('+fitExtName+','+normName+'='+normNameNew+','
-                     +p0Name+'='+p0NameNew+','+p1Name+'='+p1NameNew+','+p2Name+'='+p2NameNew+','
+                     +p1Name+'='+p1NameNew+','+p2Name+'='+p2NameNew+','
                      +p3Name+'='+p3NameNew+','+p4Name+'='+p4NameNew+','+p5Name+'='+p5NameNew+p6Name+'='+p6NameNew+')')
         else:
           ws.factory('EDIT::'+fitExtNameNew+'('+fitExtName+','
-                     +p0Name+'='+p0NameNew+','+p1Name+'='+p1NameNew+','+p2Name+'='+p2NameNew+','
+                     +p1Name+'='+p1NameNew+','+p2Name+'='+p2NameNew+','
                      +p3Name+'='+p3NameNew+','+p4Name+'='+p4NameNew+','+p5Name+'='+p5NameNew+p6Name+'='+p6NameNew+')')
 
   BernNames = ['GaussBern4','GaussBern5']
@@ -206,25 +206,25 @@ def BackgroundNameFixer(fitName, year, lepton, cat, ws, Ext=True):
         if Ext:
           ws.factory('EDIT::'+fitExtNameNew+'('+fitExtName+','+meanName+'='+meanNameNew+','
                      +sigmaName+'='+sigmaNameNew+','+stepName+'='+stepNameNew+','+normName+'='+normNameNew+','
-                     +p0Name+'='+p0NameNew+','+p1Name+'='+p1NameNew+','+p2Name+'='+p2NameNew+','
+                     +p1Name+'='+p1NameNew+','+p2Name+'='+p2NameNew+','
                      +p3Name+'='+p3NameNew+','+p4Name+'='+p4NameNew+','+p5Name+'='+p5NameNew+')')
         else:
           ws.factory('EDIT::'+fitExtNameNew+'('+fitExtName+','+meanName+'='+meanNameNew+','
                      +sigmaName+'='+sigmaNameNew+','+stepName+'='+stepNameNew+','
-                     +p0Name+'='+p0NameNew+','+p1Name+'='+p1NameNew+','+p2Name+'='+p2NameNew+','
+                     +p1Name+'='+p1NameNew+','+p2Name+'='+p2NameNew+','
                      +p3Name+'='+p3NameNew+','+p4Name+'='+p4NameNew+','+p5Name+'='+p5NameNew+')')
       elif n=="GaussBern4":
         if Ext:
           ws.factory('EDIT::'+fitExtNameNew+'('+fitExtName+','+meanName+'='+meanNameNew+','
                      +sigmaName+'='+sigmaNameNew+','+stepName+'='+stepNameNew+','+normName+'='+normNameNew+','
-                     +p0Name+'='+p0NameNew+','+p1Name+'='+p1NameNew+','+p2Name+'='+p2NameNew+','
+                     +p1Name+'='+p1NameNew+','+p2Name+'='+p2NameNew+','
                      +p3Name+'='+p3NameNew+','+p4Name+'='+p4NameNew+')')
         else:
           ws.factory('EDIT::'+fitExtNameNew+'('+fitExtName+','+meanName+'='+meanNameNew+','
                      +sigmaName+'='+sigmaNameNew+','+stepName+'='+stepNameNew+','
-                     +p0Name+'='+p0NameNew+','+p1Name+'='+p1NameNew+','+p2Name+'='+p2NameNew+','
+                     +p1Name+'='+p1NameNew+','+p2Name+'='+p2NameNew+','
                      +p3Name+'='+p3NameNew+','+p4Name+'='+p4NameNew+')')
-
+  print '\n \t\t ** END OF RENAMING  ***\n'
 
 #myWs.Print()
 
@@ -325,11 +325,10 @@ if __name__=="__main__":
           sigFile_gg   = TFile(hPath+"/"+tag+"_"+year+"/hhhh_ggH-mad125_1.root", "OPEN")
           sigFile_vbf  = TFile(hPath+"/"+tag+"_"+year+"/hhhh_vbf-mad125_1.root", "OPEN")
           sigFile_vh   = TFile(hPath+"/"+tag+"_"+year+"/hhhh_vh-mad125_1.root",  "OPEN")
-          if lepton == 'mu':
+          if   lepton == 'mu':
             fsig = [sigFile_gg, sigFile_vbf, sigFile_vh]
-          if lepton == 'el':
+          elif lepton == 'el':
             fsig = [sigFile_gg]
-
         hsig = []
         for i,f in enumerate(fsig):
           Nev = f.Get("Counts/evt_byCut").GetBinContent(2)
@@ -352,7 +351,10 @@ if __name__=="__main__":
             hsig.append(f.Get("Main/00_tri_mass_Main_cut9"))
           elif cat=='EB':
             if hjp: hsig.append(f.Get("Main/00_tri_mass_Main_cut10"))
+            elif lepton=='el':
+              hsig.append(f.Get("Main-Dale/01_mDalG_fit_Main_cut16"))
             else:   hsig.append(f.Get("Main/00_tri_mass_Main_cut9"))
+
           elif cat=='EE':
             hsig.append(f.Get("Main/00_tri_mass_Main_cut16"))
           elif cat=='mll50':
@@ -364,7 +366,9 @@ if __name__=="__main__":
           if cat in ['m1','m2','m3','m4','m5','m6','m7']:
             adjust=mllBins[int(cat[1])][1]/mllBins[7][1]
           if hjp: factor = 500
-          else:   factor = 10
+          else:
+            if   lepton == 'mu': factor = 10
+            elif lepton == 'el': factor = 30
           print len(hsig), hsig, cat
           hsig[-1].Scale(factor*adjust*scale)
 
@@ -396,40 +400,18 @@ if __name__=="__main__":
         fitExtName    = '_'.join(['bkgTmp',lepton,year,'cat'+cat])
         fit_ext       = RooExtendPdf(fitExtName,fitExtName, fit, norm)
 
-        fit_result = fit_ext.fitTo(data, RooFit.Range('DalitzRegion'), RooFit.Save(),  RooFit.Optimize(0))
-        #fit_result = fit_ext.fitTo(data, RooFit.Range('DalitzRegion'), RooFit.Save())
-        #fit_result = RooFitResult(fit_ext.fitTo(data, RooFit.Range('DalitzRegion'), RooFit.Save()))
-        #ifit = fit_ext.createIntegral(RooArgSet(mzg), RooFit.Range('signal'))
-        #ifit = fit_ext.createIntegral(RooArgSet(mzg), RooFit.NormSet(RooArgSet(mzg)), RooFit.Range('DalitzRegion'))
-
-        l0 = RooArgSet(mzg)
-        pars = fit_ext.getParameters(l0)
-        #b =  integralError(RooArgSet(mzg), fit_ext, fit_result)
-        #print b
-
-        l1, l2 = RooArgList(mzg), RooArgList(pars)
-        f1 = fit_ext.asTF(l1, l2)
-        #f1 = fit_ext.asTF(RooArgList(mzg), RooArgList(pars))
-        integ_full = f1.Integral(110,170)
-        integ  = norm.getVal()*f1.Integral(110,170)/integ_full
-        covmat = fit_result.covarianceMatrix()
-        covmat.Print()
-        cormat =  fit_result.correlationMatrix()
-        cormat.Print()
-
-        params = f1.GetParameters()
-
-        parlist = [params[a] for a in xrange(f1.GetNpar())]
-
-        #dinteg = norm.getVal()*f1.IntegralError(110, 170, params, covmat.GetMatrixArray()) / integ_full
-        #dinteg = f1.IntegralError(110, 170)
-        dinteg = f1.IntegralError(110, 170, params, covmat.GetMatrixArray())
-        print 'Npar = ', f1.GetNpar()
-        print 'Integral full   = %.3f  +/- %.3f'%(integ_full, 0)
-        print 'Integral region = %.3f  +/- %.3f'%(integ, dinteg)
-
+        fit_result = fit_ext.fitTo(data, RooFit.Range('DalitzRegion'), RooFit.Save())
+        #fit_result = fit.fitTo(data, RooFit.Range('DalitzRegion'), RooFit.Save())
 
         if verbose:
+          """ Calculating integrals and their errors!"""
+          l0 = RooArgSet(mzg)
+          # pars = fit.getParameters(l0)
+          pars = fit_ext.getParameters(l0)
+          # b =  integralError(RooArgSet(mzg), fit_ext, fit_result)
+          # print b
+          covmat = fit_result.covarianceMatrix()
+          covmat.Print()
           pars.Print()
           parsiter = pars.createIterator()
           print 'First:', pars.first().GetName(), pars.first().getVal()
@@ -437,6 +419,31 @@ if __name__=="__main__":
           while var!=None:
             print '%s: %.3f  +/ %.3f'%(var.GetName(), var.getVal(), var.getError())
             var=parsiter.Next()
+
+          l1, l2 = RooArgList(mzg), RooArgList(pars)
+          # f1 = fit.asTF(l1, l2)
+          f1 = fit_ext.asTF(l1, l2)
+          m1_f = mzg.getMin('DalitzRegion')
+          m2_f = mzg.getMax('DalitzRegion')
+          m1_s = mzg.getMin('signal')
+          m2_s = mzg.getMax('signal')
+          integ_norm = f1.Integral(m1_f,m2_f)
+          integ_full = norm.getVal()*f1.Integral(m1_f,m2_f)/integ_norm
+          integ_sig  = norm.getVal()*f1.Integral(m1_s,m2_s)/integ_norm
+
+          params = f1.GetParameters()
+          # parlist = [params[a] for a in xrange(f1.GetNpar())]
+
+          dinteg_f = norm.getVal()*f1.IntegralError(m1_f, m2_f, params, covmat.GetMatrixArray()) / integ_norm
+          dinteg_s = norm.getVal()*f1.IntegralError(m1_s, m2_s, params, covmat.GetMatrixArray()) / integ_norm
+          # dinteg = f1.IntegralError(110, 170, params, covmat.GetMatrixArray())
+          print 'Npar = ', f1.GetNpar()
+          for p in xrange(f1.GetNpar()):
+            print f1.GetParName(p), f1.GetParameter(p)
+
+          print 'Integral full = %.3f  +/- %.3f'%(integ_full, dinteg_f)
+          print 'Signal region = %.3f  +/- %.3f'%(integ_sig,  dinteg_s)
+
 
           #for p in parsiter:
           #  print 'Parameter', p.GetName(), p.getVal()
@@ -517,7 +524,10 @@ if __name__=="__main__":
         hsig[0].Draw('same hist')
 
 
-        testFrame.SetTitle(";m_{#mu#mu#gamma} (GeV);Events/"+str(binWidth)+" GeV")
+        if lepton=='mu':
+          testFrame.SetTitle(";m_{#mu#mu#gamma} (GeV);Events/"+str(binWidth)+" GeV")
+        elif lepton=='el':
+          testFrame.SetTitle(";m_{ee#gamma} (GeV);Events/"+str(binWidth)+" GeV")
 
         if hjp: leg  = TLegend(0.45,0.62,0.91,0.87)
         else:   leg  = TLegend(0.51,0.62,0.91,0.87)
