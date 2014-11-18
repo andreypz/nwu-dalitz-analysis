@@ -28,8 +28,11 @@ if __name__ == "__main__":
   #massList   = ['%.1f'%(a) for a in u.drange(120,150,1)]
   massList   = [a.strip() for a in (cf.get("fits","massList-more")).split(',')]
   catList    = [a.strip() for a in (cf.get("fits","catList")).split(',')]
+  leptonList = [a.strip() for a in (cf.get("fits","leptonList")).split(',')]
 
   s = cf.get("path","ver")
+  #s = "comboCardsMing/"
+  #s = "MingDataCards/Dalitz_electron/"
   myDir = s
 
   if opt.noSyst:
@@ -42,53 +45,57 @@ if __name__ == "__main__":
 
   for m in massList:
     cardNames = ''
-    for cat in catList:
-      print "\n**\t Making limits for M=",m,"  cat = ",cat, "\t**\n"
-      #card  = myDir+"/output_cards/hzg_mu_2012_cat"+cat+"_M"+m+"_Dalitz_.txt"
-      card  = myDir+"/output_cards/hzg_el_2012_cat"+cat+"_M"+m+"_Dalitz_.txt"
+    for lep in leptonList:
+      for cat in catList:
+        print "\n**\t Making limits for M=",m,"  cat = ",cat, "\t**\n"
 
-      if cat in ['m1','m2','m3','m4','m5','m6']:
-        cardNames = cardNames+' '+card
-      if cat in ['EB','EE','mll50']:
-        cardNames = cardNames+' '+card
+        #card  = myDir+"/datacard_hzg_eeg_cat12_8TeV_"+m[:3]+".txt"
+        #card  = myDir+"/mu_plus_el_M"+m+".txt"
+        card  = myDir+"/output_cards/hzg_"+lep+"_2012_cat"+cat+"_M"+m+"_Dalitz_.txt"
+
+        if cat in ['m1','m2','m3','m4','m5','m6']:
+          cardNames = cardNames+' '+card
+        if cat in ['EB','EE','mll50']:
+          cardNames = cardNames+' '+card
+
+        if opt.comb:
+          print "not yet"
+
+        print 'Using CARD = \n',card
+
+        if opt.noSyst:
+          os.system('combine -M '+method+' '+card + ' -m '+m+' -S 0')
+        else:
+          print 'not doing it now'
+          os.system('combine -M '+method+' '+card + ' -m '+m)
+
+        if m[-1]=='5':
+          fname = "higgsCombineTest."+method+".mH"+m
+          os.system("mv "+fname+".root "+myDir+'/'+fname+'_cat'+cat+'.root')
+        else:
+          fname = "higgsCombineTest."+method+".mH"+m[0:3]
+          os.system("mv "+fname+".root "+myDir+'/'+fname+'.0_cat'+cat+'.root')
 
       if opt.comb:
-        print "not yet"
+        print '\t Combining the cards: \n', cardNames
+        comboName = myDir+'/output_cards/combo_mH'+m+'.txt'
+        os.system('combineCards.py '+cardNames+' > '+comboName)
+        os.system("sed -i 's:"+myDir+"/output_cards/"+s[:3]+":"+s[:3]+":g' "+comboName)
 
-      print 'Using CARD = \n',card
-
-      if opt.noSyst:
-        os.system('combine -M '+method+' '+card + ' -m '+m+' -S 0')
-      else:
-        print 'not doing it now'
-        os.system('combine -M '+method+' '+card + ' -m '+m)
+        os.system('combine -M '+method+' '+comboName + ' -m '+m)
 
       if m[-1]=='5':
         fname = "higgsCombineTest."+method+".mH"+m
-        os.system("mv "+fname+".root "+myDir+'/'+fname+'_cat'+cat+'.root')
+        os.system("mv "+fname+".root "+myDir+'/'+fname+'_catCombo.root')
       else:
         fname = "higgsCombineTest."+method+".mH"+m[0:3]
-        os.system("mv "+fname+".root "+myDir+'/'+fname+'.0_cat'+cat+'.root')
-
-    print '\t Combining the cards: \n', cardNames
-    comboName = myDir+'/output_cards/combo_mH'+m+'.txt'
-    os.system('combineCards.py '+cardNames+' > '+comboName)
-    os.system("sed -i 's:"+myDir+"/output_cards/"+s[:3]+":"+s[:3]+":g' "+comboName)
-
-    os.system('combine -M '+method+' '+comboName + ' -m '+m)
-
-    if m[-1]=='5':
-      fname = "higgsCombineTest."+method+".mH"+m
-      os.system("mv "+fname+".root "+myDir+'/'+fname+'_catCombo.root')
-    else:
-      fname = "higgsCombineTest."+method+".mH"+m[0:3]
-      os.system("mv "+fname+".root "+myDir+'/'+fname+'.0_catCombo.root')
+        os.system("mv "+fname+".root "+myDir+'/'+fname+'.0_catCombo.root')
 
 
-    print myDir, s[:3]
+      print myDir, s[:3]
 
-  if opt.plot:
-    for cat in catList:
-      os.system("./limitPlotter.py "+myDir+" --cat="+cat)
-    os.system("./limitPlotter.py "+myDir+" --cat=Combo")
-    # os.system('combine -M ProfileLikelihood '+sys.argv[1]+ ' -m 125 -t 100')
+    if opt.plot:
+      for cat in catList:
+        os.system("./limitPlotter.py "+myDir+" --cat="+cat)
+      os.system("./limitPlotter.py "+myDir+" --cat=Combo")
+      # os.system('combine -M ProfileLikelihood '+sys.argv[1]+ ' -m 125 -t 100')

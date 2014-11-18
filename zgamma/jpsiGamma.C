@@ -636,7 +636,7 @@ Bool_t jpsiGamma::Process(Long64_t entry)
   }
 
   if (gamma.Pt() < cut_gammapt) return kTRUE;
-  if (fabs(gamma.SCEta()) > 1.444) return kTRUE;
+  if (fabs(gamma.SCEta()) > 1.4442) return kTRUE;
 
   if(!isRealData && makeGen){
     hists->fill1DHist(genMll,  "gen_Mll_reco_gamma_iso",  ";gen_Mll",100,0,mllMax, 1,"eff");
@@ -746,7 +746,7 @@ Bool_t jpsiGamma::Process(Long64_t entry)
   if (Mll>2.9 && Mll<3.3){
     HM->FillHistosFull(7, eventWeight);
     FillHistoCounts(7, eventWeight);
-    CountEvents(7, "With in J/Psi peak", fcuts);
+    CountEvents(7, "Within J/Psi peak", fcuts);
   }
 
   //if (doJPsiScale && !isRealData)
@@ -791,11 +791,11 @@ Bool_t jpsiGamma::Process(Long64_t entry)
   }
 
 
-  if (Mll<2.9 || Mll>3.3) return kTRUE;
+  if (Mll<2.7 || Mll>3.5) return kTRUE;
 
   HM->FillHistosFull(8, eventWeight);
   FillHistoCounts(8, eventWeight);
-  CountEvents(8, "After JPsi MC scale", fcuts);
+  CountEvents(8, "J/Psi peak", fcuts);
 
   //global_Mll = Mll;
   HM->MakeMuonPlots(muons[0]);
@@ -819,8 +819,10 @@ Bool_t jpsiGamma::Process(Long64_t entry)
     hists->fill1DHist(gen_l1.DeltaR(l1),"reco_gen_l1_deltaR","reco_gen_l1_deltaR",100,0,5, 1,"");
     hists->fill1DHist(gen_l2.DeltaR(l2),"reco_gen_l2_deltaR","reco_gen_l2_deltaR",100,0,5, 1,"");
 
-    hists->fill2DHist(gen_l1.DeltaR(l1), gen_l2.DeltaR(l2),      "reco_gen_2D_ll_deltaR",     "reco_gen_2D_ll_deltaR",     100,0,5, 100,0,5, 1,"");
-    hists->fill2DHist(gen_l1.DeltaR(l1), gen_gamma.DeltaR(gamma),"reco_gen_2D_l1gamma_deltaR","reco_gen_2D_l1gamma_deltaR",100,0,5, 100,0,5, 1,"");
+    hists->fill2DHist(gen_l1.DeltaR(l1), gen_l2.DeltaR(l2),      "reco_gen_2D_ll_deltaR",
+		      "reco_gen_2D_ll_deltaR",     100,0,5, 100,0,5, 1,"");
+    hists->fill2DHist(gen_l1.DeltaR(l1), gen_gamma.DeltaR(gamma),"reco_gen_2D_l1gamma_deltaR",
+		      "reco_gen_2D_l1gamma_deltaR",100,0,5, 100,0,5, 1,"");
 
     hists->fill1DHist(gen_gamma.DeltaR(gamma),"reco_gen_gamma_deltaR","reco_gen_gamma_deltaR",100,0,5, 1,"");
   }

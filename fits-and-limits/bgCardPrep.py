@@ -12,7 +12,7 @@ import ConfigParser as cp
 gROOT.ProcessLine(".L ../tdrstyle.C")
 setTDRStyle()
 print len(sys.argv), sys.argv
-verbose = 1
+verbose = 0
 doExt   = 0
 
 cf = cp.ConfigParser()
@@ -323,8 +323,8 @@ if __name__=="__main__":
           if lepton == 'mu': tag = 'mugamma'
           if lepton == 'el': tag = 'elgamma'
           sigFile_gg   = TFile(hPath+"/"+tag+"_"+year+"/hhhh_ggH-mad125_1.root", "OPEN")
-          sigFile_vbf  = TFile(hPath+"/"+tag+"_"+year+"/hhhh_vbf-mad125_1.root", "OPEN")
-          sigFile_vh   = TFile(hPath+"/"+tag+"_"+year+"/hhhh_vh-mad125_1.root",  "OPEN")
+          sigFile_vbf  = TFile(hPath+"/"+tag+"_"+year+"/hhhh_vbfH-mad125_1.root", "OPEN")
+          sigFile_vh   = TFile(hPath+"/"+tag+"_"+year+"/hhhh_vH-mad125_1.root",  "OPEN")
           if   lepton == 'mu':
             fsig = [sigFile_gg, sigFile_vbf, sigFile_vh]
           elif lepton == 'el':
@@ -479,11 +479,14 @@ if __name__=="__main__":
 
         if verbose:
           #print 'have unit norm?? ', sigP.haveUnitNorm()
+          if doBlind:
+            print "\n\t WARNING: your Chi2 would not make sence when Blinded!"
           chi2 = testFrame.chiSquare(bkgModel,'data')
-          chi2_4 = testFrame.chiSquare(4)
-          print ' chiSquare=', chi2, chi2_4
-          # print "Figuring out norms of PDFs",sigP.getVal(), sigP.analyticalIntegral()
-          #raw_input("pdf norm / chi2  ")
+          for a in xrange(6):
+            print 'nDof = ', a, testFrame.chiSquare(bkgModel,'data',a)
+            print testFrame.chiSquare(a)
+            #print "Figuring out norms of PDFs",sigP.getVal(), sigP.analyticalIntegral()
+          raw_input("Enter to continue ")
 
 
         '''
@@ -539,7 +542,8 @@ if __name__=="__main__":
         #if not hjp: leg.AddEntry(0,'','')
         leg.AddEntry(data,'Data','lep')
         leg.SetTextSize(0.045)
-        leg.Draw()
+        if not verbose:
+          leg.Draw()
 
         leg2  = TLegend(0.55,0.62,0.91,0.7)
         leg2.SetNColumns(2)

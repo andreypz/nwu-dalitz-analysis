@@ -76,10 +76,11 @@ void HistMaker::MakeEGammaCommonPlots(const TCEGamma& egm, TString n)
   hists->fill1DHist(egm.E2x5()/egm.E5x5(), dir+"-egm_E2x5OverE5x5", ";E2x5OverE5x5", 100,    0.5, 1,  1,dir);
   //hists->fill1DHist(egm.E2x5Max()/egm.R9(),dir+"-egm_E2x5MaxOverR9",";E2x5MaxOverR9",100,    0, 1,  1,dir);
 
-  hists->fill1DHist(egm.SigmaIEtaIPhi(),   dir+"-egm_SigmaIEtaIPhi",";SigmaIEtaIPhi",100,-2e-4,2e-4,  1,dir);
-  hists->fill1DHist(egm.SigmaIEtaIEta(),   dir+"-egm_SigmaIEtaIEta",";SigmaIEtaIEta",100, 0, 0.016,   1,dir);
-  hists->fill1DHist(egm.SigmaIPhiIPhi(),   dir+"-egm_SigmaIPhiIPhi",";SigmaIPhiIPhi",100, 0, 0.04,    1,dir);
-  hists->fill1DHist(egm.SCEnergy(),        dir+"-egm_SCEnergy",     ";SCEnergy",     100, 10, 120,    1,dir);
+  hists->fill1DHist(egm.SigmaIEtaIPhi(),   dir+"-egm_SigmaIEtaIPhi",";SigmaIEtaIPhi", 100,-2e-4,2e-4,  1,dir);
+  hists->fill1DHist(egm.SigmaIEtaIEta(),   dir+"-egm_SigmaIEtaIEta",";SigmaIEtaIEta", 100, 0, 0.016,   1,dir);
+  hists->fill1DHist(egm.SigmaIPhiIPhi(),   dir+"-egm_SigmaIPhiIPhi",";SigmaIPhiIPhi", 100, 0, 0.04,    1,dir);
+  hists->fill1DHist(egm.SCEnergy(),        dir+"-egm_SCEnergy",     ";SCEnergy",      100, 10, 120,    1,dir);
+  hists->fill1DHist(egm.EnergyRegression(),dir+"-egm_EnergyRegress",";Energy Regress",100, 10, 120,    1,dir);
   //  hists->fill1DHist(egm.GetNCrystals(),    dir+"-egm_nCrystals",    ";nCrystals",    160, 0, 160,     1,dir);
 
   if (!n.Contains("BaseSC")) {

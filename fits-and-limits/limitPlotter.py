@@ -21,6 +21,9 @@ cf.read('config.cfg')
 gStyle.SetOptTitle(0)
 
 s = cf.get("path","ver")
+#s = "comboCardsMing/"
+#s = "MingDataCards/Dalitz_electron/"
+
 method = 'Asymptotic'
 #method = 'ProfileLikelihood'
 out = TFile(s+"/limit-data-cat"+opt.cat+".root","recreate")
@@ -230,7 +233,7 @@ if __name__ == "__main__":
     if opt.cat in ['EB','Combo']:
       mg.SetMaximum(31)
       if 'el' in s:
-        mg.SetMaximum(62)
+        mg.SetMaximum(42)
     elif opt.cat in ['EE','mll50']:
       mg.SetMaximum(150)
   gPad.RedrawAxis()
@@ -274,7 +277,7 @@ if __name__ == "__main__":
   leg.Draw()
 
   if opt.br and not opt.mll:
-    f = TFile('../data/Dalitz_BR50.root','READ')
+    f = TFile('../data/Dalitz_BR20.root','READ')
     g = f.Get('csbr_mu')
     for i in range(g.GetN()):
       g.GetY()[i] *= 10

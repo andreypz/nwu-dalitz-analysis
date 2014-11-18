@@ -36,6 +36,8 @@ sel  = opt.sel
 comments = ["These plots are made for h -> ll gamma",
 #comments = ["These plots are made for z -> J/Psi gamma analysis",
             "MuEG dataset used"]
+doLumiScale = 1
+
 
 if __name__ == "__main__":
   timer = TStopwatch()
@@ -75,7 +77,7 @@ if __name__ == "__main__":
   u.setSelection(sel)
 
   if doMerge:
-    if sel=="elgamma":
+    if sel=="elgamma" or sel=='eegamma':
       os.system("hadd "+hPath+"/m_Data_" +sel+"_"+period+".root "+hPath+"/"+sel+"_"+period+"/hhhh_*Run2012*.root")
     else:
       # os.system("hadd "+hPath+"/m_Data_" +sel+"_"+period+".root "+hPath+"/"+sel+"_"+period+"/hhhh_DoubleMu_Run20*.root")
@@ -157,8 +159,8 @@ if __name__ == "__main__":
   sigVH  = {}
   for m in ['120','125','130','135','140','145','150']:
     sigGG[m]  = TFile(hPath+"/"+sel+"_"+period+"/hhhh_ggH-mad"+m+"_1.root", "OPEN")
-    sigVBF[m] = TFile(hPath+"/"+sel+"_"+period+"/hhhh_vbf-mad"+m+"_1.root", "OPEN")
-    sigVH[m]  = TFile(hPath+"/"+sel+"_"+period+"/hhhh_vh-mad"+ m+"_1.root", "OPEN")
+    sigVBF[m] = TFile(hPath+"/"+sel+"_"+period+"/hhhh_vbfH-mad"+m+"_1.root", "OPEN")
+    sigVH[m]  = TFile(hPath+"/"+sel+"_"+period+"/hhhh_vH-mad"+ m+"_1.root", "OPEN")
 
   sigFileGG   = sigGG['125']
   sigFileVBF  = sigVBF['125']
@@ -181,7 +183,6 @@ if __name__ == "__main__":
   if opt.zjp or opt.hjp:
     u.setSelection('mugamma')
 
-  doLumiScale = 1
   yields_data = u.getYields(dataFile)
   yields_zjp  = u.getYields(sigFileZjp, 'ZtoJPsiGamma',  doLumiScale)
   yields_hjp  = u.getYields(sigFileHjp, 'HtoJPsiGamma',  doLumiScale)
@@ -249,12 +250,12 @@ if __name__ == "__main__":
 
   if sel == "elgamma":
     u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "Main-Dale", pathBase+'/Dale/', cut, "toDataInt")
-    u.drawAllInFile(dataFile, "Data",bkgZip,sigFile,"signal",
-                    "AnElectron",  pathBase+"/AnElectron/",  None,"norm")
     #u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",
     #                "AnElectron-EGamma",  pathBase+"/AnElectron-EGamma/",  None,"norm")
 
-    if cut in ['9','12','15']:
+    if cut in ['9','12','15'] and sel=='elgamma':
+      u.drawAllInFile(dataFile, "Data",bkgZip,sigFile,"signal",
+                      "AnElectron",  pathBase+"/AnElectron/",  None,"norm")
       dirnameshort = "DalitzEle"
       dirname = dirnameshort+"-cut"+cut
       u.drawAllInFile(dataFile, "Data",bkgZip,sigFile,"signal",
@@ -419,7 +420,6 @@ if __name__ == "__main__":
     if opt.zjp: u.setCutListFile(hPath+"/"+sel+"_"+period+"/out_cutlist_ZtoJPsiGamma_1.txt")
   else:         u.setCutListFile(hPath+"/"+sel+"_"+period+"/out_cutlist_ggH-mad120_1.txt")
 
-
   plot_types =[]
   dirlist = os.listdir(pathBase)
   for d in dirlist:
@@ -448,7 +448,7 @@ if __name__ == "__main__":
   u.makeTable(table_all,"all", "twiki")
   u.makeTable(table_all,"all", "tex")
 
-  os.system("cat yields_all.html   > yields.html")
+  os.system("cat yields_all.html > yields.html")
 
   defaultPage = 'Main'
 

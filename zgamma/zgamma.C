@@ -486,6 +486,7 @@ Bool_t zgamma::Process(Long64_t entry)
 	 )
 	{
 
+	  Double_t scale = 1;
 	  Double_t corrPhoEnSC   = correctedPhotonEnergy(thisPhoton->SCEnergy(), thisPhoton->SCEta(), thisPhoton->R9(), runNumber,
 							 0, "Moriond2014", !isRealData, myRandom);
 	  Double_t corrPhoEnReco = correctedPhotonEnergy(thisPhoton->E(), thisPhoton->SCEta(), thisPhoton->R9(), runNumber,
@@ -493,10 +494,14 @@ Bool_t zgamma::Process(Long64_t entry)
 
 	  HM->MakePhotonEnergyCorrPlots(*thisPhoton, corrPhoEnReco, corrPhoEnSC);
 
+
+	  Double_t corrReg   = correctedPhotonEnergy(thisPhoton->EnergyRegression(), thisPhoton->SCEta(), thisPhoton->R9(), runNumber,
+							 1, "Moriond2013", !isRealData, myRandom);
+
 	  //cout<<runNumber<<"  uncor en="<< thisPhoton->E()<<"  cor en = "<<corrPhoEn<<endl;
-	  //Double_t scale = 1;
-	  Double_t scale = corrPhoEnReco/thisPhoton->E(); //Yes - use this one for mumugamma
-	  //Double_t scale = corrPhoEnSC/thisPhoton->E();
+	  //scale = corrPhoEnReco/thisPhoton->E(); //Yes - use this one for mumugamma
+	  //scale = corrPhoEnSC/thisPhoton->E();
+	  scale = corrReg/thisPhoton->E();
 
 	  thisPhoton->SetXYZM(scale*thisPhoton->Px(), scale*thisPhoton->Py(),scale*thisPhoton->Pz(),0);
 
@@ -891,8 +896,8 @@ Bool_t zgamma::Process(Long64_t entry)
 
   HM->FillHistosFull(5, eventWeight);
   FillHistoCounts(5, eventWeight);
-  CountEvents(5, "76 < m(llg) < 106; m(ll) < 50", fcuts);
-  //CountEvents(5, "110 < m(llg) < 170; m(ll) < 50", fcuts);
+  //CountEvents(5, "76 < m(llg) < 106; m(ll) < 50", fcuts);
+  CountEvents(5, "110 < m(llg) < 170; m(ll) < 50", fcuts);
 
   if (lPt1.DeltaR(gamma)<1.0 || lPt2.DeltaR(gamma)<1.0) return kTRUE;
   if ( (Mll>2.9 && Mll<3.3) || (Mll>9.3 && Mll<9.7)) return kTRUE; //jpsi and upsilon removeal

@@ -34,6 +34,7 @@ Ext = options.ext
 brLLG = '1.10'
 # Unsertainities to be put in the datacard:
 lumi     = '1.026'
+elID     = '1.100'
 muID     = '1.110'
 muISO    = '1.003'
 muTRIG   = '1.040'
@@ -55,8 +56,9 @@ mllBins = u.mllBins()
 #  ## don't use this
 #  csBR[m] = ccc
 
-introMessage = ('# This is a card produced by a cardMaker.py script using the information from a workspace in a root file\n#'\
-                  ' That file containes PDFs for Data model and the signals\' shapes. \n# Normalization (yields) for the signal are taken from that workspace.\n')
+introMessage = ('# This is a card produced by a cardMaker.py script using the information from a workspace in a root file\n'\
+                  '# That file containes PDFs for Data model and the signals\' shapes. \n#'\
+                  '# Normalization (yields) for the signal are taken from that workspace.\n')
 
 
 if options.br:
@@ -165,7 +167,7 @@ def makeCards(subdir):
                   print 'from the fit', fit(float(mass))
                   print 'from csbr:', cs
 
-            print mass, s, cs
+            print mass, s, 'cs for scale=', cs
             #sigYields.append(sigWs.var('sig_'+s+'_yield_'+channel).getVal()*cs)
             sigYields.append(round(sigWs.var('sig_'+s+'_yield_'+channel).getVal() /cs, 4))
 
@@ -209,7 +211,6 @@ def makeCards(subdir):
 
 
           card.close()
-
 
 
 

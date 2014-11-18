@@ -25,9 +25,9 @@ import ConfigParser as cp
 cf = cp.ConfigParser()
 cf.read('config.cfg')
 
-verbose    = 0
-massList   = ['125']
-#massList      = [a.strip()[0:3] for a in (cf.get("fits","massList")).split(',')]
+verbose    = 1
+#massList   = ['125']
+massList      = [a.strip()[0:3] for a in (cf.get("fits","massList")).split(',')]
 yearList      = [a.strip() for a in (cf.get("fits","yearList")).split(',')]
 leptonList    = [a.strip() for a in (cf.get("fits","leptonList")).split(',')]
 catList       = [a.strip() for a in (cf.get("fits","catList")).split(',')]
@@ -57,8 +57,6 @@ debugPlots = 0
 noSFweight = 0
 rootrace   = 0
 if rootrace: RooTrace.active(kTRUE)
-proc = {'ggH':'ggH', 'vbf':'qqH','vh':'WH','hjp':'hjp'}
-proc2 = {'gg':'ggH', 'vbf':'vbf','v':'vh','hjp':'hjp'}
 # OK listen, we're gunna need to do some bullshit just to get a uniform RooRealVar name for our data objects.
 # So we'll loop through the Branch, set mzg to the event value (if it's in range), and add that to our RooDataSet.
 # This way, we make a RooDataSet that uses our 'CMS_hzg_mass' variable.
@@ -132,7 +130,7 @@ def doInitialFits(subdir):
         dataDict[l+y] = TFile(basePath+'m_Data_'+tag+'_'+y+'.root','r')
         for s in sigNameList:
           for m in massList:
-            signalDict[s+'_'+l+y+'_M'+m] = TFile(basePath+tag+'_'+y+'/hhhh_'+proc2[s]+'-mad'+m+'_1.root','r')
+            signalDict[s+'_'+l+y+'_M'+m] = TFile(basePath+tag+'_'+y+'/hhhh_'+s+'H-mad'+m+'_1.root','r')
   print "\t ===  All files are set === \n"
 
   treeName = 'apzTree/apzTree'
@@ -378,13 +376,15 @@ def doInitialFits(subdir):
   u.createDir(subdir)
   ws.writeToFile(subdir+'/testRooFitOut_Dalitz.root')
 
+
+
+  print '*** Some yields from data'
+  print 'Full range:', yi_da0
+  if not doBlind:
+    print 'in 122-128:', yi_da1
+
   if verbose:
     ws.Print()
-
-    print '*** Some yields from data'
-    print 'Full range:', yi_da0
-    if not doBlind:
-      print 'in 122-128:', yi_da1
 
     print '*** Some yields from ggH'
     print 'Full range:', yi_sig0
@@ -404,15 +404,16 @@ def doInitialFits(subdir):
   if verbose:
     for year in yearList:
       for lepton in leptonList:
-        for cat in catList:
-          t_mean = []
-          t_sigma = []
-          for mass in massList:
-            l_mean = []
-            l_sigma = []
-            l_mean.append(mass)
-            l_sigma.append(mass)
-            for prod in sigNameList:
+        for prod in sigNameList:
+          for cat in catList:
+            t_mean = []
+            t_sigma = []
+            for mass in massList:
+              l_mean = []
+              l_sigma = []
+              l_mean.append(mass)
+              l_sigma.append(mass)
+
               print year, lepton, cat, prod
               print mean_sig[year][mass][lepton][cat][prod]
               print sigma_sig[year][mass][lepton][cat][prod]
@@ -420,11 +421,11 @@ def doInitialFits(subdir):
               # l.append("%.2f &pm; %.2f"%(a,b))
               l_mean.append("%.3f&pm;%.3f"%(mean_sig[year][mass][lepton][cat][prod][0], mean_sig[year][mass][lepton][cat][prod][1]))
               l_sigma.append("%.3f&pm;%.3f"%(sigma_sig[year][mass][lepton][cat][prod][0],sigma_sig[year][mass][lepton][cat][prod][1]))
-              # print l
+
               t_mean.append(l_mean)
               t_sigma.append(l_sigma)
-          u.makeTable(t_mean,  "mean",  opt="twiki")
-          u.makeTable(t_sigma, "sigma", opt="twiki")
+            u.makeTable(t_mean,  "mean",  opt="twiki")
+            u.makeTable(t_sigma, "sigma", opt="twiki")
 
   print '\n \t we did it!\t'
 

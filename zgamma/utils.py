@@ -42,6 +42,8 @@ def yearToTeV(y):
   else: return '0TeV'
 
 def setSelection(sel):
+  if 'ee' in sel:
+    sel='elgama'
   conf.set("selection","sel", sel)
 def getSelection():
   return conf.get("selection","sel")
@@ -586,10 +588,13 @@ def drawAllInFile(f1, name1, bZip, f3, name3, myDir, path, N, howToScale="none",
         mainHist.SetMaximum(1.2*h1.GetMaximum())
         doPdf=1
       if "diLep_mass_jpsi" in histoName:
+        if 'mu' in getSelection():
+          mainHist.SetXTitle("m_{#mu#mu} (GeV)")
         mainHist.SetMaximum(1.1*h1.GetMaximum())
         doPdf=1
       if "diLep_mass_low" in histoName:
-        mainHist.SetXTitle("m_{ee} (GeV)")
+        if 'el' in getSelection():
+          mainHist.SetXTitle("m_{ee} (GeV)")
         mainHist.SetMaximum(1.2*h1.GetMaximum())
         doPdf=1
 
