@@ -25,7 +25,7 @@ import ConfigParser as cp
 cf = cp.ConfigParser()
 cf.read('config.cfg')
 
-verbose    = 1
+verbose    = 0
 #massList   = ['125']
 massList      = [a.strip()[0:3] for a in (cf.get("fits","massList")).split(',')]
 yearList      = [a.strip() for a in (cf.get("fits","yearList")).split(',')]
@@ -33,6 +33,7 @@ leptonList    = [a.strip() for a in (cf.get("fits","leptonList")).split(',')]
 catList       = [a.strip() for a in (cf.get("fits","catList")).split(',')]
 sigNameList   = [a.strip() for a in (cf.get("fits","sigNameList")).split(',')]
 mllBins = u.mllBins()
+
 
 EBetaCut = 1.4442
 EEetaCut = 1.566
@@ -127,6 +128,8 @@ def doInitialFits(subdir):
       for l in leptonList:
         if l == 'mu': tag = 'mugamma'
         if l == 'el': tag = 'elgamma'
+        if l == 'ee': tag = 'eegamma'
+
         dataDict[l+y] = TFile(basePath+'m_Data_'+tag+'_'+y+'.root','r')
         for s in sigNameList:
           for m in massList:
@@ -193,7 +196,9 @@ def doInitialFits(subdir):
 
             print signalTree, "A signal tree", prod, '  categ=',cat, "mass =", mass
             Nev = u.getTotalEvents(signalDict[prod+"_"+lepton+year+"_M"+mass])
-            lumiWeight = LumiXSWeighter(int(mass), prod, lepton, Nev)
+            sel = lepton
+            if sel=='ee': sel ='el'
+            lumiWeight = LumiXSWeighter(int(mass), prod, sel, Nev)
             print 'Nev = ', Nev
             LoopOverTree(signalTree, cat, mzg, sig_argSW, sig_ds, lumiWeight)
 

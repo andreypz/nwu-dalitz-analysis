@@ -3,10 +3,6 @@ import sys
 from ROOT import *
 from rooFitBuilder import *
 gROOT.SetBatch()
-#gSystem.SetIncludePath( "-I$ROOFITSYS/include/" );
-#gROOT.ProcessLine(".L ../tdrstyle.C")
-#setTDRStyle()
-#gROOT.LoadMacro("../CMS_lumi.C")
 gROOT.SetMacroPath(".:../plugins/")
 gROOT.LoadMacro("HistManager.cc+")
 sys.path.append("../zgamma")

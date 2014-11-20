@@ -2,9 +2,12 @@
 import sys
 from ROOT import *
 gROOT.SetBatch()
-from systematics import *
+#from systematics import *
 sys.path.append("../zgamma")
+sys.path.append("../scripts")
+from xsBrReader import *
 import utils as u
+from apzFitProducer import AutoVivification
 from optparse import OptionParser
 parser = OptionParser(usage="usage: %prog  [options --brSyst 1.20]")
 parser.add_option("--brSyst", dest="brSyst", default='1.10', help="error on the branching ratio")
@@ -44,7 +47,9 @@ PU       = '1.008'
 meanUnc  = '0.005'
 sigmaUnc = '0.100'
 
+yearToTeV ={'2011':'7TeV', '2012':'8TeV'}
 proc = {'gg':'ggH', 'vbf':'qqH','v':'WH','hjp':'hjp'}
+prYR = {'gg':'ggF', 'vbf':'VBF','v':'WH'}
 mllBins = u.mllBins()
 
 #csBR = {}
@@ -187,12 +192,12 @@ def makeCards(subdir):
 
           if not options.br:
             card.write(nSubLine2.format(*(['CMS_hllg_brLLG', 'lnN']+nProc*[brLLG])))
-            card.write('pdf_WH        lnN     '+pdf_wh[year][mmm]+'  -  -   -  \n')
-            card.write('QCDscale_WH   lnN     '+qcd_wh[year][mmm]+'  -  -   -  \n')
-            card.write('pdf_qqH       lnN     -   '+pdf_vbf[year][mmm]+' -  -  \n')
-            card.write('QCDscale_qqH  lnN     -   '+qcd_vbf[year][mmm]+' -  -  \n')
-            card.write('pdf_ggH       lnN     -   -  '+pdf_gg[year][mmm]+'  -  \n')
-            card.write('QCDscale_ggH  lnN     -   -  '+qcd_gg[year][mmm]+'  -  \n')
+            card.write('pdf_WH        lnN     '+xsPDFErrDict['YR3'][yearToTeV[year]]['WH'][mmm]+'  -  -   -  \n')
+            card.write('QCDscale_WH   lnN     '+xsScaleErrDict['YR3'][yearToTeV[year]]['WH'][mmm]+'  -  -   -  \n')
+            card.write('pdf_qqH       lnN     -   '+xsPDFErrDict['YR3'][yearToTeV[year]]['VBF'][mmm]+' -  -  \n')
+            card.write('QCDscale_qqH  lnN     -   '+xsScaleErrDict['YR3'][yearToTeV[year]]['VBF'][mmm]+' -  -  \n')
+            card.write('pdf_ggH       lnN     -   -  '+xsPDFErrDict['YR3'][yearToTeV[year]]['ggF'][mmm]+'  -  \n')
+            card.write('QCDscale_ggH  lnN     -   -  '+xsScaleErrDict['YR3'][yearToTeV[year]]['ggF'][mmm]+'  -  \n')
 
           card.write(nSubLine2.format(*(['CMS_eff_m_ID',   'lnN']+nProc*[muID])))
           card.write(nSubLine2.format(*(['CMS_eff_m_ISO',  'lnN']+nProc*[muISO])))

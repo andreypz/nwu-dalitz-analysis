@@ -20,6 +20,7 @@ parser.add_option("--bkg",  dest="bkg",  action="store_true", default=False, hel
 parser.add_option("--qcd",  dest="qcd",  action="store_true", default=False, help="Include QCD samples")
 parser.add_option("--mcfm", dest="mcfm", action="store_true", default=False, help="Use MCFM  as a signal")
 
+parser.add_option("--evt",dest="evt",action="store_true", default=False, help="Show raw events (not scaled to lumi) for MC samles")
 parser.add_option("-e","--extra",dest="extra",action="store_true", default=False, help="Make all extra plots")
 parser.add_option("--fit",dest="fit",action="store_true", default=False, help="Do the various fits")
 parser.add_option("--apz",dest="apz",action="store_true", default=False, help="Discover new particle (requires apzTree)")
@@ -37,7 +38,7 @@ comments = ["These plots are made for h -> ll gamma",
 #comments = ["These plots are made for z -> J/Psi gamma analysis",
             "MuEG dataset used"]
 doLumiScale = 1
-
+if opt.evt: doLumiScale=0
 
 if __name__ == "__main__":
   timer = TStopwatch()

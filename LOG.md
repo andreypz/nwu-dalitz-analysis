@@ -1,6 +1,13 @@
 The log of changes:
 ===================
 
+2014-Nov-20
+Recent developement include:
+  * Photon Energy regression with corresponding corrections
+  * Fits and limits for electron channel (both merged and non-merged categories)
+  * Differential limit in m(ll) bins for muon channel 
+  * H -> J/Psi+gamma analysis implemented
+
 2014-Jun-27
   * Photon MVA ID implemented in ObjectID plugin
 

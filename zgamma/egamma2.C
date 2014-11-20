@@ -446,6 +446,17 @@ Bool_t egamma2::Process(Long64_t entry)
     }
     else thisElec->SetIdMap("mvaScore", -1);
 
+
+    //Double_t scale = 1;
+    //scale = thisElec->EnergyRegression()/thisElec->E();
+    //thisElec->SetPxPyPzE(scale*thisElec->Px(), scale*thisElec->Py(), scale*thisElec->Pz(),  thisElec->EnergyRegression());
+
+    //TLorentzVector tmp = thisElec->RegressionMomCombP4();
+    //thisElec->SetPtEtaPhiE(tmp.Pt(), tmp.Eta(), tmp.Phi(), tmp.E());
+
+    //cout<<i<<"  Electron   E ="<<thisElec->E()<<"  regE 1 = "<< thisElec->EnergyRegression()<<"  regE 2 = "<<tmp.E()<<endl;
+
+
     if(isRealData || !makeGen ||
        (selection=="el" && makeGen && (gen_l1.DeltaR(*thisElec) < 0.1 || gen_l2.DeltaR(*thisElec)<0.1)  && thisElec->Pt()>10))
       {

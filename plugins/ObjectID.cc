@@ -424,11 +424,33 @@ bool ObjectID::PassDalitzEleID(const TCElectron& el, TVector3 *pv, TString n, fl
 
 }
 
+bool ObjectID::PassElectronMVAPreSel(const TCElectron& el)
+{
+  bool pass = false;
+  if (
+      el.IdMap("gsf_numberOfLostHits") == 0
+      && (el.IdMap("dr03TkSumPt")) / el.Pt() < 0.2
+      && (el.IdMap("dr03EcalRecHitSumEt")) /el.Pt() < 0.2
+      && (el.IdMap("dr03HcalTowerSumEt")) / el.Pt() < 0.2
+      ) {
+    if (fabs(el.Eta()) < 1.479) {
+      if (el.SigmaIEtaIEta()< 0.014 && el.IdMap("hadronicOverEm") < 0.15)
+	pass = true;
+    } else { //endcap
+      if (el.SigmaIEtaIEta()< 0.035 && el.IdMap("hadronicOverEm") < 0.10)
+	pass = true;
+    }
+  }
+  return pass;
+}
+
+
 bool ObjectID::PassElectronIdAndIsoMVA(const TCElectron& lep)
 {
   bool pass = false;
 
   Float_t eleISO = CalculateElectronIso(lep);
+  if (!PassElectronMVAPreSel(lep)) return false;
 
   if(
      eleISO < 0.15

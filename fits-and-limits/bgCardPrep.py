@@ -322,25 +322,29 @@ if __name__=="__main__":
         else:
           if lepton == 'mu': tag = 'mugamma'
           if lepton == 'el': tag = 'elgamma'
+          if lepton == 'ee': tag = 'eegamma'
           sigFile_gg   = TFile(hPath+"/"+tag+"_"+year+"/hhhh_ggH-mad125_1.root", "OPEN")
           sigFile_vbf  = TFile(hPath+"/"+tag+"_"+year+"/hhhh_vbfH-mad125_1.root", "OPEN")
           sigFile_vh   = TFile(hPath+"/"+tag+"_"+year+"/hhhh_vH-mad125_1.root",  "OPEN")
           if   lepton == 'mu':
             fsig = [sigFile_gg, sigFile_vbf, sigFile_vh]
-          elif lepton == 'el':
+          elif lepton == 'el' or lepton == 'ee':
             fsig = [sigFile_gg]
+
         hsig = []
         for i,f in enumerate(fsig):
           Nev = f.Get("Counts/evt_byCut").GetBinContent(2)
           if hjp:
             cro = u.getCS("HtoJPsiGamma")/100
           else:
+            mySel=lepton
+            if mySel=='ee': mySel='el'
             if i==0:
-              cro = u.getCS("ggH-125", mySel=lepton)
+              cro = u.getCS("ggH-125", mySel)
             elif i==1:
-              cro = u.getCS("vbfH-125",mySel=lepton)
+              cro = u.getCS("vbfH-125",mySel)
             elif i==2:
-              cro = u.getCS("vH-125",  mySel=lepton)
+              cro = u.getCS("vH-125",  mySel)
 
           lumi  = u.getLumi("2012")
           scale = float(lumi*cro)/Nev
@@ -351,7 +355,7 @@ if __name__=="__main__":
             hsig.append(f.Get("Main/00_tri_mass_Main_cut9"))
           elif cat=='EB':
             if hjp: hsig.append(f.Get("Main/00_tri_mass_Main_cut10"))
-            elif lepton=='el':
+            elif lepton=='el' or lepton=='ee':
               hsig.append(f.Get("Main-Dale/01_mDalG_fit_Main_cut16"))
             else:   hsig.append(f.Get("Main/00_tri_mass_Main_cut9"))
 
@@ -360,7 +364,7 @@ if __name__=="__main__":
           elif cat=='mll50':
             hsig.append(f.Get("Main/00_tri_mass_Main_cut19"))
           else:
-            hsig.append(f.Get("Main/00_tri_mass_Main_cut19"))
+            hsig.append(f.Get("Main/00_tri_mass_Main_cut16"))
 
           adjust = 1
           if cat in ['m1','m2','m3','m4','m5','m6','m7']:
@@ -368,7 +372,7 @@ if __name__=="__main__":
           if hjp: factor = 500
           else:
             if   lepton == 'mu': factor = 10
-            elif lepton == 'el': factor = 30
+            elif lepton == 'el' or lepton == 'ee': factor = 30
           print len(hsig), hsig, cat
           hsig[-1].Scale(factor*adjust*scale)
 

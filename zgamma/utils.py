@@ -584,17 +584,19 @@ def drawAllInFile(f1, name1, bZip, f3, name3, myDir, path, N, howToScale="none",
         mainHist.SetNdivisions(505,'X')
         doPdf=1
 
+      if "diLep_mass" in histoName:
+        if 'mu' in getSelection():
+          mainHist.SetXTitle("m_{#mu#mu} (GeV)")
+        elif 'el' in getSelection():
+          mainHist.SetXTitle("m_{ee} (GeV)")
+
       if "diLep_mass_0to20" in histoName:
         mainHist.SetMaximum(1.2*h1.GetMaximum())
         doPdf=1
       if "diLep_mass_jpsi" in histoName:
-        if 'mu' in getSelection():
-          mainHist.SetXTitle("m_{#mu#mu} (GeV)")
         mainHist.SetMaximum(1.1*h1.GetMaximum())
         doPdf=1
       if "diLep_mass_low" in histoName:
-        if 'el' in getSelection():
-          mainHist.SetXTitle("m_{ee} (GeV)")
         mainHist.SetMaximum(1.2*h1.GetMaximum())
         doPdf=1
 
