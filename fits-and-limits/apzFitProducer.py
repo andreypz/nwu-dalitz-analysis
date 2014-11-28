@@ -11,6 +11,10 @@ gROOT.ProcessLine(".L ../tdrstyle.C")
 TH1.SetDefaultSumw2(kTRUE)
 gStyle.SetOptTitle(0)
 import utils as u
+from optparse import OptionParser
+parser = OptionParser(usage="usage: %prog ver [options -v]")
+parser.add_option("-v","--verbose", dest="verbose", action="store_true", default=False, help="Verbose mode (print out stuff)")
+(opt, args) = parser.parse_args()
 
 class AutoVivification(dict):
   """Implementation of perl's autovivification feature."""
@@ -25,7 +29,8 @@ import ConfigParser as cp
 cf = cp.ConfigParser()
 cf.read('config.cfg')
 
-verbose    = 0
+verbose    = opt.verbose
+
 #massList   = ['125']
 massList      = [a.strip()[0:3] for a in (cf.get("fits","massList")).split(',')]
 yearList      = [a.strip() for a in (cf.get("fits","yearList")).split(',')]
@@ -440,7 +445,7 @@ if __name__=="__main__":
 
   print len(sys.argv)
   print sys.argv
-  if len(sys.argv) != 2:
+  if len(sys.argv) < 2:
     sys.exit()
 
   s = sys.argv[1]

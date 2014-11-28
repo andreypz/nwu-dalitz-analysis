@@ -10,7 +10,8 @@ class JobConfig():
 
 class BatchMaster():
     '''A tool for submitting batch jobs'''
-    def __init__(self, configList, outDir = '.', shortQueue = False, stageDir = 'outputBatch', executable = 'execBatch.sh', prefix = 'test', bias=False):
+    def __init__(self, configList, outDir = '.', shortQueue = False, stageDir = 'outputBatch',
+                 executable = 'execBatch.sh', prefix = 'test', bias=False):
       self._prefix  = prefix
       self._current    = os.path.abspath('.')
       self._stageDir   = stageDir
@@ -105,8 +106,8 @@ class BatchMaster():
           batch_tmp.write('Transfer_Input_Files  = {0}/source.tar.gz, {0}/input_{1}_{2}.txt\n'.format(self._stageDir, cfg._dataName,  str(count+1)))
           batch_tmp.write('Transfer_Output_Files = out_synch_{0}_{1}.txt, hhhh_{2}_{3}.root\n'.format(
               cfg._dataName,  str(count+1), cfg._dataName,  str(count+1)))
-
-        batch_tmp.write('Requirements = OpSys == "LINUX"&& (Arch != "DUMMY" )\n')
+        batch_tmp.write('Requirements = machine!="ttnode0004"\n')
+        #batch_tmp.write('Requirements = OpSys == "LINUX"&& (Arch != "DUMMY" )\n')
         batch_tmp.write('Notification = Never\n')
         if self._shortQueue:
           batch_tmp.write('+LENGTH = "SHORT"\n')

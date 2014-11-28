@@ -8,10 +8,10 @@ sys.path.append("../zgamma")
 import utils as u
 from optparse import OptionParser
 parser = OptionParser(usage="usage: %prog  [options]")
-parser.add_option("--br",dest="br", action="store_true", default=False, help="Do the limit on BR*cs instead of the mu")
+parser.add_option("--br", dest="br",  action="store_true", default=False, help="Do the limit on BR*cs instead of the mu")
 parser.add_option("--mll",dest="mll", action="store_true", default=False, help="Do the limit on BR*cs in bins of mll")
 parser.add_option("--divide",dest="divide", action="store_true", default=False, help="Divide by the binn-size (for --mll option)")
-parser.add_option("--cat",dest="cat",  default='0', help="category: 0, EB, EE, etc")
+parser.add_option("--cat",dest="cat", default='EB', help="Category: EB, EE, mll50, etc")
 (opt, args) = parser.parse_args()
 
 import ConfigParser as cp

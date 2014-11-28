@@ -18,7 +18,8 @@ parser.add_option("--sig",  dest="sig",  action="store_true", default=False, hel
 parser.add_option("--bkg",  dest="bkg",  action="store_true", default=False, help="Run over the background samples")
 parser.add_option("--qcd",  dest="qcd",  action="store_true", default=False, help="Run over the QCD samples")
 parser.add_option("--test", dest="test", action="store_true", default=False, help="Run over the test sample")
-parser.add_option("--all",  dest="all",  action="store_true", default=False, help="Run over all the samples!")
+parser.add_option("--hzg",  dest="hzg",  action="store_true", default=False, help="Run over HZG signal samples.")
+parser.add_option("--all",  dest="all",  action="store_true", default=False, help="Run over all the samples (except QCD, HZG)")
 parser.add_option("--gen",  dest="gen",  action="store_true", default=False, help="Do gen-level analysis.")
 
 (opt, args) = parser.parse_args()
@@ -184,9 +185,27 @@ if period =="2012":
 
 # Signal MC configs
 
-  signal.extend([
-      cfg('ggHZG-125',  DIR+'/nuTuples_v9.8_8TeV/MC/ggHZG_M125_RD1',1, 'HZG '+selection+trig+' '+period+gen + whereWeRun),
-      ])
+  if selection in ['mugamma'] and opt.hzg:
+    params = 'HZG '+selection+trig+period+gen + whereWeRun;
+    signal.extend([
+        cfg('ggHZG-120',  DIR+'/nuTuples_v9.8_8TeV/MC/ggHZG_M120_S10',1, params),
+        cfg('ggHZG-125',  DIR+'/nuTuples_v9.8_8TeV/MC/ggHZG_M125_S10',1, params),
+        cfg('ggHZG-130',  DIR+'/nuTuples_v9.8_8TeV/MC/ggHZG_M130_S10',1, params),
+        cfg('ggHZG-135',  DIR+'/nuTuples_v9.8_8TeV/MC/ggHZG_M135_S10',1, params),
+        cfg('ggHZG-140',  DIR+'/nuTuples_v9.8_8TeV/MC/ggHZG_M140_S10',1, params),
+        cfg('ggHZG-145',  DIR+'/nuTuples_v9.8_8TeV/MC/ggHZG_M145_S10',1, params),
+        cfg('ggHZG-150',  DIR+'/nuTuples_v9.8_8TeV/MC/ggHZG_M150_S10',1, params),
+        cfg('ggHZG-155',  DIR+'/nuTuples_v9.8_8TeV/MC/ggHZG_M155_S10',1, params),
+        cfg('ggHZG-160',  DIR+'/nuTuples_v9.8_8TeV/MC/ggHZG_M160_S10',1, params),
+        cfg('ggHZG-200',  DIR+'/nuTuples_v9.8_8TeV/MC/ggHZG_M200_S10',1, params),
+        cfg('ggHZG-250',  DIR+'/nuTuples_v9.8_8TeV/MC/ggHZG_M250_S10',1, params),
+        cfg('ggHZG-275',  DIR+'/nuTuples_v9.8_8TeV/MC/ggHZG_M275_S10',1, params),
+        cfg('ggHZG-300',  DIR+'/nuTuples_v9.8_8TeV/MC/ggHZG_M300_S10',1, params),
+        cfg('ggHZG-350',  DIR+'/nuTuples_v9.8_8TeV/MC/ggHZG_M350_S10',1, params),
+        cfg('ggHZG-400',  DIR+'/nuTuples_v9.8_8TeV/MC/ggHZG_M400_S10',1, params),
+        cfg('ggHZG-450',  DIR+'/nuTuples_v9.8_8TeV/MC/ggHZG_M450_S10',1, params),
+        cfg('ggHZG-500',  DIR+'/nuTuples_v9.8_8TeV/MC/ggHZG_M500_S10',1, params),
+        ])
 
 
   if selection in ['mugamma','jp-mugamma']:

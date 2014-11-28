@@ -51,11 +51,12 @@
 
 #include "../plugins/WeightUtils.h"
 #include "../plugins/TriggerSelector.h"
-#include "../plugins/rochcor2012v2.h"
 #include "../plugins/ZGAngles.h"
 #include "../plugins/HistManager.h"
 #include "../plugins/PhotonScaleCorrections.hh"
 
+#include "../plugins/rochcor2012jan22.h"
+//#include "../plugins/rochcor2012v2.h"
 //#include "../plugins/PhosphorCorrectorFunctor.hh"
 // Header file for the classes stored in the TTree if any.
 
@@ -65,7 +66,7 @@
 #include <TVector3.h>
 
 
-#define nC 22
+#define nC 23
 class zgamma : public TSelector {
  private:
   TFile* histoFile;

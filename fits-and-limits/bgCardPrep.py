@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+0;115;0c#!/usr/bin/env python
 import sys,os
 from ROOT import *
 gROOT.SetBatch()
@@ -537,7 +537,7 @@ if __name__=="__main__":
           testFrame.SetTitle(";m_{ee#gamma} (GeV);Events/"+str(binWidth)+" GeV")
 
         if hjp: leg  = TLegend(0.45,0.62,0.91,0.87)
-        else:   leg  = TLegend(0.51,0.62,0.91,0.87)
+        else:   leg  = TLegend(0.50,0.62,0.92,0.87)
         leg.SetFillColor(0)
         leg.SetBorderSize(1)
         leg.AddEntry(hsig[0],'Expected signal x'+str(factor),'f')

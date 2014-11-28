@@ -3,9 +3,10 @@ The log of changes:
 
 2014-Nov-20
 Recent developement include:
+  * Update the scripts for PDF and QCD scale uncertainty reader: now read directly from csv file of YR
   * Photon Energy regression with corresponding corrections
   * Fits and limits for electron channel (both merged and non-merged categories)
-  * Differential limit in m(ll) bins for muon channel 
+  * Differential limit in m(ll) bins for muon channel
   * H -> J/Psi+gamma analysis implemented
 
 2014-Jun-27
@@ -16,8 +17,8 @@ Recent developement include:
   * Tagged v7.0-new-level
 
 2014-Jun-14
-  * Intruduced HistMaker and ObjID plugins 
-  * Split multiple analyzers: zgamma, jpsiGamma etc., using same modules for Id and hist making 
+  * Intruduced HistMaker and ObjID plugins
+  * Split multiple analyzers: zgamma, jpsiGamma etc., using same modules for Id and hist making
   * LHE analyzer updated to plot three things
   * Improved plotting scripts to make stacks and more
 
@@ -36,7 +37,7 @@ Recent developement include:
     * cs=0.79 fb
     * Two categories: Mll<2 and Mll>2
     * Limits using gaussBern4 fit function
-      
+
 2013-Nov-22
   * Improved Histmanager: don't need to create directories beforehand:
     if the directory doesn't exist it will be created by the plugin.
@@ -113,7 +114,7 @@ Recent developement include:
   * Make Id/Iso plots for muons.
   * Photon eta < 2.5 cut (apparently the go up to 3.0 by default. Why?)
   * Run with different trigger selections implemented:
-        double-mu, single-mu, muon-photon, double-photon (for electron selection).
+	double-mu, single-mu, muon-photon, double-photon (for electron selection).
   * Data samples added to run on batch.
   * Plotting script updated: a mix of h2l2nu and a simple plotting from a file.
 
@@ -199,7 +200,7 @@ Recent developement include:
    * V02-07 - Updated MVA cuts, tree maker and training
    * V02-05 - Workable MVA code
    * V02-03 - Added rochcor function for correcting muons, nJets histogram for jets in eta<2.5;
-         batch maser is modified to copy the files to a local directory before sending them over to batch
+	 batch maser is modified to copy the files to a local directory before sending them over to batch
 
 2012-Jul-18
   * V02-02 tag

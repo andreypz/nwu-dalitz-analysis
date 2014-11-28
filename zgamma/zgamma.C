@@ -46,7 +46,7 @@ void zgamma::Begin(TTree * tree)
   selection = (string)((TObjString*)args->At(1))->GetString();
   trigger   = (string)((TObjString*)args->At(2))->GetString();
   gen       = (string)((TObjString*)args->At(3))->GetString();
-  period    = "2012";
+  period    = (string)((TObjString*)args->At(4))->GetString();
 
 
   if (selection == "zee")
@@ -55,7 +55,7 @@ void zgamma::Begin(TTree * tree)
       trigger = "ee";
     }
 
-  //cout<<sample<<selection<<trigger<<gen<<endl;
+  cout<<sample<<"  "<<selection<<"  "<<trigger<<"  "<<gen<<"  "<<period<<endl;
 
   if (gen=="true")
     makeGen=true;
@@ -81,9 +81,10 @@ void zgamma::Begin(TTree * tree)
   HM       = new HistMaker(hists);
   ObjID    = new ObjectID();
   weighter = new WeightUtils(sample, period, selection, 0);
-  roch     = new rochcor2012();
-  triggerSelector = new TriggerSelector("", period, *triggerNames);
   myRandom = new TRandom3();
+  roch     = new rochcor2012(myRandom->Integer(10000));
+  //roch     = new rochcor2012();
+  triggerSelector = new TriggerSelector("", period, *triggerNames);
 
   for (Int_t n1=0; n1<nC; n1++){
     nEvents[n1]=0;
@@ -496,11 +497,20 @@ Bool_t zgamma::Process(Long64_t entry)
 
 
 	  Double_t corrReg   = correctedPhotonEnergy(thisPhoton->EnergyRegression(), thisPhoton->SCEta(), thisPhoton->R9(), runNumber,
-							 1, "Moriond2013", !isRealData, myRandom);
+						     1, "Moriond2013", !isRealData, myRandom);
 
-	  //cout<<runNumber<<"  uncor en="<< thisPhoton->E()<<"  cor en = "<<corrPhoEn<<endl;
+	  //Double_t Reg2 = thisPhoton->EnergyRegression()-thisPhoton->EnergyRegressionErr();
+	  //Double_t Reg2 = myRandom->Gaus(thisPhoton->EnergyRegression(),thisPhoton->EnergyRegressionErr());
+	  //Double_t corrReg2  = correctedPhotonEnergy(Reg2, thisPhoton->SCEta(), thisPhoton->R9(), runNumber,
+	  //					     1, "Moriond2013", !isRealData, myRandom);
+
+	  //cout<<runNumber<<"  uncor en="<< thisPhoton->E()<<"  reg en = "<<thisPhoton->EnergyRegression()
+	  //  <<"   regerr ="<<thisPhoton->EnergyRegressionErr()<<"  gaus(Reg,err)="<<Reg2<<endl;
+	  //cout<<"  corrReg = "<<corrReg<<"  corrReg2 = "<<corrReg2<<endl;
+
 	  //scale = corrPhoEnReco/thisPhoton->E(); //Yes - use this one for mumugamma
 	  //scale = corrPhoEnSC/thisPhoton->E();
+	  //scale = corrReg2/thisPhoton->E();
 	  scale = corrReg/thisPhoton->E();
 
 	  thisPhoton->SetXYZM(scale*thisPhoton->Px(), scale*thisPhoton->Py(),scale*thisPhoton->Pz(),0);
@@ -631,11 +641,15 @@ Bool_t zgamma::Process(Long64_t entry)
     if(thisMuon->Pt() > 4 && ObjID->PassMuonId(*thisMuon, pvPosition, "Soft") ) {
       if (doRochCorr){
 	Float_t qter = 1;
-	//cout<<"DBG before rochcor"<<endl;
-	if (isRealData)	  roch->momcor_data(*thisMuon, thisMuon->Charge(), 0, qter);
-	else         	  roch->momcor_mc(*thisMuon,  thisMuon->Charge(), 0, qter );
+	if (isRealData){
+	  roch->momcor_data(*thisMuon, thisMuon->Charge(), 0, qter);
+	  if (period=="2012D")
+	    roch->momcor_data(*thisMuon, thisMuon->Charge(), 1, qter);
+	}
+	else
+	  roch->momcor_mc  (*thisMuon, thisMuon->Charge(), 0, qter );
 
-	//cout<<"DBG after rochcor"<<endl;
+	//cout<<"DBG rochcor. qterr = "<<qter<<endl;
       }
 
       muons.push_back(*thisMuon);
@@ -845,7 +859,7 @@ Bool_t zgamma::Process(Long64_t entry)
 		 photonsTight.size(), photonsMVA.size(), jets.size(), eventWeight);
 
 
-  if (Mll > 50)
+  if (sample!="HZG" && Mll > 50)
     return kTRUE;
 
   if (makeApzTree){
@@ -891,7 +905,7 @@ Bool_t zgamma::Process(Long64_t entry)
   //}
 
   //if (Mllg<60 || Mllg>120)
-  if (Mllg<110 || Mllg>170)
+  if (sample!="HZG" &&(Mllg<110 || Mllg>170))
     return kTRUE;
 
   HM->FillHistosFull(5, eventWeight);
@@ -992,8 +1006,11 @@ Bool_t zgamma::Process(Long64_t entry)
       }
     }
   }
-
-
+  else if(Mll > 50){
+    HM->FillHistosFull(21, eventWeight);
+    FillHistoCounts(21, eventWeight);
+    CountEvents(21, "m(ll) > 50 GeV", fcuts);
+  }
   for (UInt_t i=0; i<ntrig; i++){
     triggerSelector->SelectTrigger(myTriggers[i], triggerStatus, hltPrescale, isFound, triggerPass, prescale);
     if(triggerPass) nEventsTrig[6][i]++;
@@ -1058,8 +1075,8 @@ Bool_t zgamma::Process(Long64_t entry)
       )
     return kTRUE;
 
-  FillHistoCounts(21, eventWeight);
-  CountEvents(21, "noise filters, after cuts #6",fcuts);
+  FillHistoCounts(22, eventWeight);
+  CountEvents(22, "noise filters, after cuts #6",fcuts);
 
 
   /*
