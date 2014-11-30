@@ -203,14 +203,18 @@ if __name__ == "__main__":
   #path = pathBase+"/"+subdir
 
 
-  sigName = '#splitline{20 x Signal}{m_{H}=125 GeV}'
-  if opt.zjp: sigName= '#splitline{50 x Signal}{Z #rightarrow J/Psi #gamma}'
+  sigName = '#splitline{XX x Signal}{m_{H}=125 GeV}'
+  if opt.zjp: sigName= '#splitline{XX x Signal}{Z #rightarrow J/Psi #gamma}'
   if opt.hjp: sigName= 'h #rightarrow J/Psi #gamma'
 
 
   ggHZGFile   = TFile(hPath+"/"+sel+"_"+period+"/hhhh_ggHZG-"+str(mass)+"_1.root", "OPEN")
   hackZip = zip(['120','130','135','140','145','150'],
                 [sigGG['120'],sigGG['130'],sigGG['135'], sigGG['140'],sigGG['145'],sigGG['150']])
+  sigZip = zip(['125','135','145'],
+                [sigGG['125'],sigGG['135'],sigGG['145']])
+  #sigZip = zip(['125'],
+  #             [sigGG['125']])
 
   #u.drawAllInFile(None, "", hackZip, None, '', "GEN", pathBase+'/GEN-lumi', None, "lumi")
 
@@ -221,19 +225,16 @@ if __name__ == "__main__":
   #u.drawAllInFile(None, "", '', sigFileGG, "Dalitz", "eff", pathBase+'/eff', None, "norm")
 
   if not opt.apz:
-    # u.drawAllInFile(None, "", bkgZip, sigFile, sigName, "GEN", pathBase+'/GEN', None, "norm")
-    # u.drawAllInFile(None, "", '', sigFile, sigName, "GEN", pathBase+'/GEN-angles', None, "norm")
-
-    if opt.hjp:
-      u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "Main", path, cut, "toDataInt", doFits=opt.fit)
+    if opt.bkg:
+      u.drawAllInFile(dataFile, "Data", bkgZip, None, sigName, "Main", path, cut, "lumi")
+      # u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "Main", path, cut, "lumi")
     else:
-      if opt.bkg:
-        u.drawAllInFile(dataFile, "Data", bkgZip, None, sigName, "Main", path, cut, "lumi")
-        #u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "Main", path, cut, "lumi")
-      else:
-        u.drawAllInFile(dataFile, "Data", None, sigFile, sigName, "Main", path, cut, "toDataInt", doFits=opt.fit)
+      #u.drawAllInFile(dataFile, "Data", None, None, sigName, "Main", path, cut, "toDataInt", doFits=opt.fit)
+      u.drawAllInFile(None, "Data", None, sigZip, sigName, "Main", path, cut, "toDataInt", doFits=opt.fit)
+      #u.drawAllInFile(dataFile, "Data", None, sigZip, sigName, "Main", path, cut, "toDataInt", doFits=opt.fit)
 
     if opt.extra:
+      # u.drawAllInFile(None, "", bkgZip, sigFile, sigName, "GEN", pathBase+'/GEN', None, "norm")
       for n in ['Angles','N']:
         u.drawAllInFile(dataFile, "Data",bkgZip,sigFile,"signal", n, pathBase+"/"+n, cut, "lumi")
 
@@ -265,12 +266,6 @@ if __name__ == "__main__":
       for n in ['EGamma','BaseSC-1','BaseSC-2',"track-1","track-2","track-3"]:
         u.drawAllInFile(dataFile, "Data",bkgZip,sigFile,"signal",
                         dirname+"-"+n,  pathBase+"/"+dirnameshort+"-"+n,  None,"norm")
-
-
-    # dataFile.Close()
-    #print yields_data
-
-    #sigFileGG  = TFile(hPath+"/mugamma_"+period+"/hhhh_ggH-mad125_1.root", "OPEN")
 
   ss = opt.sel
   if opt.apz and doMerge:
