@@ -600,16 +600,17 @@ Bool_t jpsiGamma::Process(Long64_t entry)
     if (!(fabs(thisMuon->Eta()) < 2.4)) continue;
 
     if(thisMuon->Pt() > 4 && ObjID->PassMuonId(*thisMuon, pvPosition, "Soft") ) {
-      if (doRochCorr && !doMuScle){
+      if (doRochCorr){
 	Float_t qter = 1;
-	if (isRealData) roch->momcor_data(*thisMuon, thisMuon->Charge(), 0, qter);
-	else            roch->momcor_mc(  *thisMuon, thisMuon->Charge(), 0, qter );
+	if (isRealData){
+	  roch->momcor_data(*thisMuon, thisMuon->Charge(), 0, qter);
+	  if (period=="2012D")
+	    roch->momcor_data(*thisMuon, thisMuon->Charge(), 1, qter);
+	}
+	else
+	  roch->momcor_mc  (*thisMuon, thisMuon->Charge(), 0, qter );
+	//cout<<"DBG rochcor. qterr = "<<qter<<endl;
       }
-      //else if(!doRochCorr && doMuScle){
-      //muScle->applyPtCorrection(*thisMuon,thisMuon->Charge());
-      //}
-      else if (doRochCorr && doMuScle)
-	Abort("Only one set of Muon corrections allowed: rochcor or muscle...");
 
       muons.push_back(*thisMuon);
     }
@@ -791,11 +792,11 @@ Bool_t jpsiGamma::Process(Long64_t entry)
   }
 
 
-  if (Mll<2.7 || Mll>3.5) return kTRUE;
-
+  //if (Mll<2.5 || Mll>3.7) return kTRUE;
   HM->FillHistosFull(8, eventWeight);
   FillHistoCounts(8, eventWeight);
-  CountEvents(8, "J/Psi peak", fcuts);
+  CountEvents(8, "no cut", fcuts);
+  //CountEvents(8, "J/Psi peak: [2.5, 3.7]", fcuts);
 
   //global_Mll = Mll;
   HM->MakeMuonPlots(muons[0]);
@@ -846,13 +847,13 @@ Bool_t jpsiGamma::Process(Long64_t entry)
 
 
 
-  //if ((l1+l2).Pt()/Mllg < 0.30 || gamma.Pt()/Mllg < 0.30)
-
-  if ((l1+l2).Pt() < 40 || gamma.Pt() < 40)
+  if ((l1+l2).Pt()/Mllg < 0.30 || gamma.Pt()/Mllg < 0.30)
+  //if ((l1+l2).Pt() < 40 || gamma.Pt() < 40)
     return kTRUE;
   HM->FillHistosFull(10, eventWeight);
   FillHistoCounts(10, eventWeight);
-  CountEvents(10, "pT > 40 and qT > 40", fcuts);
+  CountEvents(10, "pT/m(llh) > 0.3 and qT/m(llg) > 0.3", fcuts);
+  //CountEvents(10, "pT > 40 and qT > 40", fcuts);
 
 
   for (UInt_t i =0; i<ntrig; i++){

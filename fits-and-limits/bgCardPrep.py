@@ -1,4 +1,4 @@
-0;115;0c#!/usr/bin/env python
+#!/usr/bin/env python
 import sys,os
 from ROOT import *
 gROOT.SetBatch()
@@ -326,14 +326,14 @@ if __name__=="__main__":
           sigFile_gg   = TFile(hPath+"/"+tag+"_"+year+"/hhhh_ggH-mad125_1.root", "OPEN")
           sigFile_vbf  = TFile(hPath+"/"+tag+"_"+year+"/hhhh_vbfH-mad125_1.root", "OPEN")
           sigFile_vh   = TFile(hPath+"/"+tag+"_"+year+"/hhhh_vH-mad125_1.root",  "OPEN")
-          if   lepton == 'mu':
+          if lepton == 'mu':
             fsig = [sigFile_gg, sigFile_vbf, sigFile_vh]
           elif lepton == 'el' or lepton == 'ee':
             fsig = [sigFile_gg]
 
         hsig = []
         for i,f in enumerate(fsig):
-          Nev = f.Get("Counts/evt_byCut").GetBinContent(2)
+          if lepton=='el': continue
           if hjp:
             cro = u.getCS("HtoJPsiGamma")/100
           else:
@@ -346,6 +346,7 @@ if __name__=="__main__":
             elif i==2:
               cro = u.getCS("vH-125",  mySel)
 
+          Nev = f.Get("Counts/evt_byCut").GetBinContent(2)
           lumi  = u.getLumi("2012")
           scale = float(lumi*cro)/Nev
 
@@ -356,7 +357,10 @@ if __name__=="__main__":
           elif cat=='EB':
             if hjp: hsig.append(f.Get("Main/00_tri_mass_Main_cut10"))
             elif lepton=='el' or lepton=='ee':
+              #continue
               hsig.append(f.Get("Main-Dale/01_mDalG_fit_Main_cut16"))
+              hsig.append(f.Get("Main-Dale/01_mDalG_fit_Main_cut16"))
+
             else:   hsig.append(f.Get("Main/00_tri_mass_Main_cut9"))
 
           elif cat=='EE':
@@ -525,10 +529,11 @@ if __name__=="__main__":
           testFrame.SetMaximum(65)
 
         testFrame.Draw()
-        hsig[0].SetAxisRange(115,135,"X")
-        hsig[0].SetLineColor(kRed+1)
-        hsig[0].SetLineWidth(2)
-        hsig[0].Draw('same hist')
+        if lepton!='el':
+          hsig[0].SetAxisRange(115,135,"X")
+          hsig[0].SetLineColor(kRed+1)
+          hsig[0].SetLineWidth(2)
+          hsig[0].Draw('same hist')
 
 
         if lepton=='mu':
@@ -540,7 +545,8 @@ if __name__=="__main__":
         else:   leg  = TLegend(0.50,0.62,0.92,0.87)
         leg.SetFillColor(0)
         leg.SetBorderSize(1)
-        leg.AddEntry(hsig[0],'Expected signal x'+str(factor),'f')
+        if lepton!='el':
+          leg.AddEntry(hsig[0],'Expected signal x'+str(factor),'f')
         #leg.AddEntry(testFrame.findObject(bkgModel+'1sigma'),"Background Model",'f')
         leg.AddEntry(testFrame.findObject(bkgModel),"Background Model",'le')
         #if not hjp: leg.AddEntry(0,'','')

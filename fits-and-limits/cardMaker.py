@@ -42,14 +42,15 @@ muID     = '1.110'
 muISO    = '1.003'
 muTRIG   = '1.040'
 phoID    = '1.006'
-phoTRIG  = '1.020'
+phoTRIG_mu = '1.020'
+phoTRIG_el = '1.020'
 PU       = '1.008'
-meanUnc  = '0.005'
+meanUnc  = '0.001'
 sigmaUnc = '0.100'
 
 yearToTeV ={'2011':'7TeV', '2012':'8TeV'}
-proc = {'gg':'ggH', 'vbf':'qqH','v':'WH','hjp':'hjp'}
-prYR = {'gg':'ggF', 'vbf':'VBF','v':'WH'}
+proc = {'gg':'ggH', 'vbf':'qqH','v':'VH','hjp':'hjp'}
+prYR = {'gg':'ggF', 'vbf':'VBF','v':'VH'}
 mllBins = u.mllBins()
 
 #csBR = {}
@@ -100,7 +101,11 @@ def makeCards(subdir):
           sigFileName = subdir+'/'+'_'.join(['SignalOutput',lepton,year,'cat'+cat,mass])+'.root'
           sigFile = TFile(sigFileName)
           sigWs = sigFile.Get('ws_card')
+
           procList  = [proc[a] for a in sigNameList]
+          if lepton=='el': procList.remove('VH')
+          print procList
+
           if options.br:
             if hjp:
               procList=['hjp']
@@ -160,6 +165,7 @@ def makeCards(subdir):
           card.write('--------------------------------------------------------------\n')
           sigYields = []
           for s in sigNameList[::-1]:
+            if lepton=='el' and s=='v': continue
             cs = 1
             if options.br:
               if hjp:
@@ -172,7 +178,7 @@ def makeCards(subdir):
                   print 'from the fit', fit(float(mass))
                   print 'from csbr:', cs
 
-            print mass, s, 'cs for scale=', cs
+            print mass, s, lepton, 'cs for scale=', cs
             #sigYields.append(sigWs.var('sig_'+s+'_yield_'+channel).getVal()*cs)
             sigYields.append(round(sigWs.var('sig_'+s+'_yield_'+channel).getVal() /cs, 4))
 
@@ -192,18 +198,27 @@ def makeCards(subdir):
 
           if not options.br:
             card.write(nSubLine2.format(*(['CMS_hllg_brLLG', 'lnN']+nProc*[brLLG])))
-            card.write('pdf_WH        lnN     '+xsPDFErrDict['YR3'][yearToTeV[year]]['WH'][mmm]+'  -  -   -  \n')
-            card.write('QCDscale_WH   lnN     '+xsScaleErrDict['YR3'][yearToTeV[year]]['WH'][mmm]+'  -  -   -  \n')
+            if lepton!='el':
+              print 'not here'
+              card.write('pdf_ZH        lnN     '+xsPDFErrDict['YR3'][yearToTeV[year]]['ZH'][mmm]+'  -  -   -  \n')
+              card.write('QCDscale_ZH   lnN     '+xsScaleErrDict['YR3'][yearToTeV[year]]['ZH'][mmm]+'  -  -   -  \n')
             card.write('pdf_qqH       lnN     -   '+xsPDFErrDict['YR3'][yearToTeV[year]]['VBF'][mmm]+' -  -  \n')
             card.write('QCDscale_qqH  lnN     -   '+xsScaleErrDict['YR3'][yearToTeV[year]]['VBF'][mmm]+' -  -  \n')
             card.write('pdf_ggH       lnN     -   -  '+xsPDFErrDict['YR3'][yearToTeV[year]]['ggF'][mmm]+'  -  \n')
             card.write('QCDscale_ggH  lnN     -   -  '+xsScaleErrDict['YR3'][yearToTeV[year]]['ggF'][mmm]+'  -  \n')
 
-          card.write(nSubLine2.format(*(['CMS_eff_m_ID',   'lnN']+nProc*[muID])))
-          card.write(nSubLine2.format(*(['CMS_eff_m_ISO',  'lnN']+nProc*[muISO])))
-          card.write(nSubLine2.format(*(['CMS_eff_m_TRIG', 'lnN']+nProc*[muTRIG])))
-          card.write(nSubLine2.format(*(['CMS_eff_g_ID',   'lnN']+nProc*[phoID])))
-          card.write(nSubLine2.format(*(['CMS_eff_g_TRIG', 'lnN']+nProc*[phoTRIG])))
+          if lepton=='mu':
+            card.write(nSubLine2.format(*(['CMS_eff_m',   'lnN']+nProc*[muID])))
+            card.write(nSubLine2.format(*(['CMS_eff_m_ISO',  'lnN']+nProc*[muISO])))
+            card.write(nSubLine2.format(*(['CMS_eff_m_MuEgTRIG', 'lnN']+nProc*[muTRIG])))
+            card.write(nSubLine2.format(*(['CMS_eff_g',   'lnN']+nProc*[phoID])))
+            card.write(nSubLine2.format(*(['CMS_eff_g_MuEgTRIG', 'lnN']+nProc*[phoTRIG_mu])))
+
+          else:
+            card.write(nSubLine2.format(*(['CMS_eff_e',   'lnN']+nProc*[elID])))
+            card.write(nSubLine2.format(*(['CMS_eff_g',   'lnN']+nProc*[phoID])))
+            card.write(nSubLine2.format(*(['CMS_eff_g_GGTRIG', 'lnN']+nProc*[phoTRIG_el])))
+
           card.write(nSubLine2.format(*(['CMS_hllg_PU',    'lnN']+nProc*[PU])))
 
           for sig in sigNameList:

@@ -19,16 +19,7 @@ lumi2012 = float(conf.get("lumi","lumi2012A")) + float(conf.get("lumi","lumi2012
 lumi = lumi2012
 
 roundTo = 50.
-# The rooFit stuff is for resolution fits and j/psi mass fits
-gSystem.Load("libRooFit")
-mll = RooRealVar("mll","mll",2.5,3.7)
-mean_mll  = RooRealVar("m",     "mean", 3.0, 2.0, 4.0)
-width_mll = RooRealVar("#Delta","width",0.0, 0.0, .1)
-sigma_mll = RooRealVar("#sigma","sigma",1.0, 0.0, 2.0)
-lamb = RooRealVar("lamb","lamb",-0.5, -20,1)
-#res = RooRealVar("res","res",-1,1)
-#mean_res  = RooRealVar("mean_res", "mean_res", 3.0, 0.0, 20.0)
-#sigma_res = RooRealVar("sigma_res","sigma_res",1.0, 0.0, 10.0)
+
 noOverflowList  = [a.strip() for a in (conf.get("selection","noOverflowList")).split(',')]
 print 'No-Overflow list = ', noOverflowList
 
@@ -349,7 +340,7 @@ def drawAllInFile(f1, name1, bZip, sZip, name3, myDir, path, N, howToScale="none
             cro = getCS("HtoJPsiGamma")
           else:
             cro = getCS("ggH-"+s[0], getSelection()[:2])
-            scale3 = float(lumi*cro)/Nev
+          scale3 = float(lumi*cro)/Nev
         print Nev, lumi, cro, scale3
         si[-1].Scale(float(scale3))
 
@@ -658,81 +649,6 @@ def drawAllInFile(f1, name1, bZip, sZip, name3, myDir, path, N, howToScale="none
         leg.SetY2(0.7)
       '''
       if doFits:
-        if 'diLep_mass_jpsi_' in histoName:
-          mllFrame = mll.frame()
-          if h1!=None and sZip!=None:
-            mll.setRange('fitRange',2.9,3.3)
-
-            dh1 = RooDataHist("dh1","dh1", RooArgList(mll), h1)
-            voigt1 = RooVoigtian("voigt1","voigt1",mll,mean_mll,width_mll,sigma_mll)
-            #expo   = RooExponential("expo", "Bkg Model", mll, lamb)
-            #frac = RooRealVar("frac","frac",0.7, 0.5,1)
-            #SplusB = RooAddPdf("SplusB", "Bkg plus signal peak", voigt1, expo, frac)
-
-            #fit1   = SplusB.fitTo(dh1, RooFit.Range('fitRange'), RooFit.Save())
-            fit1   = voigt1.fitTo(dh1, RooFit.Range('fitRange'), RooFit.Save())
-            l1_0 = RooArgSet(mll)
-            pars = voigt1.getParameters(l1_0)
-
-            dh1.plotOn(mllFrame, RooFit.Name('data'))
-            #SplusB.plotOn(mllFrame, RooFit.LineColor(kGreen+3))
-            #SplusB.paramOn(mllFrame, RooFit.Label("Data"), RooFit.Layout(0.095,0.45,0.65))
-            voigt1.plotOn(mllFrame, RooFit.LineColor(kGreen+3))
-            voigt1.paramOn(mllFrame, RooFit.Label("Data"), RooFit.Layout(0.095,0.45,0.65))
-
-            l1_1, l1_2 = RooArgList(mll), RooArgList(pars)
-            ff1 = voigt1.asTF(l1_1, l1_2)
-
-            dh3 = RooDataHist("dh3","dh3", RooArgList(mll), h3)
-            voigt3 = RooVoigtian("voigt3","voigt3",mll,mean_mll,width_mll,sigma_mll)
-            fit3   = RooFitResult(voigt3.fitTo(dh3, RooFit.Range('fitRange'),  RooFit.Save()))
-            l3_0 = RooArgSet(mll)
-            pars = voigt3.getParameters(l3_0)
-            dh3.plotOn(mllFrame, RooFit.Name('sig'), RooFit.MarkerStyle(23), RooFit.MarkerColor(kBlue), RooFit.LineColor(kBlue))
-            voigt3.plotOn(mllFrame)
-            voigt3.paramOn(mllFrame, RooFit.Label("Signal MC"), RooFit.Layout(0.65, 1.0,0.65))
-
-            l3_1, l3_2 = RooArgList(mll), RooArgList(pars)
-            ff3 = voigt3.asTF(l3_1, l3_2)
-
-            ff1.Print('all')
-            ff3.Print('all')
-            NBINS = 100
-            hf1 = TH1F("hf1",";mll;hf1", NBINS, 2.9, 3.3)
-            hf3 = TH1F("hf3",";mll;hf3", NBINS, 2.9, 3.3)
-            for b in xrange(NBINS):
-              m = 2.9+0.4*(b+0.5)/NBINS
-              hf1.SetBinContent(b+1,ff1.Eval(m))
-              hf3.SetBinContent(b+1,ff3.Eval(m))
-              #print b, ff1.Eval(m), ff3.Eval(m)
-            integ1 = hf1.Integral()
-            hf1.Scale(1./integ1)
-            integ3 = hf3.Integral()
-            hf3.Scale(1./integ3)
-
-            hratio = hf1.Clone()
-            hratio.Divide(hf3)
-            hratio.SetName('jpsi')
-            hjpsi = TFile('JPsiMuMu_MCReScale.root','recreate')
-            hjpsi.cd()
-            hratio.Write()
-            hjpsi.Close()
-
-            #hratio.Print('all')
-            #dhratio = RooDataHist("dhratio","dhratio", RooArgList(mll), hratio)
-            #raw_input('Hit Enter to continue')
-
-            #dhratio.plotOn(mllFrame, RooFit.Name('hratio'), RooFit.MarkerColor(kOrange))
-
-            mllFrame.SetTitle(';m_{#mu#mu} (GeV);Events')
-            mllFrame.Draw()
-            mllFrame.SetMinimum(0.01)
-            #mllFrame.SetMaximum(6)
-            leg.Clear()
-            leg.AddEntry(mllFrame.findObject('data'),'Data','e1p')
-            leg.AddEntry(mllFrame.findObject('sig'),'h#rightarrow J/#Psi#gamma#rightarrow#mu#mu#gamma','pl')
-
-
         if 'res_' in histoName:
           gStyle.SetOptFit(0)
           func = TF1("func", "gaus", -0.1, 0.1);
@@ -909,7 +825,7 @@ def makeTable(table, name, opt="tex", precision='%.2f'):
       for c in range(n_col):
         val = table[l][c]
         if isinstance(val,float):
-          if c==2:
+          if c==2 and not 'pulls' in name:
             myTable+="%.0f" % (val)
           else:
             myTable+=precision % (val)

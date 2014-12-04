@@ -2,7 +2,11 @@
 import sys,os
 from ROOT import *
 from collections import defaultdict
+from apzFitProducer import AutoVivification
 gROOT.SetBatch()
+sys.path.append("../zgamma")
+import utils as u
+
 import ConfigParser as cp
 cf = cp.ConfigParser()
 cf.read('config.cfg')
@@ -20,21 +24,24 @@ plotBase = cf.get("path","htmlbase")+'/html/zgamma/dalitz/fits-'+s+'/Pulls'
 #plotBase = '/tthome/andrey/html/zgamma/bias-mar11/'
 toysDir = '../biasToys-2014-Sep23'
 
-def loopThruPulls():
-  #massList  = ['140','145','150']
-  massList     = [a.strip()[0:3] for a in (cf.get("fits","massList")).split(',')]
-  sigNameList  = [a.strip() for a in (cf.get("fits","sigNameList")).split(',')]
-  yearList     = [a.strip() for a in (cf.get("fits","yearList")).split(',')]
-  leptonList   = [a.strip() for a in (cf.get("fits","leptonList")).split(',')]
-  catList = ['EB']
+sigMuDict = AutoVivification()
+taMuDict  = AutoVivification()
 
-  genFuncList = ['Exp','Pow','Laurent']
-  #genFuncList = ['GaussPow','GaussExp','SechPow','SechExp']
+#massList  = ['140','145','150']
+massList     = [a.strip()[0:3] for a in (cf.get("fits","massList")).split(',')]
+sigNameList  = [a.strip() for a in (cf.get("fits","sigNameList")).split(',')]
+yearList     = [a.strip() for a in (cf.get("fits","yearList")).split(',')]
+leptonList   = [a.strip() for a in (cf.get("fits","leptonList")).split(',')]
+catList = ['EB']
+
+genFuncList = ['Exp','Pow','Laurent']
+
+def loopThruPulls():
   for year in yearList:
     for lep in leptonList:
-      for genFunc in genFuncList:
+      for mass in massList:
         for cat in catList:
-          for mass in massList:
+          for genFunc in genFuncList:
             if opt.copy!=None:
               bdir = opt.copy
               toyFileName  = toysDir+'_'.join(['/biasToys',year,lep,'cat'+cat,genFunc,mass])+'.root'
@@ -66,12 +73,12 @@ def makePullPlots(year='2012', lepton='mu', genFunc='Exp', cat='EB', mass='125')
   tailList = ['Bern2','Bern3','Bern4','Bern5']
   #tailList.append('gen')
   colors ={}
-  for f,col in cf.items("colors"): colors[f] = int(col)
+  for f,col in cf.items("colors"): colors[f] = eval(col)
 
   #make a TCanvas and TLegend for each type of distribution
 
-  #distList = ['sigPull', 'bgPull']
-  distList = ['sigPull','bgPull','bgPull-2','bgPull-3','nSig','nBG','sigErr','bgErr','typeA']
+  distList = ['sigPull', 'bgPull', 'typeA']
+  #distList = ['sigPull','bgPull','bgPull-2','bgPull-3','nSig','nBG','sigErr','bgErr','typeA']
   canList = []
   legList = []
   for dist in distList:
@@ -171,12 +178,10 @@ def makePullPlots(year='2012', lepton='mu', genFunc='Exp', cat='EB', mass='125')
   if not os.path.isdir(newPath):
     os.makedirs(newPath)
 
-  #get a txt file ready for the latex
-  f = open(plotBase+'-'+'-'.join([year,lepton,'cat'+cat,genFunc,'mH'+mass+'.txt']), 'w')
   for i,dist in enumerate(distList):
     canList[i].cd()
 
-    ymax = max(map(lambda x:x.GetMaximum(),histListDict[dist]))*1.1 #this is awesome if it works, python rocks
+    ymax = max(map(lambda x:x.GetMaximum(),histListDict[dist]))*1.1
 
     histListDict[dist][0].Draw()
     histListDict[dist][0].SetMaximum(ymax)
@@ -188,33 +193,47 @@ def makePullPlots(year='2012', lepton='mu', genFunc='Exp', cat='EB', mass='125')
     legList[i].Draw('same')
     canList[i].SaveAs(newPath+'/'+dist+'_'+lepton+'_'+year+'_'+genFunc+'_cat'+cat+'_mH'+mass+'.png')
 
-    if dist == 'typeA':
-      f.write('typeA:\n')
-      for hist in histListDict[dist]:
-        f.write(hist.GetName().strip('typeA_')+', ')
-      f.write('\n')
-      for hist in histListDict[dist]:
-        f.write('{0:.2f}, '.format(hist.GetMean()))
-      f.write('\n')
-    if dist == 'bgPull':
-      f.write('bgPull:\n')
-      for hist in histListDict[dist]:
-        f.write(hist.GetName().strip('bgPull_')+', ')
-      f.write('\n')
-      for hist in histListDict[dist]:
-        f.write('{0:.2f}, '.format(hist.GetMean()))
-      f.write('\n')
-  f.close()
 
+    mus = []
+    if dist == 'typeA':
+      for hist in histListDict[dist]:
+        mus.append(hist.GetMean())
+      taMuDict[year][lepton][cat][mass][genFunc]=mus
+    if dist == 'sigPull':
+      for hist in histListDict[dist]:
+        mus.append(hist.GetMean())
+      sigMuDict[year][lepton][cat][mass][genFunc]=mus
+
+  print sigMuDict
+  print taMuDict
 
 if __name__=="__main__":
   #mass = options.mass
   #makePullPlots(mass=mass)
   loopThruPulls()
 
+  table1 = []
+  table2 = []
+  for year in yearList:
+    for lep in leptonList:
+      for cat in catList:
+        for mass in massList:
+          line1 = [mass]
+          line2 = [mass]
+          for genFunc in genFuncList:
+            line1.extend(sigMuDict[year][lep][cat][mass][genFunc][1:])
+            line2.extend( taMuDict[year][lep][cat][mass][genFunc][1:])
+            print genFunc, line1
+            print genFunc, line2
+          table1.append(line1)
+          table2.append(line2)
+        #print table1
+        #print table2
 
 
-
+  u.makeTable(table1,"pulls", "twiki", precision='%.2f')
+  u.makeTable(table1,"pulls1", "tex",   precision='%.2f')
+  u.makeTable(table2,"pulls2", "tex",   precision='%.2f')
 
 
 

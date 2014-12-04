@@ -12,6 +12,7 @@ parser.add_option("--br", dest="br",  action="store_true", default=False, help="
 parser.add_option("--mll",dest="mll", action="store_true", default=False, help="Do the limit on BR*cs in bins of mll")
 parser.add_option("--divide",dest="divide", action="store_true", default=False, help="Divide by the binn-size (for --mll option)")
 parser.add_option("--cat",dest="cat", default='EB', help="Category: EB, EE, mll50, etc")
+parser.add_option("--lep",dest="lep", default='mu', help="Channel: mu or el")
 (opt, args) = parser.parse_args()
 
 import ConfigParser as cp
@@ -21,12 +22,13 @@ cf.read('config.cfg')
 gStyle.SetOptTitle(0)
 
 s = cf.get("path","ver")
+lep = opt.lep
 #s = "comboCardsMing/"
 #s = "MingDataCards/Dalitz_electron/"
 
 method = 'Asymptotic'
 #method = 'ProfileLikelihood'
-out = TFile(s+"/limit-data-cat"+opt.cat+".root","recreate")
+out = TFile(s+"/limit-data-cat"+opt.cat+"-"+lep+".root","recreate")
 
 plotBase = cf.get("path","htmlbase")+'/html/zgamma/dalitz/fits-'+s
 u.createDir(plotBase+'/Limits')
@@ -36,6 +38,8 @@ doBlind   = int(cf.get("fits","blind"))
 doObs = not doBlind
 mllBins = u.mllBins()
 
+if opt.cat!='comb': suff=opt.cat+'_'+lep
+else:  suff='Combo'
 # print massList
 
 c = TCanvas("c","c",0,0,500,400)
@@ -65,7 +69,7 @@ if __name__ == "__main__":
       center = 0.5*(r2+r1)
       print 'mbin and center',mbin, mllBins[int(mbin[1])], center
 
-      thisFile = "higgsCombineTest.Asymptotic.mH125.0_cat"+mbin+".root"
+      thisFile = "higgsCombineTest.Asymptotic.mH125.0_cat_"+mbin+"_"+lep+".root"
       # print thisFile
       xAxis.append(float(center))
       xErr.append(float(0.5*(r2-r1)))
@@ -96,7 +100,7 @@ if __name__ == "__main__":
       #  mass = int(mass)
         #print 'we are her'
       print mass
-      thisFile = filter(lambda fileName: str(mass)+'_cat'+opt.cat+'.root' in fileName,fileList)[0]
+      thisFile = filter(lambda fileName: str(mass)+'_cat_'+suff+'.root' in fileName,fileList)[0]
       print thisFile
       xAxis.append(float(mass))
       f = TFile(s+"/"+thisFile,"open")
@@ -230,9 +234,9 @@ if __name__ == "__main__":
         c.SetLogy()
   else:
     mg.GetYaxis().SetTitle('95% CL limit on #sigma#timesBR/#sigma_{SM}#times BR_{SM}')
-    if opt.cat in ['EB','Combo']:
+    if opt.cat in ['EB','comb']:
       mg.SetMaximum(31)
-      if 'el' in s:
+      if lep=='el':
         mg.SetMaximum(42)
     elif opt.cat in ['EE','mll50']:
       mg.SetMaximum(150)
@@ -247,10 +251,12 @@ if __name__ == "__main__":
     lat.SetTextSize(0.05)
     lat.DrawLatex(0.40,0.95,'m_{A} = 125 GeV')
     lat.SetTextSize(0.035)
+  elif opt.cat=='comb':
+    lat.DrawLatex(0.18,0.95, 'H #rightarrow#gamma*#gamma#rightarrow ll#gamma  CAT: '+opt.cat)
   else:
-    if "mu" in s:
+    if lep=="mu":
       lat.DrawLatex(0.18,0.95, 'H #rightarrow#gamma*#gamma#rightarrow #mu#mu#gamma  CAT: '+opt.cat)
-    elif "el" in s:
+    elif lep=="el":
       lat.DrawLatex(0.18,0.95, 'H #rightarrow#gamma*#gamma#rightarrow #font[32]{ee}#gamma  CAT: '+opt.cat)
   CMS_lumi(c, 2, 11)
 
@@ -307,9 +313,9 @@ if __name__ == "__main__":
   for e in ['.png', '.pdf']:
     CMS_lumi(c, 2, 11)
     if opt.mll:
-      c.SaveAs(plotBase+'/Limits/Limits_Mll'+e)
+      c.SaveAs(plotBase+'/Limits/limits_Mll'+e)
     else:
-      c.SaveAs(plotBase+'/Limits/Limits_cat'+opt.cat+e)
+      c.SaveAs(plotBase+'/Limits/limits_cat_'+suff+e)
 
   out.cd()
   observed.Write("observed")

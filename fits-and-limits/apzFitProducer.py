@@ -6,14 +6,15 @@ from rooFitBuilder import *
 from ROOT import *
 gROOT.SetBatch()
 sys.path.append("../zgamma")
+import utils as u
 gSystem.SetIncludePath( "-I$ROOFITSYS/include/" );
 gROOT.ProcessLine(".L ../tdrstyle.C")
 TH1.SetDefaultSumw2(kTRUE)
 gStyle.SetOptTitle(0)
-import utils as u
 from optparse import OptionParser
 parser = OptionParser(usage="usage: %prog ver [options -v]")
 parser.add_option("-v","--verbose", dest="verbose", action="store_true", default=False, help="Verbose mode (print out stuff)")
+parser.add_option("--tw", dest="tw", action="store_true", default=False, help="Use a tree from TW group (in el channel)")
 (opt, args) = parser.parse_args()
 
 class AutoVivification(dict):
@@ -38,7 +39,6 @@ leptonList    = [a.strip() for a in (cf.get("fits","leptonList")).split(',')]
 catList       = [a.strip() for a in (cf.get("fits","catList")).split(',')]
 sigNameList   = [a.strip() for a in (cf.get("fits","sigNameList")).split(',')]
 mllBins = u.mllBins()
-
 
 EBetaCut = 1.4442
 EEetaCut = 1.566
@@ -78,7 +78,18 @@ def LumiXSWeighter(mH, prod, sel, Nev=None):
   return sc
 
 
+def LoopOverTreeTW(myTree, cat, mzg, args, ds):
+  print 'TW tree:', myTree
+  for i in myTree:
+    if i.Meg> lowCutOff and i.Meg<highCutOff:
+      mzg.setVal(i.Meg)
+      Weight = i.mcwei*i.puwei
+      ds.add(args, Weight)
+    else:
+      ds.add(args)
+
 def LoopOverTree(myTree, cat, mzg, args, ds, lumiWeight):
+  print 'Looping my tree, ', myTree
   for i in myTree:
     if cat=='mll50':
       if i.m12<20 or i.m12>50: continue
@@ -123,7 +134,7 @@ def doInitialFits(subdir):
     sys.exit(0)
 
   print "\t ==== All the input files are initialized into these dictionaries ===="""
-  dataDict = {}
+  dataDict   = {}
   signalDict = {}
   if hjp:
     signalDict = {'hjp_mu2012_M125':TFile(basePath+'jp-mugamma_2012/hhhh_HiggsToJPsiGamma_1.root','r')}
@@ -135,13 +146,28 @@ def doInitialFits(subdir):
         if l == 'el': tag = 'elgamma'
         if l == 'ee': tag = 'eegamma'
 
-        dataDict[l+y] = TFile(basePath+'m_Data_'+tag+'_'+y+'.root','r')
+        if opt.tw and l=='el':
+          dataDict[l+y] = TFile('dalitzTW/data.root','r')
+        else:
+          dataDict[l+y] = TFile(basePath+'m_Data_'+tag+'_'+y+'.root','r')
+
         for s in sigNameList:
           for m in massList:
-            signalDict[s+'_'+l+y+'_M'+m] = TFile(basePath+tag+'_'+y+'/hhhh_'+s+'H-mad'+m+'_1.root','r')
+            if l=='el' and s=='v': continue
+            if l=='el' and opt.tw:
+              if s=='vbf':
+                signalDict[s+'_'+l+y+'_M'+m] = TFile('dalitzTW/output_job_hzg_eeg_dalitz_VBFH_'+m+'.root','r')
+              else:
+                signalDict[s+'_'+l+y+'_M'+m] = TFile('dalitzTW/output_job_hzg_eeg_dalitz_'+s+'H_'+m+'.root','r')
+            else:
+              signalDict[s+'_'+l+y+'_M'+m] = TFile(basePath+tag+'_'+y+'/hhhh_'+s+'H-mad'+m+'_1.root','r')
+
+
+
   print "\t ===  All files are set === \n"
 
-  treeName = 'apzTree/apzTree'
+  apzTreeName = 'apzTree/apzTree'
+  twTreeName  = 't'
 
   binning = 30
   binWidth = 2
@@ -171,6 +197,12 @@ def doInitialFits(subdir):
   # ###################################
   for year in yearList:
     for lepton in leptonList:
+
+      if opt.tw and lepton=='el':
+        treeName = twTreeName
+      else:
+        treeName = apzTreeName
+
       for cat in catList:
         plotBase = plotBase1+'_'.join([year,lepton,'cat'+cat])+'/'
         u.createDir(plotBase)
@@ -189,10 +221,12 @@ def doInitialFits(subdir):
         # ##################################################
 
         for prod in sigNameList:
+          if lepton=='el' and prod=='v': continue
           signalListDS = []
           for mass in massList:
             # store the unbinned signals for CB fitting
             signalTree = signalDict[prod+"_"+lepton+year+"_M"+mass].Get(treeName)
+
             #signalTree.Print()
             sigName = '_'.join(['ds_sig',prod,lepton,year,'cat'+cat,'M'+mass])
 
@@ -200,12 +234,18 @@ def doInitialFits(subdir):
             sig_ds    = RooDataSet(sigName,sigName,sig_argSW,'Weight')
 
             print signalTree, "A signal tree", prod, '  categ=',cat, "mass =", mass
-            Nev = u.getTotalEvents(signalDict[prod+"_"+lepton+year+"_M"+mass])
-            sel = lepton
-            if sel=='ee': sel ='el'
-            lumiWeight = LumiXSWeighter(int(mass), prod, sel, Nev)
-            print 'Nev = ', Nev
-            LoopOverTree(signalTree, cat, mzg, sig_argSW, sig_ds, lumiWeight)
+
+            if opt.tw and lepton=='el':
+              LoopOverTreeTW(signalTree, cat, mzg, sig_argSW, sig_ds)
+
+            else:
+              Nev = u.getTotalEvents(signalDict[prod+"_"+lepton+year+"_M"+mass])
+              sel = lepton
+              if sel=='ee': sel ='el'
+              lumiWeight = LumiXSWeighter(int(mass), prod, sel, Nev)
+              print 'Nev = ', Nev
+
+              LoopOverTree(signalTree, cat, mzg, sig_argSW, sig_ds, lumiWeight)
 
             #raw_input()
             signalListDS.append(sig_ds)
@@ -221,7 +261,6 @@ def doInitialFits(subdir):
             signalList.append(TH1F(histName, histName, 100, lowCutOff, highCutOff))
             signalList[-1].SetLineColor(kRed)
             signalTree = signalDict[prod+"_"+lepton+year+"_M"+mass].Get(treeName)
-
 
             if verbose:
               print 'signal mass loop', mass
@@ -260,7 +299,7 @@ def doInitialFits(subdir):
               signalListPDF.append(RooHistPdf('pdf_'+histName,'pdf_'+histName,mzg_argS,signalListDH[-1],2))
               getattr(ws,'import')(signalListPDF[-1])
 
-              if verbose: print '\n\n ** finished one mass -->>', mass
+              if verbose: print '\n\n\t ** Finished the mass -->>', mass, '\n\n'
 
             yi_sig0[year][mass][lepton][cat][prod] = sig_ds.sumEntries()
             yi_sig1[year][mass][lepton][cat][prod] = sig_ds.sumEntries('1','SignalRegion')
@@ -304,15 +343,17 @@ def doInitialFits(subdir):
         # ###############
         # get the data #
         # ###############
-        if verbose: print 'starting data section'
+        if verbose: print '\n\n \t ** Starting data selection. \n'
 
         dataName = '_'.join(['data',lepton,year,'cat'+cat])
         dataTree = dataDict[lepton+year].Get(treeName)
-
         data_argS = RooArgSet(mzg)
         data_ds   = RooDataSet(dataName,dataName,data_argS)
 
-        LoopOverTree(dataTree, cat, mzg, data_argS, data_ds, None)
+        if opt.tw and lepton=='el':
+          LoopOverTreeTW(dataTree, cat, mzg, data_argS, data_ds)
+        else:
+          LoopOverTree(dataTree, cat, mzg, data_argS, data_ds, None)
 
         if verbose:
           print dataName
@@ -343,6 +384,7 @@ def doInitialFits(subdir):
         if doBlind:
           data_ds.plotOn(testFrame, RooFit.Binning(binning),RooFit.Name('data'),RooFit.CutRange('r1'))
           data_ds.plotOn(testFrame, RooFit.Binning(binning),RooFit.Name('data'),RooFit.CutRange('r2'))
+          data_ds.plotOn(testFrame, RooFit.Binning(binning),RooFit.Name('data'),RooFit.Invisible())
         else:
           data_ds.plotOn(testFrame, RooFit.Binning(binning),RooFit.Name('data'))
 
@@ -365,7 +407,7 @@ def doInitialFits(subdir):
           testFrame.Draw()
           chi2 = testFrame.chiSquare(fitName,'data',ndof)
 
-          leg.AddEntry(testFrame.findObject(fitName),fitName+'   #chi2 = {0:.3f}'.format(chi2),'l')
+          leg.AddEntry(testFrame.findObject(fitName),fitName+(10-len(fitName))*'  '+'#chi2 = {0:.2f}'.format(chi2),'l')
           getattr(ws,'import')(fit)
 
 
@@ -415,6 +457,7 @@ def doInitialFits(subdir):
     for year in yearList:
       for lepton in leptonList:
         for prod in sigNameList:
+          if lepton=='el' and prod=='v': continue
           for cat in catList:
             t_mean = []
             t_sigma = []
@@ -429,7 +472,7 @@ def doInitialFits(subdir):
               print sigma_sig[year][mass][lepton][cat][prod]
               # a,b = mean_sig[year][mass][lepton][cat][prod]
               # l.append("%.2f &pm; %.2f"%(a,b))
-              l_mean.append("%.3f&pm;%.3f"%(mean_sig[year][mass][lepton][cat][prod][0], mean_sig[year][mass][lepton][cat][prod][1]))
+              l_mean.append("%.3f&pm;%.3f" %(mean_sig[year][mass][lepton][cat][prod][0],  mean_sig[year][mass][lepton][cat][prod][1]))
               l_sigma.append("%.3f&pm;%.3f"%(sigma_sig[year][mass][lepton][cat][prod][0],sigma_sig[year][mass][lepton][cat][prod][1]))
 
               t_mean.append(l_mean)

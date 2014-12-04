@@ -82,8 +82,8 @@ void zgamma::Begin(TTree * tree)
   ObjID    = new ObjectID();
   weighter = new WeightUtils(sample, period, selection, 0);
   myRandom = new TRandom3();
-  roch     = new rochcor2012(myRandom->Integer(10000));
-  //roch     = new rochcor2012();
+  //roch     = new rochcor2012(myRandom->Integer(10000));
+  roch     = new rochcor2012();
   triggerSelector = new TriggerSelector("", period, *triggerNames);
 
   for (Int_t n1=0; n1<nC; n1++){

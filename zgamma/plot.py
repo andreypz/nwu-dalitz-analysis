@@ -205,7 +205,7 @@ if __name__ == "__main__":
 
   sigName = '#splitline{XX x Signal}{m_{H}=125 GeV}'
   if opt.zjp: sigName= '#splitline{XX x Signal}{Z #rightarrow J/Psi #gamma}'
-  if opt.hjp: sigName= 'h #rightarrow J/Psi #gamma'
+  if opt.hjp: sigName= 'H #rightarrow J/Psi #gamma'
 
 
   ggHZGFile   = TFile(hPath+"/"+sel+"_"+period+"/hhhh_ggHZG-"+str(mass)+"_1.root", "OPEN")
@@ -215,6 +215,8 @@ if __name__ == "__main__":
                 [sigGG['125'],sigGG['135'],sigGG['145']])
   #sigZip = zip(['125'],
   #             [sigGG['125']])
+  if opt.hjp:
+    sigZip = zip(['H to J/Psi #gamma'],[sigFileHjp])
 
   #u.drawAllInFile(None, "", hackZip, None, '', "GEN", pathBase+'/GEN-lumi', None, "lumi")
 
@@ -229,8 +231,8 @@ if __name__ == "__main__":
       u.drawAllInFile(dataFile, "Data", bkgZip, None, sigName, "Main", path, cut, "lumi")
       # u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "Main", path, cut, "lumi")
     else:
-      #u.drawAllInFile(dataFile, "Data", None, None, sigName, "Main", path, cut, "toDataInt", doFits=opt.fit)
-      u.drawAllInFile(None, "Data", None, sigZip, sigName, "Main", path, cut, "toDataInt", doFits=opt.fit)
+      u.drawAllInFile(dataFile, "Data", None, None, sigName, "Main", path, cut, "toDataInt", doFits=opt.fit)
+      #u.drawAllInFile(None, "Data", None, sigZip, sigName, "Main", path, cut, "toDataInt", doFits=opt.fit)
       #u.drawAllInFile(dataFile, "Data", None, sigZip, sigName, "Main", path, cut, "toDataInt", doFits=opt.fit)
 
     if opt.extra:
@@ -322,6 +324,133 @@ if __name__ == "__main__":
 
       alphaPiZ(data, c1, TCut('ph_pt/m_llg>0.30 && di_pt/m_llg>0.30 && m_llg>121&&m_llg<131'),pathBase+"/alphaPiZ-7/")
       alphaPiZ(data, c1, TCut('ph_pt/m_llg>0.30 && di_pt/m_llg>0.30 && m_llg>85&&m_llg<96'),  pathBase+"/alphaPiZ-8/")
+
+
+  if opt.hjp and opt.fit:
+    gSystem.Load("libRooFit")
+    mll = RooRealVar("mll","mll",2.9,3.3)
+    mean_mll  = RooRealVar("m",     "mean", 3.0, 2.0, 4.0)
+    width_mll = RooRealVar("#Delta","width",0.0, 0.0, 5)
+    sigma_mll = RooRealVar("#sigma","sigma",1.0, 0.0, 5)
+    #lamb = RooRealVar("lamb","lamb",-0.5, -20,1)
+    alpha = RooRealVar("#alpha","alpha",5, 0,100)
+    cbN   = RooRealVar("N","cbN",1, 0,100)
+    p1 = RooRealVar("p1","p1",1, -5, 5)
+    p2 = RooRealVar("p2","p2",1, -5, 5)
+    bkg = RooPolynomial("bkg","bkg", mll, RooArgList(p1));
+    Nsig = RooRealVar("Nsig","signal fraction",    500,0.,10000.);
+    Nbkg = RooRealVar("Nbkg","background fraction",200,0.,10000.);
+
+    frac = RooRealVar("frac","frac",0.7, 0.5, 1.0)
+
+    histoName = '01_diLep_mass_jpsi_%s_cut%i'%('Main', opt.cut)
+    hDa = dataFile.Get('Main/'+histoName)
+    hSi = sigFile.Get('Main/'+histoName)
+    mll.setRange('fitRange',2.9,3.3)
+    dhDa = RooDataHist("dhDa","dhDa", RooArgList(mll), hDa)
+    voigtDa = RooVoigtian("voigtDa","voigtDa",mll,mean_mll,width_mll,sigma_mll)
+    #cbDa = RooCBShape('cbDa','cbDa',mll, mean_mll, sigma_mll, alpha, cbN)
+    # expo   = RooExponential("expo", "Bkg Model", mll, lamb)
+    SplusB = RooAddPdf("SplusB", "Bkg plus signal peak", RooArgList(voigtDa, bkg), RooArgList(Nsig,Nbkg))
+
+    mllFrame = mll.frame()
+    fitDa   = SplusB.fitTo(dhDa, RooFit.Range('fitRange'), RooFit.Save())
+    #fitDa   = voigtDa.fitTo(dhDa, RooFit.Range('fitRange'), RooFit.Save())
+    #fitDa   = cbDa.fitTo(dhDa, RooFit.Range('fitRange'), RooFit.Save())
+    #lDa_0 = RooArgSet(mll)
+    pars = SplusB.getParameters(RooArgSet(mll))
+    #pars = voigtDa.getParameters(RooArgSet(mll))
+    #pars = cbDa.getParameters(RooArgSet(mll))
+
+    dhDa.plotOn(mllFrame, RooFit.Name('data'))
+    # SplusB.plotOn(mllFrame, RooFit.LineColor(kGreen+3))
+    # SplusB.paramOn(mllFrame, RooFit.Label("Data"), RooFit.Layout(0.095,0.45,0.65))
+    SplusB.plotOn(mllFrame, RooFit.LineColor(kGreen+3))
+    SplusB.paramOn(mllFrame, RooFit.Label("Data"),  RooFit.Layout(0.65, 1.0,0.95))
+    #voigtDa.plotOn(mllFrame, RooFit.LineColor(kGreen+3))
+    #voigtDa.paramOn(mllFrame, RooFit.Label("Data"),  RooFit.Layout(0.65, 1.0,0.95))
+    #cbDa.plotOn(mllFrame, RooFit.LineColor(kGreen+3))
+    #cbDa.paramOn(mllFrame, RooFit.Label("Data"), RooFit.Layout(0.095,0.45,0.65))
+
+    #lDa_1, l_2 = RooArgList(mll), RooArgList(pars)
+    #ff1 = voigtDa.asTF(RooArgList(mll), RooArgList(pars))
+
+    mllFrame.SetTitle(';m_{#mu#mu} (GeV);Events')
+    mllFrame.SetMinimum(0.01)
+    mllFrame.Draw()
+    c1.SaveAs(pathBase+'/JPpeakFit_data.png')
+
+    mllFrame = mll.frame()
+    dhSi = RooDataHist("dhSi","dhSi", RooArgList(mll), hSi)
+    voigtSi = RooVoigtian("voigtSi","voigtSi",mll,mean_mll,width_mll,sigma_mll)
+    fitSi   = RooFitResult(voigtSi.fitTo(dhSi, RooFit.Range('fitRange'),  RooFit.Save()))
+    #cbSi  = RooCBShape('cbSi','cbSi',mll, mean_mll, sigma_mll, alpha, cbN)
+    #fitSi = RooFitResult(cbSi.fitTo(dhSi, RooFit.Range('fitRange'),  RooFit.Save()))
+
+    #lSi_0 = RooArgSet(mll)
+
+    pars = voigtSi.getParameters(RooArgSet(mll))
+    #pars = cbSi.getParameters(RooArgSet(mll))
+
+    dhSi.plotOn(mllFrame, RooFit.Name('sig'), RooFit.MarkerStyle(23), RooFit.MarkerColor(kBlue), RooFit.LineColor(kBlue))
+    voigtSi.plotOn(mllFrame)
+    voigtSi.paramOn(mllFrame, RooFit.Label("Signal MC"), RooFit.Layout(0.65, 1.0,0.95))
+    #cbSi.plotOn(mllFrame)
+    #cbSi.paramOn(mllFrame, RooFit.Label("Signal MC"), RooFit.Layout(0.65, 1.0,0.95))
+
+    mllFrame.SetTitle(';m_{#mu#mu} (GeV);Events')
+    mllFrame.SetMinimum(0.01)
+    mllFrame.Draw()
+    c1.SaveAs(pathBase+'/JPpeakFit_sig.png')
+
+    # mllFrame.SetMaximum(6)
+    #leg.Clear()
+    #leg.AddEntry(mllFrame.findObject('data'),'Data','e1p')
+    #leg.AddEntry(mllFrame.findObject('sig'),'h#rightarrow J/#Psi#gamma#rightarrow#mu#mu#gamma','pl')
+
+    #l3_1, l3_2 = RooArgList(mll), RooArgList(pars)
+    #ffSi = voigt3.asTF(RooArgList(mll), RooArgList(pars))
+
+    #ff1.Print('all')
+    #ff3.Print('all')
+    #NBINS = 100
+    #hf1 = TH1F("hf1",";mll;hf1", NBINS, 2.9, 3.3)
+    #hf3 = TH1F("hf3",";mll;hf3", NBINS, 2.9, 3.3)
+
+    """
+    for b in xrange(NBINS):
+      m = 2.9+0.4*(b+0.5)/NBINS
+      hf1.SetBinContent(b+1,ff1.Eval(m))
+      hf3.SetBinContent(b+1,ff3.Eval(m))
+              #print b, ff1.Eval(m), ff3.Eval(m)
+      integ1 = hf1.Integral()
+      hf1.Scale(1./integ1)
+      integ3 = hf3.Integral()
+      hf3.Scale(1./integ3)
+
+      hratio = hf1.Clone()
+      hratio.Divide(hf3)
+      hratio.SetName('jpsi')
+      hjpsi = TFile('JPsiMuMu_MCReScale.root','recreate')
+      hjpsi.cd()
+      hratio.Write()
+      hjpsi.Close()
+
+      # hratio.Print('all')
+      # dhratio = RooDataHist("dhratio","dhratio", RooArgList(mll), hratio)
+      # raw_input('Hit Enter to continue')
+
+      # dhratio.plotOn(mllFrame, RooFit.Name('hratio'), RooFit.MarkerColor(kOrange))
+
+      mllFrame.SetTitle(';m_{#mu#mu} (GeV);Events')
+      mllFrame.Draw()
+      mllFrame.SetMinimum(0.01)
+      # mllFrame.SetMaximum(6)
+      leg.Clear()
+      leg.AddEntry(mllFrame.findObject('data'),'Data','e1p')
+      leg.AddEntry(mllFrame.findObject('sig'),'h#rightarrow J/#Psi#gamma#rightarrow#mu#mu#gamma','pl')
+
+    """
 
   '''
   htmp = sigFileGG.Get("02_lPt2_pt__cut"+cut)

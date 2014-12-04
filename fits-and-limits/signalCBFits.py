@@ -59,7 +59,6 @@ def SignalNameParamFixer(year,lepton,cat,sig,mass,ws, sameMean=True):
 
 
 def SignalFitMaker(lep, year, cat, subdir):
-
   f = TFile('../data/Dalitz_BR50.root','READ')
   g = f.Get('csbr_mu')
   xsBr = g.GetFunction('pol4')
@@ -68,10 +67,10 @@ def SignalFitMaker(lep, year, cat, subdir):
   hfile = TFile('hists.root','recreate')
   hists = HistManager(hfile)
   #print massList
-  #raw_input("Input raws  ")
+
   u.set_palette()
   # reasd these from a config file:
-  sigNameList     = [a.strip() for a in (cf.get("fits","sigNameList")).split(',')]
+  sigNameList = [a.strip() for a in (cf.get("fits","sigNameList")).split(',')]
   tev = u.yearToTeV(year)
 
   #print massList
@@ -105,6 +104,8 @@ def SignalFitMaker(lep, year, cat, subdir):
   # ##################
 
   for prod in sigNameList:
+    if lep=='el' and prod=='v': continue
+
     # First of all make the fits to the existing MC samples
     SigFits = {'0':None} # Format 'mass': fit-function
 
@@ -313,6 +314,7 @@ def SignalFitMaker(lep, year, cat, subdir):
     c.SaveAs(plotBase+'_'.join(['sig','fit',prod,lep,year,'cat'+cat])+'.png')
 
   for prod in sigNameList:
+    if lep=='el' and prod=='v': continue
     for mass in massList:
       SignalNameParamFixer(year,lep,cat,prod,mass,cardDict[lep][year][cat][mass])
 

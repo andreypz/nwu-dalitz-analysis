@@ -44,13 +44,11 @@
 
 #include "../plugins/WeightUtils.h"
 #include "../plugins/TriggerSelector.h"
-#include "../plugins/rochcor2012v2.h"
 #include "../plugins/ZGAngles.h"
 #include "../plugins/HistManager.h"
 #include "../plugins/PhotonScaleCorrections.hh"
 
-//#include "../plugins/MuScleFitCorrector.h"
-
+#include "../plugins/rochcor2012jan22.h"
 //#include "../plugins/PhosphorCorrectorFunctor.hh"
 // Header file for the classes stored in the TTree if any.
 

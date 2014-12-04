@@ -1,6 +1,9 @@
 The log of changes:
 ===================
 
+2014-Nov-30
+  * Improved plotting scripts: many signals can be drawn at the same time
+
 2014-Nov-20
 Recent developement include:
   * Update the scripts for PDF and QCD scale uncertainty reader: now read directly from csv file of YR
