@@ -21,6 +21,7 @@ parser.add_option("-c", "--cat", dest="cat",   default='EB', help="Category")
 
 colors = {}
 for f,col in cf.items("colors"): colors[f] = eval(col)
+leptonList  = [a.strip() for a in (cf.get("fits","leptonList")).split(',')]
 
 verbose = 0
 toyFuncs =  ['Exp','Laurent','Pow','Bern3']
@@ -284,7 +285,10 @@ def doBiasStudy(year = '2012', lepton = 'mu', cat = '0', genFunc = 'Bern3', mass
     if i%plotEvery==0 and job%20==0:
       testFrame = mzg.frame()
       toyData.plotOn(testFrame)
-      testFrame.SetTitle("m_{H} = "+mass+";m_{#mu#mu#gamma} (GeV);Events/1 GeV")
+      if lepton=='mu':
+        testFrame.SetTitle("m_{H} = "+mass+";m_{#mu#mu#gamma} (GeV);Events/1 GeV")
+      if lepton=='el':
+        testFrame.SetTitle("m_{H} = "+mass+";m_{ee#gamma} (GeV);Events/1 GeV")
       genFit.plotOn(testFrame, RooFit.Name(genFunc))
 
       legendTmp = TLegend(0.6,0.65,0.9,0.9)
@@ -319,6 +323,8 @@ if __name__=="__main__":
   mass = str(opt.mass)
   cat = opt.cat
 
-  for f in toyFuncs:
-    print '\n\n \t =========== Starting the toys for ', f,'===========\n\n'
-    doBiasStudy(trials = trials, cat=cat,genFunc=f, job=job, mass=mass)
+#  for lep in leptonList:
+  for lep in ['mu','el']:
+    for f in toyFuncs:
+      print lep, ' \n\n \t =========== Starting the toys for ', f,'===========\n\n'
+      doBiasStudy(lepton=lep, cat=cat, genFunc=f, mass=mass, trials = trials, job=job)

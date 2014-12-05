@@ -106,8 +106,8 @@ class BatchMaster():
           batch_tmp.write('Transfer_Input_Files  = {0}/source.tar.gz, {0}/input_{1}_{2}.txt\n'.format(self._stageDir, cfg._dataName,  str(count+1)))
           batch_tmp.write('Transfer_Output_Files = out_synch_{0}_{1}.txt, hhhh_{2}_{3}.root\n'.format(
               cfg._dataName,  str(count+1), cfg._dataName,  str(count+1)))
-        batch_tmp.write('Requirements = machine!="ttnode0004"\n')
-        #batch_tmp.write('Requirements = OpSys == "LINUX"&& (Arch != "DUMMY" )\n')
+        #batch_tmp.write('Requirements = machine!="ttnode0004"\n')
+        batch_tmp.write('Requirements = OpSys == "LINUX"&& (Arch != "DUMMY" )\n')
         batch_tmp.write('Notification = Never\n')
         if self._shortQueue:
           batch_tmp.write('+LENGTH = "SHORT"\n')
@@ -137,7 +137,8 @@ class BatchMaster():
         if not self._bias:
           os.system('tar czf {0}/source.tar.gz ../zgamma ../testAnalyzer ../src ../interface ../plugins ../data 2> /dev/null'.format(self._stageDir))
         else:
-          os.system('tar czf {0}/source.tar.gz ../fits-and-limits  2> /dev/null'.format(self._stageDir))
+          #os.system('tar czf {0}/source.tar.gz ../fits-and-limits  2> /dev/null'.format(self._stageDir))
+          os.system('tar czf {0}/source.tar.gz ../fits-and-limits  --exclude="../fits-and-limits/v[1-8][1-5]*" 2> /dev/null'.format(self._stageDir))
 
 
         if bSystem=='lpc' or bSystem=='tier3':
