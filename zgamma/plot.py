@@ -231,8 +231,8 @@ if __name__ == "__main__":
       u.drawAllInFile(dataFile, "Data", bkgZip, None, sigName, "Main", path, cut, "lumi")
       # u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "Main", path, cut, "lumi")
     else:
-      u.drawAllInFile(dataFile, "Data", None, None, sigName, "Main", path, cut, "toDataInt", doFits=opt.fit)
-      #u.drawAllInFile(None, "Data", None, sigZip, sigName, "Main", path, cut, "toDataInt", doFits=opt.fit)
+      #u.drawAllInFile(dataFile, "Data", None, None, sigName, "Main", path, cut, "toDataInt", doFits=opt.fit)
+      u.drawAllInFile(None, None, None, sigZip, sigName, "Main", path, cut, "toDataInt", doFits=opt.fit)
       #u.drawAllInFile(dataFile, "Data", None, sigZip, sigName, "Main", path, cut, "toDataInt", doFits=opt.fit)
 
     if opt.extra:

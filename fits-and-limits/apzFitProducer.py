@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 import sys, os
 import numpy as np
-#import pdb
 from rooFitBuilder import *
 from ROOT import *
 gROOT.SetBatch()
@@ -16,16 +15,8 @@ parser = OptionParser(usage="usage: %prog ver [options -v]")
 parser.add_option("-v","--verbose", dest="verbose", action="store_true", default=False, help="Verbose mode (print out stuff)")
 parser.add_option("--tw", dest="tw", action="store_true", default=False, help="Use a tree from TW group (in el channel)")
 parser.add_option("--dbg", dest="dbg", action="store_true", default=False, help="Debug option: make more debugging plots")
+#parser.add_option("--copy", dest="copy",  default=None, help="This is for plotPulls script.Directory where the results from Batch are# stored. Will copy them in a better place.")
 (opt, args) = parser.parse_args()
-
-class AutoVivification(dict):
-  """Implementation of perl's autovivification feature."""
-  def __getitem__(self, item):
-    try:
-      return dict.__getitem__(self, item)
-    except KeyError:
-      value = self[item] = type(self)()
-      return value
 
 import ConfigParser as cp
 cf = cp.ConfigParser()
@@ -187,13 +178,13 @@ def doInitialFits(subdir):
   ws = RooWorkspace("ws")
 
   fs125 = TFile(subdir+'/s125.root','recreate')
-  shist = AutoVivification()
-  yi_da0  = AutoVivification()
-  yi_da1  = AutoVivification()
-  yi_sig0 = AutoVivification()
-  yi_sig1 = AutoVivification()
-  mean_sig  = AutoVivification()
-  sigma_sig = AutoVivification()
+  shist = u.AutoVivification()
+  yi_da0  = u.AutoVivification()
+  yi_da1  = u.AutoVivification()
+  yi_sig0 = u.AutoVivification()
+  yi_sig1 = u.AutoVivification()
+  mean_sig  = u.AutoVivification()
+  sigma_sig = u.AutoVivification()
   # ###################################
   # start loop over all year/lep/cat #
   # ###################################
@@ -423,12 +414,15 @@ def doInitialFits(subdir):
 
         if doBlind:
           testFrame.SetMinimum(0.1)
-        testFrame.SetTitle(";m_{#mu#mu#gamma} (GeV);Events/"+str(binWidth)+" GeV")
+        if lepton=='mu':
+          testFrame.SetTitle(";m_{#mu#mu#gamma} (GeV);Events/"+str(binWidth)+" GeV")
+        else:
+          testFrame.SetTitle(";m_{ee#gamma} (GeV);Events/"+str(binWidth)+" GeV")
 
         testFrame.Draw()
-        shist[year][lepton][cat]['gg']['125'].Scale(10)
-        shist[year][lepton][cat]['gg']['125'].Draw('same hist')
-        shist[year][lepton][cat]['gg']['125'].SetLineColor(kRed+1)
+        #shist[year][lepton][cat]['gg']['125'].Scale(10)
+        #shist[year][lepton][cat]['gg']['125'].Draw('same hist')
+        #shist[year][lepton][cat]['gg']['125'].SetLineColor(kRed+1)
 
         leg.Draw()
         CMS_lumi(c, 2, 11)

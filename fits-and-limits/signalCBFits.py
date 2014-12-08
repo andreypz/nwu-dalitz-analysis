@@ -7,7 +7,7 @@ gROOT.SetMacroPath(".:../plugins/")
 gROOT.LoadMacro("HistManager.cc+")
 sys.path.append("../zgamma")
 import utils as u
-from apzFitProducer import AutoVivification
+#from apzFitProducer import AutoVivification
 import ConfigParser as cp
 cf = cp.ConfigParser()
 cf.read('config.cfg')
@@ -89,7 +89,7 @@ def SignalFitMaker(lep, year, cat, subdir):
   c.cd()
   mzg = myWs.var('CMS_hzg_mass')
   paraNames = {}
-  cardDict = AutoVivification()
+  cardDict = u.AutoVivification()
   for mass in massList:
     cardDict[lep][year][cat][mass] = RooWorkspace('ws_card')
 

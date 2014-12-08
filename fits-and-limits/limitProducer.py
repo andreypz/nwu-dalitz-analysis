@@ -12,6 +12,8 @@ parser.add_option("--prof", dest="prof",action="store_true", default=False,
                   help="Use -M ProfileLikelihood instead of Asymptotic")
 parser.add_option("--plot", dest="plot",action="store_true", default=False,
                   help="Run the plotter script")
+parser.add_option("--dont", dest="dont",action="store_true", default=False,
+                  help="Don't run it, hust combine the cards")
 
 (opt, args) = parser.parse_args()
 
@@ -64,7 +66,8 @@ if __name__ == "__main__":
           os.system('combine -M '+method+' '+card + ' -m '+m+' -S 0')
         else:
           print
-          os.system('combine -M '+method+' '+card + ' -m '+m)
+          if not opt.dont:
+            os.system('combine -M '+method+' '+card + ' -m '+m)
 
         if m[-1]=='5':
           fname = "higgsCombineTest."+method+".mH"+m
@@ -83,7 +86,8 @@ if __name__ == "__main__":
           os.system('combine -M '+method+' '+comboName + ' -m '+m+' -S 0')
         else:
           print
-          os.system('combine -M '+method+' '+comboName + ' -m '+m)
+          if not opt.dont:
+            os.system('combine -M '+method+' '+comboName + ' -m '+m)
 
         if m[-1]=='5':
           fname = "higgsCombineTest."+method+".mH"+m
@@ -95,9 +99,9 @@ if __name__ == "__main__":
 
       print myDir, s[:3]
 
-    if opt.plot:
-      for cat in catList:
-        os.system("./limitPlotter.py "+myDir+" --cat="+cat+' --lep='+lep)
-      if opt.comb:
-        os.system("./limitPlotter.py "+myDir+" --cat=comb")
+  if opt.plot:
+    for cat in catList:
+      os.system("./limitPlotter.py "+myDir+" --cat="+cat+' --lep='+lep)
+    if opt.comb:
+      os.system("./limitPlotter.py "+myDir+" --cat=comb")
       # os.system('combine -M ProfileLikelihood '+sys.argv[1]+ ' -m 125 -t 100')

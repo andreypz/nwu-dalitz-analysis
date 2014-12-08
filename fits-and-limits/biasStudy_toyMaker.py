@@ -24,7 +24,8 @@ for f,col in cf.items("colors"): colors[f] = eval(col)
 leptonList  = [a.strip() for a in (cf.get("fits","leptonList")).split(',')]
 
 verbose = 0
-toyFuncs =  ['Exp','Laurent','Pow','Bern3']
+toyFuncs =  ['Exp','Laurent','Pow']
+#toyFuncs =  ['Exp','Laurent','Pow','Bern3']
 
 fileBase = './'
 plotBase = './'

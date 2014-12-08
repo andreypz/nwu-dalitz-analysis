@@ -2,37 +2,36 @@
 import sys,os
 from ROOT import *
 from collections import defaultdict
-from apzFitProducer import AutoVivification
 gROOT.SetBatch()
 sys.path.append("../zgamma")
+#gROOT.ProcessLine(".L ~/tdrstyle.C")
+#setTDRStyle()
 import utils as u
+from optparse import OptionParser
+parser2 = OptionParser(usage="usage: %prog [--opt]")
+parser2.add_option("--copy", dest="copy",  default=None, help="Directory where the results from Batch are stored. Will copy them in a #better place.")
+(opt, args) = parser2.parse_args()
+
+#from apzFitProducer import AutoVivification
 
 import ConfigParser as cp
 cf = cp.ConfigParser()
 cf.read('config.cfg')
 s = cf.get("path","ver")
-
-from optparse import OptionParser
-parser = OptionParser(usage="usage: %prog subdir")
-parser.add_option("--copy", dest="copy",  default=None,
-                  help="Directory where the results from Batch are stored. Will copy them in a better place.")
-(opt, args) = parser.parse_args()
-
-gROOT.ProcessLine(".L ~/tdrstyle.C")
-setTDRStyle()
 plotBase = cf.get("path","htmlbase")+'/html/zgamma/dalitz/fits-'+s+'/Pulls'
 #plotBase = '/tthome/andrey/html/zgamma/bias-mar11/'
-toysDir = '../biasToys-2014-Sep23'
+#toysDir = '../biasToys-2014-Sep23'
+toysDir = '../biasToys-2014-Dec05'
 
-sigMuDict = AutoVivification()
-taMuDict  = AutoVivification()
+sigMuDict = u.AutoVivification()
+taMuDict  = u.AutoVivification()
 
-#massList  = ['140','145','150']
-massList     = [a.strip()[0:3] for a in (cf.get("fits","massList")).split(',')]
+massList  = ['120','125','130']
+#massList     = [a.strip()[0:3] for a in (cf.get("fits","massList")).split(',')]
 sigNameList  = [a.strip() for a in (cf.get("fits","sigNameList")).split(',')]
 yearList     = [a.strip() for a in (cf.get("fits","yearList")).split(',')]
-leptonList   = [a.strip() for a in (cf.get("fits","leptonList")).split(',')]
-catList = ['EB']
+leptonList = ['el']
+catList    = ['EB']
 
 genFuncList = ['Exp','Pow','Laurent']
 
@@ -232,8 +231,8 @@ if __name__=="__main__":
 
 
   u.makeTable(table1,"pulls", "twiki", precision='%.2f')
-  u.makeTable(table1,"pulls1", "tex",   precision='%.2f')
-  u.makeTable(table2,"pulls2", "tex",   precision='%.2f')
+  u.makeTable(table1,"pulls1", "tex",  precision='%.2f')
+  u.makeTable(table2,"pulls2", "tex",  precision='%.2f')
 
 
 

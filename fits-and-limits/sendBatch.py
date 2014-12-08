@@ -23,7 +23,8 @@ executable  = 'batchJob.sh'
 version    = args[0].strip('/')
 outputPath = version
 #outputPath = version+'-bias'
-masses = ['120','125','130']
+#masses = ['120','125','130']
+masses = ['120','125','130','135','140','145','150']
 categories = ['EB']
 #categories = ['EB','EE','mll50']
 
