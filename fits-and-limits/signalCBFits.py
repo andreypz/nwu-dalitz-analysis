@@ -12,8 +12,7 @@ import ConfigParser as cp
 cf = cp.ConfigParser()
 cf.read('config.cfg')
 
-#massList0  = ['125']
-#massList   = ['125.0']
+#massList0  = ['125.0']
 massList0  = ['120','125','130','135','140','145','150']
 massList   = ['%.1f'%(a) for a in u.drange(120,150,1.0)]
 
@@ -90,7 +89,15 @@ def SignalFitMaker(lep, year, cat, subdir):
   mzg = myWs.var('CMS_hzg_mass')
   paraNames = {}
   cardDict = u.AutoVivification()
-  for mass in massList:
+
+  masses0 = massList0
+  masses1 = massList
+  if cat in ['m1','m2','m3','m4','m5','m6','m7']:
+    masses0 = ['125']
+    masses1 = ['125.0']
+
+
+  for mass in masses1:
     cardDict[lep][year][cat][mass] = RooWorkspace('ws_card')
 
     print cardDict[lep][year][cat][mass]
@@ -105,12 +112,13 @@ def SignalFitMaker(lep, year, cat, subdir):
 
   for prod in sigNameList:
     if lep=='el' and prod=='v': continue
-
+    if cat in ['m1','m2','m3','m4','m5','m6','m7']:
+      if prod!='gg': continue
     # First of all make the fits to the existing MC samples
     SigFits = {'0':None} # Format 'mass': fit-function
 
     dsList   = []
-    for m in massList0:
+    for m in masses0:
       fitBuilder = FitBuilder(mzg, year,lep,cat,sig=prod, mass=m+'.0')
       #fitBuilder.__init__(mzg,year,lep,cat,sig=prod,mass=m)
       mzg.setRange('fitRegion1',int(m)-11,int(m)+11)
@@ -157,7 +165,7 @@ def SignalFitMaker(lep, year, cat, subdir):
     fitList  = []
     normList = []
     oldMassHi = oldMassLow = 0
-    for massString in massList:
+    for massString in masses1:
 
       fitBuilder = FitBuilder(mzg, year,lep,cat,sig=prod,mass=massString)
       #fitBuilder.__init__(mzg,year,lep,cat,sig=prod,mass=str(massLow))
@@ -275,7 +283,7 @@ def SignalFitMaker(lep, year, cat, subdir):
       c.SaveAs(plotBase+'params_'+n+'.png')
     gStyle.SetOptStat(1)
 
-    testFrame = mzg.frame(float(massList[0])-10,float(massList[-1])+10)
+    testFrame = mzg.frame(float(masses1[0])-10,float(masses1[-1])+10)
 
     for signal in dsList:
       signal.plotOn(testFrame, RooFit.MarkerStyle(6))
@@ -315,7 +323,10 @@ def SignalFitMaker(lep, year, cat, subdir):
 
   for prod in sigNameList:
     if lep=='el' and prod=='v': continue
-    for mass in massList:
+    if cat in ['m1','m2','m3','m4','m5','m6','m7']:
+      if prod!='gg': continue
+
+    for mass in masses1:
       SignalNameParamFixer(year,lep,cat,prod,mass,cardDict[lep][year][cat][mass])
 
       #print cardDict[lep][year][cat][mass]
@@ -341,7 +352,7 @@ def SignalFitMaker(lep, year, cat, subdir):
     #c.Write()
 
 
-  for mass in massList:
+  for mass in masses1:
     fileName = subdir+'/'+'_'.join(['SignalOutput',lep,year,'cat'+cat,mass])
     cardDict[lep][year][cat][mass].writeToFile(fileName+'.root')
     #cardDict[lep][year][cat][mass].writeToFile('testCards/'+fileName+'.root')
@@ -359,6 +370,7 @@ if __name__=="__main__":
   for y in yearList:
     for c in catList:
       for l in leptonList:
+        if l=='el' and c!='EB': continue
         SignalFitMaker(l,y,c, ver)
 
   print "\n \t\t All finished! \n"

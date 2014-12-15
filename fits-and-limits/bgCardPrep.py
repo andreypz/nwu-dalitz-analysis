@@ -56,21 +56,21 @@ else:
 # #######################################
 
 
-def BackgroundNameFixer(fitName, year, lepton, cat, ws, Ext=True):
-  dataName      = '_'.join(['data',      lepton,year,'cat'+cat])
-  dataNameNew   = '_'.join(['data','obs',lepton,year,'cat'+cat])
+def BackgroundNameFixer(fitName, year, lep, cat, ws, Ext=True):
+  dataName      = '_'.join(['data',      lep,year,'cat'+cat])
+  dataNameNew   = '_'.join(['data','obs',lep,year,'cat'+cat])
   if Ext:
-    fitExtName = '_'.join(['bkgTmp',lepton,year,'cat'+cat])
+    fitExtName = '_'.join(['bkgTmp',lep,year,'cat'+cat])
   else:
-    fitExtName = '_'.join([bkgModel,year,lepton,'cat'+cat])
+    fitExtName = '_'.join([bkgModel,year,lep,'cat'+cat])
 
-  fitExtNameNew = '_'.join(['bkg',lepton,year,'cat'+cat])
+  fitExtNameNew = '_'.join(['bkg',lep,year,'cat'+cat])
 
   BernNames = ['Bern2','Bern3','Bern4','Bern5','Bern6']
   for n in BernNames:
     if n in fitName:
       print "renaming " + fitName
-      suffix = '_'.join([year,lepton,'cat'+cat])
+      suffix = '_'.join([year,lep,'cat'+cat])
       if Ext: normName  = 'norm'+n+'_'+suffix
       #p0Name = 'p0'+n+'_'+suffix
       p1Name = 'p1'+n+'_'+suffix
@@ -78,10 +78,10 @@ def BackgroundNameFixer(fitName, year, lepton, cat, ws, Ext=True):
 
       if Ext: print "Normname from renaming:", normName
 
-      if Ext: normNameNew  = '_'.join(['bkg',lepton,year,'cat'+cat,'norm'])
-      #p0NameNew = '_'.join(['bkg','p0',lepton,year,'cat'+cat])
-      p1NameNew = '_'.join(['bkg','p1',lepton,year,'cat'+cat])
-      p2NameNew = '_'.join(['bkg','p2',lepton,year,'cat'+cat])
+      if Ext: normNameNew  = '_'.join(['bkg',lep,year,'cat'+cat,'norm'])
+      #p0NameNew = '_'.join(['bkg','p0',lep,year,'cat'+cat])
+      p1NameNew = '_'.join(['bkg','p1',lep,year,'cat'+cat])
+      p2NameNew = '_'.join(['bkg','p2',lep,year,'cat'+cat])
 
       if Ext: ws.factory(normNameNew+'[{0},{1},{2}]'.format(ws.function(normName).getVal(),
                                                             ws.function(normName).getMin(), ws.function(normName).getMax()))
@@ -93,22 +93,22 @@ def BackgroundNameFixer(fitName, year, lepton, cat, ws, Ext=True):
 
       if n in ['Bern3','Bern4','Bern5','Bern6']:
         p3Name = 'p3'+n+'_'+suffix
-        p3NameNew = '_'.join(['bkg','p3',lepton,year,'cat'+cat])
+        p3NameNew = '_'.join(['bkg','p3',lep,year,'cat'+cat])
         ws.factory(p3NameNew+'[{0},{1},{2}]'.format(ws.function(p3Name).getVal(),
                                                     ws.function(p3Name).getMin(),ws.function(p3Name).getMax()))
       if n in ['Bern4','Bern5','Bern6']:
         p4Name = 'p4'+n+'_'+suffix
-        p4NameNew = '_'.join(['bkg','p4',lepton,year,'cat'+cat])
+        p4NameNew = '_'.join(['bkg','p4',lep,year,'cat'+cat])
         ws.factory(p4NameNew+'[{0},{1},{2}]'.format(ws.function(p4Name).getVal(),
                                                     ws.function(p4Name).getMin(),ws.function(p4Name).getMax()))
       if n in ['Bern5','Bern6']:
         p5Name = 'p5'+n+'_'+suffix
-        p5NameNew = '_'.join(['bkg','p5',lepton,year,'cat'+cat])
+        p5NameNew = '_'.join(['bkg','p5',lep,year,'cat'+cat])
         ws.factory(p5NameNew+'[{0},{1},{2}]'.format(ws.function(p5Name).getVal(),
                                                     ws.function(p5Name).getMin(),ws.function(p5Name).getMax()))
       if n in ['Bern6']:
         p6Name = 'p6'+n+'_'+suffix
-        p6NameNew = '_'.join(['bkg','p6',lepton,year,'cat'+cat])
+        p6NameNew = '_'.join(['bkg','p6',lep,year,'cat'+cat])
         ws.factory(p6NameNew+'[{0},{1},{2}]'.format(ws.function(p6Name).getVal(),
                                                     ws.function(p6Name).getMin(),ws.function(p6Name).getMax()))
       if n=='Bern2':
@@ -159,7 +159,7 @@ def BackgroundNameFixer(fitName, year, lepton, cat, ws, Ext=True):
   BernNames = ['GaussBern4','GaussBern5']
   for n in BernNames:
     if n in fitName:
-      suffix = '_'.join([year,lepton,'cat'+cat])
+      suffix = '_'.join([year,lep,'cat'+cat])
       if Ext: normName  = 'norm'+n+'_'+suffix
       meanName  = 'mean'+n+'_'+suffix
       sigmaName = 'sigma'+n+'_'+suffix
@@ -171,17 +171,17 @@ def BackgroundNameFixer(fitName, year, lepton, cat, ws, Ext=True):
       p4Name = 'p4'+n+'_'+suffix
       if n=="GaussBern5":
         p5Name = 'p5'+n+'_'+suffix
-        if Ext: normNameNew  = '_'.join(['bkg',lepton,year,'cat'+cat,'norm'])
-        meanNameNew  = '_'.join(['bkg','mean', lepton,year,'cat'+cat])
-        sigmaNameNew = '_'.join(['bkg','sigma',lepton,year,'cat'+cat])
-        stepNameNew  = '_'.join(['bkg','step', lepton,year,'cat'+cat])
-        p0NameNew = '_'.join(['bkg','p0',lepton,year,'cat'+cat])
-        p1NameNew = '_'.join(['bkg','p1',lepton,year,'cat'+cat])
-        p2NameNew = '_'.join(['bkg','p2',lepton,year,'cat'+cat])
-        p3NameNew = '_'.join(['bkg','p3',lepton,year,'cat'+cat])
-        p4NameNew = '_'.join(['bkg','p4',lepton,year,'cat'+cat])
+        if Ext: normNameNew  = '_'.join(['bkg',lep,year,'cat'+cat,'norm'])
+        meanNameNew  = '_'.join(['bkg','mean', lep,year,'cat'+cat])
+        sigmaNameNew = '_'.join(['bkg','sigma',lep,year,'cat'+cat])
+        stepNameNew  = '_'.join(['bkg','step', lep,year,'cat'+cat])
+        p0NameNew = '_'.join(['bkg','p0',lep,year,'cat'+cat])
+        p1NameNew = '_'.join(['bkg','p1',lep,year,'cat'+cat])
+        p2NameNew = '_'.join(['bkg','p2',lep,year,'cat'+cat])
+        p3NameNew = '_'.join(['bkg','p3',lep,year,'cat'+cat])
+        p4NameNew = '_'.join(['bkg','p4',lep,year,'cat'+cat])
       if n=="GaussBern5":
-        p5NameNew = '_'.join(['bkg','p5',lepton,year,'cat'+cat])
+        p5NameNew = '_'.join(['bkg','p5',lep,year,'cat'+cat])
 
         if Ext: ws.factory(normNameNew+'[{0},{1},{2}]'.format(ws.function(normName).getVal(),
                                                       ws.function(normName).getMin(), ws.function(normName).getMax()))
@@ -228,7 +228,7 @@ def BackgroundNameFixer(fitName, year, lepton, cat, ws, Ext=True):
 
 #myWs.Print()
 
-def doBandsFit(onesigma, twosigma, hmass, cpdf, nomcurve, datanorm, plot, year, lepton):
+def doBandsFit(onesigma, twosigma, hmass, cpdf, nomcurve, datanorm, plot, year, lep):
   print '\n \t \t *** starting bands \n'
   nlim = RooRealVar("nlim","", 0, 0,100)
   print 'total steps needed:', plot.GetXaxis().GetNbins()
@@ -306,13 +306,15 @@ def doBandsFit(onesigma, twosigma, hmass, cpdf, nomcurve, datanorm, plot, year, 
 
 if __name__=="__main__":
   for year in yearList:
-    for lepton in leptonList:
+    for lep in leptonList:
       for cat in catList:
-        dataName = '_'.join(['data',lepton,year,'cat'+cat])
-        suffix   = '_'.join([year,lepton,'cat'+cat])
+        if lep=='el' and cat!='EB': continue
+
+        dataName = '_'.join(['data',lep,year,'cat'+cat])
+        suffix   = '_'.join([year,lep,'cat'+cat])
         print cat, dataName, suffix
 
-        fitName  = '_'.join([bkgModel,year,lepton,'cat'+cat])
+        fitName  = '_'.join([bkgModel,year,lep,'cat'+cat])
         normName = 'norm'+bkgModel+'_'+suffix
 
 
@@ -320,12 +322,15 @@ if __name__=="__main__":
         fs125.Print()
         fs125.ls()
         hsig = []
-        if lepton=='mu': factor=10
-        if lepton=='el': factor=10
+        if lep=='mu': factor=10
+        if lep=='el': factor=10
         sigNameList   = [a.strip() for a in (cf.get("fits","sigNameList")).split(',')]
         for prod in sigNameList:
-          if lepton=='el' and prod=='v': continue
-          histName  = '_'.join(['sig',prod,lepton,year,'cat'+cat,'M125','_CMS_hzg_mass'])
+          if lep=='el' and prod=='v': continue
+          if cat in ['m1','m2','m3','m4','m5','m6','m7']:
+            if prod!='gg' or lep=='el': continue
+
+          histName  = '_'.join(['sig',prod,lep,year,'cat'+cat,'M125','_CMS_hzg_mass'])
           hsig.append(fs125.Get(histName))
           hsig[-1].Scale(factor)
           # hsig[-1].Print("all")
@@ -349,11 +354,11 @@ if __name__=="__main__":
           print sumEntriesBkg, sumEntriesSig
           raw_input("sumEntriesBkg and sumEntriesSig")
 
-        dataYieldName = '_'.join(['data','yield',lepton,year,'cat'+cat])
+        dataYieldName = '_'.join(['data','yield',lep,year,'cat'+cat])
         dataYield     = RooRealVar(dataYieldName,dataYieldName,sumEntriesBkg)
         norm          = RooRealVar(normName,normName,sumEntriesBkg,sumEntriesBkg*0.25,sumEntriesBkg*1.75)
 
-        fitExtName    = '_'.join(['bkgTmp',lepton,year,'cat'+cat])
+        fitExtName    = '_'.join(['bkgTmp',lep,year,'cat'+cat])
         fit_ext       = RooExtendPdf(fitExtName,fitExtName, fit, norm)
 
         fit_result = fit_ext.fitTo(data, RooFit.Range('DalitzRegion'), RooFit.Save())
@@ -449,7 +454,7 @@ if __name__=="__main__":
         onesigma = TGraphAsymmErrors()
         twosigma = TGraphAsymmErrors()
         tmpCurve = RooCurve(testFrame.findObject(bkgModel))
-        doBandsFit(onesigma, twosigma, mzg, fit, tmpCurve, data, testFrame, year, lepton)
+        doBandsFit(onesigma, twosigma, mzg, fit, tmpCurve, data, testFrame, year, lep)
         twosigma.SetLineColor(kBlack)
         twosigma.SetFillColor(kCyan-10)
         onesigma.SetLineColor(kBlack)
@@ -458,6 +463,7 @@ if __name__=="__main__":
         onesigma.Draw("L3 same")
         '''
 
+        testFrame.SetMinimum(0)
         if doBlind:
           data.plotOn(testFrame, RooFit.Binning(myBinning), RooFit.Name('data'), RooFit.CutRange('r1'))
           data.plotOn(testFrame, RooFit.Binning(myBinning), RooFit.Name('data'), RooFit.CutRange('r2'))
@@ -473,7 +479,7 @@ if __name__=="__main__":
           testFrame.SetMaximum(22)
         elif cat in ['m7']:
           testFrame.SetMaximum(42)
-        elif lepton=='el':
+        elif lep=='el':
           testFrame.SetMaximum(35)
         else:
           testFrame.SetMaximum(65)
@@ -485,9 +491,9 @@ if __name__=="__main__":
         hsig[0].Draw('same hist')
 
 
-        if lepton=='mu':
+        if lep=='mu':
           testFrame.SetTitle(";m_{#mu#mu#gamma} (GeV);Events/"+str(binWidth)+" GeV")
-        elif lepton=='el':
+        elif lep=='el':
           testFrame.SetTitle(";m_{ee#gamma} (GeV);Events/"+str(binWidth)+" GeV")
 
         if hjp: leg  = TLegend(0.45,0.62,0.91,0.87)
@@ -519,7 +525,7 @@ if __name__=="__main__":
         if hjp:
           lat.DrawLatex(0.18,0.95, 'H #rightarrow J/#Psi#gamma#rightarrow#mu#mu#gamma')
         else:
-          if lepton=='el':
+          if lep=='el':
             lat.DrawLatex(0.18,0.95, 'H #rightarrow#gamma*#gamma#rightarrow ee#gamma')
           else:
             lat.DrawLatex(0.18,0.95, 'H #rightarrow#gamma*#gamma#rightarrow#mu#mu#gamma')
@@ -527,17 +533,17 @@ if __name__=="__main__":
 
         gPad.RedrawAxis()
         for e in ['.png', '.pdf']:
-          c.SaveAs(plotBase+'/BestFits/'+'_'.join(['best_fit',year,lepton,'cat'+cat])+e)
+          c.SaveAs(plotBase+'/BestFits/'+'_'.join(['best_fit',year,lep,'cat'+cat])+e)
 
         ###### Import the fit and data, and rename them to the card convention
-        dataNameNew = '_'.join(['data','obs',lepton,year,'cat'+cat])
+        dataNameNew = '_'.join(['data','obs',lep,year,'cat'+cat])
 
         getattr(card_ws,'import')(data,RooFit.Rename(dataNameNew))
         if doExt:
           getattr(card_ws,'import')(fit_ext)
         else:
           getattr(card_ws,'import')(fit)
-          normNameFixed = '_'.join(['bkg',lepton,year,'cat'+cat,'norm'])
+          normNameFixed = '_'.join(['bkg',lep,year,'cat'+cat,'norm'])
           norm.SetName(normNameFixed)
           getattr(card_ws,'import')(norm)
 
@@ -552,7 +558,7 @@ if __name__=="__main__":
         card_ws.Print()
 
         #print normName
-        BackgroundNameFixer(fitName, year,lepton,cat,card_ws, doExt)
+        BackgroundNameFixer(fitName, year,lep,cat,card_ws, doExt)
 
         print 'Now print it After renaming'
         card_ws.Print()

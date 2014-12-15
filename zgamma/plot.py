@@ -19,6 +19,8 @@ parser.add_option("-p", "--period",dest="period", default="2012",  help="Year pe
 parser.add_option("--bkg",  dest="bkg",  action="store_true", default=False, help="Make plots from bkg sample")
 parser.add_option("--qcd",  dest="qcd",  action="store_true", default=False, help="Include QCD samples")
 parser.add_option("--mcfm", dest="mcfm", action="store_true", default=False, help="Use MCFM  as a signal")
+parser.add_option("--sig",  dest="sig",  action="store_true", default=False, help="Signal MC")
+parser.add_option("--data",  dest="data",  action="store_true", default=False, help="Data only")
 
 parser.add_option("--evt",dest="evt",action="store_true", default=False, help="Show raw events (not scaled to lumi) for MC samles")
 parser.add_option("-e","--extra",dest="extra",action="store_true", default=False, help="Make all extra plots")
@@ -59,12 +61,13 @@ if __name__ == "__main__":
   #setTDRStyle()
   TH1.SetDefaultSumw2(kTRUE)
 
-  pathBase = "/uscms_data/d2/andreypz/html/zgamma/dalitz/"+ver+"_cut"+cut
-  hPath    = "/eos/uscms/store/user/andreypz/batch_output/zgamma/8TeV/"+ver
-
   if '/tthome' in os.getcwd():
     pathBase = "/tthome/andrey/html/zgamma/dalitz/"+ver+"_cut"+cut
     hPath    = "/tthome/andrey/batch_output/zgamma/8TeV/"+ver
+  else:
+    pathBase = "/uscms_data/d2/andreypz/html/zgamma/dalitz/"+ver+"_cut"+cut
+    hPath    = "/eos/uscms/store/user/andreypz/batch_output/zgamma/8TeV/"+ver
+
 
   u.createDir(pathBase)
 
@@ -231,9 +234,11 @@ if __name__ == "__main__":
       u.drawAllInFile(dataFile, "Data", bkgZip, None, sigName, "Main", path, cut, "lumi")
       # u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "Main", path, cut, "lumi")
     else:
-      #u.drawAllInFile(dataFile, "Data", None, None, sigName, "Main", path, cut, "toDataInt", doFits=opt.fit)
-      u.drawAllInFile(None, None, None, sigZip, sigName, "Main", path, cut, "toDataInt", doFits=opt.fit)
-      #u.drawAllInFile(dataFile, "Data", None, sigZip, sigName, "Main", path, cut, "toDataInt", doFits=opt.fit)
+      #u.drawAllInFile(dataFile, "Data", None, sigZip, sigName, "Main", path, cut)
+      if opt.data:
+        u.drawAllInFile(dataFile, "Data", None, None, '', "Main", pathBase+'/Main-Data', cut)
+      if opt.sig:
+        u.drawAllInFile(None, None, None, sigZip, sigName,"Main", pathBase+'/Main-Sig', cut)
 
     if opt.extra:
       # u.drawAllInFile(None, "", bkgZip, sigFile, sigName, "GEN", pathBase+'/GEN', None, "norm")
@@ -253,20 +258,20 @@ if __name__ == "__main__":
                     "AlphaPiZ",pathBase+"/apz/", cut,"norm2")
 
   if sel == "elgamma":
-    u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "Main-Dale", pathBase+'/Dale/', cut, "toDataInt")
+    u.drawAllInFile(dataFile, "Data", bkgZip, sigZip, sigName, "Main-Dale", pathBase+'/Dale/', cut, "toDataInt")
     #u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",
     #                "AnElectron-EGamma",  pathBase+"/AnElectron-EGamma/",  None,"norm")
 
     if cut in ['9','12','15'] and sel=='elgamma':
-      u.drawAllInFile(dataFile, "Data",bkgZip,sigFile,"signal",
+      u.drawAllInFile(dataFile, "Data",bkgZip,sigZip,"signal",
                       "AnElectron",  pathBase+"/AnElectron/",  None,"norm")
       dirnameshort = "DalitzEle"
       dirname = dirnameshort+"-cut"+cut
-      u.drawAllInFile(dataFile, "Data",bkgZip,sigFile,"signal",
+      u.drawAllInFile(dataFile, "Data",bkgZip,sigZip,"signal",
                       dirname,  pathBase+"/"+dirnameshort+"/",  None,"norm")
 
       for n in ['EGamma','BaseSC-1','BaseSC-2',"track-1","track-2","track-3"]:
-        u.drawAllInFile(dataFile, "Data",bkgZip,sigFile,"signal",
+        u.drawAllInFile(dataFile, "Data",bkgZip,sigZip,"signal",
                         dirname+"-"+n,  pathBase+"/"+dirnameshort+"-"+n,  None,"norm")
 
   ss = opt.sel

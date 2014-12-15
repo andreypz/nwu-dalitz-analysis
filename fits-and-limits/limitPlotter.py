@@ -5,6 +5,8 @@ import numpy as np
 from ROOT import *
 gROOT.SetBatch()
 sys.path.append("../zgamma")
+sys.path.append("../scripts")
+import makeHTML as ht
 import utils as u
 from optparse import OptionParser
 parser = OptionParser(usage="usage: %prog  [options]")
@@ -13,6 +15,7 @@ parser.add_option("--mll",dest="mll", action="store_true", default=False, help="
 parser.add_option("--divide",dest="divide", action="store_true", default=False, help="Divide by the binn-size (for --mll option)")
 parser.add_option("--cat",dest="cat", default='EB', help="Category: EB, EE, mll50, etc")
 parser.add_option("--lep",dest="lep", default='mu', help="Channel: mu or el")
+parser.add_option("--path",dest="path", default=None, help="path where the limit results are stored")
 (opt, args) = parser.parse_args()
 
 import ConfigParser as cp
@@ -22,6 +25,8 @@ cf.read('config.cfg')
 gStyle.SetOptTitle(0)
 
 s = cf.get("path","ver")
+if opt.path!=None:
+  s = opt.path
 lep = opt.lep
 #s = "comboCardsMing/"
 #s = "MingDataCards/Dalitz_electron/"
@@ -188,25 +193,33 @@ if __name__ == "__main__":
   expected.SetLineWidth(2)
   expected.SetLineStyle(2)
 
-  observed.SetLineWidth(2)
-  observed.SetMarkerStyle(kFullCircle)
 
   if opt.mll:
     standardM.SetFillColor(kRed+1)
     standardM.SetLineColor(kRed+1)
     standardM.SetLineWidth(2)
-    # standardM.SetMarkerStyle(24)
+    standardM.SetMarkerColor(kRed+1)
+
+    observed.SetMarkerColor(kBlue)
+    observed.SetMarkerSize(2)
+    observed.SetMarkerStyle(kFullCircle)
 
     mg.Add(twoSigma,'P2')
     mg.Add(oneSigma,'P2')
     mg.Add(expected,'P')
   else:
+    observed.SetLineWidth(2)
+
     mg.Add(twoSigma)
     mg.Add(oneSigma)
     mg.Add(expected)
 
   if doObs:
-    mg.Add(observed)
+    if opt.mll:
+      mg.Add(observed,'P')
+    else:
+      mg.Add(observed)
+
   if opt.mll:
     mg.Add(standardM,'P')
 
@@ -237,7 +250,7 @@ if __name__ == "__main__":
     if opt.cat in ['EB','comb']:
       mg.SetMaximum(31)
       if lep=='el':
-        mg.SetMaximum(42)
+        mg.SetMaximum(52)
     elif opt.cat in ['EE','mll50']:
       mg.SetMaximum(150)
   gPad.RedrawAxis()
@@ -303,7 +316,8 @@ if __name__ == "__main__":
   elif not opt.br:
     l = TLine(120, 1, 150, 1)
     l.SetLineColor(kRed+2)
-    l.SetLineStyle(21)
+    l.SetLineWidth(2)
+    #l.SetLineStyle(21)
     l.Draw()
   elif opt.mll:
     leg.SetY1NDC(0.64)
@@ -321,3 +335,16 @@ if __name__ == "__main__":
   observed.Write("observed")
   expected.Write("expected")
   oneSigma.Write("oneSigma")
+
+
+
+  comments = ['Limits and fits']
+  defaultPage = 'BestFits'
+
+  plot_types =[]
+  dirlist = os.listdir(plotBase)
+  for d in dirlist:
+    if os.path.isdir(plotBase+"/"+d):
+      plot_types.append(d)
+  ht.makeHTML("h &rarr; dalitz decay plots", plotBase, plot_types, comments, defaultPage, doYields=False)
+

@@ -21,16 +21,16 @@ s = cf.get("path","ver")
 plotBase = cf.get("path","htmlbase")+'/html/zgamma/dalitz/fits-'+s+'/Pulls'
 #plotBase = '/tthome/andrey/html/zgamma/bias-mar11/'
 #toysDir = '../biasToys-2014-Sep23'
-toysDir = '../biasToys-2014-Dec05'
+toysDir = '../biasToys-2014-Dec08'
 
 sigMuDict = u.AutoVivification()
 taMuDict  = u.AutoVivification()
 
-massList  = ['120','125','130']
-#massList     = [a.strip()[0:3] for a in (cf.get("fits","massList")).split(',')]
+#massList  = ['120','125','130']
+massList     = [a.strip()[0:3] for a in (cf.get("fits","massList")).split(',')]
 sigNameList  = [a.strip() for a in (cf.get("fits","sigNameList")).split(',')]
 yearList     = [a.strip() for a in (cf.get("fits","yearList")).split(',')]
-leptonList = ['el']
+leptonList = ['mu']
 catList    = ['EB']
 
 genFuncList = ['Exp','Pow','Laurent']

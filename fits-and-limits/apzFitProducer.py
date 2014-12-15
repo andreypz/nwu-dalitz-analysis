@@ -197,6 +197,7 @@ def doInitialFits(subdir):
         treeName = apzTreeName
 
       for cat in catList:
+        if lepton=='el' and cat!='EB': continue
         plotBase = plotBase1+'_'.join([year,lepton,'cat'+cat])+'/'
         u.createDir(plotBase)
         if rootrace:

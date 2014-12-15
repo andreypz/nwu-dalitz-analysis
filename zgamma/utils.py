@@ -271,7 +271,7 @@ def makeStack(bZip, histDir, histoName, leg, lumi, howToScale, normToScale=None)
   return hs
 
 
-def drawAllInFile(f1, name1, bZip, sZip, name3, myDir, path, N, howToScale="none", isLog=False, doRatio=False, doFits=False):
+def drawAllInFile(f1, name1, bZip, sZip, name3, myDir, path, N, howToScale="toDataInt", isLog=False, doRatio=False, doFits=False):
   print 'myDir is ', myDir
   if f1!=None and not f1.IsZombie():
     f1.cd(myDir)
@@ -299,7 +299,7 @@ def drawAllInFile(f1, name1, bZip, sZip, name3, myDir, path, N, howToScale="none
   c1.cd()
   #c1.UseCurrentStyle()
 
-  doPdf=0
+  doPdf=1
   histoName = None
   for k in dirList:
     #print k
@@ -429,9 +429,9 @@ def drawAllInFile(f1, name1, bZip, sZip, name3, myDir, path, N, howToScale="none
         leg.SetTextSize(0.05)
 
       if h1==None and bZip==None:
-        leg = TLegend(0.6,0.70,0.92,0.85)
+        leg = TLegend(0.58,0.66,0.92,0.87)
         leg.SetBorderSize(0)
-        leg.SetTextSize(0.03)
+        leg.SetTextSize(0.04)
 
       if bZip!=None and len(bZip)>1: # need more columns if there are backgrounds
         leg = TLegend(0.6,0.7,0.99,0.92)
@@ -472,10 +472,11 @@ def drawAllInFile(f1, name1, bZip, sZip, name3, myDir, path, N, howToScale="none
           for s in si: s.Scale(norm1/norm3)
         elif howToScale=="toDataInt" and norm3!=0:
           scale = int(norm1/norm3/roundTo)*roundTo
-          if scale==0: scale=10
-          for s in si: s.Scale(scale)
           if h1==None:
+            scale=10
             leg.SetHeader('     '+str(int(scale))+' x SM Signal')
+          for s in si: s.Scale(scale)
+
 
         hmaxs.append(si[0].GetMaximum())
         print 'si[0] Hist maximum= ', si[0].GetMaximum()
@@ -497,7 +498,6 @@ def drawAllInFile(f1, name1, bZip, sZip, name3, myDir, path, N, howToScale="none
             h3.SetFillColor(col[1])
           else:
             h3.SetLineColor(40+j)
-            h3.SetLineWidth(2)
             #h3.SetLineStyle(2+j)
 
 
@@ -565,8 +565,8 @@ def drawAllInFile(f1, name1, bZip, sZip, name3, myDir, path, N, howToScale="none
         mainHist.GetYaxis().SetTitle("arbitrary units")
       elif howToScale in ["toData",'toDataInt']:
         mainHist.GetYaxis().SetTitle("Events")
-        #mainHist.SetMaximum(int(1.1*m))
-        mainHist.SetMaximum(int(1.1*m)+5)
+        #mainHist.SetMaximum(1.1*m)
+        #mainHist.SetMaximum(int(1.1*m)+5)
       else:
         mainHist.GetYaxis().SetTitle("Events")
 
@@ -612,6 +612,12 @@ def drawAllInFile(f1, name1, bZip, sZip, name3, myDir, path, N, howToScale="none
       if "ll_deltaR_" in histoName:
         if not 'el' in getSelection():
           mainHist.SetXTitle("#DeltaR(#mu_{1}, #mu_{2})")
+        else:
+          mainHist.SetAxisRange(0,0.2,"X")
+          mainHist.SetNdivisions(505,'X')
+          mainHist.SetXTitle("#DeltaR(e_{1}, e_{2})")
+          mainHist.SetMaximum(1.1*mainHist.GetMaximum())
+
 
       if "gamma_pt_" in histoName:
         mainHist.SetXTitle("Photon p_{T} (GeV)")
@@ -758,7 +764,7 @@ def drawAllInFile(f1, name1, bZip, sZip, name3, myDir, path, N, howToScale="none
       c1.SaveAs(path+"/"+histoName+'.png')
       if doPdf:
         c1.SaveAs(path+"/"+histoName+'.pdf')
-        doPdf=0
+        #doPdf=1
       gStyle.SetOptStat(0)
 
     c1.SetLogy(0)
