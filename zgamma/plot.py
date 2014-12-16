@@ -259,6 +259,11 @@ if __name__ == "__main__":
 
   if sel == "elgamma":
     u.drawAllInFile(dataFile, "Data", bkgZip, sigZip, sigName, "Main-Dale", pathBase+'/Dale/', cut, "toDataInt")
+    if opt.data:
+      u.drawAllInFile(dataFile, "Data", None, None, '', "Main-Dale", pathBase+'/Dale-Data', cut)
+    if opt.sig:
+      u.drawAllInFile(None, None, None, sigZip, sigName,"Main-Dale", pathBase+'/Dale-Sig', cut)
+
     #u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",
     #                "AnElectron-EGamma",  pathBase+"/AnElectron-EGamma/",  None,"norm")
 

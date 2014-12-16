@@ -200,8 +200,8 @@ if __name__ == "__main__":
     standardM.SetLineWidth(2)
     standardM.SetMarkerColor(kRed+1)
 
-    observed.SetMarkerColor(kBlue)
-    observed.SetMarkerSize(2)
+    observed.SetMarkerColor(kBlue+2)
+    observed.SetMarkerSize(1.2)
     observed.SetMarkerStyle(kFullCircle)
 
     mg.Add(twoSigma,'P2')
@@ -275,7 +275,11 @@ if __name__ == "__main__":
 
   leg = TLegend(0.50,0.68,0.75,0.88)
   if doObs:
-    leg.AddEntry(observed,"Observed", "l")
+    leg = TLegend(0.50,0.66,0.75,0.89)
+    if opt.mll:
+      leg.AddEntry(observed,"Observed", "p")
+    else:
+      leg.AddEntry(observed,"Observed", "l")
   leg.AddEntry(expected,"Expected", "l")
   leg.AddEntry(oneSigma,"Expected #pm 1#sigma", "f")
   leg.AddEntry(twoSigma,"Expected #pm 2#sigma", "f")
@@ -326,7 +330,9 @@ if __name__ == "__main__":
 
   for e in ['.png', '.pdf']:
     CMS_lumi(c, 2, 11)
-    if opt.mll:
+    if opt.mll and opt.divide:
+      c.SaveAs(plotBase+'/Limits/limits_Mll_dM'+e)
+    elif opt.mll:
       c.SaveAs(plotBase+'/Limits/limits_Mll'+e)
     else:
       c.SaveAs(plotBase+'/Limits/limits_cat_'+suff+e)
