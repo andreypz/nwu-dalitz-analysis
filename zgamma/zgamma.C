@@ -914,7 +914,7 @@ Bool_t zgamma::Process(Long64_t entry)
   CountEvents(5, "110 < m(llg) < 170; m(ll) < 50", fcuts);
 
   if (lPt1.DeltaR(gamma)<1.0 || lPt2.DeltaR(gamma)<1.0) return kTRUE;
-  //if ( (Mll>2.9 && Mll<3.3) || (Mll>9.3 && Mll<9.7)) return kTRUE; //jpsi and upsilon removeal
+  if ( (Mll>2.9 && Mll<3.3) || (Mll>9.3 && Mll<9.7)) return kTRUE; //jpsi and upsilon removeal
 
   HM->FillHistosFull(6, eventWeight);
   FillHistoCounts(6, eventWeight);
@@ -952,19 +952,19 @@ Bool_t zgamma::Process(Long64_t entry)
 	if (Mllg>122 && Mllg<128){
 	  HM->FillHistosFull(10, eventWeight);
 	  FillHistoCounts(10, eventWeight);
-	  CountEvents(10, "122 GeV < m(llg) < 128 GeV", fcuts);
+	  CountEvents(10, "122 < m(llg) < 128 GeV", fcuts);
 	}
 
 	if (isVBF){
 	  HM->FillHistosFull(11, eventWeight);
 	  FillHistoCounts(11, eventWeight);
 	  CountEvents(11, "VBF ID", fcuts);
-	}
 
-	if ((lPt1.Pt()+lPt2.Pt()) > 40){
-	  HM->FillHistosFull(12, eventWeight);
-	  FillHistoCounts(12, eventWeight);
-	  CountEvents(12, "ptl1+ptl2 > 40 GeV", fcuts);
+	  if (Mllg>122 && Mllg<128){
+	    HM->FillHistosFull(12, eventWeight);
+	    FillHistoCounts(12, eventWeight);
+	    CountEvents(12, "VBF in [122, 128]", fcuts);
+	  }
 	}
 
 

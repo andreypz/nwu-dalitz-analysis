@@ -324,6 +324,7 @@ if __name__=="__main__":
         hsig = []
         if lep=='mu': factor=10
         if lep=='el': factor=10
+        if hjp:       factor=500
         sigNameList   = [a.strip() for a in (cf.get("fits","sigNameList")).split(',')]
         for prod in sigNameList:
           if lep=='el' and prod=='v': continue
@@ -333,6 +334,7 @@ if __name__=="__main__":
           histName  = '_'.join(['sig',prod,lep,year,'cat'+cat,'M125','_CMS_hzg_mass'])
           hsig.append(fs125.Get(histName))
           hsig[-1].Scale(factor)
+
           # hsig[-1].Print("all")
 
         # print hsig

@@ -38,7 +38,8 @@ out = TFile(s+"/limit-data-cat"+opt.cat+"-"+lep+".root","recreate")
 plotBase = cf.get("path","htmlbase")+'/html/zgamma/dalitz/fits-'+s
 u.createDir(plotBase+'/Limits')
 
-massList  = [float(a) for a in (cf.get("fits","massList-more")).split(',')]
+#massList  = [float(a) for a in (cf.get("fits","massList-more")).split(',')]
+massList   = [float(a) for a in u.drange(120,150,1.0)]
 doBlind   = int(cf.get("fits","blind"))
 doObs = not doBlind
 mllBins = u.mllBins()
@@ -46,6 +47,9 @@ mllBins = u.mllBins()
 if opt.cat!='comb': suff=opt.cat+'_'+lep
 else:  suff='Combo'
 # print massList
+if opt.br:  combineOutDir = '/combineOut_xsbr/'
+else:       combineOutDir = '/combineOut/'
+
 
 c = TCanvas("c","c",0,0,500,400)
 c.cd()
@@ -61,7 +65,8 @@ if __name__ == "__main__":
   exp2SigHi = []
   exp2SigLow = []
   SM = []
-  fileListTmp = os.listdir(s)
+  fileListTmp = os.listdir(s+combineOutDir)
+  print fileListTmp
   fileList = filter(lambda fileName: 'higgsCombineTest.'+method in fileName,fileListTmp)
   #print fileList
   SMtot = 0.757
@@ -85,7 +90,7 @@ if __name__ == "__main__":
       SM.append(10*SMtot*mllBins[int(mbin[1])][1]/dmScale)
       print '10x SM prediction:', SM[-1]
 
-      f = TFile(s+"/"+thisFile,"open")
+      f = TFile(s+combineOutDir+thisFile,"open")
       # f.Print()
       tree = f.Get("limit")
 
@@ -108,7 +113,7 @@ if __name__ == "__main__":
       thisFile = filter(lambda fileName: str(mass)+'_cat_'+suff+'.root' in fileName,fileList)[0]
       print thisFile
       xAxis.append(float(mass))
-      f = TFile(s+"/"+thisFile,"open")
+      f = TFile(s+combineOutDir+thisFile,"open")
       #f.Print()
       tree = f.Get("limit")
       for i,l in enumerate(tree):
@@ -236,6 +241,7 @@ if __name__ == "__main__":
     mg.GetXaxis().SetTitle('m_{H} (GeV)')
     mg.GetXaxis().SetLimits(massList[0],massList[-1])
   if opt.br:
+    mg.GetXaxis().SetTitle('m_{A} (GeV)')
     mg.GetYaxis().SetTitle('#sigma(pp #rightarrow A)#timesBR(A#rightarrow#mu#mu#gamma) (fb)')
     mg.SetMaximum(21)
     if opt.mll:
@@ -264,6 +270,8 @@ if __name__ == "__main__":
     lat.SetTextSize(0.05)
     lat.DrawLatex(0.40,0.95,'m_{A} = 125 GeV')
     lat.SetTextSize(0.035)
+  elif opt.br:
+    lat.DrawLatex(0.18,0.95, 'A #rightarrow#gamma*#gamma#rightarrow #mu#mu#gamma')
   elif opt.cat=='comb':
     lat.DrawLatex(0.18,0.95, 'H #rightarrow#gamma*#gamma#rightarrow ll#gamma  CAT: '+opt.cat)
   else:
@@ -316,7 +324,7 @@ if __name__ == "__main__":
     #g.Print('all')
     gStyle.SetOptFit(0)
     leg.SetY1NDC(0.64)
-    leg.AddEntry(g,"10 #times SM", "l")
+    leg.AddEntry(g,"10 #times SM Higgs", "l")
   elif not opt.br:
     l = TLine(120, 1, 150, 1)
     l.SetLineColor(kRed+2)

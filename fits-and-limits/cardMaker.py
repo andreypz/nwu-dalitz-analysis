@@ -27,7 +27,11 @@ s = cf.get("path","ver")
 # ################################################
 
 massList   = ['%.1f'%(a) for a in u.drange(120,150,1.0)]
-#massList = ['125.0']
+sigNameList= [a.strip() for a in (cf.get("fits","signameList")).split(',')]
+hjp = 0
+if 'hjp' in sigNameList:
+  hjp = 1
+  massList = ['125.0']
 
 brTag = ''
 
@@ -77,10 +81,6 @@ def makeCards(subdir):
   yearList   = [a.strip() for a in (cf.get("fits","yearList")).split(',')]
   leptonList = [a.strip() for a in (cf.get("fits","leptonList")).split(',')]
   catList    = [a.strip() for a in (cf.get("fits","catList")).split(',')]
-  sigNameList= [a.strip() for a in (cf.get("fits","signameList")).split(',')]
-  hjp = 0
-  if 'hjp' in sigNameList:  hjp = 1
-
   for year in yearList:
     for lep in leptonList:
       for cat in catList:
@@ -145,7 +145,7 @@ def makeCards(subdir):
           card.write('shapes {0:<8} * {1:<20} ws_card:bkg_$CHANNEL\n'.format('bkg',bgFileName))
           for sig in sigNameList:
             if sig=='v' and lep=='el': continue
-            if opt.br and sig!='gg': continue
+            if opt.br and sig!='gg' and sig!='hjp': continue
             elif sig=='v':
               card.write('shapes {0:<8} * {1:<20} ws_card:{2}_$CHANNEL\n'.format('ZH',sigFileName,'sig_'+sig))
               card.write('shapes {0:<8} * {1:<20} ws_card:{2}_$CHANNEL\n'.format('WH',sigFileName,'sig_'+sig))
@@ -184,7 +184,7 @@ def makeCards(subdir):
           sigYields = []
           for s in sigNameList[::-1]:
             if lep=='el' and s=='v': continue
-            if opt.br and s!='gg': continue
+            if opt.br and s!='gg' and s!='hjp': continue
             cs = 1
             if opt.br:
               if hjp:

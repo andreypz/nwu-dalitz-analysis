@@ -60,7 +60,7 @@ void HistMaker::MakeMuonPlots(const TCMuon& mu, string dir)
  //hists->fill1DHist(muIso, dir+"_mu_iso", ";rel isolation, pu corr", 50, 0,0.7, 1, dir);
   //hists->fill2DHist(muIso, global_Mll, dir+"_mu_iso_vs_Mll", ";pfIsolationR04;M(l_{1},l_{2})", 50, 0,0.7, 50, 0,20, 1, dir);
   //Float_t iso2 = (mu.IsoMap("pfChargedHadronPt_R04") + mu.IsoMap("pfNeutralHadronEt_R04") + mu.IsoMap("pfPhotonEt_R04"))/mu.Pt();
-  //hists->fill1DHist(iso2, dir+"_mu_iso_official", ";pfIsolationR04", 50, 0,0.7, 1, dir);
+  //hists->fill1DHist(iso2, dir+"_mu_iso_official, ";pfIsolationR04", 50, 0,0.7, 1, dir);
 
 }
 
@@ -173,7 +173,7 @@ void HistMaker::MakeElectronPlots(const TCElectron& el, string dir)
     Float_t ptr = trk[1].Pt()/trk[0].Pt();
     Float_t EoverPt = el.SCRawEnergy()/(trk[0]+trk[1]).Pt();
     hists->fill1DHist(EoverPt, dir+"_el_EoverPt_all", ";E_{SC}^{raw}/p_{T}^{gsf1+gsf2}", 100,0,2.5, 1,dir);
-    hists->fill1DHist(ptr, dir+"_el_ptRatio", ";p_{T}^{gsf2}/p_{T}^{gsf1}", 100,0,1, 1,dir);
+    hists->fill1DHist(ptr, dir+"_el_ptRatio", ";p_{T}^{gsf2}/p_{T}^{gsf1}", 50,0,1, 1,dir);
     hists->fill1DHist(dR,  dir+"_el_dR_all",  ";#Delta R(gsf1, gsf2)",   100,   0,2, 1,dir);
     hists->fill1DHist(dR,  dir+"_el_dR_low",  ";#Delta R(gsf1, gsf2)",   100, 0,0.1, 1,dir);
     hists->fill1DHist(mll, dir+"_el_mll_full",";m_{ll} (GeV)",  100, 0,120, 1,dir);
@@ -366,8 +366,9 @@ void HistMaker::FillHistosFull(Int_t num, Double_t weight, string dir)
 
     }
 
-  hists->fill1DHist(_lPt1.DeltaR(_lPt2), Form("04_ll_deltaR_full_%s_cut%i",   d, num),";#Delta R(l_{1}, l_{2})",50,0,4,  weight,dir);
-  hists->fill1DHist(_lPt1.DeltaR(_lPt2), Form("04_ll_deltaR_%s_cut%i",        d, num),";#Delta R(l_{1}, l_{2})",50,0,1,  weight,dir);
+  hists->fill1DHist(_lPt1.DeltaR(_lPt2), Form("04_ll_deltaR_low_%s_cut%i",    d, num),";#Delta R(l_{1}, l_{2})",25,0,0.05, weight,dir);
+  hists->fill1DHist(_lPt1.DeltaR(_lPt2), Form("04_ll_deltaR_%s_cut%i",        d, num),";#Delta R(l_{1}, l_{2})",50,  0,1,  weight,dir);
+  hists->fill1DHist(_lPt1.DeltaR(_lPt2), Form("04_ll_deltaR_full_%s_cut%i",   d, num),";#Delta R(l_{1}, l_{2})",50,  0,4,  weight,dir);
   if (_isGammaSet){
     hists->fill1DHist(_lPt1.DeltaR(_gamma),Form("04_lPt1_gamma_deltaR_%s_cut%i",d, num),";#Delta R(#gamma,l_{1})",100,0,5, weight,dir);
     hists->fill1DHist(_lPt2.DeltaR(_gamma),Form("04_lPt2_gamma_deltaR_%s_cut%i",d, num),";#Delta R(#gamma,l_{2})",100,0,5, weight,dir);

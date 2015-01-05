@@ -24,8 +24,8 @@ cf.read('config.cfg')
 
 verbose    = opt.verbose
 
-#massList   = ['125']
-massList      = [a.strip()[0:3] for a in (cf.get("fits","massList")).split(',')]
+massList   = ['125']
+#massList      = [a.strip()[0:3] for a in (cf.get("fits","massList")).split(',')]
 yearList      = [a.strip() for a in (cf.get("fits","yearList")).split(',')]
 leptonList    = [a.strip() for a in (cf.get("fits","leptonList")).split(',')]
 catList       = [a.strip() for a in (cf.get("fits","catList")).split(',')]
@@ -34,13 +34,13 @@ mllBins = u.mllBins()
 
 EBetaCut = 1.4442
 EEetaCut = 1.566
-ptMllgCut  = 0.3
-ptGammaCut = 0
-ptDiLepCut = 0
+ptMllgCut  = 0.0
+ptGammaCut = 40
+ptDiLepCut = 40
 ptSumLep   = 0
 
 lowCutOff  = 110
-highCutOff = 170
+highCutOff = 150
 
 doBlind    = int(cf.get("fits","blind"))
 hjp=0
@@ -349,12 +349,21 @@ def doInitialFits(subdir):
         dataName = '_'.join(['data',lepton,year,'cat'+cat])
         dataTree = dataDict[lepton+year].Get(treeName)
         data_argS = RooArgSet(mzg)
+        data_argL = RooArgList(mzg)
         data_ds   = RooDataSet(dataName,dataName,data_argS)
 
         if opt.tw and lepton=='el':
           LoopOverTreeTW(dataTree, cat, mzg, data_argS, data_ds)
         else:
           LoopOverTree(dataTree, cat, mzg, data_argS, data_ds, None)
+
+        # data_ds.Print('all')
+
+        dahist = mzg.createHistogram('hist_'+dataName, RooFit.Binning(binning))
+        data_ds.fillHistogram(dahist, RooArgList(mzg))
+        data_dh   = RooDataHist('dh_'+dataName, 'dh_' +dataName, data_argL, dahist)
+        #dahist.Print('all')
+        # data_dh.Print()
 
         if verbose:
           print dataName
@@ -382,12 +391,14 @@ def doInitialFits(subdir):
         bgFitList = ['Exp','Pow','Bern2','Bern3','Bern4','Bern5','Laurent']
 
         testFrame = mzg.frame(RooFit.Range('DalitzRegion'))
-        if doBlind:
-          data_ds.plotOn(testFrame, RooFit.Binning(binning),RooFit.Name('data'),RooFit.CutRange('r1'))
-          data_ds.plotOn(testFrame, RooFit.Binning(binning),RooFit.Name('data'),RooFit.CutRange('r2'))
-          data_ds.plotOn(testFrame, RooFit.Binning(binning),RooFit.Name('data'),RooFit.Invisible())
-        else:
-          data_ds.plotOn(testFrame, RooFit.Binning(binning),RooFit.Name('data'))
+        #if doBlind:
+        #  data_ds.plotOn(testFrame, RooFit.Binning(binning),RooFit.Name('r1'),RooFit.CutRange('r1'))
+        #  data_ds.plotOn(testFrame, RooFit.Binning(binning),RooFit.Name('r2'),RooFit.CutRange('r2'))
+        #  data_ds.plotOn(testFrame, RooFit.Binning(binning),RooFit.Name('data'),RooFit.Invisible())
+        #else:
+        #  data_ds.plotOn(testFrame, RooFit.Binning(binning),RooFit.Name('data'))
+
+        data_dh.plotOn(testFrame, RooFit.Binning(binning), RooFit.Name('data2'))
 
         leg = TLegend(0.63,0.6,0.91,0.88)
         leg.SetFillColor(0)
@@ -402,13 +413,14 @@ def doInitialFits(subdir):
           if verbose:
             fit.Print()
 
-          fit.fitTo(data_ds,RooFit.Range('DalitzRegion'), RooFit.Strategy(1))
+          fit.fitTo(data_dh,RooFit.Range('DalitzRegion'), RooFit.Strategy(1))
+          #fit.fitTo(data_ds,RooFit.Range('DalitzRegion'), RooFit.Strategy(1))
           fit.plotOn(testFrame, RooFit.LineColor(colors[fitName.lower()]), RooFit.Name(fitName))
 
           getattr(ws,'import')(fit)
 
           testFrame.Draw()
-          chi2 = testFrame.chiSquare(fitName,'data',ndof)
+          chi2 = testFrame.chiSquare(fitName,'data2',ndof)
 
           leg.AddEntry(testFrame.findObject(fitName),fitName+(10-len(fitName))*'  '+'#chi2 = {0:.2f}'.format(chi2),'l')
 
@@ -421,6 +433,9 @@ def doInitialFits(subdir):
           testFrame.SetTitle(";m_{ee#gamma} (GeV);Events/"+str(binWidth)+" GeV")
 
         testFrame.Draw()
+
+        # dahist.Draw('same hist')
+
         #shist[year][lepton][cat]['gg']['125'].Scale(10)
         #shist[year][lepton][cat]['gg']['125'].Draw('same hist')
         #shist[year][lepton][cat]['gg']['125'].SetLineColor(kRed+1)

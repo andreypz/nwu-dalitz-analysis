@@ -24,17 +24,20 @@ cf = cp.ConfigParser()
 cf.read('config.cfg')
 
 
-if opt.br: outCardDir = '/output_cards_xsbr/'
-else: outCardDir = '/output_cards/'
+if opt.br:
+  outCardDir = '/output_cards_xsbr/'
+  combineOutDir = '/combineOut_xsbr/'
+else:
+  outCardDir = '/output_cards/'
+  combineOutDir = '/combineOut/'
 
 method = "Asymptotic"
 if opt.prof:
   method = "ProfileLikelihood"
 
 if __name__ == "__main__":
-  massList = ['125.0']
-  #massList   = ['%.1f'%(a) for a in u.drange(120,150,1)]
-  #massList   = [a.strip() for a in (cf.get("fits","massList-more")).split(',')]
+  #massList = ['125.0']
+  massList   = [a.strip() for a in (cf.get("fits","massList-more")).split(',')]
   catList    = [a.strip() for a in (cf.get("fits","catList")).split(',')]
   leptonList = [a.strip() for a in (cf.get("fits","leptonList")).split(',')]
 
@@ -49,6 +52,8 @@ if __name__ == "__main__":
     cf.set("path","ver", myDir)
     with open(r'config.cfg', 'wb') as configfile:
       cf.write(configfile)
+
+  u.createDir(myDir+combineOutDir)
 
   for m in massList:
     cardNames = ''
@@ -77,10 +82,10 @@ if __name__ == "__main__":
 
         if m[-1]=='5':
           fname = "higgsCombineTest."+method+".mH"+m
-          os.system("mv "+fname+".root "+myDir+'/'+fname+'_cat_'+cat+'_'+lep+'.root')
+          os.system("mv "+fname+".root "+myDir+combineOutDir+fname+'_cat_'+cat+'_'+lep+'.root')
         else:
           fname = "higgsCombineTest."+method+".mH"+m[0:3]
-          os.system("mv "+fname+".root "+myDir+'/'+fname+'.0_cat_'+cat+'_'+lep+'.root')
+          os.system("mv "+fname+".root "+myDir+combineOutDir+fname+'.0_cat_'+cat+'_'+lep+'.root')
 
       if opt.comb:
         print '\t Combining the cards: \n', cardNames
@@ -97,10 +102,10 @@ if __name__ == "__main__":
 
         if m[-1]=='5':
           fname = "higgsCombineTest."+method+".mH"+m
-          os.system("mv "+fname+".root "+myDir+'/'+fname+'_cat_Combo.root')
+          os.system("mv "+fname+".root "+myDir+combineOutDir+fname+'_cat_Combo.root')
         else:
           fname = "higgsCombineTest."+method+".mH"+m[0:3]
-          os.system("mv "+fname+".root "+myDir+'/'+fname+'.0_cat_Combo.root')
+          os.system("mv "+fname+".root "+myDir+combineOutDir+fname+'.0_cat_Combo.root')
 
 
       print myDir, s[:3]

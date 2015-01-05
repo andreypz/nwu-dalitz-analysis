@@ -285,11 +285,11 @@ def doBiasStudy(year = '2012', lepton = 'mu', cat = '0', genFunc = 'Bern3', mass
 
     if i%plotEvery==0 and job%20==0:
       testFrame = mzg.frame()
-      toyData.plotOn(testFrame)
+      toyData.plotOn(testFrame, RooFit.Binning(30))
       if lepton=='mu':
-        testFrame.SetTitle("m_{H} = "+mass+";m_{#mu#mu#gamma} (GeV);Events/1 GeV")
+        testFrame.SetTitle("m_{H} = "+mass+";m_{#mu#mu#gamma} (GeV);Events/2 GeV")
       if lepton=='el':
-        testFrame.SetTitle("m_{H} = "+mass+";m_{ee#gamma} (GeV);Events/1 GeV")
+        testFrame.SetTitle("m_{H} = "+mass+";m_{ee#gamma} (GeV);Events/2 GeV")
       genFit.plotOn(testFrame, RooFit.Name(genFunc))
 
       legendTmp = TLegend(0.6,0.65,0.9,0.9)

@@ -254,7 +254,7 @@ def makeStack(bZip, histDir, histoName, leg, lumi, howToScale, normToScale=None)
       h.SetFillColor( int(getColors(n)[1]))
     elif howToScale == 'norm':
       if normh!=0: h.Scale(1./normh)
-    elif howToScale in ['toData','toDataInt'] and normToScale!=None:
+    elif howToScale in ['toData','toDataInt','toDataRel'] and normToScale!=None:
       if normh!=0: h.Scale(normToScale/normh)
     else:
       print 'Sorry, there must be a mistake, this norm is not supported: ',howToScale
@@ -271,7 +271,7 @@ def makeStack(bZip, histDir, histoName, leg, lumi, howToScale, normToScale=None)
   return hs
 
 
-def drawAllInFile(f1, name1, bZip, sZip, name3, myDir, path, N, howToScale="toDataInt", isLog=False, doRatio=False, doFits=False):
+def drawAllInFile(f1, name1, bZip, sZip, name3, myDir, path, N, howToScale="toDataRel", isLog=False, doRatio=False, doFits=False):
   print 'myDir is ', myDir
   if f1!=None and not f1.IsZombie():
     f1.cd(myDir)
@@ -336,9 +336,9 @@ def drawAllInFile(f1, name1, bZip, sZip, name3, myDir, path, N, howToScale="toDa
       si = []
       for s in sZip:
         if myDir!="":
-          si.append(s[1].Get(myDir+"/"+histoName))
+          si.append(s[1].Get(myDir+"/"+histoName).Clone())
         else:
-          si.append(s[1].Get(histoName))
+          si.append(s[1].Get(histoName).Clone())
           print myDir, histoName
         if si[-1]==None:
           print 'Histogram'+histoName+' does not exis in'+s[0]
@@ -347,10 +347,11 @@ def drawAllInFile(f1, name1, bZip, sZip, name3, myDir, path, N, howToScale="toDa
         scale3 = 1
         if si[-1]!=None:
           Nev = getTotalEvents(s[1])
-          if conf.get("selection","jp")=='1':
+
+          if conf.get("selection","jp")=='1' or 'Psi' in sZip[0][0]:
             cro = getCS("HtoJPsiGamma")
           else:
-            cro = getCS("ggH-"+s[0], getSelection()[:2])
+            cro = getCS(s[0], getSelection()[:2])
           scale3 = float(lumi*cro)/Nev
         print s, Nev, lumi, cro, scale3
         si[-1].Scale(float(scale3))
@@ -376,7 +377,8 @@ def drawAllInFile(f1, name1, bZip, sZip, name3, myDir, path, N, howToScale="toDa
           si[0].SetNdivisions(505,'X')
           si[0].SetNdivisions(505,'Y')
         CMS_lumi(c1, 2, 11)
-        c1.SaveAs(prename+"_sig_"+sZip[0][0]+".png")
+        c1.SaveAs(prename+"_sig.png")
+        #c1.SaveAs(prename+"_sig_"+sZip[0][0]+".png")
 
       continue
 
@@ -457,29 +459,40 @@ def drawAllInFile(f1, name1, bZip, sZip, name3, myDir, path, N, howToScale="toDa
         if h1==None:
           mainHist=si[0]
 
-        norm3 = si[0].Integral()
         scale = 0
 
-        if howToScale=="lumi":
-          extract_scale_from_name = re.findall(r'\d+', name3)
-          # print "extract from name =", extract_from_name
-          if len(extract_scale_from_name) != 0:
-            scale = int(extract_scale_from_name[0])
-            si[0].Scale(scale)
-        elif howToScale=="norm" and norm3!=0:
-          for s in si: s.Scale(1./norm3)
-        elif howToScale=="toData" and norm3!=0:
-          for s in si: s.Scale(norm1/norm3)
-        elif howToScale=="toDataInt" and norm3!=0:
-          scale = int(norm1/norm3/roundTo)*roundTo
-          if h1==None:
-            scale=10
-            leg.SetHeader('     '+str(int(scale))+' x SM Signal')
-          for s in si: s.Scale(scale)
+        for s in si:
+          norm3 = s.Integral()
+
+          if howToScale=="lumi":
+            extract_scale_from_name = re.findall(r'\d+', name3)
+            # print "extract from name =", extract_from_name
+            if len(extract_scale_from_name) != 0:
+              scale = int(extract_scale_from_name[0])
+            s.Scale(scale)
+
+          elif howToScale=="norm" and norm3!=0:
+            s.Scale(1./norm3)
+
+          elif howToScale=="toData" and norm3!=0:
+            s.Scale(norm1/norm3)
+
+          elif howToScale=="toDataInt" and norm3!=0:
+            scale = int(norm1/norm3/roundTo)*roundTo
+            if h1==None:
+              scale=10
+            s.Scale(scale)
+
+          elif howToScale=="toDataRel" and norm3!=0:
+            scale = int(norm1/norm3/roundTo)*roundTo
+            if h1==None:
+              scale=10
+              leg.SetHeader('     '+str(int(scale))+' x SM Signal')
+            s.Scale(scale)
 
 
-        hmaxs.append(si[0].GetMaximum())
-        print 'si[0] Hist maximum= ', si[0].GetMaximum()
+          hmaxs.append(s.GetMaximum())
+          print s, 's Hist maximum= ', s.GetMaximum()
         print howToScale, "norm1=%.3f, norm3=%.3f, roundTo=%.3f, scale=%.3f"%(norm1, norm3, roundTo, scale)
         # if 'tri_mass125' in histoName:
         #  si[0].Print('all')
@@ -507,7 +520,10 @@ def drawAllInFile(f1, name1, bZip, sZip, name3, myDir, path, N, howToScale="toDa
             else:
               leg.AddEntry(h3,name3, "f")
           else:
-            leg.AddEntry(h3,' m_{H} = '+sZip[j][0]+' GeV', "l")
+            if howToScale=='toData':
+              leg.AddEntry(h3, sZip[j][0], "l")
+            else:
+              leg.AddEntry(h3,' m_{H} = '+sZip[j][0][:3]+' GeV', "l")
 
         if doRatio:
           c1.cd()
@@ -563,7 +579,7 @@ def drawAllInFile(f1, name1, bZip, sZip, name3, myDir, path, N, howToScale="toDa
           mainHist.SetMaximum(10*m)
       if howToScale == "norm":
         mainHist.GetYaxis().SetTitle("arbitrary units")
-      elif howToScale in ["toData",'toDataInt']:
+      elif howToScale in ["toData",'toDataInt','toDataRel']:
         mainHist.GetYaxis().SetTitle("Events")
         #mainHist.SetMaximum(1.1*m)
         #mainHist.SetMaximum(int(1.1*m)+5)
@@ -571,14 +587,16 @@ def drawAllInFile(f1, name1, bZip, sZip, name3, myDir, path, N, howToScale="toDa
         mainHist.GetYaxis().SetTitle("Events")
 
       mainHist.SetMinimum(0)
+
+      #  ---
       # Here we consider particular cases (histograms) that need special care
-      # if "tri_mass_longTail" in histoName and howToScale=="lumi":
-      # h1.SetMaximum(750)
-      if h1!=None:
-        if 'tri_mass' in histoName:
-          blindIt(h1, 3)
-        if '_mDalG_' in histoName:
-          blindIt(h1, 4)
+
+      # Blinding the Data:
+      #if h1!=None:
+      #  if 'tri_mass' in histoName:
+      #    blindIt(h1, 3)
+      #  if '_mDalG_' in histoName:
+      #    blindIt(h1, 4)
 
       if histoName in ['LHE_diLep_mass_low', 'LHE_diLep_mass',
                        'LHE_dR_l1_l2','LHE_dR_l1_l2_low', 'LHE_dR_l1_l2_vlow']:

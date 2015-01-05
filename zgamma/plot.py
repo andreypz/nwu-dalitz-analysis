@@ -20,7 +20,8 @@ parser.add_option("--bkg",  dest="bkg",  action="store_true", default=False, hel
 parser.add_option("--qcd",  dest="qcd",  action="store_true", default=False, help="Include QCD samples")
 parser.add_option("--mcfm", dest="mcfm", action="store_true", default=False, help="Use MCFM  as a signal")
 parser.add_option("--sig",  dest="sig",  action="store_true", default=False, help="Signal MC")
-parser.add_option("--data",  dest="data",  action="store_true", default=False, help="Data only")
+parser.add_option("--data", dest="data", action="store_true", default=False, help="Data only")
+parser.add_option("--vbf",  dest="vbf",  action="store_true", default=False, help="Use signal samples: ggH, vbf, vH")
 
 parser.add_option("--evt",dest="evt",action="store_true", default=False, help="Show raw events (not scaled to lumi) for MC samles")
 parser.add_option("-e","--extra",dest="extra",action="store_true", default=False, help="Make all extra plots")
@@ -79,73 +80,76 @@ if __name__ == "__main__":
   bkgNames  = []
 
   u.setSelection(sel)
+  subsel=sel
+  if opt.hjp or opt.zjp:
+    subsel = 'jp-mugamma'
 
   if doMerge:
     if sel=="elgamma" or sel=='eegamma':
       os.system("hadd "+hPath+"/m_Data_" +sel+"_"+period+".root "+hPath+"/"+sel+"_"+period+"/hhhh_*Run2012*.root")
     else:
-      # os.system("hadd "+hPath+"/m_Data_" +sel+"_"+period+".root "+hPath+"/"+sel+"_"+period+"/hhhh_DoubleMu_Run20*.root")
-      os.system("hadd "+hPath+"/m_Data_" +sel+"_"+period+".root "+hPath+"/"+sel+"_"+period+"/hhhh_MuEG_Run2012*.root")
-      # os.system("hadd "+hPath+"/m_Data_" +sel+"_"+period+".root "+hPath+"/"+sel+"_"+period+"/hhhh_DoubleElectron_Run20*.root")
+      # os.system("hadd "+hPath+"/m_Data_" +subsel+"_"+period+".root "+hPath+"/"+subsel+"_"+period+"/hhhh_DoubleMu_Run20*.root")
+      os.system("hadd "+hPath+"/m_Data_" +subsel+"_"+period+".root "+hPath+"/"+subsel+"_"+period+"/hhhh_MuEG_Run2012*.root")
+      # os.system("hadd "+hPath+"/m_Data_" +subsel+"_"+period+".root "+hPath+"/"+subsel+"_"+period+"/hhhh_DoubleElectron_Run20*.root")
 
 
     if doBkg:
-      #os.system("hadd "+hPath+"/m_DYJetsPow20_"+sel+"_"+period+".root "
-      #          +hPath+"/"+sel+"_"+period+"/hhhh_DYJetsPow20-RD1*.root")
-      #os.system("hadd "+hPath+"/m_DYJets50_"+sel+"_"+period+".root "
-      #          +hPath+"/"+sel+"_"+period+"/hhhh_DYJets50-RD1*.root")
-      #os.system("hadd "+hPath+"/m_ZG_"+sel+"_"+period+".root "
-      #          +hPath+"/"+sel+"_"+period+"/hhhh_ZGToLLG-RD1*.root ")
+      #os.system("hadd "+hPath+"/m_DYJetsPow20_"+subsel+"_"+period+".root "
+      #          +hPath+"/"+subsel+"_"+period+"/hhhh_DYJetsPow20-RD1*.root")
+      #os.system("hadd "+hPath+"/m_DYJets50_"+subsel+"_"+period+".root "
+      #          +hPath+"/"+subsel+"_"+period+"/hhhh_DYJets50-RD1*.root")
+      #os.system("hadd "+hPath+"/m_ZG_"+subsel+"_"+period+".root "
+      #          +hPath+"/"+subsel+"_"+period+"/hhhh_ZGToLLG-RD1*.root ")
 
       if opt.qcd:
-        os.system("hadd "+hPath+"/m_QCD_EM_Pt_20to30_"+sel+"_"+period+".root "
-                  +hPath+"/"+sel+"_"+period+"/hhhh_QCD_EM_Pt_20to30_*.root ")
-        os.system("hadd "+hPath+"/m_QCD_EM_Pt_30to80_"+sel+"_"+period+".root "
-                  +hPath+"/"+sel+"_"+period+"/hhhh_QCD_EM_Pt_30to80_*.root ")
-        os.system("hadd "+hPath+"/m_QCD_EM_Pt_80to170_"+sel+"_"+period+".root "
-                  +hPath+"/"+sel+"_"+period+"/hhhh_QCD_EM_Pt_80to170_*.root ")
-        os.system("hadd "+hPath+"/m_QCD_EM_Pt_170to250_"+sel+"_"+period+".root "
-                  +hPath+"/"+sel+"_"+period+"/hhhh_QCD_EM_Pt_170to250_*.root ")
-        os.system("hadd "+hPath+"/m_QCD_EM_Pt_250to350_"+sel+"_"+period+".root "
-                  +hPath+"/"+sel+"_"+period+"/hhhh_QCD_EM_Pt_350_*.root ")
-        os.system("hadd "+hPath+"/m_QCD_EM_Pt_250to350_"+sel+"_"+period+".root "
-                  +hPath+"/"+sel+"_"+period+"/hhhh_QCD_EM_Pt_350_*.root ")
+        os.system("hadd "+hPath+"/m_QCD_EM_Pt_20to30_"+subsel+"_"+period+".root "
+                  +hPath+"/"+subsel+"_"+period+"/hhhh_QCD_EM_Pt_20to30_*.root ")
+        os.system("hadd "+hPath+"/m_QCD_EM_Pt_30to80_"+subsel+"_"+period+".root "
+                  +hPath+"/"+subsel+"_"+period+"/hhhh_QCD_EM_Pt_30to80_*.root ")
+        os.system("hadd "+hPath+"/m_QCD_EM_Pt_80to170_"+subsel+"_"+period+".root "
+                  +hPath+"/"+subsel+"_"+period+"/hhhh_QCD_EM_Pt_80to170_*.root ")
+        os.system("hadd "+hPath+"/m_QCD_EM_Pt_170to250_"+subsel+"_"+period+".root "
+                  +hPath+"/"+subsel+"_"+period+"/hhhh_QCD_EM_Pt_170to250_*.root ")
+        os.system("hadd "+hPath+"/m_QCD_EM_Pt_250to350_"+subsel+"_"+period+".root "
+                  +hPath+"/"+subsel+"_"+period+"/hhhh_QCD_EM_Pt_350_*.root ")
+        os.system("hadd "+hPath+"/m_QCD_EM_Pt_250to350_"+subsel+"_"+period+".root "
+                  +hPath+"/"+subsel+"_"+period+"/hhhh_QCD_EM_Pt_350_*.root ")
 
-        # os.system("hadd "+hPath+"/m_QCD_Mu_Pt_20_"+sel+"_"+period+".root "
-        #          +hPath+"/"+sel+"_"+period+"/hhhh_QCD_Mu_Pt_20_*.root ")
-        # os.system("hadd "+hPath+"/m_QCD_Mu_Pt_15to30_"+sel+"_"+period+".root "
-        #          +hPath+"/"+sel+"_"+period+"/hhhh_QCD_Mu_Pt_5to30_*.root ")
-        os.system("hadd "+hPath+"/m_QCD_Mu_Pt_30to50_"+sel+"_"+period+".root "
-                  +hPath+"/"+sel+"_"+period+"/hhhh_QCD_Mu_Pt_30to50_*.root ")
-        os.system("hadd "+hPath+"/m_QCD_Mu_Pt_50to150_"+sel+"_"+period+".root "
-                  +hPath+"/"+sel+"_"+period+"/hhhh_QCD_Mu_Pt_50to150_*.root ")
-        os.system("hadd "+hPath+"/m_QCD_Mu_Pt_150_"+sel+"_"+period+".root "
-                  +hPath+"/"+sel+"_"+period+"/hhhh_QCD_Mu_Pt_150_*.root ")
+        # os.system("hadd "+hPath+"/m_QCD_Mu_Pt_20_"+subsel+"_"+period+".root "
+        #          +hPath+"/"+subsel+"_"+period+"/hhhh_QCD_Mu_Pt_20_*.root ")
+        # os.system("hadd "+hPath+"/m_QCD_Mu_Pt_15to30_"+subsel+"_"+period+".root "
+        #          +hPath+"/"+subsel+"_"+period+"/hhhh_QCD_Mu_Pt_5to30_*.root ")
+        os.system("hadd "+hPath+"/m_QCD_Mu_Pt_30to50_"+subsel+"_"+period+".root "
+                  +hPath+"/"+subsel+"_"+period+"/hhhh_QCD_Mu_Pt_30to50_*.root ")
+        os.system("hadd "+hPath+"/m_QCD_Mu_Pt_50to150_"+subsel+"_"+period+".root "
+                  +hPath+"/"+subsel+"_"+period+"/hhhh_QCD_Mu_Pt_50to150_*.root ")
+        os.system("hadd "+hPath+"/m_QCD_Mu_Pt_150_"+subsel+"_"+period+".root "
+                  +hPath+"/"+subsel+"_"+period+"/hhhh_QCD_Mu_Pt_150_*.root ")
 
   qcdSamples = None
   if doBkg:
-    #bkgFiles.append(TFile(hPath+"/m_ZG_"+sel+"_"+period+".root","OPEN"))
+    #bkgFiles.append(TFile(hPath+"/m_ZG_"+subsel+"_"+period+".root","OPEN"))
     #bkgNames.append('ZG')
-    #bkgFiles.append(TFile(hPath+"/m_DYJets50_"+sel+"_"+period+".root","OPEN"))
+    #bkgFiles.append(TFile(hPath+"/m_DYJets50_"+subsel+"_"+period+".root","OPEN"))
     #bkgNames.append('DYJets50')
-    bkgFiles.append(TFile(hPath+"/"+sel+"_"+period+"/hhhh_DYJetsDalitz_1.root","OPEN"))
+    bkgFiles.append(TFile(hPath+"/"+subsel+"_"+period+"/hhhh_DYJetsDalitz_1.root","OPEN"))
     bkgNames.append('DYJetsDalitz')
-    bkgFiles.append(TFile(hPath+"/"+sel+"_"+period+"/hhhh_ZGDalitz_1.root","OPEN"))
+    bkgFiles.append(TFile(hPath+"/"+subsel+"_"+period+"/hhhh_ZGDalitz_1.root","OPEN"))
     bkgNames.append('ZGDalitz')
     if opt.qcd:
-      qcdSamples = {'QCD_EM_Pt_20to30':  TFile(hPath+"/m_QCD_EM_Pt_20to30_"  +sel+"_"+period+".root","OPEN"),
-                    'QCD_EM_Pt_30to80':  TFile(hPath+"/m_QCD_EM_Pt_30to80_"  +sel+"_"+period+".root","OPEN"),
-                    'QCD_EM_Pt_80to170': TFile(hPath+"/m_QCD_EM_Pt_80to170_" +sel+"_"+period+".root","OPEN"),
-                    'QCD_EM_Pt_170to250':TFile(hPath+"/m_QCD_EM_Pt_170to250_"+sel+"_"+period+".root","OPEN"),
-                    'QCD_EM_Pt_250to350':TFile(hPath+"/m_QCD_EM_Pt_250to350_"+sel+"_"+period+".root","OPEN"),
-                    'QCD_EM_Pt_250to350':TFile(hPath+"/m_QCD_EM_Pt_250to350_"+sel+"_"+period+".root","OPEN"),
-                    'QCD_EM_Pt_350':     TFile(hPath+"/m_QCD_EM_Pt_350_"     +sel+"_"+period+".root","OPEN"),
+      qcdSamples = {'QCD_EM_Pt_20to30':  TFile(hPath+"/m_QCD_EM_Pt_20to30_"  +subsel+"_"+period+".root","OPEN"),
+                    'QCD_EM_Pt_30to80':  TFile(hPath+"/m_QCD_EM_Pt_30to80_"  +subsel+"_"+period+".root","OPEN"),
+                    'QCD_EM_Pt_80to170': TFile(hPath+"/m_QCD_EM_Pt_80to170_" +subsel+"_"+period+".root","OPEN"),
+                    'QCD_EM_Pt_170to250':TFile(hPath+"/m_QCD_EM_Pt_170to250_"+subsel+"_"+period+".root","OPEN"),
+                    'QCD_EM_Pt_250to350':TFile(hPath+"/m_QCD_EM_Pt_250to350_"+subsel+"_"+period+".root","OPEN"),
+                    'QCD_EM_Pt_250to350':TFile(hPath+"/m_QCD_EM_Pt_250to350_"+subsel+"_"+period+".root","OPEN"),
+                    'QCD_EM_Pt_350':     TFile(hPath+"/m_QCD_EM_Pt_350_"     +subsel+"_"+period+".root","OPEN"),
 
-                    'QCD_Mu_Pt_20':     TFile(hPath+"/m_QCD_Mu_Pt_20_"      +sel+"_"+period+".root","OPEN"),
-                    'QCD_Mu_Pt_15to30': TFile(hPath+"/m_QCD_Mu_Pt_15to30_"  +sel+"_"+period+".root","OPEN"),
-                    'QCD_Mu_Pt_30to50': TFile(hPath+"/m_QCD_Mu_Pt_30to50_"  +sel+"_"+period+".root","OPEN"),
-                    'QCD_Mu_Pt_50to150':TFile(hPath+"/m_QCD_Mu_Pt_50to150_" +sel+"_"+period+".root","OPEN"),
-                    'QCD_Mu_Pt_150':    TFile(hPath+"/m_QCD_Mu_Pt_150_"     +sel+"_"+period+".root","OPEN")
+                    'QCD_Mu_Pt_20':     TFile(hPath+"/m_QCD_Mu_Pt_20_"      +subsel+"_"+period+".root","OPEN"),
+                    'QCD_Mu_Pt_15to30': TFile(hPath+"/m_QCD_Mu_Pt_15to30_"  +subsel+"_"+period+".root","OPEN"),
+                    'QCD_Mu_Pt_30to50': TFile(hPath+"/m_QCD_Mu_Pt_30to50_"  +subsel+"_"+period+".root","OPEN"),
+                    'QCD_Mu_Pt_50to150':TFile(hPath+"/m_QCD_Mu_Pt_50to150_" +subsel+"_"+period+".root","OPEN"),
+                    'QCD_Mu_Pt_150':    TFile(hPath+"/m_QCD_Mu_Pt_150_"     +subsel+"_"+period+".root","OPEN")
                   }
 
       bkgNames.append('QCD')
@@ -162,30 +166,27 @@ if __name__ == "__main__":
   sigVBF = {}
   sigVH  = {}
   for m in ['120','125','130','135','140','145','150']:
-    sigGG[m]  = TFile(hPath+"/"+sel+"_"+period+"/hhhh_ggH-mad"+m+"_1.root", "OPEN")
-    sigVBF[m] = TFile(hPath+"/"+sel+"_"+period+"/hhhh_vbfH-mad"+m+"_1.root", "OPEN")
-    sigVH[m]  = TFile(hPath+"/"+sel+"_"+period+"/hhhh_vH-mad"+ m+"_1.root", "OPEN")
+    sigGG[m]  = TFile(hPath+"/"+subsel+"_"+period+"/hhhh_ggH-mad"+m+"_1.root", "OPEN")
+    sigVBF[m] = TFile(hPath+"/"+subsel+"_"+period+"/hhhh_vbfH-mad"+m+"_1.root", "OPEN")
+    sigVH[m]  = TFile(hPath+"/"+subsel+"_"+period+"/hhhh_vH-mad"+ m+"_1.root", "OPEN")
 
   sigFileGG   = sigGG['125']
   sigFileVBF  = sigVBF['125']
   sigFileVH   = sigVH['125']
 
-  sigFileZjp  = TFile(hPath+"/"+sel+"_"+period+"/hhhh_ZtoJPsiGamma_1.root",     "OPEN")
-  sigFileHjp  = TFile(hPath+"/"+sel+"_"+period+"/hhhh_HiggsToJPsiGamma_1.root", "OPEN")
+  sigFileZjp  = TFile(hPath+"/"+subsel+"_"+period+"/hhhh_ZtoJPsiGamma_1.root",     "OPEN")
+  sigFileHjp  = TFile(hPath+"/"+subsel+"_"+period+"/hhhh_HiggsToJPsiGamma_1.root", "OPEN")
 
   if opt.mcfm:  sigFile = sigFileMCFM
   elif opt.hjp: sigFile = sigFileHjp
   elif opt.zjp: sigFile = sigFileZjp
   else:         sigFile = sigFileGG
 
-  dataFile = TFile(hPath+"/m_Data_"+sel+"_"+period+".root","OPEN")
+  dataFile = TFile(hPath+"/m_Data_"+subsel+"_"+period+".root","OPEN")
 
   if sel=="zee":
     u.drawAllInFile(dataFile, "data",bkgZip,None,"",
                     "Zee",  pathBase+"/Zee",  None,"norm")
-
-  if opt.zjp or opt.hjp:
-    u.setSelection('mugamma')
 
   yields_data = u.getYields(dataFile)
   yields_zjp  = u.getYields(sigFileZjp, 'ZtoJPsiGamma',  doLumiScale)
@@ -214,8 +215,12 @@ if __name__ == "__main__":
   ggHZGFile   = TFile(hPath+"/"+sel+"_"+period+"/hhhh_ggHZG-"+str(mass)+"_1.root", "OPEN")
   hackZip = zip(['120','130','135','140','145','150'],
                 [sigGG['120'],sigGG['130'],sigGG['135'], sigGG['140'],sigGG['145'],sigGG['150']])
-  sigZip = zip(['125','135','145'],
+  sigZip = zip(['ggH-125','ggH-135','ggH-145'],
                 [sigGG['125'],sigGG['135'],sigGG['145']])
+
+  if opt.vbf:
+    sigZipVBF = zip(['ggH-125','vbfH-125','vH-125'],
+                    [sigGG['125'],sigVBF['125'],sigVH['125']])
   #sigZip = zip(['125'],
   #             [sigGG['125']])
   if opt.hjp:
@@ -229,17 +234,21 @@ if __name__ == "__main__":
 
   #u.drawAllInFile(None, "", '', sigFileGG, "Dalitz", "eff", pathBase+'/eff', None, "norm")
 
-  if not opt.apz:
+  if not opt.apz and not opt.fit:
     if opt.bkg:
+      print
       u.drawAllInFile(dataFile, "Data", bkgZip, None, sigName, "Main", path, cut, "lumi")
       # u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "Main", path, cut, "lumi")
     else:
-      #u.drawAllInFile(dataFile, "Data", None, sigZip, sigName, "Main", path, cut)
+      print
+      u.drawAllInFile(dataFile, "Data", None, sigZip, sigName, "Main", path, cut)
       if opt.data:
         u.drawAllInFile(dataFile, "Data", None, None, '', "Main", pathBase+'/Main-Data', cut)
       if opt.sig:
         u.drawAllInFile(None, None, None, sigZip, sigName,"Main", pathBase+'/Main-Sig', cut)
 
+      if opt.vbf:
+        u.drawAllInFile(dataFile, "Data", None, sigZipVBF, sigName, "Main", pathBase+'/Main-VBF', cut, 'toData')
     if opt.extra:
       # u.drawAllInFile(None, "", bkgZip, sigFile, sigName, "GEN", pathBase+'/GEN', None, "norm")
       for n in ['Angles','N']:
@@ -249,7 +258,7 @@ if __name__ == "__main__":
         for n in ['Photon','Photon-EGamma']:
           u.drawAllInFile(dataFile, "Data",bkgZip,sigFile,"signal", n, pathBase+"/"+n, None, "norm")
 
-        if sel in ["mugamma","jp-mugamma"]:
+        if sel in ["mugamma"]:
           for n in ['Muons','Mu-after']:
             u.drawAllInFile(dataFile, "Data",bkgZip,sigFile,"signal", n, pathBase+"/"+n, None, "norm")
 
@@ -258,7 +267,7 @@ if __name__ == "__main__":
                     "AlphaPiZ",pathBase+"/apz/", cut,"norm2")
 
   if sel == "elgamma":
-    u.drawAllInFile(dataFile, "Data", bkgZip, sigZip, sigName, "Main-Dale", pathBase+'/Dale/', cut, "toDataInt")
+    u.drawAllInFile(dataFile, "Data", bkgZip, sigZip, sigName, "Main-Dale", pathBase+'/Dale/', cut)
     if opt.data:
       u.drawAllInFile(dataFile, "Data", None, None, '', "Main-Dale", pathBase+'/Dale-Data', cut)
     if opt.sig:
@@ -267,7 +276,7 @@ if __name__ == "__main__":
     #u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",
     #                "AnElectron-EGamma",  pathBase+"/AnElectron-EGamma/",  None,"norm")
 
-    if cut in ['9','12','15'] and sel=='elgamma':
+    if opt.extra:
       u.drawAllInFile(dataFile, "Data",bkgZip,sigZip,"signal",
                       "AnElectron",  pathBase+"/AnElectron/",  None,"norm")
       dirnameshort = "DalitzEle"
@@ -337,38 +346,51 @@ if __name__ == "__main__":
 
 
   if opt.hjp and opt.fit:
-    gSystem.Load("libRooFit")
-    mll = RooRealVar("mll","mll",2.9,3.3)
-    mean_mll  = RooRealVar("m",     "mean", 3.0, 2.0, 4.0)
-    width_mll = RooRealVar("#Delta","width",0.0, 0.0, 5)
-    sigma_mll = RooRealVar("#sigma","sigma",1.0, 0.0, 5)
-    #lamb = RooRealVar("lamb","lamb",-0.5, -20,1)
-    alpha = RooRealVar("#alpha","alpha",5, 0,100)
-    cbN   = RooRealVar("N","cbN",1, 0,100)
-    p1 = RooRealVar("p1","p1",1, -5, 5)
-    p2 = RooRealVar("p2","p2",1, -5, 5)
-    bkg = RooPolynomial("bkg","bkg", mll, RooArgList(p1));
-    Nsig = RooRealVar("Nsig","signal fraction",    500,0.,10000.);
-    Nbkg = RooRealVar("Nbkg","background fraction",200,0.,10000.);
-
-    frac = RooRealVar("frac","frac",0.7, 0.5, 1.0)
-
+    u.createDir(pathBase+'/fits/')
     histoName = '01_diLep_mass_jpsi_%s_cut%i'%('Main', opt.cut)
     hDa = dataFile.Get('Main/'+histoName)
     hSi = sigFile.Get('Main/'+histoName)
+
+    #Ntot = hDa.GetEntries()
+    #print 'Total Data entries = ', Ntot
+    #raw_input('Enter to continue')
+
+    gSystem.Load("libRooFit")
+    mll = RooRealVar("mll","mll",2.92,3.28)
+    meanSi_mll  = RooRealVar("m",  "massSi", 3.1, 2.92, 3.25)
+    meanDa_mll  = RooRealVar("m",  "massDa", 3.1, 2.92, 3.25)
+    width_mll = RooConstVar("#Delta","width", 0.01)
+    #width_mll = RooRealVar("#Delta","width", 0, 0, 1)
+    sigmaSi_mll = RooRealVar("#sigma","sigmaSi", 0.05, 0.0, 0.2)
+    sigmaDa_mll = RooRealVar("#sigma","sigmaDa", 0.05, 0.0, 0.2)
+
+    #lamb = RooRealVar("lamb","lamb",-0.5, -20,1)
+    #alpha = RooRealVar("#alpha","alpha",5, 0,100)
+    #cbN   = RooRealVar("N","cbN",1, 0,100)
+    p1 = RooRealVar("p1","p1", 0, -1, 1)
+    #p2 = RooRealVar("p2","p2", 1, -5, 5)
+    bkg = RooPolynomial("bkg","bkg", mll, RooArgList(p1));
+    Nsig = RooRealVar("Nsig","signal fraction",    300, 50.,500);
+    Nbkg = RooRealVar("Nbkg","background fraction",150, 10.,300);
+
+    #frac = RooRealVar("frac","frac",0.7, 0.5, 1.0)
+
     mll.setRange('fitRange',2.9,3.3)
-    dhDa = RooDataHist("dhDa","dhDa", RooArgList(mll), hDa)
-    voigtDa = RooVoigtian("voigtDa","voigtDa",mll,mean_mll,width_mll,sigma_mll)
+    #mll.setRange('fitRange',3.0,3.3)
+    dhDaTmp = RooDataHist("dhDa","dhDa", RooArgList(mll), hDa)
+    dhDa = dhDaTmp.reduce(RooFit.CutRange('fitRange'))
+
+    voigtDa = RooVoigtian("voigtDa","voigtDa",mll,meanDa_mll,width_mll,sigmaDa_mll)
     #cbDa = RooCBShape('cbDa','cbDa',mll, mean_mll, sigma_mll, alpha, cbN)
     # expo   = RooExponential("expo", "Bkg Model", mll, lamb)
     SplusB = RooAddPdf("SplusB", "Bkg plus signal peak", RooArgList(voigtDa, bkg), RooArgList(Nsig,Nbkg))
 
     mllFrame = mll.frame()
-    fitDa   = SplusB.fitTo(dhDa, RooFit.Range('fitRange'), RooFit.Save())
+    fitDa   = SplusB.fitTo(dhDa, RooFit.Range('fitRange'), RooFit.Save())#, RooFit.SumW2Error(kTRUE))
     #fitDa   = voigtDa.fitTo(dhDa, RooFit.Range('fitRange'), RooFit.Save())
     #fitDa   = cbDa.fitTo(dhDa, RooFit.Range('fitRange'), RooFit.Save())
     #lDa_0 = RooArgSet(mll)
-    pars = SplusB.getParameters(RooArgSet(mll))
+    #parsDa = SplusB.getParameters(RooArgSet(mll))
     #pars = voigtDa.getParameters(RooArgSet(mll))
     #pars = cbDa.getParameters(RooArgSet(mll))
 
@@ -376,7 +398,9 @@ if __name__ == "__main__":
     # SplusB.plotOn(mllFrame, RooFit.LineColor(kGreen+3))
     # SplusB.paramOn(mllFrame, RooFit.Label("Data"), RooFit.Layout(0.095,0.45,0.65))
     SplusB.plotOn(mllFrame, RooFit.LineColor(kGreen+3))
-    SplusB.paramOn(mllFrame, RooFit.Label("Data"),  RooFit.Layout(0.65, 1.0,0.95))
+    SplusB.paramOn(mllFrame, RooFit.Label("Data"),  RooFit.Layout(0.68, 0.95,0.9),
+                   RooFit.Format('N',RooFit.FixedPrecision(4)))
+
     #voigtDa.plotOn(mllFrame, RooFit.LineColor(kGreen+3))
     #voigtDa.paramOn(mllFrame, RooFit.Label("Data"),  RooFit.Layout(0.65, 1.0,0.95))
     #cbDa.plotOn(mllFrame, RooFit.LineColor(kGreen+3))
@@ -388,30 +412,35 @@ if __name__ == "__main__":
     mllFrame.SetTitle(';m_{#mu#mu} (GeV);Events')
     mllFrame.SetMinimum(0.01)
     mllFrame.Draw()
-    c1.SaveAs(pathBase+'/JPpeakFit_data.png')
+    c1.SaveAs(pathBase+'/fits/JPpeakFit_cut'+cut+'_data.png')
 
     mllFrame = mll.frame()
-    dhSi = RooDataHist("dhSi","dhSi", RooArgList(mll), hSi)
-    voigtSi = RooVoigtian("voigtSi","voigtSi",mll,mean_mll,width_mll,sigma_mll)
+    dhSiTmp = RooDataHist("dhSi","dhSi", RooArgList(mll), hSi)
+    dhSi = dhSiTmp.reduce(RooFit.CutRange('fitRange'))
+    voigtSi = RooVoigtian("voigtSi","voigtSi",mll,meanSi_mll,width_mll,sigmaSi_mll)
     fitSi   = RooFitResult(voigtSi.fitTo(dhSi, RooFit.Range('fitRange'),  RooFit.Save()))
     #cbSi  = RooCBShape('cbSi','cbSi',mll, mean_mll, sigma_mll, alpha, cbN)
     #fitSi = RooFitResult(cbSi.fitTo(dhSi, RooFit.Range('fitRange'),  RooFit.Save()))
 
     #lSi_0 = RooArgSet(mll)
 
-    pars = voigtSi.getParameters(RooArgSet(mll))
+    #parsSi = voigtSi.getParameters(RooArgSet(mll))
     #pars = cbSi.getParameters(RooArgSet(mll))
 
     dhSi.plotOn(mllFrame, RooFit.Name('sig'), RooFit.MarkerStyle(23), RooFit.MarkerColor(kBlue), RooFit.LineColor(kBlue))
     voigtSi.plotOn(mllFrame)
-    voigtSi.paramOn(mllFrame, RooFit.Label("Signal MC"), RooFit.Layout(0.65, 1.0,0.95))
+    voigtSi.paramOn(mllFrame, RooFit.Label("Signal MC"), RooFit.Layout(0.68, 0.95,0.90),
+                    RooFit.Format('N',RooFit.FixedPrecision(4)))
     #cbSi.plotOn(mllFrame)
     #cbSi.paramOn(mllFrame, RooFit.Label("Signal MC"), RooFit.Layout(0.65, 1.0,0.95))
-
     mllFrame.SetTitle(';m_{#mu#mu} (GeV);Events')
     mllFrame.SetMinimum(0.01)
     mllFrame.Draw()
-    c1.SaveAs(pathBase+'/JPpeakFit_sig.png')
+    c1.SaveAs(pathBase+'/fits/JPpeakFit_cut'+cut+'_sig.png')
+    #mllFrame.Print('all')
+    #print     mllFrame.FindObject('paramBox')
+    #pave = TPaveText(mllFrame.FindObject('voigtSi_paramBox'))
+    #pave.SetFillColor(kBlue)
 
     # mllFrame.SetMaximum(6)
     #leg.Clear()
@@ -550,10 +579,10 @@ if __name__ == "__main__":
 
 
 
-  if sel in ['jp-mugamma']:
-    if opt.hjp: u.setCutListFile(hPath+"/"+sel+"_"+period+"/out_cutlist_HiggsToJPsiGamma_1.txt")
-    if opt.zjp: u.setCutListFile(hPath+"/"+sel+"_"+period+"/out_cutlist_ZtoJPsiGamma_1.txt")
-  else:         u.setCutListFile(hPath+"/"+sel+"_"+period+"/out_cutlist_ggH-mad120_1.txt")
+  if sel in ['mugamma']:
+    if opt.hjp: u.setCutListFile(hPath+"/"+subsel+"_"+period+"/out_cutlist_HiggsToJPsiGamma_1.txt")
+    if opt.zjp: u.setCutListFile(hPath+"/"+subsel+"_"+period+"/out_cutlist_ZtoJPsiGamma_1.txt")
+  else:         u.setCutListFile(hPath+"/"+subsel+"_"+period+"/out_cutlist_ggH-mad120_1.txt")
 
   plot_types =[]
   dirlist = os.listdir(pathBase)
@@ -578,8 +607,11 @@ if __name__ == "__main__":
       names = ['Data','Sig: total','ggH','vbfH','VH']
       table_all  = u.yieldsTable([yields_data,yields_sig, yields_ggH,yields_vbf, yields_vh], names)
 
+  if opt.hjp: precision='%.3f'
+  else:       precision='%.2f'
 
-  u.makeTable(table_all,"all", "html", precision='%.2f')
+  u.makeTable(table_all,"all", "html", precision)
+  u.makeTable(table_all,"all", "html", precision)
   u.makeTable(table_all,"all", "twiki")
   u.makeTable(table_all,"all", "tex")
 
