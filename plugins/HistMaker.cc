@@ -372,6 +372,7 @@ void HistMaker::FillHistosFull(Int_t num, Double_t weight, string dir)
   if (_isGammaSet){
     hists->fill1DHist(_lPt1.DeltaR(_gamma),Form("04_lPt1_gamma_deltaR_%s_cut%i",d, num),";#Delta R(#gamma,l_{1})",100,0,5, weight,dir);
     hists->fill1DHist(_lPt2.DeltaR(_gamma),Form("04_lPt2_gamma_deltaR_%s_cut%i",d, num),";#Delta R(#gamma,l_{2})",100,0,5, weight,dir);
+    hists->fill1DHist(diLep.DeltaR(_gamma),Form("04_ll_gamma_deltaR_%s_cut%i",d, num),";#Delta R(#gamma,ll)",100,0,5, weight,dir);
   }
 
   if (_isJet1Set){

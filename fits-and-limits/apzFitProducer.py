@@ -15,7 +15,7 @@ parser = OptionParser(usage="usage: %prog ver [options -v]")
 parser.add_option("-v","--verbose", dest="verbose", action="store_true", default=False, help="Verbose mode (print out stuff)")
 parser.add_option("--tw", dest="tw", action="store_true", default=False, help="Use a tree from TW group (in el channel)")
 parser.add_option("--dbg", dest="dbg", action="store_true", default=False, help="Debug option: make more debugging plots")
-#parser.add_option("--copy", dest="copy",  default=None, help="This is for plotPulls script.Directory where the results from Batch are# stored. Will copy them in a better place.")
+
 (opt, args) = parser.parse_args()
 
 import ConfigParser as cp
@@ -41,6 +41,7 @@ ptSumLep   = 0
 
 lowCutOff  = 110
 highCutOff = 150
+deltaMllg = highCutOff-lowCutOff
 
 doBlind    = int(cf.get("fits","blind"))
 hjp=0
@@ -104,7 +105,14 @@ def LoopOverTree(myTree, cat, mzg, args, ds, lumiWeight):
       if i.m12>9.3 and i.m12<9.7: continue
 
     if i.m123> lowCutOff and i.m123<highCutOff:
-      mzg.setVal(i.m123)
+      if hjp and lumiWeight!=None:
+        # The H->JPsi+g sample was produced with mH=125.8 GeV.
+        # This is an offset to bring it to 125 GeV
+        # Only applied to MC (lumiWeight=None)
+        mzg.setVal(i.m123-0.8)
+      else:
+        mzg.setVal(i.m123)
+
       Weight = 1
       if lumiWeight!=None:
         Weight = lumiWeight*i.weight
@@ -160,8 +168,9 @@ def doInitialFits(subdir):
   apzTreeName = 'apzTree/apzTree'
   twTreeName  = 't'
 
-  binning = 30
   binWidth = 2
+  #binning = 30
+  binning = int(float(deltaMllg)/binWidth)
 
   weight  = RooRealVar('Weight','Weight',0,100)
   mzg  = RooRealVar('CMS_hzg_mass','CMS_hzg_mass', lowCutOff,highCutOff)

@@ -928,7 +928,7 @@ def effPlots2(f1, path):
   bcol = 29
   ra[1].SetLineColor(bcol)
   ra[1].SetLineWidth(2)
-  leg = TLegend(0.70,0.65,0.95,0.98);
+  leg = TLegend(0.70,0.65,0.95,0.98)
   leg.AddEntry(ra[1],"pT(ll) > 25 GeV", "l")
   for a in xrange(2,7):
     ra[a].Draw('same hist')

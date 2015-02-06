@@ -19,7 +19,7 @@ UInt_t nEventsTrig[nC][ntrig];
 
 string  myTrigger = "";
 Float_t cut_l1pt  = 23;
-Float_t cut_l2pt  = 7, cut_l2pt_low = 4;
+Float_t cut_l2pt  = 4;
 const Float_t cut_iso_mu1 = 0.4, cut_iso_mu2=0;
 Float_t cut_gammapt = 25;
 Float_t mllMax = 25;
@@ -450,7 +450,7 @@ Bool_t jpsiGamma::Process(Long64_t entry)
 
 	if(sample=="dalitz" &&
 	   gen_lPt1.Pt()>cut_l1pt && fabs(gen_lPt1.Eta())<2.4 &&
-	   gen_lPt2.Pt()>cut_l2pt_low && fabs(gen_lPt2.Eta())<2.4
+	   gen_lPt2.Pt()>cut_l2pt && fabs(gen_lPt2.Eta())<2.4
 	   ){
 	  hists->fill1DHist(genMll,  "gen_Mll_acc_lept",  ";gen_Mll",100,0,mllMax, 1,"eff");
 	  hists->fill1DHist(gendR,   "gen_dR_acc_lept",   ";gen_dR", 50,0,0.3,     1,"eff");
@@ -683,7 +683,7 @@ Bool_t jpsiGamma::Process(Long64_t entry)
 
   Double_t Mll = (l1+l2).M();
 
-  hists->fill1DHist(Mll,  Form("diLep_mass_low_cut%i", 3), ";M(ll)", 50, 0,20,  1, "");
+  hists->fill1DHist(Mll,  Form("diLep_mass_low_cut%i",  3),";M(ll)", 50, 0,20,  1, "");
   hists->fill1DHist(Mll,  Form("diLep_mass_high_cut%i", 3),";M(ll)", 50, 0,120, 1, "");
 
 
@@ -694,7 +694,7 @@ Bool_t jpsiGamma::Process(Long64_t entry)
 
   HM->MakePhotonPlots(gamma);
 
-  if (lPt1.Pt() < cut_l1pt || lPt2.Pt() < cut_l2pt_low)   return kTRUE;
+  if (lPt1.Pt() < cut_l1pt || lPt2.Pt() < cut_l2pt)   return kTRUE;
 
   //if (!isfinite(eventWeight))
   //cout<<"nan/inf "<<eventWeight<<endl;
