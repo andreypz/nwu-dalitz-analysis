@@ -345,7 +345,7 @@ def drawAllInFile(f1, name1, bZip, sZip, name3, myDir, path, N, howToScale="toDa
           continue
 
         scale3 = 1
-        if si[-1]!=None:
+        if si[-1]!=None and howToScale!='norm':
           Nev = getTotalEvents(s[1])
 
           if conf.get("selection","jp")=='1' or 'Psi' in sZip[0][0]:
@@ -353,8 +353,9 @@ def drawAllInFile(f1, name1, bZip, sZip, name3, myDir, path, N, howToScale="toDa
           else:
             cro = getCS(s[0], getSelection()[:2])
           scale3 = float(lumi*cro)/Nev
-        print s, Nev, lumi, cro, scale3
-        si[-1].Scale(float(scale3))
+
+          print s, Nev, lumi, cro, scale3
+          si[-1].Scale(float(scale3))
 
     print "\t Drawing", histoName
 
@@ -522,6 +523,8 @@ def drawAllInFile(f1, name1, bZip, sZip, name3, myDir, path, N, howToScale="toDa
           else:
             if howToScale=='toData':
               leg.AddEntry(h3, sZip[j][0], "l")
+            elif 'LHE' in histoName:
+              leg.AddEntry(h3, sZip[j][0], "l")
             else:
               leg.AddEntry(h3,' m_{H} = '+sZip[j][0][:3]+' GeV', "l")
 
@@ -600,13 +603,14 @@ def drawAllInFile(f1, name1, bZip, sZip, name3, myDir, path, N, howToScale="toDa
 
       if histoName in ['LHE_diLep_mass_low', 'LHE_diLep_mass',
                        'LHE_dR_l1_l2','LHE_dR_l1_l2_low', 'LHE_dR_l1_l2_vlow']:
-        nBins = h1.GetNbinsX()
-        int1 = h1.Integral(int(0.25*nBins),nBins)
-        int3 = h3.Integral(int(0.25*nBins),nBins)
+        nBins = si[0].GetNbinsX()
+        int1 = si[0].Integral(int(0.25*nBins),nBins)
+        int3 = si[1].Integral(int(0.25*nBins),nBins)
         print histoName, nBins, int1, int3
-        h1.Scale(50./int1)
-        h3.Scale(50./int3)
-        mainHist.SetMaximum(1.2*h1.GetMaximum())
+        if int1!=0 and int3!=0:
+          si[0].Scale(50./int1)
+          si[1].Scale(50./int3)
+        mainHist.SetMaximum(1.2*si[0].GetMaximum())
         mainHist.SetNdivisions(505,'X')
         doPdf=1
 
