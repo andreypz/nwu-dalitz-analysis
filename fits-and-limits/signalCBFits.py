@@ -12,10 +12,8 @@ import ConfigParser as cp
 cf = cp.ConfigParser()
 cf.read('config.cfg')
 
-massList0  = ['125']
-massList  = ['125.0']
-#massList0  = ['120','125','130','135','140','145','150']
-#massList   = ['%.1f'%(a) for a in u.drange(120,150,1.0)]
+massList0  = ['120','125','130','135','140','145','150']
+massList   = ['%.1f'%(a) for a in u.drange(120,150,1.0)]
 
 myFunc = 'CBGM' #Crystall-Ball + Gauss (with same Mean)
 
@@ -73,6 +71,11 @@ def SignalFitMaker(lep, year, cat, subdir):
   sigNameList = [a.strip() for a in (cf.get("fits","sigNameList")).split(',')]
   tev = u.yearToTeV(year)
 
+  if 'hjp' in sigNameList:
+    if lep!='mu': return
+    massList0  = ['125']
+    massList  = ['125.0']
+
   #print massList
   #raw_input()
 
@@ -91,6 +94,8 @@ def SignalFitMaker(lep, year, cat, subdir):
   paraNames = {}
   cardDict = u.AutoVivification()
 
+  global massList0, massList
+  #print massList, massList0
   masses0 = massList0
   masses1 = massList
   if cat in ['m1','m2','m3','m4','m5','m6','m7']:

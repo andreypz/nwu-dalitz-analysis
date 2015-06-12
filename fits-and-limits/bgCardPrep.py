@@ -24,7 +24,9 @@ catList     = [a.strip() for a in (cf.get("fits","catList")).split(',')]
 sigNameList = [a.strip() for a in (cf.get("fits","sigNameList")).split(',')]
 doBlind     = int(cf.get("fits","blind"))
 hjp = 0
-if 'hjp' in sigNameList:  hjp = 1
+if 'hjp' in sigNameList:
+  hjp = 1
+  leptonList = ['mu']
 
 mllBins = u.mllBins()
 
@@ -317,8 +319,8 @@ if __name__=="__main__":
         fitName  = '_'.join([bkgModel,year,lep,'cat'+cat])
         normName = 'norm'+bkgModel+'_'+suffix
 
-
-        fs125 = TFile(subdir+'/s125.root')
+        if hjp: fs125 = TFile(subdir+'/s125-hjp.root','open')
+        else:   fs125 = TFile(subdir+'/s125-'+lep+'.root','open')
         fs125.Print()
         fs125.ls()
         hsig = []
@@ -333,15 +335,16 @@ if __name__=="__main__":
 
           histName  = '_'.join(['sig',prod,lep,year,'cat'+cat,'M125','_CMS_hzg_mass'])
           hsig.append(fs125.Get(histName))
+          print hsig
+          hsig[-1].Print("all")
           hsig[-1].Scale(factor)
-
-          # hsig[-1].Print("all")
 
         # print hsig
         if not hjp:
           for i in range(1,len(hsig)):
             print i, 'hsig, scaled events:', hsig[i].Integral()
             hsig[0].Add(hsig[i])
+            print "total signal now = ", hsig[0].Integral()
 
         print fitName, dataName
         data = myWs.data(dataName)
@@ -424,18 +427,18 @@ if __name__=="__main__":
 
         testFrame = mzg.frame(RooFit.Range('DalitzRegion'))
         if doBlind:
-          data.plotOn(testFrame, RooFit.Binning(myBinning), RooFit.Name('data'), RooFit.CutRange('r1'))
-          data.plotOn(testFrame, RooFit.Binning(myBinning), RooFit.Name('data'), RooFit.CutRange('r2'))
+          data.plotOn(testFrame, RooFit.Binning(myBinning), RooFit.Name('data1'), RooFit.CutRange('r1'))
+          data.plotOn(testFrame, RooFit.Binning(myBinning), RooFit.Name('data2'), RooFit.CutRange('r2'))
         else:
-          data.plotOn(testFrame, RooFit.Binning(myBinning), RooFit.Name('data'))
+          data.plotOn(testFrame, RooFit.Binning(myBinning), RooFit.Invisible(), RooFit.Name('data0'))
 
 
         fit.plotOn(testFrame, RooFit.Name(bkgModel+"2sigma"),
-                   RooFit.VisualizeError(fit_result,2), RooFit.FillColor(kCyan-10),RooFit.LineColor(kBlack))
+                   RooFit.VisualizeError(fit_result,2), RooFit.FillColor(kCyan-10),RooFit.LineColor(kCyan-10))
         fit.plotOn(testFrame, RooFit.Name(bkgModel+"1sigma"),
-                   RooFit.VisualizeError(fit_result,1), RooFit.FillColor(kCyan-6), RooFit.LineColor(kBlack))
+                   RooFit.VisualizeError(fit_result,1), RooFit.FillColor(kCyan-6), RooFit.LineColor(kCyan-6))
         #fit.plotOn(testFrame, RooFit.Name(bkgModel), RooFit.LineColor(kBlue), RooFit.LineWidth(2))
-        fit.plotOn(testFrame, RooFit.Name(bkgModel), RooFit.LineColor(kBlue), RooFit.LineWidth(2))
+        fit.plotOn(testFrame, RooFit.Name(bkgModel), RooFit.LineColor(kBlue), RooFit.LineWidth(2), RooFit.FillColor(kCyan-6))
         #fit.paramOn(testFrame, RooFit.Layout(0.30,0.99,0.9))
         #fit.statOn(testFrame)
 
@@ -446,7 +449,7 @@ if __name__=="__main__":
             print "\n\t WARNING: your Chi2 would not make sence when Blinded!"
           chi2 = testFrame.chiSquare(bkgModel,'data')
           for a in xrange(6):
-            print 'nDof = ', a, testFrame.chiSquare(bkgModel,'data',a)
+            print 'nDof = ', a, testFrame.chiSquare(bkgModel,'data0',a)
             print testFrame.chiSquare(a)
             #print "Figuring out norms of PDFs",sigP.getVal(), sigP.analyticalIntegral()
           raw_input("Enter to continue ")
@@ -467,11 +470,11 @@ if __name__=="__main__":
 
         testFrame.SetMinimum(0)
         if doBlind:
-          data.plotOn(testFrame, RooFit.Binning(myBinning), RooFit.Name('data'), RooFit.CutRange('r1'))
-          data.plotOn(testFrame, RooFit.Binning(myBinning), RooFit.Name('data'), RooFit.CutRange('r2'))
+          data.plotOn(testFrame, RooFit.Binning(myBinning), RooFit.Name('data1'), RooFit.CutRange('r1'))
+          data.plotOn(testFrame, RooFit.Binning(myBinning), RooFit.Name('data2'), RooFit.CutRange('r2'))
           testFrame.SetMinimum(0.1)
         else:
-          data.plotOn(testFrame, RooFit.Binning(myBinning), RooFit.Name('data'))
+          data.plotOn(testFrame, RooFit.Binning(myBinning), RooFit.XErrorSize(0), RooFit.Name('data'))
 
         if hjp:
           testFrame.SetMaximum(12)
@@ -498,44 +501,73 @@ if __name__=="__main__":
         elif lep=='el':
           testFrame.SetTitle(";m_{ee#gamma} (GeV);Events/"+str(binWidth)+" GeV")
 
-        if hjp: leg  = TLegend(0.45,0.62,0.91,0.87)
-        else:   leg  = TLegend(0.50,0.62,0.92,0.87)
-        leg.SetFillColor(0)
-        leg.SetBorderSize(1)
-        leg.AddEntry(hsig[0],'Expected signal x'+str(factor),'f')
-        #leg.AddEntry(testFrame.findObject(bkgModel+'1sigma'),"Background Model",'f')
-        leg.AddEntry(testFrame.findObject(bkgModel),"Background Model",'le')
-        #if not hjp: leg.AddEntry(0,'','')
-        leg.AddEntry(data,'Data','lep')
-        leg.SetTextSize(0.045)
-        if not verbose:
-          leg.Draw()
-
-        leg2  = TLegend(0.55,0.62,0.91,0.7)
-        leg2.SetNColumns(2)
-        leg2.SetFillColor(0)
-        leg2.SetBorderSize(0)
-        leg2.AddEntry(testFrame.findObject(bkgModel+'1sigma'),"#pm 1 #sigma",'f')
-        leg2.AddEntry(testFrame.findObject(bkgModel+'2sigma'),"#pm 2 #sigma",'f')
-        leg2.SetTextSize(0.045)
-        #leg2.Draw()
-
-        #proc = 'Z#rightarrow J/#Psi#gamma#rightarrow#mu#mu#gamma'
-        lat = TLatex()
-        lat.SetNDC()
-        lat.SetTextSize(0.035)
         if hjp:
-          lat.DrawLatex(0.18,0.95, 'H #rightarrow J/#Psi#gamma#rightarrow#mu#mu#gamma')
+          leg   = TLegend(0.40,0.62,0.91,0.88)
+          leg2  = TLegend(0.51,0.63,0.81,0.89)
+        else:
+          leg   = TLegend(0.47,0.62,0.92,0.88)
+          leg2  = TLegend(0.58,0.63,0.88,0.89)
+
+        leg.SetFillStyle(0)
+        leg.SetBorderSize(0)
+        leg2.SetFillStyle(0)
+        leg2.SetBorderSize(0)
+
+
+        leg.AddEntry(testFrame.findObject('data'),'Data','p')
+        leg.AddEntry(testFrame.findObject(bkgModel),"Background model",'l')
+        leg.AddEntry(0,'','')
+        if hjp:
+          leg.AddEntry(hsig[0],str(factor)+'x SM H#rightarrow(J/#Psi)#gamma #rightarrow #mu#mu#gamma','f')
         else:
           if lep=='el':
-            lat.DrawLatex(0.18,0.95, 'H #rightarrow#gamma*#gamma#rightarrow ee#gamma')
+            leg.AddEntry(hsig[0], str(factor) + 'x SM H #rightarrow #gamma*#gamma #rightarrow ee#gamma','f')
           else:
-            lat.DrawLatex(0.18,0.95, 'H #rightarrow#gamma*#gamma#rightarrow#mu#mu#gamma')
-        CMS_lumi(c, 2, 11)
+            leg.AddEntry(hsig[0], str(factor) + 'x SM H #rightarrow #gamma*#gamma #rightarrow #mu#mu#gamma','f')
+        #leg.AddEntry(testFrame.findObject(bkgModel+'1sigma'),"Background Model",'le')
+        #if not hjp:
+        leg.SetTextFont(42)
+        print '\n \t \t Legend font: ', gStyle.GetLegendFont()
+
+        leg.SetTextSize(0.045)
+        leg.Draw()
+
+
+        leg2.SetNColumns(2)
+        leg2.AddEntry(0,'','')
+        leg2.AddEntry(0,'','')
+        leg2.AddEntry(0,'','')
+        leg2.AddEntry(0,'','')
+        leg2.AddEntry(testFrame.findObject(bkgModel+'1sigma'),'#pm 1 #sigma','f')
+        leg2.AddEntry(testFrame.findObject(bkgModel+'2sigma'),"#pm 2 #sigma",'f')
+        leg2.AddEntry(0,'','')
+        leg2.AddEntry(0,'','')
+        leg2.SetTextSize(0.037)
+
+        leg2.Draw()
+
+
+        #proc = 'Z#rightarrow J/#Psi#gamma#rightarrow#mu#mu#gamma'
+        """
+        lat = TLatex()
+        lat.SetNDC()
+        lat.SetTextFont(42)
+        lat.SetTextSize(0.035)
+        if hjp:
+          lat.DrawLatex(0.18,0.95, 'H #rightarrow J/#Psi#gamma #rightarrow #mu#mu#gamma')
+        else:
+          if lep=='el':
+            lat.DrawLatex(0.18,0.95, 'H #rightarrow #gamma*#gamma #rightarrow ee#gamma')
+          else:
+            lat.DrawLatex(0.18,0.95, 'H #rightarrow #gamma*#gamma #rightarrow #mu#mu#gamma')
+        """
+        CMS_lumi(c, 2, 11,"")
 
         gPad.RedrawAxis()
         for e in ['.png', '.pdf']:
-          c.SaveAs(plotBase+'/BestFits/'+'_'.join(['best_fit',year,lep,'cat'+cat])+e)
+          if hjp: sel = 'hjp'
+          else: sel = lep
+          c.SaveAs(plotBase+'/BestFits/'+'_'.join(['best_fit',year,sel,'cat'+cat])+e)
 
         ###### Import the fit and data, and rename them to the card convention
         dataNameNew = '_'.join(['data','obs',lep,year,'cat'+cat])

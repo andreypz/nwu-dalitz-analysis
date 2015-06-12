@@ -495,12 +495,17 @@ if __name__ == "__main__":
 
   if opt.spec:
 
+    doLog = 1
+    doGen = 1
     sigFactor = 1
-    for j,h in enumerate(['01_diLep_mass_0to20_b50','04_ll_gamma_deltaR','02_lPt1_pt','02_lPt2_pt','03_gamma_pt']):
+    prodSF = 1.13
+
+    for j,h in enumerate(['01_diLep_mass_0to20_b40','01_diLep_mass_0to20_b50','04_ll_gamma_deltaR','02_lPt1_pt','02_lPt2_pt','03_gamma_pt']):
       #   for h in ['01_diLep_mass_0to20_b50','04_ll_gamma_deltaR']:
-      vMu = 'v98-mu-incl-JPsi/'
-      #vMu = 'v99-mu/'
-      vEl = 'v99-el'
+      #vMu = 'v98-mu-incl-JPsi/'
+      #vEl = 'v99-el'
+      vMu = 'v03-mll-mu-paper'
+      vEl = 'v03-mll-el-paper'
       print
       u.createDir(pathBase+'/Spec')
       sigFileMu = TFile('/tthome/andrey/batch_output/zgamma/8TeV/'+vMu+'/mugamma_2012/hhhh_ggH-mad125_1.root', 'OPEN')
@@ -508,23 +513,37 @@ if __name__ == "__main__":
       hMu = sigFileMu.Get('Main/'+h+'_Main_cut9')
       hEl = sigFileEl.Get('Main/'+h+'_Main_cut15')
 
-      daFileMu = TFile('/tthome/andrey/batch_output/zgamma/8TeV/'+vMu+'/m_Data_mugamma_2012.root', 'OPEN')
-      daFileEl = TFile('/tthome/andrey/batch_output/zgamma/8TeV/'+vEl+'/m_Data_elgamma_2012.root', 'OPEN')
-      dhMu = daFileMu.Get('Main/'+h+'_Main_cut9')
-      dhEl = daFileEl.Get('Main/'+h+'_Main_cut15')
+
+      if doGen and j==0:
+        vMuG = 'v03-mll-mu-gen-paper'
+        vElG = 'v03-mll-el-gen-paper'
+        sigFileMuGen = TFile('/tthome/andrey/batch_output/zgamma/8TeV/'+vMuG+'/mugamma_2012/hhhh_ggH-mad125_1.root', 'OPEN')
+        sigFileElGen = TFile('/tthome/andrey/batch_output/zgamma/8TeV/'+vElG+'/elgamma_2012/hhhh_ggH-mad125_1.root', 'OPEN')
+        ghMu = sigFileMuGen.Get('GEN/gen_Mll_init_b40')
+        ghEl = sigFileElGen.Get('GEN/gen_Mll_init_b40')
+
 
       lumi= u.getLumi()
       Nev = u.getTotalEvents(sigFileMu)
       cro = u.getCS('ggH-125', 'mu')
       scale = float(lumi*cro)/Nev
       hMu.Scale(sigFactor*scale)
+      if j==0 and doGen: ghMu.Scale(sigFactor*scale*prodSF)
       print Nev, lumi, cro, scale
 
       Nev = u.getTotalEvents(sigFileEl)
       cro = u.getCS('ggH-125', 'el')
       scale = float(lumi*cro)/Nev
       hEl.Scale(sigFactor*scale)
+      if j==0 and doGen: ghEl.Scale(sigFactor*scale*prodSF*(18.5/0.82))
       print Nev, lumi, cro, scale
+
+
+      if j==0 and doGen:
+        print 'mu selection:', hMu.Integral()
+        print 'el selection:', hEl.Integral()
+        print 'mu gen:', ghMu.Integral()
+        print 'el gen:', ghEl.Integral()
 
       #if j==1:
       #  factor = hMu.Integral()/hEl.Integral()
@@ -532,12 +551,36 @@ if __name__ == "__main__":
 
       hEl.Draw('hist')
       hMu.Draw('hist same')
+      if j==0 and doGen:
+        ghEl.Draw('hist same')
+        ghMu.SetLineColor(kMagenta)
+        ghEl.SetLineColor(kBlue-9)
+        ghMu.SetLineStyle(7)
+        #ghEl.SetLineStyle(4)
+        ghEl.SetFillColor(19)
+        #ghEl.SetFillColor(kCyan-10)
+
+        #redraw them
+        hEl.Draw('hist same')
+        hMu.Draw('hist same')
+        ghMu.Draw('hist same')
+        hMu.SetLineWidth(3)
+        ghMu.SetLineWidth(3)
+        # hEl.SetFillColor(kRed-10)
+        # hMu.SetLineStyle(2)
+        hEl.SetFillColor(kOrange-9)
+
       c1.RedrawAxis()
-      hMu.SetLineColor(kBlue)
-      hEl.SetLineColor(kRed)
+      hEl.GetYaxis().SetTicks('-')
+      hMu.SetLineColor(kGreen+3)
+      hEl.SetLineColor(kRed-3)
+
       if j==0:
-        hEl.SetMaximum(1.2*hEl.Clone().GetMaximum())
-        hEl.SetTitle(';m_{ll} (GeV); Events/0.4 GeV')
+        if doLog: hEl.SetMaximum(100)
+        else: hEl.SetMaximum(1.2*hEl.Clone().GetMaximum())
+        #hEl.SetTitle(';m_{ll} (GeV); Events/0.4 GeV')
+        hEl.SetTitle(';m_{\\ell\\ell}\\,\\mbox{(GeV)}; Events/0.5 GeV')
+        hEl.GetXaxis().SetNdivisions(405, 0)
       elif j==1:
         hEl.SetMaximum(1.2*hMu.Clone().GetMaximum())
         hEl.SetAxisRange(1,5,"X")
@@ -547,35 +590,78 @@ if __name__ == "__main__":
       else:
         hEl.SetMaximum(1.2*hMu.Clone().GetMaximum())
 
-      CMS_lumi(c1, 2, 11)
+      CMS_lumi(c1, 2, 11, "Simulation")
 
-      leg = TLegend(0.61,0.62,0.78,0.85);
+      lat = TLatex()
+      lat.SetNDC()
+      lat.SetTextSize(0.035)
+
+      if j==0 and doGen:
+        leg = TLegend(0.55,0.54,0.8,0.75);
+        #leg = TLegend(0.55,0.54,0.8,0.88);
+      else:
+        leg = TLegend(0.61,0.62,0.78,0.85);
       leg.SetFillColor(kWhite)
       leg.SetBorderSize(0)
-      leg.SetTextSize(0.04)
+      leg.SetTextSize(0.035)
       #if j==0:
       #  leg.SetHeader('#splitline{10 x SM Higgs,}{  m_{H} = 125 GeV}')
       #elif j==1:
       #  leg.SetHeader('#splitline{SM Higgs,}{m_{H} = 125 GeV}')
       if sigFactor==1:
-        leg.SetHeader('#splitline{ SM Higgs,}{m_{H} = 125 GeV}')
+        lat.DrawLatex(0.57,0.82, '\\mbox{SM  H} \\rightarrow \\gamma^*\\gamma \\rightarrow \\ell\\ell\\gamma')
+        lat.DrawLatex(0.62,0.77, 'm_{H} = 125 GeV')
+        #leg.SetHeader('\\mbox{SM H} \\rightarrow \\gamma^*\\gamma \\rightarrow \\ell\\ell\\gamma \\atop \\mathrm{m_{H}} = 125\\, \\mbox{GeV}')
+        #leg.SetHeader('#splitline{SM H #rightarrow #gamma*#gamma #rightarrow ll#gamma}{  m_{H} = 125 GeV}')
       else:
-        leg.SetHeader('#splitline{'+str(sigFactor)+' x SM Higgs,}{  m_{H} = 125 GeV}')
-      leg.AddEntry(hMu,' #mu channel', 'l')
-      leg.AddEntry(hEl,' e channel', 'l')
-      leg.Draw()
-      lat = TLatex()
-      lat.SetNDC()
-      lat.SetTextSize(0.035)
-      lat.DrawLatex(0.18,0.95, 'H #rightarrow #gamma*#gamma #rightarrow ll#gamma')
+        leg.SetHeader('#splitline{'+str(sigFactor)+' x SM H #rightarrow #gamma*#gamma #rightarrow ll#gamma}{  m_{H} = 125 GeV}')
+      if j==0 and doGen:
+        leg.AddEntry(ghMu,' #mu#mu before selection', 'l')
+        leg.AddEntry(ghEl,' ee before selection', 'f')
+        leg.AddEntry(hMu,' #mu#mu after selection', 'l')
+        leg.AddEntry(hEl,' ee after selection', 'f')
+      else:
+        leg.AddEntry(hMu,' #mu channel', 'l')
+        leg.AddEntry(hEl,' e channel', 'l')
 
-      for e in ['pdf','png']:
+      leg.SetTextFont(42)
+      leg.Draw()
+      gPad.RedrawAxis()
+
+      for e in ['pdf','png','eps']:
+        if doLog: c1.SetLogy()
         c1.SaveAs(pathBase+'/Spec/'+h+'_sig.'+e)
+
+      if j==0:
+        c1.SetLogy(0)
+        r1 = hMu.Clone()
+        r1.Divide(ghMu)
+        r1.Draw()
+        r1.SetMaximum(0.5)
+        r1.SetMinimum(0)
+        r1.SetTitle(';m_{ll} (GeV);ratio')
+        c1.SaveAs(pathBase+'/Spec/ratio_mu_'+h+'_sig.png')
+
+        r2 = hEl.Clone()
+        r2.Divide(ghEl)
+        r2.Draw()
+        r2.SetMaximum(0.5)
+        r2.SetMinimum(0)
+        r2.SetTitle(';m_{ll} (GeV);ratio')
+        c1.SaveAs(pathBase+'/Spec/ratio_el_'+h+'_sig.png')
+
+
+      '''
+      daFileMu = TFile('/tthome/andrey/batch_output/zgamma/8TeV/'+vMu+'/m_Data_mugamma_2012.root', 'OPEN')
+      daFileEl = TFile('/tthome/andrey/batch_output/zgamma/8TeV/'+vEl+'/m_Data_elgamma_2012.root', 'OPEN')
+      dhMu = daFileMu.Get('Main/'+h+'_Main_cut9')
+      dhEl = daFileEl.Get('Main/'+h+'_Main_cut15')
 
       dhEl.Draw('e1p')
       dhMu.Draw('same')
       if j==0:
-        dhEl.SetMaximum(1.2*dhEl.Clone().GetMaximum())
+        if doLog: dhEl.SetMaximum(1000)
+        else: dhEl.SetMaximum(1.2*dhEl.Clone().GetMaximum())
       else:
         dhEl.SetMaximum(1.2*dhMu.Clone().GetMaximum())
       c1.RedrawAxis()
@@ -585,9 +671,9 @@ if __name__ == "__main__":
       dhEl.SetMarkerSize(1.2)
 
       dhMu.SetMarkerColor(kBlue+2)
-      dhEl.SetMarkerColor(kRed+2)
+      dhEl.SetMarkerColor(kRed-4)
       dhMu.SetLineColor(kBlue+2)
-      dhEl.SetLineColor(kRed+2)
+      dhEl.SetLineColor(kRed-4)
       if j==0:
         dhEl.SetTitle(';m_{ll} (GeV); Events/0.4 GeV')
       elif j==1:
@@ -596,18 +682,22 @@ if __name__ == "__main__":
         #dhEl.Rebin()
         #dhMu.Rebin()
 
-      leg.Clear()
+      leg = TLegend(0.61,0.62,0.78,0.85);
+      leg.SetFillColor(kWhite)
+      leg.SetBorderSize(0)
+      leg.SetTextSize(0.04)
       leg.SetHeader('Data')
       leg.AddEntry(dhMu,' #mu channel', 'lp')
       leg.AddEntry(dhEl,' e channel', 'lp')
       leg.Draw()
-      lat.DrawLatex(0.18,0.95, 'H #rightarrow #gamma*#gamma #rightarrow ll#gamma')
-      CMS_lumi(c1, 2, 11)
+      #lat.DrawLatex(0.18,0.95, 'H #rightarrow #gamma*#gamma #rightarrow ll#gamma')
+      #CMS_lumi(c1, 2, 11)
 
       for e in ['pdf','png']:
+        if doLog: c1.SetLogy()
         c1.SaveAs(pathBase+'/Spec/'+h+'_data.'+e)
 
-
+      '''
   '''
   htmp = sigFileGG.Get("02_lPt2_pt__cut"+cut)
   int1 = htmp.Integral()
@@ -659,7 +749,9 @@ if __name__ == "__main__":
   if sel in ['mugamma']:
     if opt.hjp: u.setCutListFile(hPath+"/"+subsel+"_"+period+"/out_cutlist_HiggsToJPsiGamma_1.txt")
     if opt.zjp: u.setCutListFile(hPath+"/"+subsel+"_"+period+"/out_cutlist_ZtoJPsiGamma_1.txt")
-    else:       u.setCutListFile(hPath+"/"+subsel+"_"+period+"/out_cutlist_ggH-mad120_1.txt")
+    if opt.spec: u.setCutListFile("localcutlist.txt")
+  else:       u.setCutListFile(hPath+"/"+subsel+"_"+period+"/out_cutlist_ggH-mad120_1.txt")
+
 
   plot_types =[]
   dirlist = os.listdir(pathBase)

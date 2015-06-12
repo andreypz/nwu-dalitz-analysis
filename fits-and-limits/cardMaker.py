@@ -40,7 +40,7 @@ Ext = opt.ext
 brLLG = '1.10'
 # Unsertainities to be put in the datacard:
 lumi     = '1.026'
-elID     = '1.100'
+elID     = '1.035'
 muID     = '1.110'
 muISO    = '1.003'
 muTRIG   = '1.040'
@@ -48,8 +48,8 @@ phoID    = '1.006'
 phoTRIG_mu = '1.020'
 phoTRIG_el = '1.020'
 PU       = '1.008'
-meanUnc  = '0.001'
-sigmaUnc = '0.100'
+meanUnc  = {'mu':'0.001', 'el':'0.005'}
+sigmaUnc = {'mu':'0.100', 'el':'0.100'}
 
 yearToTeV ={'2011':'7TeV', '2012':'8TeV'}
 proc = {'gg':'ggH', 'vbf':'qqH','v':'VH','hjp':'hjp'}
@@ -99,7 +99,7 @@ def makeCards(subdir):
           bkgParams = ['p1','p2','p3','p4','norm']
 
         for mass in massList:
-          if cat in ['m1','m2','m3','m4','m5','m6','m7'] and mass!='125.0': continue
+          if cat in ['m1','m2','m3','m4','m5','m6','m7'] and (mass!='125.0' or not opt.br): continue
 
           sigFileName = subdir+'/'+'_'.join(['SignalOutput',lep,year,'cat'+cat,mass])+'.root'
           sigFile = TFile(sigFileName)
@@ -193,9 +193,9 @@ def makeCards(subdir):
                 cs = fit(float(mass))
                 if cat in ['m1','m2','m3','m4','m5','m6','m7']:
                   cs = cs*mllBins[int(cat[1])][1]
-                  print '\t Category:', cat, '  signal:', s
-                  print 'from the fit', fit(float(mass))
-                  print 'from csbr:', cs
+                print '\t Category:', cat, '  signal:', s
+                print 'from the fit', fit(float(mass))
+                print 'from csbr:', cs
 
             print mass, s, lep, 'cs for scale=', cs
 
@@ -261,8 +261,8 @@ def makeCards(subdir):
 
           for sig in sigNameList:
             if lep=='el' and sig=='v': continue
-            card.write('{0:<40} {1:<10} {2:^10} {3:^10}\n'.format('sig_'+sig+'_mShift_'    +channel,'param', 1, meanUnc))
-            card.write('{0:<40} {1:<10} {2:^10} {3:^10}\n'.format('sig_'+sig+'_sigmaShift_'+channel,'param', 1, sigmaUnc))
+            card.write('{0:<40} {1:<10} {2:^10} {3:^10}\n'.format('sig_'+sig+'_mShift_'    +channel,'param', 1, meanUnc[lep]))
+            card.write('{0:<40} {1:<10} {2:^10} {3:^10}\n'.format('sig_'+sig+'_sigmaShift_'+channel,'param', 1, sigmaUnc[lep]))
 
           for param in bkgParams[:-1]:
             card.write('{0:<45} {1:<15}\n'.format('bkg_'+param+'_'+channel,'flatParam'))

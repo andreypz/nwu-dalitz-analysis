@@ -409,6 +409,9 @@ Bool_t zgamma::Process(Long64_t entry)
     genMll  = (gen_l1+gen_l2).M();
     genMllg = (gen_l1+gen_l2+gen_gamma).M();
 
+    hists->fill1DHist(genMll,"gen_Mll_init", ";m_{#mu#mu}",50,0, 20, 1,"GEN");
+    hists->fill1DHist(genMll,"gen_Mll_init_b40", ";m_{#mu#mu}", 40,0, 20, 1,"GEN");
+
     hists->fill1DHist(genMll,"gen_Mll_low",  ";m_{#mu#mu}",100,0, 50, 1,"GEN");
     hists->fill1DHist(genMll,"gen_Mll_full", ";m_{#mu#mu}",200,0,130, 1,"GEN");
     hists->fill1DHist(genMll,"gen_Mll_inter",";m_{#mu#mu}",100,20,80, 1,"GEN");
@@ -453,8 +456,8 @@ Bool_t zgamma::Process(Long64_t entry)
     FillHistoCounts(1, eventWeight);
     CountEvents(1,"Pass Gen acceptance",fcuts);
 
-    if (genMll<2.9 || genMll>3.3)
-      return kTRUE;
+    //if (genMll<2.9 || genMll>3.3)
+    //return kTRUE;
 
   }
 

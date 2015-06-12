@@ -13,7 +13,7 @@ gStyle.SetOptTitle(0)
 from optparse import OptionParser
 parser = OptionParser(usage="usage: %prog ver [options -v]")
 parser.add_option("-v","--verbose", dest="verbose", action="store_true", default=False, help="Verbose mode (print out stuff)")
-parser.add_option("--tw", dest="tw", action="store_true", default=False, help="Use a tree from TW group (in el channel)")
+parser.add_option("--tw", dest="tw",   action="store_true", default=False, help="Use a tree from TW group (in el channel)")
 parser.add_option("--dbg", dest="dbg", action="store_true", default=False, help="Debug option: make more debugging plots")
 
 (opt, args) = parser.parse_args()
@@ -24,8 +24,7 @@ cf.read('config.cfg')
 
 verbose    = opt.verbose
 
-massList   = ['125']
-#massList      = [a.strip()[0:3] for a in (cf.get("fits","massList")).split(',')]
+massList      = [a.strip()[0:3] for a in (cf.get("fits","massList")).split(',')]
 yearList      = [a.strip() for a in (cf.get("fits","yearList")).split(',')]
 leptonList    = [a.strip() for a in (cf.get("fits","leptonList")).split(',')]
 catList       = [a.strip() for a in (cf.get("fits","catList")).split(',')]
@@ -34,18 +33,26 @@ mllBins = u.mllBins()
 
 EBetaCut = 1.4442
 EEetaCut = 1.566
-ptMllgCut  = 0.0
-ptGammaCut = 40
-ptDiLepCut = 40
-ptSumLep   = 0
+ptMllgCut  = 0.3
+ptGammaCut = 0
+ptDiLepCut = 0
+#ptSumLep   = 44
 
 lowCutOff  = 110
-highCutOff = 150
-deltaMllg = highCutOff-lowCutOff
-
+highCutOff = 170
 doBlind    = int(cf.get("fits","blind"))
 hjp=0
 if 'hjp' in sigNameList: hjp = 1
+
+if hjp:
+  ptMllgCut  = 0.0
+  ptGammaCut = 40.0
+  ptDiLepCut = 40.0
+  highCutOff = 150
+  massList   = ['125']
+  leptonList = ['mu']
+deltaMllg = highCutOff-lowCutOff
+
 
 colors = {}
 for f,col in cf.items("colors"):
@@ -72,14 +79,24 @@ def LumiXSWeighter(mH, prod, sel, Nev=None):
 
 def LoopOverTreeTW(myTree, cat, mzg, args, ds):
   print 'TW tree:', myTree
+  hcount=0
   for i in myTree:
     if i.Meg> lowCutOff and i.Meg<highCutOff:
       mzg.setVal(i.Meg)
       Weight = i.mcwei*i.puwei
       ds.add(args, Weight)
 
+
+      if Weight==1: #(This is data)
+        if i.Meg>120 and i.Meg<130:
+          hcount+=1
+          print hcount,i.run, i.event, i.Meg
+
+
+
 def LoopOverTree(myTree, cat, mzg, args, ds, lumiWeight):
   print 'Looping my tree, ', myTree
+  hcount=0
   for i in myTree:
     if cat=='mll50':
       if i.m12<20 or i.m12>50: continue
@@ -89,7 +106,7 @@ def LoopOverTree(myTree, cat, mzg, args, ds, lumiWeight):
       if i.m12<mllBins[int(cat[1])-1][0] or i.m12>mllBins[int(cat[1])][0]: continue
     else:
       if i.m12>20: continue
-      if i.pt1+i.pt2 < ptSumLep: continue
+      # if i.pt1+i.pt2 < ptSumLep: continue
     if   cat=="EB" and fabs(i.eta3)>EBetaCut: continue
     elif cat=="EE" and fabs(i.eta3)<EEetaCut: continue
 
@@ -119,6 +136,12 @@ def LoopOverTree(myTree, cat, mzg, args, ds, lumiWeight):
 
       ds.add(args, Weight)
 
+      if lumiWeight==None: #(This is data)
+        if i.m123>120 and i.m123<130:
+          hcount+=1
+          print hcount,i.run, i.event, i.m123
+
+
   # sig_argSW.Print()
 
 
@@ -126,18 +149,15 @@ def doInitialFits(subdir):
   print '\t Loading up the files'
   u.createDir(subdir)
 
+  basePath  = cf.get("path","base")+'/batch_output/zgamma/8TeV/'
   plotBase1 = cf.get("path","htmlbase")+'/html/zgamma/dalitz/fits-'+subdir+'/init'
-  basePath  = cf.get("path","base")+'/batch_output/zgamma/8TeV/'+subdir+'/'
-  if not os.path.exists(basePath):
-    print basePath1, "does not exist!"
-    sys.exit(0)
 
   print "\t ==== All the input files are initialized into these dictionaries ===="""
   dataDict   = {}
   signalDict = {}
   if hjp:
-    signalDict = {'hjp_mu2012_M125':TFile(basePath+'jp-mugamma_2012/hhhh_HiggsToJPsiGamma_1.root','r')}
-    dataDict['mu2012'] = TFile(basePath+'m_Data_jp-mugamma_2012.root','r')
+    signalDict = {'hjp_mu2012_M125':TFile(basePath+cf.get("path","ver-jp")+'/jp-mugamma_2012/hhhh_HiggsToJPsiGamma_1.root','r')}
+    dataDict['mu2012'] = TFile(basePath+cf.get("path","ver-jp")+'/m_Data_jp-mugamma_2012.root','r')
   else:
     for y in yearList:
       for l in leptonList:
@@ -145,10 +165,14 @@ def doInitialFits(subdir):
         if l == 'el': tag = 'elgamma'
         if l == 'ee': tag = 'eegamma'
 
+        if not os.path.exists(basePath):
+          print basePath, "does not exist!"
+          sys.exit(0)
+
         if opt.tw and l=='el':
-          dataDict[l+y] = TFile('dalitzTW/data.root','r')
+          dataDict[l+y] = TFile('dalitzTW4/data.root','r')
         else:
-          dataDict[l+y] = TFile(basePath+'m_Data_'+tag+'_'+y+'.root','r')
+          dataDict[l+y] = TFile(basePath+cf.get("path","ver-"+l)+'/m_Data_'+tag+'_'+y+'.root','r')
 
         for s in sigNameList:
           for m in massList:
@@ -159,8 +183,7 @@ def doInitialFits(subdir):
               else:
                 signalDict[s+'_'+l+y+'_M'+m] = TFile('dalitzTW/output_job_hzg_eeg_dalitz_'+s+'H_'+m+'.root','r')
             else:
-              signalDict[s+'_'+l+y+'_M'+m] = TFile(basePath+tag+'_'+y+'/hhhh_'+s+'H-mad'+m+'_1.root','r')
-
+              signalDict[s+'_'+l+y+'_M'+m] = TFile(basePath+cf.get("path","ver-"+l)+'/'+tag+'_'+y+'/hhhh_'+s+'H-mad'+m+'_1.root','r')
 
 
   print "\t ===  All files are set === \n"
@@ -186,7 +209,6 @@ def doInitialFits(subdir):
 
   ws = RooWorkspace("ws")
 
-  fs125 = TFile(subdir+'/s125.root','recreate')
   shist = u.AutoVivification()
   yi_da0  = u.AutoVivification()
   yi_da1  = u.AutoVivification()
@@ -199,6 +221,10 @@ def doInitialFits(subdir):
   # ###################################
   for year in yearList:
     for lepton in leptonList:
+      if hjp:
+        fs125 = TFile(subdir+'/s125-hjp.root','recreate')
+      else:
+        fs125 = TFile(subdir+'/s125-'+lepton+'.root','recreate')
 
       if opt.tw and lepton=='el':
         treeName = twTreeName
@@ -264,6 +290,7 @@ def doInitialFits(subdir):
             if float(mass)==125:
               fs125.cd()
               shist[year][lepton][cat][prod][mass].Write()
+
 
             signalList.append(shist[year][lepton][cat][prod][mass])
 
@@ -460,6 +487,8 @@ def doInitialFits(subdir):
         yi_da0[year][lepton][cat] = data_ds.sumEntries()
         yi_da1[year][lepton][cat] = data_ds.sumEntries('1','SignalRegion')
 
+      fs125.Close()
+
   ws.writeToFile(subdir+'/testRooFitOut_Dalitz.root')
 
 
@@ -467,14 +496,14 @@ def doInitialFits(subdir):
   print '*** Some yields from data'
   print 'Full range:', yi_da0
   if not doBlind:
-    print 'in 122-128:', yi_da1
+    print 'in SignalRegion:', yi_da1
 
   if verbose:
     ws.Print()
 
     print '*** Some yields from ggH'
     print 'Full range:', yi_sig0
-    print 'in 122-128:', yi_sig1
+    print 'in SignalRegion:', yi_sig1
 
     print "\n ** You should also notice that EBeta cut was: ", EBetaCut
     print "And that the range was from ", lowCutOff, 'to', highCutOff
