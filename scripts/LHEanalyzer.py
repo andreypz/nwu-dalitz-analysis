@@ -10,15 +10,23 @@ import makeHTML as ht
 
 subdir = sys.argv[1]
 
-outpath = '/tthome/andrey/html/zgamma/lhe/'
+outpath = '/home/andreypz/workspace/lhe-plots/lhe/'
 #outpath = '/uscms_data/d2/andreypz/html/zgamma/lhe/'
 files={}
+
+
+#files["one"] = ['../../ano_zeromass_0.2to50.root']
+#files["two"] = ['../../heft_zeromass_0.2to50.root']
+files["one"] = ['../../ano_dalitz.root']
+files["two"] = ['../../heft_dalitz.root']
+#files["one"] = ['../../ano_zeromass_50to500.root']
+#files["two"] = ['../../heft_zeromass_50to500.root']
 
 #files["two"] = ['~/LHE_files/luisa/dygamma.lhe.root']
 
 #files["one"] = ['~/LHE_files/mcfm_dalitz.root']
-files["two"] = ['~/LHE_files/hmumug_m125.root']
-files["one"] = ['~/LHE_files/heeg_m125.root']
+#files["two"] = ['~/LHE_files/hmumug_m125.root']
+#files["one"] = ['~/LHE_files/heeg_m125.root']
 #files["one"]   = ['~/LHE_files/13TeV_ggHeeg_mll0to2.root']
 #files["two"]   = ['~/LHE_files/13TeV_ggHeeg_mll2to5.root']
 #files["three"] = ['~/LHE_files/13TeV_ggHeeg_mll5to20.root']
@@ -33,11 +41,12 @@ fakeGammaFromJet = 0
 
 MH = 125
 LEPID1 = 13
-LEPID2 = 11
+LEPID2 = 13
 
 print files
 #gSystem.Load("/home/andreypz/workspace/MadGraph5/ExRootAnalysis/lib/libExRootAnalysis.so")
-gSystem.Load("/tthome/andrey/workspace/MG5_aMC_v2_1_1/ExRootAnalysis/lib/libExRootAnalysis.so")
+gSystem.Load("/home/andreypz/workspace/mg5amcnlo/ExRootAnalysis/libExRootAnalysis.so")
+#gSystem.Load("/tthome/andrey/workspace/MG5_aMC_v2_1_1/ExRootAnalysis/lib/libExRootAnalysis.so")
 #gSystem.Load("../plugins/HistManager_cc.so")
 gROOT.LoadMacro("../plugins/HistManager.cc+");
 gROOT.LoadMacro("../plugins/ZGAngles.cc+");
@@ -178,12 +187,12 @@ def FillAllHists(files, h):
 
     if hi==0:
       # print dcount,"No higgs??? what's up with that??"
-      h.fill1DHist(tri.M(),   "h_mass_noHiggs",     ";m_{ll#gamma}",  200, 80,180, 1, "")
-      h.fill1DHist(tri.M(),   "h_mass_zoom_noHiggs",";m_{ll#gamma}",  200, 124,126,1, "")
-      h.fill1DHist(diLep.M(), "h_mumu_noHiggs",     ";m_{ll}",        200, 80,180, 1, "")
-      h.fill1DHist(gamma.Pt(),"gamma_pt_noHiggs",   ";p_{T}^{#gamma}",    200, 00,180, 1, "")
+      h.fill1DHist(tri.M(),   "LHE_h_mass_noHiggs",     ";m_{ll#gamma}",  200, 80,180, 1, "")
+      h.fill1DHist(tri.M(),   "LHE_h_mass_zoom_noHiggs",";m_{ll#gamma}",  200, 124,126,1, "")
+      h.fill1DHist(diLep.M(), "LHE_h_mumu_noHiggs",     ";m_{ll}",        200, 80,180, 1, "")
+      h.fill1DHist(gamma.Pt(),"LHE_gamma_pt_noHiggs",   ";p_{T}^{#gamma}",    200, 00,180, 1, "")
     else:
-      h.fill1DHist(trueHiggs.M(),   "h_mass_trueHiggs",";mH",   200, 124,126,1, "")
+      h.fill1DHist(trueHiggs.M(),   "LHE_h_mass_trueHiggs",";m_{H}",   200, 124,126,1, "")
     # exit(0)
 
     gammaCM = TLorentzVector(gamma)
@@ -204,10 +213,10 @@ def FillAllHists(files, h):
 
     #print dcount, c1, c2, phi, c3
 
-    h.fill1DHist(c1,  "ang_co1",";gen cos_lp",  100,-1,1, 1,"");
-    h.fill1DHist(c2,  "ang_co2",";gen cos_lm",  100,-1,1, 1,"");
-    h.fill1DHist(c3,  "ang_co3",";gen cosTheta",100,-1,1, 1,"");
-    h.fill1DHist(phi, "ang_phi",";gen phi lp",  100, -TMath.Pi(), TMath.Pi(), 1,"");
+    h.fill1DHist(c1,  "LHE_ang_co1",";gen cos_lp",  100,-1,1, 1,"");
+    h.fill1DHist(c2,  "LHE_ang_co2",";gen cos_lm",  100,-1,1, 1,"");
+    h.fill1DHist(c3,  "LHE_ang_co3",";gen cosTheta",100,-1,1, 1,"");
+    h.fill1DHist(phi, "LHE_ang_phi",";gen phi lp",  100, -TMath.Pi(), TMath.Pi(), 1,"");
 
 
     h.fill1DHist(l1.M(),    "l1_mass",  ";l+ mass",    200, -2,2, 1, "")
@@ -360,25 +369,37 @@ if __name__ == "__main__":
 
 
   blah = ['LHE for mH = 125 GeV',
-          'Muons and electrons']
+          'Comparing ANO and HEFT']
   #blah = ['LHE files comparison for DY+gamma sample',
   #        'Luisa\'s vs mine']
+
+
+  sigZip = zip(['ANO','HEFT'],
+                [oneFile, twoFile])
+  #sigZip = zip(['ANO-0','ANO-50'],
+  #              [oneFile, twoFile])
+
+  u.drawAllInFile(None, None, None, sigZip, 'HEFT', '', path, None,"norm", isLog=False)
+
 
   #myzip = zip(['5<mll<20'],[testFile])
   #u.drawAllInFile(oneFile, "0<mll<2", myzip, twoFile, '2<mll<5', '', path, None,"norm", isLog=True)
   #u.drawAllInFile(oneFile, "ggH to eeg", '', twoFile, 'VH to eeg', '', path, None,"norm", isLog=True)
-  u.drawAllInFile(oneFile, "h #rightarrow ee#gamma", '', twoFile, 'h #rightarrow #mu#mu#gamma', '', path, None,"norm", isLog=False)
+  #u.drawAllInFile(oneFile, "h #rightarrow ee#gamma", '', twoFile, 'h #rightarrow #mu#mu#gamma', '', path, None,"norm", isLog=False)
   #u.drawAllInFile(oneFile, "3 GeV", [('15 GeV',twoFile)],testFile, '35 GeV', '', path, None,"norm", isLog=True)
   #u.drawAllInFile(oneFile, "DYG", [('DYJ',twoFile)],testFile, 'Sig', '', path, None,"norm", isLog=True)
 
 
   u.createDir(pathBase+"/csBR")
   c1 = TCanvas("c1","c1", 600,500)
-  h = twoFile.Get("LHE_diLep_mass_bins")
+  h1 = twoFile.Get("LHE_diLep_mass_bins")
+  h2 = twoFile.Get("LHE_diLep_mass_bins")
   #h.Print('all')
-  h.Draw()
+  h1.Draw()
+  h2.Draw()
   c1.SaveAs(pathBase+"/csBR/dilepmass.png")
 
+  '''
   xsbr = 1
   # xsbr = 0.754
   tot  = h.Integral()
@@ -410,6 +431,7 @@ if __name__ == "__main__":
   print "In cs: x: %.4f"%(xsbr*part6/tot), bin6
   print "In cs: x: %.4f"%(xsbr*part7/tot), bin7
   print "In cs: x: %.4f"%(xsbr*part8/tot), bin8
+  '''
 
   '''
   u.createDir(path+"/eff")
