@@ -335,7 +335,7 @@ if __name__=="__main__":
 
           histName  = '_'.join(['sig',prod,lep,year,'cat'+cat,'M125','_CMS_hzg_mass'])
           hsig.append(fs125.Get(histName))
-          print hsig
+          print prod, lep, hsig
           hsig[-1].Print("all")
           hsig[-1].Scale(factor)
 

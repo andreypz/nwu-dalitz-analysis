@@ -247,7 +247,6 @@ Bool_t jpsiGamma::Process(Long64_t entry)
   Float_t genMll = 0;
   Float_t gendR  = 0;
 
-
   if(!isRealData){
     //Int_t ZID = 3000001; //made-up particle that decays to l+l-
     Int_t A = 25;
@@ -306,7 +305,7 @@ Bool_t jpsiGamma::Process(Long64_t entry)
 
 
       //PHOTON from the Higgs
-      if (sample=="dalitz" && thisParticle->GetPDGId()==22 && thisParticle->GetStatus()==1
+      if ((sample=="dalitz" || sample=="hjp") && thisParticle->GetPDGId()==22 && thisParticle->GetStatus()==1
 	  //&& ObjID->GetPrimaryAncestor(thisParticle)->GetPDGId()==A
 	  && thisParticle->Mother() &&  abs(thisParticle->Mother()->GetPDGId())!=13 && abs(thisParticle->Mother()->GetPDGId())!=11)
 	{
@@ -380,10 +379,11 @@ Bool_t jpsiGamma::Process(Long64_t entry)
     hists->fill1DHist(fsr_el_count, "gen_el_fsrcount",";gen el FSR",  4, 0,4, 1,"GEN");
 
 
-    if(selection=="mu" && makeGen){
+
+    if(selection=="mugamma" && makeGen){
       if (gen_mu.size()!=2) return kTRUE;
-      //Abort(Form("ev #%i NONONO There has to be exactly 2 muons from the Higgs! \n \t\t but there are %i",
-      //eventNumber, (int)gen_mu.size()));
+	//Abort(Form("ev #%i NONONO There has to be exactly 2 muons from the Higgs! \n \t\t but there are %i",
+	//	   (int)eventNumber, (int)gen_mu.size()));
 
 
       gen_lPt1 = gen_mu[0];
@@ -403,17 +403,20 @@ Bool_t jpsiGamma::Process(Long64_t entry)
 	Abort("They are the same charge!");
 
 
+      gendR  = gen_l1.DeltaR(gen_l2);
+      genMll = (gen_l1+gen_l2).M();
+
       //cout<<"\t\t event = "<<eventNumber<<"  "<<endl;
       //cout<<" charge = "<<gen_l1.Charge()<<" pt = "<<gen_l1.Pt()<<" eta="<<gen_l1.Eta()<<" phi="<<gen_l1.Phi()<<endl;
       //cout<<" charge = "<<gen_l2.Charge()<<" pt = "<<gen_l2.Pt()<<" eta="<<gen_l2.Eta()<<" phi="<<gen_l2.Phi()<<endl;
 
 
-      if (gen_el.size()!=2 && gen_mu.size()!=2)
-	Abort(Form("  - - WARNING - -\n ev #%i What's up with that?\n There should be exact two leptons from Higgs. Insteat there %i",
-		   (int)eventNumber, (int)(gen_el.size() + gen_mu.size())));
+      if (gen_el.size()!=2 && gen_mu.size()!=2) return kTRUE;
+	//Abort(Form("  - - WARNING - -\n ev #%i What's up with that?\n There should be exact two leptons from Higgs. Insteat there %i",
+	//(int)eventNumber, (int)(gen_el.size() + gen_mu.size())));
 
-      if (gen_gamma.E()==0 && sample=="dalitz")// return kTRUE;
-	Abort(Form("%i: No gen gamma in an event? that sounds bad",(int)eventNumber));//return kTRUE;
+      if (gen_gamma.E()==0 && (sample=="dalitz" || sample=="hjp")) return kTRUE;
+	  //Abort(Form("%i: No gen gamma in an event? that sounds bad",(int)eventNumber));
 
 
       //ZGAnlgles:
@@ -433,8 +436,6 @@ Bool_t jpsiGamma::Process(Long64_t entry)
       FillHistoCounts(1, eventWeight);
       CountEvents(1,"Pass Gen acceptance",fcuts);
 
-      gendR  = gen_l1.DeltaR(gen_l2);
-      genMll = (gen_l1+gen_l2).M();
 
       hists->fill1DHist(genMll,"gen_Mll",";gen m_{ll} (GeV)",100,0,mllMax, 1,"GEN");
 
@@ -476,6 +477,7 @@ Bool_t jpsiGamma::Process(Long64_t entry)
 
     }
   }
+
 
   FillHistoCounts(2, eventWeight);
   CountEvents(2, "Acceptance", fcuts);
@@ -833,7 +835,7 @@ Bool_t jpsiGamma::Process(Long64_t entry)
 
 
 
-  if(!isRealData && makeGen && sample=="dalitz"){
+  if(!isRealData && makeGen && sample=="hjp"){
     hists->fill1DHist(gen_l1.DeltaR(l1),"reco_gen_l1_deltaR","reco_gen_l1_deltaR",100,0,5, 1,"");
     hists->fill1DHist(gen_l2.DeltaR(l2),"reco_gen_l2_deltaR","reco_gen_l2_deltaR",100,0,5, 1,"");
 

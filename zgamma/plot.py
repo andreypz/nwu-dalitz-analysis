@@ -227,8 +227,9 @@ if __name__ == "__main__":
   if opt.hjp:
     sigZip = zip(['H to J/Psi #gamma'],[sigFileHjp])
 
-  #u.drawAllInFile(None, "", hackZip, None, '', "GEN", pathBase+'/GEN-lumi', None, "lumi")
 
+
+  #u.drawAllInFile(None, "", hackZip, None, '', "GEN", pathBase+'/GEN-lumi', None, "lumi")
   # u.drawAllInFile(None, "", hackZip, sigGG['125'], '125', "GEN", pathBase+'/GEN-norm', None, "norm", doFits=True)
   # u.drawAllInFile(None, "", '', sigFileGG, "h", "GEN", pathBase+'/GEN-norm', None, "norm")
   # u.drawAllInFile(None, "", '', ggHZGFile, "h", "GEN", pathBase+'/GEN-norm', None, "norm")
@@ -251,17 +252,17 @@ if __name__ == "__main__":
       if opt.vbf:
         u.drawAllInFile(dataFile, "Data", None, sigZipVBF, sigName, "Main", pathBase+'/Main-VBF', cut, 'toData')
     if opt.extra:
-      # u.drawAllInFile(None, "", bkgZip, sigFile, sigName, "GEN", pathBase+'/GEN', None, "norm")
+      u.drawAllInFile(None, None, None, sigZip, sigName, "GEN", pathBase+'/GEN', None, "norm")
       for n in ['Angles','N']:
-        u.drawAllInFile(dataFile, "Data",bkgZip,sigFile,"signal", n, pathBase+"/"+n, cut, "lumi")
+        u.drawAllInFile(dataFile, "Data", bkgZip, sigZip,"signal", n, pathBase+"/"+n, cut, "lumi")
 
       if cut in ['8','9']:
         for n in ['Photon','Photon-EGamma']:
-          u.drawAllInFile(dataFile, "Data",bkgZip,sigFile,"signal", n, pathBase+"/"+n, None, "norm")
+          u.drawAllInFile(dataFile, "Data",bkgZip, sigZip,"signal", n, pathBase+"/"+n, None, "norm")
 
         if sel in ["mugamma"]:
           for n in ['Muons','Mu-after']:
-            u.drawAllInFile(dataFile, "Data",bkgZip,sigFile,"signal", n, pathBase+"/"+n, None, "norm")
+            u.drawAllInFile(dataFile, "Data",bkgZip,sigZip,"signal", n, pathBase+"/"+n, None, "norm")
 
   elif cut in ['14','15','16']:
     u.drawAllInFile(dataFile, "data",bkgZip,None,"",
