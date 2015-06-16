@@ -260,8 +260,11 @@ Bool_t jpsiGamma::Process(Long64_t entry)
     for (int i = 0; i < genParticles->GetSize(); ++i) {
       TCGenParticle* thisParticle = (TCGenParticle*) genParticles->At(i);
 
+      if (abs(thisParticle->GetPDGId())==24)
+	ObjID->DiscoverGeneology(thisParticle);
+
       //Higgs himself:
-      if (thisParticle->GetPDGId()==25 && thisParticle->GetStatus()==3){
+      if (thisParticle->GetPDGId()==25 && (thisParticle->GetStatus()==3 || thisParticle->GetStatus()==62)){
 	gen_higgs = *thisParticle;
 	hists->fill1DHist(thisParticle->M(), "gen_h_mass",";gen Higgs mass",  200, 124,126, 1,"GEN");
 	h++;
@@ -427,10 +430,14 @@ Bool_t jpsiGamma::Process(Long64_t entry)
 	  ang->GetAngles(gen_l1, gen_l2, gen_gamma, co1,co2,phi,co3);
 	  //cout<<eventNumber<<" gen Angles: c1= "<<co1<<"  c2="<<co2<<"   phi="<<phi<<"   coTh="<<co3<<endl;
 
-	  hists->fill1DHist(co1, "gen_co1",";gen cos_lp",  100,-1,1, 1,"GEN-ANG1");
-	  hists->fill1DHist(co2, "gen_co2",";gen cos_lm",  100,-1,1, 1,"GEN-ANG1");
-	  hists->fill1DHist(co3, "gen_co3",";gen cosTheta",100,-1,1, 1,"GEN-ANG1");
-	  hists->fill1DHist(phi, "gen_phi",";gen phi lp",  100, -TMath::Pi(), TMath::Pi(), 1,"GEN-ANG1");
+	  double W = 1;
+	  if  (sample=="hjp")
+	    W = 3*(1+co1*co1)/8;
+	  string label="GEN-ANG1";
+	  hists->fill1DHist(co1, Form("gen_co1_%s", label.c_str()), ";cos(#vec{l-}, #vec{J/#Psi}) in CM", 100,-1,1, W,label);
+	  hists->fill1DHist(co2, Form("gen_co2_%s", label.c_str()), ";cos(#vec{l+}, #vec{J/#Psi}) in CM", 100,-1,1, W,label);
+	  hists->fill1DHist(co3, Form("gen_co3_%s", label.c_str()), ";cos(#Theta)",                 100,-1,1, W,label);
+	  hists->fill1DHist(phi, Form("gen_phi_%s", label.c_str()), ";#phi(l+)",50, -TMath::Pi(), TMath::Pi(),W,label);
 	}
 
 
@@ -445,11 +452,14 @@ Bool_t jpsiGamma::Process(Long64_t entry)
 	  double co1,co2,phi,co3;
 	  ang->GetAngles(gen_l1, gen_l2, gen_gamma, co1,co2,phi,co3);
 	  //cout<<eventNumber<<" gen Angles: c1= "<<co1<<"  c2="<<co2<<"   phi="<<phi<<"   coTh="<<co3<<endl;
-
-	  hists->fill1DHist(co1, "gen_co1",";gen cos_lp",  100,-1,1, 1,"GEN-ANG2");
-	  hists->fill1DHist(co2, "gen_co2",";gen cos_lm",  100,-1,1, 1,"GEN-ANG2");
-	  hists->fill1DHist(co3, "gen_co3",";gen cosTheta",100,-1,1, 1,"GEN-ANG2");
-	  hists->fill1DHist(phi, "gen_phi",";gen phi lp",  100, -TMath::Pi(), TMath::Pi(), 1,"GEN-ANG2");
+	  double W = 1;
+	  if  (sample=="hjp")
+	    W = 3*(1+co1*co1)/8;
+	  string label="GEN-ANG2";
+	  hists->fill1DHist(co1, Form("gen_co1_%s", label.c_str()), ";cos(#vec{l-}, #vec{J/#Psi}) in CM", 100,-1,1, W,label);
+	  hists->fill1DHist(co2, Form("gen_co2_%s", label.c_str()), ";cos(#vec{l+}, #vec{J/#Psi}) in CM", 100,-1,1, W,label);
+	  hists->fill1DHist(co3, Form("gen_co3_%s", label.c_str()), ";cos(#Theta)",                 100,-1,1, W,label);
+	  hists->fill1DHist(phi, Form("gen_phi_%s", label.c_str()), ";#phi(l+)",50, -TMath::Pi(), TMath::Pi(),W,label);
 	}
 
 

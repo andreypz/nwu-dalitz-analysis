@@ -255,9 +255,11 @@ if __name__ == "__main__":
       if opt.vbf:
         u.drawAllInFile(dataFile, "Data", None, sigZipVBF, sigName, "Main", pathBase+'/Main-VBF', cut, 'toData')
     if opt.extra:
-      u.drawAllInFile(None, None, None, sigZip, sigName, "GEN", pathBase+'/GEN', None, "norm")
+      for n in ['GEN','GEN-ANG1','GEN-ANG2']:
+        u.drawAllInFile(None, None, None, sigZip, sigName, n, pathBase+"/"+n, None, "norm")
+
       for n in ['Angles','N']:
-        u.drawAllInFile(dataFile, "Data", bkgZip, sigZip,"signal", n, pathBase+"/"+n, cut, "lumi")
+        u.drawAllInFile(dataFile, "Data", bkgZip, sigZip,"signal", n, pathBase+"/"+n, cut, "norm")
 
       if cut in ['8','9']:
         for n in ['Photon','Photon-EGamma']:
