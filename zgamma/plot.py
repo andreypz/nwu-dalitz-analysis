@@ -163,6 +163,7 @@ if __name__ == "__main__":
     bkgZip = zip(bkgNames, bkgFiles)
   else: bkgZip = None
 
+  print 'DBG APZ ', subsel
   sigGG  = {}
   sigVBF = {}
   sigVH  = {}
@@ -225,7 +226,9 @@ if __name__ == "__main__":
   #sigZip = zip(['125'],
   #             [sigGG['125']])
   if opt.hjp:
-    sigZip = zip(['H to J/Psi #gamma'],[sigFileHjp])
+    #sigZip = zip(['H to J/Psi #gamma'],[sigFileHjp])
+    sigZip = zip(['H #rightarrow J/#Psi #gamma','ggH-125'],[sigFileHjp, sigGG['125']])
+
 
 
 

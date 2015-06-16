@@ -427,14 +427,31 @@ Bool_t jpsiGamma::Process(Long64_t entry)
 	  ang->GetAngles(gen_l1, gen_l2, gen_gamma, co1,co2,phi,co3);
 	  //cout<<eventNumber<<" gen Angles: c1= "<<co1<<"  c2="<<co2<<"   phi="<<phi<<"   coTh="<<co3<<endl;
 
-	  hists->fill1DHist(co1, "gen_co1",";gen cos_lp",  100,-1,1, 1,"GEN");
-	  hists->fill1DHist(co2, "gen_co2",";gen cos_lm",  100,-1,1, 1,"GEN");
-	  hists->fill1DHist(co3, "gen_co3",";gen cosTheta",100,-1,1, 1,"GEN");
-	  hists->fill1DHist(phi, "gen_phi",";gen phi lp",  100, -TMath::Pi(), TMath::Pi(), 1,"GEN");
+	  hists->fill1DHist(co1, "gen_co1",";gen cos_lp",  100,-1,1, 1,"GEN-ANG1");
+	  hists->fill1DHist(co2, "gen_co2",";gen cos_lm",  100,-1,1, 1,"GEN-ANG1");
+	  hists->fill1DHist(co3, "gen_co3",";gen cosTheta",100,-1,1, 1,"GEN-ANG1");
+	  hists->fill1DHist(phi, "gen_phi",";gen phi lp",  100, -TMath::Pi(), TMath::Pi(), 1,"GEN-ANG1");
 	}
+
+
+      if (!(gen_lPt1.Pt() > 23 && gen_lPt1.Pt() > 4 && (gen_lPt1 + gen_lPt2).Pt() > 40 && gen_gamma.Pt() > 40))
+	return kTRUE;
 
       FillHistoCounts(1, eventWeight);
       CountEvents(1,"Pass Gen acceptance",fcuts);
+
+      if (sample=="dalitz" || sample=="hjp" || sample=="zjp")
+	{
+	  double co1,co2,phi,co3;
+	  ang->GetAngles(gen_l1, gen_l2, gen_gamma, co1,co2,phi,co3);
+	  //cout<<eventNumber<<" gen Angles: c1= "<<co1<<"  c2="<<co2<<"   phi="<<phi<<"   coTh="<<co3<<endl;
+
+	  hists->fill1DHist(co1, "gen_co1",";gen cos_lp",  100,-1,1, 1,"GEN-ANG2");
+	  hists->fill1DHist(co2, "gen_co2",";gen cos_lm",  100,-1,1, 1,"GEN-ANG2");
+	  hists->fill1DHist(co3, "gen_co3",";gen cosTheta",100,-1,1, 1,"GEN-ANG2");
+	  hists->fill1DHist(phi, "gen_phi",";gen phi lp",  100, -TMath::Pi(), TMath::Pi(), 1,"GEN-ANG2");
+	}
+
 
 
       hists->fill1DHist(genMll,"gen_Mll",";gen m_{ll} (GeV)",100,0,mllMax, 1,"GEN");
