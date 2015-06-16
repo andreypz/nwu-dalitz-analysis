@@ -163,7 +163,6 @@ if __name__ == "__main__":
     bkgZip = zip(bkgNames, bkgFiles)
   else: bkgZip = None
 
-  print 'DBG APZ ', subsel
   sigGG  = {}
   sigVBF = {}
   sigVH  = {}
@@ -178,6 +177,8 @@ if __name__ == "__main__":
 
   sigFileZjp  = TFile(hPath+"/"+subsel+"_"+period+"/hhhh_ZtoJPsiGamma_1.root",     "OPEN")
   sigFileHjp  = TFile(hPath+"/"+subsel+"_"+period+"/hhhh_HiggsToJPsiGamma_1.root", "OPEN")
+
+  ggHZGFile   = TFile(hPath+"/"+subsel+"_"+period+"/hhhh_ggHZG-"+str(mass)+"_1.root", "OPEN")
 
   if opt.mcfm:  sigFile = sigFileMCFM
   elif opt.hjp: sigFile = sigFileHjp
@@ -214,7 +215,6 @@ if __name__ == "__main__":
   if opt.hjp: sigName= 'H #rightarrow J/Psi #gamma'
 
 
-  ggHZGFile   = TFile(hPath+"/"+sel+"_"+period+"/hhhh_ggHZG-"+str(mass)+"_1.root", "OPEN")
   hackZip = zip(['120','130','135','140','145','150'],
                 [sigGG['120'],sigGG['130'],sigGG['135'], sigGG['140'],sigGG['145'],sigGG['150']])
   sigZip = zip(['ggH-125','ggH-135','ggH-145'],
