@@ -5,14 +5,17 @@ import numpy as np
 from ROOT import *
 gROOT.SetBatch()
 sys.path.append("../zgamma")
+sys.path.append("../scripts")
+import makeHTML as ht
 import utils as u
 from optparse import OptionParser
 parser = OptionParser(usage="usage: %prog  [options]")
 parser.add_option("--br", dest="br",  action="store_true", default=False, help="Do the limit on BR*cs instead of the mu")
 parser.add_option("--mll",dest="mll", action="store_true", default=False, help="Do the limit on BR*cs in bins of mll")
 parser.add_option("--divide",dest="divide", action="store_true", default=False, help="Divide by the binn-size (for --mll option)")
-parser.add_option("--cat",dest="cat", default='EB', help="Category: EB, EE, mll50, etc")
+parser.add_option("--cat",dest="cat", default='EB', help="Category: EB, EE, mll50, comb (for combination)")
 parser.add_option("--lep",dest="lep", default='mu', help="Channel: mu or el")
+parser.add_option("--path",dest="path", default=None, help="path where the limit results are stored")
 (opt, args) = parser.parse_args()
 
 import ConfigParser as cp
@@ -22,6 +25,8 @@ cf.read('config.cfg')
 gStyle.SetOptTitle(0)
 
 s = cf.get("path","ver")
+if opt.path!=None:
+  s = opt.path
 lep = opt.lep
 #s = "comboCardsMing/"
 #s = "MingDataCards/Dalitz_electron/"
@@ -31,9 +36,9 @@ method = 'Asymptotic'
 out = TFile(s+"/limit-data-cat"+opt.cat+"-"+lep+".root","recreate")
 
 plotBase = cf.get("path","htmlbase")+'/html/zgamma/dalitz/fits-'+s
-u.createDir(plotBase+'/Limits')
 
-massList  = [float(a) for a in (cf.get("fits","massList-more")).split(',')]
+#massList  = [float(a) for a in (cf.get("fits","massList-more")).split(',')]
+massList   = [float(a) for a in u.drange(120,150,1.0)]
 doBlind   = int(cf.get("fits","blind"))
 doObs = not doBlind
 mllBins = u.mllBins()
@@ -41,6 +46,9 @@ mllBins = u.mllBins()
 if opt.cat!='comb': suff=opt.cat+'_'+lep
 else:  suff='Combo'
 # print massList
+if opt.br:  combineOutDir = '/combineOut_xsbr/'
+else:       combineOutDir = '/combineOut/'
+
 
 c = TCanvas("c","c",0,0,500,400)
 c.cd()
@@ -56,7 +64,8 @@ if __name__ == "__main__":
   exp2SigHi = []
   exp2SigLow = []
   SM = []
-  fileListTmp = os.listdir(s)
+  fileListTmp = os.listdir(s+combineOutDir)
+  print fileListTmp
   fileList = filter(lambda fileName: 'higgsCombineTest.'+method in fileName,fileListTmp)
   #print fileList
   SMtot = 0.757
@@ -80,7 +89,7 @@ if __name__ == "__main__":
       SM.append(10*SMtot*mllBins[int(mbin[1])][1]/dmScale)
       print '10x SM prediction:', SM[-1]
 
-      f = TFile(s+"/"+thisFile,"open")
+      f = TFile(s+combineOutDir+thisFile,"open")
       # f.Print()
       tree = f.Get("limit")
 
@@ -103,7 +112,7 @@ if __name__ == "__main__":
       thisFile = filter(lambda fileName: str(mass)+'_cat_'+suff+'.root' in fileName,fileList)[0]
       print thisFile
       xAxis.append(float(mass))
-      f = TFile(s+"/"+thisFile,"open")
+      f = TFile(s+combineOutDir+thisFile,"open")
       #f.Print()
       tree = f.Get("limit")
       for i,l in enumerate(tree):
@@ -136,13 +145,15 @@ if __name__ == "__main__":
 
   exp2SigLowErr = [a-b for a,b in zip(exp,exp2SigLow)]
   exp1SigLowErr = [a-b for a,b in zip(exp,exp1SigLow)]
-  exp2SigHiErr = [fabs(a-b) for a,b in zip(exp,exp2SigHi)]
-  exp1SigHiErr = [fabs(a-b) for a,b in zip(exp,exp1SigHi)]
+  exp2SigHiErr  = [b-a for a,b in zip(exp,exp2SigHi)]
+  exp1SigHiErr  = [b-a for a,b in zip(exp,exp1SigHi)]
 
-  print '2 sig low:',exp2SigLowErr
-  print '1 sig low:',exp1SigLowErr
-  print '1 sig hi:', exp1SigHiErr
-  print '2 sig hi:', exp2SigHiErr
+  print '-1 sigma:\n', exp1SigLowErr
+  print '+1 sigma:\n', exp1SigHiErr
+
+  print 'exp + 1 sigma up:\n',   exp1SigHi
+  print 'exp - 1 sigma down:\n', exp1SigLow
+
 
   if opt.mll: print '\n 10x SM prediction \n',SM
 
@@ -188,25 +199,33 @@ if __name__ == "__main__":
   expected.SetLineWidth(2)
   expected.SetLineStyle(2)
 
-  observed.SetLineWidth(2)
-  observed.SetMarkerStyle(kFullCircle)
 
   if opt.mll:
     standardM.SetFillColor(kRed+1)
     standardM.SetLineColor(kRed+1)
     standardM.SetLineWidth(2)
-    # standardM.SetMarkerStyle(24)
+    standardM.SetMarkerColor(kRed+1)
+
+    observed.SetMarkerColor(kBlue+2)
+    observed.SetMarkerSize(1.2)
+    observed.SetMarkerStyle(kFullCircle)
 
     mg.Add(twoSigma,'P2')
     mg.Add(oneSigma,'P2')
     mg.Add(expected,'P')
   else:
+    observed.SetLineWidth(2)
+
     mg.Add(twoSigma)
     mg.Add(oneSigma)
     mg.Add(expected)
 
   if doObs:
-    mg.Add(observed)
+    if opt.mll:
+      mg.Add(observed,'P')
+    else:
+      mg.Add(observed)
+
   if opt.mll:
     mg.Add(standardM,'P')
 
@@ -223,61 +242,74 @@ if __name__ == "__main__":
     mg.GetXaxis().SetTitle('m_{H} (GeV)')
     mg.GetXaxis().SetLimits(massList[0],massList[-1])
   if opt.br:
-    mg.GetYaxis().SetTitle('#sigma(pp #rightarrow A)#timesBR(A#rightarrow#mu#mu#gamma) (fb)')
+    mg.GetXaxis().SetTitle('m_{H} (GeV)')
+    mg.GetYaxis().SetTitle('#sigma(pp #rightarrow H) #times B(H #rightarrow #mu#mu#gamma)_{95% CL} (fb)')
     mg.SetMaximum(21)
-    if opt.mll:
+    if opt.lep=='el':
+      mg.GetYaxis().SetTitle('#sigma(pp #rightarrow H) #times B(H #rightarrow ee#gamma)_{95% CL} (fb)')
+      mg.SetMaximum(31)
+    if opt.mll and opt.lep=='mu':
       mg.SetMaximum(12)
       if opt.divide:
-        mg.GetYaxis().SetTitle('#frac{1}{#Deltam} #sigma(pp#rightarrowA)#timesBR(A#rightarrow#mu#mu#gamma) (fb/GeV)')
+        mg.GetYaxis().SetTitle('#frac{1}{#Deltam} #sigma(pp #rightarrow H)#times B(H#rightarrow#mu#mu#gamma) (fb/GeV)')
         mg.SetMaximum(200)
         mg.SetMinimum(0.03)
         c.SetLogy()
   else:
-    mg.GetYaxis().SetTitle('95% CL limit on #sigma#timesBR/#sigma_{SM}#times BR_{SM}')
+    mg.GetYaxis().SetTitle('95% CL limit on #sigma/#sigma_{SM}')
     if opt.cat in ['EB','comb']:
-      mg.SetMaximum(31)
+      mg.SetMaximum(52)
       if lep=='el':
-        mg.SetMaximum(42)
+        mg.SetMaximum(52)
     elif opt.cat in ['EE','mll50']:
       mg.SetMaximum(150)
   gPad.RedrawAxis()
 
   lat = TLatex()
   lat.SetNDC()
-  lat.SetTextSize(0.035)
+  lat.SetTextSize(0.04)
+  lat.SetTextFont(42)
 
   if opt.mll:
-    lat.DrawLatex(0.18,0.95, 'A #rightarrow#gamma*#gamma#rightarrow #mu#mu#gamma')
+    lat.DrawLatex(0.18,0.95, 'H #rightarrow #gamma*#gamma #rightarrow #mu#mu#gamma')
     lat.SetTextSize(0.05)
-    lat.DrawLatex(0.40,0.95,'m_{A} = 125 GeV')
+    lat.DrawLatex(0.40,0.95,'m_{H} = 125 GeV')
     lat.SetTextSize(0.035)
+  elif opt.br and opt.lep=='mu':
+    lat.DrawLatex(0.20,0.75, 'H #rightarrow #gamma*#gamma #rightarrow #mu#mu#gamma')
+  elif opt.br and opt.lep=='el':
+    lat.DrawLatex(0.20,0.75, 'H #rightarrow #gamma*#gamma #rightarrow ee#gamma')
   elif opt.cat=='comb':
-    lat.DrawLatex(0.18,0.95, 'H #rightarrow#gamma*#gamma#rightarrow ll#gamma  CAT: '+opt.cat)
+    lat.DrawLatex(0.20,0.72, '#splitline{H #rightarrow #gamma*#gamma #rightarrow ll#gamma}{(#mu#mu#gamma and ee#gamma)}')
   else:
     if lep=="mu":
-      lat.DrawLatex(0.18,0.95, 'H #rightarrow#gamma*#gamma#rightarrow #mu#mu#gamma  CAT: '+opt.cat)
+      lat.DrawLatex(0.20,0.75, 'H #rightarrow #gamma*#gamma #rightarrow #mu#mu#gamma')
     elif lep=="el":
-      lat.DrawLatex(0.18,0.95, 'H #rightarrow#gamma*#gamma#rightarrow #font[32]{ee}#gamma  CAT: '+opt.cat)
-  CMS_lumi(c, 2, 11)
+      lat.DrawLatex(0.20,0.75, 'H #rightarrow #gamma*#gamma #rightarrow ee#gamma')
+  #CMS_lumi(c, 2, 11, "")
 
   leg = TLegend(0.50,0.68,0.75,0.88)
   if doObs:
-    leg.AddEntry(observed,"Observed", "l")
+    leg = TLegend(0.50,0.66,0.75,0.89)
+    if opt.mll:
+      leg.AddEntry(observed,"Observed", "p")
+    else:
+      leg.AddEntry(observed,"Observed", "l")
   leg.AddEntry(expected,"Expected", "l")
   leg.AddEntry(oneSigma,"Expected #pm 1#sigma", "f")
   leg.AddEntry(twoSigma,"Expected #pm 2#sigma", "f")
 
-  selection = TLatex()
-  if "mu" in s:
-    selection = TLatex(0.70,0.95, "#mu#mu selection");
-    selection.SetTextColor(kBlue-3);
-  elif "el" in s:
-    selection = TLatex(0.70,0.95, "#font[32]{ee} selection");
-    selection.SetTextColor(kGreen-3);
-
+  #selection = TLatex()
+  #if "mu" in s:
+  #  selection = TLatex(0.70,0.95, "#mu#mu selection");
+  #  selection.SetTextColor(kBlue-3);
+  #elif "el" in s:
+  #  selection = TLatex(0.70,0.95, "#font[32]{ee} selection");
+  #  selection.SetTextColor(kGreen-3);
   #selection.SetNDC();
   #selection.Draw();
 
+  leg.SetTextFont(42)
   leg.SetTextSize(0.04)
   leg.SetFillColor(kWhite)
   leg.Draw()
@@ -287,6 +319,8 @@ if __name__ == "__main__":
     g = f.Get('csbr_mu')
     for i in range(g.GetN()):
       g.GetY()[i] *= 10
+      if opt.lep=='el':
+        g.GetY()[i] *= 1.38 # fudge factor for the eletron channel
 
     #fit = g.GetFunction('pol4')
     #fit.Print()
@@ -303,21 +337,43 @@ if __name__ == "__main__":
   elif not opt.br:
     l = TLine(120, 1, 150, 1)
     l.SetLineColor(kRed+2)
-    l.SetLineStyle(21)
+    l.SetLineWidth(2)
+    #l.SetLineStyle(21)
     l.Draw()
   elif opt.mll:
     leg.SetY1NDC(0.64)
-    leg.AddEntry(standardM,"10 #times SM Higgs", "lp")
+    leg.AddEntry(standardM,"10 #times SM", "lp")
 
 
   for e in ['.png', '.pdf']:
-    CMS_lumi(c, 2, 11)
-    if opt.mll:
-      c.SaveAs(plotBase+'/Limits/limits_Mll'+e)
+    CMS_lumi(c, 2, 11, "")
+    limitDir = plotBase+'/Limits'
+    if opt.br:
+      limitDir = plotBase+'/Limits-xsBr'
+
+    u.createDir(limitDir)
+
+    if opt.mll and opt.divide:
+      c.SaveAs(limitDir+'/limits_Mll_dM'+e)
+    elif opt.mll:
+      c.SaveAs(limitDir+'/limits_Mll'+e)
     else:
-      c.SaveAs(plotBase+'/Limits/limits_cat_'+suff+e)
+      c.SaveAs(limitDir+'/limits_cat_'+suff+e)
 
   out.cd()
   observed.Write("observed")
   expected.Write("expected")
   oneSigma.Write("oneSigma")
+
+
+
+  comments = ['Limits and fits']
+  defaultPage = 'BestFits'
+
+  plot_types =[]
+  dirlist = os.listdir(plotBase)
+  for d in dirlist:
+    if os.path.isdir(plotBase+"/"+d):
+      plot_types.append(d)
+  ht.makeHTML("h &rarr; dalitz decay plots", plotBase, plot_types, comments, defaultPage, doYields=False)
+

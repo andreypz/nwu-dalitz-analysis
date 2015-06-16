@@ -52,8 +52,10 @@ for i, row in enumerate(spamReader):
 
 print 'The end of CSV file reader'
 
-sig = 'WH'
-m = '125.0'
-print 'xs =    ', xsDict[YR][TeV][sig][m]
-print 'scale = ', xsScaleErrDict[YR][TeV][sig][m]
-print 'pdf =   ', xsPDFErrDict[YR][TeV][sig][m]
+if __name__ == "__main__":
+
+  sig = 'WH'
+  m = '125.0'
+  print 'xs =    ', xsDict[YR][TeV][sig][m]
+  print 'scale = ', xsScaleErrDict[YR][TeV][sig][m]
+  print 'pdf =   ', xsPDFErrDict[YR][TeV][sig][m]

@@ -7,14 +7,13 @@ sys.path.append("../zgamma")
 sys.path.append("../scripts")
 from xsBrReader import *
 import utils as u
-from apzFitProducer import AutoVivification
 from optparse import OptionParser
 parser = OptionParser(usage="usage: %prog  [options --brSyst 1.20]")
 parser.add_option("--brSyst", dest="brSyst", default='1.10', help="error on the branching ratio")
 parser.add_option("-b", dest="bach", action="store_true", default=True, help="batch")
 parser.add_option("--ext",dest="ext", action="store_true", default=False, help="Extended pdf for bkg")
 parser.add_option("--br",dest="br", action="store_true", default=False, help="Do the limit on BR*cs instead of the mu")
-(options, args) = parser.parse_args()
+(opt, args) = parser.parse_args()
 
 import ConfigParser as cp
 cf = cp.ConfigParser()
@@ -28,16 +27,20 @@ s = cf.get("path","ver")
 # ################################################
 
 massList   = ['%.1f'%(a) for a in u.drange(120,150,1.0)]
-#massList = ['125.0']
+sigNameList= [a.strip() for a in (cf.get("fits","signameList")).split(',')]
+hjp = 0
+if 'hjp' in sigNameList:
+  hjp = 1
+  massList = ['125.0']
 
 brTag = ''
 
-Ext = options.ext
+Ext = opt.ext
 
 brLLG = '1.10'
 # Unsertainities to be put in the datacard:
 lumi     = '1.026'
-elID     = '1.100'
+elID     = '1.035'
 muID     = '1.110'
 muISO    = '1.003'
 muTRIG   = '1.040'
@@ -45,12 +48,13 @@ phoID    = '1.006'
 phoTRIG_mu = '1.020'
 phoTRIG_el = '1.020'
 PU       = '1.008'
-meanUnc  = '0.001'
-sigmaUnc = '0.100'
+meanUnc  = {'mu':'0.001', 'el':'0.005'}
+sigmaUnc = {'mu':'0.100', 'el':'0.100'}
 
 yearToTeV ={'2011':'7TeV', '2012':'8TeV'}
 proc = {'gg':'ggH', 'vbf':'qqH','v':'VH','hjp':'hjp'}
-prYR = {'gg':'ggF', 'vbf':'VBF','v':'VH'}
+#proc = {'gg':'ggH', 'vbf':'qqH','v':'WH','hjp':'hjp'}
+#prYR = {'gg':'ggF', 'vbf':'VBF','v':'WH'}
 mllBins = u.mllBins()
 
 #csBR = {}
@@ -67,7 +71,7 @@ introMessage = ('# This is a card produced by a cardMaker.py script using the in
                   '# Normalization (yields) for the signal are taken from that workspace.\n')
 
 
-if options.br:
+if opt.br:
   f = TFile('../data/Dalitz_BR20.root','READ')
   g = f.Get('csbr_mu')
   fit = g.GetFunction('pol4')
@@ -77,19 +81,17 @@ def makeCards(subdir):
   yearList   = [a.strip() for a in (cf.get("fits","yearList")).split(',')]
   leptonList = [a.strip() for a in (cf.get("fits","leptonList")).split(',')]
   catList    = [a.strip() for a in (cf.get("fits","catList")).split(',')]
-  sigNameList= [a.strip() for a in (cf.get("fits","signameList")).split(',')]
-  hjp = 0
-  if 'hjp' in sigNameList:  hjp = 1
-
   for year in yearList:
-    for lepton in leptonList:
+    for lep in leptonList:
       for cat in catList:
+        if lep=='el' and cat!='EB': continue
         bgFileName = subdir+'/testCardBackground_Dalitz.root'
         bgFile = TFile(bgFileName)
         bgWs   = bgFile.Get('ws_card')
         bgWs.Print()
 
-        channel = '_'.join([lepton,year,'cat'+cat])
+        channel = '_'.join([lep,year,'cat'+cat])
+        print channel
         #bkgParams = ['sigma','mean','tau','norm']
         if hjp:
           bkgParams = ['p1','p2','norm']
@@ -97,32 +99,42 @@ def makeCards(subdir):
           bkgParams = ['p1','p2','p3','p4','norm']
 
         for mass in massList:
+          if cat in ['m1','m2','m3','m4','m5','m6','m7'] and (mass!='125.0' or not opt.br): continue
 
-          sigFileName = subdir+'/'+'_'.join(['SignalOutput',lepton,year,'cat'+cat,mass])+'.root'
+          sigFileName = subdir+'/'+'_'.join(['SignalOutput',lep,year,'cat'+cat,mass])+'.root'
           sigFile = TFile(sigFileName)
           sigWs = sigFile.Get('ws_card')
+          #sigWs.Print()
 
-          procList  = [proc[a] for a in sigNameList]
-          if lepton=='el': procList.remove('VH')
-          print procList
+          procList  = []
+          for s in sigNameList:
+            if lep=='el' and s=='v': continue
+            elif cat in ['m1','m2','m3','m4','m5','m6','m7'] and s!='gg': continue
+            elif s=='v':
+              procList.extend(['WH','ZH'])
+            else:
+              procList.append(proc[s])
 
-          if options.br:
+          if opt.br:
             if hjp:
               procList=['hjp']
             else:
               procList=['ggH']
 
+          print 'List of procs:', procList
+
           nProc = len(procList)
           # print procList
-          #if options.br and float(mass)%5!=0:
+          #if opt.br and float(mass)%5!=0:
           #  print "Sorry can't do this with those mass points yet, ",mass
           #  sys.exit(0)
 
           #  croDict = {a:float(u.conf.get(a+"H-"+mass[0:3], "cs-mu")) for a in sigNameList}
           #  print croDict
-
-          u.createDir(subdir+'/output_cards/')
-          card = open(subdir+'/output_cards/'+'_'.join(['hzg',lepton,year,'cat'+cat,'M'+mass,'Dalitz',brTag])+'.txt','w')
+          if opt.br: outCardDir = '/output_cards_xsbr/'
+          else: outCardDir = '/output_cards/'
+          u.createDir(subdir+outCardDir)
+          card = open(subdir+outCardDir+'_'.join(['hzg',lep,year,'cat'+cat,'M'+mass,'Dalitz',brTag])+'.txt','w')
 
           card.write(introMessage)
           card.write('imax *\n')
@@ -132,7 +144,13 @@ def makeCards(subdir):
           card.write('shapes {0:<8} * {1:<20} ws_card:$PROCESS_$CHANNEL\n'.format('*',bgFileName))
           card.write('shapes {0:<8} * {1:<20} ws_card:bkg_$CHANNEL\n'.format('bkg',bgFileName))
           for sig in sigNameList:
-            card.write('shapes {0:<8} * {1:<20} ws_card:{2}_$CHANNEL\n'.format(proc[sig],sigFileName,'sig_'+sig))
+            if sig=='v' and lep=='el': continue
+            if opt.br and sig!='gg' and sig!='hjp': continue
+            elif sig=='v':
+              card.write('shapes {0:<8} * {1:<20} ws_card:{2}_$CHANNEL\n'.format('ZH',sigFileName,'sig_'+sig))
+              card.write('shapes {0:<8} * {1:<20} ws_card:{2}_$CHANNEL\n'.format('WH',sigFileName,'sig_'+sig))
+            else:
+              card.write('shapes {0:<8} * {1:<20} ws_card:{2}_$CHANNEL\n'.format(proc[sig],sigFileName,'sig_'+sig))
 
           card.write('---------------\n')
           bgYield = bgWs.var('data_yield_'+channel).getVal()
@@ -165,22 +183,32 @@ def makeCards(subdir):
           card.write('--------------------------------------------------------------\n')
           sigYields = []
           for s in sigNameList[::-1]:
-            if lepton=='el' and s=='v': continue
+            if lep=='el' and s=='v': continue
+            if opt.br and s!='gg' and s!='hjp': continue
             cs = 1
-            if options.br:
+            if opt.br:
               if hjp:
                 cs = u.getCS("HtoJPsiGamma")
               else:
                 cs = fit(float(mass))
                 if cat in ['m1','m2','m3','m4','m5','m6','m7']:
                   cs = cs*mllBins[int(cat[1])][1]
-                  print '\t Category:', cat, '  signal:', s
-                  print 'from the fit', fit(float(mass))
-                  print 'from csbr:', cs
+                print '\t Category:', cat, '  signal:', s
+                print 'from the fit', fit(float(mass))
+                print 'from csbr:', cs
 
-            print mass, s, lepton, 'cs for scale=', cs
-            #sigYields.append(sigWs.var('sig_'+s+'_yield_'+channel).getVal()*cs)
-            sigYields.append(round(sigWs.var('sig_'+s+'_yield_'+channel).getVal() /cs, 4))
+            print mass, s, lep, 'cs for scale=', cs
+
+            procYield = sigWs.var('sig_'+s+'_yield_'+channel).getVal()/cs
+
+            if s=='v':
+              zh_frac = float(xsDict[YR][TeV]['ZH'][mass])/(float(xsDict[YR][TeV]['ZH'][mass])+float(xsDict[YR][TeV]['WH'][mass]))
+              wh_frac = 1-zh_frac
+              print s, ' ZH fraction =', zh_frac, '  WH fraction =',wh_frac
+              sigYields.append('%.4f'%(procYield*zh_frac))
+              sigYields.append('%.4f'%(procYield*wh_frac))
+            else:
+              sigYields.append('%.4f'%procYield)
 
           print 'mh =', mass, sigYields
           sigRate = sigYields
@@ -196,20 +224,30 @@ def makeCards(subdir):
             # after mH=140 the syst only available with 1GeV intervals
             mmm = mass[0:4]+'0'
 
-          if not options.br:
-            card.write(nSubLine2.format(*(['CMS_hllg_brLLG', 'lnN']+nProc*[brLLG])))
-            if lepton!='el':
-              print 'not here'
-              card.write('pdf_ZH        lnN     '+xsPDFErrDict['YR3'][yearToTeV[year]]['ZH'][mmm]+'  -  -   -  \n')
-              card.write('QCDscale_ZH   lnN     '+xsScaleErrDict['YR3'][yearToTeV[year]]['ZH'][mmm]+'  -  -   -  \n')
-            card.write('pdf_qqH       lnN     -   '+xsPDFErrDict['YR3'][yearToTeV[year]]['VBF'][mmm]+' -  -  \n')
-            card.write('QCDscale_qqH  lnN     -   '+xsScaleErrDict['YR3'][yearToTeV[year]]['VBF'][mmm]+' -  -  \n')
-            card.write('pdf_ggH       lnN     -   -  '+xsPDFErrDict['YR3'][yearToTeV[year]]['ggF'][mmm]+'  -  \n')
-            card.write('QCDscale_ggH  lnN     -   -  '+xsScaleErrDict['YR3'][yearToTeV[year]]['ggF'][mmm]+'  -  \n')
+            print xsDict[YR][TeV][sig][m]
 
-          if lepton=='mu':
+          if not opt.br:
+            card.write(nSubLine2.format(*(['CMS_hllg_brLLG', 'lnN']+nProc*[brLLG])))
+
+            if lep=='el':
+              card.write('pdf_qqbar     lnN       '+xsPDFErrDict['YR3'][yearToTeV[year]]['VBF'][mmm]+' -  -  \n')
+              card.write('QCDscale_qqH  lnN       '+xsScaleErrDict['YR3'][yearToTeV[year]]['VBF'][mmm]+' -  -  \n')
+              card.write('pdf_gg        lnN       -  '+xsPDFErrDict['YR3'][yearToTeV[year]]['ggF'][mmm]+'  -  \n')
+              card.write('QCDscale_ggH  lnN       -  '+xsScaleErrDict['YR3'][yearToTeV[year]]['ggF'][mmm]+'  -  \n')
+            else:
+              card.write('QCDscale_ZH   lnN     '+xsScaleErrDict['YR3'][yearToTeV[year]]['ZH'][mmm]+'  - -  -   -  \n')
+              card.write('QCDscale_WH   lnN     - '+xsScaleErrDict['YR3'][yearToTeV[year]]['WH'][mmm]+'  -  -   -  \n')
+              card.write('pdf_qqbar     lnN     '+
+                         xsPDFErrDict['YR3'][yearToTeV[year]]['ZH'][mmm]+' '+
+                         xsPDFErrDict['YR3'][yearToTeV[year]]['WH'][mmm]+' '+
+                         xsPDFErrDict['YR3'][yearToTeV[year]]['VBF'][mmm]+' -  -  \n')
+              card.write('QCDscale_qqH  lnN      - - '+xsScaleErrDict['YR3'][yearToTeV[year]]['VBF'][mmm]+' -  -  \n')
+              card.write('pdf_gg        lnN      - - -  '+xsPDFErrDict['YR3'][yearToTeV[year]]['ggF'][mmm]+'  -  \n')
+              card.write('QCDscale_ggH  lnN      - - -  '+xsScaleErrDict['YR3'][yearToTeV[year]]['ggF'][mmm]+'  -  \n')
+
+          if lep=='mu':
             card.write(nSubLine2.format(*(['CMS_eff_m',   'lnN']+nProc*[muID])))
-            card.write(nSubLine2.format(*(['CMS_eff_m_ISO',  'lnN']+nProc*[muISO])))
+            #card.write(nSubLine2.format(*(['CMS_eff_m_ISO',  'lnN']+nProc*[muISO])))
             card.write(nSubLine2.format(*(['CMS_eff_m_MuEgTRIG', 'lnN']+nProc*[muTRIG])))
             card.write(nSubLine2.format(*(['CMS_eff_g',   'lnN']+nProc*[phoID])))
             card.write(nSubLine2.format(*(['CMS_eff_g_MuEgTRIG', 'lnN']+nProc*[phoTRIG_mu])))
@@ -222,8 +260,9 @@ def makeCards(subdir):
           card.write(nSubLine2.format(*(['CMS_hllg_PU',    'lnN']+nProc*[PU])))
 
           for sig in sigNameList:
-            card.write('{0:<40} {1:<10} {2:^10} {3:^10}\n'.format('sig_'+sig+'_mShift_'    +channel,'param', 1, meanUnc))
-            card.write('{0:<40} {1:<10} {2:^10} {3:^10}\n'.format('sig_'+sig+'_sigmaShift_'+channel,'param', 1, sigmaUnc))
+            if lep=='el' and sig=='v': continue
+            card.write('{0:<40} {1:<10} {2:^10} {3:^10}\n'.format('sig_'+sig+'_mShift_'    +channel,'param', 1, meanUnc[lep]))
+            card.write('{0:<40} {1:<10} {2:^10} {3:^10}\n'.format('sig_'+sig+'_sigmaShift_'+channel,'param', 1, sigmaUnc[lep]))
 
           for param in bkgParams[:-1]:
             card.write('{0:<45} {1:<15}\n'.format('bkg_'+param+'_'+channel,'flatParam'))

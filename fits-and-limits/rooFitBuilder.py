@@ -470,14 +470,14 @@ class FitBuilder:
     SetOwnership(tail,0)
     return SechBern5
 
-  def BuildExp(self,tau = 1, tauLow = -50, tauHigh = 50):
+  def BuildExp(self,tau = -1, tauLow = -50, tauHigh = 5):
 
     tauVar = RooRealVar('tauExp_'+self.suffix,'tauExp_'+self.suffix,tau,tauLow,tauHigh)
     Exp = RooExponential('Exp_'+self.suffix,'Exp_'+self.suffix,self.mzg,tauVar)
     SetOwnership(tauVar,0)
     return Exp
 
-  def BuildPow(self,alpha = 115, alphaLow = -20, alphaHigh = 200, beta = 3, betaLow = -20, betaHigh = 20):
+  def BuildPow(self,alpha = 115, alphaLow = 0, alphaHigh = 200, beta = 3, betaLow = 0, betaHigh = 6):
 
     alphaVar = RooRealVar('alphaPow_'+self.suffix,'alphaPow_'+self.suffix,alpha,alphaLow,alphaHigh)
     betaVar = RooRealVar('betaPow_'+self.suffix,'betaPow_'+self.suffix,beta,betaLow,betaHigh)

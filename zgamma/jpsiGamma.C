@@ -19,7 +19,7 @@ UInt_t nEventsTrig[nC][ntrig];
 
 string  myTrigger = "";
 Float_t cut_l1pt  = 23;
-Float_t cut_l2pt  = 7, cut_l2pt_low = 4;
+Float_t cut_l2pt  = 4;
 const Float_t cut_iso_mu1 = 0.4, cut_iso_mu2=0;
 Float_t cut_gammapt = 25;
 Float_t mllMax = 25;
@@ -247,7 +247,6 @@ Bool_t jpsiGamma::Process(Long64_t entry)
   Float_t genMll = 0;
   Float_t gendR  = 0;
 
-
   if(!isRealData){
     //Int_t ZID = 3000001; //made-up particle that decays to l+l-
     Int_t A = 25;
@@ -306,7 +305,7 @@ Bool_t jpsiGamma::Process(Long64_t entry)
 
 
       //PHOTON from the Higgs
-      if (sample=="dalitz" && thisParticle->GetPDGId()==22 && thisParticle->GetStatus()==1
+      if ((sample=="dalitz" || sample=="hjp") && thisParticle->GetPDGId()==22 && thisParticle->GetStatus()==1
 	  //&& ObjID->GetPrimaryAncestor(thisParticle)->GetPDGId()==A
 	  && thisParticle->Mother() &&  abs(thisParticle->Mother()->GetPDGId())!=13 && abs(thisParticle->Mother()->GetPDGId())!=11)
 	{
@@ -380,10 +379,11 @@ Bool_t jpsiGamma::Process(Long64_t entry)
     hists->fill1DHist(fsr_el_count, "gen_el_fsrcount",";gen el FSR",  4, 0,4, 1,"GEN");
 
 
-    if(selection=="mu" && makeGen){
+
+    if(selection=="mugamma" && makeGen){
       if (gen_mu.size()!=2) return kTRUE;
-      //Abort(Form("ev #%i NONONO There has to be exactly 2 muons from the Higgs! \n \t\t but there are %i",
-      //eventNumber, (int)gen_mu.size()));
+	//Abort(Form("ev #%i NONONO There has to be exactly 2 muons from the Higgs! \n \t\t but there are %i",
+	//	   (int)eventNumber, (int)gen_mu.size()));
 
 
       gen_lPt1 = gen_mu[0];
@@ -403,17 +403,20 @@ Bool_t jpsiGamma::Process(Long64_t entry)
 	Abort("They are the same charge!");
 
 
+      gendR  = gen_l1.DeltaR(gen_l2);
+      genMll = (gen_l1+gen_l2).M();
+
       //cout<<"\t\t event = "<<eventNumber<<"  "<<endl;
       //cout<<" charge = "<<gen_l1.Charge()<<" pt = "<<gen_l1.Pt()<<" eta="<<gen_l1.Eta()<<" phi="<<gen_l1.Phi()<<endl;
       //cout<<" charge = "<<gen_l2.Charge()<<" pt = "<<gen_l2.Pt()<<" eta="<<gen_l2.Eta()<<" phi="<<gen_l2.Phi()<<endl;
 
 
-      if (gen_el.size()!=2 && gen_mu.size()!=2)
-	Abort(Form("  - - WARNING - -\n ev #%i What's up with that?\n There should be exact two leptons from Higgs. Insteat there %i",
-		   (int)eventNumber, (int)(gen_el.size() + gen_mu.size())));
+      if (gen_el.size()!=2 && gen_mu.size()!=2) return kTRUE;
+	//Abort(Form("  - - WARNING - -\n ev #%i What's up with that?\n There should be exact two leptons from Higgs. Insteat there %i",
+	//(int)eventNumber, (int)(gen_el.size() + gen_mu.size())));
 
-      if (gen_gamma.E()==0 && sample=="dalitz")// return kTRUE;
-	Abort(Form("%i: No gen gamma in an event? that sounds bad",(int)eventNumber));//return kTRUE;
+      if (gen_gamma.E()==0 && (sample=="dalitz" || sample=="hjp")) return kTRUE;
+	  //Abort(Form("%i: No gen gamma in an event? that sounds bad",(int)eventNumber));
 
 
       //ZGAnlgles:
@@ -424,17 +427,32 @@ Bool_t jpsiGamma::Process(Long64_t entry)
 	  ang->GetAngles(gen_l1, gen_l2, gen_gamma, co1,co2,phi,co3);
 	  //cout<<eventNumber<<" gen Angles: c1= "<<co1<<"  c2="<<co2<<"   phi="<<phi<<"   coTh="<<co3<<endl;
 
-	  hists->fill1DHist(co1, "gen_co1",";gen cos_lp",  100,-1,1, 1,"GEN");
-	  hists->fill1DHist(co2, "gen_co2",";gen cos_lm",  100,-1,1, 1,"GEN");
-	  hists->fill1DHist(co3, "gen_co3",";gen cosTheta",100,-1,1, 1,"GEN");
-	  hists->fill1DHist(phi, "gen_phi",";gen phi lp",  100, -TMath::Pi(), TMath::Pi(), 1,"GEN");
+	  hists->fill1DHist(co1, "gen_co1",";gen cos_lp",  100,-1,1, 1,"GEN-ANG1");
+	  hists->fill1DHist(co2, "gen_co2",";gen cos_lm",  100,-1,1, 1,"GEN-ANG1");
+	  hists->fill1DHist(co3, "gen_co3",";gen cosTheta",100,-1,1, 1,"GEN-ANG1");
+	  hists->fill1DHist(phi, "gen_phi",";gen phi lp",  100, -TMath::Pi(), TMath::Pi(), 1,"GEN-ANG1");
 	}
+
+
+      if (!(gen_lPt1.Pt() > 23 && gen_lPt1.Pt() > 4 && (gen_lPt1 + gen_lPt2).Pt() > 40 && gen_gamma.Pt() > 40))
+	return kTRUE;
 
       FillHistoCounts(1, eventWeight);
       CountEvents(1,"Pass Gen acceptance",fcuts);
 
-      gendR  = gen_l1.DeltaR(gen_l2);
-      genMll = (gen_l1+gen_l2).M();
+      if (sample=="dalitz" || sample=="hjp" || sample=="zjp")
+	{
+	  double co1,co2,phi,co3;
+	  ang->GetAngles(gen_l1, gen_l2, gen_gamma, co1,co2,phi,co3);
+	  //cout<<eventNumber<<" gen Angles: c1= "<<co1<<"  c2="<<co2<<"   phi="<<phi<<"   coTh="<<co3<<endl;
+
+	  hists->fill1DHist(co1, "gen_co1",";gen cos_lp",  100,-1,1, 1,"GEN-ANG2");
+	  hists->fill1DHist(co2, "gen_co2",";gen cos_lm",  100,-1,1, 1,"GEN-ANG2");
+	  hists->fill1DHist(co3, "gen_co3",";gen cosTheta",100,-1,1, 1,"GEN-ANG2");
+	  hists->fill1DHist(phi, "gen_phi",";gen phi lp",  100, -TMath::Pi(), TMath::Pi(), 1,"GEN-ANG2");
+	}
+
+
 
       hists->fill1DHist(genMll,"gen_Mll",";gen m_{ll} (GeV)",100,0,mllMax, 1,"GEN");
 
@@ -450,7 +468,7 @@ Bool_t jpsiGamma::Process(Long64_t entry)
 
 	if(sample=="dalitz" &&
 	   gen_lPt1.Pt()>cut_l1pt && fabs(gen_lPt1.Eta())<2.4 &&
-	   gen_lPt2.Pt()>cut_l2pt_low && fabs(gen_lPt2.Eta())<2.4
+	   gen_lPt2.Pt()>cut_l2pt && fabs(gen_lPt2.Eta())<2.4
 	   ){
 	  hists->fill1DHist(genMll,  "gen_Mll_acc_lept",  ";gen_Mll",100,0,mllMax, 1,"eff");
 	  hists->fill1DHist(gendR,   "gen_dR_acc_lept",   ";gen_dR", 50,0,0.3,     1,"eff");
@@ -476,6 +494,7 @@ Bool_t jpsiGamma::Process(Long64_t entry)
 
     }
   }
+
 
   FillHistoCounts(2, eventWeight);
   CountEvents(2, "Acceptance", fcuts);
@@ -683,7 +702,7 @@ Bool_t jpsiGamma::Process(Long64_t entry)
 
   Double_t Mll = (l1+l2).M();
 
-  hists->fill1DHist(Mll,  Form("diLep_mass_low_cut%i", 3), ";M(ll)", 50, 0,20,  1, "");
+  hists->fill1DHist(Mll,  Form("diLep_mass_low_cut%i",  3),";M(ll)", 50, 0,20,  1, "");
   hists->fill1DHist(Mll,  Form("diLep_mass_high_cut%i", 3),";M(ll)", 50, 0,120, 1, "");
 
 
@@ -694,7 +713,7 @@ Bool_t jpsiGamma::Process(Long64_t entry)
 
   HM->MakePhotonPlots(gamma);
 
-  if (lPt1.Pt() < cut_l1pt || lPt2.Pt() < cut_l2pt_low)   return kTRUE;
+  if (lPt1.Pt() < cut_l1pt || lPt2.Pt() < cut_l2pt)   return kTRUE;
 
   //if (!isfinite(eventWeight))
   //cout<<"nan/inf "<<eventWeight<<endl;
@@ -792,20 +811,37 @@ Bool_t jpsiGamma::Process(Long64_t entry)
   }
 
 
-  //if (Mll<2.5 || Mll>3.7) return kTRUE;
+  if (Mll<2.5 || Mll>3.7) return kTRUE;
   HM->FillHistosFull(8, eventWeight);
   FillHistoCounts(8, eventWeight);
-  CountEvents(8, "no cut", fcuts);
-  //CountEvents(8, "J/Psi peak: [2.5, 3.7]", fcuts);
+  //CountEvents(8, "no cut", fcuts);
+  CountEvents(8, "Loose J/Psi: [2.5, 3.7]", fcuts);
+
+  //if ((l1+l2).Pt()/Mllg < 0.30 || gamma.Pt()/Mllg < 0.30)
+  if ((l1+l2).Pt() < 40 || gamma.Pt() < 40)
+    return kTRUE;
+  HM->FillHistosFull(9, eventWeight);
+  FillHistoCounts(9, eventWeight);
+  //CountEvents(9, "no cut", fcuts);
+  //CountEvents(9, "pT/m(llg) > 0.3", fcuts);
+  CountEvents(9, "pT > 40", fcuts);
+
+
+  if (Mll<2.9 || Mll>3.3) return kTRUE;
+  HM->FillHistosFull(10, eventWeight);
+  FillHistoCounts(10, eventWeight);
+  CountEvents(10, "Tight J/Psi: [2.9, 3.3]", fcuts);
 
   //global_Mll = Mll;
   HM->MakeMuonPlots(muons[0]);
   HM->MakeMuonPlots(muons[1]);
 
-  if (Mllg>76 && Mllg<106){
+  if (Mllg>110 && Mllg<150){
+    //if (Mllg>76 && Mllg<106){
     HM->FillHistosFull(15, eventWeight);
     FillHistoCounts(15, eventWeight);
-    CountEvents(15, "76 < mllg < 106", fcuts);
+    CountEvents(15, "110 < mllg < 150", fcuts);
+    //CountEvents(15, "76 < mllg < 106", fcuts);
   }
 
   if (Mllg>122 && Mllg<128){
@@ -816,7 +852,7 @@ Bool_t jpsiGamma::Process(Long64_t entry)
 
 
 
-  if(!isRealData && makeGen && sample=="dalitz"){
+  if(!isRealData && makeGen && sample=="hjp"){
     hists->fill1DHist(gen_l1.DeltaR(l1),"reco_gen_l1_deltaR","reco_gen_l1_deltaR",100,0,5, 1,"");
     hists->fill1DHist(gen_l2.DeltaR(l2),"reco_gen_l2_deltaR","reco_gen_l2_deltaR",100,0,5, 1,"");
 
@@ -829,7 +865,7 @@ Bool_t jpsiGamma::Process(Long64_t entry)
   }
 
 
-
+  /*
   if(!isRealData && makeGen){
     for (Int_t i = 1; i<=6; i++){
       if ((l1+l2).Pt()>20+i*5)
@@ -844,16 +880,7 @@ Bool_t jpsiGamma::Process(Long64_t entry)
 	hists->fill1DHist(genMll,  Form("gen_Mll_%i",24+i),";gen_Mll", 100,0,mllMax, 1,"eff");
     }
   }
-
-
-
-  if ((l1+l2).Pt()/Mllg < 0.30 || gamma.Pt()/Mllg < 0.30)
-  //if ((l1+l2).Pt() < 40 || gamma.Pt() < 40)
-    return kTRUE;
-  HM->FillHistosFull(10, eventWeight);
-  FillHistoCounts(10, eventWeight);
-  CountEvents(10, "pT/m(llh) > 0.3 and qT/m(llg) > 0.3", fcuts);
-  //CountEvents(10, "pT > 40 and qT > 40", fcuts);
+  */
 
 
   for (UInt_t i =0; i<ntrig; i++){
@@ -873,7 +900,7 @@ Bool_t jpsiGamma::Process(Long64_t entry)
 
   HM->FillHistosFull(12, eventWeight);
   FillHistoCounts(12, eventWeight);
-  CountEvents(12, "trigger", fcuts);
+  CountEvents(12, "trigger check", fcuts);
 
   //fout<<" nEvt = "<<nEvents[0]<<" : Run/lumi/event = "<<runNumber<<"/"<<lumiSection<<"/"<<eventNumber<<endl;
 
@@ -885,10 +912,10 @@ Bool_t jpsiGamma::Process(Long64_t entry)
     CountEvents(13, "76 < mllg < 106", fcuts);
   }
 
-  if (Mllg>122 && Mllg<128){
+  if (1){
     HM->FillHistosFull(14, eventWeight);
     FillHistoCounts(14, eventWeight);
-    CountEvents(14, "122 < mllg < 128", fcuts);
+    CountEvents(14, "no cut", fcuts);
   }
 
 

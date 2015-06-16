@@ -33,8 +33,8 @@ const string pho26OR[6] = {
 UInt_t nEventsTrig[nC][ntrig];
 
 string  myTrigger = "";
-Float_t cut_l1pt  = 20;
-Float_t cut_l2pt  = 5;
+Float_t cut_l1pt  = 10;
+Float_t cut_l2pt  = 1;
 Float_t cut_gammapt = 25;
 Float_t mllMax = 25;
 
@@ -316,7 +316,7 @@ Bool_t egamma::Process(Long64_t entry)
     hists->fill1DHist(fsr_el_count, "gen_el_fsrcount",";gen el FSR",  4, 0,4, 1,"GEN");
 
 
-    if(selection=="el"){
+    if(selection=="elgamma"){
       if (gen_el.size()!=2) return kTRUE;
       //Abort(Form("ev #%i NONONO There has to be exactly 2 muons from the Higgs! \n \t\t but there are %i", eventNumber, (int)gen_el.size()));
 
@@ -371,13 +371,16 @@ Bool_t egamma::Process(Long64_t entry)
     gendR  = gen_l1.DeltaR(gen_l2);
     genMll = (gen_l1+gen_l2).M();
 
+    hists->fill1DHist(genMll,"gen_Mll_init",";gen_Mll",50,0,20, 1,"GEN");
+    hists->fill1DHist(genMll,"gen_Mll_init_b40",";gen_Mll",40,0,20, 1,"GEN");
+
     hists->fill1DHist(genMll,"gen_Mll_0",";gen_Mll",100,0,mllMax, 1,"eff");
     hists->fill1DHist(gendR, "gen_dR_0", ";gen_dR", 50,0,0.3,1,"eff");
     hists->fillProfile(gendR, genMll, "gen_Mll_vs_dR", ";dR(l1,l2);M(l1,l2)", 100, 0, 0.5, 0, 20, 1,"eff");
 
 
     //Acceptance study (do not erase!)
-    if (sample =="dalitz" && gen_gamma.Pt()>cut_gammapt && fabs(gen_gamma.Eta())<2.5){
+    if (sample =="dalitz" && gen_gamma.Pt()>cut_gammapt && fabs(gen_gamma.Eta())<1.44){
       hists->fill1DHist(genMll, "gen_Mll_acc_gamma",";gen_Mll",100,0,mllMax, 1,"eff");
       hists->fill1DHist(gendR,  "gen_dR_acc_gamma", ";gen_dR", 50,0,0.3,1,"eff");
 
@@ -441,8 +444,8 @@ Bool_t egamma::Process(Long64_t entry)
     if (fabs(thisPhoton->SCEta()) > 1.5) continue;
 
     if(thisPhoton->Pt() > 15){
-      if (isRealData || !makeGen || (sample=="dalitz" && makeGen && gen_gamma.DeltaR(*thisPhoton) < 0.1) )
-	photons0.push_back(*thisPhoton);
+      // if (isRealData || !makeGen || (sample=="dalitz" && makeGen && gen_gamma.DeltaR(*thisPhoton) < 0.4) )
+      photons0.push_back(*thisPhoton);
     }
   }
 
@@ -456,7 +459,7 @@ Bool_t egamma::Process(Long64_t entry)
       //thisElec->DeltaR(gamma) > 0.2 ) {
 
       if(isRealData || !makeGen ||
-	 ( selection=="el" && makeGen && (gen_l1.DeltaR(*thisElec) < 0.1 || gen_l2.DeltaR(*thisElec)<0.1)  && thisElec->Pt()>10))
+	 ( selection=="elgamma" && makeGen && (gen_l1.DeltaR(*thisElec) < 0.1 || gen_l2.DeltaR(*thisElec)<0.1)  && thisElec->Pt()>10))
 	{
 	  if (ObjID->PassElectronIdAndIsoMVA(*thisElec)){
 	    thisElec->SetIdMap("mvaScore", -99);
@@ -558,6 +561,8 @@ Bool_t egamma::Process(Long64_t entry)
 
   vector<TCElectron::Track> trk = DALE.GetTracks();
   sort(trk.begin(), trk.end(), P4SortCondition);
+  //vector<TCEGamma> sc = thisElec->BaseSC();
+  //sort(sc.begin(),  sc.end(),  SCESortCondition);
 
   /*
     float xx[6] = {-1,-1,-1,-1,-1,-1};
@@ -576,17 +581,16 @@ Bool_t egamma::Process(Long64_t entry)
     xx[5] = cI.nHitsMax;
   */
 
-  l1 = trk[0];
-  l2 = trk[1];
+  l1 = trk[0];  l2 = trk[1];
+  lPt1 = l1;    lPt2 = l2;
 
-  if (l1.Pt() > l2.Pt()){
-    lPt1 = l1; lPt2 = l2;}
-  else {lPt1 = l2; lPt2 = l1;}
+  if (l1.Pt() < l2.Pt())
+    Abort("Warinng: GSF tracks are  not ordered in pt!");
 
   HM->SetLeptons(lPt1, lPt2);
 
-  if (DALE.BaseSC()[0].Pt()<DALE.BaseSC()[1].Pt())
-    cout<<"Warinng SC are  not ordered in pt!"<<endl;
+  //if (DALE.BaseSC()[0].Pt()<DALE.BaseSC()[1].Pt())
+  //  Abort("Warinng: SC are  not ordered in pt!");
 
   if (!l1.IdMap("GSF_PassConv")) return kTRUE;
   if (!l2.IdMap("GSF_PassConv")) return kTRUE;
@@ -597,7 +601,7 @@ Bool_t egamma::Process(Long64_t entry)
   FillHistoCounts(5, eventWeight);
   CountEvents(5,"Conv. Veto etc",fcuts);
 
-  for(Int_t ev=0; ev<evSize;ev++){
+  for(Int_t ev=0; ev<evSize; ev++){
     if (nEvents[0]-1 == hisEVTS[ev]){cout<<nEvents[0]-1<<" evNumber="<<eventNumber<<endl;
       cout<<"\t\t  Event is passed that cut!! \n"<<endl;
       break;}
@@ -610,6 +614,13 @@ Bool_t egamma::Process(Long64_t entry)
   FillHistoCounts(6, eventWeight);
   CountEvents(6,"pt1+pt2 > 44",fcuts);
   HM->MakeElectronPlots(DALE, "DalitzEle-cut6");
+
+  Float_t Mll   = (l1+l2).M();
+  if (Mll > 1.5) return kTRUE;
+
+  FillHistoCounts(7, eventWeight);
+  CountEvents(7, "m(ee) < 1.5",fcuts);
+
 
   Double_t scale1 = DALE.SCEnergy()/DALE.E();
   DALE.SetPxPyPzE(scale1*DALE.Px(), scale1*DALE.Py(),scale1*DALE.Pz(), DALE.SCEnergy());
@@ -718,13 +729,9 @@ Bool_t egamma::Process(Long64_t entry)
 
   //fout<<nEvents[0]-1<<endl;
 
-  HM->FillHistosFull(7, eventWeight);
-  FillHistoCounts(7, eventWeight);
-  CountEvents(7,"Photon pt>30; |eta|<1.4442",fcuts);
-
+  HM->FillHistosFull(8, eventWeight);
   FillHistoCounts(8, eventWeight);
-  CountEvents(8,"Eight",fcuts);
-
+  CountEvents(8,"Photon pt>30; |eta|<1.4442",fcuts);
 
 
   if (doZee){
@@ -896,7 +903,6 @@ Bool_t egamma::Process(Long64_t entry)
 
   Float_t MdalG = (DALE+gamma).M();
   Float_t Mllg  = (l1+l2+gamma).M();
-  Float_t Mll   = (l1+l2).M();
 
   if (makeApzTree){
     apz_w = eventWeight;

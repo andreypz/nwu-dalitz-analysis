@@ -20,8 +20,19 @@ lumi = lumi2012
 
 roundTo = 50.
 
-noOverflowList  = [a.strip() for a in (conf.get("selection","noOverflowList")).split(',')]
+noOverflowList = [a.strip() for a in (conf.get("selection","noOverflowList")).split(',')]
+makePdfList    = [a.strip() for a in (conf.get("selection","makePdfList")).split(',')]
+rebinList      = [a.strip() for a in (conf.get("selection","rebinList")).split(',')]
 print 'No-Overflow list = ', noOverflowList
+
+class AutoVivification(dict):
+  """Implementation of perl's autovivification feature."""
+  def __getitem__(self, item):
+    try:
+      return dict.__getitem__(self, item)
+    except KeyError:
+      value = self[item] = type(self)()
+      return value
 
 def mllBins():
   """First number is the mLL cut threshold, second number is the fraction of the cross section"""
@@ -243,7 +254,7 @@ def makeStack(bZip, histDir, histoName, leg, lumi, howToScale, normToScale=None)
       h.SetFillColor( int(getColors(n)[1]))
     elif howToScale == 'norm':
       if normh!=0: h.Scale(1./normh)
-    elif howToScale in ['toData','toDataInt'] and normToScale!=None:
+    elif howToScale in ['toData','toDataInt','toDataRel'] and normToScale!=None:
       if normh!=0: h.Scale(normToScale/normh)
     else:
       print 'Sorry, there must be a mistake, this norm is not supported: ',howToScale
@@ -260,8 +271,8 @@ def makeStack(bZip, histDir, histoName, leg, lumi, howToScale, normToScale=None)
   return hs
 
 
-def drawAllInFile(f1, name1, bZip, sZip, name3, myDir, path, N, howToScale="none", isLog=False, doRatio=False, doFits=False):
-  print 'myDir is ', myDir
+def drawAllInFile(f1, name1, bZip, sZip, name3, myDir, path, N, howToScale="toDataRel", isLog=False, doRatio=False, doFits=False):
+  print 'myDir is =', myDir
   if f1!=None and not f1.IsZombie():
     f1.cd(myDir)
   elif bZip!=None:
@@ -288,7 +299,7 @@ def drawAllInFile(f1, name1, bZip, sZip, name3, myDir, path, N, howToScale="none
   c1.cd()
   #c1.UseCurrentStyle()
 
-  doPdf=0
+  doPdf=1
   histoName = None
   for k in dirList:
     #print k
@@ -325,24 +336,29 @@ def drawAllInFile(f1, name1, bZip, sZip, name3, myDir, path, N, howToScale="none
       si = []
       for s in sZip:
         if myDir!="":
-          si.append(s[1].Get(myDir+"/"+histoName))
+          try:
+            si.append(s[1].Get(myDir+"/"+histoName).Clone())
+          except ReferenceError:
+            print 'WARNING: ',  histoName, '  does not exist in ', s[0]
         else:
-          si.append(s[1].Get(histoName))
+          si.append(s[1].Get(histoName).Clone())
           print myDir, histoName
         if si[-1]==None:
           print 'Histogram'+histoName+' does not exis in'+s[0]
           continue
 
         scale3 = 1
-        if si[-1]!=None:
+        if si[-1]!=None and howToScale!='norm':
           Nev = getTotalEvents(s[1])
-          if conf.get("selection","jp")=='1':
+
+          if conf.get("selection","jp")=='1' or 'Psi' in sZip[0][0]:
             cro = getCS("HtoJPsiGamma")
           else:
-            cro = getCS("ggH-"+s[0], getSelection()[:2])
+            cro = getCS(s[0], getSelection()[:2])
           scale3 = float(lumi*cro)/Nev
-        print Nev, lumi, cro, scale3
-        si[-1].Scale(float(scale3))
+
+          print s, Nev, lumi, cro, scale3
+          si[-1].Scale(float(scale3))
 
     print "\t Drawing", histoName
 
@@ -365,7 +381,8 @@ def drawAllInFile(f1, name1, bZip, sZip, name3, myDir, path, N, howToScale="none
           si[0].SetNdivisions(505,'X')
           si[0].SetNdivisions(505,'Y')
         CMS_lumi(c1, 2, 11)
-        c1.SaveAs(prename+"_sig_"+sZip[0][0]+".png")
+        c1.SaveAs(prename+"_sig.png")
+        #c1.SaveAs(prename+"_sig_"+sZip[0][0]+".png")
 
       continue
 
@@ -392,7 +409,7 @@ def drawAllInFile(f1, name1, bZip, sZip, name3, myDir, path, N, howToScale="none
       if f1!=None and h1!=None:
         #h1.Draw("hist")
         h1.SetMarkerStyle(20)
-        h1.SetMarkerSize(0.75)
+        h1.SetMarkerSize(1.)
         h1.SetLineColor(kBlack)
         norm1 = h1.Integral()
         if howToScale=='norm' and  norm1!=0:
@@ -418,9 +435,9 @@ def drawAllInFile(f1, name1, bZip, sZip, name3, myDir, path, N, howToScale="none
         leg.SetTextSize(0.05)
 
       if h1==None and bZip==None:
-        leg = TLegend(0.6,0.70,0.92,0.85)
+        leg = TLegend(0.58,0.66,0.92,0.87)
         leg.SetBorderSize(0)
-        leg.SetTextSize(0.03)
+        leg.SetTextSize(0.04)
 
       if bZip!=None and len(bZip)>1: # need more columns if there are backgrounds
         leg = TLegend(0.6,0.7,0.99,0.92)
@@ -434,7 +451,8 @@ def drawAllInFile(f1, name1, bZip, sZip, name3, myDir, path, N, howToScale="none
         if sZip!=None or bZip!=None:
           leg.AddEntry(h1,name1, "lpe")
         else:
-          leg.AddEntry(h1,name1, "f")
+          leg.AddEntry(h1,name1, "lpe")
+          #leg.AddEntry(h1,name1, "f")
 
       if bZip!=None:
         #print ' if bZip!=None'
@@ -445,28 +463,40 @@ def drawAllInFile(f1, name1, bZip, sZip, name3, myDir, path, N, howToScale="none
         if h1==None:
           mainHist=si[0]
 
-        norm3 = si[0].Integral()
         scale = 0
 
-        if howToScale=="lumi":
-          extract_scale_from_name = re.findall(r'\d+', name3)
-          # print "extract from name =", extract_from_name
-          if len(extract_scale_from_name) != 0:
-            scale = int(extract_scale_from_name[0])
-            si[0].Scale(scale)
-        elif howToScale=="norm" and norm3!=0:
-          for s in si: s.Scale(1./norm3)
-        elif howToScale=="toData" and norm3!=0:
-          for s in si: s.Scale(norm1/norm3)
-        elif howToScale=="toDataInt" and norm3!=0:
-          scale = int(norm1/norm3/roundTo)*roundTo
-          if scale==0: scale=200
-          for s in si: s.Scale(scale)
-          if h1==None:
-            leg.SetHeader('     '+str(int(scale))+' x SM Signal')
+        for s in si:
+          norm3 = s.Integral()
 
-        hmaxs.append(si[0].GetMaximum())
-        print si[0].GetMaximum()
+          if howToScale=="lumi":
+            extract_scale_from_name = re.findall(r'\d+', name3)
+            # print "extract from name =", extract_from_name
+            if len(extract_scale_from_name) != 0:
+              scale = int(extract_scale_from_name[0])
+            s.Scale(scale)
+
+          elif howToScale=="norm" and norm3!=0:
+            s.Scale(1./norm3)
+
+          elif howToScale=="toData" and norm3!=0:
+            s.Scale(norm1/norm3)
+
+          elif howToScale=="toDataInt" and norm3!=0:
+            scale = int(norm1/norm3/roundTo)*roundTo
+            if h1==None:
+              scale=10
+            s.Scale(scale)
+
+          elif howToScale=="toDataRel" and norm3!=0:
+            scale = int(norm1/norm3/roundTo)*roundTo
+            if h1==None:
+              scale=10
+              leg.SetHeader('     '+str(int(scale))+' x SM Signal')
+            s.Scale(scale)
+
+
+          hmaxs.append(s.GetMaximum())
+          print s, 's Hist maximum= ', s.GetMaximum()
         print howToScale, "norm1=%.3f, norm3=%.3f, roundTo=%.3f, scale=%.3f"%(norm1, norm3, roundTo, scale)
         # if 'tri_mass125' in histoName:
         #  si[0].Print('all')
@@ -485,7 +515,6 @@ def drawAllInFile(f1, name1, bZip, sZip, name3, myDir, path, N, howToScale="none
             h3.SetFillColor(col[1])
           else:
             h3.SetLineColor(40+j)
-            h3.SetLineWidth(2)
             #h3.SetLineStyle(2+j)
 
 
@@ -495,7 +524,13 @@ def drawAllInFile(f1, name1, bZip, sZip, name3, myDir, path, N, howToScale="none
             else:
               leg.AddEntry(h3,name3, "f")
           else:
-            leg.AddEntry(h3,' m_{H} = '+sZip[j][0]+' GeV', "l")
+            if howToScale=='toData':
+              leg.AddEntry(h3, sZip[j][0], "l")
+            elif 'LHE' in histoName:
+              leg.AddEntry(h3, sZip[j][0], "l")
+            else:
+              leg.AddEntry(h3, sZip[j][0], "l")
+              #leg.AddEntry(h3,' m_{H} = '+sZip[j][0][:3]+' GeV', "l")
 
         if doRatio:
           c1.cd()
@@ -524,8 +559,9 @@ def drawAllInFile(f1, name1, bZip, sZip, name3, myDir, path, N, howToScale="none
         mainHist.Draw('e1p')
       if sZip==None and bZip==None:
         #print 'Data only'
-        h1.SetFillColor(19)
-        mainHist.Draw('hist')
+        #h1.SetFillColor(19)
+        #mainHist.Draw('hist')
+        mainHist.Draw('e1p')
       #mainHist.Print()
 
       if bZip!=None:
@@ -544,38 +580,55 @@ def drawAllInFile(f1, name1, bZip, sZip, name3, myDir, path, N, howToScale="none
 
       if len(hmaxs)>0:
         m = max(hmaxs)
+        #m = mainHist.GetMaximum()
         mainHist.SetMaximum(1.2*m)
         if isLog:
           mainHist.SetMaximum(10*m)
       if howToScale == "norm":
         mainHist.GetYaxis().SetTitle("arbitrary units")
-      elif howToScale in ["toData",'toDataInt']:
+      elif howToScale in ["toData",'toDataInt','toDataRel']:
         mainHist.GetYaxis().SetTitle("Events")
-        mainHist.SetMaximum(int(1.1*m)+5)
+        #mainHist.SetMaximum(1.1*m)
+        #mainHist.SetMaximum(int(1.1*m)+5)
       else:
         mainHist.GetYaxis().SetTitle("Events")
 
       mainHist.SetMinimum(0)
+
+      #  ---
       # Here we consider particular cases (histograms) that need special care
-      # if "tri_mass_longTail" in histoName and howToScale=="lumi":
-      # h1.SetMaximum(750)
-      if h1!=None:
-        if 'tri_mass' in histoName:
-          blindIt(h1, 3)
-        if '_mDalG_' in histoName:
-          blindIt(h1, 4)
+
+      # Blinding the Data:
+      #if h1!=None:
+      #  if 'tri_mass' in histoName:
+      #    blindIt(h1, 3)
+      #  if '_mDalG_' in histoName:
+      #    blindIt(h1, 4)
 
       if histoName in ['LHE_diLep_mass_low', 'LHE_diLep_mass',
                        'LHE_dR_l1_l2','LHE_dR_l1_l2_low', 'LHE_dR_l1_l2_vlow']:
-        nBins = h1.GetNbinsX()
-        int1 = h1.Integral(int(0.25*nBins),nBins)
-        int3 = h3.Integral(int(0.25*nBins),nBins)
+        nBins = si[0].GetNbinsX()
+        int1 = si[0].Integral(int(0.25*nBins),nBins)
+        int3 = si[1].Integral(int(0.25*nBins),nBins)
         print histoName, nBins, int1, int3
-        h1.Scale(50./int1)
-        h3.Scale(50./int3)
-        mainHist.SetMaximum(1.2*h1.GetMaximum())
+        if int1!=0 and int3!=0:
+          si[0].Scale(50./int1)
+          si[1].Scale(50./int3)
+        mainHist.SetMaximum(1.2*si[0].GetMaximum())
         mainHist.SetNdivisions(505,'X')
         doPdf=1
+
+      if any(x in histoName for x in makePdfList):
+        doPdf = 1
+
+      if any(x in histoName for x in rebinList):
+        if sZip!=None and h1==None:
+          mainHist.SetMaximum(2.5*m)
+          for h in si:
+            h.Rebin(2)
+        else:
+          mainHist.Rebin(2)
+          mainHist.SetMaximum(2.1*mainHist.GetMaximum())
 
       if "phi" in histoName:
         if isLog:
@@ -585,24 +638,30 @@ def drawAllInFile(f1, name1, bZip, sZip, name3, myDir, path, N, howToScale="none
       if "ll_deltaR_" in histoName:
         if not 'el' in getSelection():
           mainHist.SetXTitle("#DeltaR(#mu_{1}, #mu_{2})")
-        doPdf=1
-      if "ptDaleOverGamma" in histoName:
-        doPdf=1
-      if "dale_pt" in histoName:
-        doPdf=1
+        else:
+          mainHist.SetAxisRange(0,0.2,"X")
+          mainHist.SetNdivisions(505,'X')
+          mainHist.SetXTitle("#DeltaR(e_{1}, e_{2})")
+          mainHist.SetMaximum(1.1*mainHist.GetMaximum())
+
+
       if "gamma_pt_" in histoName:
         mainHist.SetXTitle("Photon p_{T} (GeV)")
-        doPdf=1
+        mainHist.SetMaximum(1.1*mainHist.GetMaximum())
+
       if "lPt1_pt_" in histoName:
         if not 'el' in getSelection():
           mainHist.SetXTitle("Leading muon p_{T} (GeV)")
-        doPdf=1
+      if "lPt2_pt_" in histoName:
+        if not 'el' in getSelection():
+          mainHist.SetXTitle("Trailing muon p_{T} (GeV)")
+        mainHist.SetAxisRange(0,60,"X")
+
       if "gamma_deltaR" in histoName:
         mainHist.SetAxisRange(1,5,"X")
-        doPdf=1
+
       if "deltaR_dale_gamma" in histoName:
         mainHist.SetAxisRange(1,5,"X")
-        doPdf=1
 
 
       if "diLep_mass" in histoName:
@@ -613,13 +672,10 @@ def drawAllInFile(f1, name1, bZip, sZip, name3, myDir, path, N, howToScale="none
 
       if "diLep_mass_0to20" in histoName:
         mainHist.SetMaximum(1.2*mainHist.GetMaximum())
-        doPdf=1
       if "diLep_mass_jpsi" in histoName:
         mainHist.SetMaximum(1.1*mainHist.GetMaximum())
-        doPdf=1
       if "diLep_mass_low" in histoName:
         mainHist.SetMaximum(1.2*mainHist.GetMaximum())
-        doPdf=1
 
       if histoName in ['gen_co3','gen_phi']:
         mainHist.SetMaximum(0.04)
@@ -664,13 +720,6 @@ def drawAllInFile(f1, name1, bZip, sZip, name3, myDir, path, N, howToScale="none
           lat.DrawLatex(0.2,0.50, '#chi^{2} = %.0f'%(r.Chi2()))
           # print ' Fit parameters: ', r.Parameter(1), r.Parameter(2)
 
-      if "lPt2_pt_" in histoName:
-        if not 'el' in getSelection():
-          mainHist.SetXTitle("Trailing muon p_{T} (GeV)")
-        mm = mainHist.GetMaximum()
-        mainHist.SetMaximum(1.2*mm)
-        mainHist.SetAxisRange(0,60,"X")
-        doPdf=1
       '''
       if 'diLep_mass_jpsi_' in histoName:
         gStyle.SetOptStat(1111)
@@ -741,7 +790,7 @@ def drawAllInFile(f1, name1, bZip, sZip, name3, myDir, path, N, howToScale="none
       c1.SaveAs(path+"/"+histoName+'.png')
       if doPdf:
         c1.SaveAs(path+"/"+histoName+'.pdf')
-        doPdf=0
+        #doPdf=1
       gStyle.SetOptStat(0)
 
     c1.SetLogy(0)
@@ -887,7 +936,7 @@ def effPlots2(f1, path):
   bcol = 29
   ra[1].SetLineColor(bcol)
   ra[1].SetLineWidth(2)
-  leg = TLegend(0.70,0.65,0.95,0.98);
+  leg = TLegend(0.70,0.65,0.95,0.98)
   leg.AddEntry(ra[1],"pT(ll) > 25 GeV", "l")
   for a in xrange(2,7):
     ra[a].Draw('same hist')

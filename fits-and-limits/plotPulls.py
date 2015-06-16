@@ -2,37 +2,36 @@
 import sys,os
 from ROOT import *
 from collections import defaultdict
-from apzFitProducer import AutoVivification
 gROOT.SetBatch()
 sys.path.append("../zgamma")
+#gROOT.ProcessLine(".L ~/tdrstyle.C")
+#setTDRStyle()
 import utils as u
+from optparse import OptionParser
+parser2 = OptionParser(usage="usage: %prog [--opt]")
+parser2.add_option("--copy", dest="copy",  default=None, help="Directory where the results from Batch are stored. Will copy them in a #better place.")
+(opt, args) = parser2.parse_args()
+
+#from apzFitProducer import AutoVivification
 
 import ConfigParser as cp
 cf = cp.ConfigParser()
 cf.read('config.cfg')
 s = cf.get("path","ver")
-
-from optparse import OptionParser
-parser = OptionParser(usage="usage: %prog subdir")
-parser.add_option("--copy", dest="copy",  default=None,
-                  help="Directory where the results from Batch are stored. Will copy them in a better place.")
-(opt, args) = parser.parse_args()
-
-gROOT.ProcessLine(".L ~/tdrstyle.C")
-setTDRStyle()
 plotBase = cf.get("path","htmlbase")+'/html/zgamma/dalitz/fits-'+s+'/Pulls'
 #plotBase = '/tthome/andrey/html/zgamma/bias-mar11/'
-toysDir = '../biasToys-2014-Sep23'
+#toysDir = '../biasToys-2014-Sep23'
+toysDir = '../biasToys-2014-Dec08'
 
-sigMuDict = AutoVivification()
-taMuDict  = AutoVivification()
+sigMuDict = u.AutoVivification()
+taMuDict  = u.AutoVivification()
 
-#massList  = ['140','145','150']
+#massList  = ['120','125','130']
 massList     = [a.strip()[0:3] for a in (cf.get("fits","massList")).split(',')]
 sigNameList  = [a.strip() for a in (cf.get("fits","sigNameList")).split(',')]
 yearList     = [a.strip() for a in (cf.get("fits","yearList")).split(',')]
-leptonList   = [a.strip() for a in (cf.get("fits","leptonList")).split(',')]
-catList = ['EB']
+leptonList = ['mu']
+catList    = ['EB']
 
 genFuncList = ['Exp','Pow','Laurent']
 
@@ -128,37 +127,37 @@ def makePullPlots(year='2012', lepton='mu', genFunc='Exp', cat='EB', mass='125')
 
         if dist == 'sigPull':
           toyTree.Draw('('+fitFunc+'.yieldSig/'+fitFunc+'.yieldSigErr)>>'+dist+'_'+fitFunc ,cutStr,'goff')
-          tmpHist.SetTitle(mass+';nSig/#sigma(nSig);A.U.')
+          tmpHist.SetTitle('m_{H}='+mass+' GeV;nSig/#sigma(nSig);A.U.')
 
         elif dist == 'bgPull':
           toyTree.Draw('(('+fitFunc+'.yieldBkg - truth.yieldBkg)/'+fitFunc+'.yieldBkgErr)>>'+dist+'_'+fitFunc ,cutStr,'goff')
-          tmpHist.SetTitle(mass+';(nBG-nTrue)/#sigma(nBG);A.U.')
+          tmpHist.SetTitle('m_{H}='+mass+' GeV;(nBG-nTrue)/#sigma(nBG);A.U.')
         elif dist == 'bgPull-2':
           toyTree.Draw('(('+fitFunc+'.yieldBkg - truth.yieldBkg)/sqrt(truth.yieldBkg))>>'+dist+'_'+fitFunc ,cutStr,'goff')
-          tmpHist.SetTitle(mass+';(nBG-nTrue)/#sqrt{nTrue};A.U.')
+          tmpHist.SetTitle('m_{H}='+mass+' GeV;(nBG-nTrue)/#sqrt{nTrue};A.U.')
         elif dist == 'bgPull-3':
           toyTree.Draw('(('+fitFunc+'.yieldBkg - truth.yieldBkg)/sqrt('+fitFunc+'.yieldBkg))>>'+dist+'_'+fitFunc ,cutStr,'goff')
-          tmpHist.SetTitle(mass+';(nBG-nTrue)/#sqrt{nBG};A.U.')
+          tmpHist.SetTitle('m_{H}='+mass+' GeV;(nBG-nTrue)/#sqrt{nBG};A.U.')
 
         elif dist == 'nSig':
           toyTree.Draw('('+fitFunc+'.yieldSig)>>'+dist+'_'+fitFunc ,cutStr,'goff')
-          tmpHist.SetTitle(mass+';nSig;A.U.')
+          tmpHist.SetTitle('m_{H}='+mass+' GeV;nSig;A.U.')
 
         elif dist == 'nBG':
           toyTree.Draw('('+fitFunc+'.yieldBkg)>>'+dist+'_'+fitFunc ,cutStr,'goff')
-          tmpHist.SetTitle(mass+';nBG;A.U.')
+          tmpHist.SetTitle('m_{H}='+mass+' GeV;nBG;A.U.')
 
         elif dist == 'sigErr':
           toyTree.Draw('('+fitFunc+'.yieldSigErr)>>'+dist+'_'+fitFunc ,cutStr,'goff')
-          tmpHist.SetTitle(mass+';#sigma(nSig);A.U.')
+          tmpHist.SetTitle('m_{H}='+mass+' GeV;#sigma(nSig);A.U.')
 
         elif dist == 'bgErr':
           toyTree.Draw('('+fitFunc+'.yieldBkgErr)>>'+dist+'_'+fitFunc ,cutStr,'goff')
-          tmpHist.SetTitle(mass+';#sigma(nBG);A.U.')
+          tmpHist.SetTitle('m_{H}='+mass+' GeV;#sigma(nBG);A.U.')
 
         elif dist == 'typeA':
           toyTree.Draw('('+fitFunc+'.yieldSig/'+fitFunc+'.yieldBkgErr)>>'+dist+'_'+fitFunc ,cutStr,'goff')
-          tmpHist.SetTitle(mass+';nSig/#sigma(nBG);A.U.')
+          tmpHist.SetTitle('m_{H}='+mass+' GeV;nSig/#sigma(nBG);A.U.')
 
         tmpHist.GetYaxis().CenterTitle()
 
@@ -183,13 +182,14 @@ def makePullPlots(year='2012', lepton='mu', genFunc='Exp', cat='EB', mass='125')
 
     ymax = max(map(lambda x:x.GetMaximum(),histListDict[dist]))*1.1
 
-    histListDict[dist][0].Draw()
+    histListDict[dist][0].Draw('hist')
     histListDict[dist][0].SetMaximum(ymax)
+    histListDict[dist][0].SetMinimum(0)
     #print  histListDict[dist][0]
     #raw_input()
     for j in range(1,len(histListDict[dist])):
       #if dist in ['sigPull','typeA'] and j==len(histListDict[dist])-1: continue
-      histListDict[dist][j].Draw('same')
+      histListDict[dist][j].Draw('same hist')
     legList[i].Draw('same')
     canList[i].SaveAs(newPath+'/'+dist+'_'+lepton+'_'+year+'_'+genFunc+'_cat'+cat+'_mH'+mass+'.png')
 
@@ -232,8 +232,8 @@ if __name__=="__main__":
 
 
   u.makeTable(table1,"pulls", "twiki", precision='%.2f')
-  u.makeTable(table1,"pulls1", "tex",   precision='%.2f')
-  u.makeTable(table2,"pulls2", "tex",   precision='%.2f')
+  u.makeTable(table1,"pulls1", "tex",  precision='%.2f')
+  u.makeTable(table2,"pulls2", "tex",  precision='%.2f')
 
 
 

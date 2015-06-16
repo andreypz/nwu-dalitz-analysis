@@ -19,7 +19,11 @@ parser.add_option("-p", "--period",dest="period", default="2012",  help="Year pe
 parser.add_option("--bkg",  dest="bkg",  action="store_true", default=False, help="Make plots from bkg sample")
 parser.add_option("--qcd",  dest="qcd",  action="store_true", default=False, help="Include QCD samples")
 parser.add_option("--mcfm", dest="mcfm", action="store_true", default=False, help="Use MCFM  as a signal")
+parser.add_option("--sig",  dest="sig",  action="store_true", default=False, help="Signal MC")
+parser.add_option("--data", dest="data", action="store_true", default=False, help="Data only")
+parser.add_option("--vbf",  dest="vbf",  action="store_true", default=False, help="Use signal samples: ggH, vbf, vH")
 
+parser.add_option("--spec",dest="spec",action="store_true", default=False, help="Make some special plots at the end.")
 parser.add_option("--evt",dest="evt",action="store_true", default=False, help="Show raw events (not scaled to lumi) for MC samles")
 parser.add_option("-e","--extra",dest="extra",action="store_true", default=False, help="Make all extra plots")
 parser.add_option("--fit",dest="fit",action="store_true", default=False, help="Do the various fits")
@@ -59,12 +63,13 @@ if __name__ == "__main__":
   #setTDRStyle()
   TH1.SetDefaultSumw2(kTRUE)
 
-  pathBase = "/uscms_data/d2/andreypz/html/zgamma/dalitz/"+ver+"_cut"+cut
-  hPath    = "/eos/uscms/store/user/andreypz/batch_output/zgamma/8TeV/"+ver
-
   if '/tthome' in os.getcwd():
     pathBase = "/tthome/andrey/html/zgamma/dalitz/"+ver+"_cut"+cut
     hPath    = "/tthome/andrey/batch_output/zgamma/8TeV/"+ver
+  else:
+    pathBase = "/uscms_data/d2/andreypz/html/zgamma/dalitz/"+ver+"_cut"+cut
+    hPath    = "/eos/uscms/store/user/andreypz/batch_output/zgamma/8TeV/"+ver
+
 
   u.createDir(pathBase)
 
@@ -76,73 +81,76 @@ if __name__ == "__main__":
   bkgNames  = []
 
   u.setSelection(sel)
+  subsel=sel
+  if opt.hjp or opt.zjp:
+    subsel = 'jp-mugamma'
 
   if doMerge:
     if sel=="elgamma" or sel=='eegamma':
       os.system("hadd "+hPath+"/m_Data_" +sel+"_"+period+".root "+hPath+"/"+sel+"_"+period+"/hhhh_*Run2012*.root")
     else:
-      # os.system("hadd "+hPath+"/m_Data_" +sel+"_"+period+".root "+hPath+"/"+sel+"_"+period+"/hhhh_DoubleMu_Run20*.root")
-      os.system("hadd "+hPath+"/m_Data_" +sel+"_"+period+".root "+hPath+"/"+sel+"_"+period+"/hhhh_MuEG_Run2012*.root")
-      # os.system("hadd "+hPath+"/m_Data_" +sel+"_"+period+".root "+hPath+"/"+sel+"_"+period+"/hhhh_DoubleElectron_Run20*.root")
+      # os.system("hadd "+hPath+"/m_Data_" +subsel+"_"+period+".root "+hPath+"/"+subsel+"_"+period+"/hhhh_DoubleMu_Run20*.root")
+      os.system("hadd "+hPath+"/m_Data_" +subsel+"_"+period+".root "+hPath+"/"+subsel+"_"+period+"/hhhh_MuEG_Run2012*.root")
+      # os.system("hadd "+hPath+"/m_Data_" +subsel+"_"+period+".root "+hPath+"/"+subsel+"_"+period+"/hhhh_DoubleElectron_Run20*.root")
 
 
     if doBkg:
-      #os.system("hadd "+hPath+"/m_DYJetsPow20_"+sel+"_"+period+".root "
-      #          +hPath+"/"+sel+"_"+period+"/hhhh_DYJetsPow20-RD1*.root")
-      #os.system("hadd "+hPath+"/m_DYJets50_"+sel+"_"+period+".root "
-      #          +hPath+"/"+sel+"_"+period+"/hhhh_DYJets50-RD1*.root")
-      #os.system("hadd "+hPath+"/m_ZG_"+sel+"_"+period+".root "
-      #          +hPath+"/"+sel+"_"+period+"/hhhh_ZGToLLG-RD1*.root ")
+      #os.system("hadd "+hPath+"/m_DYJetsPow20_"+subsel+"_"+period+".root "
+      #          +hPath+"/"+subsel+"_"+period+"/hhhh_DYJetsPow20-RD1*.root")
+      #os.system("hadd "+hPath+"/m_DYJets50_"+subsel+"_"+period+".root "
+      #          +hPath+"/"+subsel+"_"+period+"/hhhh_DYJets50-RD1*.root")
+      #os.system("hadd "+hPath+"/m_ZG_"+subsel+"_"+period+".root "
+      #          +hPath+"/"+subsel+"_"+period+"/hhhh_ZGToLLG-RD1*.root ")
 
       if opt.qcd:
-        os.system("hadd "+hPath+"/m_QCD_EM_Pt_20to30_"+sel+"_"+period+".root "
-                  +hPath+"/"+sel+"_"+period+"/hhhh_QCD_EM_Pt_20to30_*.root ")
-        os.system("hadd "+hPath+"/m_QCD_EM_Pt_30to80_"+sel+"_"+period+".root "
-                  +hPath+"/"+sel+"_"+period+"/hhhh_QCD_EM_Pt_30to80_*.root ")
-        os.system("hadd "+hPath+"/m_QCD_EM_Pt_80to170_"+sel+"_"+period+".root "
-                  +hPath+"/"+sel+"_"+period+"/hhhh_QCD_EM_Pt_80to170_*.root ")
-        os.system("hadd "+hPath+"/m_QCD_EM_Pt_170to250_"+sel+"_"+period+".root "
-                  +hPath+"/"+sel+"_"+period+"/hhhh_QCD_EM_Pt_170to250_*.root ")
-        os.system("hadd "+hPath+"/m_QCD_EM_Pt_250to350_"+sel+"_"+period+".root "
-                  +hPath+"/"+sel+"_"+period+"/hhhh_QCD_EM_Pt_350_*.root ")
-        os.system("hadd "+hPath+"/m_QCD_EM_Pt_250to350_"+sel+"_"+period+".root "
-                  +hPath+"/"+sel+"_"+period+"/hhhh_QCD_EM_Pt_350_*.root ")
+        os.system("hadd "+hPath+"/m_QCD_EM_Pt_20to30_"+subsel+"_"+period+".root "
+                  +hPath+"/"+subsel+"_"+period+"/hhhh_QCD_EM_Pt_20to30_*.root ")
+        os.system("hadd "+hPath+"/m_QCD_EM_Pt_30to80_"+subsel+"_"+period+".root "
+                  +hPath+"/"+subsel+"_"+period+"/hhhh_QCD_EM_Pt_30to80_*.root ")
+        os.system("hadd "+hPath+"/m_QCD_EM_Pt_80to170_"+subsel+"_"+period+".root "
+                  +hPath+"/"+subsel+"_"+period+"/hhhh_QCD_EM_Pt_80to170_*.root ")
+        os.system("hadd "+hPath+"/m_QCD_EM_Pt_170to250_"+subsel+"_"+period+".root "
+                  +hPath+"/"+subsel+"_"+period+"/hhhh_QCD_EM_Pt_170to250_*.root ")
+        os.system("hadd "+hPath+"/m_QCD_EM_Pt_250to350_"+subsel+"_"+period+".root "
+                  +hPath+"/"+subsel+"_"+period+"/hhhh_QCD_EM_Pt_350_*.root ")
+        os.system("hadd "+hPath+"/m_QCD_EM_Pt_250to350_"+subsel+"_"+period+".root "
+                  +hPath+"/"+subsel+"_"+period+"/hhhh_QCD_EM_Pt_350_*.root ")
 
-        # os.system("hadd "+hPath+"/m_QCD_Mu_Pt_20_"+sel+"_"+period+".root "
-        #          +hPath+"/"+sel+"_"+period+"/hhhh_QCD_Mu_Pt_20_*.root ")
-        # os.system("hadd "+hPath+"/m_QCD_Mu_Pt_15to30_"+sel+"_"+period+".root "
-        #          +hPath+"/"+sel+"_"+period+"/hhhh_QCD_Mu_Pt_5to30_*.root ")
-        os.system("hadd "+hPath+"/m_QCD_Mu_Pt_30to50_"+sel+"_"+period+".root "
-                  +hPath+"/"+sel+"_"+period+"/hhhh_QCD_Mu_Pt_30to50_*.root ")
-        os.system("hadd "+hPath+"/m_QCD_Mu_Pt_50to150_"+sel+"_"+period+".root "
-                  +hPath+"/"+sel+"_"+period+"/hhhh_QCD_Mu_Pt_50to150_*.root ")
-        os.system("hadd "+hPath+"/m_QCD_Mu_Pt_150_"+sel+"_"+period+".root "
-                  +hPath+"/"+sel+"_"+period+"/hhhh_QCD_Mu_Pt_150_*.root ")
+        # os.system("hadd "+hPath+"/m_QCD_Mu_Pt_20_"+subsel+"_"+period+".root "
+        #          +hPath+"/"+subsel+"_"+period+"/hhhh_QCD_Mu_Pt_20_*.root ")
+        # os.system("hadd "+hPath+"/m_QCD_Mu_Pt_15to30_"+subsel+"_"+period+".root "
+        #          +hPath+"/"+subsel+"_"+period+"/hhhh_QCD_Mu_Pt_5to30_*.root ")
+        os.system("hadd "+hPath+"/m_QCD_Mu_Pt_30to50_"+subsel+"_"+period+".root "
+                  +hPath+"/"+subsel+"_"+period+"/hhhh_QCD_Mu_Pt_30to50_*.root ")
+        os.system("hadd "+hPath+"/m_QCD_Mu_Pt_50to150_"+subsel+"_"+period+".root "
+                  +hPath+"/"+subsel+"_"+period+"/hhhh_QCD_Mu_Pt_50to150_*.root ")
+        os.system("hadd "+hPath+"/m_QCD_Mu_Pt_150_"+subsel+"_"+period+".root "
+                  +hPath+"/"+subsel+"_"+period+"/hhhh_QCD_Mu_Pt_150_*.root ")
 
   qcdSamples = None
   if doBkg:
-    #bkgFiles.append(TFile(hPath+"/m_ZG_"+sel+"_"+period+".root","OPEN"))
+    #bkgFiles.append(TFile(hPath+"/m_ZG_"+subsel+"_"+period+".root","OPEN"))
     #bkgNames.append('ZG')
-    #bkgFiles.append(TFile(hPath+"/m_DYJets50_"+sel+"_"+period+".root","OPEN"))
+    #bkgFiles.append(TFile(hPath+"/m_DYJets50_"+subsel+"_"+period+".root","OPEN"))
     #bkgNames.append('DYJets50')
-    bkgFiles.append(TFile(hPath+"/"+sel+"_"+period+"/hhhh_DYJetsDalitz_1.root","OPEN"))
+    bkgFiles.append(TFile(hPath+"/"+subsel+"_"+period+"/hhhh_DYJetsDalitz_1.root","OPEN"))
     bkgNames.append('DYJetsDalitz')
-    bkgFiles.append(TFile(hPath+"/"+sel+"_"+period+"/hhhh_ZGDalitz_1.root","OPEN"))
+    bkgFiles.append(TFile(hPath+"/"+subsel+"_"+period+"/hhhh_ZGDalitz_1.root","OPEN"))
     bkgNames.append('ZGDalitz')
     if opt.qcd:
-      qcdSamples = {'QCD_EM_Pt_20to30':  TFile(hPath+"/m_QCD_EM_Pt_20to30_"  +sel+"_"+period+".root","OPEN"),
-                    'QCD_EM_Pt_30to80':  TFile(hPath+"/m_QCD_EM_Pt_30to80_"  +sel+"_"+period+".root","OPEN"),
-                    'QCD_EM_Pt_80to170': TFile(hPath+"/m_QCD_EM_Pt_80to170_" +sel+"_"+period+".root","OPEN"),
-                    'QCD_EM_Pt_170to250':TFile(hPath+"/m_QCD_EM_Pt_170to250_"+sel+"_"+period+".root","OPEN"),
-                    'QCD_EM_Pt_250to350':TFile(hPath+"/m_QCD_EM_Pt_250to350_"+sel+"_"+period+".root","OPEN"),
-                    'QCD_EM_Pt_250to350':TFile(hPath+"/m_QCD_EM_Pt_250to350_"+sel+"_"+period+".root","OPEN"),
-                    'QCD_EM_Pt_350':     TFile(hPath+"/m_QCD_EM_Pt_350_"     +sel+"_"+period+".root","OPEN"),
+      qcdSamples = {'QCD_EM_Pt_20to30':  TFile(hPath+"/m_QCD_EM_Pt_20to30_"  +subsel+"_"+period+".root","OPEN"),
+                    'QCD_EM_Pt_30to80':  TFile(hPath+"/m_QCD_EM_Pt_30to80_"  +subsel+"_"+period+".root","OPEN"),
+                    'QCD_EM_Pt_80to170': TFile(hPath+"/m_QCD_EM_Pt_80to170_" +subsel+"_"+period+".root","OPEN"),
+                    'QCD_EM_Pt_170to250':TFile(hPath+"/m_QCD_EM_Pt_170to250_"+subsel+"_"+period+".root","OPEN"),
+                    'QCD_EM_Pt_250to350':TFile(hPath+"/m_QCD_EM_Pt_250to350_"+subsel+"_"+period+".root","OPEN"),
+                    'QCD_EM_Pt_250to350':TFile(hPath+"/m_QCD_EM_Pt_250to350_"+subsel+"_"+period+".root","OPEN"),
+                    'QCD_EM_Pt_350':     TFile(hPath+"/m_QCD_EM_Pt_350_"     +subsel+"_"+period+".root","OPEN"),
 
-                    'QCD_Mu_Pt_20':     TFile(hPath+"/m_QCD_Mu_Pt_20_"      +sel+"_"+period+".root","OPEN"),
-                    'QCD_Mu_Pt_15to30': TFile(hPath+"/m_QCD_Mu_Pt_15to30_"  +sel+"_"+period+".root","OPEN"),
-                    'QCD_Mu_Pt_30to50': TFile(hPath+"/m_QCD_Mu_Pt_30to50_"  +sel+"_"+period+".root","OPEN"),
-                    'QCD_Mu_Pt_50to150':TFile(hPath+"/m_QCD_Mu_Pt_50to150_" +sel+"_"+period+".root","OPEN"),
-                    'QCD_Mu_Pt_150':    TFile(hPath+"/m_QCD_Mu_Pt_150_"     +sel+"_"+period+".root","OPEN")
+                    'QCD_Mu_Pt_20':     TFile(hPath+"/m_QCD_Mu_Pt_20_"      +subsel+"_"+period+".root","OPEN"),
+                    'QCD_Mu_Pt_15to30': TFile(hPath+"/m_QCD_Mu_Pt_15to30_"  +subsel+"_"+period+".root","OPEN"),
+                    'QCD_Mu_Pt_30to50': TFile(hPath+"/m_QCD_Mu_Pt_30to50_"  +subsel+"_"+period+".root","OPEN"),
+                    'QCD_Mu_Pt_50to150':TFile(hPath+"/m_QCD_Mu_Pt_50to150_" +subsel+"_"+period+".root","OPEN"),
+                    'QCD_Mu_Pt_150':    TFile(hPath+"/m_QCD_Mu_Pt_150_"     +subsel+"_"+period+".root","OPEN")
                   }
 
       bkgNames.append('QCD')
@@ -155,34 +163,32 @@ if __name__ == "__main__":
     bkgZip = zip(bkgNames, bkgFiles)
   else: bkgZip = None
 
+  print 'DBG APZ ', subsel
   sigGG  = {}
   sigVBF = {}
   sigVH  = {}
   for m in ['120','125','130','135','140','145','150']:
-    sigGG[m]  = TFile(hPath+"/"+sel+"_"+period+"/hhhh_ggH-mad"+m+"_1.root", "OPEN")
-    sigVBF[m] = TFile(hPath+"/"+sel+"_"+period+"/hhhh_vbfH-mad"+m+"_1.root", "OPEN")
-    sigVH[m]  = TFile(hPath+"/"+sel+"_"+period+"/hhhh_vH-mad"+ m+"_1.root", "OPEN")
+    sigGG[m]  = TFile(hPath+"/"+subsel+"_"+period+"/hhhh_ggH-mad"+m+"_1.root", "OPEN")
+    sigVBF[m] = TFile(hPath+"/"+subsel+"_"+period+"/hhhh_vbfH-mad"+m+"_1.root", "OPEN")
+    sigVH[m]  = TFile(hPath+"/"+subsel+"_"+period+"/hhhh_vH-mad"+ m+"_1.root", "OPEN")
 
   sigFileGG   = sigGG['125']
   sigFileVBF  = sigVBF['125']
   sigFileVH   = sigVH['125']
 
-  sigFileZjp  = TFile(hPath+"/"+sel+"_"+period+"/hhhh_ZtoJPsiGamma_1.root",     "OPEN")
-  sigFileHjp  = TFile(hPath+"/"+sel+"_"+period+"/hhhh_HiggsToJPsiGamma_1.root", "OPEN")
+  sigFileZjp  = TFile(hPath+"/"+subsel+"_"+period+"/hhhh_ZtoJPsiGamma_1.root",     "OPEN")
+  sigFileHjp  = TFile(hPath+"/"+subsel+"_"+period+"/hhhh_HiggsToJPsiGamma_1.root", "OPEN")
 
   if opt.mcfm:  sigFile = sigFileMCFM
   elif opt.hjp: sigFile = sigFileHjp
   elif opt.zjp: sigFile = sigFileZjp
   else:         sigFile = sigFileGG
 
-  dataFile = TFile(hPath+"/m_Data_"+sel+"_"+period+".root","OPEN")
+  dataFile = TFile(hPath+"/m_Data_"+subsel+"_"+period+".root","OPEN")
 
   if sel=="zee":
     u.drawAllInFile(dataFile, "data",bkgZip,None,"",
                     "Zee",  pathBase+"/Zee",  None,"norm")
-
-  if opt.zjp or opt.hjp:
-    u.setSelection('mugamma')
 
   yields_data = u.getYields(dataFile)
   yields_zjp  = u.getYields(sigFileZjp, 'ZtoJPsiGamma',  doLumiScale)
@@ -211,62 +217,80 @@ if __name__ == "__main__":
   ggHZGFile   = TFile(hPath+"/"+sel+"_"+period+"/hhhh_ggHZG-"+str(mass)+"_1.root", "OPEN")
   hackZip = zip(['120','130','135','140','145','150'],
                 [sigGG['120'],sigGG['130'],sigGG['135'], sigGG['140'],sigGG['145'],sigGG['150']])
-  sigZip = zip(['125','135','145'],
+  sigZip = zip(['ggH-125','ggH-135','ggH-145'],
                 [sigGG['125'],sigGG['135'],sigGG['145']])
+
+  if opt.vbf:
+    sigZipVBF = zip(['ggH-125','vbfH-125','vH-125'],
+                    [sigGG['125'],sigVBF['125'],sigVH['125']])
   #sigZip = zip(['125'],
   #             [sigGG['125']])
   if opt.hjp:
-    sigZip = zip(['H to J/Psi #gamma'],[sigFileHjp])
+    #sigZip = zip(['H to J/Psi #gamma'],[sigFileHjp])
+    sigZip = zip(['H #rightarrow J/#Psi #gamma','ggH-125'],[sigFileHjp, sigGG['125']])
+
+
+
 
   #u.drawAllInFile(None, "", hackZip, None, '', "GEN", pathBase+'/GEN-lumi', None, "lumi")
-
   # u.drawAllInFile(None, "", hackZip, sigGG['125'], '125', "GEN", pathBase+'/GEN-norm', None, "norm", doFits=True)
   # u.drawAllInFile(None, "", '', sigFileGG, "h", "GEN", pathBase+'/GEN-norm', None, "norm")
   # u.drawAllInFile(None, "", '', ggHZGFile, "h", "GEN", pathBase+'/GEN-norm', None, "norm")
 
   #u.drawAllInFile(None, "", '', sigFileGG, "Dalitz", "eff", pathBase+'/eff', None, "norm")
 
-  if not opt.apz:
+  if not opt.apz and not opt.fit:
     if opt.bkg:
+      print
       u.drawAllInFile(dataFile, "Data", bkgZip, None, sigName, "Main", path, cut, "lumi")
       # u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "Main", path, cut, "lumi")
     else:
-      u.drawAllInFile(dataFile, "Data", None, None, sigName, "Main", path, cut, "toDataInt", doFits=opt.fit)
-      #u.drawAllInFile(None, "Data", None, sigZip, sigName, "Main", path, cut, "toDataInt", doFits=opt.fit)
-      #u.drawAllInFile(dataFile, "Data", None, sigZip, sigName, "Main", path, cut, "toDataInt", doFits=opt.fit)
+      print
+      #u.drawAllInFile(dataFile, "Data", None, sigZip, sigName, "Main", path, cut)
+      if opt.data:
+        u.drawAllInFile(dataFile, "Data", None, None, '', "Main", pathBase+'/Main-Data', cut)
+      if opt.sig:
+        u.drawAllInFile(None, None, None, sigZip, sigName,"Main", pathBase+'/Main-Sig', cut)
 
+      if opt.vbf:
+        u.drawAllInFile(dataFile, "Data", None, sigZipVBF, sigName, "Main", pathBase+'/Main-VBF', cut, 'toData')
     if opt.extra:
-      # u.drawAllInFile(None, "", bkgZip, sigFile, sigName, "GEN", pathBase+'/GEN', None, "norm")
+      u.drawAllInFile(None, None, None, sigZip, sigName, "GEN", pathBase+'/GEN', None, "norm")
       for n in ['Angles','N']:
-        u.drawAllInFile(dataFile, "Data",bkgZip,sigFile,"signal", n, pathBase+"/"+n, cut, "lumi")
+        u.drawAllInFile(dataFile, "Data", bkgZip, sigZip,"signal", n, pathBase+"/"+n, cut, "lumi")
 
       if cut in ['8','9']:
         for n in ['Photon','Photon-EGamma']:
-          u.drawAllInFile(dataFile, "Data",bkgZip,sigFile,"signal", n, pathBase+"/"+n, None, "norm")
+          u.drawAllInFile(dataFile, "Data",bkgZip, sigZip,"signal", n, pathBase+"/"+n, None, "norm")
 
-        if sel in ["mugamma","jp-mugamma"]:
+        if sel in ["mugamma"]:
           for n in ['Muons','Mu-after']:
-            u.drawAllInFile(dataFile, "Data",bkgZip,sigFile,"signal", n, pathBase+"/"+n, None, "norm")
+            u.drawAllInFile(dataFile, "Data",bkgZip,sigZip,"signal", n, pathBase+"/"+n, None, "norm")
 
   elif cut in ['14','15','16']:
     u.drawAllInFile(dataFile, "data",bkgZip,None,"",
                     "AlphaPiZ",pathBase+"/apz/", cut,"norm2")
 
   if sel == "elgamma":
-    u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "Main-Dale", pathBase+'/Dale/', cut, "toDataInt")
+    u.drawAllInFile(dataFile, "Data", bkgZip, sigZip, sigName, "Main-Dale", pathBase+'/Dale/', cut)
+    if opt.data:
+      u.drawAllInFile(dataFile, "Data", None, None, '', "Main-Dale", pathBase+'/Dale-Data', cut)
+    if opt.sig:
+      u.drawAllInFile(None, None, None, sigZip, sigName,"Main-Dale", pathBase+'/Dale-Sig', cut)
+
     #u.drawAllInFile(dataFile, "data",bkgZip,sigFile,"signal",
     #                "AnElectron-EGamma",  pathBase+"/AnElectron-EGamma/",  None,"norm")
 
-    if cut in ['9','12','15'] and sel=='elgamma':
-      u.drawAllInFile(dataFile, "Data",bkgZip,sigFile,"signal",
+    if opt.extra:
+      u.drawAllInFile(dataFile, "Data",bkgZip,sigZip,"signal",
                       "AnElectron",  pathBase+"/AnElectron/",  None,"norm")
       dirnameshort = "DalitzEle"
       dirname = dirnameshort+"-cut"+cut
-      u.drawAllInFile(dataFile, "Data",bkgZip,sigFile,"signal",
+      u.drawAllInFile(dataFile, "Data",bkgZip,sigZip,"signal",
                       dirname,  pathBase+"/"+dirnameshort+"/",  None,"norm")
 
       for n in ['EGamma','BaseSC-1','BaseSC-2',"track-1","track-2","track-3"]:
-        u.drawAllInFile(dataFile, "Data",bkgZip,sigFile,"signal",
+        u.drawAllInFile(dataFile, "Data",bkgZip,sigZip,"signal",
                         dirname+"-"+n,  pathBase+"/"+dirnameshort+"-"+n,  None,"norm")
 
   ss = opt.sel
@@ -327,38 +351,51 @@ if __name__ == "__main__":
 
 
   if opt.hjp and opt.fit:
-    gSystem.Load("libRooFit")
-    mll = RooRealVar("mll","mll",2.9,3.3)
-    mean_mll  = RooRealVar("m",     "mean", 3.0, 2.0, 4.0)
-    width_mll = RooRealVar("#Delta","width",0.0, 0.0, 5)
-    sigma_mll = RooRealVar("#sigma","sigma",1.0, 0.0, 5)
-    #lamb = RooRealVar("lamb","lamb",-0.5, -20,1)
-    alpha = RooRealVar("#alpha","alpha",5, 0,100)
-    cbN   = RooRealVar("N","cbN",1, 0,100)
-    p1 = RooRealVar("p1","p1",1, -5, 5)
-    p2 = RooRealVar("p2","p2",1, -5, 5)
-    bkg = RooPolynomial("bkg","bkg", mll, RooArgList(p1));
-    Nsig = RooRealVar("Nsig","signal fraction",    500,0.,10000.);
-    Nbkg = RooRealVar("Nbkg","background fraction",200,0.,10000.);
-
-    frac = RooRealVar("frac","frac",0.7, 0.5, 1.0)
-
+    u.createDir(pathBase+'/fits/')
     histoName = '01_diLep_mass_jpsi_%s_cut%i'%('Main', opt.cut)
     hDa = dataFile.Get('Main/'+histoName)
     hSi = sigFile.Get('Main/'+histoName)
+
+    #Ntot = hDa.GetEntries()
+    #print 'Total Data entries = ', Ntot
+    #raw_input('Enter to continue')
+
+    gSystem.Load("libRooFit")
+    mll = RooRealVar("mll","mll",2.92,3.28)
+    meanSi_mll  = RooRealVar("m",  "massSi", 3.1, 2.92, 3.25)
+    meanDa_mll  = RooRealVar("m",  "massDa", 3.1, 2.92, 3.25)
+    width_mll = RooConstVar("#Delta","width", 0.01)
+    #width_mll = RooRealVar("#Delta","width", 0, 0, 1)
+    sigmaSi_mll = RooRealVar("#sigma","sigmaSi", 0.05, 0.0, 0.2)
+    sigmaDa_mll = RooRealVar("#sigma","sigmaDa", 0.05, 0.0, 0.2)
+
+    #lamb = RooRealVar("lamb","lamb",-0.5, -20,1)
+    #alpha = RooRealVar("#alpha","alpha",5, 0,100)
+    #cbN   = RooRealVar("N","cbN",1, 0,100)
+    p1 = RooRealVar("p1","p1", 0, -1, 1)
+    #p2 = RooRealVar("p2","p2", 1, -5, 5)
+    bkg = RooPolynomial("bkg","bkg", mll, RooArgList(p1));
+    Nsig = RooRealVar("Nsig","signal fraction",    300, 50.,500);
+    Nbkg = RooRealVar("Nbkg","background fraction",150, 10.,300);
+
+    #frac = RooRealVar("frac","frac",0.7, 0.5, 1.0)
+
     mll.setRange('fitRange',2.9,3.3)
-    dhDa = RooDataHist("dhDa","dhDa", RooArgList(mll), hDa)
-    voigtDa = RooVoigtian("voigtDa","voigtDa",mll,mean_mll,width_mll,sigma_mll)
+    #mll.setRange('fitRange',3.0,3.3)
+    dhDaTmp = RooDataHist("dhDa","dhDa", RooArgList(mll), hDa)
+    dhDa = dhDaTmp.reduce(RooFit.CutRange('fitRange'))
+
+    voigtDa = RooVoigtian("voigtDa","voigtDa",mll,meanDa_mll,width_mll,sigmaDa_mll)
     #cbDa = RooCBShape('cbDa','cbDa',mll, mean_mll, sigma_mll, alpha, cbN)
     # expo   = RooExponential("expo", "Bkg Model", mll, lamb)
     SplusB = RooAddPdf("SplusB", "Bkg plus signal peak", RooArgList(voigtDa, bkg), RooArgList(Nsig,Nbkg))
 
     mllFrame = mll.frame()
-    fitDa   = SplusB.fitTo(dhDa, RooFit.Range('fitRange'), RooFit.Save())
+    fitDa   = SplusB.fitTo(dhDa, RooFit.Range('fitRange'), RooFit.Save())#, RooFit.SumW2Error(kTRUE))
     #fitDa   = voigtDa.fitTo(dhDa, RooFit.Range('fitRange'), RooFit.Save())
     #fitDa   = cbDa.fitTo(dhDa, RooFit.Range('fitRange'), RooFit.Save())
     #lDa_0 = RooArgSet(mll)
-    pars = SplusB.getParameters(RooArgSet(mll))
+    #parsDa = SplusB.getParameters(RooArgSet(mll))
     #pars = voigtDa.getParameters(RooArgSet(mll))
     #pars = cbDa.getParameters(RooArgSet(mll))
 
@@ -366,7 +403,9 @@ if __name__ == "__main__":
     # SplusB.plotOn(mllFrame, RooFit.LineColor(kGreen+3))
     # SplusB.paramOn(mllFrame, RooFit.Label("Data"), RooFit.Layout(0.095,0.45,0.65))
     SplusB.plotOn(mllFrame, RooFit.LineColor(kGreen+3))
-    SplusB.paramOn(mllFrame, RooFit.Label("Data"),  RooFit.Layout(0.65, 1.0,0.95))
+    SplusB.paramOn(mllFrame, RooFit.Label("Data"),  RooFit.Layout(0.68, 0.95,0.9),
+                   RooFit.Format('N',RooFit.FixedPrecision(4)))
+
     #voigtDa.plotOn(mllFrame, RooFit.LineColor(kGreen+3))
     #voigtDa.paramOn(mllFrame, RooFit.Label("Data"),  RooFit.Layout(0.65, 1.0,0.95))
     #cbDa.plotOn(mllFrame, RooFit.LineColor(kGreen+3))
@@ -378,30 +417,35 @@ if __name__ == "__main__":
     mllFrame.SetTitle(';m_{#mu#mu} (GeV);Events')
     mllFrame.SetMinimum(0.01)
     mllFrame.Draw()
-    c1.SaveAs(pathBase+'/JPpeakFit_data.png')
+    c1.SaveAs(pathBase+'/fits/JPpeakFit_cut'+cut+'_data.png')
 
     mllFrame = mll.frame()
-    dhSi = RooDataHist("dhSi","dhSi", RooArgList(mll), hSi)
-    voigtSi = RooVoigtian("voigtSi","voigtSi",mll,mean_mll,width_mll,sigma_mll)
+    dhSiTmp = RooDataHist("dhSi","dhSi", RooArgList(mll), hSi)
+    dhSi = dhSiTmp.reduce(RooFit.CutRange('fitRange'))
+    voigtSi = RooVoigtian("voigtSi","voigtSi",mll,meanSi_mll,width_mll,sigmaSi_mll)
     fitSi   = RooFitResult(voigtSi.fitTo(dhSi, RooFit.Range('fitRange'),  RooFit.Save()))
     #cbSi  = RooCBShape('cbSi','cbSi',mll, mean_mll, sigma_mll, alpha, cbN)
     #fitSi = RooFitResult(cbSi.fitTo(dhSi, RooFit.Range('fitRange'),  RooFit.Save()))
 
     #lSi_0 = RooArgSet(mll)
 
-    pars = voigtSi.getParameters(RooArgSet(mll))
+    #parsSi = voigtSi.getParameters(RooArgSet(mll))
     #pars = cbSi.getParameters(RooArgSet(mll))
 
     dhSi.plotOn(mllFrame, RooFit.Name('sig'), RooFit.MarkerStyle(23), RooFit.MarkerColor(kBlue), RooFit.LineColor(kBlue))
     voigtSi.plotOn(mllFrame)
-    voigtSi.paramOn(mllFrame, RooFit.Label("Signal MC"), RooFit.Layout(0.65, 1.0,0.95))
+    voigtSi.paramOn(mllFrame, RooFit.Label("Signal MC"), RooFit.Layout(0.68, 0.95,0.90),
+                    RooFit.Format('N',RooFit.FixedPrecision(4)))
     #cbSi.plotOn(mllFrame)
     #cbSi.paramOn(mllFrame, RooFit.Label("Signal MC"), RooFit.Layout(0.65, 1.0,0.95))
-
     mllFrame.SetTitle(';m_{#mu#mu} (GeV);Events')
     mllFrame.SetMinimum(0.01)
     mllFrame.Draw()
-    c1.SaveAs(pathBase+'/JPpeakFit_sig.png')
+    c1.SaveAs(pathBase+'/fits/JPpeakFit_cut'+cut+'_sig.png')
+    #mllFrame.Print('all')
+    #print     mllFrame.FindObject('paramBox')
+    #pave = TPaveText(mllFrame.FindObject('voigtSi_paramBox'))
+    #pave.SetFillColor(kBlue)
 
     # mllFrame.SetMaximum(6)
     #leg.Clear()
@@ -452,6 +496,212 @@ if __name__ == "__main__":
 
     """
 
+
+  if opt.spec:
+
+    doLog = 1
+    doGen = 1
+    sigFactor = 1
+    prodSF = 1.13
+
+    for j,h in enumerate(['01_diLep_mass_0to20_b40','01_diLep_mass_0to20_b50','04_ll_gamma_deltaR','02_lPt1_pt','02_lPt2_pt','03_gamma_pt']):
+      #   for h in ['01_diLep_mass_0to20_b50','04_ll_gamma_deltaR']:
+      #vMu = 'v98-mu-incl-JPsi/'
+      #vEl = 'v99-el'
+      vMu = 'v03-mll-mu-paper'
+      vEl = 'v03-mll-el-paper'
+      print
+      u.createDir(pathBase+'/Spec')
+      sigFileMu = TFile('/tthome/andrey/batch_output/zgamma/8TeV/'+vMu+'/mugamma_2012/hhhh_ggH-mad125_1.root', 'OPEN')
+      sigFileEl = TFile('/tthome/andrey/batch_output/zgamma/8TeV/'+vEl+'/elgamma_2012/hhhh_ggH-mad125_1.root', 'OPEN')
+      hMu = sigFileMu.Get('Main/'+h+'_Main_cut9')
+      hEl = sigFileEl.Get('Main/'+h+'_Main_cut15')
+
+
+      if doGen and j==0:
+        vMuG = 'v03-mll-mu-gen-paper'
+        vElG = 'v03-mll-el-gen-paper'
+        sigFileMuGen = TFile('/tthome/andrey/batch_output/zgamma/8TeV/'+vMuG+'/mugamma_2012/hhhh_ggH-mad125_1.root', 'OPEN')
+        sigFileElGen = TFile('/tthome/andrey/batch_output/zgamma/8TeV/'+vElG+'/elgamma_2012/hhhh_ggH-mad125_1.root', 'OPEN')
+        ghMu = sigFileMuGen.Get('GEN/gen_Mll_init_b40')
+        ghEl = sigFileElGen.Get('GEN/gen_Mll_init_b40')
+
+
+      lumi= u.getLumi()
+      Nev = u.getTotalEvents(sigFileMu)
+      cro = u.getCS('ggH-125', 'mu')
+      scale = float(lumi*cro)/Nev
+      hMu.Scale(sigFactor*scale)
+      if j==0 and doGen: ghMu.Scale(sigFactor*scale*prodSF)
+      print Nev, lumi, cro, scale
+
+      Nev = u.getTotalEvents(sigFileEl)
+      cro = u.getCS('ggH-125', 'el')
+      scale = float(lumi*cro)/Nev
+      hEl.Scale(sigFactor*scale)
+      if j==0 and doGen: ghEl.Scale(sigFactor*scale*prodSF*(18.5/0.82))
+      print Nev, lumi, cro, scale
+
+
+      if j==0 and doGen:
+        print 'mu selection:', hMu.Integral()
+        print 'el selection:', hEl.Integral()
+        print 'mu gen:', ghMu.Integral()
+        print 'el gen:', ghEl.Integral()
+
+      #if j==1:
+      #  factor = hMu.Integral()/hEl.Integral()
+      #  hEl.Scale(factor)
+
+      hEl.Draw('hist')
+      hMu.Draw('hist same')
+      if j==0 and doGen:
+        ghEl.Draw('hist same')
+        ghMu.SetLineColor(kMagenta)
+        ghEl.SetLineColor(kBlue-9)
+        ghMu.SetLineStyle(7)
+        #ghEl.SetLineStyle(4)
+        ghEl.SetFillColor(19)
+        #ghEl.SetFillColor(kCyan-10)
+
+        #redraw them
+        hEl.Draw('hist same')
+        hMu.Draw('hist same')
+        ghMu.Draw('hist same')
+        hMu.SetLineWidth(3)
+        ghMu.SetLineWidth(3)
+        # hEl.SetFillColor(kRed-10)
+        # hMu.SetLineStyle(2)
+        hEl.SetFillColor(kOrange-9)
+
+      c1.RedrawAxis()
+      hEl.GetYaxis().SetTicks('-')
+      hMu.SetLineColor(kGreen+3)
+      hEl.SetLineColor(kRed-3)
+
+      if j==0:
+        if doLog: hEl.SetMaximum(100)
+        else: hEl.SetMaximum(1.2*hEl.Clone().GetMaximum())
+        #hEl.SetTitle(';m_{ll} (GeV); Events/0.4 GeV')
+        hEl.SetTitle(';m_{\\ell\\ell}\\,\\mbox{(GeV)}; Events/0.5 GeV')
+        hEl.GetXaxis().SetNdivisions(405, 0)
+      elif j==1:
+        hEl.SetMaximum(1.2*hMu.Clone().GetMaximum())
+        hEl.SetAxisRange(1,5,"X")
+      elif j==0:
+        hEl.SetMaximum(1.2*hMu.Clone().GetMaximum())
+        hEl.SetTitle(';#Delta R(#gamma,ll); Events')
+      else:
+        hEl.SetMaximum(1.2*hMu.Clone().GetMaximum())
+
+      CMS_lumi(c1, 2, 11, "Simulation")
+
+      lat = TLatex()
+      lat.SetNDC()
+      lat.SetTextSize(0.035)
+
+      if j==0 and doGen:
+        leg = TLegend(0.55,0.54,0.8,0.75);
+        #leg = TLegend(0.55,0.54,0.8,0.88);
+      else:
+        leg = TLegend(0.61,0.62,0.78,0.85);
+      leg.SetFillColor(kWhite)
+      leg.SetBorderSize(0)
+      leg.SetTextSize(0.035)
+      #if j==0:
+      #  leg.SetHeader('#splitline{10 x SM Higgs,}{  m_{H} = 125 GeV}')
+      #elif j==1:
+      #  leg.SetHeader('#splitline{SM Higgs,}{m_{H} = 125 GeV}')
+      if sigFactor==1:
+        lat.DrawLatex(0.57,0.82, '\\mbox{SM  H} \\rightarrow \\gamma^*\\gamma \\rightarrow \\ell\\ell\\gamma')
+        lat.DrawLatex(0.62,0.77, 'm_{H} = 125 GeV')
+        #leg.SetHeader('\\mbox{SM H} \\rightarrow \\gamma^*\\gamma \\rightarrow \\ell\\ell\\gamma \\atop \\mathrm{m_{H}} = 125\\, \\mbox{GeV}')
+        #leg.SetHeader('#splitline{SM H #rightarrow #gamma*#gamma #rightarrow ll#gamma}{  m_{H} = 125 GeV}')
+      else:
+        leg.SetHeader('#splitline{'+str(sigFactor)+' x SM H #rightarrow #gamma*#gamma #rightarrow ll#gamma}{  m_{H} = 125 GeV}')
+      if j==0 and doGen:
+        leg.AddEntry(ghMu,' #mu#mu before selection', 'l')
+        leg.AddEntry(ghEl,' ee before selection', 'f')
+        leg.AddEntry(hMu,' #mu#mu after selection', 'l')
+        leg.AddEntry(hEl,' ee after selection', 'f')
+      else:
+        leg.AddEntry(hMu,' #mu channel', 'l')
+        leg.AddEntry(hEl,' e channel', 'l')
+
+      leg.SetTextFont(42)
+      leg.Draw()
+      gPad.RedrawAxis()
+
+      for e in ['pdf','png','eps']:
+        if doLog: c1.SetLogy()
+        c1.SaveAs(pathBase+'/Spec/'+h+'_sig.'+e)
+
+      if j==0:
+        c1.SetLogy(0)
+        r1 = hMu.Clone()
+        r1.Divide(ghMu)
+        r1.Draw()
+        r1.SetMaximum(0.5)
+        r1.SetMinimum(0)
+        r1.SetTitle(';m_{ll} (GeV);ratio')
+        c1.SaveAs(pathBase+'/Spec/ratio_mu_'+h+'_sig.png')
+
+        r2 = hEl.Clone()
+        r2.Divide(ghEl)
+        r2.Draw()
+        r2.SetMaximum(0.5)
+        r2.SetMinimum(0)
+        r2.SetTitle(';m_{ll} (GeV);ratio')
+        c1.SaveAs(pathBase+'/Spec/ratio_el_'+h+'_sig.png')
+
+
+      '''
+      daFileMu = TFile('/tthome/andrey/batch_output/zgamma/8TeV/'+vMu+'/m_Data_mugamma_2012.root', 'OPEN')
+      daFileEl = TFile('/tthome/andrey/batch_output/zgamma/8TeV/'+vEl+'/m_Data_elgamma_2012.root', 'OPEN')
+      dhMu = daFileMu.Get('Main/'+h+'_Main_cut9')
+      dhEl = daFileEl.Get('Main/'+h+'_Main_cut15')
+
+      dhEl.Draw('e1p')
+      dhMu.Draw('same')
+      if j==0:
+        if doLog: dhEl.SetMaximum(1000)
+        else: dhEl.SetMaximum(1.2*dhEl.Clone().GetMaximum())
+      else:
+        dhEl.SetMaximum(1.2*dhMu.Clone().GetMaximum())
+      c1.RedrawAxis()
+      dhMu.SetMarkerStyle(21)
+      dhEl.SetMarkerStyle(22)
+      dhMu.SetMarkerSize(1.2)
+      dhEl.SetMarkerSize(1.2)
+
+      dhMu.SetMarkerColor(kBlue+2)
+      dhEl.SetMarkerColor(kRed-4)
+      dhMu.SetLineColor(kBlue+2)
+      dhEl.SetLineColor(kRed-4)
+      if j==0:
+        dhEl.SetTitle(';m_{ll} (GeV); Events/0.4 GeV')
+      elif j==1:
+        dhEl.SetAxisRange(1,5,"X")
+        dhEl.SetTitle(';#Delta R(#gamma,ll); Events')
+        #dhEl.Rebin()
+        #dhMu.Rebin()
+
+      leg = TLegend(0.61,0.62,0.78,0.85);
+      leg.SetFillColor(kWhite)
+      leg.SetBorderSize(0)
+      leg.SetTextSize(0.04)
+      leg.SetHeader('Data')
+      leg.AddEntry(dhMu,' #mu channel', 'lp')
+      leg.AddEntry(dhEl,' e channel', 'lp')
+      leg.Draw()
+      #lat.DrawLatex(0.18,0.95, 'H #rightarrow #gamma*#gamma #rightarrow ll#gamma')
+      #CMS_lumi(c1, 2, 11)
+
+      for e in ['pdf','png']:
+        if doLog: c1.SetLogy()
+        c1.SaveAs(pathBase+'/Spec/'+h+'_data.'+e)
+
+      '''
   '''
   htmp = sigFileGG.Get("02_lPt2_pt__cut"+cut)
   int1 = htmp.Integral()
@@ -480,46 +730,6 @@ if __name__ == "__main__":
   #u.FBAss(dataFile,   'data',   'FB_cosSC-ll_vs_Mll_cut'+cut, pathBase+'/Angles/')
 
 
-  '''
-  hc7 = sigFileGG.Get("tri_mass80__cut7").Integral(35,41)*scale
-  hc8 = sigFileGG.Get("tri_mass80__cut8").Integral(35,41)*scale
-  hc9 = sigFileGG.Get("tri_mass80__cut9").Integral(35,41)*scale
-  print "Yields in bins that supposed to correspond to [122,128] window:\n",hc7, hc8, hc9
-
-  hc7 = dataFile.Get("tri_mass80__cut7").Integral(36,40)
-  hc8 = dataFile.Get("tri_mass80__cut8").Integral(36,40)
-  hc9 = dataFile.Get("tri_mass80__cut9").Integral(36,40)
-  print "Yields in bins that supposed to correspond to [122,128] window:\n",hc7, hc8, hc9
-
-  '''
-  '''
-  h2da = dataFile.Get("h2D_dalitzPlot_rotation__cut"+cut).ProjectionX("hda_prx")
-  h2si = sigFile.Get("h2D_dalitzPlot_rotation__cut"+cut).ProjectionX("hsi_prx")
-
-  #u.handleOverflowBins(h2da)
-  #u.handleOverflowBins(h2si)
-
-  h2da.Draw("hist")
-  h2si.Draw("same hist")
-  h2si.SetLineColor(kRed+1)
-  h2si.Scale(10*scale)
-  h2da.SetTitle(";projectionX;Events")
-  c1.SaveAs("h2da_dalitz.png")
-  '''
-
-  '''
-  nx = h2da.GetNbinsX()
-  ny = h2da.GetNbinsY()
-  h2da_rot = TH2D("h2da_rot","", nx, )
-  h2si_rot = TH2D("h2si_rot","")
-  for a in nx:
-  for b in ny:
-  fda = h2da.GetBinContent(a,b)
-  fsi = h2si.GetBinContent(a,b)
-
-  h2da_rot.SetBinContent(a,b, fda)
-  h2si_rot.SetBinContent(a,b,fda)
-  '''
 
   if opt.zjp and cut=='4':
     data = TFile(hPath+"/m_Data_"+sel+"_2012.root","OPEN")
@@ -540,10 +750,12 @@ if __name__ == "__main__":
 
 
 
-  if sel in ['jp-mugamma']:
-    if opt.hjp: u.setCutListFile(hPath+"/"+sel+"_"+period+"/out_cutlist_HiggsToJPsiGamma_1.txt")
-    if opt.zjp: u.setCutListFile(hPath+"/"+sel+"_"+period+"/out_cutlist_ZtoJPsiGamma_1.txt")
-  else:         u.setCutListFile(hPath+"/"+sel+"_"+period+"/out_cutlist_ggH-mad120_1.txt")
+  if sel in ['mugamma']:
+    if opt.hjp: u.setCutListFile(hPath+"/"+subsel+"_"+period+"/out_cutlist_HiggsToJPsiGamma_1.txt")
+    if opt.zjp: u.setCutListFile(hPath+"/"+subsel+"_"+period+"/out_cutlist_ZtoJPsiGamma_1.txt")
+    if opt.spec: u.setCutListFile("localcutlist.txt")
+  else:       u.setCutListFile(hPath+"/"+subsel+"_"+period+"/out_cutlist_ggH-mad120_1.txt")
+
 
   plot_types =[]
   dirlist = os.listdir(pathBase)
@@ -568,8 +780,11 @@ if __name__ == "__main__":
       names = ['Data','Sig: total','ggH','vbfH','VH']
       table_all  = u.yieldsTable([yields_data,yields_sig, yields_ggH,yields_vbf, yields_vh], names)
 
+  if opt.hjp: precision='%.3f'
+  else:       precision='%.2f'
 
-  u.makeTable(table_all,"all", "html", precision='%.2f')
+  u.makeTable(table_all,"all", "html", precision)
+  u.makeTable(table_all,"all", "html", precision)
   u.makeTable(table_all,"all", "twiki")
   u.makeTable(table_all,"all", "tex")
 

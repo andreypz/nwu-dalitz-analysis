@@ -23,8 +23,10 @@ executable  = 'batchJob.sh'
 version    = args[0].strip('/')
 outputPath = version
 #outputPath = version+'-bias'
-masses = ['140','145','150']
-categories = ['EB','EE','mll50']
+#masses = ['120','125','130']
+masses = ['120','125','130','135','140','145','150']
+categories = ['EB']
+#categories = ['EB','EE','mll50']
 
 inputSamples = []
 for m in masses:

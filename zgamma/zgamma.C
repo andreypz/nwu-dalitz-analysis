@@ -242,13 +242,15 @@ Bool_t zgamma::Process(Long64_t entry)
       TCGenParticle* thisParticle = (TCGenParticle*) genParticles->At(i);
 
 
-      //Higgs himself:
       if (thisParticle->GetPDGId()==23)
 	hists->fill1DHist(thisParticle->M(), "gen_Z_mass",";m_{Z}^{gen} (GeV)",  200, 0,200, 1,"GEN");
 
+      //Higgs himself:
       if (thisParticle->GetPDGId()==25 && (thisParticle->GetStatus()==3 || thisParticle->GetStatus()==22)){
+	hists->fill1DHist(thisParticle->M(), "gen_H_mass",";m_{H}^{gen} (GeV)",  100, 100,200, 1,"GEN");
+	//ObjID->DiscoverGeneology(thisParticle);
 	gen_higgs = *thisParticle;
-	h++;
+	//h++;
       }
 
       //GEN MUONS
@@ -257,9 +259,10 @@ Bool_t zgamma::Process(Long64_t entry)
 	  {
 	    hists->fill1DHist(thisParticle->M(), "gen_mu_mass",";gen mu mass",  200, -1,1, 1,"GEN");
 	    gen_mu.push_back(*thisParticle);
+	    //ObjID->DiscoverGeneology(thisParticle);
 	  }
 	//this is for the Madgraph case, where there are events with no Higgs in LHE file
-	//:(while there are always should be):
+	//(while there are always should be):
 	else if (h==0 && thisParticle->Mother() //good boys should have a mother
 		 && ObjID->GetPrimaryAncestor(thisParticle)->GetPDGId() == thisParticle->GetPDGId())
 	  {
@@ -401,12 +404,13 @@ Bool_t zgamma::Process(Long64_t entry)
       hists->fill1DHist(gen_phi, "gen_phi",";gen phi lp",  100, -TMath::Pi(), TMath::Pi(), 1,"GEN");
     }
 
-    FillHistoCounts(1, eventWeight);
-    CountEvents(1,"Pass Gen acceptance",fcuts);
 
     gendR   = gen_l1.DeltaR(gen_l2);
     genMll  = (gen_l1+gen_l2).M();
     genMllg = (gen_l1+gen_l2+gen_gamma).M();
+
+    hists->fill1DHist(genMll,"gen_Mll_init", ";m_{#mu#mu}",50,0, 20, 1,"GEN");
+    hists->fill1DHist(genMll,"gen_Mll_init_b40", ";m_{#mu#mu}", 40,0, 20, 1,"GEN");
 
     hists->fill1DHist(genMll,"gen_Mll_low",  ";m_{#mu#mu}",100,0, 50, 1,"GEN");
     hists->fill1DHist(genMll,"gen_Mll_full", ";m_{#mu#mu}",200,0,130, 1,"GEN");
@@ -440,19 +444,26 @@ Bool_t zgamma::Process(Long64_t entry)
       hists->fill1DHist(gen_l1.DeltaR(gen_gamma),"gen_l1gamma_deltaR",";#Delta R(#mu_{1}, #gamma)",100,0,5, 1,"GEN");
       hists->fill1DHist(gen_l2.DeltaR(gen_gamma),"gen_l2gamma_deltaR",";#Delta R(#mu_{2}, #gamma)",100,0,5, 1,"GEN");
 
-      hists->fill1DHist(gen_higgs.Pt(),  "gen_higgs_pt",  ";p_{T}^{H} (GeV)",   100, 0,150,  1, "GEN");
-      hists->fill1DHist(gen_higgs.M(),   "gen_higgs_mass",";m_{H} (GeV)",    100, 50,180, 1, "GEN");
-      hists->fill1DHist(gen_gamma.Pt(),  "gen_gamma_pt",  ";p_{T}^{#gamma}",  50, 0,150,  1, "GEN");
-      hists->fill1DHist(gen_gamma.Eta(), "gen_gamma_eta", ";#eta^{#gamma}",   50, -3,3,   1, "GEN");
+      hists->fill1DHist(gen_higgs.Pt(),  "gen_higgs_pt",  ";p_{T}^{H} (GeV)", 100, 0,150,  1, "GEN");
+      hists->fill1DHist(gen_higgs.M(),   "gen_higgs_mass",";m_{H} (GeV)",    100, 100,180, 1, "GEN");
+      hists->fill1DHist(gen_gamma.Pt(),  "gen_gamma_pt",  ";p_{T}^{#gamma}",  50,  0,150,  1, "GEN");
+      hists->fill1DHist(gen_gamma.Eta(), "gen_gamma_eta", ";#eta^{#gamma}",   50,  -3,3,   1, "GEN");
 
       //hists->fill1DHist(gen_gamma_st1.Pt(), "gen_gamma_st1_pt","Pt of gamma",   50, 0,150,  1, "");
       //hists->fill1DHist(gen_gamma_st1.Eta(),"gen_gamma_st1_eta","Eta of gamma", 50, -3,3,  1, "");
     }
 
+    FillHistoCounts(1, eventWeight);
+    CountEvents(1,"Pass Gen acceptance",fcuts);
+
+    //if (genMll<2.9 || genMll>3.3)
+    //return kTRUE;
+
   }
 
   FillHistoCounts(2, eventWeight);
-  CountEvents(2, "Acceptance", fcuts);
+  CountEvents(2, "Acceptance, and JPsi selection", fcuts);
+  //CountEvents(2, "Acceptance", fcuts);
 
   vector<TCElectron> electrons0, electrons;
   vector<TCMuon> muons0, muons;
@@ -914,11 +925,12 @@ Bool_t zgamma::Process(Long64_t entry)
   CountEvents(5, "110 < m(llg) < 170; m(ll) < 50", fcuts);
 
   if (lPt1.DeltaR(gamma)<1.0 || lPt2.DeltaR(gamma)<1.0) return kTRUE;
-  if ( (Mll>2.9 && Mll<3.3) || (Mll>9.3 && Mll<9.7)) return kTRUE; //jpsi and upsilon removeal
+  //if ( (Mll>2.9 && Mll<3.3) || (Mll>9.3 && Mll<9.7)) return kTRUE; //jpsi and upsilon removeal
+  CountEvents(6, "dR(l,g) > 1", fcuts);
+  //CountEvents(6, "dR(l,g) > 1; removed J/Psi, Ups", fcuts);
 
   HM->FillHistosFull(6, eventWeight);
   FillHistoCounts(6, eventWeight);
-  CountEvents(6, "dR(l,g) > 1; removed J/Psi, Ups", fcuts);
   HM->MakeNPlots(6,muons.size(), electrons.size(), electrons0.size(), photonsHZG.size(),
 		 photonsTight.size(), photonsMVA.size(), jets.size(), eventWeight);
 
@@ -952,19 +964,19 @@ Bool_t zgamma::Process(Long64_t entry)
 	if (Mllg>122 && Mllg<128){
 	  HM->FillHistosFull(10, eventWeight);
 	  FillHistoCounts(10, eventWeight);
-	  CountEvents(10, "122 GeV < m(llg) < 128 GeV", fcuts);
+	  CountEvents(10, "122 < m(llg) < 128 GeV", fcuts);
 	}
 
 	if (isVBF){
 	  HM->FillHistosFull(11, eventWeight);
 	  FillHistoCounts(11, eventWeight);
 	  CountEvents(11, "VBF ID", fcuts);
-	}
 
-	if ((lPt1.Pt()+lPt2.Pt()) > 40){
-	  HM->FillHistosFull(12, eventWeight);
-	  FillHistoCounts(12, eventWeight);
-	  CountEvents(12, "ptl1+ptl2 > 40 GeV", fcuts);
+	  if (Mllg>122 && Mllg<128){
+	    HM->FillHistosFull(12, eventWeight);
+	    FillHistoCounts(12, eventWeight);
+	    CountEvents(12, "VBF in [122, 128]", fcuts);
+	  }
 	}
 
 

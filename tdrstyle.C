@@ -15,6 +15,9 @@ void fixOverlay() {
 
 void setTDRStyle() {
   TStyle *tdrStyle = new TStyle("tdrStyle","Style for P-TDR");
+
+  tdrStyle->SetTextFont(42);
+
 // For the canvas:
   tdrStyle->SetCanvasBorderMode(0);
   tdrStyle->SetCanvasColor(kWhite);
