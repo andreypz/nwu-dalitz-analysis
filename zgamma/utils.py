@@ -299,7 +299,7 @@ def drawAllInFile(f1, name1, bZip, sZip, name3, myDir, path, N, howToScale="toDa
   c1.cd()
   #c1.UseCurrentStyle()
 
-  doPdf=1
+  doPdf=0
   histoName = None
   for k in dirList:
     #print k
@@ -531,6 +531,7 @@ def drawAllInFile(f1, name1, bZip, sZip, name3, myDir, path, N, howToScale="toDa
             else:
               leg.AddEntry(h3, sZip[j][0], "l")
               #leg.AddEntry(h3,' m_{H} = '+sZip[j][0][:3]+' GeV', "l")
+            leg.SetFillStyle(0)
 
         if doRatio:
           c1.cd()

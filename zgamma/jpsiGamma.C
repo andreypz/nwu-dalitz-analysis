@@ -260,8 +260,8 @@ Bool_t jpsiGamma::Process(Long64_t entry)
     for (int i = 0; i < genParticles->GetSize(); ++i) {
       TCGenParticle* thisParticle = (TCGenParticle*) genParticles->At(i);
 
-      if (abs(thisParticle->GetPDGId())==24)
-	ObjID->DiscoverGeneology(thisParticle);
+      //if (abs(thisParticle->GetPDGId())==24)
+      //ObjID->DiscoverGeneology(thisParticle);
 
       //Higgs himself:
       if (thisParticle->GetPDGId()==25 && (thisParticle->GetStatus()==3 || thisParticle->GetStatus()==62)){
@@ -430,9 +430,11 @@ Bool_t jpsiGamma::Process(Long64_t entry)
 	  ang->GetAngles(gen_l1, gen_l2, gen_gamma, co1,co2,phi,co3);
 	  //cout<<eventNumber<<" gen Angles: c1= "<<co1<<"  c2="<<co2<<"   phi="<<phi<<"   coTh="<<co3<<endl;
 
-	  double W = 1;
-	  if  (sample=="hjp")
-	    W = 3*(1+co1*co1)/8;
+	  double W = 1.;
+	  if  (sample=="hjp"){
+	    W = 3*(1+co1*co1)/4;
+	    eventWeight *= W;
+	  }
 	  string label="GEN-ANG1";
 	  hists->fill1DHist(co1, Form("gen_co1_%s", label.c_str()), ";cos(#vec{l-}, #vec{J/#Psi}) in CM", 100,-1,1, W,label);
 	  hists->fill1DHist(co2, Form("gen_co2_%s", label.c_str()), ";cos(#vec{l+}, #vec{J/#Psi}) in CM", 100,-1,1, W,label);
