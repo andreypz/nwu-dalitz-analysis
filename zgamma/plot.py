@@ -227,7 +227,7 @@ if __name__ == "__main__":
   #             [sigGG['125']])
   if opt.hjp:
     #sigZip = zip(['H to J/Psi #gamma'],[sigFileHjp])
-    sigZip = zip(['H #rightarrow J/#Psi #gamma','ggH-125'],[sigFileHjp, sigGG['125']])
+    sigZip = zip(['H #rightarrow J/#Psi #gamma','ggH #rightarrow #gamma*#gamma'],[sigFileHjp, sigGG['125']])
 
 
 
@@ -782,7 +782,7 @@ if __name__ == "__main__":
       names = ['Data','Sig: total','ggH','vbfH','VH']
       table_all  = u.yieldsTable([yields_data,yields_sig, yields_ggH,yields_vbf, yields_vh], names)
 
-  if opt.hjp: precision='%.3f'
+  if opt.hjp: precision='%.4f'
   else:       precision='%.2f'
 
   u.makeTable(table_all,"all", "html", precision)
