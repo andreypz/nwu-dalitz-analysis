@@ -340,6 +340,7 @@ def drawAllInFile(f1, name1, bZip, sZip, name3, myDir, path, N, howToScale="toDa
             si.append(s[1].Get(myDir+"/"+histoName).Clone())
           except ReferenceError:
             print 'WARNING: ',  histoName, '  does not exist in ', s[0]
+            continue 
         else:
           si.append(s[1].Get(histoName).Clone())
           print myDir, histoName
@@ -789,9 +790,9 @@ def drawAllInFile(f1, name1, bZip, sZip, name3, myDir, path, N, howToScale="toDa
       c1.SetLogy(int(isLog))
       #print 'Saving PNG:', histoName
       c1.SaveAs(path+"/"+histoName+'.png')
-      if doPdf:
-        c1.SaveAs(path+"/"+histoName+'.pdf')
-        #doPdf=1
+      #if doPdf:
+      #  c1.SaveAs(path+"/"+histoName+'.pdf')
+
       gStyle.SetOptStat(0)
 
     c1.SetLogy(0)

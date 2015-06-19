@@ -81,6 +81,8 @@ def makeCards(subdir):
   yearList   = [a.strip() for a in (cf.get("fits","yearList")).split(',')]
   leptonList = [a.strip() for a in (cf.get("fits","leptonList")).split(',')]
   catList    = [a.strip() for a in (cf.get("fits","catList")).split(',')]
+  if hjp: leptonList =['mu']
+
   for year in yearList:
     for lep in leptonList:
       for cat in catList:

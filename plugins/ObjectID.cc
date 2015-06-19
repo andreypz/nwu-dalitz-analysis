@@ -228,18 +228,18 @@ bool ObjectID::PassPhotonIdAndIso(const TCPhoton& ph, TString n, float& mvaScore
 }
 
 /*
-void ObjectID::PhotonR9Corrector(const TCPhoton& ph){
+  void ObjectID::PhotonR9Corrector(const TCPhoton& ph){
   //old R9 correction
   float R9Cor;
   R9Cor = ph.R9();
 
   if (fabs(ph.SCEta()) < 1.479)
-    R9Cor = ph.R9()*1.0045 + 0.0010;
+  R9Cor = ph.R9()*1.0045 + 0.0010;
   else
-    R9Cor = ph.R9()*1.0086 - 0.0007;
+  R9Cor = ph.R9()*1.0086 - 0.0007;
 
   //ph.SetR9(R9Cor);
-}
+  }
 */
 
 float ObjectID::CalculateMuonIso(const TCMuon& lep)
@@ -284,15 +284,15 @@ bool ObjectID::PassMuonId(const TCMuon& lep, TVector3 *pv, TString n)
     pass = true;
 
   else if(n == "Tight"
-	  && lep.IsPF() && lep.IsGLB()
-	  && lep.NormalizedChi2()             < cuts.NormalizedChi2
-	  && lep.NumberOfValidMuonHits()      > cuts.NumberOfValidMuonHits
-	  && lep.NumberOfMatchedStations()    > cuts.NumberOfMatchedStations
-	  && lep.NumberOfValidPixelHits()     > cuts.NumberOfValidPixelHits
-	  && lep.TrackLayersWithMeasurement() > cuts.TrackLayersWithMeasurement
-	  && fabs(lep.Dxy(pv)) < cuts.dxy
-	  && fabs(lep.Dz(pv))  < cuts.dz
-	  )
+          && lep.IsPF() && lep.IsGLB()
+          && lep.NormalizedChi2()             < cuts.NormalizedChi2
+          && lep.NumberOfValidMuonHits()      > cuts.NumberOfValidMuonHits
+          && lep.NumberOfMatchedStations()    > cuts.NumberOfMatchedStations
+          && lep.NumberOfValidPixelHits()     > cuts.NumberOfValidPixelHits
+          && lep.TrackLayersWithMeasurement() > cuts.TrackLayersWithMeasurement
+          && fabs(lep.Dxy(pv)) < cuts.dxy
+          && fabs(lep.Dz(pv))  < cuts.dz
+          )
     pass = true;
   return pass;
 }
@@ -310,10 +310,10 @@ float ObjectID::CalculateElectronIso(const TCElectron& lep)
 {
   float eleISO = 0;
   //if(period=="2012")
-    //eleISO = (lep.IsoMap("pfChIso_R04") + TMath::Max(0.0, (Double_t)(lep.IsoMap("pfPhoIso_R04") + lep.IsoMap("pfNeuIso_R04") - rho25Factor*lep.IsoMap("EffArea_R04"))))/lep.Pt();
-    //else if(period=="2011")
-    //eleISO = (lep.IsoMap("SumPt_R04") + TMath::Max(0.0, (Double_t)(lep.IsoMap("EmIso_R04") + lep.IsoMap("HadIso_R04") - rhoFactor*TMath::Pi()*0.09)))/lep.Pt();
-    //else cout<<"Ele iso - Period is not defined!"<<period<<endl;
+  //eleISO = (lep.IsoMap("pfChIso_R04") + TMath::Max(0.0, (Double_t)(lep.IsoMap("pfPhoIso_R04") + lep.IsoMap("pfNeuIso_R04") - rho25Factor*lep.IsoMap("EffArea_R04"))))/lep.Pt();
+  //else if(period=="2011")
+  //eleISO = (lep.IsoMap("SumPt_R04") + TMath::Max(0.0, (Double_t)(lep.IsoMap("EmIso_R04") + lep.IsoMap("HadIso_R04") - rhoFactor*TMath::Pi()*0.09)))/lep.Pt();
+  //else cout<<"Ele iso - Period is not defined!"<<period<<endl;
 
   return eleISO;
 }
@@ -334,20 +334,20 @@ bool ObjectID::PassDalitzEleID(const TCElectron& el, TVector3 *pv, TString n, fl
 
       //if (_eventNumber == 131810 || _eventNumber == 131886) {
       //cout<<_eventNumber<<" DBG DAlitz MVA ID "<<trk.size() <<"  "<<sc.size()<<endl;
-	//sc[0].Dump();
-	//sc[1].Dump();
-	//sc[2].Dump();
+      //sc[0].Dump();
+      //sc[1].Dump();
+      //sc[2].Dump();
       //}
 
       if (trk.size() < 2 || sc.size()<2)
-	return false;
+        return false;
 
       sort(sc.begin(),  sc.end(),  SCESortCondition);
       sort(trk.begin(), trk.end(), P4SortCondition);
 
 
       if (fabs(el.Dxy(pv)) > 0.02 || fabs(el.Dz(pv)) > 0.1)
-	return false;
+        return false;
 
       // classification variables
       static Float_t rho2012_, r9_, HoverE_, EoverPt_;
@@ -359,31 +359,31 @@ bool ObjectID::PassDalitzEleID(const TCElectron& el, TVector3 *pv, TString n, fl
       static TMVA::Reader* tmvaDalitz = NULL;
 
       if (!tmvaDalitz) {
-	tmvaDalitz = new TMVA::Reader("!Color:Silent");
+        tmvaDalitz = new TMVA::Reader("!Color:Silent");
 
-	tmvaDalitz->AddVariable("rho2012",    &rho2012_);
-	tmvaDalitz->AddVariable("eleBCS25_1", &eleBCS25_1_);
-	tmvaDalitz->AddVariable("eleBCS25_2", &eleBCS25_2_);
-	tmvaDalitz->AddVariable("eleGSFPt2over1",  &eleGSFPt2over1_);
-	//tmvaDalitz->AddVariable("eleGSFPt1",  &eleGSFPt1_);
-	//tmvaDalitz->AddVariable("eleGSFPt2",  &eleGSFPt2_);
-	tmvaDalitz->AddVariable("eleGSFdR",   &eleGSFdR_);
-	tmvaDalitz->AddVariable("r9", &r9_);
-	tmvaDalitz->AddVariable("SCEtaWidth", &SCEtaWidth_);
-	tmvaDalitz->AddVariable("SCPhiWidth", &SCPhiWidth_);
-	tmvaDalitz->AddVariable("HoverE",     &HoverE_);
-	tmvaDalitz->AddVariable("EoverPt",    &EoverPt_);
-	tmvaDalitz->AddVariable("dEtaAtVtx",  &dEtaAtVtx_);
-	tmvaDalitz->AddVariable("dPhiAtVtx",  &dPhiAtVtx_);
-	tmvaDalitz->AddVariable("EcalEnPin",  &EcalEnPin_);
-	tmvaDalitz->AddVariable("recoSCEta",  &recoSCEta_);
-	tmvaDalitz->AddVariable("eleBCSieie2",&eleBCSieie2_);
+        tmvaDalitz->AddVariable("rho2012",    &rho2012_);
+        tmvaDalitz->AddVariable("eleBCS25_1", &eleBCS25_1_);
+        tmvaDalitz->AddVariable("eleBCS25_2", &eleBCS25_2_);
+        tmvaDalitz->AddVariable("eleGSFPt2over1",  &eleGSFPt2over1_);
+        //tmvaDalitz->AddVariable("eleGSFPt1",  &eleGSFPt1_);
+        //tmvaDalitz->AddVariable("eleGSFPt2",  &eleGSFPt2_);
+        tmvaDalitz->AddVariable("eleGSFdR",   &eleGSFdR_);
+        tmvaDalitz->AddVariable("r9", &r9_);
+        tmvaDalitz->AddVariable("SCEtaWidth", &SCEtaWidth_);
+        tmvaDalitz->AddVariable("SCPhiWidth", &SCPhiWidth_);
+        tmvaDalitz->AddVariable("HoverE",     &HoverE_);
+        tmvaDalitz->AddVariable("EoverPt",    &EoverPt_);
+        tmvaDalitz->AddVariable("dEtaAtVtx",  &dEtaAtVtx_);
+        tmvaDalitz->AddVariable("dPhiAtVtx",  &dPhiAtVtx_);
+        tmvaDalitz->AddVariable("EcalEnPin",  &EcalEnPin_);
+        tmvaDalitz->AddVariable("recoSCEta",  &recoSCEta_);
+        tmvaDalitz->AddVariable("eleBCSieie2",&eleBCSieie2_);
 
-	// Spectators
-	tmvaDalitz->AddSpectator("eleBCS15_2", &eleBCS15_2_);
-	tmvaDalitz->AddSpectator("eleBCSieie1",&eleBCSieie1_);
+        // Spectators
+        tmvaDalitz->AddSpectator("eleBCS15_2", &eleBCS15_2_);
+        tmvaDalitz->AddSpectator("eleBCSieie1",&eleBCSieie1_);
 
-	tmvaDalitz->BookMVA("BDT", "../data/ElectronDalitzMVAID.xml");
+        tmvaDalitz->BookMVA("BDT", "../data/ElectronDalitzMVAID.xml");
       }
 
       r9_ = el.R9();
@@ -411,9 +411,9 @@ bool ObjectID::PassDalitzEleID(const TCElectron& el, TVector3 *pv, TString n, fl
 
       //cout<<"\t *** DBG MVA ID score: "<<mvaScore<<"  gsf1 pt="<<trk[0].Pt()<<endl;
       if (mvaScore > _DAleMvaCut)
-	return true;
+        return true;
       else
-	return false;
+        return false;
 
     }
   else {
@@ -435,10 +435,10 @@ bool ObjectID::PassElectronMVAPreSel(const TCElectron& el)
       ) {
     if (fabs(el.Eta()) < 1.479) {
       if (el.SigmaIEtaIEta()< 0.014 && el.IdMap("hadronicOverEm") < 0.15)
-	pass = true;
+        pass = true;
     } else { //endcap
       if (el.SigmaIEtaIEta()< 0.035 && el.IdMap("hadronicOverEm") < 0.10)
-	pass = true;
+        pass = true;
     }
   }
   return pass;
@@ -460,28 +460,28 @@ bool ObjectID::PassElectronIdAndIsoMVA(const TCElectron& lep)
      (
       (lep.Pt()>10 && lep.Pt()<20 &&
        (
-	(fabs(lep.Eta()) < 0.8
-	 && lep.MvaID() > 0.00)
-	||
-	(fabs(lep.Eta()) >  0.8 && fabs(lep.Eta()) < 1.479
-	 && lep.MvaID() > 0.10)
-	||
-	(fabs(lep.Eta()) >  1.479 && fabs(lep.Eta()) < 2.5
-	 && lep.MvaID() > 0.62)
-	)
+        (fabs(lep.Eta()) < 0.8
+         && lep.MvaID() > 0.00)
+        ||
+        (fabs(lep.Eta()) >  0.8 && fabs(lep.Eta()) < 1.479
+         && lep.MvaID() > 0.10)
+        ||
+        (fabs(lep.Eta()) >  1.479 && fabs(lep.Eta()) < 2.5
+         && lep.MvaID() > 0.62)
+        )
        )
       ||
       (lep.Pt()>20 &&
        (
-	(fabs(lep.Eta()) < 0.8
-	 && lep.MvaID() > 0.94)
-	||
-	(fabs(lep.Eta()) >  0.8 && fabs(lep.Eta()) < 1.479
-	 && lep.MvaID() > 0.85)
-	||
-	(fabs(lep.Eta()) >  1.479 && fabs(lep.Eta()) < 2.5
-	 && lep.MvaID() > 0.92)
-	)
+        (fabs(lep.Eta()) < 0.8
+         && lep.MvaID() > 0.94)
+        ||
+        (fabs(lep.Eta()) >  0.8 && fabs(lep.Eta()) < 1.479
+         && lep.MvaID() > 0.85)
+        ||
+        (fabs(lep.Eta()) >  1.479 && fabs(lep.Eta()) < 2.5
+         && lep.MvaID() > 0.92)
+        )
        )
       )
      )
@@ -546,9 +546,25 @@ TCGenParticle * ObjectID::GetPrimaryAncestor(TCGenParticle *p)
 }
 
 
+bool ObjectID::isFSR(TCGenParticle *p)
+{
+  TCGenParticle *a = p;
+  bool fsr = false;
+  while (a->Mother())
+    {
+      if (a->Mother()->GetPDGId() == 22)
+        return true;
+      else
+        a = a->Mother();
+    }
+  return fsr;
+}
+
+
 void ObjectID::DiscoverGeneology(TCGenParticle *p)
 {
   cout<<"---->> event = "<<_eventNumber<<"   "<<p->GetPDGId()<<"  st = "<<p->GetStatus()
+      <<"\n primary ancestor = "<<GetPrimaryAncestor(p)->GetPDGId()
       <<"\n pt="<<p->Pt()<<" eta="<<p->Eta()<<" phi="<<p->Phi()<<" M="<<p->M()<<endl;
   if(p->Mother()){
     TCGenParticle *m = p->Mother();
@@ -558,17 +574,17 @@ void ObjectID::DiscoverGeneology(TCGenParticle *p)
       cout<<"  grandmother = "<<g->GetPDGId()<<"  st="<<g->GetStatus()<<"\n pt="<<g->Pt()<<endl;
 
       if(g->Mother()){
-	TCGenParticle *gg = g->Mother();
-	cout<<"  grand-grandmother = "<<gg->GetPDGId()<<"  st="<<gg->GetStatus()<<"\n pt="<<gg->Pt()<<endl;
-	if(gg->Mother()){
-	  TCGenParticle *ggg = gg->Mother();
-	  cout<<"  grand-grand-grandmother = "<<ggg->GetPDGId()<<"  st="<<ggg->GetStatus()<<"\n pt="<<ggg->Pt()<<endl;
+        TCGenParticle *gg = g->Mother();
+        cout<<"  grand-grandmother = "<<gg->GetPDGId()<<"  st="<<gg->GetStatus()<<"\n pt="<<gg->Pt()<<endl;
+        if(gg->Mother()){
+          TCGenParticle *ggg = gg->Mother();
+          cout<<"  grand-grand-grandmother = "<<ggg->GetPDGId()<<"  st="<<ggg->GetStatus()<<"\n pt="<<ggg->Pt()<<endl;
 
-	  if(ggg->Mother()){
-	    TCGenParticle *gggg = ggg->Mother();
-	    cout<<"  grand-grand-grand-grandmother = "<<gggg->GetPDGId()<<"  st="<<gggg->GetStatus()<<"\n pt="<<gggg->Pt()<<endl;
-	  }
-	}
+          if(ggg->Mother()){
+            TCGenParticle *gggg = ggg->Mother();
+            cout<<"  grand-grand-grand-grandmother = "<<gggg->GetPDGId()<<"  st="<<gggg->GetStatus()<<"\n pt="<<gggg->Pt()<<endl;
+          }
+        }
       }
     }
   }
@@ -765,13 +781,13 @@ void ObjectID::MuonDump(const TCMuon& mu, TVector3 *pv)
 
 
   cout  << _runNumber << " " << _eventNumber << "  pt =" << mu.Pt()
-	<< " eta=" << mu.Eta() << " GLB=" << mu.IsGLB() << "  isPF=" << mu.IsPF() << " isTRK="<<mu.IsTRK()<<endl;
+        << " eta=" << mu.Eta() << " GLB=" << mu.IsGLB() << "  isPF=" << mu.IsPF() << " isTRK="<<mu.IsTRK()<<endl;
   cout  << "chi2_tr="<< mu.NormalizedChi2_tracker() << "  iso=" << muISO <<  "  dxy=" << mu.Dxy(pv) << " dz=" << mu.Dz(pv)
-	<< "\n  good =" << mu.IsGood()
+        << "\n  good =" << mu.IsGood()
     //<< "\n  trk =" << mu.TrackLayersWithMeasurement() << "  pix=" <<mu.PixelLayersWithMeasurement()
     //   << "\n " << mu.NormalizedChi2() << " " << mu.NumberOfValidMuonHits() << " " << mu.NumberOfMatchedStations()
     //  << " " << mu.NumberOfValidPixelHits() << " " << mu.TrackLayersWithMeasurement()
-	<< endl;
+        << endl;
 }
 
 void ObjectID::PhotonDump(const TCPhoton& pho, phIdAndIsoCuts cuts)

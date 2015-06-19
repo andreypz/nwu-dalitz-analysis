@@ -177,6 +177,7 @@ if __name__ == "__main__":
 
   sigFileZjp  = TFile(hPath+"/"+subsel+"_"+period+"/hhhh_ZtoJPsiGamma_1.root",     "OPEN")
   sigFileHjp  = TFile(hPath+"/"+subsel+"_"+period+"/hhhh_HiggsToJPsiGamma_1.root", "OPEN")
+  #sigFileHjp  = TFile(hPath+"/"+subsel+"_"+period+"/hhhh_HiggsToJPsiGamma_RECO.root", "OPEN")
 
   ggHZGFile   = TFile(hPath+"/"+subsel+"_"+period+"/hhhh_ggHZG-"+str(mass)+"_1.root", "OPEN")
 
@@ -230,8 +231,6 @@ if __name__ == "__main__":
     sigZip = zip(['H #rightarrow J/#Psi #gamma','ggH #rightarrow #gamma*#gamma'],[sigFileHjp, sigGG['125']])
 
 
-
-
   #u.drawAllInFile(None, "", hackZip, None, '', "GEN", pathBase+'/GEN-lumi', None, "lumi")
   # u.drawAllInFile(None, "", hackZip, sigGG['125'], '125', "GEN", pathBase+'/GEN-norm', None, "norm", doFits=True)
   # u.drawAllInFile(None, "", '', sigFileGG, "h", "GEN", pathBase+'/GEN-norm', None, "norm")
@@ -246,7 +245,7 @@ if __name__ == "__main__":
       # u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "Main", path, cut, "lumi")
     else:
       print
-      #u.drawAllInFile(dataFile, "Data", None, sigZip, sigName, "Main", path, cut)
+      u.drawAllInFile(dataFile, "Data", None, sigZip, sigName, "Main", path, cut)
       if opt.data:
         u.drawAllInFile(dataFile, "Data", None, None, '', "Main", pathBase+'/Main-Data', cut)
       if opt.sig:
@@ -261,7 +260,7 @@ if __name__ == "__main__":
       for n in ['Angles','N']:
         u.drawAllInFile(dataFile, "Data", bkgZip, sigZip,"signal", n, pathBase+"/"+n, cut, "norm")
 
-      if cut in ['8','9']:
+      if cut in ['11']:
         for n in ['Photon','Photon-EGamma']:
           u.drawAllInFile(dataFile, "Data",bkgZip, sigZip,"signal", n, pathBase+"/"+n, None, "norm")
 

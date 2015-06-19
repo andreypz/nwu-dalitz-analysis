@@ -154,7 +154,7 @@ if period =="2012":
   if selection in ['mugamma','jp-mugamma','4mu','2e2mu','apz']:
     bg.extend([
         cfg('DYJetsDalitz', DIR+'/nuTuples_v9.9_8TeV/dalitz-mu/DYtoMuMuJet',    1, 'DYJets '+params),
-        cfg('ZGDalitz',     DIR+'/nuTuples_v9.9_8TeV/dalitz-mu/DYtoMuMuGamma',  1, 'ZG     '+params),
+        #cfg('ZGDalitz',     DIR+'/nuTuples_v9.9_8TeV/dalitz-mu/DYtoMuMuGamma',  1, 'ZG     '+params),
         #cfg('ZGDalitz-OLD', DIRME+'/nuTuples_v9.6_8TeV/dalitz/DYtoMuMuGamma', 1, 'ZG     '+params),
         ])
   elif selection in ['elgamma']:
@@ -211,7 +211,7 @@ if period =="2012":
   if selection in ['mugamma','jp-mugamma']:
     params = selection+trig+period+gen + whereWeRun;
     signal.extend([
-        cfg('ZtoJPsiGamma',     DIR+'/nuTuples_v9.9_8TeV/dalitz-mu/ZtoJPsiGamma-MuMuGamma',1, 'zjp '+params),
+        #cfg('ZtoJPsiGamma',     DIR+'/nuTuples_v9.9_8TeV/dalitz-mu/ZtoJPsiGamma-MuMuGamma',1, 'zjp '+params),
         cfg('HiggsToJPsiGamma', DIR+'/nuTuples_v9.9_8TeV/dalitz-mu/HiggsToJPsiGamma',      1, 'hjp '+params),
         #cfg('JPsiToMuMu-S10',   DIR+'/nuTuples_v9.9_8TeV/dalitz-mu/JPsiToMuMu_S10',        1,  'jp '+params),
         #cfg('JPsiToMuMu_Pt20',  DIR+'/nuTuples_v9.9_8TeV/dalitz-mu/JPsiToMuMu_Pt20_RD2',   1,  'jp '+params),
