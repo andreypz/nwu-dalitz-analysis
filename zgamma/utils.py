@@ -335,13 +335,16 @@ def drawAllInFile(f1, name1, bZip, sZip, name3, myDir, path, N, howToScale="toDa
     if sZip!=None:
       si = []
       for s in sZip:
+        print myDir, histoName
         if myDir!="":
           si.append(s[1].Get(myDir+"/"+histoName).Clone())
         else:
-          si.append(s[1].Get(histoName).Clone())
-          print myDir, histoName
+          try:
+            si.append(s[1].Get(histoName).Clone())
+          except ReferenceError:
+            print 'Histogram'+histoName+' does not exis in '+s[0]
         if si[-1]==None:
-          print 'Histogram'+histoName+' does not exis in'+s[0]
+          print 'Histogram'+histoName+' does not exis in '+s[0]
           continue
 
         scale3 = 1

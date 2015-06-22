@@ -10,7 +10,7 @@ import makeHTML as ht
 
 subdir = sys.argv[1]
 
-outpath = '/home/andreypz/workspace/lhe-plots/lhe/'
+outpath = '/home/andreypz/workspace/html-lhe/lhe/'
 #outpath = '/uscms_data/d2/andreypz/html/zgamma/lhe/'
 files={}
 
@@ -18,7 +18,9 @@ files={}
 #files["one"] = ['../../ano_zeromass_0.2to50.root']
 #files["two"] = ['../../heft_zeromass_0.2to50.root']
 files["one"] = ['../../ano_dalitz.root']
-files["two"] = ['../../heft_dalitz.root']
+files["two"] = ['../../hc-ufo-dalitz.root']
+#files["two"] = ['../../ano_dalitz_mod.root']
+#files["two"] = ['../../heft_dalitz.root']
 #files["one"] = ['../../ano_zeromass_50to500.root']
 #files["two"] = ['../../heft_zeromass_50to500.root']
 
@@ -374,7 +376,7 @@ if __name__ == "__main__":
   #        'Luisa\'s vs mine']
 
 
-  sigZip = zip(['ANO','HEFT'],
+  sigZip = zip(['ANO','UFO'],
                 [oneFile, twoFile])
   #sigZip = zip(['ANO-0','ANO-50'],
   #              [oneFile, twoFile])
