@@ -278,6 +278,7 @@ void HistMaker::FillHistosFull(Int_t num, Double_t weight, string dir)
 
   hists->fill1DHist(Mll, Form("01_diLep_mass_0to20_%s_cut%i",    d, num),";m_{#mu#mu} (GeV)", 100, 0,20,  weight, dir);
   hists->fill1DHist(Mll, Form("01_diLep_mass_0to20_b50_%s_cut%i",d, num),";m_{#mu#mu} (GeV)",  50, 0,20,  weight, dir);
+  hists->fill1DHist(Mll, Form("01_diLep_mass_0to20_b40_%s_cut%i",d, num),";m_{#mu#mu} (GeV)",  40, 0,20,  weight, dir);
   hists->fill1DHist(Mll, Form("01_diLep_mass_0to50_%s_cut%i",    d, num),";m_{#mu#mu} (GeV)", 100, 0,50,  weight, dir);
   hists->fill1DHist(Mll, Form("01_diLep_mass_full_%s_cut%i", d, num),";m_{#mu#mu} (GeV)", 100, 0,120, weight, dir);
   hists->fill1DHist(Mll, Form("01_diLep_mass_low1_%s_cut%i", d, num),";m_{ll} (GeV)",  50,   0,1.5,   weight, dir);

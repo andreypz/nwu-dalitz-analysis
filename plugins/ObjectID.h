@@ -93,6 +93,7 @@ class ObjectID {
   virtual bool PassJetID(const TCJet& j, int nVtx);
 
   TCGenParticle* GetPrimaryAncestor(TCGenParticle *p);
+  virtual bool isFSR(TCGenParticle *p);
   virtual void DiscoverGeneology(TCGenParticle *p);
   virtual void MuonDump(const TCMuon& mu, TVector3 *pv);
   virtual void PhotonDump(const TCPhoton& pho,  phIdAndIsoCuts c);

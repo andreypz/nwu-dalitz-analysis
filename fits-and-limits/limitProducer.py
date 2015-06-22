@@ -16,6 +16,8 @@ parser.add_option("--dontrun", dest="dontrun",action="store_true", default=False
                   help="Don't run it, hust combine the cards")
 parser.add_option("--br", dest="br",action="store_true", default=False,
                   help="Make limit on xs*Br")
+parser.add_option("--cl90", dest="cl90",action="store_true", default=False,
+                  help="Do at 90% CL (default is 95%)")
 
 (opt, args) = parser.parse_args()
 
@@ -23,6 +25,8 @@ import ConfigParser as cp
 cf = cp.ConfigParser()
 cf.read('config.cfg')
 
+CLoption = ''
+if opt.cl90: CLoption = ' -C 0.90'
 
 if opt.br:
   outCardDir = '/output_cards_xsbr/'
@@ -36,13 +40,12 @@ if opt.prof:
   method = "ProfileLikelihood"
 
 if __name__ == "__main__":
-  #massList = ['125.0']
-  massList   = [a.strip() for a in (cf.get("fits","massList-more")).split(',')]
+  massList = ['125.0']
+  #massList   = [a.strip() for a in (cf.get("fits","massList-more")).split(',')]
   catList    = [a.strip() for a in (cf.get("fits","catList")).split(',')]
   leptonList = [a.strip() for a in (cf.get("fits","leptonList")).split(',')]
 
   s = cf.get("path","ver")
-  #s = "MingDataCards/Dalitz_electron/"
   myDir = s
 
   if opt.nosyst:
@@ -65,8 +68,8 @@ if __name__ == "__main__":
         #card  = myDir+"/mu_plus_el_M"+m+".txt"
         card  = myDir+outCardDir+"hzg_"+lep+"_2012_cat"+cat+"_M"+m+"_Dalitz_.txt"
 
-        if cat in ['m1','m2','m3','m4','m5','m6']:
-          cardNames = cardNames+' '+card
+        #if cat in ['m1','m2','m3','m4','m5','m6']:
+        #  cardNames = cardNames+' '+card
         if cat in ['EB','EE','mll50']:
           cardNames = cardNames+' '+card
 
@@ -78,7 +81,7 @@ if __name__ == "__main__":
         else:
           print
           if not opt.dontrun:
-            os.system('combine -M '+method+' '+card + ' -m '+m)
+            os.system('combine -M '+method+' '+card + ' -m '+m+CLoption)
 
         if m[-1]=='5':
           fname = "higgsCombineTest."+method+".mH"+m
@@ -94,11 +97,11 @@ if __name__ == "__main__":
         os.system("sed -i 's:"+myDir+outCardDir+s[:3]+":"+s[:3]+":g' "+comboName)
 
         if opt.nosyst:
-          os.system('combine -M '+method+' '+comboName + ' -m '+m+' -S 0')
+          os.system('combine -M '+method+' '+comboName + ' -m '+m+' -S 0'+CLoption)
         else:
           print
           if not opt.dontrun:
-            os.system('combine -M '+method+' '+comboName + ' -m '+m)
+            os.system('combine -M '+method+' '+comboName + ' -m '+m+CLoption)
 
         if m[-1]=='5':
           fname = "higgsCombineTest."+method+".mH"+m

@@ -272,7 +272,7 @@ def makeStack(bZip, histDir, histoName, leg, lumi, howToScale, normToScale=None)
 
 
 def drawAllInFile(f1, name1, bZip, sZip, name3, myDir, path, N, howToScale="toDataRel", isLog=False, doRatio=False, doFits=False):
-  print 'myDir is ', myDir
+  print 'myDir is =', myDir
   if f1!=None and not f1.IsZombie():
     f1.cd(myDir)
   elif bZip!=None:
@@ -299,7 +299,7 @@ def drawAllInFile(f1, name1, bZip, sZip, name3, myDir, path, N, howToScale="toDa
   c1.cd()
   #c1.UseCurrentStyle()
 
-  doPdf=1
+  doPdf=0
   histoName = None
   for k in dirList:
     #print k
@@ -337,7 +337,11 @@ def drawAllInFile(f1, name1, bZip, sZip, name3, myDir, path, N, howToScale="toDa
       for s in sZip:
         print myDir, histoName
         if myDir!="":
-          si.append(s[1].Get(myDir+"/"+histoName).Clone())
+          try:
+            si.append(s[1].Get(myDir+"/"+histoName).Clone())
+          except ReferenceError:
+            print 'WARNING: ',  histoName, '  does not exist in ', s[0]
+            continue 
         else:
           try:
             si.append(s[1].Get(histoName).Clone())
@@ -529,7 +533,9 @@ def drawAllInFile(f1, name1, bZip, sZip, name3, myDir, path, N, howToScale="toDa
             elif 'LHE' in histoName:
               leg.AddEntry(h3, sZip[j][0], "l")
             else:
-              leg.AddEntry(h3,' m_{H} = '+sZip[j][0][:3]+' GeV', "l")
+              leg.AddEntry(h3, sZip[j][0], "l")
+              #leg.AddEntry(h3,' m_{H} = '+sZip[j][0][:3]+' GeV', "l")
+            leg.SetFillStyle(0)
 
         if doRatio:
           c1.cd()
@@ -787,9 +793,9 @@ def drawAllInFile(f1, name1, bZip, sZip, name3, myDir, path, N, howToScale="toDa
       c1.SetLogy(int(isLog))
       #print 'Saving PNG:', histoName
       c1.SaveAs(path+"/"+histoName+'.png')
-      if doPdf:
-        c1.SaveAs(path+"/"+histoName+'.pdf')
-        #doPdf=1
+      #if doPdf:
+      #  c1.SaveAs(path+"/"+histoName+'.pdf')
+
       gStyle.SetOptStat(0)
 
     c1.SetLogy(0)

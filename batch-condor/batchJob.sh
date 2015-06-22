@@ -22,10 +22,9 @@ then
   source /software/tier3/osg/cmsset_default.sh
   cd /software/tier3/osg/slc6_amd64_gcc472/cms/cmssw/CMSSW_5_3_11
 else
-  source /uscmst1/prod/sw/cms/bashrc prod
+  source /cvmfs/cms.cern.ch/cmsset_default.sh
+  cd /cvmfs/cms.cern.ch/slc6_amd64_gcc472/cms/cmssw/CMSSW_5_3_20
   # this is needed just to set-up root:
-  #cd /uscmst1/prod/sw/cmssw/slc5_amd64_gcc472/cms/cmssw/CMSSW_6_2_0
-  cd /uscmst1/prod/sw/cmssw/slc5_amd64_gcc462/cms/cmssw/CMSSW_5_3_20
 fi
 eval `scramv1 runtime -sh`
 cd -

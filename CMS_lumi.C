@@ -1,8 +1,9 @@
 #include "CMS_lumi.h"
 
 void
-CMS_lumi( TPad* pad, int iPeriod, int iPosX )
+CMS_lumi( TPad* pad, int iPeriod, int iPosX, TString extraText)
 {
+  //cout<<"\n\n Extra text for this plot: "<<extraText<<endl;
   bool outOfFrame    = false;
   if( iPosX/10==0 )
     {
@@ -131,7 +132,7 @@ CMS_lumi( TPad* pad, int iPeriod, int iPosX )
 	  latex.SetTextSize(cmsTextSize*t);
 	  latex.SetTextAlign(align_);
 	  latex.DrawLatex(posX_, posY_, cmsText);
-	  if( writeExtraText )
+	  if( writeExtraText && extraText!="")
 	    {
 	      latex.SetTextFont(extraTextFont);
 	      latex.SetTextAlign(align_);
@@ -140,7 +141,7 @@ CMS_lumi( TPad* pad, int iPeriod, int iPosX )
 	    }
 	}
     }
-  else if( writeExtraText )
+  else if( writeExtraText && extraText!="")
     {
       if( iPosX==0)
 	{
