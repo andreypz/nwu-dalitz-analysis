@@ -335,6 +335,7 @@ def drawAllInFile(f1, name1, bZip, sZip, name3, myDir, path, N, howToScale="toDa
     if sZip!=None:
       si = []
       for s in sZip:
+        print myDir, histoName
         if myDir!="":
           try:
             si.append(s[1].Get(myDir+"/"+histoName).Clone())
@@ -342,10 +343,12 @@ def drawAllInFile(f1, name1, bZip, sZip, name3, myDir, path, N, howToScale="toDa
             print 'WARNING: ',  histoName, '  does not exist in ', s[0]
             continue
         else:
-          si.append(s[1].Get(histoName).Clone())
-          print myDir, histoName
+          try:
+            si.append(s[1].Get(histoName).Clone())
+          except ReferenceError:
+            print 'Histogram'+histoName+' does not exis in '+s[0]
         if si[-1]==None:
-          print 'Histogram'+histoName+' does not exis in'+s[0]
+          print 'Histogram'+histoName+' does not exis in '+s[0]
           continue
 
         scale3 = 1
@@ -610,12 +613,12 @@ def drawAllInFile(f1, name1, bZip, sZip, name3, myDir, path, N, howToScale="toDa
       if histoName in ['LHE_diLep_mass_low', 'LHE_diLep_mass',
                        'LHE_dR_l1_l2','LHE_dR_l1_l2_low', 'LHE_dR_l1_l2_vlow']:
         nBins = si[0].GetNbinsX()
-        int1 = si[0].Integral(int(0.25*nBins),nBins)
-        int3 = si[1].Integral(int(0.25*nBins),nBins)
-        print histoName, nBins, int1, int3
-        if int1!=0 and int3!=0:
-          si[0].Scale(50./int1)
-          si[1].Scale(50./int3)
+        
+        for sisi in si: 
+          int1 = sisi.Integral(int(0.25*nBins),nBins)
+          if int1!=0:
+            sisi.Scale(50./int1)
+
         mainHist.SetMaximum(1.2*si[0].GetMaximum())
         mainHist.SetNdivisions(505,'X')
         doPdf=1

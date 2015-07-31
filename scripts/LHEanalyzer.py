@@ -7,10 +7,17 @@ gROOT.SetBatch()
 sys.path.append("../zgamma")
 import utils as u
 import makeHTML as ht
+from optparse import OptionParser
+
+parser = OptionParser(usage="usage: %prog name [options --new]")
+parser.add_option("-n","--new", dest="new",action="store_true", default=False, help="Make new hists. Otherwise re-use the existing ones")
+
+(opt, args) = parser.parse_args()
+
 
 subdir = sys.argv[1]
 
-outpath = '/home/andreypz/workspace/lhe-plots/lhe/'
+outpath = '/home/andreypz/workspace/html-lhe/lhe/'
 #outpath = '/uscms_data/d2/andreypz/html/zgamma/lhe/'
 files={}
 
@@ -18,7 +25,11 @@ files={}
 #files["one"] = ['../../ano_zeromass_0.2to50.root']
 #files["two"] = ['../../heft_zeromass_0.2to50.root']
 files["one"] = ['../../ano_dalitz.root']
-files["two"] = ['../../heft_dalitz.root']
+#files["two"] = ['../../hc-ufo-dalitz.root']
+files["two"] = ['../../hc-ufo-dalitz-mmu-b-noT.root']
+files["three"] = ['../../hc-ufo-dalitz-mmu-b-withT.root']
+#files["two"] = ['../../ano_dalitz_mod.root']
+#files["two"] = ['../../heft_dalitz.root']
 #files["one"] = ['../../ano_zeromass_50to500.root']
 #files["two"] = ['../../heft_zeromass_50to500.root']
 
@@ -51,25 +62,29 @@ gSystem.Load("/home/andreypz/workspace/mg5amcnlo/ExRootAnalysis/libExRootAnalysi
 gROOT.LoadMacro("../plugins/HistManager.cc+");
 gROOT.LoadMacro("../plugins/ZGAngles.cc+");
 
-oneFile = TFile(outpath+"out_one_"+subdir+".root","RECREATE")
-oneFile.cd()
-h1 = HistManager(oneFile)
+openOption = 'OPEN'
+if opt.new:
+  openOption = 'RECREATE'
 
-twoFile = TFile(outpath+"out_two_"+subdir+".root","RECREATE")
-twoFile.cd()
-h2 = HistManager(twoFile)
+oneFile  = TFile(outpath+"out_one_"+subdir+".root",openOption)
+twoFile  = TFile(outpath+"out_two_"+subdir+".root",openOption)
+testFile = TFile(outpath+"out_test_"+subdir+".root",openOption)
 
-testFile = TFile(outpath+"out_test_"+subdir+".root","RECREATE")
-#testFile.mkdir("eff")
-testFile.cd()
-h3 = HistManager(testFile)
+if opt.new:
+  oneFile.cd()
+  h1 = HistManager(oneFile)
+  twoFile.cd()
+  h2 = HistManager(twoFile)
+  #testFile.mkdir("eff")
+  testFile.cd()
+  h3 = HistManager(testFile)
 
-ang = ZGAngles()
+  ang = ZGAngles()
 
-newDir = outpath
-print newDir
-if not os.path.exists(newDir):
-  os.makedirs(newDir)
+  newDir = outpath
+  print newDir
+  if not os.path.exists(newDir):
+    os.makedirs(newDir)
 
 def FillAllHists(files, h):
   # h is a hist manager instance here
@@ -354,18 +369,18 @@ if __name__ == "__main__":
   if not os.path.exists(path):
     os.makedirs(path)
 
-  FillAllHists(files["one"],  h1)
-  FillAllHists(files["two"],  h2)
-  #FillAllHists(files["three"],  h3)
 
-
-  oneFile.cd()
-  oneFile.Write()
-  twoFile.cd()
-  twoFile.Write()
-  testFile.cd()
-  testFile.Write()
-  print "Saved files: \n",testFile.GetName(), "\n", oneFile.GetName(), "\n", twoFile.GetName()
+  if opt.new:
+    FillAllHists(files["one"],  h1)
+    FillAllHists(files["two"],  h2)
+    FillAllHists(files["three"],  h3)
+    oneFile.cd()
+    oneFile.Write()
+    twoFile.cd()
+    twoFile.Write()
+    testFile.cd()
+    testFile.Write()
+    print "Saved files: \n",testFile.GetName(), "\n", oneFile.GetName(), "\n", twoFile.GetName()
 
 
   blah = ['LHE for mH = 125 GeV',
@@ -374,8 +389,8 @@ if __name__ == "__main__":
   #        'Luisa\'s vs mine']
 
 
-  sigZip = zip(['ANO','HEFT'],
-                [oneFile, twoFile])
+  sigZip = zip(['ANO','HC /t','HC'],
+                [oneFile, twoFile, testFile])
   #sigZip = zip(['ANO-0','ANO-50'],
   #              [oneFile, twoFile])
 
