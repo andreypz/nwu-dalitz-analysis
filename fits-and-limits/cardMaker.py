@@ -25,6 +25,7 @@ s = cf.get("path","ver")
 # Pull the info out, make the cards, write them #
 # Run with: combine -M Asymptotic datacard.txt  #
 # ################################################
+lumi2012  = 19.703
 
 massList   = ['%.1f'%(a) for a in u.drange(120,150,1.0)]
 sigNameList= [a.strip() for a in (cf.get("fits","signameList")).split(',')]
@@ -202,6 +203,8 @@ def makeCards(subdir):
             print mass, s, lep, 'cs for scale=', cs
 
             procYield = sigWs.var('sig_'+s+'_yield_'+channel).getVal()/cs
+
+            print mass, s, lep, 'Acc*Eff =', procYield/lumi2012
 
             if s=='v':
               zh_frac = float(xsDict[YR][TeV]['ZH'][mass])/(float(xsDict[YR][TeV]['ZH'][mass])+float(xsDict[YR][TeV]['WH'][mass]))

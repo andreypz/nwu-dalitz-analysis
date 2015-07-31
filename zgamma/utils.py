@@ -340,7 +340,7 @@ def drawAllInFile(f1, name1, bZip, sZip, name3, myDir, path, N, howToScale="toDa
             si.append(s[1].Get(myDir+"/"+histoName).Clone())
           except ReferenceError:
             print 'WARNING: ',  histoName, '  does not exist in ', s[0]
-            continue 
+            continue
         else:
           si.append(s[1].Get(histoName).Clone())
           print myDir, histoName
@@ -530,8 +530,8 @@ def drawAllInFile(f1, name1, bZip, sZip, name3, myDir, path, N, howToScale="toDa
             elif 'LHE' in histoName:
               leg.AddEntry(h3, sZip[j][0], "l")
             else:
-              leg.AddEntry(h3, sZip[j][0], "l")
-              #leg.AddEntry(h3,' m_{H} = '+sZip[j][0][:3]+' GeV', "l")
+              #leg.AddEntry(h3, sZip[j][0], "l")
+              leg.AddEntry(h3,' m_{H} = '+sZip[j][0][4:7]+' GeV', "l")
             leg.SetFillStyle(0)
 
         if doRatio:

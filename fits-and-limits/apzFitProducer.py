@@ -86,11 +86,10 @@ def LoopOverTreeTW(myTree, cat, mzg, args, ds):
       Weight = i.mcwei*i.puwei
       ds.add(args, Weight)
 
-
       if Weight==1: #(This is data)
         if i.Meg>120 and i.Meg<130:
           hcount+=1
-          print hcount,i.run, i.event, i.Meg
+          # print hcount,i.run, i.event, i.Meg
 
 
 
@@ -139,7 +138,7 @@ def LoopOverTree(myTree, cat, mzg, args, ds, lumiWeight):
       if lumiWeight==None: #(This is data)
         if i.m123>120 and i.m123<130:
           hcount+=1
-          print hcount,i.run, i.event, i.m123
+          # print hcount,i.run, i.event, i.m123
 
 
   # sig_argSW.Print()
@@ -191,7 +190,7 @@ def doInitialFits(subdir):
   apzTreeName = 'apzTree/apzTree'
   twTreeName  = 't'
 
-  binWidth = 2
+  binWidth = 0.2
   #binning = 30
   binning = int(float(deltaMllg)/binWidth)
 
@@ -203,6 +202,8 @@ def doInitialFits(subdir):
   mzg.setBins(50000,'cache')
   mzg.setRange('r1',110,120)
   mzg.setRange('r2',130,170)
+
+  #res  = RooRealVar('Mass_res','Mss_res', 0.8,1.2)
 
   c = TCanvas("c","c",0,0,500,400)
   c.cd()
@@ -216,6 +217,7 @@ def doInitialFits(subdir):
   yi_sig1 = u.AutoVivification()
   mean_sig  = u.AutoVivification()
   sigma_sig = u.AutoVivification()
+  FWHM_sig = u.AutoVivification()
   # ###################################
   # start loop over all year/lep/cat #
   # ###################################
@@ -341,11 +343,15 @@ def doInitialFits(subdir):
             yi_sig0[year][mass][lepton][cat][prod] = sig_ds.sumEntries()
             yi_sig1[year][mass][lepton][cat][prod] = sig_ds.sumEntries('1','SignalRegion')
 
-            #mean_sig[year][mass][lepton][cat][prod]  = [signalList[-1].mean(mzg), signalList[-1].GetMeanError()]
+            mean_sig[year][mass][lepton][cat][prod]  = [signalListDS[-1].mean(mzg), signalList[-1].GetMeanError()]
+            sigma_sig[year][mass][lepton][cat][prod] = [signalListDS[-1].sigma(mzg), signalList[-1].GetRMSError()]
+            #mean_sig[year][mass][lepton][cat][prod]  = [signalList[-1].GetMean(), signalList[-1].GetMeanError()]
             #sigma_sig[year][mass][lepton][cat][prod] = [signalList[-1].GetRMS(), signalList[-1].GetRMSError()]
-            mean_sig[year][mass][lepton][cat][prod]  = [signalList[-1].GetMean(), signalList[-1].GetMeanError()]
-            sigma_sig[year][mass][lepton][cat][prod] = [signalList[-1].GetRMS(), signalList[-1].GetRMSError()]
 
+            bin1 = signalList[-1].FindFirstBinAbove(signalList[-1].GetMaximum()/2)
+            bin2 = signalList[-1].FindLastBinAbove(signalList[-1].GetMaximum()/2)
+            print bin1, bin2
+            FWHM_sig[year][mass][lepton][cat][prod] = (signalList[-1].GetBinCenter(bin2) - signalList[-1].GetBinCenter(bin1))
             # mean_dh[year][mass][lepton][cat]  = [signalListDH[-1].GetMean(), signalListDH[-1].GetMeanError()]
             # sigma_dh[year][mass][lepton][cat] = [signalListDH[-1].GetRMS(), signalListDH[-1].GetRMSError()]
 
@@ -510,6 +516,7 @@ def doInitialFits(subdir):
 
     print "\n Mean from dataset: ", mean_sig
     print "\n Sigma DS:", sigma_sig
+    print "\n FWHM:", FWHM_sig
 
     # print "\n Mean from Datahist:", mean_gg0_dh
     # print "\n Sigma DH:", sigma_gg0_dh
@@ -524,11 +531,14 @@ def doInitialFits(subdir):
           for cat in catList:
             t_mean = []
             t_sigma = []
+            t_fwhm  = []
             for mass in massList:
               l_mean = []
               l_sigma = []
+              l_fwhm = []
               l_mean.append(mass)
               l_sigma.append(mass)
+              l_fwhm.append(mass)
 
               print year, lepton, cat, prod
               print mean_sig[year][mass][lepton][cat][prod]
@@ -537,11 +547,13 @@ def doInitialFits(subdir):
               # l.append("%.2f &pm; %.2f"%(a,b))
               l_mean.append("%.3f&pm;%.3f" %(mean_sig[year][mass][lepton][cat][prod][0],  mean_sig[year][mass][lepton][cat][prod][1]))
               l_sigma.append("%.3f&pm;%.3f"%(sigma_sig[year][mass][lepton][cat][prod][0],sigma_sig[year][mass][lepton][cat][prod][1]))
-
+              l_fwhm.append("%.3f"% (FWHM_sig[year][mass][lepton][cat][prod]))
               t_mean.append(l_mean)
               t_sigma.append(l_sigma)
+              t_fwhm.append(l_fwhm)
             u.makeTable(t_mean,  "mean",  opt="twiki")
             u.makeTable(t_sigma, "sigma", opt="twiki")
+            u.makeTable(t_fwhm, "fwhm", opt="twiki")
 
   print '\n \t we did it!\t'
 
