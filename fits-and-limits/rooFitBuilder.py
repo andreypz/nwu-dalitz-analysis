@@ -40,6 +40,7 @@ class FitBuilder:
         'SechBern3': self.BuildSechStepBern3,
         'SechBern4': self.BuildSechStepBern4,
         'SechBern5': self.BuildSechStepBern5,
+        'Gauss': self.BuildGauss,
         'Exp': self.BuildExp,
         'Pow': self.BuildPow,
         'PowDecay': self.BuildPowDecay,
@@ -67,6 +68,7 @@ class FitBuilder:
       'GaussBern5':kGray,
       'SechBern4':kBlack,
       'SechBern5':kGreen,
+      'Gauss':kGreen+2,
       'Exp':kBlue,
       'Exp2':kOrange,
       'ExpSum':kGreen+2,
@@ -92,6 +94,7 @@ class FitBuilder:
       'GaussBern5':7,
       'SechBern4':6,
       'SechBern5':7,
+      'Gauss':2,
       'Exp':1,
       'Exp2':2,
       'ExpSum':2,
@@ -470,6 +473,16 @@ class FitBuilder:
     SetOwnership(tail,0)
     return SechBern5
 
+  def BuildGauss(self, mean = 125,meanLow = 100, meanHigh = 150, sigma = 0.2, sigmaLow = 0.01, sigmaHigh = 5):
+
+    meanVar = RooRealVar('mean_'+self.suffix,'mean_'+self.suffix, mean, meanLow, meanHigh)
+    sigmaVar = RooRealVar('sigma_'+self.suffix,'sigma_'+self.suffix,sigma,sigmaLow,sigmaHigh)
+    gauss = RooGaussian('gauss_'+self.suffix,'gauss_'+self.suffix,self.mzg,meanVar,sigmaVar)
+    SetOwnership(meanVar,0)
+    SetOwnership(sigmaVar,0)
+    paramList = [meanVar,sigmaVar]
+    return gauss, paramList
+
   def BuildExp(self,tau = -1, tauLow = -50, tauHigh = 5):
 
     tauVar = RooRealVar('tauExp_'+self.suffix,'tauExp_'+self.suffix,tau,tauLow,tauHigh)
@@ -623,15 +636,6 @@ class FitBuilder:
     SetOwnership(p2Var,0)
     SetOwnership(p3Var,0)
     return Poly3
-
-  def BuildRooGaussian(self, mean = 125,meanLow = 100, meanHigh = 150, sigma = 1.5, sigmaLow = 0.3, sigmaHigh = 70):
-
-    meanVar = RooRealVar('mean_'+self.suffix,'mean_'+self.suffix, mean, meanLow, meanHigh)
-    sigmaVar = RooRealVar('sigma_'+self.suffix,'sigma_'+self.suffix,sigma,sigmaLow,sigmaHigh)
-    gauss = RooGaussian('gauss_'+self.suffix,'gauss_'+self.suffix,self.mzg,meanVar,sigmaVar)
-    SetOwnership(meanVar,0)
-    SetOwnership(sigmaVar,0)
-    return gauss
 
   def BuildCrystalBallGauss(self, piece, mean = 125, meanG = -1, meanGLow = -1, meanGHigh = -1,
                             meanCB = -1, meanCBLow = -1, meanCBHigh = -1,

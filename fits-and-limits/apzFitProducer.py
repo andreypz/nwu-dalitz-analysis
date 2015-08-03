@@ -199,6 +199,7 @@ def doInitialFits(subdir):
   mzg.setRange('FullRegion',   lowCutOff, highCutOff)
   mzg.setRange('DalitzRegion', lowCutOff, highCutOff)
   mzg.setRange('SignalRegion', 120, 130)
+  mzg.setRange('myFitRange', 115, 135)
   mzg.setBins(50000,'cache')
   mzg.setRange('r1',110,120)
   mzg.setRange('r2',130,170)
@@ -242,9 +243,6 @@ def doInitialFits(subdir):
           RooTrace.dump()
           raw_input()
 
-        signalList    = []
-        signalListDH  = []
-        signalListPDF = []
         if verbose: print 'top of loop',year,lepton,cat
 
         # ##################################################
@@ -253,7 +251,10 @@ def doInitialFits(subdir):
 
         for prod in sigNameList:
           if lepton=='el' and prod=='v': continue
+          signalList    = []
           signalListDS = []
+          signalListDH  = []
+          signalListPDF = []
 
           for mass in massList:
             histName  = '_'.join(['sig',prod,lepton,year,'cat'+cat,'M'+mass])
@@ -343,8 +344,12 @@ def doInitialFits(subdir):
             yi_sig0[year][mass][lepton][cat][prod] = sig_ds.sumEntries()
             yi_sig1[year][mass][lepton][cat][prod] = sig_ds.sumEntries('1','SignalRegion')
 
-            mean_sig[year][mass][lepton][cat][prod]  = [signalListDS[-1].mean(mzg), signalList[-1].GetMeanError()]
-            sigma_sig[year][mass][lepton][cat][prod] = [signalListDS[-1].sigma(mzg), signalList[-1].GetRMSError()]
+            reduced = signalListDS[-1].reduce("CMS_hzg_mass>"+str(float(mass)*(1-0.1))+"&&CMS_hzg_mass<"+str(float(mass)*(1+0.1)))
+
+            mean_sig[year][mass][lepton][cat][prod]  = [reduced.mean(mzg),  signalList[-1].GetMeanError()]
+            sigma_sig[year][mass][lepton][cat][prod] = [reduced.sigma(mzg), signalList[-1].GetRMSError()]
+            #mean_sig[year][mass][lepton][cat][prod]  = [signalListDS[-1].mean(mzg), signalList[-1].GetMeanError()]
+            #sigma_sig[year][mass][lepton][cat][prod] = [signalListDS[-1].sigma(mzg), signalList[-1].GetRMSError()]
             #mean_sig[year][mass][lepton][cat][prod]  = [signalList[-1].GetMean(), signalList[-1].GetMeanError()]
             #sigma_sig[year][mass][lepton][cat][prod] = [signalList[-1].GetRMS(), signalList[-1].GetRMSError()]
 
@@ -357,28 +362,52 @@ def doInitialFits(subdir):
 
 
           if debugPlots:
+            fitBuilder = FitBuilder(mzg, year, lepton, cat)
             print '\n\n Now make some plots!\n'
             testFrame = mzg.frame()
+            SigFits = {'0':None} # Format 'mass': fit-function
             for i,signal in enumerate(signalListPDF):
-              sigName = 'sig-'+str(i)
               signalListDH[i].plotOn(testFrame)
               signal.plotOn(testFrame, RooFit.Name(sigName))
-              # signal.paramOn(testFrame)
-              # signal.statOn(testFrame)
-              # print i,signal
-              testFrame.SetTitle(';m_{#mu#mu#gamma} (GeV);Events')
+              if lepton=='mu': testFrame.SetTitle(';m_{#mu#mu#gamma} (GeV);Events')
+              else:            testFrame.SetTitle(';m_{ee#gamma} (GeV);Events')
               testFrame.SetMinimum(0.0001)
               testFrame.Draw()
-            CMS_lumi(c, 2, 11)
+            CMS_lumi(c, 2, 11, 'Simulation')
             c.SaveAs(plotBase+'_'.join(['signals',prod,year,lepton,'cat'+cat])+'.png')
 
 
             # testFrame = mzg.frame()
             for signal in signalListDS:
+              """
+              sigName = '_'.join(['DBG-DH',prod,lepton,year,'cat'+cat,'M'+mass])
+              SigFits[sigName],paramList = fitBuilder.Build('Gauss', mean = 125, meanLow = 120, meanHigh = 130, sigma = 0.2, sigmaLow = 0.05, sigmaHigh = 1)
+              SigFits[sigName].fitTo(signalListDS[i], RooFit.Range('myFitRange'), RooFit.PrintLevel(-1))
+
+              print paramList
+              for param in paramList:
+                print sigName, param.GetName(), param.getVal()
+              raw_input("\n ---> Param List. hit enter to continue")
+              SigFits[sigName].plotOn(testFrame)
+              SigFits[sigName].paramOn(testFrame)
+              """
+              testFrame = mzg.frame()
               signal.plotOn(testFrame, RooFit.DrawOption('pl'))
               testFrame.Draw()
-            CMS_lumi(c, 2, 11)
-            c.SaveAs(plotBase+'_'.join(['ds_sig',year,lepton,'cat'+cat])+'.png')
+              myS125 = shist[year][lepton][cat][prod]['125'].Clone()
+              myS125.Draw('same hist')
+              myS125.SetLineColor(kGreen+1)
+
+              f1 = TF1("f1", "gaus", 120, 130);
+              f1.SetParameters(0,125, 0.2);
+              f1.FixParameter(0, 0);
+              f1.SetParLimits(1, 122, 127);
+              myS125.Fit('f1','R')
+              myS125.GetFunction("f1").Print()
+              #raw_input("\n ---> Param List. hit enter to continue")
+
+            CMS_lumi(c, 2, 11, 'Simulation')
+            c.SaveAs(plotBase+'_'.join(['ds_sig',prod,year,lepton,'cat'+cat])+'.png')
 
         del signalTree
 
@@ -543,6 +572,7 @@ def doInitialFits(subdir):
               print year, lepton, cat, prod
               print mean_sig[year][mass][lepton][cat][prod]
               print sigma_sig[year][mass][lepton][cat][prod]
+              print FWHM_sig[year][mass][lepton][cat][prod]
               # a,b = mean_sig[year][mass][lepton][cat][prod]
               # l.append("%.2f &pm; %.2f"%(a,b))
               l_mean.append("%.3f&pm;%.3f" %(mean_sig[year][mass][lepton][cat][prod][0],  mean_sig[year][mass][lepton][cat][prod][1]))
@@ -555,7 +585,7 @@ def doInitialFits(subdir):
             u.makeTable(t_sigma, "sigma", opt="twiki")
             u.makeTable(t_fwhm, "fwhm", opt="twiki")
 
-  print '\n \t we did it!\t'
+  print '\n \t We did it!\t'
 
 
 

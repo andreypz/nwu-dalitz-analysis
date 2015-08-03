@@ -12,10 +12,10 @@ import ConfigParser as cp
 cf = cp.ConfigParser()
 cf.read('config.cfg')
 
-massList0  = ['125']
-massList   = ['125.0']
-#massList0  = ['120','125','130','135','140','145','150']
-#massList   = ['%.1f'%(a) for a in u.drange(120,150,1.0)]
+#massList0  = ['125','145']
+#massList   = ['125.0','145.0']
+massList0  = ['120','125','130','135','140','145','150']
+massList   = ['%.1f'%(a) for a in u.drange(120,150,1.0)]
 
 myFunc = 'CBGM' #Crystall-Ball + Gauss (with same Mean)
 
@@ -309,15 +309,24 @@ def SignalFitMaker(lep, year, cat, subdir):
       # fit.paramOn(testFrame)
       # testFrame.getAttText().SetTextSize(0.02)
       # testFrame.getAttText().SetTextColor(kRed)
+
+    sigmaDS = []
     for i,signal in enumerate(dsList):
+      #if i==0: m=125
+      #if i==1: m=145
+      # reduced = signal.reduce("CMS_hzg_mass>"+str(m*(1-0.1))+"&&CMS_hzg_mass<"+str(m*(1+0.1)))
+      # reduced.plotOn(testFrame, RooFit.MarkerStyle(20+i), RooFit.MarkerSize(1), RooFit.Binning(150))
+      # sigmaDS.append(reduced.sigma(mzg))
       signal.plotOn(testFrame, RooFit.MarkerStyle(20+i), RooFit.MarkerSize(1), RooFit.Binning(150))
-      #signal.statOn(testFrame,RooFit.What("MR"),RooFit.Layout(0.60,0.83,0.87),RooFit.CutRange('statRange125'))
+      # signal.statOn(testFrame,RooFit.What("MR"),RooFit.Layout(0.60,0.83,0.87),RooFit.CutRange('statRange125'))
+
       print signal.mean(mzg), signal.sigma(mzg)
       # raw_input("Mean and sigma from dataset above")
 
     m = testFrame.GetMaximum()
 
     testFrame.SetMaximum(1.1*m)
+    testFrame.SetMinimum(0.005)
     '''
     if prod == 'gg':
       testFrame.SetMaximum(1.1*m)
@@ -333,13 +342,14 @@ def SignalFitMaker(lep, year, cat, subdir):
       testFrame.SetTitle(";m_{ee#gamma} (GeV);Signal shape")
     else:
       testFrame.SetTitle(";m_{#mu#mu#gamma} (GeV);Signal shape")
-
+    '''
     lat = TLatex()
     lat.SetNDC()
     lat.SetTextSize(0.045)
-    lat.DrawLatex(0.66,0.85, 'Mean = %.1f'%dsList[0].mean(mzg))
-    lat.DrawLatex(0.66,0.80, 'RMS  = %.2f'%dsList[0].sigma(mzg))
-
+    #lat.DrawLatex(0.66,0.85, 'Mean = %.1f'%dsList[0].mean(mzg))
+    lat.DrawLatex(0.42,0.80, '\\frac{RMS}{m_{H}}  = \\frac{%.2f}{125} = %.3f' %( sigmaDS[0], sigmaDS[0]/125) )
+    lat.DrawLatex(0.62,0.60, '\\frac{RMS}{m_{H}}  = \\frac{%.2f}{145} = %.3f' %( sigmaDS[1], sigmaDS[1]/145) )
+    '''
     CMS_lumi(c, 2, 11, "Simulation")
     c.SaveAs(plotBase+'_'.join(['sig','fit',prod,lep,year,'cat'+cat])+'.png')
 
