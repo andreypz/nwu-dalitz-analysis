@@ -74,7 +74,7 @@ if __name__ == "__main__":
   u.createDir(pathBase)
 
   if doMerge:
-    os.system("rm "+hPath+"/m_*.root") #removing the old merged files
+    os.system("rm "+hPath+"/m_Data_"+sel+"*.root") #removing the old merged files
 
   dataFile  = None
   bkgFiles  = []
@@ -245,7 +245,8 @@ if __name__ == "__main__":
       # u.drawAllInFile(dataFile, "Data", bkgZip, sigFile, sigName, "Main", path, cut, "lumi")
     else:
       print
-      u.drawAllInFile(dataFile, "Data", None, sigZip, sigName, "Main", path, cut)
+      if opt.data and opt.sig:
+        u.drawAllInFile(dataFile, "Data", None, sigZip, sigName, "Main", path, cut)
       if opt.data:
         u.drawAllInFile(dataFile, "Data", None, None, '', "Main", pathBase+'/Main-Data', cut)
       if opt.sig:
@@ -500,17 +501,19 @@ if __name__ == "__main__":
 
   if opt.spec:
 
-    doLog = 1
-    doGen = 1
+    doLog = 0
+    doGen = 0
     sigFactor = 1
     prodSF = 1.13
 
     for j,h in enumerate(['01_diLep_mass_0to20_b40','01_diLep_mass_0to20_b50','04_ll_gamma_deltaR','02_lPt1_pt','02_lPt2_pt','03_gamma_pt']):
-      #   for h in ['01_diLep_mass_0to20_b50','04_ll_gamma_deltaR']:
+      # for j,h in enumerate(['01_diLep_mass_0to20_b50','04_ll_gamma_deltaR']):
       #vMu = 'v98-mu-incl-JPsi/'
       #vEl = 'v99-el'
-      vMu = 'v03-mll-mu-paper'
-      vEl = 'v03-mll-el-paper'
+      #vMu = 'v03-mll-mu-paper'
+      #vEl = 'v03-mll-el-paper'
+      vMu = 'v07-mll-thesis'
+      vEl = 'v07-mll-thesis'
       print
       u.createDir(pathBase+'/Spec')
       sigFileMu = TFile('/tthome/andrey/batch_output/zgamma/8TeV/'+vMu+'/mugamma_2012/hhhh_ggH-mad125_1.root', 'OPEN')
@@ -637,7 +640,7 @@ if __name__ == "__main__":
         if doLog: c1.SetLogy()
         c1.SaveAs(pathBase+'/Spec/'+h+'_sig.'+e)
 
-      if j==0:
+      if j==0 and doGen:
         c1.SetLogy(0)
         r1 = hMu.Clone()
         r1.Divide(ghMu)
@@ -656,7 +659,7 @@ if __name__ == "__main__":
         c1.SaveAs(pathBase+'/Spec/ratio_el_'+h+'_sig.png')
 
 
-      '''
+
       daFileMu = TFile('/tthome/andrey/batch_output/zgamma/8TeV/'+vMu+'/m_Data_mugamma_2012.root', 'OPEN')
       daFileEl = TFile('/tthome/andrey/batch_output/zgamma/8TeV/'+vEl+'/m_Data_elgamma_2012.root', 'OPEN')
       dhMu = daFileMu.Get('Main/'+h+'_Main_cut9')
@@ -680,7 +683,7 @@ if __name__ == "__main__":
       dhMu.SetLineColor(kBlue+2)
       dhEl.SetLineColor(kRed-4)
       if j==0:
-        dhEl.SetTitle(';m_{ll} (GeV); Events/0.4 GeV')
+        dhEl.SetTitle(';m_{\\ell\\ell}\\,\\mbox{(GeV)}; Events/0.5 GeV')
       elif j==1:
         dhEl.SetAxisRange(1,5,"X")
         dhEl.SetTitle(';#Delta R(#gamma,ll); Events')
@@ -695,14 +698,14 @@ if __name__ == "__main__":
       leg.AddEntry(dhMu,' #mu channel', 'lp')
       leg.AddEntry(dhEl,' e channel', 'lp')
       leg.Draw()
-      #lat.DrawLatex(0.18,0.95, 'H #rightarrow #gamma*#gamma #rightarrow ll#gamma')
-      #CMS_lumi(c1, 2, 11)
+      lat.DrawLatex(0.18,0.95, 'H #rightarrow #gamma*#gamma #rightarrow ll#gamma')
+      CMS_lumi(c1, 2, 11,"")
 
-      for e in ['pdf','png']:
+      for e in ['pdf','png','eps']:
         if doLog: c1.SetLogy()
         c1.SaveAs(pathBase+'/Spec/'+h+'_data.'+e)
 
-      '''
+
   '''
   htmp = sigFileGG.Get("02_lPt2_pt__cut"+cut)
   int1 = htmp.Integral()
@@ -752,10 +755,12 @@ if __name__ == "__main__":
 
 
   if sel in ['mugamma']:
+    u.setCutListFile(hPath+"/"+subsel+"_"+period+"/out_cutlist_ggH-mad120_1.txt")
     if opt.hjp: u.setCutListFile(hPath+"/"+subsel+"_"+period+"/out_cutlist_HiggsToJPsiGamma_1.txt")
     if opt.zjp: u.setCutListFile(hPath+"/"+subsel+"_"+period+"/out_cutlist_ZtoJPsiGamma_1.txt")
-    if opt.spec: u.setCutListFile("localcutlist.txt")
-  else:       u.setCutListFile(hPath+"/"+subsel+"_"+period+"/out_cutlist_ggH-mad120_1.txt")
+    #if opt.spec: u.setCutListFile("localcutlist.txt")
+  else:
+    u.setCutListFile(hPath+"/"+subsel+"_"+period+"/out_cutlist_ggH-mad120_1.txt")
 
 
   plot_types =[]
