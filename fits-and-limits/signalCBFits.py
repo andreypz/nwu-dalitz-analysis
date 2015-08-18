@@ -12,6 +12,8 @@ import ConfigParser as cp
 cf = cp.ConfigParser()
 cf.read('config.cfg')
 
+#massList0  = ['125','145']
+#massList   = ['125.0','145.0']
 massList0  = ['120','125','130','135','140','145','150']
 massList   = ['%.1f'%(a) for a in u.drange(120,150,1.0)]
 
@@ -94,6 +96,8 @@ def SignalFitMaker(lep, year, cat, subdir):
   paraNames = {}
   cardDict = u.AutoVivification()
 
+  mzg.setRange('statRange125',120,130)
+
   global massList0, massList
   #print massList, massList0
   masses0 = massList0
@@ -126,7 +130,6 @@ def SignalFitMaker(lep, year, cat, subdir):
     dsList   = []
     for m in masses0:
       fitBuilder = FitBuilder(mzg, year,lep,cat,sig=prod, mass=m+'.0')
-      #fitBuilder.__init__(mzg,year,lep,cat,sig=prod,mass=m)
       mzg.setRange('fitRegion1',int(m)-11,int(m)+11)
 
       sigName = '_'.join(['ds','sig',prod,lep,year,'cat'+cat,'M'+m])
@@ -193,15 +196,15 @@ def SignalFitMaker(lep, year, cat, subdir):
         else:
           massHi  = massRound+5
           massLow = massRound
-      ###### only calc the low and high points if they change
-      if not(oldMassLow == massLow and oldMassHi == massHi):
-        oldMassLow = massLow
-        oldMassHi  = massHi
+        if not(oldMassLow == massLow and oldMassHi == massHi):
+          # only calc the low and high points if they change
+          oldMassLow = massLow
+          oldMassHi  = massHi
 
-        ###### fit the low mass point
 
-        print 'massLow and massHi=', massLow, massHi
-        #raw_input("Mass low and Hi; hit enter")
+      # print 'massLow and massHi=', massLow, massHi
+      # raw_input("Mass low and Hi"+massString+"; hit enter")
+
 
       massDiff = (massHi - mass)/5.
 
@@ -219,6 +222,7 @@ def SignalFitMaker(lep, year, cat, subdir):
         # raw_input('Massdiff...')
 
         mzg.setRange('fitRegion_'+massString,mass-11,mass+11)
+        #mzg.setRange('fitRegion_'+massString,mass-5,mass+5)
         beta = RooRealVar('beta','beta', 0.5, 0., 1.)
         beta.setVal(massDiff)
 
@@ -305,13 +309,24 @@ def SignalFitMaker(lep, year, cat, subdir):
       # fit.paramOn(testFrame)
       # testFrame.getAttText().SetTextSize(0.02)
       # testFrame.getAttText().SetTextColor(kRed)
-      # fit.statOn(testFrame,RooFit.Layout(0.18,0.43,0.87))
+
+    sigmaDS = []
     for i,signal in enumerate(dsList):
+      #if i==0: m=125
+      #if i==1: m=145
+      # reduced = signal.reduce("CMS_hzg_mass>"+str(m*(1-0.1))+"&&CMS_hzg_mass<"+str(m*(1+0.1)))
+      # reduced.plotOn(testFrame, RooFit.MarkerStyle(20+i), RooFit.MarkerSize(1), RooFit.Binning(150))
+      # sigmaDS.append(reduced.sigma(mzg))
       signal.plotOn(testFrame, RooFit.MarkerStyle(20+i), RooFit.MarkerSize(1), RooFit.Binning(150))
+      # signal.statOn(testFrame,RooFit.What("MR"),RooFit.Layout(0.60,0.83,0.87),RooFit.CutRange('statRange125'))
+
+      print signal.mean(mzg), signal.sigma(mzg)
+      # raw_input("Mean and sigma from dataset above")
 
     m = testFrame.GetMaximum()
 
     testFrame.SetMaximum(1.1*m)
+    testFrame.SetMinimum(0.005)
     '''
     if prod == 'gg':
       testFrame.SetMaximum(1.1*m)
@@ -323,8 +338,19 @@ def SignalFitMaker(lep, year, cat, subdir):
     testFrame.SetMinimum(1e-4)
 
     testFrame.Draw()
-    testFrame.SetTitle(";m_{#mu#mu#gamma} (GeV);Signal shape")
-    CMS_lumi(c, 2, 11)
+    if lep=="el":
+      testFrame.SetTitle(";m_{ee#gamma} (GeV);Signal shape")
+    else:
+      testFrame.SetTitle(";m_{#mu#mu#gamma} (GeV);Signal shape")
+    '''
+    lat = TLatex()
+    lat.SetNDC()
+    lat.SetTextSize(0.045)
+    #lat.DrawLatex(0.66,0.85, 'Mean = %.1f'%dsList[0].mean(mzg))
+    lat.DrawLatex(0.42,0.80, '\\frac{RMS}{m_{H}}  = \\frac{%.2f}{125} = %.3f' %( sigmaDS[0], sigmaDS[0]/125) )
+    lat.DrawLatex(0.62,0.60, '\\frac{RMS}{m_{H}}  = \\frac{%.2f}{145} = %.3f' %( sigmaDS[1], sigmaDS[1]/145) )
+    '''
+    CMS_lumi(c, 2, 11, "Simulation")
     c.SaveAs(plotBase+'_'.join(['sig','fit',prod,lep,year,'cat'+cat])+'.png')
 
   for prod in sigNameList:

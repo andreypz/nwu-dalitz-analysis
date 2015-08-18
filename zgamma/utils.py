@@ -341,7 +341,7 @@ def drawAllInFile(f1, name1, bZip, sZip, name3, myDir, path, N, howToScale="toDa
             si.append(s[1].Get(myDir+"/"+histoName).Clone())
           except ReferenceError:
             print 'WARNING: ',  histoName, '  does not exist in ', s[0]
-            continue 
+            continue
         else:
           try:
             si.append(s[1].Get(histoName).Clone())
@@ -533,8 +533,8 @@ def drawAllInFile(f1, name1, bZip, sZip, name3, myDir, path, N, howToScale="toDa
             elif 'LHE' in histoName:
               leg.AddEntry(h3, sZip[j][0], "l")
             else:
-              leg.AddEntry(h3, sZip[j][0], "l")
-              #leg.AddEntry(h3,' m_{H} = '+sZip[j][0][:3]+' GeV', "l")
+              #leg.AddEntry(h3, sZip[j][0], "l")
+              leg.AddEntry(h3,' m_{H} = '+sZip[j][0][4:7]+' GeV', "l")
             leg.SetFillStyle(0)
 
         if doRatio:
@@ -613,8 +613,8 @@ def drawAllInFile(f1, name1, bZip, sZip, name3, myDir, path, N, howToScale="toDa
       if histoName in ['LHE_diLep_mass_low', 'LHE_diLep_mass',
                        'LHE_dR_l1_l2','LHE_dR_l1_l2_low', 'LHE_dR_l1_l2_vlow']:
         nBins = si[0].GetNbinsX()
-        
-        for sisi in si: 
+
+        for sisi in si:
           int1 = sisi.Integral(int(0.25*nBins),nBins)
           if int1!=0:
             sisi.Scale(50./int1)
@@ -782,7 +782,10 @@ def drawAllInFile(f1, name1, bZip, sZip, name3, myDir, path, N, howToScale="toDa
         else:
           lat.DrawLatex(0.18,0.95, 'H #rightarrow#gamma*#gamma#rightarrow#mu#mu#gamma')
 
-      CMS_lumi(c1, 2, 11)
+      if 'LHE' in histoName:
+        CMS_lumi(c1, 2, 11,"Simulation")
+      else:
+        CMS_lumi(c1, 2, 11)
 
       # print "hmax =", hmaxs
 

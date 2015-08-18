@@ -14,7 +14,8 @@ Inside this directory there are multiple analyzers looking into a similar final 
 Those are:
   * *zgamma.C* for muon channel,
   * *egamma.C* for electron channel,
-  * *jpsiGamma.C* looking into J/Psi+gamma final state, where J/Psi goes into two muons.
+  * *egamma2.C* for electron channel in category 2 (2 separate electrons),
+  * *jpsiGamma.C* - looking into J/Psi+gamma final state, where J/Psi goes into two muons,
   * *apz.py* - searching for a new particle at m_a = 18 GeV or so
 
 In order to run all of those I use *run.py* script. Here is how it goes for the local job to run the jpsiGamma analyzer:

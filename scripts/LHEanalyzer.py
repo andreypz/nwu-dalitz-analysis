@@ -17,7 +17,8 @@ parser.add_option("-n","--new", dest="new",action="store_true", default=False, h
 
 subdir = sys.argv[1]
 
-outpath = '/home/andreypz/workspace/html-lhe/lhe/'
+outpath = '/tthome/andrey/html/zgamma/lhe/'
+#outpath = '/home/andreypz/workspace/html-lhe/lhe/'
 #outpath = '/uscms_data/d2/andreypz/html/zgamma/lhe/'
 files={}
 
@@ -382,10 +383,10 @@ if __name__ == "__main__":
   #        'Luisa\'s vs mine']
 
 
-  sigZip = zip(['Ele', 'Grid Mu ','Mu 13TeV'],
-                [oneFile, twoFile, testFile])
-  #sigZip = zip(['ANO-0','ANO-50'],
-  #              [oneFile, twoFile])
+  #sigZip = zip(['H #rightarrow ee#gamma','HC /t','HC'],
+  #              [oneFile, twoFile, testFile])
+  sigZip = zip(['H #rightarrow ee#gamma','H #rightarrow #mu#mu#gamma'],
+                [oneFile, twoFile])
 
   u.drawAllInFile(None, None, None, sigZip, 'HEFT', '', path, None,"norm", isLog=False)
 

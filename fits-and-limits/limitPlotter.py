@@ -242,7 +242,7 @@ if __name__ == "__main__":
     mg.GetXaxis().SetTitle('m_{H} (GeV)')
     mg.GetXaxis().SetLimits(massList[0],massList[-1])
   if opt.br:
-    mg.GetXaxis().SetTitle('m_{H} (GeV)')
+    #mg.GetXaxis().SetTitle('m_{H} (GeV)')
     mg.GetYaxis().SetTitle('#sigma(pp #rightarrow H) #times B(H #rightarrow #mu#mu#gamma)_{95% CL} (fb)')
     mg.SetMaximum(21)
     if opt.lep=='el':
