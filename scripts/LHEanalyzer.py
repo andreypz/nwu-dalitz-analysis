@@ -24,27 +24,14 @@ files={}
 
 #files["one"] = ['../../ano_zeromass_0.2to50.root']
 #files["two"] = ['../../heft_zeromass_0.2to50.root']
-files["one"] = ['../../ano_dalitz.root']
+#files["one"] = ['../../ano_dalitz.root']
 #files["two"] = ['../../hc-ufo-dalitz.root']
-files["two"] = ['../../hc-ufo-dalitz-mmu-b-noT.root']
-files["three"] = ['../../hc-ufo-dalitz-mmu-b-withT.root']
+files["one"] = ['../../hc-ufo-dalitz-ele-8TeV.root']
+files["two"] = ['../../cmsgrid_final.lhe.root']
+files["three"] = ['../../hc-ufo-dalitz-mmu-b-noT.root']
+#files["three"] = ['../../hc-ufo-dalitz-ele-50K.root']
 #files["two"] = ['../../ano_dalitz_mod.root']
 #files["two"] = ['../../heft_dalitz.root']
-#files["one"] = ['../../ano_zeromass_50to500.root']
-#files["two"] = ['../../heft_zeromass_50to500.root']
-
-#files["two"] = ['~/LHE_files/luisa/dygamma.lhe.root']
-
-#files["one"] = ['~/LHE_files/mcfm_dalitz.root']
-#files["two"] = ['~/LHE_files/hmumug_m125.root']
-#files["one"] = ['~/LHE_files/heeg_m125.root']
-#files["one"]   = ['~/LHE_files/13TeV_ggHeeg_mll0to2.root']
-#files["two"]   = ['~/LHE_files/13TeV_ggHeeg_mll2to5.root']
-#files["three"] = ['~/LHE_files/13TeV_ggHeeg_mll5to20.root']
-
-#files["one"]   = ['~/LHE_files/dyJet/dyJet_xcut_03.root']
-#files["two"]   = ['~/LHE_files/dyJet/dyJet_xcut_15.root']
-#files["three"] = ['~/LHE_files/dyJet/dyJet_xcut_35_verylarge.root']
 
 #files["one"] = ['/tthome/andrey/LHE_dalitz_Luisa/dygamma.lhe.root']
 #files["two"] = ['/tthome/andrey/LHE_dalitz_Luisa/dyjet.lhe.root']
@@ -52,7 +39,7 @@ fakeGammaFromJet = 0
 
 MH = 125
 LEPID1 = 13
-LEPID2 = 13
+LEPID2 = 11
 
 print files
 #gSystem.Load("/home/andreypz/workspace/MadGraph5/ExRootAnalysis/lib/libExRootAnalysis.so")
@@ -208,6 +195,8 @@ def FillAllHists(files, h):
       h.fill1DHist(gamma.Pt(),"LHE_gamma_pt_noHiggs",   ";p_{T}^{#gamma}",    200, 00,180, 1, "")
     else:
       h.fill1DHist(trueHiggs.M(),   "LHE_h_mass_trueHiggs",";m_{H}",   200, 124,126,1, "")
+      h.fill1DHist(trueHiggs.Pt(),  "LHE_h_pt_", ";p_{T}^{H} (GeV)",   100, 0,100,  1, "")
+
     # exit(0)
 
     gammaCM = TLorentzVector(gamma)
@@ -286,6 +275,10 @@ def FillAllHists(files, h):
     h.fill1DHist(diLep.M(),   "LHE_diLep_mass_bins",";m_{ll} (GeV)", 5000,0,55,  1, "")
     h.fill1DHist(diLep.M(),   "LHE_diLep_mass_full",";m_{ll} (GeV)", 100, 0,130, 1, "")
     h.fill1DHist(diLep.M(),   "LHE_diLep_mass_low", ";m_{ll} (GeV)", 100, 0,1,   1, "")
+    
+    if LEPID1==11 or LEPID2==11:
+      h.fill1DHist(diLep.M(),   "LHE_diLep_xxx", ";m_{ll} (GeV)", 200, 0,0.05,   1, "")
+
     h.fill1DHist(tri.M(),     "LHE_h_mass",    ";m_{ll#gamma} (GeV)",100, 80,180,1, "")
     h.fill1DHist(tri.M(),     "LHE_h_mass_low",";m_{ll#gamma} (GeV)",100,  0,50, 1, "")
     if MH!=0:
@@ -389,7 +382,7 @@ if __name__ == "__main__":
   #        'Luisa\'s vs mine']
 
 
-  sigZip = zip(['ANO','HC /t','HC'],
+  sigZip = zip(['Ele', 'Grid Mu ','Mu 13TeV'],
                 [oneFile, twoFile, testFile])
   #sigZip = zip(['ANO-0','ANO-50'],
   #              [oneFile, twoFile])
