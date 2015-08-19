@@ -17,8 +17,8 @@ parser.add_option("-n","--new", dest="new",action="store_true", default=False, h
 
 subdir = sys.argv[1]
 
-outpath = '/tthome/andrey/html/zgamma/lhe/'
-#outpath = '/home/andreypz/workspace/html-lhe/lhe/'
+#outpath = '/tthome/andrey/html/zgamma/lhe/'
+outpath = '/home/andreypz/workspace/html-lhe/lhe/'
 #outpath = '/uscms_data/d2/andreypz/html/zgamma/lhe/'
 files={}
 
@@ -27,9 +27,11 @@ files={}
 #files["two"] = ['../../heft_zeromass_0.2to50.root']
 #files["one"] = ['../../ano_dalitz.root']
 #files["two"] = ['../../hc-ufo-dalitz.root']
-files["one"] = ['../../hc-ufo-dalitz-ele-8TeV.root']
-files["two"] = ['../../cmsgrid_final.lhe.root']
-files["three"] = ['../../hc-ufo-dalitz-mmu-b-noT.root']
+#files["one"] = ['../../hc-ufo-dalitz-ele-8TeV.root']
+files["one"] = ['../../hc-ufo-dalitz-ele-M200.root']
+files["two"] = ['../../hc-ufo-dalitz-ele-M400.root']
+files["three"] = ['../../hc-ufo-dalitz-ele-M600.root']
+#files["three"] = ['../../hc-ufo-dalitz-mmu-b-noT.root']
 #files["three"] = ['../../hc-ufo-dalitz-ele-50K.root']
 #files["two"] = ['../../ano_dalitz_mod.root']
 #files["two"] = ['../../heft_dalitz.root']
@@ -38,8 +40,8 @@ files["three"] = ['../../hc-ufo-dalitz-mmu-b-noT.root']
 #files["two"] = ['/tthome/andrey/LHE_dalitz_Luisa/dyjet.lhe.root']
 fakeGammaFromJet = 0
 
-MH = 125
-LEPID1 = 13
+MH = 200
+LEPID1 = 11
 LEPID2 = 11
 
 print files
@@ -195,6 +197,7 @@ def FillAllHists(files, h):
       h.fill1DHist(diLep.M(), "LHE_h_mumu_noHiggs",     ";m_{ll}",        200, 80,180, 1, "")
       h.fill1DHist(gamma.Pt(),"LHE_gamma_pt_noHiggs",   ";p_{T}^{#gamma}",    200, 00,180, 1, "")
     else:
+      h.fill1DHist(trueHiggs.M(),   "LHE_h_mass_many",";m_{H}",        200, 100,800,1, "")
       h.fill1DHist(trueHiggs.M(),   "LHE_h_mass_trueHiggs",";m_{H}",   200, 124,126,1, "")
       h.fill1DHist(trueHiggs.Pt(),  "LHE_h_pt_", ";p_{T}^{H} (GeV)",   100, 0,100,  1, "")
 
@@ -281,6 +284,7 @@ def FillAllHists(files, h):
       h.fill1DHist(diLep.M(),   "LHE_diLep_xxx", ";m_{ll} (GeV)", 200, 0,0.05,   1, "")
 
     h.fill1DHist(tri.M(),     "LHE_h_mass",    ";m_{ll#gamma} (GeV)",100, 80,180,1, "")
+    h.fill1DHist(tri.M(),     "LHE_h_mass_wide",";m_{ll#gamma} (GeV)",100, 100,800,1, "")
     h.fill1DHist(tri.M(),     "LHE_h_mass_low",";m_{ll#gamma} (GeV)",100,  0,50, 1, "")
     if MH!=0:
       h.fill1DHist(tri.M(),     "LHE_h_mass_zoom", ";m_{ll#gamma} (GeV)", 200, MH-1,MH+1,  1, "")
@@ -385,8 +389,10 @@ if __name__ == "__main__":
 
   #sigZip = zip(['H #rightarrow ee#gamma','HC /t','HC'],
   #              [oneFile, twoFile, testFile])
-  sigZip = zip(['H #rightarrow ee#gamma','H #rightarrow #mu#mu#gamma'],
-                [oneFile, twoFile])
+  # sigZip = zip(['H #rightarrow ee#gamma','H #rightarrow #mu#mu#gamma'],
+  #             [oneFile, twoFile])
+  sigZip = zip(['H #rightarrow ee#gamma, M=125','H #rightarrow ee#gamma, M=200','H #rightarrow ee#gamma, M=400'],
+               [oneFile, twoFile, testFile])
 
   u.drawAllInFile(None, None, None, sigZip, 'HEFT', '', path, None,"norm", isLog=False)
 
