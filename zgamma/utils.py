@@ -782,11 +782,13 @@ def drawAllInFile(f1, name1, bZip, sZip, name3, myDir, path, N, howToScale="toDa
       else:
         if 'el' in getSelection():
           lat.DrawLatex(0.18,0.95, 'H #rightarrow#gamma*#gamma#rightarrow ee#gamma')
+        elif 'mu' in getSelection():
+          lat.DrawLatex(0.18,0.95, 'H #rightarrow#gamma*#gamma#rightarrow #mu#mu#gamma')
         else:
-          lat.DrawLatex(0.18,0.95, 'H #rightarrow#gamma*#gamma#rightarrow#mu#mu#gamma')
+          lat.DrawLatex(0.18,0.95, 'H #rightarrow#gamma*#gamma#rightarrow ll#gamma')
 
       if 'LHE' in histoName:
-        CMS_lumi(c1, 2, 11,"Simulation")
+        CMS_lumi(c1, 12, 11,"Simulation")
       else:
         CMS_lumi(c1, 2, 11)
 
