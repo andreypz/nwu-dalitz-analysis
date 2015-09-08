@@ -18,37 +18,29 @@ parser.add_option("-n","--new", dest="new",action="store_true", default=False, h
 subdir = sys.argv[1]
 
 #outpath = '/tthome/andrey/html/zgamma/lhe/'
-outpath = '/home/andreypz/workspace/html-lhe/lhe/'
+#outpath = '/home/andreypz/workspace/html-lhe/lhe/'
 #outpath = '/uscms_data/d2/andreypz/html/zgamma/lhe/'
+outpath = '/afs/cern.ch/user/a/andrey/work/html/LHE/'
 files={}
 
+files["one"] = ['../../heeg_m125.root']
+files["two"] = ['../../hmumug_m125.root']
 
-#files["one"] = ['../../ano_zeromass_0.2to50.root']
-#files["two"] = ['../../heft_zeromass_0.2to50.root']
-#files["one"] = ['../../ano_dalitz.root']
-#files["two"] = ['../../hc-ufo-dalitz.root']
-#files["one"] = ['../../hc-ufo-dalitz-ele-8TeV.root']
-files["one"] = ['../../hc-ufo-dalitz-ele-M200.root']
-files["two"] = ['../../hc-ufo-dalitz-ele-M400.root']
-files["three"] = ['../../hc-ufo-dalitz-ele-M600.root']
-#files["three"] = ['../../hc-ufo-dalitz-mmu-b-noT.root']
-#files["three"] = ['../../hc-ufo-dalitz-ele-50K.root']
-#files["two"] = ['../../ano_dalitz_mod.root']
-#files["two"] = ['../../heft_dalitz.root']
+#files["one"] = ['../../hc-ufo-dalitz-ele-M200.root']
+#files["two"] = ['../../hc-ufo-dalitz-ele-M400.root']
+#files["three"] = ['../../hc-ufo-dalitz-ele-M600.root']
 
-#files["one"] = ['/tthome/andrey/LHE_dalitz_Luisa/dygamma.lhe.root']
-#files["two"] = ['/tthome/andrey/LHE_dalitz_Luisa/dyjet.lhe.root']
 fakeGammaFromJet = 0
 
 MH = 200
-LEPID1 = 11
+LEPID1 = 13
 LEPID2 = 11
 
 print files
 #gSystem.Load("/home/andreypz/workspace/MadGraph5/ExRootAnalysis/lib/libExRootAnalysis.so")
-gSystem.Load("/home/andreypz/workspace/mg5amcnlo/ExRootAnalysis/libExRootAnalysis.so")
+#gSystem.Load("/home/andreypz/workspace/mg5amcnlo/ExRootAnalysis/libExRootAnalysis.so")
 #gSystem.Load("/tthome/andrey/workspace/MG5_aMC_v2_1_1/ExRootAnalysis/lib/libExRootAnalysis.so")
-#gSystem.Load("../plugins/HistManager_cc.so")
+gSystem.Load("/afs/cern.ch/user/a/andrey/work/MG5_aMC_v2_3_2/ExRootAnalysis/libExRootAnalysis.so")
 gROOT.LoadMacro("../plugins/HistManager.cc+");
 gROOT.LoadMacro("../plugins/ZGAngles.cc+");
 
@@ -91,16 +83,16 @@ def FillAllHists(files, h):
   zcount  = 0
 
   for evt in fChain:
-    g1 = TLorentzVector(0)
-    g2 = TLorentzVector(0)
-    g3 = TLorentzVector(0)
-    l1 = TLorentzVector(0)
-    l2 = TLorentzVector(0)
-    j1 = TLorentzVector(0)
-    j2 = TLorentzVector(0)
-    gamma = TLorentzVector(0)
-    diLep = TLorentzVector(0)
-    trueHiggs = TLorentzVector(0)
+    g1 = TLorentzVector()
+    g2 = TLorentzVector()
+    g3 = TLorentzVector()
+    l1 = TLorentzVector()
+    l2 = TLorentzVector()
+    j1 = TLorentzVector()
+    j2 = TLorentzVector()
+    gamma = TLorentzVector()
+    diLep = TLorentzVector()
+    trueHiggs = TLorentzVector()
 
     hasZ  = 0
     hasWp = 0
@@ -278,14 +270,22 @@ def FillAllHists(files, h):
     h.fill1DHist(diLep.M(),   "LHE_diLep_mass",     ";m_{ll} (GeV)", 100, 0,60,  1, "")
     h.fill1DHist(diLep.M(),   "LHE_diLep_mass_bins",";m_{ll} (GeV)", 5000,0,55,  1, "")
     h.fill1DHist(diLep.M(),   "LHE_diLep_mass_full",";m_{ll} (GeV)", 100, 0,130, 1, "")
-    h.fill1DHist(diLep.M(),   "LHE_diLep_mass_low", ";m_{ll} (GeV)", 100, 0,1,   1, "")
-    
-    if LEPID1==11 or LEPID2==11:
-      h.fill1DHist(diLep.M(),   "LHE_diLep_xxx", ";m_{ll} (GeV)", 200, 0,0.05,   1, "")
+    h.fill1DHist(diLep.M(),   "LHE_diLep_mass_low", ";m_{ll} (GeV)", 500, 0,1,   1, "")
+    h.fill1DHist(diLep.M(),   "LHE_diLep_mass_M20", ";m_{ll} (GeV)", 2000, 0,20, 1, "")
 
-    h.fill1DHist(tri.M(),     "LHE_h_mass",    ";m_{ll#gamma} (GeV)",100, 80,180,1, "")
+    h.fill1DHist(diLep.M(),   "LHE_diLep_mass_0dot5",";m_{ll} (GeV)", 200, 0,0.5,  1, "")
+    h.fill1DHist(diLep.M(),   "LHE_diLep_mass_1",  ";m_{ll} (GeV)", 200, 0,1,    1, "")
+    h.fill1DHist(diLep.M(),   "LHE_diLep_mass_5",  ";m_{ll} (GeV)", 200, 0,5,    1, "")
+    h.fill1DHist(diLep.M(),   "LHE_diLep_mass_20", ";m_{ll} (GeV)", 200, 0,20,   1, "")
+    h.fill1DHist(diLep.M(),   "LHE_diLep_mass_50", ";m_{ll} (GeV)", 200, 0,50,   1, "")
+
+    if LEPID1==11 or LEPID2==11:
+      h.fill1DHist(diLep.M(),   "LHE_diLep_mass_0dot005",";m_{ll} (GeV)", 200, 0,0.005, 1, "")
+      h.fill1DHist(diLep.M(),   "LHE_diLep_mass_0dot01", ";m_{ll} (GeV)", 200, 0,0.01,  1, "")
+
+    h.fill1DHist(tri.M(),     "LHE_h_mass",     ";m_{ll#gamma} (GeV)",100, 80,180, 1, "")
     h.fill1DHist(tri.M(),     "LHE_h_mass_wide",";m_{ll#gamma} (GeV)",100, 100,800,1, "")
-    h.fill1DHist(tri.M(),     "LHE_h_mass_low",";m_{ll#gamma} (GeV)",100,  0,50, 1, "")
+    h.fill1DHist(tri.M(),     "LHE_h_mass_low", ";m_{ll#gamma} (GeV)",100,  0,50,  1, "")
     if MH!=0:
       h.fill1DHist(tri.M(),     "LHE_h_mass_zoom", ";m_{ll#gamma} (GeV)", 200, MH-1,MH+1,  1, "")
       h.fill1DHist(tri.M(),     "LHE_h_mass_zoom2",";m_{ll#gamma} (GeV)", 200, MH-0.1,MH+0.1,  1, "")
@@ -371,7 +371,7 @@ if __name__ == "__main__":
   if opt.new:
     FillAllHists(files["one"],  h1)
     FillAllHists(files["two"],  h2)
-    FillAllHists(files["three"],  h3)
+    #FillAllHists(files["three"],  h3)
     oneFile.cd()
     oneFile.Write()
     twoFile.cd()
@@ -389,10 +389,10 @@ if __name__ == "__main__":
 
   #sigZip = zip(['H #rightarrow ee#gamma','HC /t','HC'],
   #              [oneFile, twoFile, testFile])
-  # sigZip = zip(['H #rightarrow ee#gamma','H #rightarrow #mu#mu#gamma'],
-  #             [oneFile, twoFile])
-  sigZip = zip(['H #rightarrow ee#gamma, M=125','H #rightarrow ee#gamma, M=200','H #rightarrow ee#gamma, M=400'],
-               [oneFile, twoFile, testFile])
+  sigZip = zip(['H #rightarrow ee#gamma','H #rightarrow #mu#mu#gamma'],
+               [oneFile, twoFile])
+  #sigZip = zip(['H #rightarrow ee#gamma, M=125','H #rightarrow ee#gamma, M=200','H #rightarrow ee#gamma, M=400'],
+  #             [oneFile, twoFile, testFile])
 
   u.drawAllInFile(None, None, None, sigZip, 'HEFT', '', path, None,"norm", isLog=False)
 
@@ -407,14 +407,32 @@ if __name__ == "__main__":
 
   u.createDir(pathBase+"/csBR")
   c1 = TCanvas("c1","c1", 600,500)
-  h1 = twoFile.Get("LHE_diLep_mass_bins")
+  h1 = oneFile.Get("LHE_diLep_mass_bins")
   h2 = twoFile.Get("LHE_diLep_mass_bins")
   #h.Print('all')
   h1.Draw()
-  h2.Draw()
+  h2.Draw('same')
+  h2.SetLineColor(kBlue)
   c1.SaveAs(pathBase+"/csBR/dilepmass.png")
 
-  '''
+
+  hel = oneFile.Get("LHE_diLep_mass_low")
+  hmu = twoFile.Get("LHE_diLep_mass_low")
+
+
+  iEL1    = hel.Integral(0,105)
+  iELhist = hel.Integral(0,500)
+  iELtot  = hel.Integral(0,501)
+
+  iMU1    = hmu.Integral(0,105)
+  iMUhist = hmu.Integral(0,500)
+  iMUtot  = hmu.Integral(0,501)
+
+  print "\t\t ***"
+  print "Integral el, tot= %.1f, hist=%.f, reg1=%.1f, frac (reg1/hist) = %.3f" %(iELtot, iELhist, iEL1, iEL1/iELtot) 
+  print "Integral mu, tot= %.1f, hist=%.f, reg1=%.1f, frac (reg1/hist) = %.3f" %(iMUtot, iMUhist, iMU1, iMU1/iMUtot) 
+
+  '''  m(ll) bins  for the differential limit:
   xsbr = 1
   # xsbr = 0.754
   tot  = h.Integral()
