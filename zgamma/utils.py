@@ -55,8 +55,11 @@ def setCutListFile(fname):
 
 def getCuts():
   fcuts = conf.get("selection","cutlist")
-  with open(fcuts) as f:
-    lines = f.read().splitlines()
+  try:
+    with open(fcuts) as f:
+      lines = f.read().splitlines()
+  except IOError:
+    return '0 0'
 
   cuts = ['']*23
 

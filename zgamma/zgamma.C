@@ -412,7 +412,8 @@ Bool_t zgamma::Process(Long64_t entry)
     hists->fill1DHist(genMll,"gen_Mll_init", ";m_{#mu#mu}",50,0, 20, 1,"GEN");
     hists->fill1DHist(genMll,"gen_Mll_init_b40", ";m_{#mu#mu}", 40,0, 20, 1,"GEN");
 
-    hists->fill1DHist(genMll,"gen_Mll_low",  ";m_{#mu#mu}",100,0, 50, 1,"GEN");
+    hists->fill1DHist(genMll,"gen_Mll_low",  ";m_{#mu#mu}",100,0, 1, 1,"GEN");
+    hists->fill1DHist(genMll,"gen_Mll_50",  ";m_{#mu#mu}",100,0, 50, 1,"GEN");
     hists->fill1DHist(genMll,"gen_Mll_full", ";m_{#mu#mu}",200,0,130, 1,"GEN");
     hists->fill1DHist(genMll,"gen_Mll_inter",";m_{#mu#mu}",100,20,80, 1,"GEN");
 

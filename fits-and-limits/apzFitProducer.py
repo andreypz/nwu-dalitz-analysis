@@ -536,7 +536,7 @@ def doInitialFits(subdir):
   if verbose:
     ws.Print()
 
-    print '*** Some yields from ggH'
+    print '*** Some yields from the Signal'
     print 'Full range:', yi_sig0
     print 'in SignalRegion:', yi_sig1
 

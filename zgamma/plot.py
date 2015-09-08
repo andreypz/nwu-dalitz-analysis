@@ -501,12 +501,13 @@ if __name__ == "__main__":
 
   if opt.spec:
 
-    doLog = 0
-    doGen = 0
+    doLog = 1
+    doGen = 1
     sigFactor = 1
-    prodSF = 1.13
+    prodSF = 1. #1.13
 
-    for j,h in enumerate(['01_diLep_mass_0to20_b40','01_diLep_mass_0to20_b50','04_ll_gamma_deltaR','02_lPt1_pt','02_lPt2_pt','03_gamma_pt']):
+    for j,h in enumerate(['01_diLep_mass_0to20_b40']):
+      # for j,h in enumerate(['01_diLep_mass_0to20_b40','01_diLep_mass_0to20_b50','04_ll_gamma_deltaR','02_lPt1_pt','02_lPt2_pt','03_gamma_pt']):
       # for j,h in enumerate(['01_diLep_mass_0to20_b50','04_ll_gamma_deltaR']):
       #vMu = 'v98-mu-incl-JPsi/'
       #vEl = 'v99-el'
@@ -527,8 +528,10 @@ if __name__ == "__main__":
         vElG = 'v03-mll-el-gen-paper'
         sigFileMuGen = TFile('/tthome/andrey/batch_output/zgamma/8TeV/'+vMuG+'/mugamma_2012/hhhh_ggH-mad125_1.root', 'OPEN')
         sigFileElGen = TFile('/tthome/andrey/batch_output/zgamma/8TeV/'+vElG+'/elgamma_2012/hhhh_ggH-mad125_1.root', 'OPEN')
-        ghMu = sigFileMuGen.Get('GEN/gen_Mll_init_b40')
-        ghEl = sigFileElGen.Get('GEN/gen_Mll_init_b40')
+        ghMu = sigFileMuGen.Get('GEN/gen_Mll_low')
+        ghEl = sigFileElGen.Get('GEN/gen_Mll_low')
+        # ghMu = sigFileMuGen.Get('GEN/gen_Mll_init_b40')
+        # ghEl = sigFileElGen.Get('GEN/gen_Mll_init_b40')
 
 
       lumi= u.getLumi()
@@ -536,22 +539,23 @@ if __name__ == "__main__":
       cro = u.getCS('ggH-125', 'mu')
       scale = float(lumi*cro)/Nev
       hMu.Scale(sigFactor*scale)
-      if j==0 and doGen: ghMu.Scale(sigFactor*scale*prodSF)
+      if j==0 and doGen: ghMu.Scale(sigFactor*1.0*0.0001)
+      #if j==0 and doGen: ghMu.Scale(sigFactor*scale*prodSF)
       print Nev, lumi, cro, scale
 
       Nev = u.getTotalEvents(sigFileEl)
       cro = u.getCS('ggH-125', 'el')
       scale = float(lumi*cro)/Nev
       hEl.Scale(sigFactor*scale)
-      if j==0 and doGen: ghEl.Scale(sigFactor*scale*prodSF*(18.5/0.82))
+      if j==0 and doGen: ghEl.Scale(sigFactor*1.25*0.0001)
+      #if j==0 and doGen: ghEl.Scale(sigFactor*scale*prodSF)
       print Nev, lumi, cro, scale
-
 
       if j==0 and doGen:
         print 'mu selection:', hMu.Integral()
         print 'el selection:', hEl.Integral()
-        print 'mu gen:', ghMu.Integral()
-        print 'el gen:', ghEl.Integral()
+        print 'mu gen:', ghMu.Integral(), ghMu.Integral(10,20)
+        print 'el gen:', ghEl.Integral(), ghEl.Integral(10,20)
 
       #if j==1:
       #  factor = hMu.Integral()/hEl.Integral()

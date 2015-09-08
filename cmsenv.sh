@@ -6,8 +6,8 @@ PWD=$(pwd)
 if [[ $PWD == /tthome/* ]]
 then
   echo "NWU"
-  # cd /software/tier3/osg/slc6_amd64_gcc472/cms/cmssw/CMSSW_5_3_11/
-  cd /software/tier3/osg/slc6_amd64_gcc481/cms/cmssw/CMSSW_7_2_2/
+  cd /software/tier3/osg/slc6_amd64_gcc472/cms/cmssw/CMSSW_5_3_11/
+  #cd /software/tier3/osg/slc6_amd64_gcc481/cms/cmssw/CMSSW_7_2_2/
 
 else
   #cd /uscms/home/andreypz/work/CMSSW_5_3_20

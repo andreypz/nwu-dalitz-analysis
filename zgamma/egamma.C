@@ -288,8 +288,8 @@ Bool_t egamma::Process(Long64_t entry)
 
       //PHOTON from the Higgs
       if (sample=="dalitz" && thisParticle->GetPDGId()==22 && thisParticle->GetStatus()==1
-	  //&& ObjID->GetPrimaryAncestor(thisParticle)->GetPDGId()==A
-	  && thisParticle->Mother() &&  abs(thisParticle->Mother()->GetPDGId())!=13 && abs(thisParticle->Mother()->GetPDGId())!=11)
+	  && ObjID->GetPrimaryAncestor(thisParticle)->GetPDGId()==A)
+	  //&& thisParticle->Mother() &&  abs(thisParticle->Mother()->GetPDGId())!=13 && abs(thisParticle->Mother()->GetPDGId())!=11)
 	{
 	  gen_gamma = *thisParticle;
 	  ph++;
@@ -359,10 +359,10 @@ Bool_t egamma::Process(Long64_t entry)
       ang->GetAngles(gen_l1, gen_l2, gen_gamma, co1,co2,phi,co3);
     //cout<<eventNumber<<" gen Angles: c1= "<<co1<<"  c2="<<co2<<"   phi="<<phi<<"   coTh="<<co3<<endl;
 
-    hists->fill1DHist(co1, "gen_co1",";gen cos_lp",  100,-1,1, 1,"");
-    hists->fill1DHist(co2, "gen_co2",";gen cos_lm",  100,-1,1, 1,"");
-    hists->fill1DHist(co3, "gen_co3",";gen cosTheta",100,-1,1, 1,"");
-    hists->fill1DHist(phi, "gen_phi",";gen phi lp",  100, -TMath::Pi(), TMath::Pi(), 1,"");
+    hists->fill1DHist(co1, "gen_co1",";gen cos_lp",  100,-1,1, 1,"GEN");
+    hists->fill1DHist(co2, "gen_co2",";gen cos_lm",  100,-1,1, 1,"GEN");
+    hists->fill1DHist(co3, "gen_co3",";gen cosTheta",100,-1,1, 1,"GEN");
+    hists->fill1DHist(phi, "gen_phi",";gen phi lp",  100, -TMath::Pi(), TMath::Pi(), 1,"GEN");
 
 
     FillHistoCounts(1, eventWeight);
@@ -371,8 +371,12 @@ Bool_t egamma::Process(Long64_t entry)
     gendR  = gen_l1.DeltaR(gen_l2);
     genMll = (gen_l1+gen_l2).M();
 
-    hists->fill1DHist(genMll,"gen_Mll_init",";gen_Mll",50,0,20, 1,"GEN");
+    hists->fill1DHist(genMll,"gen_Mll_init",";gen_Mll",    50,0,20, 1,"GEN");
     hists->fill1DHist(genMll,"gen_Mll_init_b40",";gen_Mll",40,0,20, 1,"GEN");
+
+    hists->fill1DHist(genMll,"gen_Mll_low",  ";m_{ee}",100,0, 1, 1,"GEN");
+    hists->fill1DHist(genMll,"gen_Mll_50",  ";m_{ee}",100,0, 50, 1,"GEN");
+    hists->fill1DHist(genMll,"gen_Mll_full", ";m_{ee}",200,0,130, 1,"GEN");
 
     hists->fill1DHist(genMll,"gen_Mll_0",";gen_Mll",100,0,mllMax, 1,"eff");
     hists->fill1DHist(gendR, "gen_dR_0", ";gen_dR", 50,0,0.3,1,"eff");

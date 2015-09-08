@@ -17,24 +17,17 @@ parser.add_option("-n","--new", dest="new",action="store_true", default=False, h
 
 subdir = sys.argv[1]
 
-#outpath = '/tthome/andrey/html/zgamma/lhe/'
-outpath = '/home/andreypz/workspace/html-lhe/lhe/'
+outpath = '/tthome/andrey/html/zgamma/lhe/'
+#outpath = '/home/andreypz/workspace/html-lhe/lhe/'
 #outpath = '/uscms_data/d2/andreypz/html/zgamma/lhe/'
 files={}
 
 
-#files["one"] = ['../../ano_zeromass_0.2to50.root']
-#files["two"] = ['../../heft_zeromass_0.2to50.root']
-#files["one"] = ['../../ano_dalitz.root']
-#files["two"] = ['../../hc-ufo-dalitz.root']
-#files["one"] = ['../../hc-ufo-dalitz-ele-8TeV.root']
 files["one"] = ['../../hc-ufo-dalitz-ele-M200.root']
 files["two"] = ['../../hc-ufo-dalitz-ele-M400.root']
 files["three"] = ['../../hc-ufo-dalitz-ele-M600.root']
 #files["three"] = ['../../hc-ufo-dalitz-mmu-b-noT.root']
 #files["three"] = ['../../hc-ufo-dalitz-ele-50K.root']
-#files["two"] = ['../../ano_dalitz_mod.root']
-#files["two"] = ['../../heft_dalitz.root']
 
 #files["one"] = ['/tthome/andrey/LHE_dalitz_Luisa/dygamma.lhe.root']
 #files["two"] = ['/tthome/andrey/LHE_dalitz_Luisa/dyjet.lhe.root']
@@ -279,7 +272,7 @@ def FillAllHists(files, h):
     h.fill1DHist(diLep.M(),   "LHE_diLep_mass_bins",";m_{ll} (GeV)", 5000,0,55,  1, "")
     h.fill1DHist(diLep.M(),   "LHE_diLep_mass_full",";m_{ll} (GeV)", 100, 0,130, 1, "")
     h.fill1DHist(diLep.M(),   "LHE_diLep_mass_low", ";m_{ll} (GeV)", 100, 0,1,   1, "")
-    
+
     if LEPID1==11 or LEPID2==11:
       h.fill1DHist(diLep.M(),   "LHE_diLep_xxx", ";m_{ll} (GeV)", 200, 0,0.05,   1, "")
 
