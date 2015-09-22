@@ -37,8 +37,8 @@ out = TFile(s+"/limit-data-cat"+opt.cat+"-"+lep+".root","recreate")
 
 plotBase = cf.get("path","htmlbase")+'/html/zgamma/dalitz/fits-'+s
 
-#massList  = [float(a) for a in (cf.get("fits","massList-more")).split(',')]
-massList   = [float(a) for a in u.drange(120,150,1.0)]
+massList  = [float(a) for a in (cf.get("fits","massList-more")).split(',')]
+#massList   = [float(a) for a in u.drange(120,150,1.0)]
 doBlind   = int(cf.get("fits","blind"))
 doObs = not doBlind
 mllBins = u.mllBins()
@@ -68,7 +68,7 @@ if __name__ == "__main__":
   print fileListTmp
   fileList = filter(lambda fileName: 'higgsCombineTest.'+method in fileName,fileListTmp)
   #print fileList
-  SMtot = 0.757
+  SMtot = 0.732
 
   if opt.mll:
     for mbin in ['m1','m2','m3','m4','m5','m6','m7']:
@@ -115,6 +115,7 @@ if __name__ == "__main__":
       f = TFile(s+combineOutDir+thisFile,"open")
       #f.Print()
       tree = f.Get("limit")
+      #tree.Print('all')
       for i,l in enumerate(tree):
         #print i, l, l.limit
         if method =='ProfileLikelihood' and i==0:
@@ -135,9 +136,9 @@ if __name__ == "__main__":
 
 
   print 'masses:', xAxis
-  print 'exp:',exp
+  print 'exp:\n', ["{0:0.2f}".format(i) for i in exp]
   if doObs:
-    print 'obs:',obs
+    print 'obs:\n',["{0:0.2f}".format(i) for i in obs]
   #print exp2SigLow
   #print exp1SigLow
   #print exp1SigHi
@@ -148,11 +149,11 @@ if __name__ == "__main__":
   exp2SigHiErr  = [b-a for a,b in zip(exp,exp2SigHi)]
   exp1SigHiErr  = [b-a for a,b in zip(exp,exp1SigHi)]
 
-  print '-1 sigma:\n', exp1SigLowErr
-  print '+1 sigma:\n', exp1SigHiErr
+  print '-1 sigma:\n', ["{0:0.2f}".format(i) for i in exp1SigLowErr]
+  print '+1 sigma:\n', ["{0:0.2f}".format(i) for i in exp1SigHiErr]
 
-  print 'exp + 1 sigma up:\n',   exp1SigHi
-  print 'exp - 1 sigma down:\n', exp1SigLow
+  print 'exp + 1 sigma up:\n',   ["{0:0.2f}".format(i) for i in exp1SigHi]
+  print 'exp - 1 sigma down:\n', ["{0:0.2f}".format(i) for i in exp1SigLow]
 
 
   if opt.mll: print '\n 10x SM prediction \n',SM
@@ -247,7 +248,7 @@ if __name__ == "__main__":
     mg.SetMaximum(21)
     if opt.lep=='el':
       mg.GetYaxis().SetTitle('#sigma(pp #rightarrow H) #times B(H #rightarrow ee#gamma)_{95% CL} (fb)')
-      mg.SetMaximum(31)
+      mg.SetMaximum(52)
     if opt.mll and opt.lep=='mu':
       mg.SetMaximum(12)
       if opt.divide:
@@ -258,9 +259,7 @@ if __name__ == "__main__":
   else:
     mg.GetYaxis().SetTitle('95% CL limit on #sigma/#sigma_{SM}')
     if opt.cat in ['EB','comb']:
-      mg.SetMaximum(52)
-      if lep=='el':
-        mg.SetMaximum(52)
+      mg.SetMaximum(42)
     elif opt.cat in ['EE','mll50']:
       mg.SetMaximum(150)
   gPad.RedrawAxis()
@@ -316,11 +315,9 @@ if __name__ == "__main__":
 
   if opt.br and not opt.mll:
     f = TFile('../data/Dalitz_BR20.root','READ')
-    g = f.Get('csbr_mu')
+    g = f.Get('csbr_'+opt.lep)
     for i in range(g.GetN()):
       g.GetY()[i] *= 10
-      if opt.lep=='el':
-        g.GetY()[i] *= 1.38 # fudge factor for the eletron channel
 
     #fit = g.GetFunction('pol4')
     #fit.Print()
@@ -358,7 +355,10 @@ if __name__ == "__main__":
     elif opt.mll:
       c.SaveAs(limitDir+'/limits_Mll'+e)
     else:
-      c.SaveAs(limitDir+'/limits_cat_'+suff+e)
+      if opt.br:
+        c.SaveAs(limitDir+'/limits_xsBR_cat_'+suff+e)
+      else:
+        c.SaveAs(limitDir+'/limits_cat_'+suff+e)
 
   out.cd()
   observed.Write("observed")

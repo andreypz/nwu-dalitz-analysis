@@ -286,10 +286,20 @@ Bool_t egamma::Process(Long64_t entry)
       }
 
 
+      // DBG::
+      //if ((thisParticle->GetPDGId()==22 && thisParticle->Mother())
+      //  || (thisParticle->GetPDGId()==A ))
+      //ObjID->DiscoverGeneology(thisParticle);
+
+
       //PHOTON from the Higgs
+
       if (sample=="dalitz" && thisParticle->GetPDGId()==22 && thisParticle->GetStatus()==1
-	  && ObjID->GetPrimaryAncestor(thisParticle)->GetPDGId()==A)
-	  //&& thisParticle->Mother() &&  abs(thisParticle->Mother()->GetPDGId())!=13 && abs(thisParticle->Mother()->GetPDGId())!=11)
+	  && thisParticle->Mother() && thisParticle->Mother()->GetPDGId()==22
+	  && ( (  h==1 && ObjID->GetPrimaryAncestor(thisParticle)->GetPDGId()==A)
+	       || (h==0))
+	  )
+	//&& thisParticle->Mother() &&  abs(thisParticle->Mother()->GetPDGId())!=13 && abs(thisParticle->Mother()->GetPDGId())!=11)
 	{
 	  gen_gamma = *thisParticle;
 	  ph++;

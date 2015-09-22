@@ -413,7 +413,7 @@ Bool_t zgamma::Process(Long64_t entry)
     hists->fill1DHist(genMll,"gen_Mll_init_b40", ";m_{#mu#mu}", 40,0, 20, 1,"GEN");
 
     hists->fill1DHist(genMll,"gen_Mll_low",  ";m_{#mu#mu}",100,0, 1, 1,"GEN");
-    hists->fill1DHist(genMll,"gen_Mll_50",  ";m_{#mu#mu}",100,0, 50, 1,"GEN");
+    hists->fill1DHist(genMll,"gen_Mll_50",   ";m_{#mu#mu}",100,0, 50, 1,"GEN");
     hists->fill1DHist(genMll,"gen_Mll_full", ";m_{#mu#mu}",200,0,130, 1,"GEN");
     hists->fill1DHist(genMll,"gen_Mll_inter",";m_{#mu#mu}",100,20,80, 1,"GEN");
 
@@ -926,9 +926,9 @@ Bool_t zgamma::Process(Long64_t entry)
   CountEvents(5, "110 < m(llg) < 170; m(ll) < 50", fcuts);
 
   if (lPt1.DeltaR(gamma)<1.0 || lPt2.DeltaR(gamma)<1.0) return kTRUE;
-  //if ( (Mll>2.9 && Mll<3.3) || (Mll>9.3 && Mll<9.7)) return kTRUE; //jpsi and upsilon removeal
-  CountEvents(6, "dR(l,g) > 1", fcuts);
-  //CountEvents(6, "dR(l,g) > 1; removed J/Psi, Ups", fcuts);
+  if ( (Mll>2.9 && Mll<3.3) || (Mll>9.3 && Mll<9.7)) return kTRUE; //jpsi and upsilon removeal
+  //CountEvents(6, "dR(l,g) > 1", fcuts);
+  CountEvents(6, "dR(l,g) > 1; removed J/Psi, Ups", fcuts);
 
   HM->FillHistosFull(6, eventWeight);
   FillHistoCounts(6, eventWeight);

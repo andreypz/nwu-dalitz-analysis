@@ -2,7 +2,6 @@
 import sys
 from ROOT import *
 gROOT.SetBatch()
-#from systematics import *
 sys.path.append("../zgamma")
 sys.path.append("../scripts")
 from xsBrReader import *
@@ -27,7 +26,7 @@ s = cf.get("path","ver")
 # ################################################
 lumi2012  = 19.703
 
-massList   = ['%.1f'%(a) for a in u.drange(120,150,1.0)]
+massList   = ['%.1f'%(a) for a in u.drange(120,150,1.)]
 sigNameList= [a.strip() for a in (cf.get("fits","signameList")).split(',')]
 hjp = 0
 if 'hjp' in sigNameList:
@@ -54,10 +53,12 @@ sigmaUnc = {'mu':'0.100', 'el':'0.100'}
 
 yearToTeV ={'2011':'7TeV', '2012':'8TeV'}
 proc = {'gg':'ggH', 'vbf':'qqH','v':'VH','hjp':'hjp'}
+proc_conf = {'gg':'ggH', 'vbf':'vbfH','v':'vH'}
 #proc = {'gg':'ggH', 'vbf':'qqH','v':'WH','hjp':'hjp'}
 #prYR = {'gg':'ggF', 'vbf':'VBF','v':'WH'}
 mllBins = u.mllBins()
 
+AEFF = u.AutoVivification()
 #csBR = {}
 #for i,m in enumerate(massList):
 #  # for now this numbers are retrieved from systematics.py file
@@ -68,15 +69,18 @@ mllBins = u.mllBins()
 #  csBR[m] = ccc
 
 introMessage = ('# This is a card produced by a cardMaker.py script using the information from a workspace in a root file\n'\
-                  '# That file containes PDFs for Data model and the signals\' shapes. \n#'\
+                  '# That file contains the PDFs for Data model and the signals\' shapes. \n#'\
                   '# Normalization (yields) for the signal are taken from that workspace.\n')
 
 
 if opt.br:
   f = TFile('../data/Dalitz_BR20.root','READ')
-  g = f.Get('csbr_mu')
-  fit = g.GetFunction('pol4')
-  #g.Print('all')
+  gMu = f.Get('csbr_mu')
+  fitMu = gMu.GetFunction('pol4')
+
+  gEl = f.Get('csbr_el')
+  fitEl = gEl.GetFunction('pol4')
+  # g.Print('all')
 
 def makeCards(subdir):
   yearList   = [a.strip() for a in (cf.get("fits","yearList")).split(',')]
@@ -172,12 +176,12 @@ def makeCards(subdir):
             nSubLine1 +=' {'+str(i+1)+':^15}'
             nSubLine2 +=' {'+str(i+1)+':^5}'
 
-          print i, nSubLine1
+          # print i, nSubLine1
 
           nSubLine1 +=' {'+str(i+2)+':^15} \n'
           nSubLine2 +=' {'+str(i+2)+':5} - \n'
 
-          print 'nSubLine1=', nSubLine1
+          # print 'nSubLine1=', nSubLine1
 
           card.write(nSubLine1.format(*(['bin']+[channel]*(nProc+1))))
           card.write(nSubLine1.format(*(['process']+procList[::-1]+['bkg'])))
@@ -189,33 +193,47 @@ def makeCards(subdir):
             if lep=='el' and s=='v': continue
             if opt.br and s!='gg' and s!='hjp': continue
             cs = 1
+
+            procYield = sigWs.var('sig_'+s+'_yield_'+channel).getVal()
+
             if opt.br:
               if hjp:
                 cs = u.getCS("HtoJPsiGamma")
               else:
-                cs = fit(float(mass))
-                if cat in ['m1','m2','m3','m4','m5','m6','m7']:
-                  cs = cs*mllBins[int(cat[1])][1]
-                print '\t Category:', cat, '  signal:', s
-                print 'from the fit', fit(float(mass))
-                print 'from csbr:', cs
+                if lep=='mu':   cs = fitMu(float(mass))
+                elif lep=='el': cs = fitEl(float(mass))
+                else: print 'This fit does not exist'
 
-            print mass, s, lep, 'cs for scale=', cs
+              if cat in ['m1','m2','m3','m4','m5','m6','m7']:
+                cs = cs*mllBins[int(cat[1])][1]
 
-            procYield = sigWs.var('sig_'+s+'_yield_'+channel).getVal()/cs
+              # When doing limit on cs*BR, need to divide by cs:
+              procYield = sigWs.var('sig_'+s+'_yield_'+channel).getVal()/cs
 
-            print mass, s, lep, 'Acc*Eff =', procYield/lumi2012
+              print '\t Category:', cat, '  signal:', s, 'm=', mass
+              print '\t ** From the fit: %.3f' % cs
+              print mass, s, lep, 'cs for scale=', cs
+
+
+            print mass, s, lep
+            if opt.br:
+              print '\t \t raw sig= ', procYield*cs, 'Acc*Eff = %.3f' % (procYield/lumi2012)
+            else:
+              # cs = u.getCS('%s-%i' %(proc_conf[s], float(mass)), lep)
+              print '\t \t raw sig= ', procYield, 'Acc*Eff = %.3f' % (procYield/lumi2012/cs)
+
 
             if s=='v':
               zh_frac = float(xsDict[YR][TeV]['ZH'][mass])/(float(xsDict[YR][TeV]['ZH'][mass])+float(xsDict[YR][TeV]['WH'][mass]))
               wh_frac = 1-zh_frac
-              print s, ' ZH fraction =', zh_frac, '  WH fraction =',wh_frac
+              print s, 'YR=',YR, ' ZH fraction =', zh_frac, '  WH fraction =',wh_frac
               sigYields.append('%.4f'%(procYield*zh_frac))
               sigYields.append('%.4f'%(procYield*wh_frac))
             else:
               sigYields.append('%.4f'%procYield)
 
-          print 'mh =', mass, sigYields
+          print 'M =', mass, 'YIELDS=', sigYields
+
           sigRate = sigYields
           card.write(nSubLine1.format(*(['rate']+sigRate+[bkgRate])))
 
@@ -228,8 +246,6 @@ def makeCards(subdir):
           if float(mass)>140:
             # after mH=140 the syst only available with 1GeV intervals
             mmm = mass[0:4]+'0'
-
-            print xsDict[YR][TeV][sig][m]
 
           if not opt.br:
             card.write(nSubLine2.format(*(['CMS_hllg_brLLG', 'lnN']+nProc*[brLLG])))

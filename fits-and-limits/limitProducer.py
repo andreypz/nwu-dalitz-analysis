@@ -40,8 +40,8 @@ if opt.prof:
   method = "ProfileLikelihood"
 
 if __name__ == "__main__":
-  massList = ['125.0']
-  #massList   = [a.strip() for a in (cf.get("fits","massList-more")).split(',')]
+  # massList = ['125.0']
+  massList   = [a.strip() for a in (cf.get("fits","massList-more")).split(',')]
   catList    = [a.strip() for a in (cf.get("fits","catList")).split(',')]
   leptonList = [a.strip() for a in (cf.get("fits","leptonList")).split(',')]
 

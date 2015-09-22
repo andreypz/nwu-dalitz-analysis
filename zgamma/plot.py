@@ -511,44 +511,45 @@ if __name__ == "__main__":
       # for j,h in enumerate(['01_diLep_mass_0to20_b50','04_ll_gamma_deltaR']):
       #vMu = 'v98-mu-incl-JPsi/'
       #vEl = 'v99-el'
-      #vMu = 'v03-mll-mu-paper'
-      #vEl = 'v03-mll-el-paper'
-      vMu = 'v07-mll-thesis'
-      vEl = 'v07-mll-thesis'
+      vMu = 'v03-mll-mu-paper'
+      vEl = 'v03-mll-el-paper'
+      vMuG = 'v08-mll-gen'
+      vElG = 'v08-mll-gen'
+
       print
+
+      mH = '125'
       u.createDir(pathBase+'/Spec')
-      sigFileMu = TFile('/tthome/andrey/batch_output/zgamma/8TeV/'+vMu+'/mugamma_2012/hhhh_ggH-mad125_1.root', 'OPEN')
-      sigFileEl = TFile('/tthome/andrey/batch_output/zgamma/8TeV/'+vEl+'/elgamma_2012/hhhh_ggH-mad125_1.root', 'OPEN')
+      sigFileMu = TFile('/tthome/andrey/batch_output/zgamma/8TeV/'+vMu+'/mugamma_2012/hhhh_ggH-mad'+mH+'_1.root', 'OPEN')
+      sigFileEl = TFile('/tthome/andrey/batch_output/zgamma/8TeV/'+vEl+'/elgamma_2012/hhhh_ggH-mad'+mH+'_1.root', 'OPEN')
       hMu = sigFileMu.Get('Main/'+h+'_Main_cut9')
       hEl = sigFileEl.Get('Main/'+h+'_Main_cut15')
 
 
       if doGen and j==0:
-        vMuG = 'v03-mll-mu-gen-paper'
-        vElG = 'v03-mll-el-gen-paper'
-        sigFileMuGen = TFile('/tthome/andrey/batch_output/zgamma/8TeV/'+vMuG+'/mugamma_2012/hhhh_ggH-mad125_1.root', 'OPEN')
-        sigFileElGen = TFile('/tthome/andrey/batch_output/zgamma/8TeV/'+vElG+'/elgamma_2012/hhhh_ggH-mad125_1.root', 'OPEN')
-        ghMu = sigFileMuGen.Get('GEN/gen_Mll_low')
-        ghEl = sigFileElGen.Get('GEN/gen_Mll_low')
-        # ghMu = sigFileMuGen.Get('GEN/gen_Mll_init_b40')
-        # ghEl = sigFileElGen.Get('GEN/gen_Mll_init_b40')
+        sigFileMuGen = TFile('/tthome/andrey/batch_output/zgamma/8TeV/'+vMuG+'/mugamma_2012/hhhh_ggH-mad'+mH+'_1.root', 'OPEN')
+        sigFileElGen = TFile('/tthome/andrey/batch_output/zgamma/8TeV/'+vElG+'/elgamma_2012/hhhh_ggH-mad'+mH+'_1.root', 'OPEN')
+        #ghMu = sigFileMuGen.Get('GEN/gen_Mll_low')
+        #ghEl = sigFileElGen.Get('GEN/gen_Mll_low')
+        ghMu = sigFileMuGen.Get('GEN/gen_Mll_init_b40')
+        ghEl = sigFileElGen.Get('GEN/gen_Mll_init_b40')
 
 
       lumi= u.getLumi()
       Nev = u.getTotalEvents(sigFileMu)
-      cro = u.getCS('ggH-125', 'mu')
+      cro = u.getCS('ggH-'+mH, 'mu')
       scale = float(lumi*cro)/Nev
       hMu.Scale(sigFactor*scale)
-      if j==0 and doGen: ghMu.Scale(sigFactor*1.0*0.0001)
-      #if j==0 and doGen: ghMu.Scale(sigFactor*scale*prodSF)
+      #if j==0 and doGen: ghMu.Scale(sigFactor)
+      if j==0 and doGen: ghMu.Scale(sigFactor*scale*prodSF)
       print Nev, lumi, cro, scale
 
       Nev = u.getTotalEvents(sigFileEl)
-      cro = u.getCS('ggH-125', 'el')
+      cro = u.getCS('ggH-'+mH, 'el')
       scale = float(lumi*cro)/Nev
       hEl.Scale(sigFactor*scale)
-      if j==0 and doGen: ghEl.Scale(sigFactor*1.25*0.0001)
-      #if j==0 and doGen: ghEl.Scale(sigFactor*scale*prodSF)
+      #if j==0 and doGen: ghEl.Scale(sigFactor)
+      if j==0 and doGen: ghEl.Scale(sigFactor*scale*prodSF)
       print Nev, lumi, cro, scale
 
       if j==0 and doGen:
@@ -567,10 +568,9 @@ if __name__ == "__main__":
         ghEl.Draw('hist same')
         ghMu.SetLineColor(kMagenta)
         ghEl.SetLineColor(kBlue-9)
-        ghMu.SetLineStyle(7)
+        ghEl.SetLineStyle(7)
         #ghEl.SetLineStyle(4)
         ghEl.SetFillColor(19)
-        #ghEl.SetFillColor(kCyan-10)
 
         #redraw them
         hEl.Draw('hist same')
@@ -579,7 +579,8 @@ if __name__ == "__main__":
         hMu.SetLineWidth(3)
         ghMu.SetLineWidth(3)
         # hEl.SetFillColor(kRed-10)
-        # hMu.SetLineStyle(2)
+        hEl.SetLineStyle(8)
+        #hEl.SetAxisRange(0,1.5,'X')
         hEl.SetFillColor(kOrange-9)
 
       c1.RedrawAxis()
@@ -622,11 +623,11 @@ if __name__ == "__main__":
       #  leg.SetHeader('#splitline{SM Higgs,}{m_{H} = 125 GeV}')
       if sigFactor==1:
         lat.DrawLatex(0.57,0.82, '\\mbox{SM  H} \\rightarrow \\gamma^*\\gamma \\rightarrow \\ell\\ell\\gamma')
-        lat.DrawLatex(0.62,0.77, 'm_{H} = 125 GeV')
+        lat.DrawLatex(0.62,0.77, 'm_{H} = '+mH+' GeV')
         #leg.SetHeader('\\mbox{SM H} \\rightarrow \\gamma^*\\gamma \\rightarrow \\ell\\ell\\gamma \\atop \\mathrm{m_{H}} = 125\\, \\mbox{GeV}')
         #leg.SetHeader('#splitline{SM H #rightarrow #gamma*#gamma #rightarrow ll#gamma}{  m_{H} = 125 GeV}')
       else:
-        leg.SetHeader('#splitline{'+str(sigFactor)+' x SM H #rightarrow #gamma*#gamma #rightarrow ll#gamma}{  m_{H} = 125 GeV}')
+        leg.SetHeader('#splitline{'+str(sigFactor)+' x SM H #rightarrow #gamma*#gamma #rightarrow ll#gamma}{  m_{H} = '+mH+' GeV}')
       if j==0 and doGen:
         leg.AddEntry(ghMu,' #mu#mu before selection', 'l')
         leg.AddEntry(ghEl,' ee before selection', 'f')
@@ -663,7 +664,7 @@ if __name__ == "__main__":
         c1.SaveAs(pathBase+'/Spec/ratio_el_'+h+'_sig.png')
 
 
-
+      '''
       daFileMu = TFile('/tthome/andrey/batch_output/zgamma/8TeV/'+vMu+'/m_Data_mugamma_2012.root', 'OPEN')
       daFileEl = TFile('/tthome/andrey/batch_output/zgamma/8TeV/'+vEl+'/m_Data_elgamma_2012.root', 'OPEN')
       dhMu = daFileMu.Get('Main/'+h+'_Main_cut9')
@@ -709,7 +710,7 @@ if __name__ == "__main__":
         if doLog: c1.SetLogy()
         c1.SaveAs(pathBase+'/Spec/'+h+'_data.'+e)
 
-
+      '''
   '''
   htmp = sigFileGG.Get("02_lPt2_pt__cut"+cut)
   int1 = htmp.Integral()

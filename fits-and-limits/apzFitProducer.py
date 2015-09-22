@@ -73,18 +73,21 @@ def LumiXSWeighter(mH, prod, sel, Nev=None):
     cro = float(u.conf.get(prod+"H-"+str(mH), "cs-"+sel))
 
   sc = float(u.lumi*cro)/Nev
-  print 'M=',mH, 'cs=',cro, 'Nev=', Nev, 'lumi=',u.lumi, "scale", sc
+  print 'sel=', sel, 'M=',mH, 'cs=',cro, 'Nev=', Nev, 'lumi=',u.lumi, "scale", sc
   return sc
 
 
 def LoopOverTreeTW(myTree, cat, mzg, args, ds):
   print 'TW tree:', myTree
+  # This is due to mistake in MCFM BR calculation: need to adjust it now.
+  BR_k_factor = 1.43
+
   hcount=0
   for i in myTree:
     if i.Meg> lowCutOff and i.Meg<highCutOff:
       mzg.setVal(i.Meg)
       Weight = i.mcwei*i.puwei
-      ds.add(args, Weight)
+      ds.add(args, Weight*BR_k_factor)
 
       if Weight==1: #(This is data)
         if i.Meg>120 and i.Meg<130:
@@ -190,9 +193,9 @@ def doInitialFits(subdir):
   apzTreeName = 'apzTree/apzTree'
   twTreeName  = 't'
 
-  binWidth = 0.2
-  #binning = 30
+  binWidth = 2
   binning = int(float(deltaMllg)/binWidth)
+  #binning = 30
 
   weight  = RooRealVar('Weight','Weight',0,100)
   mzg  = RooRealVar('CMS_hzg_mass','CMS_hzg_mass', lowCutOff,highCutOff)
@@ -403,7 +406,7 @@ def doInitialFits(subdir):
               f1.FixParameter(0, 0);
               f1.SetParLimits(1, 122, 127);
               myS125.Fit('f1','R')
-              myS125.GetFunction("f1").Print()
+              # myS125.GetFunction("f1").Print()
               #raw_input("\n ---> Param List. hit enter to continue")
 
             CMS_lumi(c, 2, 11, 'Simulation')
@@ -428,7 +431,7 @@ def doInitialFits(subdir):
         else:
           LoopOverTree(dataTree, cat, mzg, data_argS, data_ds, None)
 
-        # data_ds.Print('all')
+        if verbose: data_ds.Print('all')
 
         dahist = mzg.createHistogram('hist_'+dataName, RooFit.Binning(binning))
         data_ds.fillHistogram(dahist, RooArgList(mzg))
