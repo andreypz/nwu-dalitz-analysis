@@ -273,11 +273,15 @@ def FillAllHists(files, h):
     h.fill1DHist(diLep.M(),   "LHE_diLep_mass_low", ";m_{ll} (GeV)", 500, 0,1,   1, "")
     h.fill1DHist(diLep.M(),   "LHE_diLep_mass_M20", ";m_{ll} (GeV)", 2000, 0,20, 1, "")
 
+    h.fill1DHist(diLep.M(),   "LHE_diLep_mass_0dot1",";m_{ll} (GeV)", 200, 0,0.1,  1, "")
     h.fill1DHist(diLep.M(),   "LHE_diLep_mass_0dot5",";m_{ll} (GeV)", 200, 0,0.5,  1, "")
     h.fill1DHist(diLep.M(),   "LHE_diLep_mass_1",  ";m_{ll} (GeV)", 200, 0,1,    1, "")
     h.fill1DHist(diLep.M(),   "LHE_diLep_mass_5",  ";m_{ll} (GeV)", 200, 0,5,    1, "")
     h.fill1DHist(diLep.M(),   "LHE_diLep_mass_20", ";m_{ll} (GeV)", 200, 0,20,   1, "")
     h.fill1DHist(diLep.M(),   "LHE_diLep_mass_50", ";m_{ll} (GeV)", 200, 0,50,   1, "")
+
+    if diLep.M() < 20:
+      h.fill1DHist(diLep.M(), "LHE_diLep_mass_low2",  ";m_{ll} (GeV)", 500, 0,1,    1, "")
 
     if LEPID1==11 or LEPID2==11:
       h.fill1DHist(diLep.M(),   "LHE_diLep_mass_0dot005",";m_{ll} (GeV)", 200, 0,0.005, 1, "")
@@ -394,7 +398,12 @@ if __name__ == "__main__":
   #sigZip = zip(['H #rightarrow ee#gamma, M=125','H #rightarrow ee#gamma, M=200','H #rightarrow ee#gamma, M=400'],
   #             [oneFile, twoFile, testFile])
 
-  u.drawAllInFile(None, None, None, sigZip, 'HEFT', '', path, None,"norm", isLog=False)
+  u.drawAllInFile(None, None, None, sigZip, 'LHE', '', path, None,"norm", isLog=False)
+
+
+  #sigZip = zip(['H #rightarrow #mu#mu#gamma'],
+  #             [twoFile])
+  #u.drawAllInFile(oneFile, '', None, sigZip, 'LHE', '', path, None,"norm", isLog=True)
 
 
   #myzip = zip(['5<mll<20'],[testFile])
@@ -416,8 +425,8 @@ if __name__ == "__main__":
   c1.SaveAs(pathBase+"/csBR/dilepmass.png")
 
 
-  hel = oneFile.Get("LHE_diLep_mass_low")
-  hmu = twoFile.Get("LHE_diLep_mass_low")
+  hel = oneFile.Get("LHE_diLep_mass_low2")
+  hmu = twoFile.Get("LHE_diLep_mass_low2")
 
 
   iEL1    = hel.Integral(0,105)

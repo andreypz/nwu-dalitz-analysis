@@ -434,14 +434,14 @@ def drawAllInFile(f1, name1, bZip, sZip, name3, myDir, path, N, howToScale="toDa
       leg = TLegend(0.63,0.72,0.92,0.90)
       if 'LHE' in histoName:
         leg = TLegend(0.67,0.77,0.92,0.90)
-      leg.SetTextSize(0.03)
-
-      if sZip==None and bZip==None:
-        leg = TLegend(0.70,0.74,0.88,0.80)
         leg.SetBorderSize(0)
+        leg.SetTextSize(0.03)
+      
+      elif sZip==None and bZip==None:
+        leg = TLegend(0.70,0.74,0.88,0.80)
         leg.SetTextSize(0.05)
 
-      if h1==None and bZip==None:
+      elif h1==None and bZip==None:
         leg = TLegend(0.58,0.66,0.92,0.87)
         leg.SetBorderSize(0)
         leg.SetTextSize(0.04)
@@ -521,8 +521,9 @@ def drawAllInFile(f1, name1, bZip, sZip, name3, myDir, path, N, howToScale="toDa
             h3.SetLineColor(col[0])
             h3.SetFillColor(col[1])
           else:
-            h3.SetLineColor(40+j)
-            #h3.SetLineStyle(2+j)
+            h3.SetLineColor(40+2*j)
+            h3.SetLineWidth(3)
+            #h3.SetLineStyle(1+8*j)
 
 
           if len(sZip)==1:
@@ -801,8 +802,8 @@ def drawAllInFile(f1, name1, bZip, sZip, name3, myDir, path, N, howToScale="toDa
       c1.SetLogy(int(isLog))
       #print 'Saving PNG:', histoName
       c1.SaveAs(path+"/"+histoName+'.png')
-      #if doPdf:
-      #  c1.SaveAs(path+"/"+histoName+'.pdf')
+      if doPdf:
+        c1.SaveAs(path+"/"+histoName+'.pdf')
 
       gStyle.SetOptStat(0)
 
