@@ -194,7 +194,6 @@ def makeCards(subdir):
             if opt.br and s!='gg' and s!='hjp': continue
             cs = 1
 
-            procYield = sigWs.var('sig_'+s+'_yield_'+channel).getVal()
 
             if opt.br:
               if hjp:
@@ -214,6 +213,8 @@ def makeCards(subdir):
               print '\t ** From the fit: %.3f' % cs
               print mass, s, lep, 'cs for scale=', cs
 
+            else:
+              procYield = sigWs.var('sig_'+s+'_yield_'+channel).getVal()
 
             print mass, s, lep
             if opt.br:
