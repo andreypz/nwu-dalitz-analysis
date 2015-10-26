@@ -104,6 +104,11 @@ class zgamma : public TSelector {
   Double_t apz_eta1234, apz_eta12, apz_eta34, apz_eta1, apz_eta2, apz_eta3, apz_eta4;
   Bool_t apz_vbf;
 
+  TLorentzVector *apz_lep1, *apz_lep2, *apz_gamma, *apz_jet1, *apz_jet2;
+  TVector2 *apz_met;
+  Bool_t apz_trig1, apz_trig2, apz_trig3, apz_trig4, apz_trig5;
+  UInt_t apz_njets;
+
   string period;
   string sample;
   string selection;

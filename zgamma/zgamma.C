@@ -22,7 +22,7 @@ const Float_t cut_iso_mu1 = 0.4, cut_iso_mu2=0;
 Float_t cut_gammapt = 25;
 Float_t mllMax = 25;
 
-Bool_t checkTrigger = kTRUE;
+Bool_t checkTrigger = 0;
 Float_t global_Mll = 0;
 //Bool_t applyPhosphor = 0;
 Bool_t doRochCorr = 1;
@@ -104,6 +104,24 @@ void zgamma::Begin(TTree * tree)
   if (makeApzTree){
     _apzTree = new TTree("apzTree", "A tree for studying new particles");
     _apzTree->Branch("weight",&apz_w,     "weight/D");
+
+
+    apz_lep1 = new TLorentzVector();
+    apz_lep2 = new TLorentzVector();
+    apz_gamma = new TLorentzVector();
+    apz_jet1 = new TLorentzVector();
+    apz_jet2 = new TLorentzVector();
+    apz_met = new TVector2();
+
+
+    _apzTree->Branch("lep1", &apz_lep1, 6400, 0);
+    _apzTree->Branch("lep2", &apz_lep2, 6400, 0);
+    _apzTree->Branch("gamma",&apz_gamma, 6400, 0);
+    _apzTree->Branch("jet1", &apz_jet1, 6400, 0);
+    _apzTree->Branch("jet2", &apz_jet2, 6400, 0);
+    _apzTree->Branch("met",  &apz_met, 6400, 0);
+    _apzTree->Branch("njets",  &apz_njets,  "njets/i");
+
     _apzTree->Branch("dr1234",&apz_dr1234,"dr1234/D");
     _apzTree->Branch("dr12",  &apz_dr12,  "dr12/D");
     _apzTree->Branch("dr13",  &apz_dr13,  "dr13/D");
@@ -128,6 +146,12 @@ void zgamma::Begin(TTree * tree)
     _apzTree->Branch("eta3",   &apz_eta3,   "eta3/D");
     _apzTree->Branch("eta4",   &apz_eta4,   "eta4/D");
     _apzTree->Branch("isVBF",  &apz_vbf,    "vbf/O");
+
+    _apzTree->Branch("trig1",  &apz_trig1,    "trig1/O");
+    _apzTree->Branch("trig2",  &apz_trig2,    "trig2/O");
+    _apzTree->Branch("trig3",  &apz_trig3,    "trig3/O");
+    _apzTree->Branch("trig4",  &apz_trig4,    "trig4/O");
+    _apzTree->Branch("trig5",  &apz_trig5,    "trig5/O");
 
     _apzTree->Branch("run",  &runNumber,  "run/i");
     _apzTree->Branch("event",&eventNumber,"event/l");
@@ -876,6 +900,21 @@ Bool_t zgamma::Process(Long64_t entry)
 
   if (makeApzTree){
     apz_w = eventWeight;
+
+    *apz_lep1 = lPt1;
+    *apz_lep2 = lPt2;
+    *apz_gamma = gamma;
+    *apz_jet1 = jet1;
+    *apz_jet2 = jet2;
+    *apz_met = *recoMET;
+    apz_njets = jets.size();
+
+    //cout<<"\t orig = "<<lPt1.Phi()<<endl;
+    //cout<<"\t apz  = "<<apz_lep1->Phi()<<endl;
+    //lPt1.SetPhi(0.001);
+    //cout<<"orig = "<<lPt1.Phi()<<endl;
+    //cout<<"apz  = "<<apz_lep1->Phi()<<endl;
+
     apz_pt1 = lPt1.Pt();
     apz_pt2 = lPt2.Pt();
     apz_pt3 = gamma.Pt();
@@ -906,7 +945,25 @@ Bool_t zgamma::Process(Long64_t entry)
     apz_m4l = 0;
     apz_vbf = isVBF;
 
+    triggerSelector->SelectTrigger("HLT_Mu22_Photon22_CaloIdL_v", triggerStatus, hltPrescale, isFound, triggerPass, prescale);
+    apz_trig1 = triggerPass;
+    triggerSelector->SelectTrigger("HLT_IsoMu24_v", triggerStatus, hltPrescale, isFound, triggerPass, prescale);
+    apz_trig2 = triggerPass;
+    triggerSelector->SelectTrigger("HLT_IsoMu24_eta2p1_v", triggerStatus, hltPrescale, isFound, triggerPass, prescale);
+    apz_trig3 = triggerPass;
+    triggerSelector->SelectTrigger("HLT_Mu13_Mu8_v", triggerStatus, hltPrescale, isFound, triggerPass, prescale);
+    apz_trig4 = triggerPass;
+    triggerSelector->SelectTrigger("HLT_Mu17_Mu8_v", triggerStatus, hltPrescale, isFound, triggerPass, prescale);
+    apz_trig5 = triggerPass;
+
     _apzTree->Fill();
+
+    apz_lep1->Clear();
+    apz_lep2->Clear();
+    apz_gamma->Clear();
+    apz_jet1->Clear();
+    apz_jet2->Clear();
+    apz_met->Clear();
 
   }
 
