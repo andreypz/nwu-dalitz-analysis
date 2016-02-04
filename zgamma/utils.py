@@ -349,9 +349,9 @@ def drawAllInFile(f1, name1, bZip, sZip, name3, myDir, path, N, howToScale="toDa
           try:
             si.append(s[1].Get(histoName).Clone())
           except ReferenceError:
-            print 'Histogram'+histoName+' does not exis in '+s[0]
+            print 'Histogram: '+histoName+' does not exist in '+s[0]
         if si[-1]==None:
-          print 'Histogram'+histoName+' does not exis in '+s[0]
+          print 'Histogram: '+histoName+' does not exist in '+s[0]
           continue
 
         scale3 = 1
@@ -433,7 +433,7 @@ def drawAllInFile(f1, name1, bZip, sZip, name3, myDir, path, N, howToScale="toDa
 
       leg = TLegend(0.63,0.72,0.92,0.90)
       if 'LHE' in histoName:
-        leg = TLegend(0.67,0.77,0.92,0.90)
+        leg = TLegend(0.57,0.77,0.92,0.90)
         leg.SetBorderSize(0)
         leg.SetTextSize(0.03)
       
@@ -526,7 +526,7 @@ def drawAllInFile(f1, name1, bZip, sZip, name3, myDir, path, N, howToScale="toDa
             #h3.SetLineStyle(1+8*j)
 
 
-          if len(sZip)==1:
+          if len(si)==1:
             if howToScale=="toDataInt":
               leg.AddEntry(h3,name3.replace('XX',str(int(scale))), "f")
             else:

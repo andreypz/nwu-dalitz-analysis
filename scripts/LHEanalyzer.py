@@ -23,8 +23,9 @@ subdir = sys.argv[1]
 outpath = '/afs/cern.ch/user/a/andrey/work/html/LHE/'
 files={}
 
-files["one"] = ['../../heeg_m125.root']
-files["two"] = ['../../hmumug_m125.root']
+files["one"] = ['../../ggh012j_htomumug_dalitzeff_feb02.root']
+files["two"] = ['../../vbfh_htomumug_dalitzeff_feb02.root']
+files["three"] = ['../../hmumug_m125.root']
 
 #files["one"] = ['../../hc-ufo-dalitz-ele-M200.root']
 #files["two"] = ['../../hc-ufo-dalitz-ele-M400.root']
@@ -294,11 +295,19 @@ def FillAllHists(files, h):
       h.fill1DHist(tri.M(),     "LHE_h_mass_zoom", ";m_{ll#gamma} (GeV)", 200, MH-1,MH+1,  1, "")
       h.fill1DHist(tri.M(),     "LHE_h_mass_zoom2",";m_{ll#gamma} (GeV)", 200, MH-0.1,MH+0.1,  1, "")
 
-        ## VBF Plots:
+    if qq>=1:
+      h.fill1DHist(j1.Pt(),   "LHE_Jet1_Pt",";pT jet, GeV", 200, 0,400,  1, "")
+      
     if qq==2:
-      h.fill1DHist((j1+j2).M(),             "LHE_diJet_mass",";M(j1,j2), GeV", 200, 0,600,  1, "")
-      h.fill1DHist(fabs(j1.Eta()+j2.Eta()), "LHE_diJet_dEta",";|#Delta#eta(j_{1},j_{2})|",  200,   0,6,  1, "")
+      h.fill1DHist(j2.Pt(),   "LHE_Jet2_Pt",";pT jet, GeV", 200, 0,400,  1, "")
 
+      ## VBF Plots:
+      h.fill1DHist((j1+j2).M(),             "LHE_diJet_mass",";M(j1,j2), GeV", 100, 0,800,  1, "")
+      h.fill1DHist(fabs(j1.Eta()-j2.Eta()), "LHE_diJet_dEta",";|#Delta#eta(j_{1},j_{2})|",  100,   0,8,  1, "")
+
+      h.fill1DHist(tri.Eta() - 0.5*(j1.Eta() + j2.Eta()),  "LHE_diJet_Zeppenfeld",
+                   ";Zeppenfeld: #eta(H) - #frac{1}{2}(#eta_{j1} + #eta_{j2})", 100, -6,6,  1, "")
+      
       '''
         if not hasGlu3:
             h.fill1DHist(tri.Pt(),    "LHE_h_pt",";Pt of the Higgs",  200, 0,200,  1, "")
@@ -375,7 +384,7 @@ if __name__ == "__main__":
   if opt.new:
     FillAllHists(files["one"],  h1)
     FillAllHists(files["two"],  h2)
-    #FillAllHists(files["three"],  h3)
+    FillAllHists(files["three"],  h3)
     oneFile.cd()
     oneFile.Write()
     twoFile.cd()
@@ -386,17 +395,20 @@ if __name__ == "__main__":
 
 
   blah = ['LHE for mH = 125 GeV',
-          'Comparing ANO and HEFT']
+          'Comparing 13 and 8 TeV, LO, NLO, VBF']
   #blah = ['LHE files comparison for DY+gamma sample',
   #        'Luisa\'s vs mine']
 
 
   #sigZip = zip(['H #rightarrow ee#gamma','HC /t','HC'],
   #              [oneFile, twoFile, testFile])
-  sigZip = zip(['H #rightarrow ee#gamma','H #rightarrow #mu#mu#gamma'],
-               [oneFile, twoFile])
+  #sigZip = zip(['H #rightarrow ee#gamma','H #rightarrow #mu#mu#gamma'],
+  #             [oneFile, twoFile])
   #sigZip = zip(['H #rightarrow ee#gamma, M=125','H #rightarrow ee#gamma, M=200','H #rightarrow ee#gamma, M=400'],
   #             [oneFile, twoFile, testFile])
+  sigZip = zip(['ggH #rightarrow #mu#mu#gamma, NLO 13 TeV','vbfH #rightarrow #mu#mu#gamma, 13 TeV',
+                'ggH #rightarrow #mu#mu#gamma, LO 8 TeV'],
+               [oneFile, twoFile, testFile])
 
   u.drawAllInFile(None, None, None, sigZip, 'LHE', '', path, None,"norm", isLog=False)
 
