@@ -10,10 +10,12 @@ import makeHTML as ht
 from optparse import OptionParser
 
 parser = OptionParser(usage="usage: %prog name [options --new]")
-parser.add_option("-n","--new", dest="new",action="store_true", default=False, help="Make new hists. Otherwise re-use the existing ones")
+parser.add_option("-n","--new", dest="new",action="store_true", default=False, 
+                  help="Make new hists. Otherwise re-use the existing ones")
+parser.add_option("-m","--mH", dest="mH",type=int, default=125, 
+                  help="Mass of the H")
 
 (opt, args) = parser.parse_args()
-
 
 subdir = sys.argv[1]
 
@@ -23,25 +25,29 @@ subdir = sys.argv[1]
 outpath = '/afs/cern.ch/user/a/andrey/work/html/LHE/'
 files={}
 
-files["one"] = ['../../ggh012j_htomumug_dalitzeff_feb02.root']
-files["two"] = ['../../vbfh_htomumug_dalitzeff_feb02.root']
-files["three"] = ['../../hmumug_m125.root']
+MH = opt.mH
 
-#files["one"] = ['../../hc-ufo-dalitz-ele-M200.root']
-#files["two"] = ['../../hc-ufo-dalitz-ele-M400.root']
-#files["three"] = ['../../hc-ufo-dalitz-ele-M600.root']
+files["one"] = ['../../Oct2016/ggH'+str(MH)+'_mmg.lhe.root']
+files["two"] = ['../../Oct2016/vbfH'+str(MH)+'_eeg.lhe.root']
+files["three"] = ['../../Oct2016/ZH'+str(MH)+'_mmg.lhe.root']
 
 fakeGammaFromJet = 0
 
-MH = 200
 LEPID1 = 13
 LEPID2 = 11
 
 print files
-#gSystem.Load("/home/andreypz/workspace/MadGraph5/ExRootAnalysis/lib/libExRootAnalysis.so")
-#gSystem.Load("/home/andreypz/workspace/mg5amcnlo/ExRootAnalysis/libExRootAnalysis.so")
-#gSystem.Load("/tthome/andrey/workspace/MG5_aMC_v2_1_1/ExRootAnalysis/lib/libExRootAnalysis.so")
-gSystem.Load("/afs/cern.ch/user/a/andrey/work/MG5_aMC_v2_3_2/ExRootAnalysis/libExRootAnalysis.so")
+#libExRootPath = '/home/andreypz/workspace/MadGraph5/ExRootAnalysis/lib/'
+#libExRootPath = '/home/andreypz/workspace/mg5amcnlo/ExRootAnalysis/'
+libExRootPath = '/afs/cern.ch/user/a/andrey/work/MG5_aMC_v2_3_2/ExRootAnalysis/'
+#libExRootPath = '/afs/cern.ch/user/a/andrey/work/MG5_aMC_v2_4_3/ExRootAnalysis/'
+
+# In ROOT 6, also need this (but it still does not work):
+#gInterpreter.AddIncludePath(libExRootPath)
+#gInterpreter.Declare('#include "'+libExRootPath+'ExRootAnalysis/ExRootClasses.h"')
+
+gSystem.Load(libExRootPath+"/libExRootAnalysis.so")
+
 gROOT.LoadMacro("../plugins/HistManager.cc+");
 gROOT.LoadMacro("../plugins/ZGAngles.cc+");
 
@@ -191,7 +197,7 @@ def FillAllHists(files, h):
       h.fill1DHist(gamma.Pt(),"LHE_gamma_pt_noHiggs",   ";p_{T}^{#gamma}",    200, 00,180, 1, "")
     else:
       h.fill1DHist(trueHiggs.M(),   "LHE_h_mass_many",";m_{H}",        200, 100,800,1, "")
-      h.fill1DHist(trueHiggs.M(),   "LHE_h_mass_trueHiggs",";m_{H}",   200, 124,126,1, "")
+      h.fill1DHist(trueHiggs.M(),   "LHE_h_mass_trueHiggs",";m_{H}",   200, 110,140,1, "")
       h.fill1DHist(trueHiggs.Pt(),  "LHE_h_pt_", ";p_{T}^{H} (GeV)",   100, 0,100,  1, "")
 
     # exit(0)
@@ -288,7 +294,7 @@ def FillAllHists(files, h):
       h.fill1DHist(diLep.M(),   "LHE_diLep_mass_0dot005",";m_{ll} (GeV)", 200, 0,0.005, 1, "")
       h.fill1DHist(diLep.M(),   "LHE_diLep_mass_0dot01", ";m_{ll} (GeV)", 200, 0,0.01,  1, "")
 
-    h.fill1DHist(tri.M(),     "LHE_h_mass",     ";m_{ll#gamma} (GeV)",100, 80,180, 1, "")
+    h.fill1DHist(tri.M(),     "LHE_h_mass",     ";m_{ll#gamma} (GeV)",100, 100,150, 1, "")
     h.fill1DHist(tri.M(),     "LHE_h_mass_wide",";m_{ll#gamma} (GeV)",100, 100,800,1, "")
     h.fill1DHist(tri.M(),     "LHE_h_mass_low", ";m_{ll#gamma} (GeV)",100,  0,50,  1, "")
     if MH!=0:
@@ -394,20 +400,14 @@ if __name__ == "__main__":
     print "Saved files: \n",testFile.GetName(), "\n", oneFile.GetName(), "\n", twoFile.GetName()
 
 
-  blah = ['LHE for mH = 125 GeV',
+  blah = ['LHE for mH = '+str(MH)+' GeV',
           'Comparing 13 and 8 TeV, LO, NLO, VBF']
-  #blah = ['LHE files comparison for DY+gamma sample',
-  #        'Luisa\'s vs mine']
 
 
-  #sigZip = zip(['H #rightarrow ee#gamma','HC /t','HC'],
-  #              [oneFile, twoFile, testFile])
-  #sigZip = zip(['H #rightarrow ee#gamma','H #rightarrow #mu#mu#gamma'],
-  #             [oneFile, twoFile])
-  #sigZip = zip(['H #rightarrow ee#gamma, M=125','H #rightarrow ee#gamma, M=200','H #rightarrow ee#gamma, M=400'],
+  #sigZip = zip(['One: Mu '+str(MH),'Two: Ele '+str(MH),
+  #              'Tre: VBF Mu '+str(MH)],
   #             [oneFile, twoFile, testFile])
-  sigZip = zip(['ggH #rightarrow #mu#mu#gamma, NLO 13 TeV','vbfH #rightarrow #mu#mu#gamma, 13 TeV',
-                'ggH #rightarrow #mu#mu#gamma, LO 8 TeV'],
+  sigZip = zip(['One: ggF '+str(MH),'Two: VBF '+str(MH), 'Tre: ZH '+str(MH)],
                [oneFile, twoFile, testFile])
 
   u.drawAllInFile(None, None, None, sigZip, 'LHE', '', path, None,"norm", isLog=False)

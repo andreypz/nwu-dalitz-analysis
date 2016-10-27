@@ -25,6 +25,8 @@ makePdfList    = [a.strip() for a in (conf.get("selection","makePdfList")).split
 rebinList      = [a.strip() for a in (conf.get("selection","rebinList")).split(',')]
 print 'No-Overflow list = ', noOverflowList
 
+myColors = [1, 47, 8, 9, 41, 46, 30]
+
 class AutoVivification(dict):
   """Implementation of perl's autovivification feature."""
   def __getitem__(self, item):
@@ -521,7 +523,7 @@ def drawAllInFile(f1, name1, bZip, sZip, name3, myDir, path, N, howToScale="toDa
             h3.SetLineColor(col[0])
             h3.SetFillColor(col[1])
           else:
-            h3.SetLineColor(40+2*j)
+            h3.SetLineColor(myColors[j])
             h3.SetLineWidth(3)
             #h3.SetLineStyle(1+8*j)
 
