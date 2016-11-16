@@ -27,9 +27,11 @@ files={}
 
 MH = opt.mH
 
-files["one"] = ['../../Oct2016/ggH'+str(MH)+'_mmg.lhe.root']
-files["two"] = ['../../Oct2016/vbfH'+str(MH)+'_eeg.lhe.root']
-files["three"] = ['../../Oct2016/ZH'+str(MH)+'_mmg.lhe.root']
+files["one"] = ['../../Oct2016/ggH'+str(MH)+'_eeg.lhe.root']
+files["two"] = ['../../Oct2016/ZH'+str(MH)+'_eeg.lhe.root']
+files["three"] = ['../../Oct2016/WH'+str(MH)+'_eeg.lhe.root']
+#files["three"] = ['../../Oct2016/HZG'+str(MH)+'_mmg.lhe.root']
+
 
 fakeGammaFromJet = 0
 
@@ -37,16 +39,22 @@ LEPID1 = 13
 LEPID2 = 11
 
 print files
-#libExRootPath = '/home/andreypz/workspace/MadGraph5/ExRootAnalysis/lib/'
-#libExRootPath = '/home/andreypz/workspace/mg5amcnlo/ExRootAnalysis/'
-libExRootPath = '/afs/cern.ch/user/a/andrey/work/MG5_aMC_v2_3_2/ExRootAnalysis/'
-#libExRootPath = '/afs/cern.ch/user/a/andrey/work/MG5_aMC_v2_4_3/ExRootAnalysis/'
 
-# In ROOT 6, also need this (but it still does not work):
-#gInterpreter.AddIncludePath(libExRootPath)
-#gInterpreter.Declare('#include "'+libExRootPath+'ExRootAnalysis/ExRootClasses.h"')
+print gROOT.GetVersion()
+
+if gROOT.GetVersion()=='6.06/01':
+  libExRootPath = '/afs/cern.ch/user/a/andrey/work/MG5_aMC_v2_4_3/ExRootAnalysis/'
+
+  # In ROOT 6, also need this (but it still does not work):
+  #gInterpreter.AddIncludePath(libExRootPath)
+  gInterpreter.Declare('#include "'+libExRootPath+'ExRootAnalysis/ExRootClasses.h"')
+else:
+  libExRootPath = '/afs/cern.ch/user/a/andrey/work/MG5_aMC_v2_3_2/ExRootAnalysis/'
+  #libExRootPath = '/home/andreypz/workspace/MadGraph5/ExRootAnalysis/lib/'
+  #libExRootPath = '/home/andreypz/workspace/mg5amcnlo/ExRootAnalysis/'
 
 gSystem.Load(libExRootPath+"/libExRootAnalysis.so")
+
 
 gROOT.LoadMacro("../plugins/HistManager.cc+");
 gROOT.LoadMacro("../plugins/ZGAngles.cc+");
@@ -401,13 +409,14 @@ if __name__ == "__main__":
 
 
   blah = ['LHE for mH = '+str(MH)+' GeV',
-          'Comparing 13 and 8 TeV, LO, NLO, VBF']
+          'Comparing 13 TeV, ggF, ZH, WH']
 
 
   #sigZip = zip(['One: Mu '+str(MH),'Two: Ele '+str(MH),
   #              'Tre: VBF Mu '+str(MH)],
   #             [oneFile, twoFile, testFile])
-  sigZip = zip(['One: ggF '+str(MH),'Two: VBF '+str(MH), 'Tre: ZH '+str(MH)],
+
+  sigZip = zip(['One: ggF '+str(MH),'Two: ZH '+str(MH), 'Tre: WH '+str(MH)],
                [oneFile, twoFile, testFile])
 
   u.drawAllInFile(None, None, None, sigZip, 'LHE', '', path, None,"norm", isLog=False)
