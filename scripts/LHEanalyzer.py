@@ -10,9 +10,9 @@ import makeHTML as ht
 from optparse import OptionParser
 
 parser = OptionParser(usage="usage: %prog name [options --new]")
-parser.add_option("-n","--new", dest="new",action="store_true", default=False, 
+parser.add_option("-n","--new", dest="new",action="store_true", default=False,
                   help="Make new hists. Otherwise re-use the existing ones")
-parser.add_option("-m","--mH", dest="mH",type=int, default=125, 
+parser.add_option("-m","--mH", dest="mH",type=int, default=125,
                   help="Mass of the H")
 
 (opt, args) = parser.parse_args()
@@ -46,7 +46,7 @@ if gROOT.GetVersion()=='6.06/01':
   libExRootPath = '/afs/cern.ch/user/a/andrey/work/MG5_aMC_v2_4_3/ExRootAnalysis/'
 
   # In ROOT 6, also need this (but it still does not work):
-  #gInterpreter.AddIncludePath(libExRootPath)
+  gInterpreter.AddIncludePath(libExRootPath)
   gInterpreter.Declare('#include "'+libExRootPath+'ExRootAnalysis/ExRootClasses.h"')
 else:
   libExRootPath = '/afs/cern.ch/user/a/andrey/work/MG5_aMC_v2_3_2/ExRootAnalysis/'
@@ -55,9 +55,8 @@ else:
 
 gSystem.Load(libExRootPath+"/libExRootAnalysis.so")
 
-
-gROOT.LoadMacro("../plugins/HistManager.cc+");
-gROOT.LoadMacro("../plugins/ZGAngles.cc+");
+gROOT.LoadMacro("../plugins/HistManager.cc+")
+gROOT.LoadMacro("../plugins/ZGAngles.cc+")
 
 openOption = 'OPEN'
 if opt.new:
@@ -66,6 +65,7 @@ if opt.new:
 oneFile  = TFile(outpath+"out_one_"+subdir+".root",openOption)
 twoFile  = TFile(outpath+"out_two_"+subdir+".root",openOption)
 testFile = TFile(outpath+"out_test_"+subdir+".root",openOption)
+
 
 if opt.new:
   oneFile.cd()
@@ -116,7 +116,9 @@ def FillAllHists(files, h):
     hasGamma=0
     hi = 0
     qq = 0
+
     for p in evt.Particle:
+
       px = p.Px
       py = p.Py
       pz = p.Pz
@@ -311,17 +313,17 @@ def FillAllHists(files, h):
 
     if qq>=1:
       h.fill1DHist(j1.Pt(),   "LHE_Jet1_Pt",";pT jet, GeV", 200, 0,400,  1, "")
-      
+
     if qq==2:
       h.fill1DHist(j2.Pt(),   "LHE_Jet2_Pt",";pT jet, GeV", 200, 0,400,  1, "")
 
       ## VBF Plots:
       h.fill1DHist((j1+j2).M(),             "LHE_diJet_mass",";M(j1,j2), GeV", 100, 0,800,  1, "")
-      h.fill1DHist(fabs(j1.Eta()-j2.Eta()), "LHE_diJet_dEta",";|#Delta#eta(j_{1},j_{2})|",  100,   0,8,  1, "")
+      h.fill1DHist(abs(j1.Eta()-j2.Eta()), "LHE_diJet_dEta",";|#Delta#eta(j_{1},j_{2})|",  100,   0,8,  1, "")
 
       h.fill1DHist(tri.Eta() - 0.5*(j1.Eta() + j2.Eta()),  "LHE_diJet_Zeppenfeld",
                    ";Zeppenfeld: #eta(H) - #frac{1}{2}(#eta_{j1} + #eta_{j2})", 100, -6,6,  1, "")
-      
+
       '''
         if not hasGlu3:
             h.fill1DHist(tri.Pt(),    "LHE_h_pt",";Pt of the Higgs",  200, 0,200,  1, "")
@@ -367,7 +369,7 @@ def FillAllHists(files, h):
 
 
     h.fill1DHist(diLep.DeltaR(gamma),              "LHE_dR_diLep_gamma", ";dR(ll, #gamma)",         50, 0,10, 1, "")
-    h.fill1DHist(fabs(diLep.Eta() - gamma.Eta()),  "LHE_dEta_diLep_gamma", ";|dEta(ll, #gamma)|",   50, 0,10, 1, "")
+    h.fill1DHist(abs(diLep.Eta() - gamma.Eta()),  "LHE_dEta_diLep_gamma", ";|dEta(ll, #gamma)|",   50, 0,10, 1, "")
     h.fill1DHist((diLep.Vect()+gamma.Vect()).Pt(), "LHE_diff_diLep_gamma_pt", ";(diLep+#gamma).Pt()", 50, -20,20, 1, "")
     h.fill1DHist(TVector2.Phi_mpi_pi(diLep.Phi()-gamma.Phi()), "LHE_dPhi_diLep_gamma", ";#Delta#phi(ll, #gamma)", 50, -10,10, 1, "")
 
@@ -384,10 +386,10 @@ def FillAllHists(files, h):
   print "Has Z:", zcount, "  haswp", wpcount, "  hasWm:", wmcount
 
 if __name__ == "__main__":
-  gROOT.ProcessLine(".L ../tdrstyle.C")
+  #gROOT.ProcessLine(".L ../tdrstyle.C")
   setTDRStyle()
   TH1.SetDefaultSumw2(kTRUE)
-    #gStyle.SetOptStat(1)
+  #gStyle.SetOptStat(1)
 
   pathBase = outpath
   path = pathBase+subdir
@@ -459,8 +461,8 @@ if __name__ == "__main__":
   iMUtot  = hmu.Integral(0,501)
 
   print "\t\t ***"
-  print "Integral el, tot= %.1f, hist=%.f, reg1=%.1f, frac (reg1/hist) = %.3f" %(iELtot, iELhist, iEL1, iEL1/iELtot) 
-  print "Integral mu, tot= %.1f, hist=%.f, reg1=%.1f, frac (reg1/hist) = %.3f" %(iMUtot, iMUhist, iMU1, iMU1/iMUtot) 
+  print "Integral el, tot= %.1f, hist=%.f, reg1=%.1f, frac (reg1/hist) = %.3f" %(iELtot, iELhist, iEL1, iEL1/iELtot)
+  print "Integral mu, tot= %.1f, hist=%.f, reg1=%.1f, frac (reg1/hist) = %.3f" %(iMUtot, iMUhist, iMU1, iMU1/iMUtot)
 
   '''  m(ll) bins  for the differential limit:
   xsbr = 1
@@ -611,4 +613,3 @@ if __name__ == "__main__":
   twoFile.Close()
 
   print "\n\t\t finita la comedia \n"
-
