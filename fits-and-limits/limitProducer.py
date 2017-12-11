@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import os,sys
+import os,sys,subprocess
 sys.path.append("../zgamma")
 import utils as u
 from optparse import OptionParser
@@ -35,6 +35,7 @@ else:
   outCardDir = '/output_cards/'
   combineOutDir = '/combineOut/'
 
+Year = '2016'
 method = "Asymptotic"
 if opt.prof:
   method = "ProfileLikelihood"
@@ -47,6 +48,8 @@ if __name__ == "__main__":
 
   s = cf.get("path","ver")
   myDir = s
+
+  combLogFile = '/'.join([myDir,combineOutDir,'combine_logs.log'])
 
   if opt.nosyst:
     myDir = s.replace("/","")+"-noSyst"
@@ -66,11 +69,11 @@ if __name__ == "__main__":
 
         #card  = myDir+"/datacard_hzg_eeg_cat12_8TeV_"+m[:3]+".txt"
         #card  = myDir+"/mu_plus_el_M"+m+".txt"
-        card  = myDir+outCardDir+"hzg_"+lep+"_2012_cat"+cat+"_M"+m+"_Dalitz_.txt"
+        card  = myDir+outCardDir+"hzg_"+lep+"_"+Year+"_cat"+cat+"_M"+m+"_Dalitz_.txt"
 
         #if cat in ['m1','m2','m3','m4','m5','m6']:
         #  cardNames = cardNames+' '+card
-        if cat in ['EB','EE','mll50']:
+        if cat in ['HR9','LR9','EE','VBF']:
           cardNames = cardNames+' '+card
 
 
@@ -82,6 +85,8 @@ if __name__ == "__main__":
           print
           if not opt.dontrun:
             os.system('combine -M '+method+' '+card + ' -m '+m+CLoption)
+            #with open(combLogFile, 'w') as logFile:
+            #  pro = subprocess.Popen(['combine', '-M', method, card, '-m', m, CLoption], stdin=None, stdout=logFile, stderr=logFile, shell=False)
 
         if m[-1]=='5':
           fname = "higgsCombineTest."+method+".mH"+m
@@ -89,7 +94,7 @@ if __name__ == "__main__":
         else:
           fname = "higgsCombineTest."+method+".mH"+m[0:3]
           os.system("mv "+fname+".root "+myDir+combineOutDir+fname+'.0_cat_'+cat+'_'+lep+'.root')
-
+          
       if opt.comb:
         print '\t Combining the cards: \n', cardNames
         comboName = myDir+outCardDir+'/combo_mH'+m+'.txt'

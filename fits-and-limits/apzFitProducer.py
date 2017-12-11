@@ -34,6 +34,8 @@ catList       = [a.strip() for a in (cf.get("fits","catList")).split(',')]
 sigNameList   = [a.strip() for a in (cf.get("fits","sigNameList")).split(',')]
 mllBins = u.mllBins()
 
+print sigNameList
+
 EBetaCut = 1.4442
 EEetaCut = 1.566
 ptMllgCut  = 0.3
@@ -153,7 +155,7 @@ def makeTTree(fname):
   return T1
 
 
-def LoopOverTree2016(myTree, cat, mzg, args, ds, lumiWeight):
+def LoopOverTree2016(myTree, mzg, args, ds):
   print 'Looping my tree, ', myTree
   hcount=0
   for n,i in enumerate(myTree):
@@ -161,10 +163,7 @@ def LoopOverTree2016(myTree, cat, mzg, args, ds, lumiWeight):
       print n, i, i.mH, i.weight, i.mcweight
     mzg.setVal(i.mH)
     
-    Weight = i.weight
-    if lumiWeight!=None:
-      Weight = lumiWeight*i.weight
-      
+    Weight = i.weight*i.mcweight
     ds.add(args, Weight)
 
 
@@ -173,7 +172,7 @@ def doInitialFits2016(subdir):
   u.createDir(subdir)
 
   basePath  = './'
-  plotBase1 = cf.get("path","htmlbase")+'/html/fits-'+subdir+'/init'
+  plotBase1 = cf.get("path","base")+'/fits-'+subdir+'/init'
 
   dataDict   = {}
   signalDict = {}
@@ -182,27 +181,35 @@ def doInitialFits2016(subdir):
   else:
     for y in yearList:
       for l in leptonList:
-        if l == 'mu': tag = 'mugamma'
+        for cat in catList: 
+          if l == 'mu': tag = 'mugamma'
 
-        if not os.path.exists(basePath):
-          print basePath, "does not exist!"
-          sys.exit(0)
+          if not os.path.exists(basePath):
+            print basePath, "does not exist!"
+            sys.exit(0)
 
-        else:
-          dataDict[l+y] = makeTTree('./vlq/HiggsMass.txt')
+          else:
+            dataDict[l+y+cat] = makeTTree('./vlq/HiggsMass'+cat+'.txt')
 
   
-        for s in sigNameList:
-          for m in massList:
-            signalDict[s+'_'+l+y+'_M'+m] = makeTTree('./vlq/HiggsMass_signal.txt')
+          for s in sigNameList:
+            for m in massList:
+              mtag = m
+              stag = s
+              if m=='125':
+                mtag = '' 
+              if s=='ggF' and m!='125':
+                stag = ''
+ 
+              signalDict[s+'_'+l+y+cat+'_M'+m] = makeTTree('./vlq/HiggsMass_signal'+stag+mtag+cat+'.txt')
 
   print "\t ===  All trees are set === \n"
  
-  binWidth = 2
+  binWidth = 1
   binning = int(float(deltaMllg)/binWidth)
   #binning = 30
 
-  weight  = RooRealVar('Weight','Weight',0,100)
+  weight  = RooRealVar('Weight','Weight',-100,100)
   mzg  = RooRealVar('CMS_hzg_mass','CMS_hzg_mass', lowCutOff,highCutOff)
   mzg.setRange('FullRegion',   lowCutOff, highCutOff)
   mzg.setRange('DalitzRegion', lowCutOff, highCutOff)
@@ -265,7 +272,7 @@ def doInitialFits2016(subdir):
                                                                        RooFit.Binning(binning))
 
             # store the unbinned signals for CB fitting
-            signalTree = signalDict[prod+"_"+lepton+year+"_M"+mass]
+            signalTree = signalDict[prod+"_"+lepton+year+cat+"_M"+mass]
 
             #signalTree.Print()
             sigName = '_'.join(['ds_sig',prod,lepton,year,'cat'+cat,'M'+mass])
@@ -275,7 +282,7 @@ def doInitialFits2016(subdir):
 
             print signalTree, "A signal tree", prod, '  categ=',cat, "mass =", mass
 
-            LoopOverTree2016(signalTree, cat, mzg, sig_argSW, sig_ds, 1)
+            LoopOverTree2016(signalTree, mzg, sig_argSW, sig_ds)
             
             signalListDS.append(sig_ds)
             getattr(ws,'import')(signalListDS[-1])
@@ -331,27 +338,27 @@ def doInitialFits2016(subdir):
               else:            testFrame.SetTitle(';m_{ee#gamma} (GeV);Events')
               #testFrame.SetMinimum(0.0001)
               testFrame.Draw()
-            CMS_lumi(c, 2, 11, 'Simulation')
+            CMS_lumi(c, 4, 11, 'Simulation')
             c.SaveAs(plotBase+'_'.join(['signals',prod,year,lepton,'cat'+cat])+'.png')
 
 
-            for signal in signalListDS:
-              testFrame = mzg.frame()
-              signal.plotOn(testFrame, RooFit.DrawOption('pl'))
-              testFrame.Draw()
-              myS125 = shist[year][lepton][cat][prod]['125'].Clone()
-              myS125.Draw('same hist')
-              myS125.SetLineColor(kGreen+1)
-
-              f1 = TF1("f1", "gaus", 120, 130);
-              f1.SetParameters(0,125, 0.2);
-              f1.FixParameter(0, 0);
-              f1.SetParLimits(1, 122, 127);
-              myS125.Fit('f1','R')
-              # myS125.GetFunction("f1").Print()
-              #raw_input("\n ---> Param List. hit enter to continue")
-
-            CMS_lumi(c, 2, 11, 'Simulation')
+            signal = signalListDS[1] # 125 GeV
+            testFrame = mzg.frame()
+            signal.plotOn(testFrame, RooFit.DrawOption('pl'))
+            testFrame.Draw()
+            myS125 = shist[year][lepton][cat][prod]['125'].Clone()
+            myS125.Draw('same hist')
+            myS125.SetLineColor(kGreen+1)
+            
+            f1 = TF1("f1", "gaus", 120, 130);
+            f1.SetParameters(0,125, 0.2);
+            f1.FixParameter(0, 0);
+            f1.SetParLimits(1, 122, 127);
+            myS125.Fit('f1','R')
+            # myS125.GetFunction("f1").Print()
+            #raw_input("\n ---> Param List. hit enter to continue")
+            
+            CMS_lumi(c, 4, 11, 'Simulation')
             c.SaveAs(plotBase+'_'.join(['ds_sig',prod,year,lepton,'cat'+cat])+'.png')
 
             
@@ -363,12 +370,12 @@ def doInitialFits2016(subdir):
         if verbose: print '\n\n \t ** Starting data selection. \n'
 
         dataName = '_'.join(['data',lepton,year,'cat'+cat])
-        dataTree = dataDict[lepton+year]
+        dataTree = dataDict[lepton+year+cat]
         data_argS = RooArgSet(mzg)
         data_argL = RooArgList(mzg)
         data_ds = RooDataSet(dataName,dataName,data_argS)
 
-        LoopOverTree2016(dataTree, cat, mzg, data_argS, data_ds, None)
+        LoopOverTree2016(dataTree, mzg, data_argS, data_ds)
         if verbose: data_ds.Print('all')
 
         dahist = mzg.createHistogram('hist_'+dataName, RooFit.Binning(binning))
@@ -387,7 +394,8 @@ def doInitialFits2016(subdir):
           data_ds.plotOn(testFrame,RooFit.Binning(binning))
 
           testFrame.Draw()
-          CMS_lumi(c, 2, 11)
+          testFrame.SetMinimum(0)
+          CMS_lumi(c, 4, 11)
           c.SaveAs(plotBase+'_'.join(['data',year,lepton,'cat'+cat])+'.png')
         # <<-- debug plots
         
@@ -427,8 +435,8 @@ def doInitialFits2016(subdir):
           if verbose:
             fit.Print()
 
-          fit.fitTo(data_dh,RooFit.Range('DalitzRegion'), RooFit.Strategy(1))
-          #fit.fitTo(data_ds,RooFit.Range('DalitzRegion'), RooFit.Strategy(1))
+          #fit.fitTo(data_dh,RooFit.Range('DalitzRegion'), RooFit.Strategy(1))
+          fit.fitTo(data_ds,RooFit.Range('DalitzRegion'), RooFit.Strategy(1))
           fit.plotOn(testFrame, RooFit.LineColor(colors[fitName.lower()]), RooFit.Name(fitName))
 
           getattr(ws,'import')(fit)
@@ -455,20 +463,25 @@ def doInitialFits2016(subdir):
         #shist[year][lepton][cat]['gg']['125'].SetLineColor(kRed+1)
 
         leg.Draw()
-        CMS_lumi(c, 2, 11)
+        CMS_lumi(c, 4, 11)
         c.SaveAs(plotBase+'_'.join(['fits',year,lepton,'cat'+cat])+'.png')
 
         ws.commitTransaction()
 
+        print year, lepton, cat
         print '\t Commit transaction end \n'
-
+        
         yi_da0[year][lepton][cat] = data_ds.sumEntries()
         yi_da1[year][lepton][cat] = data_ds.sumEntries('1','SignalRegion')
 
+      # <<-- cat indent
+      print 'End of cat', cat
       fs125.Close()
-
+      
+  #<<-- end of loop over year and lepton
+  print "Writing to file"
   ws.writeToFile(subdir+'/testRooFitOut_Dalitz.root')
-
+  
 
 
   print '*** Some yields from data'
@@ -492,11 +505,6 @@ def doInitialFits2016(subdir):
     # print "\n Mean from Datahist:", mean_gg0_dh
     # print "\n Sigma DH:", sigma_gg0_dh
     raw_input('Enter')
-
-
-    
-
-
 
 
 
@@ -767,7 +775,7 @@ def doInitialFits(subdir):
               # myS125.GetFunction("f1").Print()
               #raw_input("\n ---> Param List. hit enter to continue")
 
-            CMS_lumi(c, 2, 11, 'Simulation')
+            CMS_lumi(c, 4, 11, 'Simulation')
             c.SaveAs(plotBase+'_'.join(['ds_sig',prod,year,lepton,'cat'+cat])+'.png')
 
         del signalTree
@@ -807,7 +815,7 @@ def doInitialFits(subdir):
           data_ds.plotOn(testFrame,RooFit.Binning(binning))
 
           testFrame.Draw()
-          CMS_lumi(c, 2, 11)
+          CMS_lumi(c, 4, 11)
           c.SaveAs(plotBase+'_'.join(['data',year,lepton,'cat'+cat])+'.png')
 
         getattr(ws,'import')(data_ds)

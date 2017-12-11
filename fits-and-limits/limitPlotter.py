@@ -13,7 +13,7 @@ parser = OptionParser(usage="usage: %prog  [options]")
 parser.add_option("--br", dest="br",  action="store_true", default=False, help="Do the limit on BR*cs instead of the mu")
 parser.add_option("--mll",dest="mll", action="store_true", default=False, help="Do the limit on BR*cs in bins of mll")
 parser.add_option("--divide",dest="divide", action="store_true", default=False, help="Divide by the binn-size (for --mll option)")
-parser.add_option("--cat",dest="cat", default='EB', help="Category: EB, EE, mll50, comb (for combination)")
+parser.add_option("--cat",dest="cat", default='HR9', help="Category: EB, EE, mll50, comb (for combination)")
 parser.add_option("--lep",dest="lep", default='mu', help="Channel: mu or el")
 parser.add_option("--path",dest="path", default=None, help="path where the limit results are stored")
 (opt, args) = parser.parse_args()
@@ -35,7 +35,7 @@ method = 'Asymptotic'
 #method = 'ProfileLikelihood'
 out = TFile(s+"/limit-data-cat"+opt.cat+"-"+lep+".root","recreate")
 
-plotBase = cf.get("path","htmlbase")+'/html/zgamma/dalitz/fits-'+s
+plotBase = cf.get("path","base")+'/fits-'+s
 
 massList  = [float(a) for a in (cf.get("fits","massList-more")).split(',')]
 #massList   = [float(a) for a in u.drange(120,150,1.0)]
@@ -65,7 +65,7 @@ if __name__ == "__main__":
   exp2SigLow = []
   SM = []
   fileListTmp = os.listdir(s+combineOutDir)
-  print fileListTmp
+  #print fileListTmp
   fileList = filter(lambda fileName: 'higgsCombineTest.'+method in fileName,fileListTmp)
   #print fileList
   SMtot = 0.732
@@ -108,8 +108,9 @@ if __name__ == "__main__":
       #if str(mass)[4] == "0": # nasty trick
       #  mass = int(mass)
         #print 'we are her'
-      print mass
-      thisFile = filter(lambda fileName: str(mass)+'_cat_'+suff+'.root' in fileName,fileList)[0]
+      filtName = str(mass)+'_cat_'+suff+'.root'
+      print mass, filtName
+      thisFile = filter(lambda fileName: filtName in fileName,fileList)[0]
       print thisFile
       xAxis.append(float(mass))
       f = TFile(s+combineOutDir+thisFile,"open")
@@ -258,10 +259,16 @@ if __name__ == "__main__":
         c.SetLogy()
   else:
     mg.GetYaxis().SetTitle('95% CL limit on #sigma/#sigma_{SM}')
-    if opt.cat in ['EB','comb']:
+    if opt.cat in ['EB']:
       mg.SetMaximum(42)
-    elif opt.cat in ['EE','mll50']:
+    elif opt.cat in ['comb']:
+      mg.SetMaximum(9)
+    elif opt.cat in ['mll50']:
       mg.SetMaximum(150)
+    elif opt.cat in ['HR9','LR9','VBF']:
+      mg.SetMaximum(30)
+    elif opt.cat in ['EE']:
+      mg.SetMaximum(50)
   gPad.RedrawAxis()
 
   lat = TLatex()
@@ -332,7 +339,7 @@ if __name__ == "__main__":
     leg.SetY1NDC(0.64)
     leg.AddEntry(g,"10 #times SM", "l")
   elif not opt.br:
-    l = TLine(120, 1, 150, 1)
+    l = TLine(120, 1, 130, 1)
     l.SetLineColor(kRed+2)
     l.SetLineWidth(2)
     #l.SetLineStyle(21)
@@ -343,7 +350,7 @@ if __name__ == "__main__":
 
 
   for e in ['.png', '.pdf']:
-    CMS_lumi(c, 2, 11, "")
+    CMS_lumi(c, 4, 11, "")
     limitDir = plotBase+'/Limits'
     if opt.br:
       limitDir = plotBase+'/Limits-xsBr'

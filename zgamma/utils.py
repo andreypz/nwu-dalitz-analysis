@@ -13,10 +13,11 @@ TH1.SetDefaultSumw2(kTRUE)
 import ConfigParser as cp
 conf = cp.ConfigParser()
 conf.optionxform = str
-conf.read('../zgamma/config.cfg')
+conf.read('../zgamma/config_2016.cfg')
 lumi2012 = float(conf.get("lumi","lumi2012A")) + float(conf.get("lumi","lumi2012B"))+\
     float(conf.get("lumi","lumi2012C")) + float(conf.get("lumi","lumi2012D"))
-lumi = lumi2012
+lumi2016 = float(conf.get("lumi","lumi2016"))
+lumi = lumi2016
 
 roundTo = 50.
 
@@ -75,6 +76,8 @@ def getCuts():
 def getLumi(period='2012'):
   if period=="2012":
     return lumi2012
+  elif period=="2016":
+    return lumi2016
   else:
     print "Sorry only 2012 is considered"
     return 0

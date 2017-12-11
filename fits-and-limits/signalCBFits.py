@@ -12,14 +12,17 @@ import ConfigParser as cp
 cf = cp.ConfigParser()
 cf.read('config.cfg')
 
-#massList0  = ['125','145']
-#massList   = ['125.0','145.0']
-massList0  = ['120','125','130','135','140','145','150']
-massList   = ['%.1f'%(a) for a in u.drange(120,150,1.0)]
+RooMsgService.instance().setGlobalKillBelow(RooFit.WARNING)
+
+global massList0, massList
+massList0  = ['120','125','130']
+#massList   = ['120.0','125.0','130.0']
+#massList0  = ['120','125','130','135','140','145','150']
+massList   = ['%.1f'%(a) for a in u.drange(120,130,1.0)]
 
 myFunc = 'CBGM' #Crystall-Ball + Gauss (with same Mean)
 
-lumi = u.getLumi()
+lumi = u.getLumi('2016')
 
 # rounding function for interpolation
 def roundTo5(x, base=5):
@@ -81,7 +84,7 @@ def SignalFitMaker(lep, year, cat, subdir):
   #print massList
   #raw_input()
 
-  plotBase = cf.get("path","htmlbase")+"/html/zgamma/dalitz/fits-"+subdir+'/init' + '_'.join([year,lep,'cat'+cat])+'/'
+  plotBase = cf.get("path","base")+"/fits-"+subdir+'/init' + '_'.join([year,lep,'cat'+cat])+'/'
   u.createDir(plotBase)
 
   rooWsFile = TFile(subdir+'/testRooFitOut_Dalitz.root')
@@ -102,6 +105,10 @@ def SignalFitMaker(lep, year, cat, subdir):
   #print massList, massList0
   masses0 = massList0
   masses1 = massList
+  #masses0  = ['120','125','130']
+  #masses1   = ['120.0','125.0','130.0']
+
+  print 
   if cat in ['m1','m2','m3','m4','m5','m6','m7']:
     masses0 = ['125']
     masses1 = ['125.0']
@@ -135,10 +142,16 @@ def SignalFitMaker(lep, year, cat, subdir):
       sigName = '_'.join(['ds','sig',prod,lep,year,'cat'+cat,'M'+m])
       sig_ds = myWs.data(sigName)
       dsList.append(sig_ds)
-
+      #print 'Name = ', sigName
+      
+      #myWs.Print()
+      #sig_ds.Print("all")
+      
       SigFits[m],paramList = fitBuilder.Build(myFunc, piece = 'Interp', mean = float(m))
+      #print SigFits[m], paramList
+      #SigFits[m].fitTo(sig_ds, RooFit.Range('fitRegion1'))
       SigFits[m].fitTo(sig_ds, RooFit.Range('fitRegion1'), RooFit.SumW2Error(kTRUE),
-                       RooFit.Strategy(1), RooFit.NumCPU(4), RooFit.PrintLevel(-1))
+                      RooFit.Strategy(1), RooFit.NumCPU(4), RooFit.PrintLevel(-1))
 
       # print paramList
       # raw_input("\n ---> Param List. hit enter to continue")
@@ -312,6 +325,8 @@ def SignalFitMaker(lep, year, cat, subdir):
 
     sigmaDS = []
     for i,signal in enumerate(dsList):
+      print '\n'
+      print i, 'Plotting:', signal
       #if i==0: m=125
       #if i==1: m=145
       # reduced = signal.reduce("CMS_hzg_mass>"+str(m*(1-0.1))+"&&CMS_hzg_mass<"+str(m*(1+0.1)))
@@ -350,7 +365,7 @@ def SignalFitMaker(lep, year, cat, subdir):
     lat.DrawLatex(0.42,0.80, '\\frac{RMS}{m_{H}}  = \\frac{%.2f}{125} = %.3f' %( sigmaDS[0], sigmaDS[0]/125) )
     lat.DrawLatex(0.62,0.60, '\\frac{RMS}{m_{H}}  = \\frac{%.2f}{145} = %.3f' %( sigmaDS[1], sigmaDS[1]/145) )
     '''
-    CMS_lumi(c, 2, 11, "Simulation")
+    CMS_lumi(c, 4, 11, "Simulation")
     c.SaveAs(plotBase+'_'.join(['sig','fit',prod,lep,year,'cat'+cat])+'.png')
 
   for prod in sigNameList:
@@ -398,6 +413,9 @@ if __name__=="__main__":
   catList    = [a.strip() for a in (cf.get("fits","catList")).split(',')]
 
   ver = cf.get("path","ver")
+
+  gROOT.ProcessLine("gErrorIgnoreLevel = 1001;")
+
 
   for y in yearList:
     for c in catList:
