@@ -1,23 +1,23 @@
 #!/usr/bin/env python
+
 import sys,os
+sys.path.append("../zgamma")
+import utils as u
+
 from ROOT import *
 gROOT.SetBatch()
-sys.path.append("../zgamma")
-sys.path.append("../scripts")
 gROOT.LoadMacro("integralError.C")
-from array import *
-import utils as u
-import makeHTML as ht
-import ConfigParser as cp
 gROOT.ProcessLine(".L ../tdrstyle.C")
+gROOT.LoadMacro("../CMS_lumi.C")
 setTDRStyle()
+
 print len(sys.argv), sys.argv
 verbose = 0
 doExt   = 0
 
+import ConfigParser as cp
 cf = cp.ConfigParser()
 cf.read('config.cfg')
-subdir = cf.get("path","ver")
 yearList    = [a.strip() for a in (cf.get("fits","yearList")).split(',')]
 leptonList  = [a.strip() for a in (cf.get("fits","leptonList")).split(',')]
 catList     = [a.strip() for a in (cf.get("fits","catList")).split(',')]
@@ -30,7 +30,8 @@ if 'hjp' in sigNameList:
 
 mllBins = u.mllBins()
 
-plotBase = cf.get("path","htmlbase")+"/html/zgamma/dalitz/fits-"+subdir
+subdir = cf.get("path","ver")
+plotBase = cf.get("path","base")+"/fits-"+subdir
 u.createDir(plotBase+'/BestFits')
 
 rooWsFile = TFile(subdir+'/testRooFitOut_Dalitz.root')
@@ -45,11 +46,11 @@ mzg.setRange('signal',120,130)
 mzg.setRange('r1',110,120)
 mzg.setRange('r2',130,170)
 
-if hjp:
-  bkgModel = 'Bern2'
-else:
-  bkgModel = 'Bern4'
-
+bkgModel = {'hjp': 'Bern2',
+            'HR9': 'Bern4',
+            'LR9': 'Bern4',
+            'VBF': 'Bern4',
+            'EE':  'Bern4'}
 # #######################################
 # prep the background and data card    #
 # we're going to the extend the bg pdf #
@@ -64,7 +65,7 @@ def BackgroundNameFixer(fitName, year, lep, cat, ws, Ext=True):
   if Ext:
     fitExtName = '_'.join(['bkgTmp',lep,year,'cat'+cat])
   else:
-    fitExtName = '_'.join([bkgModel,year,lep,'cat'+cat])
+    fitExtName = '_'.join([bkgModel[cat],year,lep,'cat'+cat])
 
   fitExtNameNew = '_'.join(['bkg',lep,year,'cat'+cat])
 
@@ -316,8 +317,8 @@ if __name__=="__main__":
         suffix   = '_'.join([year,lep,'cat'+cat])
         print cat, dataName, suffix
 
-        fitName  = '_'.join([bkgModel,year,lep,'cat'+cat])
-        normName = 'norm'+bkgModel+'_'+suffix
+        fitName  = '_'.join([bkgModel[cat],year,lep,'cat'+cat])
+        normName = 'norm'+bkgModel[cat]+'_'+suffix
 
         if hjp: fs125 = TFile(subdir+'/s125-hjp.root','open')
         else:   fs125 = TFile(subdir+'/s125-'+lep+'.root','open')
@@ -422,8 +423,8 @@ if __name__=="__main__":
           myBinning = 20
           binWidth  = 2.
         else:
-          myBinning = 30
-          binWidth  = 2.
+          myBinning = 60
+          binWidth  = 1.
 
         testFrame = mzg.frame(RooFit.Range('DalitzRegion'))
         if doBlind:
@@ -433,12 +434,12 @@ if __name__=="__main__":
           data.plotOn(testFrame, RooFit.Binning(myBinning), RooFit.Invisible(), RooFit.Name('data0'))
 
 
-        fit.plotOn(testFrame, RooFit.Name(bkgModel+"2sigma"),
+        fit.plotOn(testFrame, RooFit.Name(bkgModel[cat]+"2sigma"),
                    RooFit.VisualizeError(fit_result,2), RooFit.FillColor(kCyan-10),RooFit.LineColor(kCyan-10))
-        fit.plotOn(testFrame, RooFit.Name(bkgModel+"1sigma"),
+        fit.plotOn(testFrame, RooFit.Name(bkgModel[cat]+"1sigma"),
                    RooFit.VisualizeError(fit_result,1), RooFit.FillColor(kCyan-6), RooFit.LineColor(kCyan-6))
-        #fit.plotOn(testFrame, RooFit.Name(bkgModel), RooFit.LineColor(kBlue), RooFit.LineWidth(2))
-        fit.plotOn(testFrame, RooFit.Name(bkgModel), RooFit.LineColor(kBlue), RooFit.LineWidth(2), RooFit.FillColor(kCyan-6))
+        #fit.plotOn(testFrame, RooFit.Name(bkgModel[cat]), RooFit.LineColor(kBlue), RooFit.LineWidth(2))
+        fit.plotOn(testFrame, RooFit.Name(bkgModel[cat]), RooFit.LineColor(kBlue), RooFit.LineWidth(2), RooFit.FillColor(kCyan-6))
         #fit.paramOn(testFrame, RooFit.Layout(0.30,0.99,0.9))
         #fit.statOn(testFrame)
 
@@ -447,9 +448,9 @@ if __name__=="__main__":
           #print 'have unit norm?? ', sigP.haveUnitNorm()
           if doBlind:
             print "\n\t WARNING: your Chi2 would not make sence when Blinded!"
-          chi2 = testFrame.chiSquare(bkgModel,'data')
+          chi2 = testFrame.chiSquare(bkgModel[cat],'data')
           for a in xrange(6):
-            print 'nDof = ', a, testFrame.chiSquare(bkgModel,'data0',a)
+            print 'nDof = ', a, testFrame.chiSquare(bkgModel[cat],'data0',a)
             print testFrame.chiSquare(a)
             #print "Figuring out norms of PDFs",sigP.getVal(), sigP.analyticalIntegral()
           raw_input("Enter to continue ")
@@ -458,7 +459,7 @@ if __name__=="__main__":
         '''
         onesigma = TGraphAsymmErrors()
         twosigma = TGraphAsymmErrors()
-        tmpCurve = RooCurve(testFrame.findObject(bkgModel))
+        tmpCurve = RooCurve(testFrame.findObject(bkgModel[cat]))
         doBandsFit(onesigma, twosigma, mzg, fit, tmpCurve, data, testFrame, year, lep)
         twosigma.SetLineColor(kBlack)
         twosigma.SetFillColor(kCyan-10)
@@ -486,8 +487,10 @@ if __name__=="__main__":
           testFrame.SetMaximum(42)
         elif lep=='el':
           testFrame.SetMaximum(35)
+        elif cat=='VBF':
+          testFrame.SetMaximum(12)
         else:
-          testFrame.SetMaximum(65)
+          testFrame.SetMaximum(72)
 
         testFrame.Draw()
         hsig[0].SetAxisRange(115,135,"X")
@@ -515,7 +518,7 @@ if __name__=="__main__":
 
 
         leg.AddEntry(testFrame.findObject('data'),'Data','p')
-        leg.AddEntry(testFrame.findObject(bkgModel),"Background model",'l')
+        leg.AddEntry(testFrame.findObject(bkgModel[cat]),"Background model",'l')
         leg.AddEntry(0,'','')
         if hjp:
           leg.AddEntry(hsig[0],str(factor)+'x SM H#rightarrow(J/#Psi)#gamma #rightarrow #mu#mu#gamma','f')
@@ -524,7 +527,7 @@ if __name__=="__main__":
             leg.AddEntry(hsig[0], str(factor) + 'x SM H #rightarrow #gamma*#gamma #rightarrow ee#gamma','f')
           else:
             leg.AddEntry(hsig[0], str(factor) + 'x SM H #rightarrow #gamma*#gamma #rightarrow #mu#mu#gamma','f')
-        #leg.AddEntry(testFrame.findObject(bkgModel+'1sigma'),"Background Model",'le')
+        #leg.AddEntry(testFrame.findObject(bkgModel[cat]+'1sigma'),"Background Model",'le')
         #if not hjp:
         leg.SetTextFont(42)
         print '\n \t \t Legend font: ', gStyle.GetLegendFont()
@@ -538,8 +541,8 @@ if __name__=="__main__":
         leg2.AddEntry(0,'','')
         leg2.AddEntry(0,'','')
         leg2.AddEntry(0,'','')
-        leg2.AddEntry(testFrame.findObject(bkgModel+'1sigma'),'#pm 1 #sigma','f')
-        leg2.AddEntry(testFrame.findObject(bkgModel+'2sigma'),"#pm 2 #sigma",'f')
+        leg2.AddEntry(testFrame.findObject(bkgModel[cat]+'1sigma'),'#pm 1 #sigma','f')
+        leg2.AddEntry(testFrame.findObject(bkgModel[cat]+'2sigma'),"#pm 2 #sigma",'f')
         leg2.AddEntry(0,'','')
         leg2.AddEntry(0,'','')
         leg2.SetTextSize(0.037)
@@ -561,7 +564,7 @@ if __name__=="__main__":
           else:
             lat.DrawLatex(0.18,0.95, 'H #rightarrow #gamma*#gamma #rightarrow #mu#mu#gamma')
         """
-        CMS_lumi(c, 2, 11,"")
+        CMS_lumi(c, 4, 11,"")
 
         gPad.RedrawAxis()
         for e in ['.png', '.pdf']:
@@ -610,4 +613,4 @@ if __name__=="__main__":
   for d in dirlist:
     if os.path.isdir(plotBase+"/"+d):
       plot_types.append(d)
-  ht.makeHTML("h &rarr; dalitz decay plots", plotBase, plot_types, comments, defaultPage, doYields=False)
+  # ht.makeHTML("h &rarr; dalitz decay plots", plotBase, plot_types, comments, defaultPage, doYields=False)

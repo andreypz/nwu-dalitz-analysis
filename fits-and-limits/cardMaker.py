@@ -17,7 +17,7 @@ parser.add_option("--br",dest="br", action="store_true", default=False, help="Do
 import ConfigParser as cp
 cf = cp.ConfigParser()
 cf.read('config.cfg')
-s = cf.get("path","ver")
+subdir = cf.get("path","ver")
 
 # ################################################
 # We're finally ready to make the datacards     #
@@ -25,8 +25,10 @@ s = cf.get("path","ver")
 # Run with: combine -M Asymptotic datacard.txt  #
 # ################################################
 lumi2012  = 19.703
+lumi2016  = 35.9
+lumi = lumi2016
 
-massList   = ['%.1f'%(a) for a in u.drange(120,150,1.)]
+massList   = ['%.1f'%(a) for a in u.drange(120,130,1.)]
 sigNameList= [a.strip() for a in (cf.get("fits","signameList")).split(',')]
 hjp = 0
 if 'hjp' in sigNameList:
@@ -39,7 +41,7 @@ Ext = opt.ext
 
 brLLG = '1.10'
 # Unsertainities to be put in the datacard:
-lumi     = '1.026'
+lumi_unc = '1.026'
 elID     = '1.035'
 muID     = '1.110'
 muISO    = '1.003'
@@ -48,12 +50,12 @@ phoID    = '1.006'
 phoTRIG_mu = '1.020'
 phoTRIG_el = '1.020'
 PU       = '1.008'
-meanUnc  = {'mu':'0.001', 'el':'0.005'}
-sigmaUnc = {'mu':'0.100', 'el':'0.100'}
+meanUnc  = {'mu':'0.0006', 'el':'0.005'}
+sigmaUnc = {'mu':'0.050', 'el':'0.100'}
 
-yearToTeV ={'2011':'7TeV', '2012':'8TeV'}
-proc = {'gg':'ggH', 'vbf':'qqH','v':'VH','hjp':'hjp'}
-proc_conf = {'gg':'ggH', 'vbf':'vbfH','v':'vH'}
+yearToTeV ={'2011':'7TeV', '2012':'8TeV', '2016':'8TeV'}
+proc = {'ggF':'ggH', 'VBF':'qqH','WH':'WH','ZH':'ZH','v':'VH','hjp':'hjp'}
+proc_conf = {'ggF':'ggH', 'VBF':'vbfH','v':'vH'}
 #proc = {'gg':'ggH', 'vbf':'qqH','v':'WH','hjp':'hjp'}
 #prYR = {'gg':'ggF', 'vbf':'VBF','v':'WH'}
 mllBins = u.mllBins()
@@ -103,6 +105,7 @@ def makeCards(subdir):
         if hjp:
           bkgParams = ['p1','p2','norm']
         else:
+          # For Bern4, there are three parameters
           bkgParams = ['p1','p2','p3','p4','norm']
 
         for mass in massList:
@@ -218,10 +221,10 @@ def makeCards(subdir):
 
             print mass, s, lep
             if opt.br:
-              print '\t \t raw sig= ', procYield*cs, 'Acc*Eff = %.3f' % (procYield/lumi2012)
+              print '\t \t raw sig= ', procYield*cs, 'Acc*Eff = %.3f' % (procYield/lumi)
             else:
               # cs = u.getCS('%s-%i' %(proc_conf[s], float(mass)), lep)
-              print '\t \t raw sig= ', procYield, 'Acc*Eff = %.3f' % (procYield/lumi2012/cs)
+              print '\t \t raw sig= ', procYield, 'Acc*Eff = %.3f' % (procYield/lumi/cs)
 
 
             if s=='v':
@@ -241,7 +244,7 @@ def makeCards(subdir):
           card.write('-------------------------------------------------------------\n')
           card.write(' \n')
 
-          card.write(nSubLine2.format(*(['lumi_8TeV', 'lnN']+nProc*[lumi])))
+          card.write(nSubLine2.format(*(['lumi_13TeV', 'lnN']+nProc*[lumi_unc])))
           mmm = mass
 
           if float(mass)>140:
@@ -306,4 +309,4 @@ if __name__=="__main__":
   with open(r'config.cfg', 'wb') as configfile:
     cf.write(configfile)
 
-  makeCards(s)
+  makeCards(subdir)
