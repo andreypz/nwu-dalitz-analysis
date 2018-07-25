@@ -105,7 +105,7 @@ class zgamma : public TSelector {
   Bool_t apz_vbf;
 
   TLorentzVector *apz_lep1, *apz_lep2, *apz_gamma, *apz_jet1, *apz_jet2;
-  TVector2 *apz_met;
+  TLorentzVector *apz_met;
   Bool_t apz_trig1, apz_trig2, apz_trig3, apz_trig4, apz_trig5;
   UInt_t apz_njets;
 
