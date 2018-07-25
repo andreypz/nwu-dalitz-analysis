@@ -111,7 +111,7 @@ void zgamma::Begin(TTree * tree)
     apz_gamma = new TLorentzVector();
     apz_jet1 = new TLorentzVector();
     apz_jet2 = new TLorentzVector();
-    apz_met = new TVector2();
+    apz_met = new TLorentzVector();
 
 
     _apzTree->Branch("lep1", &apz_lep1, 6400, 0);
@@ -906,7 +906,7 @@ Bool_t zgamma::Process(Long64_t entry)
     *apz_gamma = gamma;
     *apz_jet1 = jet1;
     *apz_jet2 = jet2;
-    apz_met->Set(recoMET->Px(), recoMET->Py());
+    apz_met->SetXYZM(recoMET->Px(), recoMET->Py(), 0, 0);
     apz_njets = jets.size();
     //cout<<"recomet ="<<recoMET->Mod()<<"  apz Met = "<<apz_met->Mod()<<endl;
     //cout<<"\t orig = "<<lPt1.Phi()<<endl;
