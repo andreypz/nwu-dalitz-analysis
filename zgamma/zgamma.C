@@ -140,7 +140,7 @@ void zgamma::Begin(TTree * tree)
 
     _apzTree->Branch("eta1234",&apz_eta1234,"eta1234/D");
     _apzTree->Branch("eta12",  &apz_eta12,  "eta12/D");
-    _apzTree->Branch("eta34",  &apz_eta34,  "eta12/D");
+    _apzTree->Branch("eta34",  &apz_eta34,  "eta34/D");
     _apzTree->Branch("eta1",   &apz_eta1,   "eta1/D");
     _apzTree->Branch("eta2",   &apz_eta2,   "eta2/D");
     _apzTree->Branch("eta3",   &apz_eta3,   "eta3/D");
@@ -906,9 +906,9 @@ Bool_t zgamma::Process(Long64_t entry)
     *apz_gamma = gamma;
     *apz_jet1 = jet1;
     *apz_jet2 = jet2;
-    *apz_met = *recoMET;
+    apz_met->Set(recoMET->Px(), recoMET->Py());
     apz_njets = jets.size();
-
+    //cout<<"recomet ="<<recoMET->Mod()<<"  apz Met = "<<apz_met->Mod()<<endl;
     //cout<<"\t orig = "<<lPt1.Phi()<<endl;
     //cout<<"\t apz  = "<<apz_lep1->Phi()<<endl;
     //lPt1.SetPhi(0.001);
